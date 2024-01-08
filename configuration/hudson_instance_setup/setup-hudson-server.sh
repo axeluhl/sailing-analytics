@@ -22,13 +22,13 @@ else
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
     # Install secrets
     scp root@sapsailing.com:dev-secrets /tmp
-    sudo mv /tmp/dev-secrets /root
+    sudo mv /tmp/dev-secrets /root/secrets
     sudo chown root /root/secrets
     sudo chgrp root /root/secrets
     sudo chmod 600 /root/secrets
     # Create "hudson" user and clear its directory again which is to become a mount point
     sudo adduser hudson
-    sudo rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null
+    sudo su - hudson -c "rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null"
     sudo mkdir /usr/lib/hudson
     sudo chown hudson /usr/lib/hudson
     sudo mkdir /var/log/hudson
@@ -62,6 +62,10 @@ EOF
     sudo cp /root/mail.properties /home/sailing/servers/DEV/configuration
     sudo chown sailing /home/sailing/servers/DEV/configuration/mail.properties
     sudo chgrp sailing /home/sailing/servers/DEV/configuration/mail.properties
+    # Start the sailing.service with empty/no user data, so the next boot is recognized as a re-boot
+    sudo systemctl start sailing.service
+    sudo systemctl stop sailing.service
+    sudo mount -a
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
