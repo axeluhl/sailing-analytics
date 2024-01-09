@@ -22,7 +22,7 @@ GIT_PATH="$(grep "^${GIT_USER}" /etc/passwd | cut -d':' -f6)/${GIT_DIR_NAME}" # 
 for dir in $(ls -d */ ); do
     USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
     HOME_DIR=$(grep "^${USERNAME}" /etc/passwd | cut -d':' -f6)   # The path to the home dir of the user whose cronjob will be installed.
-    touch $HOME_DIR/crontab
+    > $HOME_DIR/crontab
     for crontab in $(ls ${USERNAME}/crontab*); do
         cat "$crontab"  >> $HOME_DIR/crontab
         echo "" >> $HOME_DIR/crontab  # Adds a newline
@@ -36,4 +36,4 @@ for dir in $(ls -d */ ); do
 done
 
 cd ../files
-\cp -rL * /
+\cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.

@@ -6,7 +6,7 @@ urls=$(mongo --quiet "mongodb://dbserver.internal.sapsailing.com:10201/winddb?re
 if [[ $urls == "null" ]]; then
     echo "Mongo db returns null for tractrac url discovery" | notify-operators "MongoDB/tractrac urls issue"
     exit 1
-else 
+else
     echo ${urls} | sort -u >"${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
 fi
 cd "${GIT_ROOT}"

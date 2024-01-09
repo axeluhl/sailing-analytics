@@ -2,7 +2,7 @@
 ADMIN_EMAIL="axel.uhl@sap.com jan.hamann@sapsailing.com"
 if [ $# -eq 0 ]; then
     GIT_PATH="/home/wiki/gitwiki"
-else 
+else
     GIT_PATH=$1
 fi
 cd $GIT_PATH
