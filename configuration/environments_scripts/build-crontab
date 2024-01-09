@@ -24,10 +24,10 @@ do
             exit 4;;
     esac
 done
+shift $((OPTIND-1)) # shift the arguments along so -s is no longer $1
 ENV_TYPE="$1"
 GIT_USER="$2"
 GIT_DIR_NAME="$3"
-
 cd "$(dirname "$0")/${ENV_TYPE}/users"
 GIT_PATH="$(grep "^${GIT_USER}" /etc/passwd | cut -d':' -f6)/${GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
 for dir in $(ls -d */ ); do
@@ -46,7 +46,7 @@ for dir in $(ls -d */ ); do
     crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
 done
 
-if [[ "$ONLY_CRONTAB" == "true" ]]; then
+if [[ "$ONLY_CRONTAB" != "true" ]]; then
     cd ../files
     \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
 fi
