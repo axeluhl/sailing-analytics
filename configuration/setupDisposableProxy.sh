@@ -7,7 +7,7 @@ BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 HTTPD_GIT_REPO_IP="18.135.5.168"
-AWS_CREDENTIALS_IP="52.17.217.83"
+AWS_CREDENTIALS_IP="34.254.223.106"
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo -E bash <<NESTEDEOF
