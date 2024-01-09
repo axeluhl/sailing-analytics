@@ -119,8 +119,8 @@ EOF
     sudo mkswap /var/cache/swapfile
     # And while adding to /etc/fstab, also add the NFS mount of /home/scores:
     sudo mkdir /home/scores
-    sudo su - -c 'echo "/var/cache/swapfile       none    swap    pri=0      0       0" >>/etc/fstab
-logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0'
+    sudo su - -c 'echo "/var/cache/swapfile       none    swap    pri=0      0       0
+logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2

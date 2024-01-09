@@ -3,7 +3,7 @@
 # hudson             ALL = (root) NOPASSWD: /usr/local/bin/launchhudsonslave
 # hudson             ALL = (root) NOPASSWD: /usr/local/bin/launchhudsonslave-java11
 # hudson             ALL = (root) NOPASSWD: /usr/local/bin/getLatestImageOfType.sh
-AWS=/usr/bin/aws
+AWS=/bin/aws
 REGION=eu-west-1
 HUDSON_SLAVE_AMI_ID=$( /usr/local/bin/getLatestImageOfType.sh hudson-slave )
 echo Launching instance from AMI ${HUDSON_SLAVE_AMI_ID} ...
