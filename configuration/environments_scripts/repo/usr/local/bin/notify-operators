@@ -1,1 +1,4 @@
-../../../../../on-site-scripts/paris2024/notify-operators
+#!/bin/bash
+OPERATORS=$(cat /var/cache/landscapeManagersMailingList)
+logger -t sailing "Sending notification e-mail with subject $1 to ${OPERATORS}"
+mail -s "$1" ${OPERATORS}
