@@ -6,15 +6,24 @@
 # home dir and are installed for that user too. 
 # Useful files are also copied across.
 
-#then construct the crontab, replacing a keyword with the user in the specification. install the crontab in the path of the user
-#and then run it for the specified user.
-if [[ $# -ne 3 ]]; then
-    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>"
+if [[ $# -ne 3 && $# -ne 4 ]]; then
+    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>  "
     echo ""
     echo "Where USER_WITH_CODE is a user that contains a checked out copy of the main git."
     echo "And where NAME_OF_GIT_DIR is the path to the git repo from the USER_WITH_CODE's home directory."
+    echo "Use the s flag to only do the crontab and not copy any files across"
     exit 2
 fi
+
+options='s'
+while getopts $options option
+do
+    case $option in
+        s) ONLY_CRONTAB="true";;
+        \?) echo "Invalid option"
+            exit 4;;
+    esac
+done
 ENV_TYPE="$1"
 GIT_USER="$2"
 GIT_DIR_NAME="$3"
@@ -37,5 +46,7 @@ for dir in $(ls -d */ ); do
     crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
 done
 
-cd ../files
-\cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
+if [[ "$ONLY_CRONTAB" == "true" ]]; then
+    cd ../files
+    \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
+fi
