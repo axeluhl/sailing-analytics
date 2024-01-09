@@ -23,14 +23,26 @@ fi
 shift $((OPTIND-1))
 if [ $# != 0 ]; then
   SERVER=$1
-  scp "${0}" ec2-user@${SERVER}:
-  ssh -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
+  scp -o StrictHostKeyChecking=false "${0}" ec2-user@${SERVER}:
+  ssh -o StrictHostKeyChecking=false -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
   BACKUP_FILE=/tmp/backupdb.sql
+  # Install cron job for ssh key update for landscape managers
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
+  sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /tmp
+  sudo mv /tmp/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/mysql_instance_setup/crontab-ec2-user /home/ec2-user/crontab
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/ec2-user
+  sudo chown ec2-user /home/ec2-user/ssh-key-reader.token
+  sudo chgrp ec2-user /home/ec2-user/ssh-key-reader.token
+  sudo chmod 600 /home/ec2-user/ssh-key-reader.token
+  # Install packages for MariaDB and cron/anacron/crontab:
   sudo yum update -y
-  sudo yum -y install mariadb105-server
+  sudo yum -y install mariadb105-server cronie
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
+  crontab /home/ec2-user/crontab
   cat <<'EOF' >${BACKUP_FILE}
 -- The following two lines added manually, based on
 -- https://dba.stackexchange.com/questions/266480/mariadb-mysql-all-db-import-table-user-already-exists
@@ -38,7 +50,7 @@ DROP TABLE IF EXISTS `mysql`.`global_priv`;
 DROP VIEW IF EXISTS `mysql`.`user`;
 EOF
   echo "Creating backup through mysql client on sapsailing.com..."
-  ssh root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
+  ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
   echo "Importing backup locally..."
   sudo mysql -u root -h localhost <${BACKUP_FILE}
   sudo mysql -u root -h localhost -e "FLUSH PRIVILEGES;"
