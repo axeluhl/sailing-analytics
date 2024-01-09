@@ -42,6 +42,8 @@ else
   sudo yum -y install mariadb105-server cronie
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
+  sudo systemctl enable crond.service
+  sudo systemctl start crond.service
   crontab /home/ec2-user/crontab
   cat <<'EOF' >${BACKUP_FILE}
 -- The following two lines added manually, based on
@@ -67,5 +69,7 @@ EOF
   sudo mysqladmin -u root --password=${ROOT_PW} shutdown
   sudo systemctl start mariadb.service
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
-  echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance."
+  echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
+  echo "make sure the instance has the \"Database and Messaging\" security group set,
+  echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi
