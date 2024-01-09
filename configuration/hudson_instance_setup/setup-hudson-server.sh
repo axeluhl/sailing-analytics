@@ -49,6 +49,9 @@ else
     sudo ln -s /home/sailing/code/configuration/launchhudsonslave /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/launchhudsonslave-java11 /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/aws-automation/getLatestImageOfType.sh /usr/local/bin
+    # Enable NFS server
+    sudo systemctl enable nfs-server.service
+    sudo systemctl start nfs-server.service
     # Enable the service:
     sudo systemctl daemon-reload
     sudo systemctl enable hudson.service
