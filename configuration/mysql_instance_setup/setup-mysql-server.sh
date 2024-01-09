@@ -24,11 +24,11 @@ shift $((OPTIND-1))
 if [ $# != 0 ]; then
   SERVER=$1
   scp "${0}" ec2-user@${SERVER}:
-  ssh -A ec2-user@${SERVER} ./$( basename "${0}" )
+  ssh -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
   BACKUP_FILE=/tmp/backupdb.sql
   sudo yum update -y
-  sudo yum install mariadb105-server
+  sudo yum -y install mariadb105-server
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
   cat <<'EOF' >${BACKUP_FILE}
@@ -45,7 +45,7 @@ EOF
   sudo systemctl stop mariadb.service
   echo "Launching mysqld_safe to update user passwords..."
   sudo mysqld_safe --skip-grant-tables --skip-networking &
-  while ! sudo mysql -u root -e "show databases;"; do
+  while ! sudo mysql -u root -e "show databases;" >/dev/null; do
     echo "Waiting for mysqld_safe to become available..."
     sleep 5
   done
@@ -54,4 +54,6 @@ EOF
   mysql -u root -e "FLUSH PRIVILEGES;"
   sudo mysqladmin -u root --password=${ROOT_PW} shutdown
   sudo systemctl start mariadb.service
+  echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
+  echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance."
 fi
