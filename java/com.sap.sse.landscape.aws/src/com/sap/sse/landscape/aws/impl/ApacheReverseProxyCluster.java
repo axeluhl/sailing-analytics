@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.common.Duration;
@@ -37,7 +38,7 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT exten
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey>> hosts;
-    
+    private static final Logger logger = Logger.getLogger(ApacheReverseProxyCluster.class.getName());
     public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();
@@ -63,10 +64,9 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(az.getRegion()), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "");
-                // !/bin/bash \n iptables -F
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "#!/bin/bash \n sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys");
                 addHost(host);
-        Wait.wait(() -> !host.getInstance().state().name().equals(InstanceStateName.PENDING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, "Reattempting to add to target group");
+        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(360)), Duration.ONE_MINUTE, Level.WARNING, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {

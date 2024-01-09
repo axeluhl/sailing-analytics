@@ -475,7 +475,38 @@ public class LandscapeManagementPanel extends SimplePanel {
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
-        mainPanel.add(machineImagesCaptionPanel);       
+        mainPanel.add(machineImagesCaptionPanel);     
+        final SafeHtmlCell amiForProxyCell = new SafeHtmlCell();
+        final SafeHtmlCell instanceIdCell = new SafeHtmlCell();
+        final SafeHtmlCell instancePublicIpCell = new SafeHtmlCell();
+        final Column<ReverseProxyDTO,SafeHtml> amiProxyProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(amiForProxyCell) {
+
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO proxy) {
+                return new LinkBuilder()
+                       .setAmiId(proxy.getImageId())
+                       .setRegion(regionsTable.getSelectionModel().getSelectedObject())
+                       .setPathMode(LinkBuilder.pathModes.InstanceByAmiIdSearch)
+                       .build();
+            }
+            
+        };
+        final Column<ReverseProxyDTO, SafeHtml> instanceIdProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instanceIdCell) {
+
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+                return new LinkBuilder().setInstanceId(reverseProxy.getInstanceId()).setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.InstanceSearch).build();
+            }
+            
+        };
+        final Column<ReverseProxyDTO, SafeHtml> instancePublicIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instanceIdCell) {
+
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+              return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.publicIp).setPublicIp(reverseProxy.getPublicIpAddress()).build();
+            }
+            
+        };
         proxiesTable = new TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -495,8 +526,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         };
         
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getImageId(), stringMessages.id());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getPublicIpAddress()  , stringMessages.publicIp());
+       proxiesTable.addColumn(instanceIdProxiesColumn, stringMessages.instanceId());
+       proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
+       proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        //setup actions

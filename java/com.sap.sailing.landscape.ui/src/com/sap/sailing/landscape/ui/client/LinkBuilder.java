@@ -10,7 +10,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
 
     static public enum pathModes {
         InstanceSearch, InstanceByAmiIdSearch, ImageSearch, AmiSearch, Hostname,
-        ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch
+        ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch, publicIp
     };
 
     private pathModes pathMode;
@@ -20,6 +20,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
     private String targetGroupName;
     private String autoScalingGroupName;
     private String amiId;
+    private String publicIp;
 
     LinkBuilder setPathMode(pathModes mode) {
         pathMode = mode;
@@ -51,6 +52,10 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         return self();
     }
 
+    LinkBuilder setPublicIp(String ip) {
+        this.publicIp = ip;
+        return self();
+    }
     LinkBuilder setReplicaSet(SailingApplicationReplicaSetDTO<String> replicaSet) {
         this.replicaSet = replicaSet;
         return self();
@@ -119,6 +124,13 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         return "https://releases.sapsailing.com/" + version + "/release-notes.txt";
     }
 
+    /**
+     * Checks if an attribute is null and throws an exception if so. 
+     *
+     * @param attr The variable name to check for null.
+     * @param name The human readable name of the variable.
+     * @throws Exception This stores the value which is not set.
+     */
     private void checkAttribute(Object attr, String name) throws Exception {
         if (attr == null) {
             throw new Exception(name + " needs to be given!");
@@ -195,6 +207,12 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 checkAttribute(autoScalingGroupName, "Auto-Scaling Group Name");
                 appendEc2AutoScalingGroupLink(builder, autoScalingGroupName);
                 break;
+            case publicIp:
+                checkAttribute(publicIp, "Public Ip");
+                final String ipLink = "https://" + publicIp;
+                builder.appendHtmlConstant("<a target=\"_blank\" href=\"" + ipLink + "\">");
+                builder.appendEscaped(publicIp);
+                builder.appendHtmlConstant("</a>");
             }
         } catch (Exception e) {
             builder.appendHtmlConstant("<a target=\"_blank\" >");

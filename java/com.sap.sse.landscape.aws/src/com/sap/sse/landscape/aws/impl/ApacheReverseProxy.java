@@ -99,7 +99,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
                 + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname) + "; service httpd reload && "
-                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set configFileNameForHostname redirect\"", false);
+                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set " +  configFileNameForHostname + " redirect\"", false);
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
