@@ -1,11 +1,12 @@
 #!/bin/bash
-/home/wiki/gitwiki
-#eg /home/wiki/gitwiki
-GIT_ROOT="${2}"
+
 # Downloads all TracTrac event data based on ${GIT_ROOT}/configuration/tractrac-json-urls
 # into the target directory (specified as $1) for those event URLs whose specific folder
 # does not yet exist in the target directory.
 TARGET_DIR="${1}"
+
+# eg /home/wiki/gitwiki
+GIT_ROOT="${2}"
 JSON_URLS_FILE="${GIT_ROOT}/configuration/tractrac-json-urls"
 for i in `cat "${JSON_URLS_FILE}"`; do
   EVENT_DB="$( basename $( dirname ${i} ) )"
