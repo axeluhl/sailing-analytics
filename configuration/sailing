@@ -39,11 +39,6 @@ SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_servers() {
-        echo "Initializing local MongoDB replica set \"replica\"..."
-        while ! echo "rs.initiate()" | mongo; do
-          echo "MongoDB not ready yet; waiting and trying again..."
-          sleep 5
-        done
         /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
 	chown root /usr/local/bin/cp_root_mail_properties
@@ -63,6 +58,11 @@ start_servers() {
 	    done
 	  else
 	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
+	    echo "Initializing local MongoDB replica set \"replica\"..."
+	    while ! echo "rs.initiate()" | mongo; do
+	      echo "MongoDB not ready yet; waiting and trying again..."
+	      sleep 5
+	    done
 	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
 	    if [ "${FIRST_SERVER}" = "" ]; then
 	      echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
