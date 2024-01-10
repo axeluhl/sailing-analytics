@@ -1,4 +1,1 @@
-#!/bin/bash
-OPERATORS=$(cat /var/cache/landscapeManagersMailingList)
-logger -t sailing "Sending notification e-mail with subject $1 to ${OPERATORS}"
-mail -s "$1" ${OPERATORS}
+../../../../../on-site-scripts/tokyo2020/notify-operators
