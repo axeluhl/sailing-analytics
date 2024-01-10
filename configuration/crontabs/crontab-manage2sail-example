@@ -1,1 +1,5 @@
+# If you'd like to receive e-mail notifications about new Manage2Sail results for an event,
+# adjust the following accordingly, making sure you also update the mailing list file
+# referenced by the notify... script. Adjust the Manage2Sail event ID in the script
+# to point to the event you'd like to observe.
 #* * * * * PATH_OF_HOME_DIR_TO_REPLACE/bin/notifyAbout49erEuros2023Updates 2>PATH_OF_HOME_DIR_TO_REPLACE/notifyAbout49erEuros2023Updates.err >PATH_OF_HOME_DIR_TO_REPLACE/notifyAbout49erEuros2023Updates.out
