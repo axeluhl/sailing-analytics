@@ -7,8 +7,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -38,7 +36,6 @@ ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT exten
 extends AbstractApacheReverseProxy<ShardingKey, MetricsT, ProcessT>
 implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     private Set<AwsInstance<ShardingKey>> hosts;
-    private static final Logger logger = Logger.getLogger(ApacheReverseProxyCluster.class.getName());
     public ApacheReverseProxyCluster(AwsLandscape<ShardingKey> landscape) {
         super(landscape);
         this.hosts = new HashSet<>();

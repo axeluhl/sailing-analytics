@@ -499,7 +499,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
             
         };
-        final Column<ReverseProxyDTO, SafeHtml> instancePublicIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instanceIdCell) {
+        final Column<ReverseProxyDTO, SafeHtml> instancePublicIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instancePublicIpCell) {
 
             @Override
             public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
