@@ -7,7 +7,7 @@ AWS=/bin/aws
 REGION=eu-west-1
 HUDSON_SLAVE_AMI_ID=$( /usr/local/bin/getLatestImageOfType.sh hudson-slave )
 echo Launching instance from AMI ${HUDSON_SLAVE_AMI_ID} ...
-instanceid=`$AWS ec2 run-instances --image-id $HUDSON_SLAVE_AMI_ID --count 1 --instance-type c5d.4xlarge --key-name Axel --security-groups "Sailing Analytics App" --region $REGION --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Hudson Ubuntu Slave}]' --instance-initiated-shutdown-behavior terminate | tee /tmp/slavelaunch.out | jq .Instances[0].InstanceId | sed -e 's/"//g'`
+instanceid=`$AWS ec2 run-instances --image-id $HUDSON_SLAVE_AMI_ID --count 1 --instance-type c5d.4xlarge --key-name Axel --security-groups "Sailing Analytics App" --region $REGION --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Hudson Build Instance}]' --instance-initiated-shutdown-behavior terminate | tee /tmp/slavelaunch.out | jq .Instances[0].InstanceId | sed -e 's/"//g'`
 if [ "$instanceid" = "" ]; then
   echo Error launching instance
   exit 1
