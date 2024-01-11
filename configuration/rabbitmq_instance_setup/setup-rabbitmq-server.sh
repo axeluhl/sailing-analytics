@@ -33,6 +33,6 @@ EOF
   sudo systemctl restart rabbitmq-server.service
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
   echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
-  echo "make sure the instance has the \"Database and Messaging\" security group set,
+  echo "make sure the instance has the \"Database and Messaging\" security group set,"
   echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi
