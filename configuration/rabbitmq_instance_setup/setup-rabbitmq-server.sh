@@ -1,4 +1,7 @@
 #!/bin/bash
+# Apply this to an instance launched from a barebones Debian 12 image with ~16GB of root volume size.
+# As a result, you'll get a ready-to-use RabbitMQ server that is running on the default port and accepts
+# connections with the guest user log-in also from non-localhost addresses.
 if [ $# != 0 ]; then
   SERVER=$1
   scp -o StrictHostKeyChecking=false "${0}" admin@${SERVER}:
@@ -15,15 +18,21 @@ else
   sudo chgrp admin /home/admin/ssh-key-reader.token
   sudo chmod 600 /home/admin/ssh-key-reader.token
   # Install packages for MariaDB and cron/anacron/crontab:
-  sudo apt-get update
-  sudo apt-get upgrade
-  sudo apt-get install rabbitmq-server systemd-cron
+  sudo apt-get -y update
+  sudo apt-get -y upgrade
+  sudo apt-get -y install rabbitmq-server systemd-cron
   crontab /home/admin/crontab
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
   sudo rabbitmq-plugins enable rabbitmq_management
+  # Allow guest login from non-localhost IPs:
+  sudo su - -c "cat <<EOF >>/etc/rabbitmq/rabbitmq.conf
+loopback_users = none
+EOF
+"
+  sudo systemctl restart rabbitmq-server.service
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
   echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
-  echo "make sure the instance has the \"Database and Messaging\" security group set,
+  echo "make sure the instance has the \"Database and Messaging\" security group set,"
   echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi
