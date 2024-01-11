@@ -29,7 +29,8 @@ shift $((OPTIND-1)) # shift the arguments along so -s is no longer $1
 ENV_TYPE="$1"
 GIT_USER="$2"
 RELATIVE_GIT_DIR_NAME="$3"
-cd "$(dirname "$0")/${ENV_TYPE}/users"
+cd "$(dirname "$0")/${ENV_TYPE}"
+cd "users"
 GIT_PATH="$(eval echo $(printf "~%q" "$GIT_USER"))/${RELATIVE_GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
 for dir in $(ls -d */ ); do
     USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
