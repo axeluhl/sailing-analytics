@@ -4,9 +4,11 @@
 # into the target directory (specified as $1) for those event URLs whose specific folder
 # does not yet exist in the target directory.
 TARGET_DIR="${1}"
-
-# eg /home/wiki/gitwiki
-GIT_ROOT="${2}"
+if [[ $# -eq 0 ]]; then 
+    GIT_ROOT=/home/wiki/gitwiki
+else
+    GIT_ROOT="${2}"
+fi
 JSON_URLS_FILE="${GIT_ROOT}/configuration/tractrac-json-urls"
 for i in `cat "${JSON_URLS_FILE}"`; do
   EVENT_DB="$( basename $( dirname ${i} ) )"
