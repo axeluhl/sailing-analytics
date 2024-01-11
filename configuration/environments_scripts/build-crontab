@@ -47,7 +47,7 @@ if [[ -d "users" ]]; then
     done
     cd ..
 fi
-if [[ "$ONLY_CRONTAB" != "true" ]]; then
+if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
     cd "files"
     \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
 fi
