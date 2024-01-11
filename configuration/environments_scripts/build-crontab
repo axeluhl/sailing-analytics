@@ -8,10 +8,10 @@
 # Useful files are also copied across from the "files" dir within each image type.
 
 if [[ $# -ne 3 && $# -ne 4 ]]; then
-    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_CODE> <NAME_OF_GIT_DIR>  "
+    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
     echo ""
-    echo "Where USER_WITH_CODE is a user that contains a checked out copy of the main git."
-    echo "And where NAME_OF_GIT_DIR is the path to the git repo from the USER_WITH_CODE's home directory."
+    echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
+    echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
     echo "Use the s flag to only do the crontab and not copy any files across"
     exit 2
 fi
