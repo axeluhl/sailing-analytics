@@ -45,7 +45,7 @@ if [[ -d "users" ]]; then
         sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
         crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
     done
-    cd ..
+    cd .. # exits users folder, which is essential for the next commands
 fi
 if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
     cd "files"
