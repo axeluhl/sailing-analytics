@@ -38,9 +38,6 @@ for dir in $(ls -d */ ); do
         cat "$crontab"  >> $HOME_DIR/crontab
         echo "" >> $HOME_DIR/crontab  # Adds a newline
     done
-    if [[ -d "${dir}baseHomeDir" ]]; then
-        cp -r ${dir}baseHomeDir/* $HOME_DIR
-    fi
     sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
     sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
     crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
