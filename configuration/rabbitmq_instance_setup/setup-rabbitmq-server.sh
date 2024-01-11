@@ -18,9 +18,9 @@ else
   sudo chgrp admin /home/admin/ssh-key-reader.token
   sudo chmod 600 /home/admin/ssh-key-reader.token
   # Install packages for MariaDB and cron/anacron/crontab:
-  sudo apt-get update
-  sudo apt-get upgrade
-  sudo apt-get install rabbitmq-server systemd-cron
+  sudo apt-get -y update
+  sudo apt-get -y upgrade
+  sudo apt-get -y install rabbitmq-server systemd-cron
   crontab /home/admin/crontab
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
