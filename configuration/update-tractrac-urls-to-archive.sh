@@ -7,7 +7,7 @@ else
 fi
 PATH_TO_TRAC_TRAC_URLS="configuration/tractrac-json-urls"
 urls=$(mongo --quiet "mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive" --eval 'db.TRACTRAC_CONFIGURATIONS.find({}, {TT_CONFIG_JSON_URL : 1}).toArray()' | grep -v ObjectId | jq -r '.[].TT_CONFIG_JSON_URL' )
-if [[ $urls == "null" ]]; then
+if [[ $urls == "null" || $? -ne 0 ]]; then
     echo "Mongo db returns null for tractrac url discovery" | notify-operators "MongoDB/tractrac urls issue"
     exit 1
 else
