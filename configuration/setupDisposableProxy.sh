@@ -6,6 +6,7 @@ IP=$1
 BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
+RELATIVE_GIT_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
 HTTPD_GIT_REPO_IP="18.135.5.168"
 AWS_CREDENTIALS_IP="34.254.223.106"
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
@@ -34,20 +35,19 @@ yum install -y php  # also install mod_php
 cd /home
 GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
 adduser ${GIT_COPY_USER}
-mv git ${GIT_COPY_USER}/gitwiki
+mv git ${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}
 scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/.ssh" "/home/${GIT_COPY_USER}"  # copies wiki users passwordless keys
-## crontab -u ${GIT_COPY_USER} "/home/${GIT_COPY_USER}/gitwiki/configuration/crontabs/users/crontab-wiki-user"
-ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/syncgit" "/home/${GIT_COPY_USER}"
+## crontab -u ${GIT_COPY_USER} "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/crontabs/users/crontab-wiki-user"
 chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "${GIT_COPY_USER}"
 # setup symbolic links
 cd /usr/local/bin
-ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/update_authorized_keys_for_landscape_managers" /usr/local/bin/update_authorized_keys_for_landscape_managers
-ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed" /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
-ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/on-site-scripts/paris2024/notify-operators"
-ln -s  "/home/${GIT_COPY_USER}/gitwiki/configuration/sync-repo-and-execute-cmd.sh" /root
-ln -s  /home/${GIT_COPY_USER}/gitwiki/configuration/switchoverArchive.sh 
-ln -s  /home/${GIT_COPY_USER}/gitwiki/configuration/crontabs/environments/crontab-reverse-proxy /root/crontab   # make sure to check the correct crontab is used
-## cp  /home/${GIT_COPY_USER}/gitwiki/configuration/httpd/cgi-bin/reverseProxyHealthcheck.sh /var/www/cgi-bin
+ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/update_authorized_keys_for_landscape_managers" /usr/local/bin/update_authorized_keys_for_landscape_managers
+ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/update_authorized_keys_for_landscape_managers_if_changed" /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
+ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/on-site-scripts/paris2024/notify-operators"
+ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/sync-repo-and-execute-cmd.sh" /root
+ln -s  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/switchoverArchive.sh 
+ln -s  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/crontabs/environments/crontab-reverse-proxy /root/crontab   # make sure to check the correct crontab is used
+## cp  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/httpd/cgi-bin/reverseProxyHealthcheck.sh /var/www/cgi-bin
 cp /root/reverseProxyHealthcheck.sh /var/www/cgi-bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
@@ -75,8 +75,8 @@ service fail2ban start
 yum remove -y firewalld
 yum install -y mod_ssl
 # setup mounting of nvme
-ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
-## ln -s "/home/${GIT_COPY_USER}/gitwiki/configuration/archive_instance_setup/mountnvmeswap" /usr/local/bin/mountnvmeswap
+ln -s "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
+## ln -s "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/archive_instance_setup/mountnvmeswap" /usr/local/bin/mountnvmeswap
 source /root/.bashrc
 ./mountnvmeswap
 systemctl enable mountnvmeswap.service
@@ -84,7 +84,7 @@ systemctl enable mountnvmeswap.service
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 rm $HTTP_LOGROTATE_ABSOLUTE
-cp /home/${GIT_COPY_USER}/gitwiki/configuration/logrotate-httpd /etc/logrotate.d/httpd
+cp /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/logrotate-httpd /etc/logrotate.d/httpd
 mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
 sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
@@ -98,7 +98,7 @@ rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 
 # setup git
-## "/home/${GIT_COPY_USER}/gitwiki/configuration/setupHttpdGitLocal.sh" "httpdConf@18.135.5.168:repo.git"
+## "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/setupHttpdGitLocal.sh" "httpdConf@18.135.5.168:repo.git"
 /root/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
 # copy key accross
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519" /root/.ssh
