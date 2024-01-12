@@ -12,14 +12,15 @@ if [[ $# -ne 3 && $# -ne 4 ]]; then
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
     echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
-    echo "Use the s flag to only do the crontab and not copy any files across"
+    echo "Use the s(imple) flag to only do the crontab and not copy any files across. The n(o install) flag can be used to setup the crontabs but not install them."
     exit 2
 fi
-
-options='s'
+INSTALL_CRONTAB="true"
+options='sn'
 while getopts $options option
 do
     case $option in
+        n) INSTALL_CRONTAB="false";;
         s) ONLY_CRONTAB="true";;
         \?) echo "Invalid option"
             exit 4;;
@@ -43,7 +44,9 @@ if [[ -d "users" ]]; then
         done
         sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
         sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
-        crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+        if [[ "$INSTALL_CRONTAB" == "true" ]]; then    
+            crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+        fi
     done
     cd .. # exits users folder, which is essential for the next commands
 fi
