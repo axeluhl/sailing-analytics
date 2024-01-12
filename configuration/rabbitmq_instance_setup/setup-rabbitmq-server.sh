@@ -7,6 +7,9 @@ if [ $# != 0 ]; then
   scp -o StrictHostKeyChecking=false "${0}" admin@${SERVER}:
   ssh -o StrictHostKeyChecking=false -A admin@${SERVER} ./$( basename "${0}" )
 else
+  # Fix the non-sensical use of "dash" as the default shell:
+  sudo rm /usr/bin/sh
+  sudo ln -s /usr/bin/bash /usr/bin/sh
   # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
@@ -20,7 +23,9 @@ else
   # Install packages for MariaDB and cron/anacron/crontab:
   sudo apt-get -y update
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
+  sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys
+  sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys
   crontab /home/admin/crontab
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
