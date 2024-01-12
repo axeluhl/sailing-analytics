@@ -1465,9 +1465,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public RabbitMQEndpoint getDefaultRabbitConfiguration(com.sap.sse.landscape.Region region) {
+        final RabbitMQEndpoint defaultRabbitMQInDefaultRegion = ()->SharedLandscapeConstants.RABBIT_IN_DEFAULT_REGION_HOSTNAME; // using default port RabbitMQEndpoint.DEFAULT_PORT
         final RabbitMQEndpoint result;
         if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = ()->SharedLandscapeConstants.RABBIT_IN_DEFAULT_REGION_HOSTNAME; // using default port RabbitMQEndpoint.DEFAULT_PORT
+            result = defaultRabbitMQInDefaultRegion; 
         } else {
             final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(
                     region, SharedLandscapeConstants.RABBITMQ_TAG_NAME, AwsInstanceImpl::new);
@@ -1487,7 +1488,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     }
                 };
             } else {
-                result = null;
+                result = defaultRabbitMQInDefaultRegion; // no instance with tag found; hope for VPC peering and use RabbitMQ hostname from default region
             }
         }
         return result;

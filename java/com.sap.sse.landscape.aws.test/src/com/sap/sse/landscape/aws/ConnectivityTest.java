@@ -550,4 +550,11 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         assertTrue(rabbitConfig.getNodeName().startsWith("172.31."));
         assertEquals(5672, rabbitConfig.getPort());
     }
+    
+    @Test
+    public void getDefaultRabbitConfigForRegionWithNoTaggedInstanceInIt() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.US_EAST_2, landscape));
+        assertEquals("rabbit.internal.sapsailing.com", rabbitConfig.getNodeName());
+        assertEquals(5672, rabbitConfig.getPort());
+    }
 }
