@@ -1,7 +1,5 @@
 package com.sap.sailing.landscape.common;
 
-import software.amazon.awssdk.regions.Region;
-
 public interface SharedLandscapeConstants {
     /**
      * If no specific domain name is provided, e.g., when creating a new application replica set, this will be
@@ -24,12 +22,12 @@ public interface SharedLandscapeConstants {
     
     String RABBIT_IN_DEFAULT_REGION_HOSTNAME = "rabbit.internal.sapsailing.com";
 
-    Region DEFAULT_REGION = Region.EU_WEST_1;
+    String DEFAULT_REGION = "eu-west-1";
     
     /**
      * We maintain a DNS entry for "rabbit.internal.sapsailing.com" (see {@link #RABBIT_IN_DEFAULT_REGION_HOSTNAME}) in this region
      */
-    String REGION_WITH_RABBITMQ_DNS_HOSTNAME = DEFAULT_REGION.id();
+    String REGION_WITH_RABBITMQ_DNS_HOSTNAME = DEFAULT_REGION;
     
     /**
      * This is the region of the load balancer handling the default traffic for {@code *.sapsailing.com}. It is also
@@ -49,7 +47,7 @@ public interface SharedLandscapeConstants {
      * for archived events. If such a state is reached, "dynamic" load balancing may potentially be used regardless
      * the region.
      */
-    String REGION_WITH_DEFAULT_LOAD_BALANCER = DEFAULT_REGION.id();
+    String REGION_WITH_DEFAULT_LOAD_BALANCER = DEFAULT_REGION;
     
     /**
      * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
