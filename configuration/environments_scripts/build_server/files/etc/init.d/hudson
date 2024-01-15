@@ -7,7 +7,7 @@
 #     under the terms of the GNU Lesser General Public License as published by
 #     the Free Software Foundation; either version 2.1 of the License, or (at
 #     your option) any later version.
-#			      
+#                  
 #     This library is distributed in the hope that it will be useful, but
 #     WITHOUT ANY WARRANTY; without even the implied warranty of
 #     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -23,17 +23,17 @@
 # Check for missing binaries (stale symlinks should not happen)
 HUDSON_WAR="/usr/lib/hudson/hudson.war"
 test -r "$HUDSON_WAR" || { echo "$HUDSON_WAR not installed"; 
-	if [ "$1" = "stop" ]; then exit 0;
-	else exit 5; fi; }
+    if [ "$1" = "stop" ]; then exit 0;
+    else exit 5; fi; }
 
 # Check for existence of needed config file and read it
 HUDSON_CONFIG=/etc/sysconfig/hudson
 test -e "$HUDSON_CONFIG" || { echo "$HUDSON_CONFIG not existing";
-	if [ "$1" = "stop" ]; then exit 0;
-	else exit 6; fi; }
+    if [ "$1" = "stop" ]; then exit 0;
+    else exit 6; fi; }
 test -r "$HUDSON_CONFIG" || { echo "$HUDSON_CONFIG not readable. Perhaps you forgot 'sudo'?";
-	if [ "$1" = "stop" ]; then exit 0;
-	else exit 6; fi; }
+    if [ "$1" = "stop" ]; then exit 0;
+    else exit 6; fi; }
 
 HUDSON_PID_FILE="/var/run/hudson.pid"
 HUDSON_USER="hudson"
@@ -42,16 +42,16 @@ HUDSON_GROUP="hudson"
 # Source function library.
 . /etc/init.d/functions
 
-# Read config	
+# Read config
 [ -f "$HUDSON_CONFIG" ] && . "$HUDSON_CONFIG"
 
 # Set up environment accordingly to the configuration settings
 [ -n "$HUDSON_HOME" ] || { echo "HUDSON_HOME not configured in $HUDSON_CONFIG";
-	if [ "$1" = "stop" ]; then exit 0;
-	else exit 6; fi; }
+    if [ "$1" = "stop" ]; then exit 0;
+    else exit 6; fi; }
 [ -d "$HUDSON_HOME" ] || { echo "HUDSON_HOME directory does not exist: $HUDSON_HOME";
-	if [ "$1" = "stop" ]; then exit 0;
-	else exit 1; fi; }
+    if [ "$1" = "stop" ]; then exit 0;
+    else exit 1; fi; }
 export HUDSON_HOME
 
 # Search usable Java. We do this because various reports indicated
@@ -80,71 +80,71 @@ RETVAL=0
 
 case "$1" in
     start)
-	echo -n "Starting Hudson "
-	daemon  --user "$HUDSON_USER" --pidfile "$HUDSON_PID_FILE" "$JAVA_CMD" "$PARAMS" &> /var/tmp/hudson.log &
-	RETVAL=$?
-	if [ $RETVAL = 0 ]; then
-	    success
-	    echo > "$HUDSON_PID_FILE"  # just in case we fail to find it
+    echo -n "Starting Hudson "
+    daemon  --user "$HUDSON_USER" --pidfile "$HUDSON_PID_FILE" "$JAVA_CMD" "$PARAMS" &> /var/tmp/hudson.log &
+    RETVAL=$?
+    if [ $RETVAL = 0 ]; then
+        success
+        echo > "$HUDSON_PID_FILE"  # just in case we fail to find it
             MY_SESSION_ID=`/bin/ps h -o sess -p $$`
             # get PID
             /bin/ps hww -u "$HUDSON_USER" -o sess,ppid,pid,cmd | \
             while read sess ppid pid cmd; do
-		[ "$ppid" = 1 ] || continue
-		# this test doesn't work because Hudson sets a new Session ID
+        [ "$ppid" = 1 ] || continue
+        # this test doesn't work because Hudson sets a new Session ID
                 # [ "$sess" = "$MY_SESSION_ID" ] || continue
-	       	echo "$cmd" | grep $HUDSON_WAR > /dev/null
-		[ $? = 0 ] || continue
-		# found a PID
-		echo $pid > "$HUDSON_PID_FILE"
-	    done
-	else
-	    failure
-	fi
-	echo
-	;;
+            echo "$cmd" | grep $HUDSON_WAR > /dev/null
+        [ $? = 0 ] || continue
+        # found a PID
+        echo $pid > "$HUDSON_PID_FILE"
+        done
+    else
+        failure
+    fi
+    echo
+    ;;
     stop)
-	echo -n "Shutting down Hudson "
-	killproc hudson
-	RETVAL=$?
-	echo
-	;;
+    echo -n "Shutting down Hudson "
+    killproc hudson
+    RETVAL=$?
+    echo
+    ;;
     try-restart|condrestart)
-	if test "$1" = "condrestart"; then
-		echo "${attn} Use try-restart ${done}(LSB)${attn} rather than condrestart ${warn}(RH)${norm}"
-	fi
-	$0 status
-	if test $? = 0; then
-		$0 restart
-	else
-		: # Not running is not a failure.
-	fi
-	;;
+    if test "$1" = "condrestart"; then
+        echo "${attn} Use try-restart ${done}(LSB)${attn} rather than condrestart ${warn}(RH)${norm}"
+    fi
+    $0 status
+    if test $? = 0; then
+        $0 restart
+    else
+        : # Not running is not a failure.
+    fi
+    ;;
     restart)
-	$0 stop
-	$0 start
-	;;
+    $0 stop
+    $0 start
+    ;;
     force-reload)
-	echo -n "Reload service Hudson "
-	$0 try-restart
-	;;
+    echo -n "Reload service Hudson "
+    $0 try-restart
+    ;;
     reload)
-    	$0 restart
-	;;
+        $0 restart
+    ;;
     status)
-    	status hudson
-	RETVAL=$?
-	;;
+        status hudson
+    RETVAL=$?
+    ;;
     probe)
-	## Optional: Probe for the necessity of a reload, print out the
-	## argument to this init script which is required for a reload.
-	## Note: probe is not (yet) part of LSB (as of 1.9)
+    ## Optional: Probe for the necessity of a reload, print out the
+    ## argument to this init script which is required for a reload.
+    ## Note: probe is not (yet) part of LSB (as of 1.9)
 
-	test "$HUDSON_CONFIG" -nt "$HUDSON_PID_FILE" && echo reload
-	;;
+    test "$HUDSON_CONFIG" -nt "$HUDSON_PID_FILE" && echo reload
+    ;;
     *)
-	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
-	exit 1
-	;;
+    echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+    exit 1
+    ;;
 esac
 exit $RETVAL
