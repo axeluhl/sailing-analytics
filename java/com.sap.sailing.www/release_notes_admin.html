@@ -23,6 +23,15 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">January 2024</h2>
+          <ul class="bulletList">
+            <li>When launching a new application replica set in a region, the choice of the default RabbitMQ
+                server now depends on the region: in our "default" region "eu-west-1", RabbitMQ is identified
+                by the DNS-mapped host name "rabbit.internal.sapsailing.com". Elsewhere, the RabbitMQ server
+                in the region is explored using the RabbitMQEndpoint tag. If not found, again
+                "rabbit.internal.sapsailing.com" will be used, assuming there may be a VPC peering across
+                regions.</li>
+          </ul>
           <h2 class="articleSubheadline">October 2023</h2>
           <ul class="bulletList">
             <li>TracTrac and YellowBrick passwords are no longer sent back to the client; there were ways to discover
