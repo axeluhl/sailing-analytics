@@ -5,17 +5,7 @@
 # chkconfig: 2345 95 10
 # description: Sailing contains all sailing services
 #
-### BEGIN INIT INFO
-# Provides:          sailing
-# Required-Start:    $local_fs $network $named $remote_fs
-# Should-Start:      
-# Required-Stop:
-# Should-Stop:
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: The sailing service
-# Description:       Start all sailing services required for this instance
-### END INIT INFO
+
 
 # Source function library.
 . /etc/init.d/functions

@@ -18,17 +18,7 @@
 #     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
 #     USA.
 #
-### BEGIN INIT INFO
-# Provides:          hudson
-# Required-Start:    $local_fs $remote_fs $network $time $named
-# Should-Start: $time sendmail
-# Required-Stop:     $local_fs $remote_fs $network $time $named
-# Should-Stop: $time sendmail
-# Default-Start:     3 5
-# Default-Stop:      0 1 2 6
-# Short-Description: Hudson continuous build server
-# Description:       Start the Hudson continuous build server
-### END INIT INFO
+
 
 # Check for missing binaries (stale symlinks should not happen)
 HUDSON_WAR="/usr/lib/hudson/hudson.war"
