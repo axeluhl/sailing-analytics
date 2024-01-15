@@ -17,14 +17,14 @@ if [ "${curl_exit_code}" = "0" ]; then
       ssh_key_curl_exit_code=$?
       if [ "${ssh_key_curl_exit_code}" = "0" ]; then
         echo "${ssh_key_curl_output}" | jq -r '.[].publicKey'
-	ssh_key_jq_exit_code=$?
-	if [ "${ssh_key_jq_exit_code}" != "0" ]; then
-	  EXIT_CODE=${ssh_key_jq_exit_code}
-	  logger -t sailing "Couldn't parse response of get_ssh_keys_owned_by_user; jq exit code ${ssh_key_jq_exit_code}"
-	fi
+    ssh_key_jq_exit_code=$?
+    if [ "${ssh_key_jq_exit_code}" != "0" ]; then
+      EXIT_CODE=${ssh_key_jq_exit_code}
+      logger -t sailing "Couldn't parse response of get_ssh_keys_owned_by_user; jq exit code ${ssh_key_jq_exit_code}"
+    fi
       else
         EXIT_CODE=${ssh_key_curl_exit_code}
-	logger -t sailing "Couldn't get response of get_ssh_keys_owned_by_user; curl exit code ${ssh_key_corl_exit_code}"
+    logger -t sailing "Couldn't get response of get_ssh_keys_owned_by_user; curl exit code ${ssh_key_corl_exit_code}"
       fi
     done | sort -u )
     logger -t sailing "Obtained public keys: ${public_keys}"

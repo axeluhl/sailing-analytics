@@ -40,7 +40,7 @@ do
         if [[ ! -f ${CACHE_LOCATION} || $((currentUnixTime - $(cat "${CACHE_LOCATION}") )) -gt "$TIME_CHECK_SECONDS" ]]; then
             date +"%s" > "${CACHE_LOCATION}"
             echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
-        fi       
+        fi
         logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
         exit 1
     fi

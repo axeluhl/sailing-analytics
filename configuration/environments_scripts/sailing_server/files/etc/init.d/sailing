@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# sailing	Starts sailing services
+# sailing    Starts sailing services
 #
 # chkconfig: 2345 95 10
 # description: Sailing contains all sailing services
@@ -30,39 +30,39 @@ echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_servers() {
         /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
-	cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
-	chown root /usr/local/bin/cp_root_mail_properties
-	chgrp root /usr/local/bin/cp_root_mail_properties
-	chmod 755 /usr/local/bin/cp_root_mail_properties
-	cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
+    cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
+    chown root /usr/local/bin/cp_root_mail_properties
+    chgrp root /usr/local/bin/cp_root_mail_properties
+    chmod 755 /usr/local/bin/cp_root_mail_properties
+    cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
         if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
           echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
           $GIT_REPOSITORY/configuration/imageupgrade.sh
         else
           echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
-	  echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
+      echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
           if [ -f "${REBOOT_INDICATOR}" ]; then
-	    echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
-	    for conf in ${JAVA_START_INSTANCES}; do
-	      su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
-	    done
-	  else
-	    echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
-	    echo "Initializing local MongoDB replica set \"replica\"..."
-	    while ! echo "rs.initiate()" | mongo; do
-	      echo "MongoDB not ready yet; waiting and trying again..."
-	      sleep 5
-	    done
-	    FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
-	    if [ "${FIRST_SERVER}" = "" ]; then
-	      echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
-	    else
-	      echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
-	      configure_and_start_server "${FIRST_SERVER}"
-	    fi
-	    echo 1 >"${REBOOT_INDICATOR}"
-	  fi
-	fi
+        echo "This is a re-boot. No EC2 user data is evaluated for server configuration; no server configuration is performed. Only configured applications are launched." >>/var/log/sailing.err
+        for conf in ${JAVA_START_INSTANCES}; do
+          su - sailing -c "cd ${SERVERS_DIR}/${conf} && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+        done
+      else
+        echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
+        echo "Initializing local MongoDB replica set \"replica\"..."
+        while ! echo "rs.initiate()" | mongo; do
+          echo "MongoDB not ready yet; waiting and trying again..."
+          sleep 5
+        done
+        FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
+        if [ "${FIRST_SERVER}" = "" ]; then
+          echo "No SERVER_NAME provided; not configuring/starting any application processes" >>/var/log/sailing.err
+        else
+          echo "Server to configure and start: ${FIRST_SERVER}" >>/var/log/sailing.err
+          configure_and_start_server "${FIRST_SERVER}"
+        fi
+        echo 1 >"${REBOOT_INDICATOR}"
+      fi
+    fi
 }
 
 # Call with the server directory name (not the full path, just a single element from ${JAVA_START_INSTANCE}) as parameter
@@ -85,36 +85,36 @@ configure_and_start_server() {
 }
 
 stop_servers() {
-	for conf in $JAVA_START_INSTANCES; do
-		echo "Stopping Java server $conf" >> /var/log/sailing.err
-		su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
-		RETVAL=$?
-		[ $RETVAL -eq 0 ] && success || failure
-		sync_logs
-	done
+    for conf in $JAVA_START_INSTANCES; do
+        echo "Stopping Java server $conf" >> /var/log/sailing.err
+        su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && success || failure
+        sync_logs
+    done
 }
 
 sync_logs() {
-	echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.err
-	logrotate -f /etc/logrotate.conf
-	sync
+    echo "Executing logrotate followed by a sync to ensure that logs are synchronized" >> /var/log/sailing.err
+    logrotate -f /etc/logrotate.conf
+    sync
 }
 
 # See how we were called.
 case "$1" in
   start)
-	start_servers
-	/usr/sbin/update-motd
-	touch /var/lock/subsys/sailing
+    start_servers
+    /usr/sbin/update-motd
+    touch /var/lock/subsys/sailing
     ;;
   stop)
-	stop_servers
-	rm -f /var/lock/subsys/sailing
-	;;
+    stop_servers
+    rm -f /var/lock/subsys/sailing
+    ;;
   status)
-	status java
-	RETVAL=$?
-	;;
+    status java
+    RETVAL=$?
+    ;;
   *)
     echo $"Usage: $0 {start|status|stop}"
     RETVAL=3
