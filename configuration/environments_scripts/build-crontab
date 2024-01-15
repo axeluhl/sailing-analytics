@@ -7,7 +7,7 @@
 # user's home.
 # Useful files are also copied across from the "files" dir within each image type.
 
-if [[ $# -ne 3 && $# -ne 4 ]]; then
+if [[ $# -ne 3 && $# -ne 4 && $# -ne 5 ]]; then
     echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
