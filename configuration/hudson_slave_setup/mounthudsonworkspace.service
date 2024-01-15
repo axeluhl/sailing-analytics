@@ -1,12 +1,1 @@
-[Unit]
-Description=Mount Hudson Workspace
-After=ephemeral-data.mount
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/mounthudsonworkspace
-RemainAfterExit=true
-StandardOutput=journal
-
-[Install]
-WantedBy=multi-user.target
+../environments_scripts/hudson_slave/files/etc/systemd/system/mounthudsonworkspace.service
