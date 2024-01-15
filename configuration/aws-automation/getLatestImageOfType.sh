@@ -1,1 +1,1 @@
-../environments_scripts/build_server/files/usr/local/bin/getLatestImageOfType.sh
+../environments_scripts/repo/usr/local/bin/getLatestImageOfType.sh
