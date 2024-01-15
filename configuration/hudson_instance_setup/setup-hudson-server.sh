@@ -14,7 +14,7 @@
 # tag key "image-type" and tag value "sailing-analytics-server".
 if [ $# != 0 ]; then
   SERVER=$1
-  $(dirname $0)/../sailing_server_setup/setup-sailing-server.sh ${SERVER}
+  $(dirname $0)/../sailing_server/setup-sailing-server.sh ${SERVER}
   scp "${0}" ec2-user@${SERVER}:
   ssh -A ec2-user@${SERVER} ./$( basename "${0}" )
 else
