@@ -32,7 +32,7 @@ else
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/mysql_instance_setup/crontab-ec2-user /home/ec2-user/crontab
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/ec2-user/
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/ec2-user
   sudo chown ec2-user /home/ec2-user/ssh-key-reader.token
   sudo chgrp ec2-user /home/ec2-user/ssh-key-reader.token
@@ -44,7 +44,7 @@ else
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
-  crontab /home/ec2-user/crontab
+  /home/ec2-user/environments_scripts/build-crontab "mysql_instance_setup" ec2-user environments_scripts
   cat <<'EOF' >${BACKUP_FILE}
 -- The following two lines added manually, based on
 -- https://dba.stackexchange.com/questions/266480/mariadb-mysql-all-db-import-table-user-already-exists

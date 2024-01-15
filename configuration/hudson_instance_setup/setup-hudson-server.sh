@@ -39,16 +39,7 @@ else
     sudo chgrp hudson /var/log/hudson
     sudo chmod g+w /var/log/hudson
     sudo wget -O /usr/lib/hudson/hudson.war "https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2"
-    # Link hudson file to /etc/init.d
-    sudo ln -s /home/sailing/code/configuration/hudson_instance_setup/hudson /etc/init.d
-    # Link hudson service to /etc/systemd/system
-    sudo ln -s /home/sailing/code/configuration/hudson_instance_setup/hudson.service /etc/systemd/system
-    # Link Hudson system-wide config file:
-    sudo ln -s /home/sailing/code/configuration/hudson_instance_setup/sysconfig-hudson /etc/sysconfig/hudson
-    # Link additional script files needed for Hudson build server control:
-    sudo ln -s /home/sailing/code/configuration/launchhudsonslave /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/launchhudsonslave-java11 /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/aws-automation/getLatestImageOfType.sh /usr/local/bin
+    /home/sailing/code/configuration/environments_scripts/build-crontab build_server sailing code
     # Enable NFS server
     sudo systemctl enable nfs-server.service
     sudo systemctl start nfs-server.service

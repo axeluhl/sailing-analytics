@@ -45,10 +45,10 @@ else
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
-    # Install sailing.sh script to /etc/profile.d
-    sudo ln -s /home/sailing/code/configuration/sailing.sh /etc/profile.d
     # Keep Amazon Linux from patching root's authorized_keys file:
     sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
+    # build-crontab
+    sudo /home/sailing/code/configuration/environments_scripts/build-crontab sailing_server sailing code
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
 PermitRootLogin without-password
@@ -61,10 +61,7 @@ EOF
 # number of connections the firewall can track
 net.ipv4.ip_conntrac_max = 131072
 EOF
-"
-    # Install mountnvmeswap stuff
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
+"  
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
@@ -86,9 +83,6 @@ EOF
 "
     sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
     # Install cron job for ssh key update for landscape managers
-    sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/crontab-root /root/crontab
     sudo su - -c "crontab /root/crontab"
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
@@ -96,8 +90,6 @@ EOF
     sudo chgrp root /root/ssh-key-reader.token
     sudo chmod 600 /root/ssh-key-reader.token
     # Install /etc/init.d/sailing start-up / shut-down service
-    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable sailing.service
     # Install secrets

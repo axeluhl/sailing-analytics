@@ -15,7 +15,6 @@ else
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/rabbitmq_instance_setup/crontab-admin /home/admin/crontab
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/admin
   sudo chown admin /home/admin/ssh-key-reader.token
   sudo chgrp admin /home/admin/ssh-key-reader.token
@@ -26,7 +25,8 @@ else
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
   sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys
   sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys
-  crontab /home/admin/crontab
+  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/admin
+  /home/admin/environments_scripts/build-crontab "rabbitmq_instance_setup" admin environments_scripts
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
   sudo rabbitmq-plugins enable rabbitmq_management
