@@ -9,6 +9,7 @@ import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.InboundReplicationConfiguration;
 import com.sap.sse.landscape.OutboundReplicationConfiguration;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.UserDataProvider;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -43,7 +44,7 @@ implements UserDataProvider {
      * {@link #getServerName() server name}.</li>
      * <li>The {@link #setInboundReplicationConfiguration(InboundReplicationConfiguration) inbound replication}
      * {@link InboundReplicationConfiguration#getInboundRabbitMQEndpoint() RabbitMQ endpoint} defaults to the region's
-     * {@link AwsLandscape#getDefaultRabbitConfiguration(com.sap.sse.landscape.aws.impl.AwsRegion) default RabbitMQ
+     * {@link AwsLandscape#getDefaultRabbitConfiguration(Region) default RabbitMQ
      * configuration}. Note that this setting will take effect only if auto-replication is activated for one or more
      * replicables (see {@link InboundReplicationConfiguration#getReplicableIds()}).</li>
      * <li>The {@link #setOutboundReplicationConfiguration() outbound replication}
