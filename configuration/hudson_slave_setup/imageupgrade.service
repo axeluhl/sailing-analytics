@@ -1,12 +1,1 @@
-[Unit]
-Description=Check for image-upgrade EC2 user data and triggers an image upgrade if found
-Requires=-.mount cloud-init.service
-After=-.mount cloud-init.service networking.service systemd-networkd.service
-
-[Install]
-WantedBy=multi-user.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=true
-ExecStart=/usr/local/bin/imageupgrade
+../environments_scripts/hudson_slave/files/etc/systemd/system/imageupgrade.service

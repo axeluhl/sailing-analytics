@@ -1,0 +1,1 @@
+0 7 2 * *       export PATH=/bin:/usr/bin:/usr/local/bin; docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
