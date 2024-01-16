@@ -2,9 +2,9 @@
 
 Our Bugzilla system at [bugzilla.sapsailing.com](https://bugzilla.sapsailing.com) uses a relational database to store all the bugs and issues. This used to be a MySQL database and has been migrated to MariaDB at the beginning of 2024.
 
-We don't provide a dedicated AMI for this because we don't need to scale this out or replicate this by any means. Instead, we provide a script to set this up, starting from a clean Amazon Linux 2 instance.
+We don't provide a dedicated AMI for this because we don't need to scale this out or replicate this by any means. Instead, we provide a script to set this up, starting from a clean Amazon Linux 2023 instance.
 
-Launch a new instance, based on the latest Amazon Linux 2 AMI maintained by AWS, and configure the root volume size to be, e.g., 16GB. As of this writing, the total size consumed by the database contents on disk is less than 1GB. Tag the volume with a tag key ``WeeklySailingInfrastructureBackup`` and value ``Yes`` to include it in the weekly backup schedule.
+Launch a new instance, based on the latest Amazon Linux 2023 AMI maintained by AWS, and configure the root volume size to be, e.g., 16GB. As of this writing, the total size consumed by the database contents on disk is less than 1GB. Tag the volume with a tag key ``WeeklySailingInfrastructureBackup`` and value ``Yes`` to include it in the weekly backup schedule.
 
 When the instance has finished booting up, run the following script, passing the external IP address of the instance as mandatory argument:
 ```
