@@ -15,7 +15,7 @@ public class DropdownItem extends Widget {
     interface DropdownItemUiBinder extends UiBinder<Element, DropdownItem> {
     }
     
-    @UiField EventHeaderResources local_res;
+    @UiField DropdownItemResources local_res;
 
     @UiField
     AnchorElement link;

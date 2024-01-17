@@ -5,6 +5,7 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeaderResources" />
+  <ui:with field="dropdownitem_res" type="com.sap.sailing.gwt.home.desktop.partials.eventheader.DropdownItemResources" />
   <g:HTMLPanel addStyleNames="{res.mediaCss.grid}" debugId="EventHeaderPanel">
     <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
       <div class="{local_res.css.eventheader_intro}">
@@ -12,19 +13,19 @@
        	  <a ui:field="eventLogoAnchorUi"><div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}" /></a>
         </div>
         <!-- IF header.dropdown === 'regattas' -->
-        <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.jsdropdown}">
-          <a ui:field="dropdownTrigger" class="{local_res.css.dropdown_head} {local_res.css.jsdropdown_head}">
-            <span class="{local_res.css.dropdown_head_title}">
+        <div ui:field="dropdownTitle" class="{dropdownitem_res.css.dropdown} {dropdownitem_res.css.jsdropdown}">
+          <a ui:field="dropdownTrigger" class="{dropdownitem_res.css.dropdown_head} {dropdownitem_res.css.jsdropdown_head}">
+            <span class="{dropdownitem_res.css.dropdown_head_title}">
               <span ui:field="dropdownEventName"></span>
               <!-- IF event.state === 'live' -->
               <div ui:field="dropdownEventState" data-labeltype="live" class="{res.mainCss.label} {res.mainCss.labellarge}">
                 <!-- <ui:text from='{i18n.live}' /> -->
               </div>
               <!-- IFEND event.state === 'live' -->
-              <div class="{local_res.css.dropdown_head_title_button}"></div>
+              <div class="{dropdownitem_res.css.dropdown_head_title_button}"></div>
             </span>
           </a>
-          <g:FlowPanel ui:field="dropdownContent" addStyleNames="{local_res.css.dropdown_content} {local_res.css.jsdropdown_content}">
+          <g:FlowPanel ui:field="dropdownContent" addStyleNames="{dropdownitem_res.css.dropdown_content} {dropdownitem_res.css.jsdropdown_content}">
             <!-- EACH regattaItem in event.regattas -->
             <!-- TODO <s:eventHeader.RegattasDropdownItem ui:field='regattaItem'></s> -->
               <!-- EACHEND -->

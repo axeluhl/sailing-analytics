@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
@@ -34,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownHandler;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -71,6 +71,7 @@ public class EventHeader extends Composite {
         this.event = presenter.getEventDTO();
         this.presenter = presenter;
         EventHeaderResources.INSTANCE.css().ensureInjected();
+        DropdownItemResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         initFields();
         initSharing();
@@ -173,9 +174,9 @@ public class EventHeader extends Composite {
             @Override
             protected void dropdownStateChanged(boolean dropdownShown) {
                 if (dropdownShown) {
-                    dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
+                    dropdownTitle.addClassName(DropdownItemResources.INSTANCE.css().jsdropdownactive());
                 } else {
-                    dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
+                    dropdownTitle.removeClassName(DropdownItemResources.INSTANCE.css().jsdropdownactive());
                 }
             }
         };

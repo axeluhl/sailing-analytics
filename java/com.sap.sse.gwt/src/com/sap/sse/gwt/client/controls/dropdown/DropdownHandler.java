@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.utils;
+package com.sap.sse.gwt.client.controls.dropdown;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
