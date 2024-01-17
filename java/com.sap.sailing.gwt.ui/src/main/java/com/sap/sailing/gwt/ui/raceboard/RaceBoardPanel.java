@@ -766,7 +766,7 @@ public class RaceBoardPanel
     }
     
     private Dropdown createRaceDropDown(final RaceColumnDTO raceColumnOfSelectedRace, final FleetDTO fleetOfSelectedRace) {
-        final Dropdown result = new Dropdown();
+        final Dropdown result = new Dropdown(RaceboardDropdownResources.INSTANCE);
         for (final RaceColumnDTO raceColumn : getLeaderboardPanel().getLeaderboard().getRaceList()) {
             for (final FleetDTO fleet : raceColumn.getFleets()) {
                 final RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);

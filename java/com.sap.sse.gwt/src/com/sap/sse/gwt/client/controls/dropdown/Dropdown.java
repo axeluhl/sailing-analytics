@@ -26,11 +26,19 @@ public class Dropdown extends Composite {
     @UiField SpanElement dropdownDisplayedText;
     @UiField DivElement dropdownTitle;
     @UiField DropdownResources local_res;
+    final DropdownHandler dropdownHandler; // final to force initialization; default scope to avoid unused warning
 
     public Dropdown() {
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
-        new DropdownHandler(dropdownTrigger, dropdownContent.getElement()) {
+        dropdownHandler = createDropdownHandler();
+    }
+
+    /**
+     * Must be invoked after <tt>uiBinder.createAndBindUi(this)</tt> has been called
+     */
+    private DropdownHandler createDropdownHandler() {
+        return new DropdownHandler(dropdownTrigger, dropdownContent.getElement()) {
             @Override
             protected void dropdownStateChanged(boolean dropdownShown) {
                 if (dropdownShown) {
@@ -40,6 +48,12 @@ public class Dropdown extends Composite {
                 }
             }
         };
+    }
+    
+    public Dropdown(DropdownResources resources) {
+        local_res = resources;
+        initWidget(uiBinder.createAndBindUi(this));
+        dropdownHandler = createDropdownHandler();
     }
     
     public void setDisplayedText(String displayedText) {
