@@ -786,7 +786,9 @@ public class RaceBoardPanel
             for (final FleetDTO fleet : raceColumn.getFleets()) {
                 final RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
                 if (raceIdentifier != null) {
-                    result.addItem(raceColumn.getName()+"/"+fleet.getName(), getValueForRaceDropDown(raceIdentifier));
+                    result.addItem((LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName())?"":(raceColumn.getSeriesName()+"/"))
+                            +raceColumn.getName()
+                            +(LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())?"":("/"+fleet.getName())), getValueForRaceDropDown(raceIdentifier));
                     if (raceColumn.equals(raceColumnOfSelectedRace) && fleet.equals(fleetOfSelectedRace)) {
                         // select the race selected for this RaceBoardPanel
                         result.setSelectedIndex(i);
@@ -814,16 +816,9 @@ public class RaceBoardPanel
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         if (!currentRaceHasBeenSelectedOnce) {
             FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
-            String seriesName = raceColumn.getSeriesName();
-            if (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(seriesName)) {
-                seriesName = "";
-            } 
-            String fleetForRaceName = fleet==null?"":fleet.getName();
-            if (fleetForRaceName.equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-                fleetForRaceName = "";
-            } else {
-                fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetForRaceName;
-            }
+            final String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName()) ? "" : raceColumn.getSeriesName();
+            final String fleetName = fleet == null ? "" : LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName()) ? "" : fleet.getName();
+            final String fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetName;
             final ListBox raceDropDown = createRaceDropDown(raceColumn, fleet);
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
@@ -832,7 +827,7 @@ public class RaceBoardPanel
             raceInformationHeader.clear();
 //            raceInformationHeader.add(raceNameLabel);
             raceInformationHeader.add(raceDropDown);
-            raceInformationHeader.add(raceAdditionalInformationLabel);
+//            raceInformationHeader.add(raceAdditionalInformationLabel);
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {

@@ -175,14 +175,13 @@ public class EventHeader extends Composite {
         new DropdownHandler(dropdownTrigger, dropdownContent.getElement()) {
             @Override
             protected void dropdownStateChanged(boolean dropdownShown) {
-                if(dropdownShown) {
+                if (dropdownShown) {
                     dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
                 } else {
                     dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
                 }
             }
         };
-        
         presenter.forPlaceSelection(new PlaceCallback() {
             @Override
             public void forPlace(final AbstractEventPlace place, String title, boolean active) {
@@ -190,7 +189,7 @@ public class EventHeader extends Composite {
                 dropdownItem.addDomHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
+                        if (LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
                             event.preventDefault();
                             presenter.navigateTo(place);
                         }
@@ -203,7 +202,7 @@ public class EventHeader extends Composite {
 
     private String withoutPrefix(String title, String... prefixes) {
         for (String prefix : prefixes) {
-            if(title.startsWith(prefix)) {
+            if (title.startsWith(prefix)) {
                 return title.substring(prefix.length(), title.length());
             }
         }
@@ -212,7 +211,6 @@ public class EventHeader extends Composite {
 
     private void hide(Element... elementsToHide) {
         for (Element element : elementsToHide) {
-//            element.getStyle().setDisplay(Display.NONE);
             element.removeFromParent();
         }
     }

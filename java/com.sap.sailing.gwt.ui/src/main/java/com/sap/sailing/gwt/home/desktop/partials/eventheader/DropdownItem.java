@@ -10,7 +10,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DropdownItem extends Widget {
-
     private static DropdownItemUiBinder uiBinder = GWT.create(DropdownItemUiBinder.class);
 
     interface DropdownItemUiBinder extends UiBinder<Element, DropdownItem> {
@@ -26,13 +25,10 @@ public class DropdownItem extends Widget {
 
     public DropdownItem(String text, SafeUri link, boolean active) {
         setElement(uiBinder.createAndBindUi(this));
-        
-        if(active) {
+        if (active) {
             getElement().addClassName(local_res.css().dropdown_content_linkactive());
         }
-        
         this.link.setHref(link);
         this.title.setInnerText(text);
     }
-
 }
