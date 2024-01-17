@@ -1,4 +1,4 @@
-MEMORY=400g
+MEMORY=500g
 SERVER_NAME=ARCHIVE
 REPLICATION_CHANNEL=sapsailinganalytics-archive
 MONGODB_URI="mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive&retryWrites=true&readPreference=secondaryPreferred"
