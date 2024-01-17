@@ -5,7 +5,7 @@
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeaderResources" />
-  <ui:with field="dropdownitem_res" type="com.sap.sse.gwt.client.controls.dropdown.DropdownItemResources" />
+  <ui:with field="dropdownitem_res" type="com.sap.sse.gwt.client.controls.dropdown.DropdownResources" />
   <g:HTMLPanel addStyleNames="{res.mediaCss.grid}" debugId="EventHeaderPanel">
     <div class="{res.mediaCss.small12} {res.mediaCss.large9} {res.mediaCss.columns}">
       <div class="{local_res.css.eventheader_intro}">

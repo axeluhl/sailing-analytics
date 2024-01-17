@@ -19,9 +19,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -30,7 +27,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -40,7 +36,6 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -123,6 +118,7 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.controls.dropdown.Dropdown;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -769,47 +765,33 @@ public class RaceBoardPanel
         quickFlagDataProvider.updateFlagData(leaderboard);
     }
     
-    private ListBox createRaceDropDown(final RaceColumnDTO raceColumnOfSelectedRace, final FleetDTO fleetOfSelectedRace) {
-        final ListBox result = new ListBox();
-        result.addChangeHandler(e->{
-            final RaceIdentifier raceIdentifierSelected = getRaceIdentifierFromRaceDropDownValue(result.getSelectedValue());
-            final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
-                    raceIdentifierSelected.getRegattaName(), raceIdentifierSelected.getRaceName(),
-                    getLeaderboardPanel().getLeaderboard().getName(), raceboardContextDefinition.getLeaderboardGroupName(),
-                    raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
-            final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
-            final String url = linkWithSettingsGenerator.createUrl(getSettings()); // launch with the same settings as the current race
-            Window.open(url, raceIdentifierSelected.toString(), "");
-        });
-        int i=0;
+    private Dropdown createRaceDropDown(final RaceColumnDTO raceColumnOfSelectedRace, final FleetDTO fleetOfSelectedRace) {
+        final Dropdown result = new Dropdown();
         for (final RaceColumnDTO raceColumn : getLeaderboardPanel().getLeaderboard().getRaceList()) {
             for (final FleetDTO fleet : raceColumn.getFleets()) {
                 final RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
                 if (raceIdentifier != null) {
-                    result.addItem((LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName())?"":(raceColumn.getSeriesName()+"/"))
+                    final String displayName = (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName())?"":(raceColumn.getSeriesName()+"/"))
                             +raceColumn.getName()
-                            +(LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())?"":("/"+fleet.getName())), getValueForRaceDropDown(raceIdentifier));
-                    if (raceColumn.equals(raceColumnOfSelectedRace) && fleet.equals(fleetOfSelectedRace)) {
+                            +(LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())?"":("/"+fleet.getName()));
+                    final boolean selected = raceColumn.equals(raceColumnOfSelectedRace) && fleet.equals(fleetOfSelectedRace);
+                    result.addItem(displayName, /* link */ null, selected, ()->{
+                        final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
+                                raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
+                                getLeaderboardPanel().getLeaderboard().getName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                                raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
+                        final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
+                        final String url = linkWithSettingsGenerator.createUrl(getSettings()); // launch with the same settings as the current race
+                        Window.open(url, raceIdentifier.toString(), "");
+                    });
+                    if (selected) {
                         // select the race selected for this RaceBoardPanel
-                        result.setSelectedIndex(i);
+                        result.setDisplayedText(displayName);
                     }
-                    i++;
                 }
             }
         }
         return result;
-    }
-
-    private String getValueForRaceDropDown(RaceIdentifier raceIdentifier) {
-        final JSONObject raceIdentifierAsJsonObject = new JSONObject();
-        raceIdentifierAsJsonObject.put("regattaname", new JSONString(raceIdentifier.getRegattaName()));
-        raceIdentifierAsJsonObject.put("racename", new JSONString(raceIdentifier.getRaceName()));
-        return raceIdentifierAsJsonObject.toString();
-    }
-    
-    private RaceIdentifier getRaceIdentifierFromRaceDropDownValue(String raceDropDownValue) {
-        final JSONObject raceIdentifierAsJsonObject = (JSONObject) JSONParser.parseStrict(raceDropDownValue);
-        return new RegattaNameAndRaceName(((JSONString) raceIdentifierAsJsonObject.get("regattaname")).stringValue(), ((JSONString) raceIdentifierAsJsonObject.get("racename")).stringValue());
     }
 
     @Override
@@ -819,7 +801,7 @@ public class RaceBoardPanel
             final String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName()) ? "" : raceColumn.getSeriesName();
             final String fleetName = fleet == null ? "" : LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName()) ? "" : fleet.getName();
             final String fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetName;
-            final ListBox raceDropDown = createRaceDropDown(raceColumn, fleet);
+            final Dropdown raceDropDown = createRaceDropDown(raceColumn, fleet);
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
             final Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);

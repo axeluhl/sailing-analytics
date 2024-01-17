@@ -15,21 +15,33 @@ public class DropdownItem extends Widget {
     interface DropdownItemUiBinder extends UiBinder<Element, DropdownItem> {
     }
     
-    @UiField DropdownItemResources local_res;
+    @UiField DropdownResources local_res;
 
     @UiField
     AnchorElement link;
     
     @UiField
     DivElement title;
+    
+    private final String text;
 
     public DropdownItem(String text, SafeUri link, boolean active) {
+        this.text = text;
         setElement(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         if (active) {
             getElement().addClassName(local_res.css().dropdown_content_linkactive());
         }
-        this.link.setHref(link);
+        if (link != null) {
+            this.link.setHref(link);
+        }
         this.title.setInnerText(text);
+    }
+    
+    /**
+     * @return the text passed to the constructor of this item
+     */
+    public String getText() {
+        return text;
     }
 }

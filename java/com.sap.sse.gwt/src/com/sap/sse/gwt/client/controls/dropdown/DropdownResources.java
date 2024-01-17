@@ -4,10 +4,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.sap.sse.gwt.common.CommonIcons;
 
-public interface DropdownItemResources extends CommonIcons {
-    public static final DropdownItemResources INSTANCE = GWT.create(DropdownItemResources.class);
+public interface DropdownResources extends CommonIcons {
+    public static final DropdownResources INSTANCE = GWT.create(DropdownResources.class);
 
-    @Source("DropdownItem.gss")
+    @Source("Dropdown.gss")
     LocalCss css();
     
     public interface LocalCss extends CssResource {

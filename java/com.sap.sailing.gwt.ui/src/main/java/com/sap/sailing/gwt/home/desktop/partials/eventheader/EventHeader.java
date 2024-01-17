@@ -35,7 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 import com.sap.sse.gwt.client.controls.dropdown.DropdownHandler;
 import com.sap.sse.gwt.client.controls.dropdown.DropdownItem;
-import com.sap.sse.gwt.client.controls.dropdown.DropdownItemResources;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownResources;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -66,7 +66,7 @@ public class EventHeader extends Composite {
     @UiField EventHeaderSharingButtons sharing;
     @UiField DataByLogo dataByLogo;
     @UiField EventHeaderResources local_res;
-    @UiField DropdownItemResources dropdownitem_res;
+    @UiField DropdownResources dropdownitem_res;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -178,9 +178,9 @@ public class EventHeader extends Composite {
             @Override
             protected void dropdownStateChanged(boolean dropdownShown) {
                 if (dropdownShown) {
-                    dropdownTitle.addClassName(DropdownItemResources.INSTANCE.css().jsdropdownactive());
+                    dropdownTitle.addClassName(dropdownitem_res.css().jsdropdownactive());
                 } else {
-                    dropdownTitle.removeClassName(DropdownItemResources.INSTANCE.css().jsdropdownactive());
+                    dropdownTitle.removeClassName(dropdownitem_res.css().jsdropdownactive());
                 }
             }
         };

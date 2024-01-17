@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="local_res" type="com.sap.sse.gwt.client.controls.dropdown.DropdownResources" />
+    <g:HTMLPanel debugId="DropdownPanel">
+        <div ui:field="dropdownTitle" class="{local_res.css.dropdown} {local_res.css.jsdropdown}">
+            <a ui:field="dropdownTrigger" class="{local_res.css.dropdown_head} {local_res.css.jsdropdown_head}">
+                <span class="{local_res.css.dropdown_head_title}">
+                    <span ui:field="dropdownDisplayedText"></span>
+                    <div class="{local_res.css.dropdown_head_title_button}"></div>
+                </span>
+            </a>
+            <g:FlowPanel ui:field="dropdownContent" addStyleNames="{local_res.css.dropdown_content} {local_res.css.jsdropdown_content}">
+              <!-- programmatically add DropdownItem elements here -->
+            </g:FlowPanel>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>
