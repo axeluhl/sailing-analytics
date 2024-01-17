@@ -53,6 +53,7 @@ public class Dropdown extends Composite {
     public Dropdown(DropdownResources resources) {
         local_res = resources;
         initWidget(uiBinder.createAndBindUi(this));
+        resources.css().ensureInjected();
         dropdownHandler = createDropdownHandler();
     }
     
