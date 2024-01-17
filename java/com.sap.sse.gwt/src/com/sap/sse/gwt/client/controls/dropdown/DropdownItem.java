@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.eventheader;
+package com.sap.sse.gwt.client.controls.dropdown;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;

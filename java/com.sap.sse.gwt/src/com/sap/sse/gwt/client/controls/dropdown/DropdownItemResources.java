@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.home.desktop.partials.eventheader;
+package com.sap.sse.gwt.client.controls.dropdown;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
+import com.sap.sse.gwt.common.CommonIcons;
 
-public interface DropdownItemResources extends SharedDesktopResources {
+public interface DropdownItemResources extends CommonIcons {
     public static final DropdownItemResources INSTANCE = GWT.create(DropdownItemResources.class);
 
     @Source("DropdownItem.gss")

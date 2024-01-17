@@ -34,6 +34,8 @@ import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
 import com.sap.sse.gwt.client.controls.dropdown.DropdownHandler;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownItem;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownItemResources;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
