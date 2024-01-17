@@ -19,6 +19,9 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,6 +30,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -36,6 +40,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -152,7 +157,7 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
 public class RaceBoardPanel
         extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
         implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
-    private static final String RACEBOARD_PATH = "/gwt/RaceBoard.html";
+    public static final String RACEBOARD_PATH = "/gwt/RaceBoard.html";
     private final SailingServiceAsync sailingService;
     private SailingServiceWriteAsync sailingServiceWrite;
     private final MediaServiceAsync mediaService;
@@ -207,6 +212,7 @@ public class RaceBoardPanel
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     private TrackingConnectorInfoDTO trackingConnectorInfo;
     private CompetitorFilterPanel competitorSearchTextBox;
+    private final RaceboardContextDefinition raceboardContextDefinition;
 
     /**
      * @param eventId
@@ -260,6 +266,7 @@ public class RaceBoardPanel
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
         final RaceBoardPerspectiveOwnSettings parsedPerspectiveOwnSettings = settings.getPerspectiveOwnSettings();
+        this.raceboardContextDefinition = raceboardContextDefinition;
         FlowPanel mainPanel = new ResizableFlowPanel();
         mainPanel.setSize("100%", "100%");
         raceInformationHeader = new FlowPanel();
@@ -761,6 +768,47 @@ public class RaceBoardPanel
         }
         quickFlagDataProvider.updateFlagData(leaderboard);
     }
+    
+    private ListBox createRaceDropDown(final RaceColumnDTO raceColumnOfSelectedRace, final FleetDTO fleetOfSelectedRace) {
+        final ListBox result = new ListBox();
+        result.addChangeHandler(e->{
+            final RaceIdentifier raceIdentifierSelected = getRaceIdentifierFromRaceDropDownValue(result.getSelectedValue());
+            final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
+                    raceIdentifierSelected.getRegattaName(), raceIdentifierSelected.getRaceName(),
+                    getLeaderboardPanel().getLeaderboard().getName(), raceboardContextDefinition.getLeaderboardGroupName(),
+                    raceboardContextDefinition.getLeaderboardGroupId(), raceboardContextDefinition.getEventId(), null);
+            final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
+            final String url = linkWithSettingsGenerator.createUrl(getSettings()); // launch with the same settings as the current race
+            Window.open(url, raceIdentifierSelected.toString(), "");
+        });
+        int i=0;
+        for (final RaceColumnDTO raceColumn : getLeaderboardPanel().getLeaderboard().getRaceList()) {
+            for (final FleetDTO fleet : raceColumn.getFleets()) {
+                final RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+                if (raceIdentifier != null) {
+                    result.addItem(raceColumn.getName()+"/"+fleet.getName(), getValueForRaceDropDown(raceIdentifier));
+                    if (raceColumn.equals(raceColumnOfSelectedRace) && fleet.equals(fleetOfSelectedRace)) {
+                        // select the race selected for this RaceBoardPanel
+                        result.setSelectedIndex(i);
+                    }
+                    i++;
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getValueForRaceDropDown(RaceIdentifier raceIdentifier) {
+        final JSONObject raceIdentifierAsJsonObject = new JSONObject();
+        raceIdentifierAsJsonObject.put("regattaname", new JSONString(raceIdentifier.getRegattaName()));
+        raceIdentifierAsJsonObject.put("racename", new JSONString(raceIdentifier.getRaceName()));
+        return raceIdentifierAsJsonObject.toString();
+    }
+    
+    private RaceIdentifier getRaceIdentifierFromRaceDropDownValue(String raceDropDownValue) {
+        final JSONObject raceIdentifierAsJsonObject = (JSONObject) JSONParser.parseStrict(raceDropDownValue);
+        return new RegattaNameAndRaceName(((JSONString) raceIdentifierAsJsonObject.get("regattaname")).stringValue(), ((JSONString) raceIdentifierAsJsonObject.get("racename")).stringValue());
+    }
 
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
@@ -776,12 +824,14 @@ public class RaceBoardPanel
             } else {
                 fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetForRaceName;
             }
+            final ListBox raceDropDown = createRaceDropDown(raceColumn, fleet);
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
             final Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
             raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
             raceInformationHeader.clear();
-            raceInformationHeader.add(raceNameLabel);
+//            raceInformationHeader.add(raceNameLabel);
+            raceInformationHeader.add(raceDropDown);
             raceInformationHeader.add(raceAdditionalInformationLabel);
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
@@ -789,7 +839,7 @@ public class RaceBoardPanel
                 String link = EntryPointLinkFactory.createRacesTabLink(eventId.toString(), leaderboardName);
                 regattaNameAnchor.setHref(link);
             } else {
-                String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");
+                String leaderboardGroupNameParam = getLeaderboardGroupName();
                 if (leaderboardGroupNameParam != null) {
                     Map<String, String> leaderboardGroupLinkParameters = new HashMap<String, String>();
                     leaderboardGroupLinkParameters.put("showRaceDetails", "true");
@@ -825,6 +875,10 @@ public class RaceBoardPanel
             currentRaceHasBeenSelectedOnce = true;
             taggingComponent.updateRace(leaderboardName, raceColumn, fleet);
         }
+    }
+
+    private String getLeaderboardGroupName() {
+        return raceboardContextDefinition == null ? null : raceboardContextDefinition.getLeaderboardGroupName();
     }
 
     @Override
