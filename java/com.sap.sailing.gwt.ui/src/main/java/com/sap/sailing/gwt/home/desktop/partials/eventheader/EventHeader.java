@@ -99,7 +99,7 @@ public class EventHeader extends Composite {
         }
         String eventDisplayName = event.getDisplayName();
         String nameToShow;
-        if(presenter.showRegattaMetadata()) {
+        if (presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
             String regattaDisplayName = regattaMetadata.getDisplayName();
             if (regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
@@ -107,7 +107,6 @@ public class EventHeader extends Composite {
             } else {
                 nameToShow = eventDisplayName + " - " + regattaDisplayName;
             }
-            
             if (regattaMetadata.getCompetitorsCount() > 0) {
                 competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
             } else {
@@ -131,16 +130,14 @@ public class EventHeader extends Composite {
             Date startDate = regattaMetadata.getStartDate() != null ? regattaMetadata.getStartDate() : event.getStartDate();
             Date endDate = regattaMetadata.getEndDate() != null ? regattaMetadata.getEndDate() : event.getEndDate();
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(startDate, endDate));
-            
             hide(eventVenueContainer, eventLink);
         } else {
             nameToShow = eventDisplayName;
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
             eventVenue.setInnerText(event.getLocationAndVenueAndCountry());
-            
-            if(event.getOfficialWebsiteURL() != null) {
+            if (event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
-                if(title.length() > 35) {
+                if (title.length() > 35) {
                     title = StringMessages.INSTANCE.officalEventWebsite();
                 }
                 eventLink.setInnerText(title);
