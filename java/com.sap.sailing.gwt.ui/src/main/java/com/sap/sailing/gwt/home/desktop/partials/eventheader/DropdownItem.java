@@ -25,6 +25,7 @@ public class DropdownItem extends Widget {
 
     public DropdownItem(String text, SafeUri link, boolean active) {
         setElement(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
         if (active) {
             getElement().addClassName(local_res.css().dropdown_content_linkactive());
         }

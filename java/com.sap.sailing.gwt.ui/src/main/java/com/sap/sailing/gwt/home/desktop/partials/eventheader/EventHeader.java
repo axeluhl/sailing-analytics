@@ -63,6 +63,8 @@ public class EventHeader extends Composite {
     @UiField FlowPanel dropdownContent;
     @UiField EventHeaderSharingButtons sharing;
     @UiField DataByLogo dataByLogo;
+    @UiField EventHeaderResources local_res;
+    @UiField DropdownItemResources dropdownitem_res;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -70,9 +72,9 @@ public class EventHeader extends Composite {
     public EventHeader(EventView.Presenter presenter) {
         this.event = presenter.getEventDTO();
         this.presenter = presenter;
-        EventHeaderResources.INSTANCE.css().ensureInjected();
-        DropdownItemResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
+        dropdownitem_res.css().ensureInjected();
         initFields();
         initSharing();
     }
