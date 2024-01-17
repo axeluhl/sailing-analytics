@@ -25,13 +25,28 @@ public class Dropdown extends Composite {
     @UiField AnchorElement dropdownTrigger;
     @UiField SpanElement dropdownDisplayedText;
     @UiField DivElement dropdownTitle;
-    @UiField DropdownResources local_res;
+    @UiField DivElement dropdownHeadTitleButton;
+    @UiField SpanElement dropdownHeadTitle;
+    private final DropdownResources local_res;
     final DropdownHandler dropdownHandler; // final to force initialization; default scope to avoid unused warning
 
     public Dropdown() {
+        this(GWT.create(DropdownResources.class));
+    }
+    
+    public Dropdown(DropdownResources resources) {
         initWidget(uiBinder.createAndBindUi(this));
-        local_res.css().ensureInjected();
+        local_res = resources;
+        resources.css().ensureInjected();
         dropdownHandler = createDropdownHandler();
+        dropdownTitle.addClassName(local_res.css().dropdown());
+        dropdownTitle.addClassName(local_res.css().jsdropdown());
+        dropdownTrigger.addClassName(local_res.css().dropdown_head());
+        dropdownTrigger.addClassName(local_res.css().jsdropdown_head());
+        dropdownContent.addStyleName(local_res.css().dropdown_content());
+        dropdownContent.addStyleName(local_res.css().jsdropdown_content());
+        dropdownHeadTitle.addClassName(local_res.css().dropdown_head_title());
+        dropdownHeadTitleButton.addClassName(local_res.css().dropdown_head_title_button());
     }
 
     /**
@@ -50,19 +65,12 @@ public class Dropdown extends Composite {
         };
     }
     
-    public Dropdown(DropdownResources resources) {
-        local_res = resources;
-        initWidget(uiBinder.createAndBindUi(this));
-        resources.css().ensureInjected();
-        dropdownHandler = createDropdownHandler();
-    }
-    
     public void setDisplayedText(String displayedText) {
         dropdownDisplayedText.setInnerText(displayedText);
     }
     
     public void addItem(String itemText, SafeUri link, boolean selected, Runnable callback) {
-        final DropdownItem dropdownItem = new DropdownItem(itemText, link, selected);
+        final DropdownItem dropdownItem = new DropdownItem(local_res, itemText, link, selected);
         dropdownItem.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

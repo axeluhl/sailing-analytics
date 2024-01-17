@@ -43,7 +43,7 @@
   margin-left: 0.714285714285714em;
   height: 0.285714285714286em;
   width: 0.428571428571429em;
-  background-image: resourceUrl("arrowDownFilledBlack");
+  background-image: resourceUrl("arrowDownFilledWhite");
   background-position: center bottom;
   background-repeat: no-repeat;
   background-size: 100%;

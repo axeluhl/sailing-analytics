@@ -9,10 +9,4 @@ public interface RaceboardDropdownResources extends DropdownResources {
     @Source("RaceboardDropdown.gss")
     @Override
     LocalCss css();
-    
-    public interface LocalCss extends DropdownResources.LocalCss {
-        String dropdown_head();
-        String dropdown_head_title();
-        String dropdown_head_title_button();
-    }
 }

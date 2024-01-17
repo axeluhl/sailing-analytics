@@ -39,4 +39,7 @@ public interface CommonIcons extends ClientBundle {
     
     @Source("arrow-down-filled-black.png")
     ImageResource arrowDownFilledBlack();
+    
+    @Source("arrow-down-filled-white.png")
+    ImageResource arrowDownFilledWhite();
 }

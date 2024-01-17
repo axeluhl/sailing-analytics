@@ -1,12 +1,9 @@
 package com.sap.sse.gwt.client.controls.dropdown;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.sap.sse.gwt.common.CommonIcons;
 
 public interface DropdownResources extends CommonIcons {
-    static final DropdownResources INSTANCE = GWT.create(DropdownResources.class);
-
     @Source("Dropdown.gss")
     LocalCss css();
     

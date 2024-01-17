@@ -15,8 +15,6 @@ public class DropdownItem extends Widget {
     interface DropdownItemUiBinder extends UiBinder<Element, DropdownItem> {
     }
     
-    @UiField DropdownResources local_res;
-
     @UiField
     AnchorElement link;
     
@@ -26,16 +24,22 @@ public class DropdownItem extends Widget {
     private final String text;
 
     public DropdownItem(String text, SafeUri link, boolean active) {
+        this(GWT.create(DropdownResources.class), text, link, active);
+    }
+    
+    public DropdownItem(DropdownResources local_res, String text, SafeUri link, boolean active) {
         this.text = text;
         setElement(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         if (active) {
             getElement().addClassName(local_res.css().dropdown_content_linkactive());
         }
+        this.link.addClassName(local_res.css().dropdown_content_link());
         if (link != null) {
             this.link.setHref(link);
         }
         this.title.setInnerText(text);
+        this.title.addClassName(local_res.css().dropdown_content_link_title());
     }
     
     /**

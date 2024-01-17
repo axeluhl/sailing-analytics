@@ -6,8 +6,8 @@
     font-weight: bold;
   }
   </ui:style>
-    <a ui:field="link" class="{local_res.css.dropdown_content_link}">
-      <div ui:field="title" class="{local_res.css.dropdown_content_link_title}">
+    <a ui:field="link">
+      <div ui:field="title">
         <!-- regatta.name -->
       </div>
     </a>
