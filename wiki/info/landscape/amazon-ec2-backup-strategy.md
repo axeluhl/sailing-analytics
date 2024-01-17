@@ -240,7 +240,7 @@ TARGET_DIR=/var/lib/mysql/backup
 
 # Configuration for MySQL
 MYSQL_DATABASES="bugs mysql"
-MYSQLEXPORT_CMD="mysqldump -u root --password=sailaway"
+MYSQLEXPORT_CMD="mysqldump -u root --password=..."
 
 [...]
 
