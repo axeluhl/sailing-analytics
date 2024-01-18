@@ -23,7 +23,7 @@ public class Dropdown extends Composite {
     
     @UiField FlowPanel dropdownContent;
     @UiField AnchorElement dropdownTrigger;
-    @UiField SpanElement dropdownDisplayedText;
+    @UiField DivElement dropdownDisplayedText;
     @UiField DivElement dropdownTitle;
     @UiField DivElement dropdownHeadTitleButton;
     @UiField SpanElement dropdownHeadTitle;

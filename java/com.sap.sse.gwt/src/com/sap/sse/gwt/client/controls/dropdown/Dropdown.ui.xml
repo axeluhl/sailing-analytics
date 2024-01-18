@@ -5,7 +5,7 @@
         <div ui:field="dropdownTitle">
             <a ui:field="dropdownTrigger">
                 <span ui:field="dropdownHeadTitle">
-                    <span ui:field="dropdownDisplayedText"></span>
+                    <div ui:field="dropdownDisplayedText"></div>
                     <div ui:field="dropdownHeadTitleButton"></div>
                 </span>
             </a>
