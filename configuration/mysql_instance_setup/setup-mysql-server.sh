@@ -28,6 +28,7 @@ if [ $# != 0 ]; then
   ssh -o StrictHostKeyChecking=false -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
   BACKUP_FILE=/tmp/backupdb.sql
+  backupdbNOLOCK=/tmp/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
@@ -53,7 +54,8 @@ DROP TABLE IF EXISTS `mysql`.`global_priv`;
 DROP VIEW IF EXISTS `mysql`.`user`;
 EOF
   echo "Creating backup through mysql client on sapsailing.com..."
-  ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
+  echo "Removing lock on log table which causes failures"
+  cat ${BACKUP_FILE} | sed  "/LOCK TABLES \`transaction_registry\`/,/UNLOCK TABLES;/d" >${backupdbNOLOCK}
   echo "Importing backup locally..."
   sudo mysql -u root -h localhost <${BACKUP_FILE}
   sudo mysql -u root -h localhost -e "FLUSH PRIVILEGES;"
