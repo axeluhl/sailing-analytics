@@ -123,6 +123,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.Hel
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadder;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.raceboard.RaceboardDropdownResources;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -3442,6 +3443,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
         getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        getLeftHeaderPanel().setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
+        getRightHeaderPanel().setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
         if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();
