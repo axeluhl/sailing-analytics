@@ -42,6 +42,7 @@ else
   # Install packages for MariaDB and cron/anacron/crontab:
   sudo yum update -y
   sudo yum -y install mariadb105-server cronie
+  sudo su -c "printf '[mysqld]\nlog_bin = /var/log/mariadb/mysql-bin.log' >> /etc/my.cnf.d/mariadb-server.cnf"
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
