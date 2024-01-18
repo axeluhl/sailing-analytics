@@ -55,6 +55,7 @@ DROP TABLE IF EXISTS `mysql`.`global_priv`;
 DROP VIEW IF EXISTS `mysql`.`user`;
 EOF
   echo "Creating backup through mysql client on sapsailing.com..."
+  ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --ignore-table=mysql.user --skip-lock-tables  --lock-tables=0 " >> ${BACKUP_FILE}
   echo "Removing lock on log table which causes failures"
   cat ${BACKUP_FILE} | sed  "/LOCK TABLES \`transaction_registry\`/,/UNLOCK TABLES;/d" >${backupdbNOLOCK}
   echo "Importing backup locally..."
