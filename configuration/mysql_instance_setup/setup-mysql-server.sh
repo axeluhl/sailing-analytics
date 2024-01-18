@@ -67,6 +67,7 @@ else
   mysql -u root -e "FLUSH PRIVILEGES;"
   sudo mysqladmin -u root --password=${ROOT_PW} shutdown
   sudo systemctl start mariadb.service
+  sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
   echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
   echo "make sure the instance has the \"Database and Messaging\" security group set,"
