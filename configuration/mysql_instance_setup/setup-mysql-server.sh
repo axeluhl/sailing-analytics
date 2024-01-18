@@ -48,12 +48,6 @@ else
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
   crontab /home/ec2-user/crontab
-  cat <<'EOF' >${BACKUP_FILE}
--- The following two lines added manually, based on
--- https://dba.stackexchange.com/questions/266480/mariadb-mysql-all-db-import-table-user-already-exists
-DROP TABLE IF EXISTS `mysql`.`global_priv`;
-DROP VIEW IF EXISTS `mysql`.`user`;
-EOF
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --ignore-table=mysql.user --skip-lock-tables  --lock-tables=0 " >> ${BACKUP_FILE}
   echo "Removing lock on log table which causes failures"
