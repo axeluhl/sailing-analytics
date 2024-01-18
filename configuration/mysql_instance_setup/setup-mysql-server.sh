@@ -16,10 +16,12 @@ done
 if [ -z "${ROOT_PW}" ]; then
   echo -n "MySQL password for user root: "
   read -s ROOT_PW
+  echo
 fi
 if [ -z "${BUGS_PW}" ]; then
   echo -n "MySQL password for user bugs: "
   read -s BUGS_PW
+  echo
 fi
 shift $((OPTIND-1))
 if [ $# != 0 ]; then
@@ -27,8 +29,8 @@ if [ $# != 0 ]; then
   scp -o StrictHostKeyChecking=false "${0}" ec2-user@${SERVER}:
   ssh -o StrictHostKeyChecking=false -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
-  BACKUP_FILE=/tmp/backupdb.sql
-  backupdbNOLOCK=/tmp/backupdbNOLOCK.sql
+  BACKUP_FILE=/home/ec2-user/backupdb.sql
+  backupdbNOLOCK=/home/ec2-user/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
@@ -54,6 +56,8 @@ else
   cat ${BACKUP_FILE} | sed  "/LOCK TABLES \`transaction_registry\`/,/UNLOCK TABLES;/d" >${backupdbNOLOCK}
   echo "Importing backup locally..."
   sudo mysql -u root -h localhost <${backupdbNOLOCK}
+  rm ${backupdbNOLOCK}
+  rm ${BACKUP_FILE}
   echo "Creating new users, granting permissions for bugs and root, renaming root "
   sudo mysql -u root -e "use mysql; INSERT INTO \`tables_priv\` (\`Host\`, \`Db\`, \`User\`, \`Table_name\`, \`Grantor\`, \`Timestamp\`, \`Table_priv\`, \`Column_priv\`) VALUES ('localhost','mysql','mariadb.sys','global_priv','root@localhost','0000-00-00 00:00:00','Select,Delete','');"
   sudo mysql -u root -e "drop user bugs;create user bugs@'%' identified by  '${BUGS_PW}';"
