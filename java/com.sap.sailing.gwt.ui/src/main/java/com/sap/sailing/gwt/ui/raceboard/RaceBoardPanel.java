@@ -771,9 +771,9 @@ public class RaceBoardPanel
             for (final FleetDTO fleet : raceColumn.getFleets()) {
                 final RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
                 if (raceIdentifier != null) {
-                    final String displayName = (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName())?"":(raceColumn.getSeriesName()+"/"))
+                    final String displayName = (LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName())?"":(raceColumn.getSeriesName()+"/\u200b"))
                             +raceColumn.getName()
-                            +(LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())?"":("/"+fleet.getName()));
+                            +(LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())?"":("/\u200b"+fleet.getName()));
                     final boolean selected = raceColumn.equals(raceColumnOfSelectedRace) && fleet.equals(fleetOfSelectedRace);
                     result.addItem(displayName, /* link */ null, selected, ()->{
                         final RaceboardContextDefinition strippedRaceBoardContextDefinition = new RaceboardContextDefinition(
@@ -797,19 +797,12 @@ public class RaceBoardPanel
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         if (!currentRaceHasBeenSelectedOnce) {
-            FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
-            final String seriesName = LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(raceColumn.getSeriesName()) ? "" : raceColumn.getSeriesName();
-            final String fleetName = fleet == null ? "" : LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName()) ? "" : fleet.getName();
-            final String fleetForRaceName = (seriesName.isEmpty() ? "" : " - ") + fleetName;
+            final FleetDTO fleet = raceColumn.getFleet(raceIdentifier);
             final Dropdown raceDropDown = createRaceDropDown(raceColumn, fleet);
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
-            final Label raceAdditionalInformationLabel = new Label(seriesName + fleetForRaceName);
-            raceAdditionalInformationLabel.setStyleName("RaceSeriesAndFleet-Label");
             raceInformationHeader.clear();
-//            raceInformationHeader.add(raceNameLabel);
             raceInformationHeader.add(raceDropDown);
-//            raceInformationHeader.add(raceAdditionalInformationLabel);
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
