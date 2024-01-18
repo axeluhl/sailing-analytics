@@ -53,19 +53,15 @@ else
   echo "Removing lock on log table which causes failures"
   cat ${BACKUP_FILE} | sed  "/LOCK TABLES \`transaction_registry\`/,/UNLOCK TABLES;/d" >${backupdbNOLOCK}
   echo "Importing backup locally..."
-  sudo mysql -u root -h localhost <${BACKUP_FILE}
-  sudo mysql -u root -h localhost -e "FLUSH PRIVILEGES;"
+  sudo mysql -u root -h localhost <${backupdbNOLOCK}
+  echo "Creating new users, granting permissions for bugs and root, renaming root "
+  sudo mysql -u root -e "use mysql; INSERT INTO \`tables_priv\` (\`Host\`, \`Db\`, \`User\`, \`Table_name\`, \`Grantor\`, \`Timestamp\`, \`Table_priv\`, \`Column_priv\`) VALUES ('localhost','mysql','mariadb.sys','global_priv','root@localhost','0000-00-00 00:00:00','Select,Delete','');"
+  sudo mysql -u root -e "drop user bugs;create user bugs@'%' identified by  '${BUGS_PW}';"
+  sudo mysql -u root -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE ON \`bugs\`.* TO \`bugs\`@\`%\`"
+  sudo mysql -u root -e "RENAME USER 'root'@'localhost' TO 'root'@'%' "
+  sudo mysql -u root -e "alter user root@'%' identified by '${ROOT_PW}';"
+  sudo mysql -u root -p${ROOT_PW} -e "FLUSH PRIVILEGES;"
   sudo systemctl stop mariadb.service
-  echo "Launching mysqld_safe to update user passwords..."
-  sudo mysqld_safe --skip-grant-tables --skip-networking &
-  while ! sudo mysql -u root -e "show databases;" >/dev/null; do
-    echo "Waiting for mysqld_safe to become available..."
-    sleep 5
-  done
-  mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('${ROOT_PW}') WHERE user='root';"
-  mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('${BUGS_PW}') WHERE user='bugs';"
-  mysql -u root -e "FLUSH PRIVILEGES;"
-  sudo mysqladmin -u root --password=${ROOT_PW} shutdown
   sudo systemctl start mariadb.service
   sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
