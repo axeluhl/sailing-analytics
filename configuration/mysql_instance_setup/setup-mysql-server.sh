@@ -30,6 +30,7 @@ if [ $# != 0 ]; then
   ssh -o StrictHostKeyChecking=false -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
   BACKUP_FILE=/home/ec2-user/backupdb.sql
+  backupdbNOLOCK=/home/ec2-user/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
@@ -43,18 +44,22 @@ else
   # Install packages for MariaDB and cron/anacron/crontab:
   sudo yum update -y
   sudo yum -y install mariadb105-server cronie
-  sudo su -c "printf '[mysqld]\nlog_bin = /var/log/mariadb/mysql-bin.log' >> /etc/my.cnf.d/mariadb-server.cnf"
+  sudo su -c "printf '\n[mysqld]\nlog_bin = /var/log/mariadb/mysql-bin.log\n' >> /etc/my.cnf.d/mariadb-server.cnf"
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
   crontab /home/ec2-user/crontab
   echo "Creating backup through mysql client on sapsailing.com..."
-  ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
+  ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --skip-lock-tables  --lock-tables=0" >> ${BACKUP_FILE}
+  # the two lock options are supposed to ignore table locks, but the following removes a problematic exception.
+  echo "Removing lock on log table which causes failures"
+  cat ${BACKUP_FILE} | sed  "/LOCK TABLES \`transaction_registry\`/,/UNLOCK TABLES;/d" >${backupdbNOLOCK}
   echo "Importing backup locally..."
-  sudo mysql -u root -h localhost <${BACKUP_FILE}
+  sudo mysql -u root -h localhost <${backupdbNOLOCK}
   sudo mysql -u root -p${ROOT_PW} -e "FLUSH PRIVILEGES;"
   rm ${BACKUP_FILE}
+  rm ${backupdbNOLOCK}
   sudo systemctl stop mariadb.service
   sudo systemctl start mariadb.service
   sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
