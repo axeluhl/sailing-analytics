@@ -16,10 +16,12 @@ done
 if [ -z "${ROOT_PW}" ]; then
   echo -n "MySQL password for user root: "
   read -s ROOT_PW
+  echo
 fi
 if [ -z "${BUGS_PW}" ]; then
   echo -n "MySQL password for user bugs: "
   read -s BUGS_PW
+  echo
 fi
 shift $((OPTIND-1))
 if [ $# != 0 ]; then
@@ -27,7 +29,7 @@ if [ $# != 0 ]; then
   scp -o StrictHostKeyChecking=false "${0}" ec2-user@${SERVER}:
   ssh -o StrictHostKeyChecking=false -A ec2-user@${SERVER} "./$( basename "${0}" ) -r \"${ROOT_PW}\" -b \"${BUGS_PW}\""
 else
-  BACKUP_FILE=/tmp/backupdb.sql
+  BACKUP_FILE=/home/ec2-user/backupdb.sql
   # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
   sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
@@ -50,8 +52,9 @@ else
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
   echo "Importing backup locally..."
-  sudo mysql -u root  <${BACKUP_FILE}
+  sudo mysql -u root -h localhost <${BACKUP_FILE}
   sudo mysql -u root -p${ROOT_PW} -e "FLUSH PRIVILEGES;"
+  rm ${BACKUP_FILE}
   sudo systemctl stop mariadb.service
   sudo systemctl start mariadb.service
   sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
