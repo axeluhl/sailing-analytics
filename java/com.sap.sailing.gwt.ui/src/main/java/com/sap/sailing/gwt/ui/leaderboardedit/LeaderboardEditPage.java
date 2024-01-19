@@ -142,7 +142,8 @@ public class LeaderboardEditPage extends AbstractSailingWriteEntryPoint implemen
                             EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(
                                     context, getSailingService(), new AsyncActionsExecutor(), leaderboardName, 
                                     /* leaderboardGroupName */ null, LeaderboardEditPage.this, getStringMessages(), 
-                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings, LeaderboardEditPage.this);
+                                    userAgent, getAvailableDetailTypesForLeaderboardResult, settings, LeaderboardEditPage.this,
+                                    getUserService());
                             leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                             return leaderboardPanel;
                         }

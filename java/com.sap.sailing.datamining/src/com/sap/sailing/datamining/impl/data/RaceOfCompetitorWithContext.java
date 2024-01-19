@@ -11,7 +11,10 @@ import java.util.function.BiFunction;
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.impl.components.TackTypeSegmentRetrievalProcessor;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -45,14 +48,51 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
+/**
+ * Equality is based on competitor and race which are compared by identity, assuming there are no duplicated
+ * instances for the same {@link Competitor} and {@link TrackedRace} entities.
+ */
 public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
     private final HasTrackedRaceContext trackedRaceContext;
     private final Competitor competitor;
+    private final TackTypeSegmentsDataMiningSettings settings;
 
-    public RaceOfCompetitorWithContext(HasTrackedRaceContext trackedRaceContext, Competitor competitor) {
+    public RaceOfCompetitorWithContext(HasTrackedRaceContext trackedRaceContext, Competitor competitor, TackTypeSegmentsDataMiningSettings settings) {
         this.trackedRaceContext = trackedRaceContext;
         this.competitor = competitor;
+        this.settings = settings;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((trackedRaceContext == null) ? 0 : trackedRaceContext.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceOfCompetitorWithContext other = (RaceOfCompetitorWithContext) obj;
+        if (competitor == null) {
+            if (other.competitor != null)
+                return false;
+        } else if (!competitor.equals(other.competitor))
+            return false;
+        if (trackedRaceContext == null) {
+            if (other.trackedRaceContext != null)
+                return false;
+        } else if (!trackedRaceContext.equals(other.trackedRaceContext))
+            return false;
+        return true;
     }
 
     @Override
@@ -626,5 +666,52 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         }
         Integer rank = getTrackedRace().getRank(getCompetitor(), timePoint);
         return rank == 0 ? null : rank;
+    }
+
+    @Override
+    public double getRatioDurationLongVsShortTack() {
+        final TackTypeRatioCollector<Duration> resultProcessor = new TackTypeRatioCollector<Duration>(Duration.NULL) {
+            @Override
+            protected Duration add(Duration a, Duration b) {
+                return a.plus(b);
+            }
+
+            @Override
+            protected double divide(Duration a, Duration b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Duration getAddable(HasTackTypeSegmentContext element) {
+                return element.getDuration();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(
+                /* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(this)).collect(resultProcessor);
+    }
+
+    @Override
+    public double getRatioDistanceLongVsShortTack() {
+        final TackTypeRatioCollector<Distance> resultProcessor = new TackTypeRatioCollector<Distance>(Distance.NULL) {
+            @Override
+            protected Distance add(Distance a, Distance b) {
+                return a.add(b);
+            }
+
+            @Override
+            protected double divide(Distance a, Distance b) {
+                return a.divide(b);
+            }
+
+            @Override
+            protected Distance getAddable(HasTackTypeSegmentContext element) {
+                return element.getDistance();
+            }
+        };
+        final TackTypeSegmentRetrievalProcessor tackTypeSegmentRetriever = new TackTypeSegmentRetrievalProcessor(/* executor */ null,
+                Collections.emptySet(), settings, 0, "TackTypeSegments");
+        return Util.stream(tackTypeSegmentRetriever.retrieveData(this)).collect(resultProcessor);
     }
 }

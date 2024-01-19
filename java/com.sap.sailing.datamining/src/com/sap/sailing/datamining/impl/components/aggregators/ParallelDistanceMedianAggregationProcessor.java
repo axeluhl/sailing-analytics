@@ -3,7 +3,6 @@ package com.sap.sailing.datamining.impl.components.aggregators;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +58,7 @@ public class ParallelDistanceMedianAggregationProcessor
     }
 
     private Distance getMedianOf(List<Distance> values) {
-        Collections.sort(values, new Comparator<Distance>() {
-            @Override
-            public int compare(Distance d1, Distance d2) {
-                return d1.compareTo(d2);
-            }
-        });
+        Collections.sort(values);
         if (listSizeIsEven(values)) {
             int index1 = (values.size() / 2) - 1;
             int index2 = index1 + 1;

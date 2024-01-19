@@ -14,11 +14,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -358,6 +358,9 @@ public class Util {
         return result;
     }
     
+    /**
+     * @return {@code null} if the {@code iterable} is empty; its last element otherwise
+     */
     public static <T> T last(Iterable<T> iterable) {
         final T result;
         if (isEmpty(iterable)) {
@@ -379,9 +382,39 @@ public class Util {
         addAll(map(iterable, mapper), result);
         return result;
     }
+    
+    @FunctionalInterface
+    public static interface UtilPredicate<T> {
+        boolean test(T t);
+    }
 
-    public static <T> Iterable<T> filter(final Iterable<T> iterable, final Predicate<T> predicate) {
-        return ()->StreamSupport.stream(iterable.spliterator(), /* parallel */ false).filter(predicate).iterator();
+    public static <T> Iterable<T> filter(final Iterable<T> iterable, final UtilPredicate<T> predicate) {
+        return ()->new Iterator<T>() {
+            private boolean hasNext = true;
+            private Iterator<T> iterator = iterable.iterator();
+            private T next = advance();
+            
+            @Override
+            public boolean hasNext() {
+                return hasNext;
+            }
+
+            private T advance() {
+                while ((hasNext=iterator.hasNext()) && !predicate.test(next=iterator.next())) {
+                }
+                return next;
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext) {
+                    throw new NoSuchElementException();
+                }
+                final T result = next;
+                advance();
+                return result;
+            }
+        };
     }
     
     /**
@@ -1157,4 +1190,81 @@ public class Util {
         return result;
     }
 
+    /**
+     * Find the longest common character sub-sequence shared by both strings. A sub-sequence does not
+     * have to be contiguous. For example "acd" is a sub-sequence of "abcde" and hence the longest common
+     * sub-sequence of "abcde" and "123a456dc789d0".
+     */
+    public static int getLengthOfLongestCommonSubsequence(String a, String b) {
+        final int[][] longestCommonSubstringStartingInAAndB = new int[a.length()][];
+        for (int i=0; i<a.length(); i++) {
+            longestCommonSubstringStartingInAAndB[i] = new int[b.length()];
+            for (int j=0; j<b.length(); j++) {
+                longestCommonSubstringStartingInAAndB[i][j] = -1;
+            }
+        }
+        return lcs(a, b, a.length(), b.length(), longestCommonSubstringStartingInAAndB);
+    }
+    
+    private static int lcs(String a, String b, int endOfSubstringInA, int endOfSubstringInB, int[][] longestCommonSubstringStartingInAAndB) {
+        final int result;
+        if (endOfSubstringInA == 0 || endOfSubstringInB == 0) {
+          result = 0;
+        } else if (longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] != -1) {
+          result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else if (a.charAt(endOfSubstringInA - 1) == b.charAt(endOfSubstringInB - 1)) {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    1 + lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB);
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        } else {
+            longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1] =
+                    Math.max(lcs(a, b, endOfSubstringInA, endOfSubstringInB - 1, longestCommonSubstringStartingInAAndB),
+                             lcs(a, b, endOfSubstringInA - 1, endOfSubstringInB, longestCommonSubstringStartingInAAndB));
+            result = longestCommonSubstringStartingInAAndB[endOfSubstringInA-1][endOfSubstringInB-1];
+        }
+        return result;
+    }
+
+    public static int getLengthOfLongestCommonSubstring(String a, String b) {
+        final Iterable<String> longestCommonSubstrings = getLongestCommonSubstring(a, b);
+        return Util.isEmpty(longestCommonSubstrings) ? 0 : longestCommonSubstrings.iterator().next().length();
+    }
+    /**
+     * Find the longest common character sub-sequence(s) shared by both strings. A sub-sequence does not
+     * have to be contiguous. For example "acd" is a sub-sequence of "abcde" and hence the longest common
+     * sub-sequence of "abcde" and "123a456dc789d0". The result may be empty, or contain one or more
+     * longest common substrings, then all of equal length.
+     */
+    public static Iterable<String> getLongestCommonSubstring(String a, String b) {
+        final int[][] l = new int[a.length()][];
+        for (int i=0; i<a.length(); i++) {
+            l[i] = new int[b.length()];
+        }
+        int z = 0;
+        final Set<String> result = new HashSet<>();
+        String bestResultSoFar = null;
+        for (int i=0; i<a.length(); i++) {
+            for (int j=0; j<b.length(); j++) {
+                if (a.charAt(i) == b.charAt(j)) {
+                    if (i == 0 || j == 0) {
+                        l[i][j] = 1;
+                    } else {
+                        l[i][j] = l[i - 1][j - 1] + 1;
+                    }
+                    if (l[i][j] > z) {
+                        z = l[i][j];
+                        bestResultSoFar = a.substring(i - z + 1, i+1);
+                        result.clear();
+                        result.add(bestResultSoFar);
+                    } else if (l[i][j] == z) {
+                        bestResultSoFar = a.substring(i - z + 1, i+1);
+                        result.add(bestResultSoFar);
+                    }
+                } else {
+                    l[i][j] = 0;
+                }
+            }
+        }
+        return result;
+    }
 }

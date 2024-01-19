@@ -2,6 +2,7 @@ package com.sap.sailing.landscape;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -16,7 +17,7 @@ import com.sap.sailing.landscape.procedures.StartMultiServer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AmazonMachineImage;
@@ -53,6 +54,14 @@ public interface LandscapeService {
      * will be overwritten by this. Callers shall ensure that the current user has the {@code LANDSCAPE:MANAGE:AWS} permission.
      */
     void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode);
+
+    /**
+     * For a combination of an AWS access key ID, the corresponding secret plus a session token produces the session
+     * token and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. Callers shall ensure that the current user has the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createSessionCredentials(String awsKeyId, String awsKeySecret, String sessionToken);
     
     boolean hasValidSessionCredentials();
 
@@ -167,16 +176,30 @@ public interface LandscapeService {
     /**
      * @return the reports on the master data import and content comparison; 
      */
-    Pair<DataImportProgress, CompareServersResult> archiveReplicaSet(String regionId,
+    Triple<DataImportProgress, CompareServersResult, String> archiveReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive, String bearerTokenOrNullForArchive,
             Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
             boolean removeApplicationReplicaSet, MongoEndpoint moveDatabaseHere, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception;
     
-    void removeApplicationReplicaSet(String regionId,
+    /**
+     * If the replica set is mapped through DNS, the DNS record is removed first, before any attempts are made to shut
+     * down the processes and to remove the ALB rules and target groups. This way, this method can also be used at the
+     * end of an archiving process where a reverse proxy entry has already been set to direct traffic for the replica
+     * set to the archive from now on. It is then important that the DNS record is removed before starting to dismantle
+     * the replica set because only then the traffic will be routed to the archive before the replica set's
+     * infrastructure really becomes unresponsive.
+     * 
+     * @param moveDatabaseHere
+     *            if not {@code null}, the application replica set master's database will be moved to this MongoDB
+     *            endpoint
+     * @return an error message string in case archiving the database was requested but failed for some reason;
+     *         {@code null} otherwise
+     */
+    String removeApplicationReplicaSet(String regionId,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSetToRemove,
-            String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+            MongoEndpoint moveDatabaseHere, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption) throws Exception;
 
     Release getRelease(String releaseNameOrNullForLatestMaster);
 
@@ -241,6 +264,7 @@ public interface LandscapeService {
      * {@link AwsApplicationReplicaSet#isEligibleForDeployment(com.sap.sse.landscape.aws.ApplicationProcessHost, Optional, Optional, byte[])
      * eligible} for deploying a process of the replica set to it. In particular, the directory as derived from the
      * replica set name and the HTTP port must not be used by any other application already deployed on that host.
+     * The replica process is registered with the {@code replicaSet}'s public target group.
      */
     <AppConfigBuilderT extends Builder<AppConfigBuilderT, String>,
      MultiServerDeployerBuilderT extends DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT>>
@@ -399,15 +423,53 @@ public interface LandscapeService {
     
     void removeShardingKeysFromShard(Iterable<String> selectedleaderboards, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription,AwsRegion region, String shardName, String bearertoken) throws Exception;
+            AwsRegion region,String shardName, String bearertoken) throws Exception;
     
     public void appendShardingKeysToShard(Iterable<String> selectedLeaderboards,
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet,
-            byte[] passphraseForPrivateKeyDecription, AwsRegion region, String shardName, String bearertoken) throws Exception;
+            AwsRegion region, String shardName, String bearertoken) throws Exception;
     
     void removeShard(AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, String shardTargetGroupArn) throws Exception;
     
     void addShard(Iterable<String> selectedLeaderboardNames, 
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet, 
-            AwsRegion region, String bearertoken, byte[] passphraseForPrivateKeyDecription, String shardName) throws Exception;
+            AwsRegion region, String bearertoken, String shardName) throws Exception;
+
+    /**
+     * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
+     * found running} on {@code host} and deploys them to another host in {@code host}'s availability zone. The default
+     * configuration for primaries and replicas is used based on the application replica set the processes belong to,
+     * except for the memory configuration which is copied from the processes running on {@code host}. This will mean
+     * that any hand-crafted special configuration will get lost during the process. So don't apply this operation to
+     * hosts running non-standard application processes with non-default configurations.
+     * <p>
+     * 
+     * For those processes that are the primary ("master") instance of their replica set this method ensures that there
+     * is at least one healthy replica available before moving the primary instance to the new host. When moving a
+     * primary process, it is first removed from the "-m" target group, the new process is launched on the new host, and
+     * when it is healthy it is added to the "-m" target group.
+     * <p>
+     * 
+     * Moving a replica is easier: the replica can be launched on the new host first, added to the public target group
+     * when healthy, and then the replica on the old {@code host} can be terminated and removed.
+     * 
+     * @param host
+     *            must be a "multi-instance" host intended for sharing; this must be indicated by the tag value
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE "___multi___"} on the
+     *            {@code sailing-analytics-server} tag of the instance. Otherwise, the method will throw an
+     *            {@link IllegalStateException}.
+     * @param optionalInstanceTypeForNewInstance
+     *            if not specified, the new multi-instance launched will use the same instance type as the one from
+     *            where the processes are moved away ({@code host})
+     * @return a triple of which the {@link Triple#getA() first} element is the new host to which the processes have
+     *         been moved, the {@link Triple#getB() second} element is the set of master processes moved, and the
+     *         {@link Triple#getC() third} element is the set of replica processes moved; the master and replica process
+     *         maps are keyed by the names of the application replica sets to which the processes belong.
+     */
+    Triple<SailingAnalyticsHost<String>, Map<String, SailingAnalyticsProcess<String>>, Map<String, SailingAnalyticsProcess<String>>>
+    moveAllApplicationProcessesAwayFrom(SailingAnalyticsHost<String> host,
+            Optional<InstanceType> optionalInstanceTypeForNewInstance,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    String getHostname(String replicaSetName, String optionalDomainName);
 }

@@ -75,6 +75,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelection;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.leaderboardedit.EditScoreDialog.ScoreCorrectionUpdate;
 import com.sap.sse.common.InvertibleComparator;
 import com.sap.sse.common.SortingOrder;
 import com.sap.sse.common.Util;
@@ -98,6 +99,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
@@ -480,6 +482,36 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         }
     }
 
+    private class IncrementalScoreCorrectionViewProvider
+            extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final String raceColumnName;
+        
+        protected IncrementalScoreCorrectionViewProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
+        }
+
+        @Override
+        public Cell<String> getCell() {
+            return new TextCell();
+        }
+
+        @Override
+        public FieldUpdater<LeaderboardRowDTO, String> getFieldUpdater() {
+            return null;
+        }
+
+        @Override
+        public String getValue(LeaderboardRowDTO object) {
+            final LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
+            String result = "";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.incrementalScoreCorrectionInPoints != null) {
+                final char sign = Math.signum(leaderboardEntryDTO.incrementalScoreCorrectionInPoints) >= 0 ? '+' : '-';
+                result=" ["+sign+scoreFormat.format(leaderboardEntryDTO.incrementalScoreCorrectionInPoints)+"]";
+            }
+            return result;
+        }
+    }
+
     private class TotalPointsEditCellProvider
             extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final EditTextCell totalPointsEditCell;
@@ -622,12 +654,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                     new EditScoreDialog(stringMessages, row.competitor.getName(), raceColumnName,
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints,
                             row.fieldsByRaceColumnName.get(raceColumnName).totalPoints,
-                            new DialogCallback<Util.Pair<MaxPointsReason, Double>>() {
+                            row.fieldsByRaceColumnName.get(raceColumnName).incrementalScoreCorrectionInPoints,
+                            new DialogCallback<ScoreCorrectionUpdate>() {
                                 @Override
-                                public void ok(final Util.Pair<MaxPointsReason, Double> editedObject) {
+                                public void ok(final ScoreCorrectionUpdate editedObject) {
                                     addBusyTask();
                                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(),
-                                            row.competitor.getIdAsString(), raceColumnName, editedObject.getB(),
+                                            row.competitor.getIdAsString(), raceColumnName, editedObject.getCorrectedScore(),
                                             getLeaderboardDisplayDate(),
                                             new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                                 @Override
@@ -640,11 +673,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                                                 }
 
                                                 @Override
-                                                public void onSuccess(
-                                                        Util.Triple<Double, Double, Boolean> newTotalAndTotalPointsAndIsCorrected) {
-                                                    getSailingService().updateLeaderboardMaxPointsReason(
-                                                            getLeaderboardName(), row.competitor.getIdAsString(),
-                                                            raceColumnName, editedObject.getA(),
+                                                public void onSuccess(Util.Triple<Double, Double, Boolean> newTotalAndNetPointsAndIsCorrected) {
+                                                    getSailingService().updateLeaderboardIncrementalScoreCorrection(getLeaderboardName(),
+                                                            row.competitor.getIdAsString(), raceColumnName, editedObject.getIncrementalScoreCorrectionInPoints(),
                                                             getLeaderboardDisplayDate(),
                                                             new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
                                                                 @Override
@@ -656,30 +687,51 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                                                                                     getLeaderboardName(),
                                                                                     raceColumnName, t.getMessage()));
                                                                 }
-
+                                                                
                                                                 @Override
-                                                                public void onSuccess(
-                                                                        Util.Triple<Double, Double, Boolean> newTotalAndNetPointsAndIsCorrected) {
-                                                                    removeBusyTask();
-                                                                    final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName
-                                                                            .get(raceColumnName);
-                                                                    leaderboardEntryDTO.reasonForMaxPoints = editedObject
-                                                                            .getA();
-                                                                    leaderboardEntryDTO.totalPoints = newTotalAndNetPointsAndIsCorrected
-                                                                            .getA();
-                                                                    leaderboardEntryDTO.netPoints = newTotalAndNetPointsAndIsCorrected
-                                                                            .getB();
-                                                                    leaderboardEntryDTO.totalPointsCorrected = newTotalAndNetPointsAndIsCorrected
-                                                                            .getC();
-                                                                    maxPointsDropDownCellProvider.getCell()
-                                                                            .setViewData(row, null);
-                                                                    totalPointsEditCellProvider.getCell()
-                                                                            .setViewData(row, null);
-                                                                    whiteboard.setObjectWithWhichToUpdateRow(row);
+                                                                public void onSuccess(Util.Triple<Double, Double, Boolean> newTotalAndNetPointsAndIsCorrected) {
+                                                                    getSailingService().updateLeaderboardMaxPointsReason(
+                                                                            getLeaderboardName(), row.competitor.getIdAsString(),
+                                                                            raceColumnName, editedObject.getMaxPointsReason(),
+                                                                            getLeaderboardDisplayDate(),
+                                                                            new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
+                                                                                @Override
+                                                                                public void onFailure(Throwable t) {
+                                                                                    removeBusyTask();
+                                                                                    getErrorReporter().reportError(stringMessages
+                                                                                            .errorUpdatingLeaderboardScore(
+                                                                                                    row.competitor.getName(),
+                                                                                                    getLeaderboardName(),
+                                                                                                    raceColumnName, t.getMessage()));
+                                                                                }
+                
+                                                                                @Override
+                                                                                public void onSuccess(
+                                                                                        Util.Triple<Double, Double, Boolean> newTotalAndNetPointsAndIsCorrected) {
+                                                                                    removeBusyTask();
+                                                                                    final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName
+                                                                                            .get(raceColumnName);
+                                                                                    leaderboardEntryDTO.reasonForMaxPoints = editedObject
+                                                                                            .getMaxPointsReason();
+                                                                                    leaderboardEntryDTO.totalPoints = newTotalAndNetPointsAndIsCorrected
+                                                                                            .getA();
+                                                                                    leaderboardEntryDTO.netPoints = newTotalAndNetPointsAndIsCorrected
+                                                                                            .getB();
+                                                                                    leaderboardEntryDTO.totalPointsCorrected = newTotalAndNetPointsAndIsCorrected
+                                                                                            .getC();
+                                                                                    leaderboardEntryDTO.incrementalScoreCorrectionInPoints = editedObject
+                                                                                            .getIncrementalScoreCorrectionInPoints();
+                                                                                    maxPointsDropDownCellProvider.getCell()
+                                                                                            .setViewData(row, null);
+                                                                                    totalPointsEditCellProvider.getCell()
+                                                                                            .setViewData(row, null);
+                                                                                    whiteboard.setObjectWithWhichToUpdateRow(row);
+                                                                                }
+                                                                            });
                                                                 }
-                                                            });
-                                                }
-                                            });
+                                                });
+                                            }
+                                    });
                                 }
 
                                 @Override
@@ -700,7 +752,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
             final SailingServiceWriteAsync sailingServiceWrite, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent, Iterable<DetailType> availableDetailTypes, 
-            EditableLeaderboardSettings settings, WithSecurity sailingCF) {
+            EditableLeaderboardSettings settings, WithSecurity sailingCF, UserService userService) {
         super(null, context, sailingServiceWrite, asyncActionsExecutor, settings,
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true, new ClassicLeaderboardStyle(),
@@ -731,7 +783,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(
                                 EditableLeaderboardPanel.this, providerNames, getSailingService(), stringMessages,
-                                getErrorReporter());
+                                getErrorReporter(), userService);
                         dialog.show();
                     }
 
@@ -1215,13 +1267,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider = new MaxPointsDropDownCellProvider(
                 race.getRaceColumnName());
-        // list.add(maxPointsDropDownCellProvider);
         final TotalPointsEditCellProvider totalPointsEditCellProvider = new TotalPointsEditCellProvider(
                 race.getRaceColumnName());
         list.add(totalPointsEditCellProvider);
-        final ReasonForMaxPointsTextViewProvider testViewProvider = new ReasonForMaxPointsTextViewProvider(
+        final ReasonForMaxPointsTextViewProvider maxPointsReasonViewProvider = new ReasonForMaxPointsTextViewProvider(
                 race.getRaceColumnName());
-        list.add(testViewProvider);
+        list.add(maxPointsReasonViewProvider);
+        final IncrementalScoreCorrectionViewProvider incrementalScoreCorrectionViewProvider = new IncrementalScoreCorrectionViewProvider(
+                race.getRaceColumnName());
+        list.add(incrementalScoreCorrectionViewProvider);
         final UncorrectedTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedTotalPointsViewProvider(
                 race.getRaceColumnName());
         list.add(uncorrectedViewProvider);

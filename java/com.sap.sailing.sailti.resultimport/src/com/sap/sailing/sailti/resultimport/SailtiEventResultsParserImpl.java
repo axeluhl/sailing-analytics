@@ -25,13 +25,6 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
  * for that class can parse the document into an {@link EventResultDescriptor} from which the regatta results can be obtained
  * using {@link EventResultDescriptor#getRegattaResults()}.<p>
  * 
- * TODO bug5693 Sailti URL format...: URLs should be of the form
- * <pre>
- * http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
- * </pre>
- * where the UUID following the <code>event</code> path element represents the event ID. Events can be
- * discovered by the manage2sail.com website.
- * 
  * @author Axel Uhl (D043530)
  *
  */

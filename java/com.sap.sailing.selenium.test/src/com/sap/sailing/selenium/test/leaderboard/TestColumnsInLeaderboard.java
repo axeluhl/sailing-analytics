@@ -124,7 +124,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // Create a regatta with 1 series and 5 races as well as a leaderboard
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(this.regatta);
+        regattaStructure.createRegatta(this.regatta, /* withDefaultLeaderboard */ false);
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
         seriesDialog.addRaces(1, 1);

@@ -18,7 +18,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteService extends RemoteService {
@@ -62,6 +62,14 @@ public interface LandscapeManagementWriteService extends RemoteService {
     void createMfaSessionCredentials(String awsAccessKey, String awsSecret, String mfaTokenCode);
 
     /**
+     * For a combination of an AWS access key ID, the corresponding secret plus a valid session token produces the session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createSessionCredentials(String awsAccessKey, String awsSecret, String awsSessionToken);
+
+    /**
      * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
      * user's preference store which holds any session credentials created previously using
      * {@link #createMfaSessionCredentials(String, String, String)}.
@@ -84,9 +92,9 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
-    SailingApplicationReplicaSetDTO<String> removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption) throws Exception;
+    String removeApplicationReplicaSet(String regionId,
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption) throws Exception;
 
     SailingApplicationReplicaSetDTO<String> createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
@@ -98,7 +106,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
 
     ArrayList<ReleaseDTO> getReleases();
 
-    Pair<DataImportProgress, CompareServersResultDTO> archiveReplicaSet(String regionId,
+    Triple<DataImportProgress, CompareServersResultDTO, String> archiveReplicaSet(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToArchive,
             String bearerTokenOrNullForApplicationReplicaSetToArchive,
             String bearerTokenOrNullForArchive,
@@ -148,13 +156,18 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<LeaderboardNameDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
     
     void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoardNames, SailingApplicationReplicaSetDTO<String> replicaSet,
-            String bearerToken, String region, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+            String bearerToken, String region) throws Exception;
     
     public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSet, String region, String bearerToken) throws Exception;
     
-    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region, byte[] passphrase) throws Exception;
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region) throws Exception;
     
-    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> shardingKeysToAppend, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> shardingKeysToAppend, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
     
-    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> shardingKeysToRemove, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, byte[] passphraseForPrivateKeyDecryption) throws Exception;
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> shardingKeysToRemove, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
+
+    void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    boolean hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName);
 }

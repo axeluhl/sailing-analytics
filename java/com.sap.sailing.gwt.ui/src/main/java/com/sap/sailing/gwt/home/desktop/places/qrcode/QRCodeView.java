@@ -89,8 +89,24 @@ public class QRCodeView extends Composite {
 
     public void showPublic(String publicRegattaName, String publicInviteBranchIOUrl) {
         logger.info("Showing QR Code for public regatta invite");
-        titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(publicRegattaName));
-        showQrCodeForURL(publicInviteBranchIOUrl);
+        if (publicInviteBranchIOUrl != null) {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRegatta(publicRegattaName));
+            showQrCodeForURL(publicInviteBranchIOUrl);
+        } else {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleErrorCreatingQrCode());
+        }
+    }
+
+    public void showRaceManagerApp(String raceManagerAppBranchIOUrl) {
+        logger.info("Showing QR Code for race manager app");
+        titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleOpenRaceManagerApp());
+        if (raceManagerAppBranchIOUrl != null) {
+            subtitleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeSubTitleOpenRaceManagerApp());
+            showQrCodeForURL(raceManagerAppBranchIOUrl);
+        } else {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleErrorCreatingQrCode());
+        }
+        
     }
 
     public void showBouyTender(QRCodeEvent event, String leaderboardName, String branchIoUrl) {
@@ -103,7 +119,11 @@ public class QRCodeView extends Composite {
         } else {
             logger.info("No event available");
         }
-        showQrCodeForURL(branchIoUrl);
+        if (branchIoUrl != null) {
+            showQrCodeForURL(branchIoUrl);
+        } else {
+            titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleErrorCreatingQrCode());
+        }
         showEventImageIfPossible(event);
     }
 

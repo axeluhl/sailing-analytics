@@ -52,6 +52,12 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWins();
         case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
             return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
+        case LOW_POINT_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointA82Only();
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsA82Only();
+        case LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL:
+            return stringMessages.scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal();
         }
         return null;
     }
@@ -84,6 +90,12 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsDescription();
         case HIGH_POINT_BY_WINS_TIES_LASTLY_BROKEN_BY_OTHER_LEADERBOARD:
             return stringMessages.scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
+        case LOW_POINT_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointA82OnlyDescription();
+        case LOW_POINT_FIRST_TO_WIN_THREE_RACES_A82_ONLY:
+            return stringMessages.scoringSchemeLowPointSystemFirstThreeWinsA82OnlyDescription();
+        case LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL:
+            return stringMessages.scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

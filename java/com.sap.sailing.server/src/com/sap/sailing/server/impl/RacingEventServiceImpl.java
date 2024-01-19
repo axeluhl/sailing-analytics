@@ -253,6 +253,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.interfaces.MasterDataImportConstants;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -315,6 +316,7 @@ import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
@@ -1362,14 +1364,7 @@ Replicator {
 
     @Override
     public CourseArea getCourseArea(Serializable courseAreaId) {
-        for (Event event : getAllEvents()) {
-            for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                if (courseArea.getId().equals(courseAreaId)) {
-                    return courseArea;
-                }
-            }
-        }
-        return null;
+        return getBaseDomainFactory().getExistingCourseAreaById(courseAreaId);
     }
 
     @Override
@@ -2336,6 +2331,12 @@ Replicator {
         }
 
         @Override
+        public void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn,
+                Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+            notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
+        }
+
+        @Override
         public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             notifyForCompetitorScoreCorrectionUpdateIfNotAlreadyNotifiedRecently(competitor, raceColumn);
         }
@@ -3047,6 +3048,15 @@ Replicator {
                 // race list became empty by the removal performed here.
                 final boolean oldTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
                 try {
+                    /*
+                     * The following enqueues a task which calls RegattaListener.raceRemoved(...) which transitively
+                     * invokes RegattaLogFixTrackerRegattaListener.trackerStopped (WHY? The dataTracker entry should
+                     * already have been removed by the stopAllTrackersForWhichRaceIsLastReachable(...) above; maybe a
+                     * Java memory model idiosyncrasy with the queue thread not "seeing" the change to dataTrackers?).
+                     * We must make sure to not block its execution, e.g., by synchronization, because otherwise
+                     * the the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
+                     * tasks it may enqueue after the task enqueued here. See bug 5879.
+                     */
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
                             getThreadLocalTransporterForCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster()));
                     final boolean newTrackedRacesIsEmpty = Util.isEmpty(trackedRegatta.getTrackedRaces());
@@ -3058,6 +3068,16 @@ Replicator {
                 isTrackedRacesBecameEmpty = false;
             }
             if (isTrackedRacesBecameEmpty) {
+                /*
+                 * The following call to removeTrackedRegatta(regatta) can transitively invoke the synchronized
+                 * RegattaLogFixTrackerRegattaListener.regattaRemoved(...) and from there .stop() and from there
+                 * TrackedRegattaImpl.removeRaceListener which waits for a CompletableFuture; The CompletableFuture will
+                 * only be completed once the trackedRegatta.removeTrackedRace(...) call above completes because the
+                 * task completing the CompletableFuture is next in the queue. So we have to ensure that
+                 * RegattaListener.raceRemoved(...) will not block.
+                 * 
+                 * See also bug5879 (DEADLOCK).
+                 */
                 removeTrackedRegatta(regatta);
             }
             // remove tracked race from RaceColumns of regatta
@@ -3870,17 +3890,17 @@ Replicator {
     }
 
     @Override
-    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds) {
-        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames);
-        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds));
+    public CourseArea[] addCourseAreas(UUID eventId, String[] courseAreaNames, UUID[] courseAreaIds, Position[] centerPositions, Distance[] radiuses) {
+        final CourseArea[] courseAreas = addCourseAreasWithoutReplication(eventId, courseAreaIds, courseAreaNames, centerPositions, radiuses);
+        replicate(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds, centerPositions, radiuses));
         return courseAreas;
     }
 
     @Override
-    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames) {
+    public CourseArea[] addCourseAreasWithoutReplication(UUID eventId, UUID[] courseAreaIds, String[] courseAreaNames, Position[] centerPositions, Distance[] radiuses) {
         final CourseArea[] result = new CourseArea[courseAreaNames.length];
         for (int i=0; i<courseAreaIds.length; i++) {
-            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i]);
+            final CourseArea courseArea = getBaseDomainFactory().getOrCreateCourseArea(courseAreaIds[i], courseAreaNames[i], centerPositions[i], radiuses[i]);
             final Event event = eventsById.get(eventId);
             if (event == null) {
                 throw new IllegalArgumentException("No sailing event with ID " + eventId + " found.");
@@ -3960,7 +3980,6 @@ Replicator {
         mediaDB.updateRace(mediaTrack.dbId, mediaTrack.assignedRaces);
         mediaLibrary.assignedRacesChanged(mediaTrack);
         replicate(new UpdateMediaTrackRacesOperation(mediaTrack));
-
     }
 
     @Override
@@ -4143,12 +4162,12 @@ Replicator {
 
     @Override
     public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
-                RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
+                final Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                final RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.reloadRaceLog(fleetImpl);
                     logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName()
@@ -4512,9 +4531,10 @@ Replicator {
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();
+                    final CourseAreaJsonDeserializer courseAreaDeserializer = new CourseAreaJsonDeserializer(DomainFactory.INSTANCE);
                     LeaderboardSearchResultBaseJsonDeserializer deserializer = new LeaderboardSearchResultBaseJsonDeserializer(
                             new EventBaseJsonDeserializer(
-                                    new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                                    new VenueJsonDeserializer(courseAreaDeserializer),
                                     leaderboardGroupBaseJsonDeserializer, new TrackingConnectorInfoJsonDeserializer()),
                             leaderboardGroupBaseJsonDeserializer);
                     result = new ResultImpl<LeaderboardSearchResultBase>(query,
@@ -4645,11 +4665,24 @@ Replicator {
             final Fleet fleet = raceColumn.getFleetByName(identifier.getFleetName());
             if (fleet != null) {
                 result = innerResolver.apply(raceColumn, fleet);
+                if (result == null) {
+                    logger.log(Level.WARNING, "Failed to resolve "+identifier+" because innerResolver couldn't find fleet "+
+                            fleet.getName()+" in race column "+
+                            raceColumn.getName()+" which has fleets "+
+                            Util.join(", ", raceColumn.getFleets())+
+                            " by race log resolver "+this);
+                }
             } else {
                 result = null;
+                logger.log(Level.WARNING, "Failed to resolve "+identifier+" because fleet wasn't found in race column "+
+                        raceColumn.getName()+" which has fleets "+
+                        Util.join(", ", raceColumn.getFleets())+
+                        " by race log resolver "+this);
             }
         } else {
             result = null;
+            logger.log(Level.WARNING, "Failed to resolve "+identifier+" because race column "+
+                    identifier.getRaceColumnName()+" wasn't found by race log resolver "+this);
         }
         return result;
     }
@@ -4671,13 +4704,20 @@ Replicator {
                 regattaLike = (FlexibleLeaderboard) leaderboard;
             } else {
                 regattaLike = null;
+                logger.log(Level.WARNING, "Couldn't find race column "+identifier.getRaceColumnName()+
+                        " in "+this+" because regatta was not found and leaderboard "+
+                        identifier.getRegattaLikeParentName() + 
+                        (leaderboard == null ? " not found" : " not a flexible leaderboard"));
             }
         }
         if (regattaLike != null) {
             raceColumn = regattaLike.getRaceColumnByName(identifier.getRaceColumnName());
-                } else {
+            if (raceColumn == null) {
+                logger.log(Level.WARNING, "Couldn't find race column "+identifier.getRaceColumnName()+" in regatta "+regattaLike);
+            }
+        } else {
             raceColumn = null;
-                }
+        }
         return raceColumn;
     }
 
@@ -4748,7 +4788,7 @@ Replicator {
     public Map<Integer, Statistics> getLocalStatisticsByYear() {
         final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
         getAllEvents().forEach((event) -> {
-            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+            if (getSecurityService().hasCurrentUserReadPermission(event) && event.isPublic()) {
                 final Integer eventYear = EventUtil.getYearOfEvent(event);
                 // The year may be null if the event has no start date set
                 // In this case the event is ignored for the yearly
@@ -5175,8 +5215,7 @@ Replicator {
                 0.5);
         final String query;
         try {
-            query = createLeaderboardQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations,
-                    exportTrackedRacesAndStartTracking);
+            query = createLeaderboardGroupQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking);
         } catch (UnsupportedEncodingException e1) {
             throw new RuntimeException(e1);
         }
@@ -5239,16 +5278,22 @@ Replicator {
         }
     }
 
-    private String createLeaderboardQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
+    private String createLeaderboardGroupQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
-        StringBuffer queryStringBuffer = new StringBuffer("");
+        StringBuilder queryStringBuilder = new StringBuilder();
         for (UUID uuid : leaderboardGroupIds) {
-            queryStringBuffer.append("uuids[]=" + uuid + "&");
+            queryStringBuilder.append(MasterDataImportConstants.QUERY_PARAM_UUIDS);
+            queryStringBuilder.append('=');
+            queryStringBuilder.append(uuid);
+            queryStringBuilder.append('&');
         }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
-                exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
-        return queryStringBuffer.toString();
+        queryStringBuilder.append(String.format(MasterDataImportConstants.QUERY_PARAM_COMPRESS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_WIND+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_DEVICE_CONFIGS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_TRACKED_RACES_AND_START_TRACKING+"=%s",
+                                               compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
+        return queryStringBuilder.toString();
     }
 
     private class TimeoutExtendingInputStream extends FilterInputStream {
@@ -5372,4 +5417,17 @@ Replicator {
                 racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
     }
 
+    @Override
+    public Iterable<TrackedRace> getAllTrackedRacesForEventTrackingAt(Event event, TimePoint at) {
+        final Set<TrackedRace> result = new HashSet<>();
+        for (final Leaderboard leaderboard : event.getLeaderboards()) {
+            for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                if (trackedRace.getStartOfTracking() != null && !trackedRace.getStartOfTracking().after(at)
+                        && (trackedRace.getEndOfTracking() == null || !trackedRace.getEndOfTracking().before(at))) {
+                    result.add(trackedRace);
+                }
+            }
+        }
+        return result;
+    }
 }

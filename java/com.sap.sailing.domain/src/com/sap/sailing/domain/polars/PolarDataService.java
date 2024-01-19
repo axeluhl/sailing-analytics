@@ -160,7 +160,7 @@ public interface PolarDataService {
      * See {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)}
      * Always use regression
      */
-    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithBearing(BoatClass boatClass, Speed windSpeed,
+    SpeedWithBearingWithConfidence<Void> getAverageSpeedWithTrueWindAngle(BoatClass boatClass, Speed windSpeed,
             LegType legType, Tack tack) throws NotEnoughDataHasBeenAddedException;
 
     void insertExistingFixes(TrackedRace trackedRace);

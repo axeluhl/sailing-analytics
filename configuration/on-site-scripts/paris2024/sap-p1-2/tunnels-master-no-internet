@@ -1,0 +1,13 @@
+#!/bin/bash
+killall autossh
+# Tunnel to cloud MongoDB on port 10203; reverse tunnel to localhost:10202 for MongoDB
+autossh -M 21504 -f -A -N \
+  -L 443:localhost:9443 \
+  -L 5673:localhost:5672 \
+  -L 15673:localhost:15673 \
+  -L 5675:localhost:5672 \
+  -L 15675:localhost:15672 \
+  localhost
+# The tunnel connection to sap-p1-1 is expected to be established from the sap-p1-1 side by a reverse port forward
+# Tunnel to localhost for TracTrac port forwards
+tractrac-A

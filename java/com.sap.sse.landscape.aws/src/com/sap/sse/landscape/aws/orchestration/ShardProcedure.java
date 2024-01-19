@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import java.util.stream.StreamSupport;
 import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Region;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
@@ -25,6 +27,7 @@ import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
 import com.sap.sse.landscape.aws.TargetGroup;
+import com.sap.sse.landscape.aws.impl.LoadBalancerRuleInserter;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -50,19 +53,18 @@ extends AbstractAwsProcedureImpl<ShardingKey>
 implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
     private static final Logger logger = Logger.getLogger(ShardProcedure.class.getName());
     final static int NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE = 2;
+    public static final int DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE = 2;
     @SuppressWarnings("unchecked") // this silently assumes that a String can be cast to a ShardingKey without problems
     protected final ShardingKey SHARDING_KEY_UNUSED_BY_ANY_APPLICATION = (ShardingKey) "lauycaluy3cla3yrclaurlIYQL8";
     protected final String shardName;
     final protected Set<ShardingKey> shardingKeys;
-    final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
-    final Region region;
-    final byte[] passphraseForPrivateKeyDecryption;
+    final protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
+    final protected Region region;
     private final String pathPrefixForShardingKey;
 
     protected ShardProcedure(BuilderImpl<?,?, ShardingKey, MetricsT, ProcessT> builder) throws Exception {
         super(builder);
         this.shardName = builder.getShardName();
-        this.passphraseForPrivateKeyDecryption = builder.getPassphrase();
         this.replicaSet = builder.getReplicaSet();
         this.shardingKeys = builder.getShardingKeys();
         this.region = builder.getRegion();
@@ -84,11 +86,9 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         BuilderT setShardingKeys(Set<ShardingKey> shardingkeys);
 
-        BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
+        BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset);
 
         BuilderT setRegion(Region region);
-
-        BuilderT setPassphrase(byte[] passphrase);
     }
 
     protected abstract static class BuilderImpl<BuilderT extends Builder<BuilderT, T, ShardingKey, MetricsT, ProcessT>, 
@@ -104,7 +104,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         protected Set<ShardingKey> shardingKeys;
         protected AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet;
         protected Region region;
-        protected byte[] passphraseForPrivateKeyDecryption;
         private String pathPrefixForShardingKey;
         
         @Override
@@ -126,7 +125,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         }
 
         @Override
-        public BuilderT setReplicaset(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
+        public BuilderT setReplicaSet(AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaset) {
             this.replicaSet = replicaset;
             return self();
         }
@@ -134,12 +133,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         @Override
         public BuilderT setRegion(Region region) {
             this.region = region;
-            return self();
-        }
-
-        @Override
-        public BuilderT setPassphrase(byte[] passphrase) {
-            this.passphraseForPrivateKeyDecryption = passphrase;
             return self();
         }
 
@@ -152,10 +145,6 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
 
         protected AwsLandscape<ShardingKey> getLandscape() {
             return (AwsLandscape<ShardingKey>) super.getLandscape();
-        }
-
-        byte[] getPassphrase() {
-            return passphraseForPrivateKeyDecryption;
         }
 
         Region region() {
@@ -225,7 +214,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         Util.addAll(shardingKeys, shardingKeyForConsumption);
         final int ruleIdx = alb.getFirstShardingPriority(replicaSet.getHostname());
         while (!shardingKeyForConsumption.isEmpty()) {
-            alb.shiftRulesToMakeSpaceAt(ruleIdx);
+            LoadBalancerRuleInserter.create(alb, ApplicationLoadBalancer.MAX_PRIORITY, ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER).shiftRulesToMakeSpaceAt(ruleIdx, 1);
             final Set<ShardingKey> shardingKeysForNextRule = new HashSet<>();
             for (final Iterator<ShardingKey> i=shardingKeyForConsumption.iterator();
                     shardingKeysForNextRule.size() < ApplicationLoadBalancer.MAX_CONDITIONS_PER_RULE-NUMBER_OF_STANDARD_CONDITIONS_FOR_SHARDING_RULE && i.hasNext(); ) {
@@ -260,7 +249,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
         final int requiredRules = numberOfRequiredRules(Util.size(shardingKeys))
                 + (existingShardingRules + /* 5 std rules per replica set */ NUMBER_OF_RULES_PER_REPLICA_SET);
         final ApplicationLoadBalancer<ShardingKey> res;
-        if (Util.size(replicaSet.getLoadBalancerRules())
+        if (Util.size(replicaSet.getLoadBalancer().getRules())
                 + numberOfRequiredRules(Util.size(shardingKeys)) < ApplicationLoadBalancer.MAX_RULES_PER_LOADBALANCER) {
             res = replicaSet.getLoadBalancer();
         } else {
@@ -270,7 +259,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             final Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancersFiltered = Util.filter(loadBalancers,
                     t -> {
                         try {
-                            return !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
+                            return t.getVpcId().equals(replicaSet.getLoadBalancer().getVpcId())
+                                    && !t.getArn().equals(replicaSet.getLoadBalancer().getArn());
                         } catch (InterruptedException | ExecutionException e) {
                             logger.log(Level.WARNING, "Exception while trying to obtain a load balancer's ARN", e);
                             throw new RuntimeException(e);
@@ -288,13 +278,17 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                 }
                 final String name = getAvailableDNSMappedAlbName(loadBalancerNames);
                 // Create a new alb
-                res = getLandscape().createLoadBalancer(name, region);
+                res = getLandscape().createLoadBalancer(name, region, getSecurityGroupForVpc());
             }
             changeReplicaSetLoadBalancer(res, replicaSet);
         }
         return res;
     }
     
+    private SecurityGroup getSecurityGroupForVpc() throws InterruptedException, ExecutionException {
+        return getLandscape().getSecurityGroup(replicaSet.getLoadBalancer().getSecurityGroupIds().get(0), region);
+    }
+
     /**
      * This method changes the {@code replicaSetToMove}'s load balancer to another one. This method contains a 6min
      * sleep, which is necessary for ensuring that all DNS rules point to the new one. This method can fail if the
@@ -379,8 +373,8 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
             Collection<TargetGroup<ShardingKey>> originalTargetGroups,
             Map<TargetGroup<ShardingKey>, Iterable<ShardingKey>> shardingKeysPerTargetGroup) throws Exception {
         targetAlb
-                .addRulesAssigningUnusedPriorities(true,
-                        createRules(targetAlb, replicaSet.getHostname(),
+                .addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
+                        Optional.empty(), createRules(targetAlb, replicaSet.getHostname(),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getMasterTargetGroup()),
                                 targetGroupsToTempTargetgroups.get(replicaSetToMove.getPublicTargetGroup())))
                 .forEach(t -> tempRules.add(t));

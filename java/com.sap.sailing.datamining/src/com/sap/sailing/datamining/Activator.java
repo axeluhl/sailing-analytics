@@ -10,16 +10,19 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasCompetitorContext;
+import com.sap.sailing.datamining.data.HasCompetitorDayContext;
+import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
-import com.sap.sailing.datamining.data.HasCompleteManeuverCurveWithEstimationDataContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasManeuverSpeedDetailsContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
@@ -40,6 +43,11 @@ import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationAv
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMaxAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDurationSumAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelSpeedAverageAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelSpeedMaxAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelSpeedMedianAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelSpeedMinAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelSpeedSumAggregationProcessor;
 import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
@@ -105,13 +113,16 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasBravoFixContext.class);
         internalClasses.add(HasBravoFixTrackContext.class);
         internalClasses.add(HasFoilingSegmentContext.class);
+        internalClasses.add(HasTackTypeSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasManeuverSpeedDetailsContext.class);
         internalClasses.add(HasCompleteManeuverCurveWithEstimationDataContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
+        internalClasses.add(HasCompetitorDayContext.class);
         internalClasses.add(HasLeaderboardGroupContext.class);
         internalClasses.add(HasLeaderboardContext.class);
+        internalClasses.add(HasCompetitorContext.class);
         return internalClasses;
     }
 
@@ -138,6 +149,11 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelDistanceMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMinAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMedianAggregationProcessor.getDefinition());
+        aggregators.add(ParallelSpeedSumAggregationProcessor.getDefinition());
+        aggregators.add(ParallelSpeedAverageAggregationProcessor.getDefinition());
+        aggregators.add(ParallelSpeedMaxAggregationProcessor.getDefinition());
+        aggregators.add(ParallelSpeedMinAggregationProcessor.getDefinition());
+        aggregators.add(ParallelSpeedMedianAggregationProcessor.getDefinition());
         aggregators.add(ParallelDurationSumAggregationProcessor.getDefinition());
         aggregators.add(ParallelDurationAverageAggregationProcessor.getDefinition());
         aggregators.add(ParallelDurationMaxAggregationProcessor.getDefinition());

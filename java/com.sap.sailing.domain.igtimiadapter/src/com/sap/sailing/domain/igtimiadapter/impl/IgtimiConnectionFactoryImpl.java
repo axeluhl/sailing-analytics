@@ -285,7 +285,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         for (Entry<Type, Double> e : typeAndCompression.entrySet()) {
             url.append("&types["+e.getKey().getCode()+"]="+e.getValue());
         }
-        url.append("&");
+        url.append("&restore_archives=true&");
         url.append(getAccessTokenUrlParameter(account));
         return url.toString();
     }

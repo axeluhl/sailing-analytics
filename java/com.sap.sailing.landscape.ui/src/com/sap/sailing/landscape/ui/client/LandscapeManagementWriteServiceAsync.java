@@ -2,9 +2,11 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
@@ -19,7 +21,7 @@ import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 
 public interface LandscapeManagementWriteServiceAsync {
@@ -90,6 +92,15 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<Void> callback);
 
     /**
+     * For a combination of an AWS access key ID, the corresponding secret plus a valid session token produces the session
+     * credentials and stores them in the user's preference store from where they can be obtained again using
+     * {@link #getSessionCredentials()}. Any session credentials previously stored in the current user's preference store
+     * will be overwritten by this. The current user must have the {@code LANDSCAPE:MANAGE:AWS} permission.
+     */
+    void createSessionCredentials(String awsAccessKey, String awsSecret, String awsSessionToken,
+            AsyncCallback<Void> callback);
+
+    /**
      * For the current user who has to have the {@code LANDSCAPE:MANAGE:AWS} permission, clears the preference in the
      * user's preference store which holds any session credentials created previously using
      * {@link #createMfaSessionCredentials(String, String, String)}.
@@ -115,8 +126,8 @@ public interface LandscapeManagementWriteServiceAsync {
             String passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
 
     void removeApplicationReplicaSet(String regionId,
-            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, String optionalKeyName,
-            byte[] passphraseForPrivateKeyDescryption, AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
+            SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove, MongoEndpointDTO moveDatabaseHere,
+            String optionalKeyName, byte[] passphraseForPrivateKeyDescryption, AsyncCallback<String> callback);
 
     void createDefaultLoadBalancerMappings(String regionId,
             SailingApplicationReplicaSetDTO<String> applicationReplicaSetToCreateLoadBalancerMappingFor,
@@ -135,7 +146,7 @@ public interface LandscapeManagementWriteServiceAsync {
             Duration durationToWaitBeforeCompareServers, int maxNumberOfCompareServerAttempts,
             boolean removeApplicationReplicaSet, MongoEndpointDTO moveDatabaseHere, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption,
-            AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>> callback);
+            AsyncCallback<Triple<DataImportProgress, CompareServersResultDTO, String>> callback);
 
     void deployApplicationToExistingHost(String replicaSetName, AwsInstanceDTO hostToDeployTo,
             String replicaInstanceType, boolean dynamicLoadBalancerMapping, String releaseNameOrNullForLatestMaster,
@@ -200,9 +211,9 @@ public interface LandscapeManagementWriteServiceAsync {
     void getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
             AsyncCallback<ArrayList<LeaderboardNameDTO>> names);
 
-    void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoards,
+    void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoardNames,
             SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String region,
-            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+            AsyncCallback<Void> callback);
 
     /**
      * @param callback
@@ -223,13 +234,10 @@ public interface LandscapeManagementWriteServiceAsync {
      *            the replica set which contains the shard.
      * @param region
      *            replica set's region
-     * @param passphrase
-     *            passphrase for the private key decription.
-     * @param callback
      * 
      */
     public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region,
-            byte[] passphrase, AsyncCallback<Void> callback);
+            AsyncCallback<Void> callback);
 
     /**
      * Appends sharding keys for each leader board in {@code selectedLeaderboards} to the shard, identified by
@@ -248,13 +256,10 @@ public interface LandscapeManagementWriteServiceAsync {
      *            shard's name where the keys are supposed to be appended
      * @param replicaSet
      *            shard's replica set
-     * @param bearerToken
-     * @param passphraseForPrivateKeyDecryption
-     * @param callback
      */
     void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
             SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
-            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+            AsyncCallback<Void> callback);
 
     /**
      * Removes the shardingkeys for {@selectedLeaderBoards} from a shard, identified by {@code shardName} from
@@ -269,11 +274,41 @@ public interface LandscapeManagementWriteServiceAsync {
      *            Shard's name where the keys should be removed from
      * @param replicaSet
      *            replica set which contains the shard
-     * @param bearerToken
-     * @param passphraseForPrivateKeyDecryption
-     * @param callback
      */
     void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> selectedLeaderBoards, String region, String shardName,
             SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken,
-            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+            AsyncCallback<Void> callback);
+
+    /**
+     * Removes all application processes {@link SailingAnalyticsHost#getApplicationProcesses(Optional, Optional, byte[])
+     * found running} on {@code host} and deploys them to another host in {@code host}'s availability zone.
+     * The default configuration for primaries and replicas is used based on the application replica set the
+     * processes belong to, except for the memory configuration which is copied from the processes running
+     * on {@code host}. This will mean that any hand-crafted special configuration will get lost during the
+     * process. So don't apply this operation to hosts running non-standard application processes with non-default
+     * configurations.
+     * <p>
+     * 
+     * For those processes that are the primary ("master") instance of their replica set this method ensures that there
+     * is at least one healthy replica available before moving the primary instance to the new host. When moving a
+     * primary process, it is first removed from the "-m" target group, the new process is launched on the new host, and
+     * when it is healthy it is added to the "-m" target group.
+     * <p>
+     * 
+     * Moving a replica is easier: the replica can be launched on the new host first, added to the public target group
+     * when healthy, and then the replica on the old {@code host} can be terminated and removed.
+     * 
+     * @param host
+     *            must be a "multi-instance" host intended for sharing; this must be indicated by the tag value
+     *            {@link SharedLandscapeConstants#MULTI_PROCESS_INSTANCE_TAG_VALUE "___multi___"} on the
+     *            {@code sailing-analytics-server} tag of the instance. Otherwise, the method will throw an
+     *            {@link IllegalStateException}.
+     * @param optionalInstanceTypeForNewInstance
+     *            if not specified, the new multi-instance launched will use the same instance type as the one from
+     *            where the processes are moved away ({@code host})
+     */
+    void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
+            String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
+
+    void hasDNSResourceRecordsForReplicaSet(String replicaSetName, String optionalDomainName, AsyncCallback<Boolean> callback);
 }

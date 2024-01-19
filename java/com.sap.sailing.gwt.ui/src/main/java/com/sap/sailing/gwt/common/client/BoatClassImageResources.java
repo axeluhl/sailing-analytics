@@ -224,6 +224,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource Hansa303Icon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HANSE_418.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Hanse418Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/HOBIE_16.png")
     @ImageOptions(preventInlining = true)
     ImageResource Hobie16Icon(); 
@@ -368,6 +372,14 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource RSTeraIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_VENTURE.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource RSVentureIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SALONA_46.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource Salona46Icon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SCAN_KAP_99.png")
     @ImageOptions(preventInlining = true)
     ImageResource ScanKap99Icon();
@@ -431,6 +443,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/INTERNATIONAL_14.png")
     @ImageOptions(preventInlining = true)
     ImageResource International14Icon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IMOCA.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource ImocaIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/IQFOIL_MEN.png")
     @ImageOptions(preventInlining = true)
@@ -595,6 +611,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VARIANTA.png")
     @ImageOptions(preventInlining = true)
     ImageResource VariantaIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/VO.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource VOIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/X_99.png")
     @ImageOptions(preventInlining = true)

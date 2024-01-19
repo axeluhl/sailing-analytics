@@ -8,9 +8,11 @@ import com.sap.sailing.datamining.shared.ManeuverSettings;
 import com.sap.sailing.datamining.shared.ManeuverSettingsImpl;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettings;
 import com.sap.sailing.datamining.shared.ManeuverSpeedDetailsSettingsImpl;
+import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.datamining.presentation.ManeuverSpeedDetailsSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.datamining.presentation.TackTypeSegmentsDataMiningSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.FoilingSegmentsDataMiningSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.polarmining.PolarDataMiningSettingsDialogComponent;
 import com.sap.sailing.polars.datamining.shared.PolarDataMiningSettings;
@@ -28,23 +30,21 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
     public DataMiningSettingsInfoManagerImpl(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         infosMappedBySettingsType = new HashMap<>();
-
         // GWT doesn't support Class.isAssignableFrom and Class.getInterfaces.
         // Adding every implementation of the desired type is necessary.
         PolarDataMiningSettingsInfo polarDataMiningSettingsInfo = new PolarDataMiningSettingsInfo();
         infosMappedBySettingsType.put(PolarDataMiningSettings.class, polarDataMiningSettingsInfo);
         infosMappedBySettingsType.put(PolarDataMiningSettingsImpl.class, polarDataMiningSettingsInfo);
-
         ManeuverSpeedDetailsSettingsInfo maneuverSpeedDetailsSettingsInfo = new ManeuverSpeedDetailsSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettings.class, maneuverSpeedDetailsSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSpeedDetailsSettingsImpl.class, maneuverSpeedDetailsSettingsInfo);
-
         ManeuverSettingsInfo maneuverSettingsInfo = new ManeuverSettingsInfo();
         infosMappedBySettingsType.put(ManeuverSettings.class, maneuverSettingsInfo);
         infosMappedBySettingsType.put(ManeuverSettingsImpl.class, maneuverSettingsInfo);
-
         FoilingSegmentsDataMiningSettingsInfo foilingDataMiningSettingsInfo = new FoilingSegmentsDataMiningSettingsInfo();
         infosMappedBySettingsType.put(FoilingSegmentsDataMiningSettings.class, foilingDataMiningSettingsInfo);
+        TackTypeSegmentsDataMiningSettingsInfo tackTypeDataMiningSettingsInfo = new TackTypeSegmentsDataMiningSettingsInfo();
+        infosMappedBySettingsType.put(TackTypeSegmentsDataMiningSettings.class, tackTypeDataMiningSettingsInfo);
     }
 
     /*
@@ -139,6 +139,26 @@ public class DataMiningSettingsInfoManagerImpl implements DataMiningSettingsInfo
         @Override
         public String getId() {
             return "FoilingSegmentsDataMiningSettingsInfo";
+        }
+    }
+
+    private class TackTypeSegmentsDataMiningSettingsInfo implements DataMiningSettingsInfo {
+        @SuppressWarnings("unchecked")
+        @Override
+        public <SettingsType extends SerializableSettings> SettingsDialogComponent<SettingsType> createSettingsDialogComponent(
+                SettingsType settings) {
+            return (SettingsDialogComponent<SettingsType>) new TackTypeSegmentsDataMiningSettingsDialogComponent(
+                    (TackTypeSegmentsDataMiningSettings) settings);
+        }
+
+        @Override
+        public String getLocalizedName() {
+            return stringMessages.tackTypeSegments();
+        }
+
+        @Override
+        public String getId() {
+            return "TackTypeSegmentsDataMiningSettingsInfo";
         }
     }
 }

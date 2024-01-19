@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -300,15 +301,17 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
      *            passing calculator is used, and the TracTrac-provided ones are ignored.
-     * @param storedURImay
-     *            be <code>null</code> or the empty string in which case the server will use the
+     * @param storedURI
+     *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
+     * @param jsonUrlAsKey
+     *            identifies the TracTrac connection parameters which in particular can be used to obtain the
+     *            username/password combination for the update URI because we don't send these to the client
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
-            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername,
-            String tracTracPassword, AsyncCallback<Void> callback);
+            boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, List<SwissTimingRaceRecordDTO> rrs, String hostname,
             int port, boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
@@ -318,8 +321,14 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
+    /**
+     * @param creatorUserName
+     *            together with the {@code raceUrl} this is used to identify the connection and obtain it's
+     *            username/password combination on the server; this is essential because we don't send those credentials
+     *            to the client
+     */
     void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs, boolean trackWind,
-            boolean correctWindByDeclination, String yellowBrickUsername, String yellowBrickPassword,
+            boolean correctWindByDeclination, String creatorUserName, String raceUrl,
             AsyncCallback<Void> callback);
 
     void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
@@ -328,6 +337,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void deleteTracTracConfigurations(Collection<TracTracConfigurationWithSecurityDTO> tracTracConfigurations,
             AsyncCallback<Void> callback);
 
+    /**
+     * @param tracTracConfiguration when the {@link TracTracConfigurationWithSecurityDTO#getTracTracPassword() password}
+     * field of the configuration is {@code null}, the password will not be updated.
+     */
     void updateTracTracConfiguration(TracTracConfigurationWithSecurityDTO tracTracConfiguration,
             AsyncCallback<Void> callback);
 
@@ -383,12 +396,34 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints,
             AsyncCallback<Void> callback);
 
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date,
             AsyncCallback<Util.Triple<Double, Double, Boolean>> asyncCallback);
 
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Double correctedScore, Date date, AsyncCallback<Util.Triple<Double, Double, Boolean>> asyncCallback);
+
+    /**
+     * @param asyncCallback
+     *            The result is a {@link Triple} with the new total points in {@link Triple#getA() a}, the new net
+     *            points in {@link Triple#getB() b}, and whether or not the result is obtained from the correction
+     *            ("isCorrected") as {@link Triple#getC() c}.
+     */
+    void updateLeaderboardIncrementalScoreCorrection(String leaderboardName, String competitorIdAsString,
+            String columnName, Double scoringOffsetInPoints, Date date,
+            AsyncCallback<Triple<Double, Double, Boolean>> callback);
 
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment, AsyncCallback<Void> callback);
@@ -456,7 +491,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURL, String baseURL,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
@@ -481,7 +516,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
 
-    void createCourseAreas(UUID eventId, String[] courseAreaNames, AsyncCallback<Void> callback);
+    void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas, AsyncCallback<Void> callback);
 
     void removeCourseAreas(UUID eventId, UUID[] idsOfCourseAreasToRemove, AsyncCallback<Void> callback);
 
@@ -638,7 +673,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void setFinishingAndEndTime(RaceLogSetFinishingAndFinishTimeDTO editedObject, AsyncCallback<Pair<Boolean, Boolean>> asyncCallback);
 
-
     void setImpliedWindSource(String leaderboardName, String raceColumnName, String fleetName,
             ImpliedWindSource impliedWindSource, AsyncCallback<Void> callback);
 
@@ -654,5 +688,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> selectedSet, AsyncCallback<Void> callback);
 
+    /**
+     * @param editedObject
+     *            if the {@link YellowBrickConfigurationWithSecurityDTO#getPassword() password} field of the
+     *            configuration object is {@code null}, this means that the original password is to be left unchanged.
+     */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
 }

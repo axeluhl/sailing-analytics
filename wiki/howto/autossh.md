@@ -21,10 +21,10 @@ The only problem with this approach is that the source compilation in this case 
 It can therefore be useful to use the tool `checkinstall` instead of `sudo make install`.
 
 ## Configuration
-It is benefitial to use tmux for the usage of autossh to create a terminal session, in which autossh can run without blocking the whole terminal session. Use `yum install tmux` for the installation.
+It is beneficial to use `tmux` for the usage of `autossh` to create a terminal session, in which `autossh` can run without blocking the whole terminal session. Use `yum install tmux` for the installation.
 
-Autossh itself relies on ssh and passes its terminal arguments to ssh. There are a few exeptions, for example the -M argument, which specifies the monitoring and echo port needed for the operation of autossh (uses the specified port and the port + 1). Autossh can be configured via environment variables, refer to the autossh manual for further information (`man autossh`).  
-It can be useful to tweak the ssh_config and sshd_config to assure a quick recovery from failovers (see [Olympic Setup](/wiki/info/landscape/olympic-setup.md#tunnels) for the configuration). A typical command for creating a ssh tunnel is the following:
+Autossh itself relies on `ssh` and passes its terminal arguments to `ssh`. There are a few exeptions, for example the -M argument, which specifies the monitoring and echo port needed for the operation of `autossh` (uses the specified port and the port + 1). Autossh can be configured via environment variables, refer to the `autossh` manual for further information (`man autossh`).  
+It can be useful to tweak the `/etc/ssh_config` and `/etc/sshd_config` to assure a quick recovery from failovers (see [Olympic Setup Tokyo 2020](/wiki/info/landscape/tokyo2020/olympic-setup.md#tunnels) and [Olympic Setup Paris 2024](/wiki/info/landscape/paris2024/olympic-setup.md#tunnels) for the configuration). A typical command for creating a ssh tunnel is the following:
 
 ```
 autossh -M 20000 -N -L *:5672:localhost:5672 -i /root/.ssh/id_rsa <ip-address>

@@ -99,5 +99,4 @@ public class DistanceAndDurationAwareWindTransitionProbabilitiesCalculator
                 / transitionProbabilitySum;
         return new Pair<>(intersectedWindRangeUntilCurrentNode, normalizedTransitionProbabilityUntilCurrentNode);
     }
-
 }

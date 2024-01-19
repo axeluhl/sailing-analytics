@@ -51,7 +51,6 @@ public class ShardManagementPanel extends SimplePanel {
     private SailingApplicationReplicaSetDTO<String> replicaSet;
     private final BusyIndicator busyIndicator;
     private String region;
-    private String passphrase;
     private List<LeaderboardNameDTO> leaderboards;
     private Map<AwsShardDTO, Iterable<String>> shardsAndShardingKeys;
     private final CaptionPanel leaderboardCaption, leaderboardsInShardCaption;
@@ -291,7 +290,7 @@ public class ShardManagementPanel extends SimplePanel {
                             l.addAll(selectedLeaderboards);
                             busyIndicator.setBusy(true);
                             landscapeManagementService.addShard(newShardName, l, replicaSet,
-                                    getBearerToken(), region, passphrase.getBytes(), new AsyncCallback<Void>() {
+                                    getBearerToken(), region, new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
                                             busyIndicator.setBusy(false);
@@ -336,20 +335,19 @@ public class ShardManagementPanel extends SimplePanel {
         setBusy(true);
         for (AwsShardDTO selection : shardTable.getSelectionModel().getSelectedSet()) {
             hasAnythingChanged = true;
-            landscapeManagementService.removeShard(selection, replicaSet, region, passphrase.getBytes(),
-                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(caught.getMessage());
-                            setBusy(false);
-                        }
+            landscapeManagementService.removeShard(selection, replicaSet, region, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(caught.getMessage());
+                    setBusy(false);
+                }
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            Notification.notify(stringMessages.deletedShard(selection.getName()), NotificationType.SUCCESS);
-                            refresh();
-                        }
-                    });
+                @Override
+                public void onSuccess(Void result) {
+                    Notification.notify(stringMessages.deletedShard(selection.getName()), NotificationType.SUCCESS);
+                    refresh();
+                }
+            });
         }
     }
 
@@ -361,7 +359,7 @@ public class ShardManagementPanel extends SimplePanel {
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
             hasAnythingChanged = true;
             landscapeManagementService.appendShardingKeysToShard(selectedLeaderboards, region, shard.getName(),
-                    replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
+                    replicaSet, getBearerToken(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             setBusy(false);
@@ -387,7 +385,7 @@ public class ShardManagementPanel extends SimplePanel {
             final AwsShardDTO shard = shardTable.getSelectionModel().getSelectedSet().iterator().next();
             hasAnythingChanged = true;
             landscapeManagementService.removeShardingKeysFromShard(selectedLeaderboards, region, shard.getName(),
-                    replicaSet, getBearerToken(), passphrase.getBytes(), new AsyncCallback<Void>() {
+                    replicaSet, getBearerToken(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             setBusy(false);
@@ -411,12 +409,7 @@ public class ShardManagementPanel extends SimplePanel {
         this.region = region;
     }
 
-    public void setPassphrase(String passphrase) {
-        this.passphrase = passphrase;
-    }
-
     public Boolean hasAnythingChanged() {
         return hasAnythingChanged;
     }
-
 }

@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
@@ -278,7 +279,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     /** for backward compatibility with the regatta overview */
     List<RaceGroupDTO> getRegattaStructureForEvent(UUID eventId) throws UnauthorizedException;
-    
+
     List<RegattaDTO> getRegattasForEvent(UUID eventId);
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet)
@@ -368,7 +369,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      * @param manage2SailJsonUrl
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
-    Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl) throws UnauthorizedException;
+    Iterable<RegattaDTO> getManage2SailRegattas(String manage2SailJsonUrl) throws Exception;
 
     boolean doesRegattaLogContainCompetitors(String name)
             throws UnauthorizedException, DoesNotHaveRegattaLogException, NotFoundException;
@@ -596,9 +597,13 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     Pair<String, List<YellowBrickRaceRecordDTO>> listYellowBrickRacesInEvent(
             YellowBrickConfigurationWithSecurityDTO configuration) throws Exception;
-    
+
     // === Service method introduced for new ManagementConsole UI ===
     List<EventMetadataDTO> getEventList();
-    
+
     List<EventSeriesMetadataDTO> getEventSeriesList();
+
+    List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName);
+
+    String getGoogleMapsLoaderAuthenticationParams();
 }

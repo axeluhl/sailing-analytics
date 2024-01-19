@@ -42,6 +42,8 @@ public class LeaderboardEntryDTO implements Serializable {
     public Double totalPoints;
     public Double totalPointsUncorrected;
     
+    public Double incrementalScoreCorrectionInPoints;
+    
     /**
      * Tells if the total points have been overridden by a score correction. Can be used to render differently in editing environment.
      */
@@ -653,6 +655,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime * result + (totalPointsCorrected ? 1231 : 1237);
         result = prime * result + ((totalPointsUncorrected == null) ? 0 : totalPointsUncorrected.hashCode());
+        result = prime * result + ((incrementalScoreCorrectionInPoints == null) ? 0 : incrementalScoreCorrectionInPoints.hashCode());
         result = prime * result + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0
                 : windwardDistanceToCompetitorFarthestAheadInMeters.hashCode());
         return result;
@@ -808,6 +811,11 @@ public class LeaderboardEntryDTO implements Serializable {
             if (other.totalPoints != null)
                 return false;
         } else if (!totalPoints.equals(other.totalPoints))
+            return false;
+        if (incrementalScoreCorrectionInPoints == null) {
+            if (other.incrementalScoreCorrectionInPoints != null)
+                return false;
+        } else if (!incrementalScoreCorrectionInPoints.equals(other.incrementalScoreCorrectionInPoints))
             return false;
         if (totalPointsCorrected != other.totalPointsCorrected)
             return false;

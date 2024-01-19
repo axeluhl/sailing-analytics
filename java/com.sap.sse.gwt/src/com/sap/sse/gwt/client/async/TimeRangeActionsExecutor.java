@@ -15,12 +15,12 @@ import com.sap.sse.common.Util.Pair;
  * An Executor for efficient, asynchronous execution of {@link TimeRangeAsyncAction}s. This executor operates on
  * {@link TimeRangeAsyncAction}s which specify the wanted {@link TimeRange} by {@link Key} with
  * {@link TimeRangeAsyncAction#getTimeRanges()} and are expected to return a {@code Result} when their
- * {@link TimeRangeAsyncAction#execute(Map<Key,TimeRange>, AsyncCallback)} is invoked. The {@link Key} could, e.g., be a
+ * {@link TimeRangeAsyncAction#execute(Map, AsyncCallback)} is invoked. The {@link Key} could, e.g., be a
  * competitor or a boat class.
  * <p>
  * 
  * This executor manages and optimizes concurrent requests for equal {@code Key}s that have overlapping time ranges.
- * This way, redundant requests for the same data can be avoided. This executor collects the results of the overlapping
+ * This way, redundant requests for the same data can thus be avoided. This executor collects the results of the overlapping
  * concurrent requests and uses them to satisfy each individual client request as if they had all been executed in their
  * entirety.
  * <p>

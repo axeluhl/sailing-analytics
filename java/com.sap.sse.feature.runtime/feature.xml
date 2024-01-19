@@ -716,25 +716,40 @@
          version="2.9.0"
          unpack="false"/>
 
+  
    <plugin
-         id="com.jcraft.jsch"
+         id="com.github.mwiede.jsch"
          download-size="0"
          install-size="0"
-         version="0.1.54.v20170116-1932"
+         version="0.2.8"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.mwiede.jsch.source"
+         download-size="0"
+         install-size="0"
+         version="0.2.8"
+         unpack="false"/>
+
+   <plugin
+         id="bcprov-ext"
+         download-size="0"
+         install-size="0"
+         version="1.72.0"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.18.8"
+         version="2.20.59"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api.source"
          download-size="0"
          install-size="0"
-         version="2.18.8"
+         version="2.20.59"
          unpack="false"/>
 
    <plugin

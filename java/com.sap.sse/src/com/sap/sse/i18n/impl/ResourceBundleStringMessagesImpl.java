@@ -35,6 +35,13 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
         final String message = getResourceBundle(locale).getString(messageKey);
+        return get(message, parameters);
+    }
+
+    /**
+     * package-protected to allow access by test fragment
+     */
+    String get(final String message, String... parameters) {
         final StringBuilder result = new StringBuilder();
         boolean withinQuotedArea = false;
         for (int i = 0; i < message.length(); i++) {
@@ -64,7 +71,7 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
         return i < message.length() - 1 && message.charAt(i) == '\'' && message.charAt(i + 1) == '\'';
     }
 
-    private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*$");
+    private static final Pattern placeholderMatcher = Pattern.compile("\\{([0-9]+)\\}.*", Pattern.DOTALL);
 
     /**
      * @return -1 if there is no placeholder starting at character {@code i} in {@code message}, or the number of the

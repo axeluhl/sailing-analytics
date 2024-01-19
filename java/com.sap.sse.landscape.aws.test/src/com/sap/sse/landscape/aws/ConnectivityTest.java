@@ -44,12 +44,14 @@ import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.RotatingFileBasedLog;
+import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -87,12 +89,12 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  */
 public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
-    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
+    private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));
     private static AwsLandscape<String> landscape;
     private static AwsRegion region;
     private static byte[] keyPass;
     private static String AXELS_KEY_PASS;
-    private static final String AXELS_KEY_NAME = "Axel";
+    private static final String AXELS_KEY_NAME = "Axel_ed25519";
     private static final String pathPrefixForShardingKey = "/sse/landscape/test";
     
     @BeforeClass
@@ -193,7 +195,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         // In order to use this to import a valid key existing pair we'll import the last valid key, namely testKeyFromEncryptedBytes:
         landscape.importKeyPair(region, pubKeyBytes, encryptedPrivateKeyFromDecrypted.toByteArray(), AXELS_KEY_NAME);
         final SshCommandChannel sshChannel = landscape.getCentralReverseProxy(region).getHosts().iterator().next()
-                .createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(),
+                .createRootSshChannel(optionalTimeout, Optional.of(AXELS_KEY_NAME),
                         AXELS_KEY_PASS.getBytes());
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("ls -al", /* stderr prefix */ null, /* stderr log level */ null);
         assertFalse(stdout.isEmpty());
@@ -207,28 +209,28 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, RotatingFileBasedLog> proxy = landscape.getCentralReverseProxy(region);
         final String hostname = "kw2021.sapsailing.com";
         final AwsInstance<String> proxyHost = proxy.getHosts().iterator().next();
-        final ProcessT process = createApplicationProcess(proxyHost);
-        proxy.setEventRedirect(hostname, process, UUID.randomUUID(), /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
+        final ProcessT process = createApplicationProcess(proxyHost, "testtest");
+        proxy.setEventRedirect(hostname, process, UUID.randomUUID(), Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
         final ByteArrayOutputStream configFileContents = new ByteArrayOutputStream();
-        final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
+        final ChannelSftp sftpChannel = proxyHost.createRootSftpChannel(optionalTimeout, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
         sftpChannel.connect((int) optionalTimeout.orElse(Duration.NULL).asMillis());
         final String configFileName = "/etc/httpd/conf.d/"+hostname+".conf";
         sftpChannel.get(configFileName, configFileContents);
         assertTrue(configFileContents.toString().startsWith("Use Event-SSL "+hostname));
         sftpChannel.getSession().disconnect();
-        proxy.removeRedirect(hostname, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
-        final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, /* optional SSH key name */ Optional.empty(), AXELS_KEY_PASS.getBytes());
+        proxy.removeRedirect(hostname, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
+        final SshCommandChannel lsSshChannel = proxyHost.createRootSshChannel(optionalTimeout, Optional.of(AXELS_KEY_NAME), AXELS_KEY_PASS.getBytes());
         final String lsOutput = lsSshChannel.runCommandAndReturnStdoutAndLogStderr("ls "+configFileName, /* stderr prefix */ null, /* stderr log level */ null);
         assertTrue(lsOutput.isEmpty());
     }
 
-    protected ProcessT createApplicationProcess(final AwsInstance<String> host) {
+    protected ProcessT createApplicationProcess(final AwsInstance<String> host, String serverName) {
         final SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>> sailingAnalyticsHost =
                 new SailingAnalyticsHostImpl<String, SailingAnalyticsHost<String>>(
                         host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(),
                         landscape, new SailingAnalyticsProcessFactory(()->landscape));
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, sailingAnalyticsHost, ApplicationProcessHost.DEFAULT_SERVER_PATH, 2010, landscape);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, sailingAnalyticsHost, ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+serverName, 2010, landscape);
         return process;
     }
     
@@ -236,16 +238,29 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     public void testConnectivity() throws Exception {
         final String TARGET_GROUP_NAME_PREFIX = "S-test-";
         final String hostedZoneName = "wiesen-weg.de";
-        final String hostname = "test-"+new Random().nextInt()+"."+hostedZoneName;
+        final String serverName = "test-"+new Random().nextInt();
+        final String hostname = serverName+"."+hostedZoneName;
         final String keyName = "MyKey-"+UUID.randomUUID();
         createKeyPair(keyName);
         final MongoEndpoint mongoEndpoint = landscape.getMongoEndpoints(region).iterator().next();
         final AwsInstance<String> host = landscape.launchHost(
                 getLatestSailingImage(),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"),
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(
+                        new SecurityGroup() {
+                            @Override
+                            public String getId() {
+                                return "sg-0b2afd48960251280";
+                            }
+
+                            @Override
+                            public String getVpcId() {
+                                return "abc";
+                            }
+                        }),
                 Optional.of(Tags.with("Name", "MyHost").and("Hello", "World")),
                 "MONGODB_URI=\""+mongoEndpoint.getURI(Optional.of(new DatabaseImpl(mongoEndpoint, "winddbTest")))+"\"",
-                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestMasterRelease().getName());
+                "INSTALL_FROM_RELEASE="+SailingReleaseRepository.INSTANCE.getLatestMasterRelease().getName(),
+                "SERVER_NAME=\""+serverName+"\"");
         try {
             assertNotNull(host);
             final Instance instance = landscape.getInstance(host.getInstanceId(), region);
@@ -261,15 +276,15 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
             }
             assertTrue(foundName);
             assertTrue(foundHello);
-            final ProcessT process = createApplicationProcess(host);
+            final ProcessT process = createApplicationProcess(host, serverName);
             process.waitUntilReady(optionalTimeout);
             // check env.sh access
-            final String envSh = process.getEnvSh(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
+            final String envSh = process.getEnvSh(optionalTimeout, Optional.empty(), keyPass);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
-            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass);
+            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, Optional.empty(), keyPass);
             assertNotNull(release);
-            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass));
+            assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, Optional.empty(), keyPass));
             final AwsLandscape<String> castLandscape = (AwsLandscape<String>) landscape;
             final CreateDNSBasedLoadBalancerMapping.Builder<?, ?, String, SailingAnalyticsMetrics, ProcessT> builder = CreateDNSBasedLoadBalancerMapping.builder();
             builder
@@ -285,7 +300,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                 createDNSBasedLoadBalancerMappingProcedure.run();
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed());
                 assertNotNull(createDNSBasedLoadBalancerMappingProcedure.getMasterTargetGroupCreated());
-                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout, /* optional SSH key name */ Optional.empty(), keyPass), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated().getName());
+                assertEquals(TARGET_GROUP_NAME_PREFIX+process.getServerName(optionalTimeout, Optional.empty(), keyPass), createDNSBasedLoadBalancerMappingProcedure.getPublicTargetGroupCreated().getName());
             } finally {
                 if (createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed() != null) {
                     createDNSBasedLoadBalancerMappingProcedure.getLoadBalancerUsed().delete();
@@ -406,7 +421,18 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
 
     private void testSshConnectWithKey(final String keyName) throws Exception {
         final AwsInstance<String> host = landscape.launchHost(getLatestSailingImage(),
-                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(()->"sg-0b2afd48960251280"), /* tags */ Optional.empty());
+                InstanceType.T3_SMALL, landscape.getAvailabilityZoneByName(region, "eu-west-2b"), keyName, Collections.singleton(
+                        new SecurityGroup() {
+                            @Override
+                            public String getId() {
+                                return "sg-0b2afd48960251280";
+                            }
+
+                            @Override
+                            public String getVpcId() {
+                                return "abc";
+                            }
+                        }), /* tags */ Optional.empty());
         try {
             assertNotNull(host);
             logger.info("Created instance with ID "+host.getInstanceId());
@@ -465,7 +491,8 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     @Test
     public void createEmptyLoadBalancerTest() throws InterruptedException, ExecutionException {
         final String albName = "MyAlb"+new Random().nextInt();
-        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region);
+        final ApplicationLoadBalancer<String> alb = landscape.createLoadBalancer(albName, region,
+                /* securityGroupForVpc null means use default VPC which is OK for this test */ null);
         try {
             assertNotNull(alb);
             assertEquals(albName, alb.getName());
@@ -489,7 +516,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     public void createAndDeleteTargetGroupTest() {
         final String targetGroupName = "TestTargetGroup-"+new Random().nextInt();
         final TargetGroup<String> targetGroup = landscape.createTargetGroup(region, targetGroupName, 80, ApplicationProcess.HEALTH_CHECK_PATH, 80,
-                /* loadBalancerArn */ null);
+                /* loadBalancerArn */ null, /* vpcId */ null);
         try {
             final TargetGroup<String> fetchedTargetGroup = landscape.getTargetGroup(region, targetGroupName,
                     targetGroup.getTargetGroupArn(), targetGroup.getLoadBalancerArn(), targetGroup.getProtocol(),
@@ -503,10 +530,31 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     
     @Test
     public void testCentralReverseProxyInEuWest2IsAvailable() throws IOException, InterruptedException, JSchException {
-        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion("eu-west-2", landscape));
+        final ReverseProxyCluster<String, SailingAnalyticsMetrics, ProcessT, ?> proxy = landscape.getCentralReverseProxy(new AwsRegion(Region.EU_WEST_2, landscape));
         assertEquals(1, Util.size(proxy.getHosts()));
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());
         healthCheckConnection.disconnect();
+    }
+
+    @Test
+    public void getDefaultRabbitConfigForEuWest1() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.EU_WEST_1, landscape));
+        assertEquals("rabbit.internal.sapsailing.com", rabbitConfig.getNodeName());
+        assertEquals(5672, rabbitConfig.getPort());
+    }
+    
+    @Test
+    public void getDefaultRabbitConfigForEuWest2() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.EU_WEST_2, landscape));
+        assertTrue(rabbitConfig.getNodeName().startsWith("172.31."));
+        assertEquals(5672, rabbitConfig.getPort());
+    }
+    
+    @Test
+    public void getDefaultRabbitConfigForRegionWithNoTaggedInstanceInIt() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.US_EAST_2, landscape));
+        assertEquals("rabbit.internal.sapsailing.com", rabbitConfig.getNodeName());
+        assertEquals(5672, rabbitConfig.getPort());
     }
 }

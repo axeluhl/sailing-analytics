@@ -42,6 +42,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.domain.windestimation.IncrementalWindEstimation;
 import com.sap.sailing.domain.windestimation.TimePointAndPositionWithToleranceComparator;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.windestimation.ManeuverBasedWindEstimationComponentImpl;
@@ -51,6 +52,8 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.WindQuality;
 import com.sap.sailing.windestimation.data.transformer.CompleteManeuverCurveWithEstimationDataToManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.exception.ModelPersistenceException;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DistanceBasedTwdTransitionRegressorModelContext.DistanceValueRange;
+import com.sap.sailing.windestimation.model.regressor.twdtransition.DurationBasedTwdTransitionRegressorModelContext.DurationValueRange;
 import com.sap.sailing.windestimation.model.store.ClassPathReadOnlyModelStoreImpl;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -73,11 +76,21 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
 
     private static final double PERCENT_QUANTILE = 0.8;
 
+    /**
+     * These model file names must match up with the boundaries defined in the {@link DistanceValueRange} and {@link DurationValueRange}
+     * enumeration types. The files themselves are obtained by executing the training runs, particularly the launch configurations
+     * {@code AggregatedDurationBasedTwdTransitionImporter} and {@code AggregatedDistanceBasedTwdTransitionImporter} which, when provided
+     * with the argument {@code ../com.sap.sailing.windestimation.test/resources/trained_wind_estimation_models} will store the serialized
+     * versions of the wind regressor models there, using the boundaries as defined in the two enumeration types.<p>
+     * 
+     * Failing to update these files and their names after making changes to either of the enumeration types will lead to exceptions
+     * during test runs.
+     */
     public static final String[] modelFilesNames = {
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom0.0To10.0.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom10.0To912.0.clf",
-            "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom1368.0ToMaximum.clf",
             "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom912.0To1368.0.clf",
+            "SERIALIZATION.modelForDistanceBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DistanceBasedTwdTransitionRegressorFrom1368.0ToMaximum.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom0.0To1.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom1.0To140.0.clf",
             "SERIALIZATION.modelForDurationBasedTwdDeltaStdRegressor.IncrementalSingleDimensionPolynomialRegressor.DurationBasedTwdTransitionRegressorFrom140.0To5394.0.clf",
@@ -127,9 +140,11 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
         Wait.wait(()->!polarDataService.isCurrentlyActiveAndOrHasQueue(), /* timeout */ Optional.of(Duration.ONE_MINUTE),
                 /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(5), Level.INFO, "Waiting for polar data service to finish computing");
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
+        final IncrementalWindEstimation windEstimation = windEstimationFactoryService.createIncrementalWindEstimationTrack(getTrackedRace());
         getTrackedRace()
-                .setWindEstimation(windEstimationFactoryService.createIncrementalWindEstimationTrack(getTrackedRace()));
+                .setWindEstimation(windEstimation);
         getTrackedRace().waitForManeuverDetectionToFinish();
+        windEstimation.waitUntilDone();
     }
 
     @Test
@@ -208,14 +223,16 @@ public class IncrementalMstHmmWindEstimationForTrackedRaceTest extends OnlineTra
                 foundCount++;
             }
         }
-        assertTrue((double) foundCount / (double) estimatedWindFixes.size() > PERCENT_QUANTILE);
+        assertTrue("Expected ratio of matching fixes to be at least "+PERCENT_QUANTILE+" but was only "+(double) foundCount / (double) estimatedWindFixes.size(),
+                (double) foundCount / (double) estimatedWindFixes.size() > PERCENT_QUANTILE);
         foundCount = 0;
         for (Wind wind : targetWindFixes) {
             if (findWithinTolerance(estimatedWindFixesMap, new Pair<>(wind.getPosition(), wind.getTimePoint())) != null) {
                 foundCount++;
             }
         }
-        assertTrue((double) foundCount / (double) targetWindFixes.size() > PERCENT_QUANTILE);
+        assertTrue("Expected ratio of matching fixes to be at least "+PERCENT_QUANTILE+" but was only "+(double) foundCount / (double) estimatedWindFixes.size(),
+                (double) foundCount / (double) targetWindFixes.size() > PERCENT_QUANTILE);
     }
 
     /**

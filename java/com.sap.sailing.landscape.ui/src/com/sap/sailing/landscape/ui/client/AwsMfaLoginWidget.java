@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -24,6 +25,7 @@ public class AwsMfaLoginWidget extends VerticalPanel implements AwsAccessKeyProv
     private final TextBox awsAccessKeyTextBox;
     private final PasswordTextBox awsSecretPasswordTextBox;
     private final TextBox mfaTokenCodeTextBox;
+    private final TextBox sessionTokenTextBox;
     private final LandscapeManagementWriteServiceAsync landscapeManagementService;
     private final ErrorReporter errorReporter;
     private final Grid awsCredentialsGrid;
@@ -47,7 +49,7 @@ public class AwsMfaLoginWidget extends VerticalPanel implements AwsAccessKeyProv
         buttonPanel.add(refreshButton);
         final Button logoutButton = new Button(stringMessages.logout());
         buttonPanel.add(logoutButton);
-        awsCredentialsGrid = new Grid(4, 2);
+        awsCredentialsGrid = new Grid(5, 2);
         this.add(awsCredentialsGrid);
         awsCredentialsGrid.setWidget(0, 0, new Label(stringMessages.awsAccessKey()));
         awsAccessKeyTextBox = new TextBox();
@@ -72,31 +74,43 @@ public class AwsMfaLoginWidget extends VerticalPanel implements AwsAccessKeyProv
             public void onSuccess(Void result) {
             }
         }));
-        awsCredentialsGrid.setWidget(0, 1, awsAccessKeyTextBox);
-        awsCredentialsGrid.setWidget(1, 0, new Label(stringMessages.awsSecret()));
+        int row=0;
+        awsCredentialsGrid.setWidget(row++, 1, awsAccessKeyTextBox);
+        awsCredentialsGrid.setWidget(row, 0, new Label(stringMessages.awsSecret()));
         awsSecretPasswordTextBox = new PasswordTextBox();
-        awsCredentialsGrid.setWidget(1, 1, awsSecretPasswordTextBox);
+        awsCredentialsGrid.setWidget(row++, 1, awsSecretPasswordTextBox);
         mfaTokenCodeTextBox = new TextBox();
-        awsCredentialsGrid.setWidget(2, 0, new Label(stringMessages.mfaTokenCode()));
-        awsCredentialsGrid.setWidget(2, 1, mfaTokenCodeTextBox);
+        awsCredentialsGrid.setWidget(row, 0, new Label(stringMessages.mfaTokenCode()));
+        awsCredentialsGrid.setWidget(row++, 1, mfaTokenCodeTextBox);
+        sessionTokenTextBox = new TextBox();
+        awsCredentialsGrid.setWidget(row, 0, new Label(stringMessages.optionalSessionToken()));
+        awsCredentialsGrid.setWidget(row++, 1, sessionTokenTextBox);
         final Button loginButton = new Button(stringMessages.login());
-        awsCredentialsGrid.setWidget(3, 0, loginButton);
+        awsCredentialsGrid.setWidget(row++, 0, loginButton);
         awsCredentialsGrid.setVisible(false);
         refreshButton.addClickHandler(e->checkSessionCredentials());
-        loginButton.addClickHandler(e->landscapeManagementService.createMfaSessionCredentials(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(), mfaTokenCodeTextBox.getValue(),
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.invalidCredentialsNoSessionCreated(caught.getMessage()));
-                        checkSessionCredentials();
-                    }
+        final AsyncCallback<Void> sessionCredentialsCallback = new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.invalidCredentialsNoSessionCreated(caught.getMessage()));
+                checkSessionCredentials();
+            }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        Notification.notify(stringMessages.loggedInSuccessfully(), NotificationType.SUCCESS);
-                        checkSessionCredentials();
-                    }
-                }));
+            @Override
+            public void onSuccess(Void result) {
+                Notification.notify(stringMessages.loggedInSuccessfully(), NotificationType.SUCCESS);
+                checkSessionCredentials();
+            }
+        };
+        loginButton.addClickHandler(e->{
+            if (Util.hasLength(mfaTokenCodeTextBox.getValue())) {
+                landscapeManagementService.createMfaSessionCredentials(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(), mfaTokenCodeTextBox.getValue(),
+                        sessionCredentialsCallback);
+            } else {
+                landscapeManagementService.createSessionCredentials(awsAccessKeyTextBox.getValue(), awsSecretPasswordTextBox.getValue(), sessionTokenTextBox.getValue(),
+                        sessionCredentialsCallback);
+            }
+        });
         logoutButton.addClickHandler(e->landscapeManagementService.clearSessionCredentials(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -114,6 +128,7 @@ public class AwsMfaLoginWidget extends VerticalPanel implements AwsAccessKeyProv
         checkSessionCredentials();
     }
     
+    @Override
     public void addListener(AwsMfaLoginListener listener) {
         listeners.add(listener);
     }

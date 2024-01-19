@@ -34,10 +34,10 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingEventIdUrlUtil;
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -132,8 +132,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         eventIDTextBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                jsonURLTextBox.setText("http://manage2sail.com/api/public/links/event/" + eventIDTextBox.getValue()
-                        + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
+                final String url = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIDTextBox.getValue());
+                jsonURLTextBox.setText(url);
             }
         });
         eventIDTextBox.ensureDebugId("eventIDTextBox");
@@ -141,8 +141,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         jsonURLTextBox = new TextBox();
         jsonURLTextBox.ensureDebugId("JsonURLTextBox");
         jsonURLTextBox.setVisibleLength(100);
-        jsonURLTextBox.getElement().setPropertyString("placeholder",
-                        "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json");
+        jsonURLTextBox.getElement().setPropertyString("placeholder", SwissTimingEventIdUrlUtil.getUrlFromEventId("d30883d3-2876-4d7e-af49-891af6cbae1b"));
         listRegattasButton = new Button(this.stringMessages.listRegattas());
         importDetailsButton = new Button(this.stringMessages.importRegattas());
         importDetailsButton.setEnabled(false);
@@ -234,12 +233,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void createEvent(final EventDTO newEvent) {
-        List<String> courseAreaNames = new ArrayList<String>();
-        for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
-            courseAreaNames.add(courseAreaDTO.getName());
-        }
         sailingServiceWrite.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
+                newEvent.venue.getName(), newEvent.isPublic, newEvent.venue.getCourseAreas(), newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(),
                 newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), new AsyncCallback<EventDTO>() {
                     @Override
@@ -263,14 +258,13 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         if (eventIDTextBox.getValue() == null || eventIDTextBox.getValue().length() == 0) {
             jsonURL = jsonURLTextBox.getValue();
         } else {
-            jsonURL = "http://manage2sail.com/api/public/links/event/" + eventIDTextBox.getValue()
-                    + "?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+            jsonURL = SwissTimingEventIdUrlUtil.getUrlFromEventId(eventIDTextBox.getValue());
         }
         if (jsonURL == null || jsonURL.length() == 0) {
             errorReporter.reportError(stringMessages.pleaseEnterNonEmptyUrl());
         } else {
             busyIndicator.setBusy(true);
-            sailingServiceWrite.getRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
+            sailingServiceWrite.getManage2SailRegattas(jsonURL, new AsyncCallback<Iterable<RegattaDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);

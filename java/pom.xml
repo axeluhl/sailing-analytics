@@ -47,7 +47,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9
+      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx8192m -XX:+UseG1GC
@@ -94,6 +94,7 @@
         <module>com.sap.sse.landscape.aws</module>
         <module>com.sap.sse.landscape.aws.common</module>
         <module>com.sap.sse.landscape.aws.common.test</module>
+        <module>com.sap.sse.landscape.test</module>
         <module>com.sap.sse.landscape.aws.test</module>
         <module>com.sap.sse.landscape.aws.persistence</module>
         <module>com.sap.sailing.landscape</module>
@@ -113,11 +114,13 @@
         <module>com.sap.sse.datamining.ui</module>
         <module>com.sap.sse.security.interface</module>
         <module>com.sap.sse.security</module>
+        <module>com.sap.sse.security.datamining</module>
         <module>com.sap.sse.security.persistence</module>
         <module>com.sap.sse.security.persistence.test</module>
         <module>com.sap.sse.security.storemerging</module>
         <module>com.sap.sse.security.storemerging.test</module>
         <module>com.sap.sse.security.ui</module>
+        <module>com.sap.sse.security.ui.test</module>
         <module>com.sap.sse.security.userstore.mongodb</module>
         <module>com.sap.sse.operationaltransformation</module>
         <module>com.sap.sse.replication</module>

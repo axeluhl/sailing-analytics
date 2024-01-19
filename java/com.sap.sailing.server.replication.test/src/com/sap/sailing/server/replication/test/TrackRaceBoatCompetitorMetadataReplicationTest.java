@@ -99,10 +99,10 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     }
 
     private void startTrackingOnMaster() throws Exception {
-        final CourseArea courseArea = master.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area");
+        final CourseArea courseArea = master.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Course Area", /* centerPosition */ null, /* radius */ null);
         // in production, a course area creation based on an event's venue creation would be
         // replicated; in test set-ups, the course area needs to be "replicated" manually:
-        replica.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName());
+        replica.getBaseDomainFactory().getOrCreateCourseArea(courseArea.getId(), courseArea.getName(), /* centerPosition */ null, /* radius */ null);
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
                 CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null,

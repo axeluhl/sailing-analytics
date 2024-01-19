@@ -22,7 +22,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dexpedition.udp.port=2010 -Xmx4096m -Dmongo.dbName=winddbTest -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Dgwt.rpc.version=9"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dexpedition.udp.port=2010 -Xmx4096m -Dmongo.dbName=winddbTest -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Dgwt.rpc.version=9 -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN} -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS}"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%"/>
@@ -32,6 +32,7 @@
     <stringAttribute key="profilingTraceType-PERFORMANCE_HOTSPOT_TRACE" value="KEY_IGNORE_SLEEPING_THREADS%CTX_KEY%true%CTX_ENTRY%KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <stringAttribute key="profilingTraceType-SYNCHRONIZATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%"/>
     <setAttribute key="selected_target_bundles">
+        <setEntry value="bcprov-ext@default:default"/>
         <setEntry value="com.amazon.aws.aws-java-api.source"/>
         <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
         <setEntry value="com.chargebee.chargebee-java@default:default"/>
@@ -43,9 +44,10 @@
         <setEntry value="com.github.haifengl.smile-graph@default:default"/>
         <setEntry value="com.github.haifengl.smile-math.source"/>
         <setEntry value="com.github.haifengl.smile-math@default:default"/>
+        <setEntry value="com.github.mwiede.jsch.source"/>
+        <setEntry value="com.github.mwiede.jsch@default:default"/>
         <setEntry value="com.google.gson.source"/>
         <setEntry value="com.google.gson@default:default"/>
-        <setEntry value="com.jcraft.jsch@default:default"/>
         <setEntry value="com.rabbitmq.client.source"/>
         <setEntry value="com.rabbitmq.client@default:default"/>
         <setEntry value="com.sap.db.jdbc.source"/>
@@ -297,6 +299,7 @@
         <setEntry value="com.sap.sse.replication.persistence@default:default"/>
         <setEntry value="com.sap.sse.replication@6:true"/>
         <setEntry value="com.sap.sse.security.common@default:default"/>
+        <setEntry value="com.sap.sse.security.datamining@5:true"/>
         <setEntry value="com.sap.sse.security.interface@default:default"/>
         <setEntry value="com.sap.sse.security.persistence@default:default"/>
         <setEntry value="com.sap.sse.security.ui@6:true"/>

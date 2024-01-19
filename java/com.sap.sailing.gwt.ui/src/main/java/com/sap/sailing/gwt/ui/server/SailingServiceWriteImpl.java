@@ -344,6 +344,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryValue;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardColumnFactor;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardIncrementalScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
@@ -355,6 +356,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Speed;
@@ -550,43 +552,49 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
-            String courseDesignUpdateURI, boolean trackWind, final boolean correctWindByDeclination,
+            String updateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
-            boolean useOfficialEventsToUpdateRaceLog, String tracTracUsername, String tracTracPassword)
+            boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
                 + " and storedURI " + storedURI);
+        final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
                 // reload JSON and load clientparams.php
-                RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
+                final RaceRecord record = getTracTracAdapter().getSingleTracTracRaceRecord(new URL(rr.jsonURL), rr.id, /*loadClientParams*/true);
                 logger.info("Loaded race " + record.getName() + " in " + record.getEventName() + " start:" + record.getRaceStartTime() +
                         " trackingStart:" + record.getTrackingStartTime() + " trackingEnd:" + record.getTrackingEndTime());
                 // note that the live URI may be null for races that were put into replay mode
-                final String effectiveLiveURI;
+                final URI effectiveLiveURI;
                 if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
                     if (liveURI == null || liveURI.trim().length() == 0) {
-                        effectiveLiveURI = record.getLiveURI() == null ? null : record.getLiveURI().toString();
+                        effectiveLiveURI = record.getLiveURI();
                     } else {
-                        effectiveLiveURI = liveURI;
+                        effectiveLiveURI = new URI(liveURI);
                     }
                 } else {
                     effectiveLiveURI = null;
                 }
-                final String effectiveStoredURI;
+                final URI effectiveStoredURI;
                 if (storedURI == null || storedURI.trim().length() == 0) {
-                    effectiveStoredURI = record.getStoredURI().toString();
+                    effectiveStoredURI = record.getStoredURI();
                 } else {
-                    effectiveStoredURI = storedURI;
+                    effectiveStoredURI = new URI(storedURI);
+                }
+                final URI effectiveUpdateURI;
+                if (updateURI == null || updateURI.trim().length() == 0) {
+                    effectiveUpdateURI = record.getDefaultUpdateURI();
+                } else {
+                    effectiveUpdateURI = new URI(updateURI);
                 }
                 getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
-                        record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
-                        new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
+                        record.getParamURL(), effectiveLiveURI, effectiveStoredURI, effectiveUpdateURI,
                         new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                         new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()), getRaceLogStore(),
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
-                        tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
+                        offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
+                        config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
                         correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
@@ -596,14 +604,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception {
         logger.info(
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
                 getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
-                        getRaceLogStore(), getRegattaLogStore(), yellowBrickUsername, yellowBrickPassword, trackWind,
+                        getRaceLogStore(), getRegattaLogStore(), creatorUsername, raceUrl, trackWind,
                         correctWindByDeclination);
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
@@ -661,7 +669,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 getTracTracAdapter().createTracTracConfiguration(tracTracConfiguration.getCreatorName(),
                 tracTracConfiguration.getName(), tracTracConfiguration.getJsonUrl(),
                 tracTracConfiguration.getLiveDataURI(), tracTracConfiguration.getStoredDataURI(),
-                tracTracConfiguration.getCourseDesignUpdateURI(), tracTracConfiguration.getTracTracUsername(),
+                tracTracConfiguration.getUpdateURI(), tracTracConfiguration.getTracTracUsername(),
                         tracTracConfiguration.getTracTracPassword()));
     }
 
@@ -1142,7 +1150,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(
+    public Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(
             String leaderboardName, String competitorIdAsString, String raceColumnName, MaxPointsReason maxPointsReason,
             Date date) throws NoWindException {
         SecurityUtils.getSubject().checkPermission(
@@ -1153,9 +1161,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(
-            String leaderboardName, String competitorIdAsString, String columnName, Double correctedScore, Date date)
-            throws NoWindException {
+    public Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double correctedScore, Date date) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
@@ -1164,8 +1171,17 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
-            String comment) {
+    public Triple<Double, Double, Boolean> updateLeaderboardIncrementalScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double scoringOffsetInPoints, Date date) {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                        Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
+        return getService().apply(new UpdateLeaderboardIncrementalScoreCorrection(leaderboardName, columnName,
+                competitorIdAsString, scoringOffsetInPoints, new MillisecondsTimePoint(date)));
+    }
+
+    @Override
+    public void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
         SecurityUtils.getSubject().checkPermission(
                 SecuredDomainType.LEADERBOARD.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
                         Leaderboard.getTypeRelativeObjectIdentifier(leaderboardName)));
@@ -1503,12 +1519,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
-
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT, EventBaseImpl.getTypeRelativeObjectIdentifier(eventUuid), eventName,
                 new Callable<EventDTO>() {
@@ -1527,20 +1542,20 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
                                 venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
                                 eventImages, eventVideos, leaderboardGroupIds));
-                        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+                        createCourseAreas(eventUuid, courseAreas);
                         return getEventById(eventUuid, false);
                     }
                 });
     }
 
     @Override
-    public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+    public void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas) {
         getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
-        final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
-        for (int i = 0; i < courseAreaNames.length; i++) {
-            courseAreaIDs[i] = UUID.randomUUID();
-        }
-        getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIDs));
+        getService().apply(new AddCourseAreas(eventId,
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getName), new String[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getId), new UUID[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getCenterPosition), new Position[courseAreas.size()]),
+                Util.toArray(Util.map(courseAreas, CourseAreaDTO::getRadius), new Distance[courseAreas.size()])));
     }
 
     @Override
@@ -2407,19 +2422,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void copyCourseToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
+    public void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples, boolean copyMarkDeviceMappings, int priority)
             throws NotFoundException {
         final LeaderboardThatHasRegattaLike fromLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(fromTriple.getA());
         getSecurityService().checkCurrentUserReadPermission(fromLeaderboard);
         LeaderboardThatHasRegattaLike toLeaderboard = null;
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             toLeaderboard = (LeaderboardThatHasRegattaLike) getLeaderboardByName(toTriple.getA()); // they should all be the same
             getSecurityService().checkCurrentUserUpdatePermission(toLeaderboard);
         }
         RaceLog fromRaceLog = getRaceLog(fromTriple);
         Set<RaceLog> toRaceLogs = new HashSet<>();
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             toRaceLogs.add(getRaceLog(toTriple));
         }
         getRaceLogTrackingAdapter().copyCourse(fromRaceLog, fromLeaderboard, toRaceLogs, toLeaderboard,
@@ -2427,15 +2442,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void copyCompetitorsToOtherRaceLogs(com.sap.sse.common.Util.Triple<String, String, String> fromTriple,
-            Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
+    public void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
+            Set<Triple<String, String, String>> toTriples) throws NotFoundException {
         getSecurityService().checkCurrentUserReadPermission(getLeaderboardByName(fromTriple.getA()));
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             getSecurityService().checkCurrentUserUpdatePermission(getLeaderboardByName(toTriple.getA()));
         }
         final RaceColumn raceColumn = getRaceColumn(fromTriple.getA(), fromTriple.getB());
         final Set<Pair<RaceColumn, Fleet>> toRaces = new HashSet<>();
-        for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
+        for (Triple<String, String, String> toTriple : toTriples) {
             final RaceColumn toRaceColumn = getRaceColumn(toTriple.getA(), toTriple.getB());
             final Fleet toFleet = getFleetByName(toRaceColumn, toTriple.getC());
             toRaces.add(new Pair<>(toRaceColumn, toFleet));

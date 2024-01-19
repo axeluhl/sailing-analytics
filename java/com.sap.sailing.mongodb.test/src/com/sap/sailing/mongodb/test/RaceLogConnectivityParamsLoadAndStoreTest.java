@@ -52,7 +52,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         final Regatta regatta = racingEventService.createRegatta("My Regatta", "12mR", true,
                 CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null, MillisecondsTimePoint.now(),
                 MillisecondsTimePoint.now().plus(Duration.ONE_DAY), UUID.randomUUID(), series, /* persistent */ true,
-                new LowPoint(), racingEventService.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default").getId(),
+                new LowPoint(), racingEventService.getBaseDomainFactory().getOrCreateCourseArea(UUID.randomUUID(), "Default", /* centerPosition */ null, /* radius */ null).getId(),
                 /* buoyZoneRadiusInHullLengths */ 2.0,
                 /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);

@@ -136,12 +136,10 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             dimensionMatcher = (d1, d2) -> {
                 if (d1 == d2) return true;
                 if (d1 == null || d2 == null) return false;
-                
                 return d1.getDisplayName().equals(d2.getDisplayName());
             };
             selectionCallback = EmptyApplyCallback;
         }
-        
         if (currentRetrieverChainDefinition != null) {
             isUpdating = true;
             dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,

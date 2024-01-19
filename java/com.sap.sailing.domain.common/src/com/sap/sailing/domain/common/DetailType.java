@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  *
  */
 public enum DetailType implements Serializable {
+    LEG_TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
     LEG_DISTANCE_TRAVELED(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "DISTANCE_TRAVELED"),
     LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START(0, ASCENDING, null, "DISTANCE_TRAVELED_INCLUDING_GATE_START"),
     LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING, PREMIUM_LEADERBOARD_INFORMATION, "AVERAGE_SPEED_OVER_GROUND_IN_KNOTS"),
@@ -116,7 +117,7 @@ public enum DetailType implements Serializable {
     RACE_NET_POINTS(2, ASCENDING, null),
     REGATTA_NET_POINTS(2, ASCENDING, null),
     REGATTA_NET_POINTS_SUM(2, ASCENDING, null),
-    RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL(1, ASCENDING, null),
+    RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL(1, DESCENDING, null),
     RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START(1, ASCENDING, null),
     RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START(2, DESCENDING, null),
     RACE_CALCULATED_TIME_TRAVELED(0, ASCENDING, null),
@@ -216,13 +217,17 @@ public enum DetailType implements Serializable {
 
     private SortingOrder defaultSortingOrder;
     
-    /**
-     * TODO:
-     */
     private Action premiumAction;
 
     private final String[] oldNames;
 
+    /**
+     * @param precision
+     *            the number of decimal digits in which they are usually provided and should be formatted
+     * @param premiumAction
+     *            If not {@code null} then the user must have permission to execute this action on the leaderboard to
+     *            which it is applied.
+     */
     DetailType(int precision, SortingOrder defaultSortingOrder, Action premiumAction, String... oldNames) {
         this.oldNames = oldNames;
         this.precision = precision;
@@ -230,6 +235,9 @@ public enum DetailType implements Serializable {
         this.defaultSortingOrder = defaultSortingOrder;
     }
 
+    /**
+     * @return the number of decimal digits in which they are usually provided and should be formatted
+     */
     public int getPrecision() {
         return precision;
     }
@@ -238,6 +246,10 @@ public enum DetailType implements Serializable {
         return defaultSortingOrder;
     }
     
+    /**
+     * If not {@code null} then the user must have permission to execute the action returned on the
+     * leaderboard to which it is applied.
+     */
     public Action getPremiumAction() {
         return this.premiumAction;
     }
@@ -273,6 +285,7 @@ public enum DetailType implements Serializable {
      */
     public static Collection<DetailType> getAutoplayDetailTypesForChart() {
         final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
+        availableDetailsTypes.add(DetailType.LEG_TACKTYPE_LONGTACK_SHORTTACK);
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);
@@ -434,9 +447,6 @@ public enum DetailType implements Serializable {
         allowed.add(OVERALL_TIME_ON_TIME_FACTOR);
         allowed.add(OVERALL_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
         allowed.add(OVERALL_TOTAL_SCORED_RACE_COUNT);
-        allowed.add(TOTAL_TIME_SAILED_UPWIND_IN_SECONDS);
-        allowed.add(TOTAL_TIME_SAILED_REACHING_IN_SECONDS);
-        allowed.add(TOTAL_TIME_SAILED_DOWNWIND_IN_SECONDS);
         return allowed;
     }
 

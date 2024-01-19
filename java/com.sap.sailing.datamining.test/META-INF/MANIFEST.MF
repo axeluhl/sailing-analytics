@@ -12,5 +12,8 @@ Import-Package: junit.framework;version="4.8.2",
 Require-Bundle: org.mockito.mockito-core;bundle-version="4.8.1",
  org.hamcrest;bundle-version="2.2.0",
  com.sap.sse.common,
- org.objenesis;bundle-version="2.1.0"
+ org.objenesis;bundle-version="2.1.0",
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18",
+ com.sap.sailing.domain.test
 Automatic-Module-Name: com.sap.sailing.datamining.test

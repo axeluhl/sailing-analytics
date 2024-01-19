@@ -28,7 +28,7 @@ public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultInstanceTypeNamr, ErrorReporter errorReporter) {
+            String defaultInstanceTypeName, ErrorReporter errorReporter) {
         final ListBox instanceTypeBox = dialog.createListBox(/*isMultipleSelect*/false);
         if (additionalItem != null) {
             instanceTypeBox.addItem(additionalItem, additionalValue);
@@ -46,7 +46,7 @@ public class LandscapeDialogUtil {
                 int i=0;
                 for (final String instanceType : result) {
                     instanceTypeBox.addItem(instanceType, instanceType);
-                    if (additionalItem == null && instanceType.equals(defaultInstanceTypeNamr)) {
+                    if (additionalItem == null && instanceType.equals(defaultInstanceTypeName)) {
                         instanceTypeBox.setSelectedIndex(i);
                     }
                     i++;

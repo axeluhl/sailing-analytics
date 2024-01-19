@@ -10,6 +10,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -19,15 +20,19 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.LeaderboardActions;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.SingleCalculationPerSubjectCache;
 
 public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
     public static final String ZERO_BASED_WAYPOINT_INDEX = "zeroBasedWaypointIndex";
@@ -40,6 +45,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
     public static final String NET_POINTS_BASED_ON_PASSING_ORDER = "netPointsBasedOnPassingOrder";
     public static final String MAX_POINTS_REASON = "maxPointsReason";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static SingleCalculationPerSubjectCache<Pair<Leaderboard, TrackedRace>, JSONObject> ongoingLiveCalculationsByRaceAndRequestingUsername =
+            new SingleCalculationPerSubjectCache<>(MarkPassingsJsonSerializer::serializeForLiveTimePointToJSON, /* 10min timeout */ Duration.ONE_MINUTE.times(10));
     
     /**
      * The time point for which to obtain the ranking information at the marks
@@ -68,10 +75,26 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
 
     @Override
     public JSONObject serialize(TrackedRace trackedRace) {
+        final JSONObject result;
+        if (timePoint == null) {
+            result = ongoingLiveCalculationsByRaceAndRequestingUsername.get(new Pair<>(leaderboard, trackedRace));
+        } else {
+            result = serializeToJSON(leaderboard, trackedRace, timePoint);
+        }
+        return result;
+    }
+    
+    private static JSONObject serializeForLiveTimePointToJSON(Pair<Leaderboard, TrackedRace> leaderboardAndTrackedRace) {
+        final TimePoint timePointForRanksAtMarks = MillisecondsTimePoint.now().minus(leaderboardAndTrackedRace.getB().getDelayToLiveInMillis());
+        return serializeToJSON(leaderboardAndTrackedRace.getA(), leaderboardAndTrackedRace.getB(), timePointForRanksAtMarks);
+    }
+
+    private static JSONObject serializeToJSON(Leaderboard leaderboard, TrackedRace trackedRace, TimePoint timePoint) {
+        final JSONObject result;
         final Course course = trackedRace.getRace().getCourse();
         final TimePoint timePointForRanksAtMarks = timePoint != null ? timePoint :
             MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
-        JSONObject result = new JSONObject();
+        result = new JSONObject();
         CompetitorAndBoatJsonSerializer competitorWithBoatSerializer = CompetitorAndBoatJsonSerializer.create(/* serializeNonPublicCompetitorFields */ false);
         CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
         JSONArray byCompetitorJson = new JSONArray();
@@ -106,6 +129,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
             forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);
+            final boolean leaderboardValidAndSubjectMaySeePremiumInformation = leaderboard != null &&
+                    SecurityUtils.getSubject().isPermitted(SecuredDomainType.LEADERBOARD.getStringPermissionForObject(LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION, leaderboard));
             trackedRace.lockForRead(markPassingsForCompetitor);
             try {
                 for (MarkPassing markPassing : markPassingsForCompetitor) {
@@ -124,7 +149,8 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
                     }
                     markPassingJson.put(TRACKED_RANK_AT_MARK_PASSING, rank);
                     markPassingJson.put(ONE_BASED_PASSING_ORDER, passingOrder);
-                    if (leaderboard != null) {
+                    // the following expensive-to-compute metrics will be delivered only to our valued "premium" customers:
+                    if (leaderboardValidAndSubjectMaySeePremiumInformation) {
                         final Pair<RaceColumn, Fleet> raceColumnAndFleet = leaderboard.getRaceColumnAndFleet(trackedRace);
                         if (raceColumnAndFleet != null) {
                             final Double totalPoints = leaderboard.getScoreCorrection().getCorrectedScore(() -> passingOrder,
@@ -179,12 +205,12 @@ public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSeria
         return result;
     }
 
-    private void addMarkPassingTime(MarkPassing markPassing, JSONObject markPassingJson) {
+    private static void addMarkPassingTime(MarkPassing markPassing, JSONObject markPassingJson) {
         markPassingJson.put(TIMEASMILLIS, markPassing.getTimePoint().asMillis());
         markPassingJson.put(TIMEASISO, TIMEPOINT_FORMATTER.format(markPassing.getTimePoint().asDate()));
     }
 
-    private void addWaypoint(final Course course, Waypoint waypoint, JSONObject jsonToAddTo) {
+    private static void addWaypoint(final Course course, Waypoint waypoint, JSONObject jsonToAddTo) {
         jsonToAddTo.put(WAYPOINT_NAME, waypoint.getName());
         jsonToAddTo.put(ZERO_BASED_WAYPOINT_INDEX, course.getIndexOfWaypoint(waypoint));
     }

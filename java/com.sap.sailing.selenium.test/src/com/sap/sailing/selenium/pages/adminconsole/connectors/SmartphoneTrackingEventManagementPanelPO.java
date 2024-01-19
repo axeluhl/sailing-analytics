@@ -11,8 +11,14 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
+import com.sap.sailing.selenium.test.adminconsole.smartphonetracking.MapDevicesDialogPO;
+import com.sap.sailing.selenium.test.adminconsole.smartphonetracking.RegisterCompetitorsDialogPO;
 
 public class SmartphoneTrackingEventManagementPanelPO extends PageArea {
+    
+    private static final String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
+    private static final String ACTION_MAP_DEVICES = "ACTION_MAP_DEVICES";
+    
     @FindBy(how = BySeleniumId.class, using = "AvailableLeaderboardsTable")
     private WebElement leaderboardTable;
 
@@ -44,5 +50,15 @@ public class SmartphoneTrackingEventManagementPanelPO extends PageArea {
     public void refreshLeaderboardTable() {
         leaderboardRefreshButton.click();
         waitForAjaxRequests();
+    }
+    
+    public RegisterCompetitorsDialogPO pushCompetitorRegistrationsActionButton(DataEntryPO aLeaderboard) {
+        aLeaderboard.clickActionImage(ACTION_COMPETITOR_REGISTRATIONS);
+        return this.waitForPO(RegisterCompetitorsDialogPO::new, "registerCompetitorsDialog");
+    }
+    
+    public MapDevicesDialogPO pushMapDevicesActionButton(DataEntryPO aLeaderboard) {
+        aLeaderboard.clickActionImage(ACTION_MAP_DEVICES);
+        return this.waitForPO(MapDevicesDialogPO::new, "regattaLogTrackingDeviceMappingsDialog");
     }
 }

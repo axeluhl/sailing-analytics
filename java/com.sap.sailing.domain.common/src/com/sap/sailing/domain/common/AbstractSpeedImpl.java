@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -79,5 +80,10 @@ public abstract class AbstractSpeedImpl implements Speed {
     @Override
     public double divide(Speed speed) {
         return getKnots() / speed.getKnots();
+    }
+
+    @Override
+    public Speed scale(double d) {
+        return new KnotSpeedImpl(getKnots()*d);
     }
 }

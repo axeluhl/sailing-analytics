@@ -448,8 +448,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             getOrThrowQualifiedUser(userQualifierName);
             // get the group tenant the role is qualified for if one exists
             final UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-            final Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
-                    userQualifierName, transitive);
+            final Role role = getSecurityService().getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(), userQualifierName, transitive);
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final String message = "User "+SecurityUtils.getSubject().getPrincipal()+" added role " + role.getName() + " for user " + username;
             getSecurityService().setOwnershipWithoutCheckPermissionForObjectCreationAndRevertOnError(
@@ -488,8 +487,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             getOrThrowQualifiedUser(userQualifierName);
             // get the group tenant the role is qualified for if one exists
             UserGroup tenant = getOrThrowTenant(tenantQualifierName);
-            Role role = getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(),
-                    userQualifierName, isTransitive);
+            Role role = getSecurityService().getOrThrowRoleFromIDsAndCheckMetaPermissions(roleDefinitionId, tenant == null ? null : tenant.getId(), userQualifierName, isTransitive);
             final String message = SecurityUtils.getSubject().getPrincipal().toString()+" removed role " + role.getName() + " for user " + username;
             final TypeRelativeObjectIdentifier associationTypeIdentifier = PermissionAndRoleAssociation.get(role, user);
             final QualifiedObjectIdentifier qualifiedTypeIdentifier = SecuredSecurityTypes.ROLE_ASSOCIATION
@@ -626,21 +624,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     }
 
     /**
-     * @return the role associated with the given IDs and qualifiers
-     * @throws UserManagementException
-     *             if the current user does not have the meta permission to give this specific, qualified role in this
-     *             context.
-     */
-    protected Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName, boolean transitive) throws UserManagementException {
-        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName, transitive);
-        if (!getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
-                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
-            throw new UserManagementException("You are not allowed to take this role to the user.");
-        }
-        return role;
-    }
-
-    /**
      * @return the user group associated with the tenantQualifierName
      * @throws UserManagementException,
      *             if the tenantQualifierName was not empty or null but did not yield a valid user group
@@ -668,21 +651,6 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             throw new UserManagementException("user " + username + " not found.");
         }
         return user;
-    }
-
-    protected Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException {
-        final User user;
-        if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
-            user = null;
-        } else {
-            user = getSecurityService().getUserByName(qualifyingUsername);
-            if (user == null) {
-                throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
-            }
-        }
-        return new Role(
-                getSecurityService().getRoleDefinition(roleDefinitionId),
-                qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user, transitive);
     }
 
     @Override

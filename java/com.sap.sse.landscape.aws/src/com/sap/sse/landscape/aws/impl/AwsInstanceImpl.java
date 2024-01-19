@@ -32,6 +32,7 @@ import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
@@ -147,7 +148,7 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         }
         final JSch jsch = new JSch();
         JSch.setLogger(new JCraftLogAdapter());
-        jsch.addIdentity(keyName, landscape.getDecryptedPrivateKey(keyPair, privateKeyEncryptionPassphrase), keyPair.getPublicKey(), /* passphrase */ null);
+        jsch.addIdentity(keyName, keyPair.getEncryptedPrivateKey(), keyPair.getPublicKey(), privateKeyEncryptionPassphrase);
         final InetAddress address = getPublicAddress();
         if (address == null) {
             throw new IllegalStateException("Instance "+getInstanceId()+" doesn't have a public IP address");
@@ -246,6 +247,11 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     @Override
     public AwsAvailabilityZone getAvailabilityZone() {
         return availabilityZone;
+    }
+
+    @Override
+    public InstanceType getInstanceType() {
+        return getInstance().instanceType();
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.events.EventListResponseEvent;
@@ -93,7 +94,10 @@ public class EventService {
             @Override
             public void onSuccess(final LeaderboardGroupDTO result) {
                 final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
-                sailingService.createEvent(name, null, date, null, venue, false, courseAreaNames, null, null, new HashMap<String, String>(),
+                // TODO: merge master to managementConsole
+                final List<CourseAreaDTO> courseAreaDtos = new ArrayList<CourseAreaDTO>();
+                courseAreaNames.forEach(name -> courseAreaDtos.add(new CourseAreaDTO(UUID.randomUUID(), name)));
+                sailingService.createEvent(name, null, date, null, venue, false, courseAreaDtos, null, null, new HashMap<String, String>(),
                         new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback);
             }
         });

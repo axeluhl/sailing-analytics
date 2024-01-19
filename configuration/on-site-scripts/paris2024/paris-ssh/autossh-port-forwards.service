@@ -1,0 +1,12 @@
+[Unit]
+Description=Establish RabbitMQ SSH tunnel with port forwards on 5673 and 15673
+Wants=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/tunnels

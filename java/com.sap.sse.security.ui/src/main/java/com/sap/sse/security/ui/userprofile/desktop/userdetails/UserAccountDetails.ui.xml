@@ -47,17 +47,25 @@
                 <ui:text from="{i18n_sec.save}" />
               </g:Button>
             </div>
-            <div class="{local_res.css.useraccountdetails_content_spacer} {res.mediaCss.small12}"></div>
-            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.mediumoffset6} {res.mediaCss.small12}">
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
               <label class="{local_res.css.useraccountdetails_content_detail_label}">
                 <ui:text from="{i18n_sec.email}" />
               </label>
               <g:TextBox ui:field="emailUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
             </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+              </label>
+              <g:Label ui:field="validationStatus" addStyleNames="{local_res.css.useraccountdetails_status_text}" />
+            </div>
             <div class="{local_res.css.useraccountdetails_content_submit} {res.mediaCss.small12}">
               <g:Button ui:field="changeEmailUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
-                <ui:text from="{i18n_sec.save}" />
+                <ui:text from="{i18n_sec.saveAndValidate}" />
               </g:Button>
+              
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_hint} {res.mediaCss.small12}">
+              <ui:text from="{i18n_sec.saveRevalidateHint}"/>
             </div>
             <div class="{local_res.css.useraccountdetails_content_spacer} {res.mediaCss.small12}"></div>
             <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">

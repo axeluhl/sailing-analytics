@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -292,10 +293,10 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeCourseAreas(UUID eventId, UUID[] courseAreaIds) throws UnauthorizedException;
 
-    void createCourseAreas(UUID eventId, String[] courseAreaNames) throws UnauthorizedException;
+    void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas);
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
+            boolean isPublic, List<CourseAreaDTO> courseAreas, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<UUID> leaderboardGroupIds)
             throws UnauthorizedException;
@@ -345,9 +346,12 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
 
-    com.sap.sse.common.Util.Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
+    Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
             String competitorIdAsString, String columnName, Double correctedScore, Date date) throws NoWindException;
 
+    Triple<Double, Double, Boolean> updateLeaderboardIncrementalScoreCorrection(
+            String leaderboardName, String competitorIdAsString, String columnName, Double scoringOffsetInPoints, Date date);
+    
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints);
 
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName)
@@ -439,11 +443,11 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
-            String tracTracUsername, String tracTracPassword) throws UnauthorizedException, Exception;
+            String jsonUrlAsKey) throws UnauthorizedException, Exception;
 
     void trackWithYellowBrick(RegattaIdentifier regattaToAddTo, List<YellowBrickRaceRecordDTO> rrs,
-            boolean trackWind, final boolean correctWindByDeclination, String yellowBrickUsername,
-            String yellowBrickPassword) throws Exception;
+            boolean trackWind, final boolean correctWindByDeclination, String creatorUsername,
+            String raceUrl) throws Exception;
 
     void createYellowBrickConfiguration(String name, String yellowBrickRaceUrl, String yellowBrickUsername,
             String yellowBrickPassword);

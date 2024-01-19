@@ -387,12 +387,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
-        final Integer oldMaximumNumberOfDiscards = maximumNumberOfDiscards;
-        if (!Util.equalsWithNull(maximumNumberOfDiscards, maximumNumberOfDiscards)) {
+        final Integer oldMaximumNumberOfDiscards = getMaximumNumberOfDiscards();
+        if (!Util.equalsWithNull(oldMaximumNumberOfDiscards, maximumNumberOfDiscards)) {
             this.maximumNumberOfDiscards = maximumNumberOfDiscards;
             raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, maximumNumberOfDiscards);
         }
-        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 
     @Override

@@ -141,9 +141,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getUserGroup(UUID id);
 
     UserGroup getUserGroupByName(String name);
-    
+
     Iterable<UserGroup> getUserGroupsOfUser(User user);
 
+    /**
+     * Creates a user group with the given {@code id} and {@code name} and makes the calling subject
+     * its owner and a member of the group and assigns the {@code user} role qualified to the new
+     * group to the calling subject ({@code user:{name}}) as a "transitive" role assignment, allowing
+     * the user to grant that role also to other users, in turn.
+     */
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
     
     void addUserToUserGroup(UserGroup group, User user);
@@ -269,6 +275,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     CacheManager getCacheManager();
     
+    /**
+     * Sends mail to the user identified by {@code username} if that user is found and has a non-{@code null}
+     * {@link User#getEmail() e-mail address}. Note that this method does <em>not</em> check whether that
+     * e-mail address is validated. This way this method can also be used to, e.g., send an e-mail in order
+     * to validate an e-mail address.
+     */
     void sendMail(String username, String subject, String body) throws MailException;
 
     /**
@@ -298,6 +310,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     void setPreference(String username, String key, String value);
 
+    /**
+     * @see UserStore#setPreferenceObject(String, String, Object)}
+     */
     void setPreferenceObject(String name, String preferenceKey, Object preference);
 
     /**
@@ -419,6 +434,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Callable<T> actionToDeleteObject);
     
+    /**
+     * Deletes {@link #deleteOwnership(QualifiedObjectIdentifier) ownership} and
+     * {@link #deleteAccessControlList(QualifiedObjectIdentifier) ACLs} for the object identified by {@code identifier}
+     */
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier);
 
     <T extends WithQualifiedObjectIdentifier> void filterObjectsWithPermissionForCurrentUser(
@@ -775,8 +794,19 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Updates the currently held SubscriptionPlanPrices for all known SubscriptionPlans
+     * 
      * @param itemPrices
      */
     void updateSubscriptionPlanPrices(Map<String, BigDecimal> itemPrices);
 
+    Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException;
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID qualifyingGroupId, String userQualifierName,
+            boolean transitive) throws UserManagementException;
 }

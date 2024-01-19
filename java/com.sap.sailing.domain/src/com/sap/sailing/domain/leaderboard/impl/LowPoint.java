@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -55,14 +56,23 @@ public class LowPoint extends AbstractScoringSchemeImpl {
         return effectiveRank;
     }
 
+    /**
+     * For an {@link MaxPointsReason#STP} penalty, the uncorrected score is obtained from the
+     * {@code uncorrectedScoreProvider} and incremented by 1.0; otherwise, the number of competitors plus one is used.
+     */
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint, Leaderboard leaderboard) {
+            Integer numberOfCompetitorsInRace,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         Double result;
-        if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
-            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
+        if (maxPointsReason == MaxPointsReason.STP) { // TODO bug5873: this is where other incremental IRMs need to be considered, too, with configurable increments
+            final Double uncorrectedScore = uncorrectedScoreProvider.get();
+            result = uncorrectedScore == null ? null : uncorrectedScore + 1.0;
+        } else if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
+            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard() + 1);
         } else {
-            result = (double) (numberOfCompetitorsInRace+1);
+            result = (double) (numberOfCompetitorsInRace + 1);
         }
         return result;
     }

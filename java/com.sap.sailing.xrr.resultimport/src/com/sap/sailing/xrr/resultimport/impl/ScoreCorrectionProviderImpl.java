@@ -2,6 +2,7 @@ package com.sap.sailing.xrr.resultimport.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
 
     @Override
     public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String, TimePoint>>>();
         for (Parser parser : getAllRegattaResults()) {
             try {
@@ -81,7 +82,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
         for (Parser parser : getAllRegattaResults()) {
             try {
                 final RegattaResults regattaResults = parser.parse();
@@ -108,7 +109,7 @@ public class ScoreCorrectionProviderImpl extends AbstractDocumentBasedScoreCorre
     }
 
     private Iterable<Parser> getAllRegattaResults() throws SAXException, IOException,
-            ParserConfigurationException {
+            ParserConfigurationException, URISyntaxException {
         final List<Parser> result = new ArrayList<>();
         for (ResultDocumentDescriptor resultDocDescr : getResultDocumentProvider().getResultDocumentDescriptors()) {
             final Parser parser = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getDocumentName());

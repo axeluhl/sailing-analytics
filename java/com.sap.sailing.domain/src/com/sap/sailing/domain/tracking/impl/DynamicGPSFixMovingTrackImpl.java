@@ -275,5 +275,4 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
     }
-    
 }

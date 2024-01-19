@@ -44,10 +44,12 @@ public class RaceRecord {
     private final String raceVisibility;
     private final boolean hasReplay;
     private final URL jsonUrl;
+    private final URI defaultUpdateURI;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String paramURLAsString,
             String ID, String trackingstarttime, String trackingendtime, String racestarttime,
-            String commaSeparatedBoatClassNames, String status, String visibility, boolean hasReplay, boolean loadLiveAndStoredURI)
+            String commaSeparatedBoatClassNames, String status, String visibility, boolean hasReplay, boolean loadLiveAndStoredURI,
+            String defaultUpdateURI)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
@@ -91,10 +93,8 @@ public class RaceRecord {
             }
         }
         this.racestarttime = tp;
-        
         String technicalEventName = getTechnicalEventName(jsonURL);
         final String baseJsonURL = getBaseURL(jsonURL);
-        
         try {
             if (paramURLAsString == null || paramURLAsString.isEmpty()) {
                 // for backward compatibility (the param_url field was not always in the JSON document) and perhaps for live mode
@@ -124,6 +124,7 @@ public class RaceRecord {
             liveURI = null;
             storedURI = null;
         }
+        this.defaultUpdateURI = defaultUpdateURI == null ? null : new URI(defaultUpdateURI);
     }
 
     private String getBaseURL(URL url) {
@@ -221,5 +222,8 @@ public class RaceRecord {
         return jsonUrl;
     }
     
+    public URI getDefaultUpdateURI() {
+        return defaultUpdateURI;
+    }
 }
 

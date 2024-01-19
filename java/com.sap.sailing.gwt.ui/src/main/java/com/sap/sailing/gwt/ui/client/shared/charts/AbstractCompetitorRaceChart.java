@@ -34,6 +34,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -120,9 +121,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private long effectiveStepSize = -1;
     
-    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForPrimary;
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionsExecutorForCompetitorRaceDataForPrimary;
 
-    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionsExecutorForCompetitorRaceDataForSecondary;
+    private final TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionsExecutorForCompetitorRaceDataForSecondary;
 
     AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
@@ -280,15 +281,18 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
             ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve, final TimingHolder tholder,
-            TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> timeRangeActionExecutor) {
+            TimeRangeActionsExecutor<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> timeRangeActionExecutor) {
         long effectiveStepSize = getEffectiveStepSize(from, to);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, effectiveStepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardGroupId, leaderboardName);
-        TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO> dataLoadedCallback =
-                new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, CompetitorDTO>() {
+        TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>> dataLoadedCallback =
+                new TimeRangeAsyncCallback<CompetitorsRaceDataDTO, Triple<CompetitorRaceDataDTO, Date, Date>, Pair<CompetitorDTO, DetailType>>() {
             @Override
             public void onSuccess(final CompetitorsRaceDataDTO result) {
+                GWT.log("Received complete result for getCompetitorsRaceData request "+
+                        selectedRaceIdentifier+", "+competitorsToLoad+", "+from+", "+to+", "+effectiveStepSize+", "+selectedDataTypeToRetrieve+", "+
+                        leaderboardGroupName+", "+leaderboardGroupId+", "+leaderboardName);
                 hideLoading();
                 AbstractCompetitorRaceChart.this.effectiveStepSize = effectiveStepSize;
                 if (result != null) {
@@ -312,17 +316,17 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             }
 
             @Override
-            public Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
-                final Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
+            public Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> unzipResult(CompetitorsRaceDataDTO result) {
+                final Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> unzipped = new HashMap<>();
                 for (final CompetitorRaceDataDTO competitorRaceData : result.getAllRaceData()) {
-                    unzipped.put(competitorRaceData.getCompetitor(), new Triple<>(competitorRaceData,
-                            result.getRequestedFromTime(), result.getRequestedToTime()));
+                    unzipped.put(new Pair<>(competitorRaceData.getCompetitor(), result.getDetailType()),
+                            new Triple<>(competitorRaceData, result.getRequestedFromTime(), result.getRequestedToTime()));
                 }
                 return unzipped;
             }
 
             @Override
-            public CompetitorsRaceDataDTO zipSubResults(Map<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> subResultMap) {
+            public CompetitorsRaceDataDTO zipSubResults(Map<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> subResultMap) {
                 final DetailType detailType = subResultMap.values().stream().findFirst()
                         .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getA().getDetailType()).orElse(null);
                 final Date from = subResultMap.values().stream().findFirst()
@@ -330,8 +334,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 final Date to = subResultMap.values().stream().findFirst()
                         .map(competitorRaceDataWithDates -> competitorRaceDataWithDates.getC()).orElse(null);
                 final Map<CompetitorDTO, CompetitorRaceDataDTO> raceDataPerCompetitor = new HashMap<>();
-                for (final Entry<CompetitorDTO, Triple<CompetitorRaceDataDTO, Date, Date>> e : subResultMap.entrySet()) {
-                    raceDataPerCompetitor.put(e.getKey(), e.getValue().getA());
+                for (final Entry<Pair<CompetitorDTO, DetailType>, Triple<CompetitorRaceDataDTO, Date, Date>> e : subResultMap.entrySet()) {
+                    raceDataPerCompetitor.put(e.getKey().getA(), e.getValue().getA());
                 }
                 return new CompetitorsRaceDataDTO(detailType, from, to, raceDataPerCompetitor);
             }
@@ -367,14 +371,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     /**
-     * Based on a time range and a {@link #getStepSizeInMillis() desired step size} computes an effective
-     * step size that observes a maximum number of fixes that may be queried in one request from the server
-     * ({@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY}). If the time range and the desired step
-     * size do not exceed this limit, the step size desired will be returned. Otherwise, the step size will be
-     * extended such that {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes will be requested
-     * for the time range between {@code from} and {@code to}.
+     * Based on a time range and a {@link #getStepSizeInMillis() desired step size} computes an effective step size that
+     * observes a maximum number of fixes that may be queried in one request from the server
+     * ({@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY}). If the time range and the desired step size do
+     * not exceed this limit, the step size desired will be returned. Otherwise, the step size will be extended such
+     * that {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes will be requested for the time range
+     * between {@code from} and {@code to}.
      * 
-     * @return the effective step size in milliseconds
+     * @return the effective step size in milliseconds; if {@code from} or {@code to} are {@code null}, 0 is returned,
+     *         assuming that then the server will compute a reasonable step size
      */
     private long getEffectiveStepSize(final Date from, final Date to) {
         return Math.max(getStepSizeInMillis(),
@@ -394,16 +399,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
             showLoading(stringMessages.loadingCompetitorData());
-            ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<>();
+            final ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<>();
             competitorsToLoad.add(competitor);
             final TimeRange timeRangeToLoadForFirstMetric = TimeRange.create(
-                    TimePoint.of(primary.timeOfEarliestRequestInMillis),
-                    TimePoint.of(primary.timeOfLatestRequestInMillis));
+                    TimePoint.of(primary.timeOfEarliestRequestInMillis == null ? timeRangeWithZoomProvider.getFromTime() == null ? null : timeRangeWithZoomProvider.getFromTime().getTime() : primary.timeOfEarliestRequestInMillis),
+                    TimePoint.of(primary.timeOfLatestRequestInMillis == null ? timeRangeWithZoomProvider.getToTime() == null ? null : timeRangeWithZoomProvider.getToTime().getTime() : primary.timeOfLatestRequestInMillis));
             final TimeRange timeRangeToLoad;
             if (getSelectedSecondDetailType() != null) {
                 final TimeRange timeRangeToLoadForSecondMetric = TimeRange.create(
-                        TimePoint.of(secondary.timeOfEarliestRequestInMillis),
-                        TimePoint.of(secondary.timeOfLatestRequestInMillis));
+                        TimePoint.of(secondary.timeOfEarliestRequestInMillis == null ? timeRangeWithZoomProvider.getFromTime() == null ? null : timeRangeWithZoomProvider.getFromTime().getTime() : secondary.timeOfEarliestRequestInMillis),
+                        TimePoint.of(secondary.timeOfLatestRequestInMillis == null ? timeRangeWithZoomProvider.getToTime() == null ? null : timeRangeWithZoomProvider.getToTime().getTime() : secondary.timeOfLatestRequestInMillis));
                 timeRangeToLoad = timeRangeToLoadForFirstMetric.extend(timeRangeToLoadForSecondMetric);
             } else {
                 timeRangeToLoad = timeRangeToLoadForFirstMetric;
@@ -448,6 +453,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, DetailType retrievedDataType,
             boolean append, TimingHolder tholder) {
+        GWT.log("Received chart data for competitors "+chartData.getCompetitors()+" with, respectively, these many data points: "+
+                Util.joinStrings(", ", Util.map(chartData.getCompetitors(), c->""+chartData.getCompetitorData(c).getRaceData().size())));
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
@@ -512,8 +519,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (tholder.timeOfEarliestRequestInMillis == null || tholder.timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
             tholder.timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
         }
-        if (tholder.timeOfLatestRequestInMillis == null || tholder.timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
-            tholder.timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        // FIXME bug5895: storing particularly the requestedToTime without knowing whether data up to there was delivered at all makes no sense
+        final Date oldestDateOfNewestData = chartData.getOldestDateOfNewestData();
+        if (tholder.timeOfLatestRequestInMillis == null || (oldestDateOfNewestData != null && tholder.timeOfLatestRequestInMillis < oldestDateOfNewestData.getTime())) {
+            tholder.timeOfLatestRequestInMillis = oldestDateOfNewestData == null ? null : oldestDateOfNewestData.getTime();
         }
         chart.redraw();
     }
@@ -527,8 +536,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     /**
-     * 
-     * @param competitor
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
     protected Series getOrCreateCompetitorDataSeries(DetailType seriesDetailType, final CompetitorDTO competitor) {
@@ -537,7 +544,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         Series result = this.dataSeriesForDetailTypeAndCompetitor.get(coDePair);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.LINE);
-
             if (hasSecondYAxis()) {
                 result.setName(DetailTypeFormatter.format(seriesDetailType) + " " + competitor.getName());
             } else {
@@ -553,14 +559,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
             dataSeriesForDetailTypeAndCompetitor.put(coDePair, result);
         }
-
         result.setYAxis(yAxisIndex);
         return result;
     }
 
     /**
-     * 
-     * @param competitor
      * @return A series in the chart, that can be used to show the mark passings.
      */
     private Series getOrCreateCompetitorMarkPassingSeries(Series linkedCompetitorSeries, DetailType seriesDetailType, CompetitorDTO competitor) {
@@ -585,19 +588,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         super.setVisible(visible);
         if (visible) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
                 @Override
                 public void execute() {
                     chart.setSizeToMatchContainer();
                     // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
-                    // positions
-                    // (nativeAdjustCheckboxPosition)
-                    // in the BaseChart class would not be called
+                    // positions (nativeAdjustCheckboxPosition) in the BaseChart class would not be called
                     chart.redraw();
                 }
             });
         }
-
     }
 
     private int yAxisIndex(DetailType seriesDetailType) {
@@ -848,9 +847,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // is date before first cache entry or is cache empty?
             if (primary.timeOfEarliestRequestInMillis == null
                     || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
             } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
-                updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */ true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
             break;
@@ -858,13 +857,13 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         case Replay: {
             if (primary.timeOfLatestRequestInMillis == null) {
                 // pure replay mode
-                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
+                updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */ false);
             } else {
                 // replay mode during live play
                 if (primary.timeOfEarliestRequestInMillis == null || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
+                    updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */ true);
                 } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
-                    updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                    updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */ true);
                 }
             }
             break;

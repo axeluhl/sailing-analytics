@@ -20,7 +20,9 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.common,
  org.mongodb.bson;bundle-version="4.3.1",
  org.mongodb.driver-core;bundle-version="4.3.1",
- org.mongodb.driver-sync;bundle-version="4.3.1"
+ org.mongodb.driver-sync;bundle-version="4.3.1",
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Import-Package: com.sap.sse.security.shared,
  com.sap.sse.security.ui.shared,
  org.apache.shiro.session.mgt

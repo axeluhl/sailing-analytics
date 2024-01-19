@@ -1,5 +1,7 @@
 package com.sap.sailing.server.impl;
 
+import java.util.function.Supplier;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -127,12 +129,18 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
                         rankByRaceCommittee, positionedCompetitor.getScore(), positionedCompetitor.getMaxPointsReason());
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
-            // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
-            // be triggered, even though no score correction may have been performed
-            String comment = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())
-                    ? String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET, raceColumn.getName())
-                    : String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET, raceColumn.getName(), fleet.getName());
-            applyMetadataUpdate(leaderboard, timePoint, comment);
+            // Update the metadata only if it is newer than any previous score correction update.
+            // This helps if "mechanical" updates are received out of order and will converge towards
+            // the latest update time point:
+            if (leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ||
+                    (timePoint != null && leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().before(timePoint))) {
+                // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
+                // be triggered, even though no score correction may have been performed
+                String comment = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())
+                        ? String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_SINGLE_FLEET, raceColumn.getName())
+                        : String.format(COMMENT_TEXT_ON_SCORE_CORRECTION_MULTI_FLEET, raceColumn.getName(), fleet.getName());
+                applyMetadataUpdate(leaderboard, timePoint, comment);
+            }
         }
     }
 
@@ -162,7 +170,7 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
      * If a non-{@code null} {@code optionalExplicitScore} is provided, it it returned. Otherwise, if a valid
      * {@link MaxPointsReason} is provided, {@code null} is returned as the explicit score because the scoring scheme
      * shall be used dynamically to determine the penalty score (see
-     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint, Leaderboard)}).
+     * {@link ScoringScheme#getPenaltyScore(RaceColumn, Competitor, MaxPointsReason, Integer, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint, Leaderboard, Supplier)}).
      * If no explicit score is provided and no {@link MaxPointsReason} is specified, a score is determined from the
      * {@code oneBasedRankByRaceCommittee} using the leaderboard scoring scheme's
      * {@link ScoringScheme#getScoreForRank(Leaderboard, RaceColumn, Competitor, int, java.util.concurrent.Callable, com.sap.sailing.domain.leaderboard.NumberOfCompetitorsInLeaderboardFetcher, TimePoint)

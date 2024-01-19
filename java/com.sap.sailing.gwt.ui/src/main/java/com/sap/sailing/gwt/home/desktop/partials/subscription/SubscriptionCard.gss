@@ -1,3 +1,4 @@
+@external button, Caption, dialogContent;
 .content {
  padding: 0;
 }
@@ -155,6 +156,14 @@
  color: #fff;
 }
 
+.priceDisabled .price {
+ background-color: #f2f2f2;
+}
+
+.priceDisabled .price.selected {
+ background-color: #ddd;;
+}
+
 .priceInfo {
  width: fit-content;
  border: solid;
@@ -308,5 +317,80 @@
  font-weight: bold;
  font-size: 1.2em;
  text-transform: capitalize;
- margin: 0 1em;
+ margin: 0 auto;
+ width: 140px;
+}
+/* Small screens */
+@media ( max-width: 400px) {
+	.featureCheck {
+		margin: 0 0 0 8px;
+	}
+	.featureNone {
+		margin: 0 0 0 8px;
+	}
+	.featureHeader {
+		white-space: nowrap;
+		width: auto;
+		text-align: left;
+		vertical-align: bottom;
+	}
+	.featureHeader div {
+        -ms-writing-mode: tb-rl;
+        -webkit-writing-mode: vertical-rl;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+	}
+	.featureHeader
+	.featureCheck img {
+		width: 19px;
+	}
+}
+
+.buttonWarning {
+ background-color: #c9caca;
+}
+
+.confirmationDialog {
+ border: solid;
+ border-width: 1px;
+ border-color: #ddd;
+ border-radius: 0.333333333333333em;
+ margin-bottom: -50px;
+}
+
+.confirmationDialog .Caption {
+ margin-block-start: 0.67em;
+ margin-block-end: 0.67em;
+ margin-inline-start: 0px;
+ margin-inline-end: 0px;
+ font-weight: bold;
+ background-color: #f2f2f2;
+ margin: 0;
+ border-bottom-color: #ddd;
+ min-height: 2em;
+ display: flex;
+ align-items: center;
+ padding: 0.67em;
+}
+
+.dialogContent {
+ padding: 0.67em;
+ background-color: #fff;
+}
+
+.confirmationDialog button :hover {
+ background-color: #0081b8;
+}
+
+.confirmationDialog button {
+ border-radius: 0.214285714285714em;
+ background-color: #008fcc;
+ font-size: .933333333333333rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ padding: 0.714285714285714em 1.071428571428571em;
+ color: #fff;
+ border: none;
+ transition: background-color .2s;
+ text-decoration: none;
 }

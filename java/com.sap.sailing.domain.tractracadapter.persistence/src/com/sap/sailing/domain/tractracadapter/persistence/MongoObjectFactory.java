@@ -23,6 +23,10 @@ public interface MongoObjectFactory {
      */
     void createTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
 
+    /**
+     * When the {@link TracTracConfiguration#getTracTracPassword() password} is {@code null} then it
+     * will not be updated but left unchanged.
+     */
     void updateTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
 
     void deleteTracTracConfiguration(String creatorName, String jsonurl);

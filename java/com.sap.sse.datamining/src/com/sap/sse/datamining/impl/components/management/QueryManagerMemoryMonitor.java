@@ -53,26 +53,26 @@ public class QueryManagerMemoryMonitor implements MemoryMonitor {
     }
     
     private void checkMemory() {
-        final long freeMemory = infoProvider.freeMemory();
-        final long totalMemory = infoProvider.totalMemory();
-        final double freeMemoryRatio = (double) freeMemory / totalMemory;
+        final long freeMemoryInBytes = infoProvider.freeMemory();
+        final long totalMemoryInBytes = infoProvider.totalMemory();
+        final double freeMemoryRatio = (double) freeMemoryInBytes / totalMemoryInBytes;
         final int numberOfRunningQueries = queryManager.getNumberOfRunningQueries();
         if (numberOfRunningQueries > 0) {
-            logStatus(freeMemory, totalMemory, freeMemoryRatio, numberOfRunningQueries);
+            logStatus(freeMemoryInBytes, totalMemoryInBytes, freeMemoryRatio, numberOfRunningQueries);
         }
         boolean actionHasBeenPerformed = false;
         final Iterator<MemoryMonitorAction> actionsIterator = actions.iterator();
         while (!actionHasBeenPerformed && actionsIterator.hasNext()) {
-            MemoryMonitorAction action = actionsIterator.next();
-            actionHasBeenPerformed = action.checkMemoryAndPerformAction(freeMemoryRatio);
+            final MemoryMonitorAction action = actionsIterator.next();
+            actionHasBeenPerformed = action.checkMemoryAndPerformAction(freeMemoryRatio, freeMemoryInBytes);
             if (actionHasBeenPerformed) {
-                //Also perform actions, that are equally important
+                // Also perform actions, that are equally important
                 while (actionsIterator.hasNext()) {
                     MemoryMonitorAction nextAction = actionsIterator.next();
                     if (action.compareTo(nextAction) != 0) {
                         break;
                     }
-                    nextAction.checkMemoryAndPerformAction(freeMemoryRatio);
+                    nextAction.checkMemoryAndPerformAction(freeMemoryRatio, freeMemoryInBytes);
                 }
             }
         }

@@ -70,6 +70,14 @@ CODE_DIRECTORY=code
 #
 # USE_ENVIRONMENT=
 
+# Figuring out what the "mail" tool version is so we
+# can know whether it requires -a or -A to attach a file:
+if mail -V | grep -q "GNU Mailutils"; then
+  MAIL_ATTACH_OPTION="-A"
+else
+  MAIL_ATTACH_OPTION="-a"
+fi
+
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`

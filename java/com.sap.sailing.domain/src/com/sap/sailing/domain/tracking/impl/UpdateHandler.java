@@ -29,6 +29,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
 import com.sap.sse.util.HttpUrlConnectionHelper;
@@ -70,7 +71,7 @@ public class UpdateHandler {
         this.eventId = eventId;
         this.raceId = raceId;
         this.updateDeserializer = new UpdateResponseDeserializer();
-        if (updateURI != null && !updateURI.toString().equals("")) {
+        if (Util.hasLength(username)) {
             logger.info("Activating update handler "+this+" for race with ID "+raceId);
             this.active = true;
         } else {
@@ -91,7 +92,7 @@ public class UpdateHandler {
     }
     
     /**
-     * @return a new list that the caller may extend to add more parameters; the list returned contains tbe basic
+     * @return a new list that the caller may extend to add more parameters; the list returned contains the basic
      *         parameters {@code eventid}, {@code raceid}, {@code username} and {@code password}.
      */
     protected List<BasicNameValuePair> getDefaultParametersAsNewList() {

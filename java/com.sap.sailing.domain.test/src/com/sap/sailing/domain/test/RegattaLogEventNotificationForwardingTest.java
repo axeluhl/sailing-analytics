@@ -110,7 +110,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
 
     private FlexibleLeaderboard createTestLeaderboard() {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Flexible Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[0]),
-                new LowPoint(), new CourseAreaImpl("Test Course Area", UUID.randomUUID()));
+                new LowPoint(), new CourseAreaImpl("Test Course Area", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         return leaderboard;
     }
     

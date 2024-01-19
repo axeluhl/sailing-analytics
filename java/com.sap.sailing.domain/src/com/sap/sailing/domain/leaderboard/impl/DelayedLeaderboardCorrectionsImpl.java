@@ -40,12 +40,13 @@ import com.sap.sse.common.IsManagedByCache;
  * 
  */
 public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWithDefaultAction, DelayedLeaderboardCorrections, IsManagedByCache<SharedDomainFactory<?>> {
-    private static final long serialVersionUID = 8824782847677232275L;
-    
+    private static final long serialVersionUID = 2652040937315024239L;
+
     // structures that key corrections by competitor ID
     private final Map<Serializable, Double> carriedPointsByCompetitorID;
     private final Map<Serializable, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorID;
     private final Map<Serializable, Map<RaceColumn, Double>> correctedScoresByCompetitorID;
+    private final Map<Serializable, Map<RaceColumn, Double>> incrementalScoreCorrectionOffsetsInPointsByCompetitorID;
     private final Map<Serializable, String> displayNamesByCompetitorID;
     private final Set<Serializable> suppressedCompetitorIDs;
     
@@ -57,11 +58,12 @@ public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWith
     public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard, CompetitorFactory competitorFactory) {
         this.competitorFactory = competitorFactory;
         listeners = new HashSet<>();
-        carriedPointsByCompetitorID = new HashMap<Serializable, Double>();
-        maxPointsReasonsByCompetitorID = new HashMap<Serializable, Map<RaceColumn,MaxPointsReason>>();
-        correctedScoresByCompetitorID = new HashMap<Serializable, Map<RaceColumn, Double>>();
-        displayNamesByCompetitorID = new HashMap<Serializable, String>();
-        suppressedCompetitorIDs = new HashSet<Serializable>();
+        carriedPointsByCompetitorID = new HashMap<>();
+        maxPointsReasonsByCompetitorID = new HashMap<>();
+        correctedScoresByCompetitorID = new HashMap<>();
+        incrementalScoreCorrectionOffsetsInPointsByCompetitorID = new HashMap<>();
+        displayNamesByCompetitorID = new HashMap<>();
+        suppressedCompetitorIDs = new HashSet<>();
         this.leaderboard = leaderboard;
         leaderboard.addRaceColumnListener(this);
     }
@@ -117,7 +119,7 @@ public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWith
             synchronized (maxPointsReasonsByCompetitorID) {
                 Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorID.get(competitorId);
                 if (map == null) {
-                    map = new HashMap<RaceColumn, MaxPointsReason>();
+                    map = new HashMap<>();
                     maxPointsReasonsByCompetitorID.put(competitorId, map);
                 }
                 map.put(raceColumn, maxPointsReason);
@@ -135,10 +137,29 @@ public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWith
             synchronized (correctedScoresByCompetitorID) {
                 Map<RaceColumn, Double> map = correctedScoresByCompetitorID.get(competitorId);
                 if (map == null) {
-                    map = new HashMap<RaceColumn, Double>();
+                    map = new HashMap<>();
                     correctedScoresByCompetitorID.put(competitorId, map);
                 }
                 map.put(raceColumn, correctedScore);
+            }
+        }
+    }
+
+    @Override
+    public void correctScoreIncrementallyByID(Serializable competitorId, RaceColumn raceColumn,
+            double incrementalScoreCorrectionOffsetInPoints) {
+        assertNoTrackedRaceAssociatedYet();
+        Competitor competitor = competitorFactory.getExistingCompetitorById(competitorId);
+        if (competitor != null) {
+            leaderboard.getScoreCorrection().correctScoreIncrementally(competitor, raceColumn, incrementalScoreCorrectionOffsetInPoints);
+        } else {
+            synchronized (incrementalScoreCorrectionOffsetsInPointsByCompetitorID) {
+                Map<RaceColumn, Double> map = incrementalScoreCorrectionOffsetsInPointsByCompetitorID.get(competitorId);
+                if (map == null) {
+                    map = new HashMap<>();
+                    incrementalScoreCorrectionOffsetsInPointsByCompetitorID.put(competitorId, map);
+                }
+                map.put(raceColumn, incrementalScoreCorrectionOffsetInPoints);
             }
         }
     }
@@ -197,6 +218,20 @@ public class DelayedLeaderboardCorrectionsImpl implements RaceColumnListenerWith
                                 correctedScoreEntry.getValue());
                     }
                     correctedScoresEntryIter.remove();
+                }
+            }
+        }
+        synchronized (incrementalScoreCorrectionOffsetsInPointsByCompetitorID) {
+            for (Iterator<java.util.Map.Entry<Serializable, Map<RaceColumn, Double>>> incrementallyCorrectedScoresEntryIter = incrementalScoreCorrectionOffsetsInPointsByCompetitorID
+                    .entrySet().iterator(); incrementallyCorrectedScoresEntryIter.hasNext();) {
+                java.util.Map.Entry<Serializable, Map<RaceColumn, Double>> incrementallyCorrectedScoresEntries = incrementallyCorrectedScoresEntryIter.next();
+                if (competitorsByID.containsKey(incrementallyCorrectedScoresEntries.getKey())) {
+                    for (java.util.Map.Entry<RaceColumn, Double> incrementallyCorrectedScoreEntry : incrementallyCorrectedScoresEntries.getValue().entrySet()) {
+                        leaderboard.getScoreCorrection().correctScoreIncrementally(
+                                competitorsByID.get(incrementallyCorrectedScoresEntries.getKey()), incrementallyCorrectedScoreEntry.getKey(),
+                                incrementallyCorrectedScoreEntry.getValue());
+                    }
+                    incrementallyCorrectedScoresEntryIter.remove();
                 }
             }
         }

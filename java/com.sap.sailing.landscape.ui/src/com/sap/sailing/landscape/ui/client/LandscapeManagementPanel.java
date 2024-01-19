@@ -53,7 +53,6 @@ import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -128,6 +127,7 @@ public class LandscapeManagementPanel extends SimplePanel {
     
     //Spacing for Setupbar (AWS/SSH/REGION)
     private static final int DEFAULT_SETUPBAR_HEIGHT = 300;
+    private static final int DEFAULT_AMOUNT_SSHKEYS_PER_PAGE = 3;
 
     public LandscapeManagementPanel(StringMessages stringMessages, UserService userService,
             AdminConsoleTableResources tableResources, ErrorReporter errorReporter) {
@@ -155,7 +155,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         };
         sshKeyManagementPanel = new SshKeyManagementPanel(stringMessages, userService,
-                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel());
+                landscapeManagementService, tableResources, errorReporter, /* access key provider */ mfaLoginWidget, regionsTable.getSelectionModel(), DEFAULT_AMOUNT_SSHKEYS_PER_PAGE);
         final CaptionPanel sshKeysCaptionPanel = new CaptionPanel(stringMessages.sshKeys());
         sshKeysCaptionPanel.setHeight("" + DEFAULT_SETUPBAR_HEIGHT + "px");
         regionsTable.addColumn(new TextColumn<String>() {
@@ -257,7 +257,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                 return result;
             }
         };
-        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name());
+        applicationReplicaSetsTable.addColumn(rs->rs.getReplicaSetName(), stringMessages.name(), (rs1, rs2)->rs1.getReplicaSetName().toLowerCase().compareTo(rs2.getReplicaSetName().toLowerCase()));
         final SafeHtmlCell versionCell = new SafeHtmlCell();
         final Column<SailingApplicationReplicaSetDTO<String>, SafeHtml> versionColumn = new Column<SailingApplicationReplicaSetDTO<String>, SafeHtml>(versionCell) {
             @Override
@@ -351,6 +351,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                         Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
                 selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet));
+        applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_MOVE_ALL_APPLICATION_PROCESSES_AWAY_FROM,
+                applicationReplicaSetWhoseMastersHostToDecommission -> moveAllApplicationProcessesAwayFrom(stringMessages,
+                        applicationReplicaSetWhoseMastersHostToDecommission));
         // see below for the finalization o the applicationRelicaSetsActionColumn; we need to have the machineImagesTable ready for the last action...
         final CaptionPanel applicationReplicaSetsCaptionPanel = new CaptionPanel(stringMessages.applicationReplicaSets());
         final VerticalPanel applicationReplicaSetsVerticalPanel = new VerticalPanel();
@@ -367,12 +370,14 @@ public class LandscapeManagementPanel extends SimplePanel {
                 StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
                 e -> removeApplicationReplicaSets(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(removeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(removeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(removeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> upgradeApplicationReplicaSetButton = new SelectedElementsCountingButton<>(
                 stringMessages.upgrade(), applicationReplicaSetsTable.getSelectionModel(),
                 e->upgradeApplicationReplicaSet(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         disableButtonWhenLocalReplicaSetIsSelected(upgradeApplicationReplicaSetButton, userService);
+        disableButtonWhenArchive(upgradeApplicationReplicaSetButton);
         applicationReplicaSetsButtonPanel.add(upgradeApplicationReplicaSetButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> stopReplicatingAndUnregisterMasterButton = new SelectedElementsCountingButton<>(
                 stringMessages.stopReplicating(), applicationReplicaSetsTable.getSelectionModel(),
@@ -388,10 +393,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                 stringMessages.switchToReplicaOnSharedInstance(), applicationReplicaSetsTable.getSelectionModel(),
                 e->switchToReplicaOnSharedInstance(stringMessages, applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
         applicationReplicaSetsButtonPanel.add(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
+        disableButtonWhenArchive(useSharedInsteadOfDedicatedAutoScalingReplicasButton);
         final SelectedElementsCountingButton<SailingApplicationReplicaSetDTO<String>> scaleAutoScalingReplicasUpDown = new SelectedElementsCountingButton<>(
                 stringMessages.scaleAutoScalingReplicasUpOrDown(), applicationReplicaSetsTable.getSelectionModel(),
                 e->scaleAutoScalingReplicasUpDown(stringMessages, regionsTable.getSelectionModel().getSelectedObject(),
                         applicationReplicaSetsTable.getSelectionModel().getSelectedSet()));
+        disableButtonWhenArchive(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsButtonPanel.add(scaleAutoScalingReplicasUpDown);
         applicationReplicaSetsCaptionPanel.add(applicationReplicaSetsVerticalPanel);
         applicationReplicaSetsVerticalPanel.add(applicationReplicaSetsTable);
@@ -426,7 +433,19 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToMoveMasterFor)));
         applicationReplicaSetsTable.addColumn(applicationReplicaSetsActionColumn, stringMessages.actions());
-        machineImagesTable.addColumn(object->object.getId(), stringMessages.id());
+        
+        final SafeHtmlCell amiIdCell = new SafeHtmlCell();
+        final Column<AmazonMachineImageDTO, SafeHtml> amiIdColumn = new Column<AmazonMachineImageDTO, SafeHtml>(amiIdCell) {
+            @Override
+            public SafeHtml getValue(AmazonMachineImageDTO ami) {
+                return new LinkBuilder()
+                        .setRegion(regionsTable.getSelectionModel().getSelectedObject())
+                        .setAmiId(ami.getId())
+                        .setPathMode(LinkBuilder.pathModes.InstanceByAmiIdSearch)
+                        .build();
+            }
+        };
+        machineImagesTable.addColumn(amiIdColumn, stringMessages.id());
         machineImagesTable.addColumn(object->object.getRegionId(), stringMessages.region());
         machineImagesTable.addColumn(object->object.getName(), stringMessages.name());
         machineImagesTable.addColumn(object->object.getType(), stringMessages.imageType());
@@ -487,25 +506,29 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
     
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
-        new ShardManagementDialog(landscapeManagementService, replicaset, region, sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption(), errorReporter, stringMessages,
-                new DialogCallback<Boolean>() {
-                    @Override
-                    public void ok(Boolean hasAnythingChanged) {
-                        if (hasAnythingChanged) {
-                            refreshApplicationReplicaSetsTable();
-                        }
-                    }
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, errorReporter, stringMessages, new DialogCallback<Boolean>() {
+            @Override
+            public void ok(Boolean hasAnythingChanged) {
+                if (hasAnythingChanged) {
+                    refreshApplicationReplicaSetsTable();
+                }
+            }
 
-                    @Override
-                    public void cancel() {
-                        // there is no cancel button
-                    }
-        }).show();
+            @Override
+            public void cancel() {
+                // there is no cancel button
+            }
+      }).show();
     }
     
     private void disableButtonWhenLocalReplicaSetIsSelected(Button button, UserService userService) {
         applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
                 !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO->arsDTO.isLocalReplicaSet(userService)).findAny().isPresent()));
+    }
+    
+    private void disableButtonWhenArchive(Button button) {
+        applicationReplicaSetsTable.getSelectionModel().addSelectionChangeHandler(e->button.setEnabled(
+                !applicationReplicaSetsTable.getSelectionModel().getSelectedSet().stream().filter(arsDTO-> arsDTO.isArchive()).findAny().isPresent()));
     }
     
     private void validatePassphrase(StringMessages stringMessages, AsyncCallback<Boolean> callback) {
@@ -890,6 +913,39 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
         });
     }
+    
+    private void moveAllApplicationProcessesAwayFrom(StringMessages stringMessages, SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
+        final AwsInstanceDTO fromHost = applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost();
+        new MoveAllAwayFromHostDialog(landscapeManagementService, fromHost,
+                applicationReplicaSetsTable.getDataProvider().getList(), stringMessages, errorReporter, new DialogCallback<String>() {
+                    @Override
+                    public void ok(String optionalInstanceTypeName) {
+                        applicationReplicaSetsBusy.setBusy(true);
+                        landscapeManagementService.moveAllApplicationProcessesAwayFrom(fromHost, optionalInstanceTypeName,
+                                sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                                sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        applicationReplicaSetsBusy.setBusy(false);
+                                        Notification.notify(stringMessages.successfullyMovedAllProcessesAwayFromHost(fromHost.getInstanceId()), NotificationType.SUCCESS);
+                                        refreshApplicationReplicaSetsTable();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+    }
 
     private void createApplicationReplicaSetWithMasterOnExistingHost(StringMessages stringMessages, SailingApplicationReplicaSetDTO<String> applicationReplicaSetOnWhichToDeployMaster) {
         landscapeManagementService.getReleases(new AsyncCallback<ArrayList<ReleaseDTO>>() {
@@ -902,8 +958,8 @@ public class LandscapeManagementPanel extends SimplePanel {
             public void onSuccess(ArrayList<ReleaseDTO> result) {
                 new CreateApplicationReplicaSetDialog(landscapeManagementService, /* sharedMasterInstanceAlreadyExists */ true,
                         result.stream().map(r->r.getName())::iterator, stringMessages, errorReporter, new DialogCallback<CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions>() {
-            @Override
-            public void ok(CreateApplicationReplicaSetInstructions instructions) {
+                    @Override
+                    public void ok(CreateApplicationReplicaSetInstructions instructions) {
                         applicationReplicaSetsBusy.setBusy(true);
                         landscapeManagementService.deployApplicationToExistingHost(instructions.getName(), applicationReplicaSetOnWhichToDeployMaster.getMaster().getHost(), 
                                 instructions.getDedicatedInstanceType(), instructions.isDynamicLoadBalancerMapping(),
@@ -932,12 +988,12 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     }
                                  }
                               });
-            }
-            
-            @Override
-            public void cancel() {
-            }
-         },
+                    }
+                    
+                    @Override
+                    public void cancel() {
+                    }
+                 },
                 regionsTable.getSelectionModel().getSelectedObject().equals(SharedLandscapeConstants.REGION_WITH_DEFAULT_LOAD_BALANCER))
                 .show();
             }
@@ -972,14 +1028,30 @@ public class LandscapeManagementPanel extends SimplePanel {
 
     private void removeApplicationReplicaSet(String regionId, final Iterator<SailingApplicationReplicaSetDTO<String>> replicaSetIterator, StringMessages stringMessages) {
         assert replicaSetIterator.hasNext();
+        final MongoEndpointDTO selectedMongoEndpointForDBArchiving = mongoEndpointsTable.getSelectionModel().getSelectedObject();
         final SailingApplicationReplicaSetDTO<String> applicationReplicaSetToRemove = replicaSetIterator.next();
-        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove,
+        final ApplicationReplicaSetActionChainingCallback<String> applicationReplicaSetActionChainingCallback = new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
+                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
+                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName));
+        landscapeManagementService.removeApplicationReplicaSet(regionId, applicationReplicaSetToRemove, selectedMongoEndpointForDBArchiving,
                 sshKeyManagementPanel.getSelectedKeyPair()==null?null:sshKeyManagementPanel.getSelectedKeyPair().getName(),
                         sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                         ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                        new ApplicationReplicaSetActionChainingCallback<String>(replicaSetIterator, applicationReplicaSetToRemove,
-                                (rId, rsi)->removeApplicationReplicaSet(rId, rsi, stringMessages), regionId,
-                                replicaSetName->stringMessages.successfullyRemovedApplicationReplicaSet(replicaSetName)));
+                        new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                applicationReplicaSetActionChainingCallback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(String mongoDbArchivingErrorMessage) {
+                                applicationReplicaSetActionChainingCallback.onSuccess(/* application replica set (removed) */ null);
+                                if (mongoDbArchivingErrorMessage != null) {
+                                    errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
+                                            selectedMongoEndpointForDBArchiving.getReplicaSetName(), mongoDbArchivingErrorMessage));
+                                }
+                            }
+                        });
     }
     
     private static class ReplicaSetArchivingParameters {
@@ -1033,7 +1105,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                 selectedMongoEndpointForDBArchiving, sshKeyManagementPanel.getSelectedKeyPair().getName(),
                                 sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                                     ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes() : null,
-                                new AsyncCallback<Pair<DataImportProgress, CompareServersResultDTO>>() {
+                                new AsyncCallback<Triple<DataImportProgress, CompareServersResultDTO, String>>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 applicationReplicaSetsBusy.setBusy(false);
@@ -1041,8 +1113,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                             }
 
                             @Override
-                            public void onSuccess(Pair<DataImportProgress, CompareServersResultDTO> result) {
+                            public void onSuccess(Triple<DataImportProgress, CompareServersResultDTO, String> result) {
                                 applicationReplicaSetsBusy.setBusy(false);
+                                final String mongoDBArchivingErrorMessage = result.getC();
                                 if (result == null || result.getA() == null || result.getA().failed()) {
                                     errorReporter.reportError(stringMessages.errorDuringImport(result==null||result.getA()==null?"":result.getA().getErrorMessage()));
                                 } else if (result.getB() == null) {
@@ -1051,6 +1124,10 @@ public class LandscapeManagementPanel extends SimplePanel {
                                     errorReporter.reportError(stringMessages.differencesInServerContentFound(
                                             result.getB().getServerAName(), result.getB().getADiffs().toString(),
                                             result.getB().getServerBName(), result.getB().getBDiffs().toString()));
+                                } else if (mongoDBArchivingErrorMessage != null) {
+                                    errorReporter.reportError(stringMessages.errorArchivingMongoDBTo(
+                                            selectedMongoEndpointForDBArchiving != null ? selectedMongoEndpointForDBArchiving.getReplicaSetName() : "",
+                                            mongoDBArchivingErrorMessage));
                                 }
                                 if (result != null && result.getA() != null && !result.getA().failed()
                                  && result.getB() != null && !result.getB().hasDiffs()) {

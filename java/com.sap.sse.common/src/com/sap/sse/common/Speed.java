@@ -2,6 +2,7 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 /**
@@ -68,10 +69,20 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public double divide(Speed speed) {
             return 0;
         }
+
+        @Override
+        public Speed scale(double d) {
+            return this;
+        }
     };
     
     @Statistic(messageKey="speedInKnots", resultDecimals=2)
     double getKnots();
+    
+    @Dimension(messageKey="speedInFullKnots")
+    default int getKnotsFloored() {
+        return (int) Math.round(getKnots());
+    }
 
     double getMetersPerSecond();
 
@@ -103,4 +114,6 @@ public interface Speed extends Comparable<Speed>, Serializable {
      *            must not be {@code null}, or a {@link NullPointerException} will result
      */
     double divide(Speed speed);
+
+    Speed scale(double d);
 }

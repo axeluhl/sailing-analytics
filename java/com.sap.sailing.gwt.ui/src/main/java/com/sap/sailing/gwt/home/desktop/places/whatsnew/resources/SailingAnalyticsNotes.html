@@ -1,9 +1,133 @@
+
 <!DOCTYPE html>
 <html>
 <body>
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">January 2024</h5>
+         <ul class="bulletList">
+            <li>Bug fix for colored tails: maximum value for color key was sometimes not
+                adjusted properly, leading to a "red shift" on the tails.</li>
+         </ul>
+         <h5 class="articleSubheadline">December 2023</h5>
+         <ul class="bulletList">
+            <li>The memory manager for data mining queries is now less aggressive for large heap sizes and
+                therefore less likely to kill expensive queries when there is still enough free memory.</li>
+            <li>Added two dimensions on wind fix datamining ("is in race" and "is in tracking time range").</li>
+            <li>Added a simple data mining retriever chain allowing for competitor counting.</li>
+            <li>Added a statistic for smoothed speed on GPS fixes in data mining.</li>
+            <li>Issues with updating the boat tails on the map have been resolved.</li>
+            <li>Several performance improvements for tail updates on the map have been implemented.</li>
+            <li>Colored tails now require a premium subscription.</li>
+            <li>Added data mining fact type for "tack type segment" (long/short tack) which
+                comes with the statistics <em>distance</em> and <em>duration</em>.</li>
+         </ul>
+         <h5 class="articleSubheadline">November 2023</h5>
+         <ul class="bulletList">
+            <li>Including short tack and long tack in two ways: In the Data Mining module as a dimension to the GPS fixes and
+                on the Raceboard as a new colortype of the tails.
+                (For more information about tail coloring, look back at the notes of April 2019.)</li>
+            <li>Added statistics for length of a leg to the Data Mining module.</li>
+            <li>Added tool tips to the drop-down lists for selecting the competitor chart data type
+                and the data type for displaying as the tail color on the map</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2023</h5>
+         <ul class="bulletList">
+            <li>Competitor charts sometimes wouldn't update properly in live mode. This has now been fixed.</li>
+         </ul>
+         <h5 class="articleSubheadline">September 2023</h5>
+         <ul class="bulletList">
+            <li>Added statistics for maneuvers to Data Mining module to match capabilities of
+                maneuver table in the race viewer.</li>
+            <li>Bug fix: for some QR-Codes the fallback page (mostly valid after opening link on desktop computers) 
+                generates broken QR-Codes. QR-Codes are now created correctly.</li>
+         </ul>
+         <h5 class="articleSubheadline">August 2023</h5>
+         <ul class="bulletList">
+            <li>Bug fix: When rotating the map wind-up, buoy zone circles were not drawn with their correct diameter.</li>
+            <li>Improved subscriptions page, indicating missing e-mail address validation early on.</li>
+            <li>If course areas have been modeled with their center position and radius they can now optionally
+                be displayed in the race viewer.</li>
+            <li>Protest flag in regatta overview is displayed as lowered now after the end of the protest time.</li>
+            <li>Bug fix: when a replica starts up, reads a dependent start time from the primary instance and
+                a tracked race is already attached for the dependent race, resolving the dependent start time
+                while still reading the data from the primary instance fails and is erroneously cached. Now,
+                instead, a new attempt to resolve the race on which the other's start time depends, will be
+                made, then finding the race log searched for. This will fix the issue of unreliable
+                start time display for dependent start times in very dynamically scaling large events.</li>
+            <li>Expensive to compute REST API properties no require the <tt>PREMIUM_LEADERBOARD_INFORMATION</tt>
+                permission on the respective leaderboard, as implied by the "premium" role. For now, the following
+                additional properties are affected: <tt>gapToLeader-s</tt> and <tt>gapToLeader-m</tt> in
+                end points <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/competitors/legs</tt> and
+                <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/competitors/live</tt>;
+                and <tt>pointsBasedOnPassingOrder</tt>, <tt>netPointsBasedOnPassingOrder</tt> and
+                <tt>maxPointsReason</tt> in <tt>/sailingserver/api/v1/regattas/{regatta}/races/{race}/markpassings</tt>.
+                These three endpoints additionally will combine time-wise overlapping calls for the same
+                race by the same user and return the same result for them all.</li>
+            <li>Fixed a bug in the calculation of estimated race durations where optimum TWAs as inferred from the
+                polar data was confused with the courses over ground to be sailed.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2023</h5>
+         <ul class="bulletList">
+           <li>Flipped default ordering of the "GPS Lag" column. When sorting by that column for
+               the first time now the greatest lag is displayed at the top.</li>
+           <li>The mark passing / split times detection has been adjusted for overall improved
+               accuracy of most tracking devices. This will in particular reduce the tolerance
+               for passing a mark on the wrong side, hence more likely suppressing passing candidates
+               on the wrong side of a mark even if the passing happened very near to the mark.</li>
+           <li>Bug fix: tracked races connected to more than one leaderboard column at the same time
+               will now send their competitor and race status updates to all those column's race logs.
+               This in particular fixes the special iQFOil set-up with their marathon races.</li>
+           <li>Added speed in full knots (rounded) as a dimension to the GPS fixes in Data Mining.
+               This can be used, e.g., to filter for outliers such as capsized or towed boats.</li>
+           <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+               optional incremental score corrections which are added to the points determined based on the competitor's rank
+               in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+               points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+               for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+               are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+               penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+               the penalty when editing the increment.</li>
+            <li>
+               Bug fix: It is now possible to subscribe to a plan and set a VAT number if previously subscribed to another plan.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2023</h5>
+         <ul class="bulletList">
+           <li>Fixed an issue with the plans shown as subscribed to based on the plan
+               categories. For premium users it would have seemed they implicitly got
+               a data mining plan although they did not. Please note that currently
+               you still require to get in touch (support@sapsailing.com) in order
+               to upgrade from a Premium to a data mining plan. This is a known
+               issue that we are working on currently.</li>
+           <li>Replaced the old "Laser" boat class logo / icon with the new ILCA icon.
+               The boat classes internally continue using their original names, also
+               to keep the polar data consistent as the boat hardware hasn't changed,
+               but the new "ILCA" alias names are now available.</li>
+         </ul>
+         <h5 class="articleSubheadline">May 2023</h5>
+         <ul class="bulletList">
+            <li>An STP or SCP scoring code ("Standard Penalty" / "Scoring Penalty") now by default adds 1.0 to the competitor's score as calculated based on the ranking.
+                The STP / SCP code is shown already with the beginning of the race, but any official scoring result entered after the race will be
+                used during replay only once the competitor has finished the race. For the medal stages of the new Formula Kite scoring
+                (Low Point, First to Win Three Races, both, the A8.1 and A8.2 variants) an STP / SCP will add 1.1 to the competitor's score.</li>
+            <li>The "Low Point, First to Win Three Races" scoring schemes, which rank competitors in the medal series based on the number of
+                "races won" now count a win if the competitor has achieved the lowest score in that race. This changes the previous rule where
+                the competitor needed to score 1.0 points in order to be called the "winner" of that race. In particular, with this change
+                a competitor with, say, 2.0 points can be the "winner" of the race in case the competitor finishing first took a standard
+                penalty (STP) or scoring penalty (SCP) which adds 1.1 points to the 1.0 point awarded for finishing first, so a total of 2.1 points, thus worse
+                than the 2.0 points of the competitor finishing second. Should there still be a tie on points, the finishing order is
+                used to break that tie.</li>
+            <li>Average leg Velocity Made Good (VMG) is now available in <a href="/gwt/DataMining.html">data mining</a>.</li>
+         </ul>
+         <h5 class="articleSubheadline">April 2023</h5>
+         <ul class="bulletList">
+           <li>Added XTE (cross-track error) to data mining statistics on GPS fixes</li>
+         </ul>
+         <h5 class="articleSubheadline">March 2023</h5>
+         <ul class="bulletList">
+           <li>Added VMG to data mining statistics on GPS fixes</li>
+         </ul>
          <h5 class="articleSubheadline">February 2023</h5>
          <ul class="bulletList">
            <li>Added ability to upload multiple gallery media files of an event at once. It also includes some optimizations and bug fixes.</li>
@@ -20,6 +144,11 @@
                remnants of the previous grouping structure could have remained when running the new query
                with fewer dimensions. Deferring the chart update to outside the current event loop has
                solved this issue.</li>
+           <li>Data mining now offers administrators with the necessary permissions to analyze role, permission,
+               session and subscription data for administrative purposes.</li>
+           <li>The <tt>.../v2/leaderboards</tt> API now supports the <tt>LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS</tt> detail type,
+               also included when specifying <tt>ALL</tt>. It produces the field <tt>currentLegAverageSpeedOverGround-kts</tt>
+               in the <tt>data</tt> part of the result document.</li>
          </ul>
          <h5 class="articleSubheadline">January 2023</h5>
          <ul class="bulletList">

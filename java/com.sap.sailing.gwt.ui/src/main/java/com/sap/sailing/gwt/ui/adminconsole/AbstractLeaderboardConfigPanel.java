@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
@@ -35,6 +34,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -224,6 +224,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
+                for (final CourseAreaDTO courseArea : t.courseAreas) {
+                    strings.add(courseArea.getName());
+                }
                 return strings;
             }
 
@@ -257,23 +260,24 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
         addLeaderboardControls(buttonPanel);
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
-        mainPanel.add(new Grid(1, 1));
+        final Grid hPanel = new Grid(1, 2);
+        Label helpLabel = new Label(stringMessages.helptextLinkingRaces());
+        hPanel.setWidget(0, 0, helpLabel);
+        hPanel.setWidget(0, 1, new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://vimeo.com/768053778/922b629cc4"));
+        mainPanel.add(hPanel);
         // caption panels for the selected leaderboard and tracked races
-        HorizontalPanel splitPanel = new HorizontalPanel();
-        splitPanel.setWidth("100%");
+        final HorizontalPanel splitPanel = new HorizontalPanel();
         splitPanel.ensureDebugId("LeaderboardDetailsPanel");
+        splitPanel.setWidth("100%");
         mainPanel.add(splitPanel);
         selectedLeaderBoardPanel = new CaptionPanel(stringMessages.leaderboard());
         splitPanel.add(selectedLeaderBoardPanel);
-        splitPanel.setCellWidth(selectedLeaderBoardPanel, "50%");
         VerticalPanel vPanel = new VerticalPanel();
-        vPanel.setWidth("100%");
         selectedLeaderBoardPanel.setContentWidget(vPanel);
         trackedRacesCaptionPanel = new CaptionPanel(stringMessages.trackedRaces());
         splitPanel.add(trackedRacesCaptionPanel);
-        splitPanel.setCellWidth(trackedRacesCaptionPanel, "50%");
         VerticalPanel trackedRacesPanel = new VerticalPanel();
-        trackedRacesPanel.setWidth("100%");
         trackedRacesCaptionPanel.setContentWidget(trackedRacesPanel);
         trackedRacesCaptionPanel.setStyleName("bold");
         trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages,
@@ -350,17 +354,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
             }
             Notification.notify(stringMessages.raceLogReloaded(), NotificationType.SUCCESS);
         });
-        HorizontalPanel hPanel = new HorizontalPanel();
-        hPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        hPanel.setWidth("100%");
-        hPanel.setSpacing(5);
-        hPanel.add(reloadAllRaceLogs);
-        Label helpLabel = new Label(stringMessages.helptextLinkingRaces());
-        helpLabel.setWidth("85%");
-        hPanel.add(helpLabel);
-        hPanel.add(new HelpButton(HelpButtonResources.INSTANCE,
-                stringMessages.videoGuide(), "https://vimeo.com/768053778/922b629cc4"));
-        vPanel.add(hPanel);
+
+        vPanel.add(reloadAllRaceLogs);
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
         raceColumnTable = new RaceTableWrapper<RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(

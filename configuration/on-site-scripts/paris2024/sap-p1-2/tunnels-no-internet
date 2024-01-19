@@ -1,0 +1,24 @@
+#!/bin/bash
+killall autossh
+sleep 2
+# No point in trying to reach paris-ssh.sapsailing.com without Internet connection;
+# Instead, sap-p1-1 and sap-p1-2 are expected to use their local RabbitMQ through port 5673,
+# and sap-p1-2 obtains the security-service replication from sap-p1-1's RabbitMQ tunneled
+# through port 5675.
+#
+# TODO Regarding HTTPS to security-service.sapsailing.com:443, couldn't we forward
+# localhost:443 to sap-p1-1:9443 such that access goes through NGINX on sap-p1-1?
+#
+# The tunnel connection to sap-p1-1 is expected to be established from the sap-p1-1 side by a reverse port forward
+# However, the RabbitMQ forwards to emulate rabbit.internal.sapsailing.com (eu-west-1) and rabbit-eu-west-3.sapsailing.com
+# with the local RabbitMQ need to go through a localhost port forward. Furthermore, the security-service.sapsailing.com tunnel
+# is re-directed to sap-p1-1's NGINX, assuming it has a replacement running if Internet fails.
+autossh -M 21504 -f -A -N \
+  -L 5673:localhost:5672 \
+  -L 15673:localhost:15672 \
+  -L 5675:sap-p1-1:5672 \
+  -L 15675:sap-p1-1:15672 \
+  -L 443:sap-p1-1:9443 \
+  sap-p1-1
+# Tunnel to localhost for TracTrac port forwards
+tractrac-A

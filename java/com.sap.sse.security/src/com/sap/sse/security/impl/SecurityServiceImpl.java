@@ -1128,7 +1128,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        logger.info("Changing e-mail address of user "+username+" to "+newEmail);
+        logger.info("Changing e-mail address of user " + username + " to " + newEmail);
         final String validationSecret = user.createRandomSecret();
         apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
@@ -1962,6 +1962,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
             result = createActionReturningCreatedObject.call();
         } catch (AuthorizationException e) {
+            logger.warning("Unauthorized request to create user with name \""+username+"\": "+e.getMessage());
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -2129,8 +2130,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final RoleDefinition potentiallyExistingRoleDefinition = store.getRoleDefinition(rolePrototype.getId());
         final RoleDefinition result;
         if (potentiallyExistingRoleDefinition == null) {
-            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(),
-                    rolePrototype.getPermissions());
+            result = store.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
             setOwnership(result.getIdentifier(), null, getServerGroup());
         } else if (rolePrototype.getPermissions() != null
                 && !rolePrototype.getPermissions().equals(potentiallyExistingRoleDefinition.getPermissions())) {
@@ -2322,7 +2322,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             boolean setServerGroupAsOwner, final String displayName) {
         boolean wasNecessaryToMigrate = false;
         final OwnershipAnnotation owner = this.getOwnership(identifier);
-        // initialize ownerships on migration and fix objects that were orphaned by e.g. deleting the owning user/group
+        // initialize ownerships on migration and fix objects that were orphaned by setting the owning user/group
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
             final UserGroup tenantOwnerToSet = setServerGroupAsOwner ? this.getServerGroup() : null;
@@ -2522,17 +2522,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
-
         for (Map.Entry<RoleDefinition, Boolean> entr : source.getRoleDefinitionMap().entrySet()) {
             putRoleDefinitionToUserGroup(destination, entr.getKey(), entr.getValue());
         }
-
         for (Pair<User, Role> userAndRole : store.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             final Role copyRole = new Role(existingRole.getRoleDefinition(), destination,
                     existingRole.getQualifiedForUser(), existingRole.isTransitive());
-            addRoleForUser(userAndRole.getA(),
-                    copyRole);
+            addRoleForUser(userAndRole.getA(), copyRole);
             callback.onRoleCopy(userAndRole.getA(), existingRole, copyRole);
         }
     }
@@ -2726,7 +2723,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return newUserSubscriptions;
     }
-    
+
     /**
      * Add or remove subscription plan's roles for user
      */
@@ -2985,4 +2982,46 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return null;
     }
 
+    @Override
+    public Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername, boolean transitive) throws UserManagementException {
+        final User user;
+        if (qualifyingUsername == null || qualifyingUsername.trim().isEmpty()) {
+            user = null;
+        } else {
+            user = getUserByName(qualifyingUsername);
+            if (user == null) {
+                throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
+            }
+        }
+        final UserGroup group;
+        if (qualifyingTenantId == null) {
+            group = null;
+        } else {
+            group = getUserGroup(qualifyingTenantId);
+            if (group == null) {
+                throw new UserManagementException("Group with ID "+qualifyingTenantId+" not found for role qualification");
+            }
+        }
+        final RoleDefinition roleDefinition = getRoleDefinition(roleDefinitionId);
+        if (roleDefinition == null) {
+            throw new UserManagementException("Role definition with ID "+roleDefinitionId+" not found");
+        }
+        return new Role(roleDefinition, group, user, transitive);
+    }
+
+    /**
+     * @return the role associated with the given IDs and qualifiers
+     * @throws UserManagementException
+     *             if the current user does not have the meta permission to give this specific, qualified role in this
+     *             context.
+     */
+    @Override
+    public Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID tenantId, String userQualifierName, boolean transitive) throws UserManagementException {
+        final Role role = createRoleFromIDs(roleDefinitionId, tenantId, userQualifierName, transitive);
+        if (!hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
+                role.getRoleDefinition(), role.getQualificationAsOwnership())) {
+            throw new UserManagementException("You are not allowed to take this role to the user.");
+        }
+        return role;
+    }
 }

@@ -124,8 +124,13 @@ public class RegattaListComposite extends Composite {
                 string.add(t.getName());
                 if (t.boatClass != null) {
                     string.add(t.boatClass.getName());
+                }             
+                if (t.courseAreas != null) {
+                    for (final CourseAreaDTO courseArea : t.courseAreas) {
+                        string.add(courseArea.getName());
+                    }
                 }
-                return string;
+                return string;          
             }
 
             @Override
@@ -181,7 +186,6 @@ public class RegattaListComposite extends Composite {
                         return t.getRegattaIdentifier().hashCode();
                     }
                 }, filterablePanelRegattas.getAllListDataProvider(), table);
-
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
@@ -207,7 +211,6 @@ public class RegattaListComposite extends Composite {
         regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
                 (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
-
         TextColumn<RegattaDTO> competitorRegistrationTypeColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
@@ -265,6 +268,16 @@ public class RegattaListComposite extends Composite {
                 return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());
             }
         });
+        TextColumn<RegattaDTO> courseAreasColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO leaderboard) {
+                return Util.joinStrings(", ", Util.map(leaderboard.courseAreas, CourseAreaDTO::getName));
+            }
+        };
+        courseAreasColumn.setSortable(true);
+        columnSortHandler.setComparator(courseAreasColumn,
+                (r1, r2) -> new NaturalComparator().compare(Util.joinStrings(", ", Util.map(r1.courseAreas, CourseAreaDTO::getName)),
+                        Util.joinStrings(", ", Util.map(r2.courseAreas, CourseAreaDTO::getName))));
         final HasPermissions type = SecuredDomainType.REGATTA;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = create(
                 new RegattaConfigImagesBarCell(stringMessages), userService);
@@ -297,6 +310,7 @@ public class RegattaListComposite extends Composite {
         table.addColumn(competitorRegistrationTypeColumn, stringMessages.competitorRegistrationTypeShort());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
+        table.addColumn(courseAreasColumn, stringMessages.courseAreas());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(actionsColumn, stringMessages.actions());

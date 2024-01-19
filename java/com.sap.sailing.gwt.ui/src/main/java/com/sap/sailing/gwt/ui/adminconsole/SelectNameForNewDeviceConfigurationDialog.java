@@ -42,8 +42,10 @@ public class SelectNameForNewDeviceConfigurationDialog extends DataEntryDialog<S
             Validator<String> validator, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<String> callback) {
         super(stringMessages.createDeviceConfiguration(), stringMessages.forWhichDeviceShouldConfigurationApply(), 
                 stringMessages.create(), stringMessages.cancel(), validator, callback);
+        this.ensureDebugId("SelectNameForNewDeviceConfigurationDialog");
         this.stringMessages = stringMessages;
         this.identifierBox = createTextBox("");
+        this.identifierBox.ensureDebugId("raceManagerDeviceName");
     }
     
     @Override

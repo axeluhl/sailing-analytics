@@ -234,6 +234,7 @@ public class AppPreferences {
             case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_classflag_key);
             case SWC:
+            case SWC_4MIN:
                 return key(R.string.preference_racing_procedure_swc_classflag_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_classflag_key);
@@ -259,6 +260,7 @@ public class AppPreferences {
             case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
             case SWC:
+            case SWC_4MIN:
                 return key(R.string.preference_racing_procedure_swc_hasxray_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
@@ -284,6 +286,7 @@ public class AppPreferences {
             case RRS26_3MIN:
                 return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
             case SWC:
+            case SWC_4MIN:
                 return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);

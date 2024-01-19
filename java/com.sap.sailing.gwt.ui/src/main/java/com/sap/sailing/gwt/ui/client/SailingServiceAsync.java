@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.apache.shiro.authz.AuthorizationException;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LegIdentifier;
@@ -131,6 +133,10 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
             AsyncCallback<Void> asyncCallback);
 
+    /**
+     * Passwords are erased from {@link TracTracConfigurationWithSecurityDTO#getTracTracPassword()} which will
+     * always return {@code null} for the objects sent to the callback's {@link AsyncCallback#onSuccess(Object)} method.
+     */
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationWithSecurityDTO>> callback);
 
     void getRawWindFixes(RegattaAndRaceIdentifier raceIdentifier, Collection<WindSource> windSources,
@@ -327,7 +333,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getLeaderboardsNamesOfMetaLeaderboard(String metaLeaderboardName,
             AsyncCallback<List<Util.Pair<String, String>>> callback);
 
-    void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);  
+    void getRegattaStructureForEvent(UUID eventId, AsyncCallback<List<RaceGroupDTO>> asyncCallback);
 
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
             AsyncCallback<Void> asyncCallback);
@@ -383,12 +389,13 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getEventsForLeaderboard(String leaderboardName, AsyncCallback<Collection<EventDTO>> callback);
 
     /**
-     * Imports regatta structure definitions from an ISAF XRR document
+     * Imports regatta structure definitions from an ISAF XRR document provided through SwissTiming's Manage2Sail.
+     * The back-end will enhance the URL with the necessary API access token if none is provided in the URL.
      * 
      * @param manage2SailJsonUrl
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
-    void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+    void getManage2SailRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
     
     /**
      * Returns mark passings for the competitor. Using the {@code waitForCalculations} parameter callers can control
@@ -665,7 +672,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
             AsyncCallback<RaceCourseDTO> callback);
 
     void getRegattasForEvent(UUID eventId, AsyncCallback<List<RegattaDTO>> callback);
-    
+
     void getAdminConsoleChangeLogSize(AsyncCallback<Integer> callback);
 
     void getPreviousYellowBrickConfigurations(
@@ -676,6 +683,14 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     // === Service method introduced for new ManagementConsole UI ===
     void getEventList(AsyncCallback<List<EventMetadataDTO>> callback);
-    
+
     void getEventSeriesList(AsyncCallback<List<EventSeriesMetadataDTO>> callback);
+
+    /**
+     * Tries to find the connection between the leaderboard identified by the {@code leaderboardName} and one or more {@link Event}s and then
+     * from the {@link Event}s obtains their {@link CourseArea}s.
+     */
+    void getCourseAreaForEventOfLeaderboard(String leaderboardName, AsyncCallback<List<CourseAreaDTO>> callback);
+
+    void getGoogleMapsLoaderAuthenticationParams(AsyncCallback<String> callback);
 }

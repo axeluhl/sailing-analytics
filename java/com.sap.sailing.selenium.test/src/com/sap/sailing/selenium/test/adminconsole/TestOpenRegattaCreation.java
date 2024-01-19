@@ -35,6 +35,6 @@ public class TestOpenRegattaCreation extends AbstractSeleniumTest {
     private void configureRegattaAndLeaderboard() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(this.regatta);
+        regattaStructure.createRegatta(this.regatta, /* withDefaultLeaderboard */ false);
     }
 }

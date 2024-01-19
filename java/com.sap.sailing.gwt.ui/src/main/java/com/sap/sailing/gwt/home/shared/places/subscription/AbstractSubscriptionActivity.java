@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCard.Type;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.subscription.InvalidSubscriptionProviderException;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan.PlanGroup;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
@@ -25,7 +26,6 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     private final SubscriptionClientFactory clientFactory;
     private final SubscriptionPlace subscriptionsPlace;
     private final SubscriptionView view;
-    private boolean isMailVerificationRequired;
 
     protected AbstractSubscriptionActivity(final SubscriptionPlace place,
             final SubscriptionClientFactory clientFactory) {
@@ -38,28 +38,11 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         Window.setTitle(subscriptionsPlace.getTitle());
         view.setPresenter(this);
-        try {
-            clientFactory.getSubscriptionServiceFactory().getDefaultWriteAsyncService()
-                    .isMailVerificationRequired(new AsyncCallback<Boolean>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            clientFactory.createErrorView(StringMessages.INSTANCE.currentlyUnableToSubscribe(), caught);
-                        }
-
-                        @Override
-                        public void onSuccess(Boolean result) {
-                            isMailVerificationRequired = Boolean.valueOf(result);
-                            renderSubscriptions(eventBus);
-                        }
-                    });
-        } catch (InvalidSubscriptionProviderException e) {
-            clientFactory.createErrorView(StringMessages.INSTANCE.currentlyUnableToSubscribe(), e);
-        }
         eventBus.addHandler(AuthenticationContextEvent.TYPE, event -> {
             renderSubscriptions(eventBus);
         });
-
         panel.setWidget(view);
+        renderSubscriptions(eventBus);
     }
     
     private void renderSubscriptions(final EventBus eventBus) {
@@ -75,10 +58,12 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 final Type type;
                                 if (checkIfUserIsOwnerOfThePlan(plan) || checkIfUserIsSubscribedToPlanCategory(plan)) {
                                     type = Type.OWNER;
-                                } else if (checkIfUserWasAlreadySubscripedToOneTimePlan(plan)) {
+                                } else if (checkIfUserWasAlreadySubscribedToOneTimePlan(plan)) {
                                     type = Type.ONETIMELOCK;
                                 } else if (subscriptionsPlace.getPlansToHighlight().contains(plan.getSubscriptionPlanId())) {
                                     type = Type.HIGHLIGHT;
+                                } else if (checkIfPlanWouldBeAnUpgrade(plan)) {
+                                    type = Type.UPGRADE;
                                 } else {
                                     type = Type.DEFAULT;
                                 }
@@ -91,13 +76,12 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
                                 } else {
                                     groupDTO = new SubscriptionGroupDTO(plan.getGroup().getId(),
                                             plan.isUserSubscribedToPlan(), plan.getPrices(), plan.getGroup(),
-                                            plan.isUserSubscribedToPlanCategory(), plan.getError(), type);
+                                            plan.isUserSubscribedToAllPlanCategories(), plan.getError(), type);
                                     groupMap.put(plan.getGroup(), groupDTO);
                                 }
                             });
                             List<SubscriptionGroupDTO> groups = new ArrayList<SubscriptionGroupDTO>(groupMap.values());
                             groups.sort(new Comparator<SubscriptionGroupDTO>() {
-                                
                                 @Override
                                 public int compare(SubscriptionGroupDTO o1, SubscriptionGroupDTO o2) {
                                     // comparing by ordinal
@@ -147,11 +131,15 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
     }
     
     private boolean checkIfUserIsSubscribedToPlanCategory(final SubscriptionPlanDTO plan) {
-        return plan.isUserSubscribedToPlanCategory();
+        return plan.isUserSubscribedToAllPlanCategories();
     }
     
-    private boolean checkIfUserWasAlreadySubscripedToOneTimePlan(final SubscriptionPlanDTO plan) {
+    private boolean checkIfUserWasAlreadySubscribedToOneTimePlan(final SubscriptionPlanDTO plan) {
         return plan.isUserWasAlreadySubscribedToOneTimePlan();
+    }
+    
+    private boolean checkIfPlanWouldBeAnUpgrade(final SubscriptionPlanDTO plan) {
+        return plan.isOneOfTheUserSubscriptionsIsCoveredByPlan();
     }
 
     private void onInvalidSubscriptionProviderError(final InvalidSubscriptionProviderException exc) {
@@ -160,7 +148,8 @@ public abstract class AbstractSubscriptionActivity extends AbstractActivity impl
 
     @Override
     public boolean isMailVerificationRequired() {
-        return isMailVerificationRequired;
+        final UserDTO currentUser = clientFactory.getUserService().getCurrentUser();
+        return currentUser == null || !currentUser.isEmailValidated();
     }
 
 }

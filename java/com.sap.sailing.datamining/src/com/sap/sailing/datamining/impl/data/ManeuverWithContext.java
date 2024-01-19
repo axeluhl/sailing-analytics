@@ -7,16 +7,19 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
+ * Equality is based on the {@link #getManeuver() maneuver} only.
  * 
  * @author Vladislav Chumak (D069712)
  *
@@ -42,6 +45,31 @@ public class ManeuverWithContext implements HasManeuverContext {
         this.timePointBeforeForAnalysis = enteringAndExistingDetails.getTimePointBefore();
         this.timePointAfterForAnalysis = enteringAndExistingDetails.getTimePointAfter();
         this.directionChangeInDegreesForAnalysis = enteringAndExistingDetails.getDirectionChangeInDegrees();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((maneuver == null) ? 0 : maneuver.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ManeuverWithContext other = (ManeuverWithContext) obj;
+        if (maneuver == null) {
+            if (other.maneuver != null)
+                return false;
+        } else if (!maneuver.equals(other.maneuver))
+            return false;
+        return true;
     }
 
     public TimePoint getTimePointBeforeForAnalysis() {
@@ -221,4 +249,23 @@ public class ManeuverWithContext implements HasManeuverContext {
                 .getDegrees());
     }
 
+    @Override
+    public Speed getLowestSpeed() {
+        return getManeuver().getLowestSpeed();
+    }
+
+    @Override
+    public Speed getSpeedDifference() {
+        return new KnotSpeedImpl(getManeuver().getSpeedWithBearingAfter().getKnots() - getManeuver().getSpeedWithBearingBefore().getKnots());
+    }
+
+    @Override
+    public double getMaximimumTurningRateInDegreesPerSecond() {
+        return getManeuver().getMaxTurningRateInDegreesPerSecond();
+    }
+
+    @Override
+    public double getAverageTurningRateInDegreesPerSecond() {
+        return getManeuver().getAvgTurningRateInDegreesPerSecond();
+    }
 }

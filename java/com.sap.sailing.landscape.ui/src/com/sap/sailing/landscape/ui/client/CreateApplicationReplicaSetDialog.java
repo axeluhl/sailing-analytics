@@ -1,5 +1,6 @@
 package com.sap.sailing.landscape.ui.client;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -11,6 +12,7 @@ import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -114,9 +116,39 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
     
     private static class Validator implements DataEntryDialog.Validator<CreateApplicationReplicaSetInstructions> {
         private final StringMessages stringMessages;
+        private final LandscapeManagementWriteServiceAsync landscapeManagementService;
         
-        public Validator(StringMessages stringMessages) {
+        public Validator(StringMessages stringMessages, LandscapeManagementWriteServiceAsync landscapeManagementService) {
             this.stringMessages = stringMessages;
+            this.landscapeManagementService = landscapeManagementService;
+        }
+
+        @Override
+        public void validate(CreateApplicationReplicaSetInstructions valueToValidate, AsyncCallback<String> callback,
+                AsyncActionsExecutor validationExecutor) {
+            // TODO Auto-generated method stub
+            final String localErrorMessage = getErrorMessage(valueToValidate);
+            if (localErrorMessage != null) {
+                validationExecutor.execute(cb->cb.onSuccess(localErrorMessage), VALIDATION_ACTION_CATEGORY, callback);
+            } else {
+                // check availability of DNS name remotely:
+                landscapeManagementService.hasDNSResourceRecordsForReplicaSet(valueToValidate.getName(), valueToValidate.getOptionalDomainName(),
+                        new AsyncCallback<Boolean>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                callback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(Boolean hasDNSResourceRecordsForReplicaSet) {
+                                if (hasDNSResourceRecordsForReplicaSet) {
+                                    callback.onSuccess(stringMessages.dnsNameAlreadyInUse());
+                                } else {
+                                    callback.onSuccess(null); // no error
+                                }
+                            }
+                });
+            }
         }
 
         @Override
@@ -154,7 +186,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             boolean mayUseDynamicLoadBalancer) {
         super(stringMessages
                 .createApplicationReplicaSet(), landscapeManagementService, releaseNames, stringMessages,
-                errorReporter, new Validator(stringMessages), callback);
+                errorReporter, new Validator(stringMessages, landscapeManagementService), callback);
         this.stringMessages = stringMessages;
         this.useExistingSharedMasterInstance = useExistingSharedMasterInstance;
         nameBox = createTextBox("", 40);

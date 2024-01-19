@@ -95,4 +95,9 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
         double directionRad = (2*Math.PI+Math.atan2(y, x))%(2*Math.PI);
         return new MeterPerSecondSpeedWithDegreeBearingImpl(metersPerSecond, new RadianBearingImpl(directionRad));
     }
+    
+    @Override
+    public SpeedWithBearing scale(double d) {
+        return SpeedWithBearing.super.scale(d);
+    }
 }

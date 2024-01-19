@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/com.sap.sailing.windestimation.lab/src/com/sap/sailing/windestimation/data/importer/DurationBasedTwdTransitionImporter.java"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="1"/>
+    </listAttribute>
+    <mapAttribute key="org.eclipse.debug.core.preferred_launchers">
+        <mapEntry key="[run]" value="org.eclipse.jdt.launching.localJavaApplication"/>
+    </mapAttribute>
+    <booleanAttribute key="org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE" value="true"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.sap.sailing.windestimation.data.importer.DurationBasedTwdTransitionImporter"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="com.sap.sailing.windestimation.lab"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="../com.sap.sailing.windestimation.test/resources/trained_wind_estimation_models"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.windestimation.lab"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx4g -Dmongo.uri=&quot;mongodb://localhost/windestimation?uuidRepresentation=javaLegacy&quot;"/>
+</launchConfiguration>

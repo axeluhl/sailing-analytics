@@ -34,7 +34,7 @@ import com.sap.sse.security.ui.client.i18n.subscription.SubscriptionStringConsta
 public class SubscriptionCard extends Composite {
 
     public static enum Type {
-        FREE, OWNER, HIGHLIGHT, DEFAULT, ONETIMELOCK
+        FREE, OWNER, HIGHLIGHT, DEFAULT, UPGRADE, ONETIMELOCK
     }
 
     private static SubscriptionUiBinder uiBinder = GWT.create(SubscriptionUiBinder.class);
@@ -44,8 +44,10 @@ public class SubscriptionCard extends Composite {
     private static final String SUBSCRIPTION_STYLE = SubscriptionCardResources.INSTANCE.css().subscription();
     private static final String FREE_STYLE = SubscriptionCardResources.INSTANCE.css().free();
     private static final String PRICE_STYLE = SubscriptionCardResources.INSTANCE.css().price();
+    private static final String PRICE_DISABLED_STYLE = SubscriptionCardResources.INSTANCE.css().priceDisabled();
     private static final String PRICE_INFO_STYLE = SubscriptionCardResources.INSTANCE.css().priceInfo();
     private static final String SELECTED_STYLE = SubscriptionCardResources.INSTANCE.css().selected();
+    private static final String BUTTON_WARNING = SubscriptionCardResources.INSTANCE.css().buttonWarning();
 
     interface SubscriptionUiBinder extends UiBinder<Widget, SubscriptionCard> {
     }
@@ -72,7 +74,7 @@ public class SubscriptionCard extends Composite {
     private SubscriptionPrice currentPrice;
     private final SubscriptionGroupDTO subscriptionGroupDTO;
 
-    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn) {
+    public <T> SubscriptionCard(SubscriptionGroupDTO subscriptionGroupDTO, Type type, Consumer<SubscriptionPrice> subscriptionCallback, EventBus eventBus, boolean loggedIn, boolean emailValidated) {
         this.subscriptionCallback = subscriptionCallback;
         this.subscriptionGroupDTO = subscriptionGroupDTO;
         SubscriptionCardResources.INSTANCE.css().ensureInjected();
@@ -142,12 +144,26 @@ public class SubscriptionCard extends Composite {
             button.setText(i18n.subscribe());
             break;
         case DEFAULT:
-            button.setText(i18n.subscribe());
+            if (emailValidated) {
+                button.setText(i18n.subscribe());
+            } else {
+                button.setText(i18n.emailNotValidated());
+                button.addStyleName(BUTTON_WARNING);
+            }
+            break;
+        case UPGRADE:
+            if (emailValidated) {
+                button.setText(i18n.upgrade());
+            } else {
+                button.setText(i18n.emailNotValidated());
+                button.addStyleName(BUTTON_WARNING);
+            }
             break;
         case OWNER:
             addStyleName(OWNED_STYLE);
             highlightHeader.add(new Label(i18n.subscriptionOwnerHeaderText()));
             button.setText(i18n.userManagement());
+            prices.addStyleName(PRICE_DISABLED_STYLE);
             break;
         case ONETIMELOCK:
             addStyleName(OWNED_STYLE);
@@ -173,7 +189,7 @@ public class SubscriptionCard extends Composite {
             });
         default:
             break;
-        }       
+        }
         title.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupNameMessageKey()));
         description.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupDescMessageKey()));
         info.setInnerText(subscriptionStringConstants.getString(subscriptionGroupDTO.getSubscriptionGroupInfoMessageKey()));

@@ -62,7 +62,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardName();
     String pleaseEnterAName();
     String pleaseEnterABoatClass();
-    String discardRacesFromHowManyStartedRacesOn();
+    String applyDiscardsBasedOnNumberOfScoredRaces(int maxNumberOfDiscardedResults);
     String leaderboardWithThisNameAlreadyExists();
     String discardThresholdsMustBeNumeric();
     String discardThresholdsMustBeAscending();
@@ -2080,6 +2080,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String qrCodeTitle(String leaderboardName);
     String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
     String qrCodeTitleOpenRegatta(String regattaName);
+    String qrCodeTitleOpenRaceManagerApp();
+    String qrCodeSubTitleOpenRaceManagerApp();
+    String qrCodeTitleErrorCreatingQrCode();
     String qrCodeUnsecureServerRedirect(String hostName);
     String qrCodeUnsecureServerRedirectTitle(String hostName);
     String qrCodeInfoMessage();
@@ -2337,6 +2340,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String subscriptions();
     String noSubscriptions();
     String subscribe();
+    String upgrade();
+    String upgradeInfo();
     String cancelSubscription();
     String subscriptionOwnerHeaderText();
     String subscriptionHighlightText();
@@ -2361,8 +2366,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String nextBillingAt();
     String currencyValue(double value, String currency);
     String errorLoadingUserSubscription(String errMessage);
-    String failedCancelSubscription();
-    String errorCancelSubscription(String errMessage);
+    String failedNonRenewingSubscription();
+    String errorNonRenewingSubscription(String errMessage);
     String errorInvalidSubscritionProvider(String errMessage);
     String unableToLoadCourseAreas(String message);
     String zoomCheckBoxLabel();
@@ -2436,8 +2441,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String timePointOfLastFix();
     String copyMarkDeviceMappings();
     String errorLoadingPolarDataForBoatClass(String boatClass, String message);
-    String confirmCancelSubscriptionTitle();
-    String confirmCancelSubscriptionText();
+    String confirmNonRenewingSubscriptionTitle();
+    String confirmNonRenewingSubscriptionText();
     String videoGuide();
     String orcExplanation();
     String subscriptionOneTimePlanLockedText();
@@ -2452,4 +2457,23 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboard();
     String scoringSchemeHighPointsByWindTiesLastlyBrokenByOtherLeaderboardDescription();
     String helptextLinkingRaces();
+    String scoringSchemeLowPointA82Only();
+    String scoringSchemeLowPointA82OnlyDescription();
+    String scoringSchemeLowPointSystemFirstThreeWinsA82Only();
+    String scoringSchemeLowPointSystemFirstThreeWinsA82OnlyDescription();
+    String errorFetchingUserPreference(String preferenceKey, String message);
+    String errorSettingUserPreference(String preferenceKey, String message);
+    String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal();
+    String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
+    String incrementalScoreCorrectionInPoints();
+    String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
+    String tackTypeUnit();
+    String tackTypeTooltip();
+    String tackType();
+    String tackTypeSegments();
+    String errorMinimumDurationBetweenAdjacentTackTypeSegmentsMustNotBeNegative();
+    String errorMinimumTackTypeSegmentDurationMustNotBeNegative();
+    String minimumDurationBetweenAdjacentTackTypeSegmentsInSeconds();
+    String minimumTackTypeSegmentsDurationInSeconds();
+    String errorNoAuthenticationParamsForGoogleMapsFound(String message);
 }

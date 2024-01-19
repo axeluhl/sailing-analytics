@@ -26,7 +26,8 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
     private final JsonSerializer<EventBase> eventBaseJsonSerializer;
     private final JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer;
 
-    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer, JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer) {
+    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer,
+            JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer) {
         this.eventBaseJsonSerializer = eventBaseJsonSerializer;
         this.leaderboardGroupBaseJsonSerializer = leaderboardGroupBaseJsonSerializer;
     }

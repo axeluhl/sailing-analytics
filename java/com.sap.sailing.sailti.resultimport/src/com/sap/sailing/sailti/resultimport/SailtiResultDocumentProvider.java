@@ -17,7 +17,6 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
  * A sailti.com specific result document provider reading the complete XRR document of an event to find all regattas
  * inside.
  * 
- * @author Frank
  * @author Axel Uhl (d043530)
  *
  */

@@ -1,14 +1,16 @@
 @def SHADOW_COLOR #21a0e4;
 
 .help-icon {
-    width: 23px;
+    width: 17px;
     height: auto;
+    margin: 3px;
     box-shadow: 0 0 5px SHADOW_COLOR;
     background-color: rgba(33, 160, 228, .4);
     border-radius: 100%;
 }
 
 .help-popup {
+	background-color: white;
     box-shadow: 0 0 10px SHADOW_COLOR;
     border: 0 none;
 }

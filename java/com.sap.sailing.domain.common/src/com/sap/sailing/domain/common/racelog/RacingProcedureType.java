@@ -16,7 +16,8 @@ public enum RacingProcedureType {
     ESS("\"Extreme Sailing Series\"-Start"),
     BASIC("Basic Countdown Start"),
     LEAGUE("League Start"),
-    RRS26_3MIN("Fix Line Start with 3min Sequence (RRS26/3)");
+    RRS26_3MIN("Fix Line Start with 3min Sequence (RRS26/3)"),
+    SWC_4MIN("Sailing World Cup Start with 4min Sequence (Kites, Surfers)");
     
     private String displayName;
 

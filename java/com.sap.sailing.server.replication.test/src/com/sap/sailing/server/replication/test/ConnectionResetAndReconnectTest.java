@@ -42,7 +42,6 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     public static boolean forceStopDelivery = false;
     
     static class QueuingConsumerTest extends QueueingConsumer {
-
         public QueuingConsumerTest(Channel ch) {
             super(ch);
         }
@@ -54,11 +53,9 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
             }
             return super.nextDelivery();
         }
-        
     }
     
     static class MasterReplicationDescriptorMock extends ReplicationMasterDescriptorImpl {
-
         public MasterReplicationDescriptorMock(String messagingHost, String hostname, String exchangeName, int servletPort, int messagingPort, Iterable<Replicable<?, ?>> replicables) {
             super(messagingHost, exchangeName, messagingPort, UUID.randomUUID().toString(), hostname, servletPort, /* bearerToken */ null, replicables);
         }
@@ -84,7 +81,6 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
             channel.basicConsume(queueName, /* auto-ack */ true, consumer);
             return consumer;
         }
-        
     }
 
     private static class ServerReplicationTestSetUp extends
@@ -107,7 +103,6 @@ public class ConnectionResetAndReconnectTest extends AbstractServerReplicationTe
     public void testReplicaLoosingConnectionToExchangeQueue() throws Exception {
         assertNotSame(master, replica);
         assertEquals(Util.size(master.getAllRegattas()), Util.size(replica.getAllRegattas()));
-        
         /* until here both instances should have the same in-memory state.
          * now lets add an event on master and stop the messaging queue. */
         stopMessagingExchange();

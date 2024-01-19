@@ -13,7 +13,7 @@ public class StoredDataMiningReportPreferences extends AbstractGenericSerializab
 
     @Override
     protected void addChildSettings() {
-        storedReports = new SettingsList<>("storedReports", this, () -> new StoredDataMiningReportPreference());
+        storedReports = new SettingsList<>("storedReports", this, StoredDataMiningReportPreference::new);
     }
 
     public Iterable<StoredDataMiningReportPreference> getStoredReports() {

@@ -151,7 +151,9 @@
 <setEntry value="org.eclipse.osgi.util@default:default"/>
 <setEntry value="org.eclipse.osgi.util.source@default:default"/>
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
-<setEntry value="com.jcraft.jsch@default:default"/>
+<setEntry value="com.github.mwiede.jsch@default:default"/>
+<setEntry value="com.github.mwiede.jsch.source@default:default"/>
+<setEntry value="bcprov-ext@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api@default:default"/>
 <setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
@@ -301,6 +303,7 @@
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>
 <setEntry value="com.sap.sse.replication.interfaces@default:default"/>
+<setEntry value="com.sap.sse.security.datamining@5:true"/>
 <setEntry value="com.sap.sse.security.persistence@default:default"/>
 <setEntry value="com.sap.sse.security.interface@default:default"/>
 <setEntry value="com.sap.sse.replication.persistence@default:default"/>

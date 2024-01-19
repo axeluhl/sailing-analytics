@@ -23,6 +23,210 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">January 2024</h2>
+          <ul class="bulletList">
+            <li>When launching a new application replica set in a region, the choice of the default RabbitMQ
+                server now depends on the region: in our "default" region "eu-west-1", RabbitMQ is identified
+                by the DNS-mapped host name "rabbit.internal.sapsailing.com". Elsewhere, the RabbitMQ server
+                in the region is explored using the RabbitMQEndpoint tag. If not found, again
+                "rabbit.internal.sapsailing.com" will be used, assuming there may be a VPC peering across
+                regions.</li>
+          </ul>
+          <h2 class="articleSubheadline">October 2023</h2>
+          <ul class="bulletList">
+            <li>TracTrac and YellowBrick passwords are no longer sent back to the client; there were ways to discover
+                those passwords from the password fields by tweaking with the browser's debug tools. When leaving
+                the password field empty during updating a connectivity record, the password will simply be left
+                unchanged.</li>
+            <li>The TracTrac "Update URI" is now discovered from the new field <tt>server_update_uri</tt> in the
+                JSON document describing an event. This way, users don't need to enter it unless they want to
+                override the default with some special value. It is therefore now usually sufficient
+                to enter a user name and password combination in order to activate these updates that are sent
+                back to the TracTrac server.</li>
+          </ul>
+          <h2 class="articleSubheadline">August 2023</h2>
+          <ul class="bulletList">
+            <li>Added a new racing procedure <tt>SWC_4MIN</tt> for kites and windsurfers with a shortened four-minute
+                start sequence with green flag for one minute after start.</li>
+            <li>The layout regression in leaderboard configuration panels ("Leaderboards / Leaderboards" and
+                "Connectors / Smartphone Tracking") has been fixed. The help text has moved above the two
+                caption boxes, and action icon columns for the two bottom tables now resize in lock-step,
+                letting the rows of the two adjacent tables typically have similar, if not the same, height.</li>
+            <li>Course areas can now optionally be specified with a center point and radius for display on the map.</li>
+            <li>Bug fix: when allowing for competitor updates in combination with the TracTrac connector, the updates
+                were not applied properly to the Competitor records in case of a "league" setup where competitors
+                can change their boats in the context of their regatta.</li>
+            <li>Macao and Faroe three-letter IOC / Noational Paralympic Committee codes according to
+                <a href="https://en.wikipedia.org/wiki/List_of_IOC_country_codes">https://en.wikipedia.org/wiki/List_of_IOC_country_codes</a>
+                are now supported (MAC and FRO, respectively).</li>
+            <li>Added "303" as alias name for the "Hansa 303" class</li>
+            <li>Added "RS Venture" boat class with icon</li>
+            <li>The race logs for leaderboards to which the logged-in user has READ permission are now visible under
+                <a href="/gwt/AdminConsole.html#LeaderboardsPlace:">/gwt/AdminConsole.html#LeaderboardsPlace:</a>.</li>
+            <li>The TracTrac connector will now ignore mark positions from marks tagged with a course area that is different
+                from the non-empty course area with which the race is tagged (if any). If either the mark or the race or neither
+                are tagged with a course area on TracTrac's side the mark position will be processed.</li>
+            <li>Auto-Scaling Groups created by landscape management now have monitoring enabled by default.</li>
+            <li>Bug fix: selecting more than one shard for removal in the Landscape Management panel now works properly and
+                removes all shards selected, not only the first.</li>
+            <li>Tracked races without start time are now sorted towards the "later" end of the list.</li>
+          </ul>
+          <h2 class="articleSubheadline">July 2023</h2>
+          <ul class="bulletList">
+            <li>Score updates received through the race log, e.g., from the SAP Sailing Race Manager app or from the
+                SwissTiming tablets through a TracTrac race connection, will update a leaderboard's "last update"
+                time point only if it is newer than the already existing latest score correction time point.
+                This way, if updates are received out of order it will be the latest update defining the
+                last score correction time point.</li>
+            <li>Bugfix: when computing a leaderboard's live delay, not the last race with a valid start time but the
+                "rightmost" race connected to a column in the leaderboard was considered. For example, when the current
+                live race "R3" has a live delay of 2s and there is another race "R4" already connected to the leaderboard
+                with a live delay of 30s then the live delay for the leaderboard will end up being considered to be 30s,
+                not 2s. This is now fixed.</li>
+            <li>The <tt>/sailingserver/windStatus</tt> page now also shows battery levels if received.</li>
+            <li>Tolerate TracTrac competitor status and result updates for unknown competitors (e.g., hidden ones such
+                as jury boats that are tracked). This avoid issues with making race results official, too.</li>
+            <li>"IQF" is now an alias name for "iQFOil"</li>
+            <li>Introduced "SCA" as a new invalid result marker (IRM). When used together with the scoring scheme "LowPointWithAutomaticRDG",
+                a default score is computed based on average of the competitor's scores in all races prior to the one for
+                which the SCA has been given. This implements RRS A9b.</li>
+            <li>Introduced a new scoring scheme: "Low point system; Medal races as quarter final, semi final and grand final."
+                It is well-suited for the iQFOil format as seen in the years 2022/2023. Model each of the Quarter Final,
+                Semi Final, and Grand Final as a separate "Medal Series" with one race each. The scoring scheme understands
+                that the best competitor of the opening series advances to the last medal series (e.g., "Grand Final"), and
+                the second and third of the Opening Series advance straight to the Semi Final (last-but-one medal series).</li>
+            <li>The invalid result markers (IRMs) <tt>SCP</tt>, <tt>STP</tt>, <tt>DPI</tt>, and <tt>RDG</tt> can now consider
+                optional incremental score corrections which are added to the points determined based on the competitor's rank
+                in the race and the scoring scheme that applied to the race. For example, a <tt>DPI</tt> penalty with <tt>+2.5</tt>
+                points may now be specified which applied during tracking the race. Absolute score corrections will be considered
+                for these IRMs at the end of the race, regardless the incremental score correction. Note that the increments
+                are subject to any column factors being applied; this may contradict an event's rules that may state that certain
+                penalties, such as <tt>STP</tt> are <em>not</em> subject to doubling for a medal race. In such cases, specify half
+                the penalty when editing the increment. Specifying and incremental penalties can be done on the <tt>/gwt/LeaderboardEdit.html</tt>
+                reachable from the administration console's Leaderboards/Leaderboards tab (red dice symbol). They are displayed there
+                in brackets behind the score and an optional IRM code, as in "17 DPI [+1.5]". Clearing the corresponding field
+                in the editing popup dialog removes the incremental scoring offset, just like clearing the IRM code drop-down
+                or the absolute score correction removes the values there, respectively.</li>
+          </ul>
+          <h2 class="articleSubheadline">June 2023</h2>
+          <ul class="bulletList">
+            <li>When importing results, sorting of the result documents has been improved. The drop-down now puts those
+                result documents at the top that have the relatively longest match of their class name with the regatta's
+                class name, also now considering all alias names for the class known to the system. For equally likely
+                matches the newer result document is preferred. The score importer used last is remembered in the
+                user preferences now and suggested by default. The most likely result document from that "default"
+                score provider is suggested for import if the boat class name has sufficient overlap with the leaderboard's
+                boat class name.</li>
+            <li>In the Admin Console Regattas section, the table now features a course area column. This was previously shown
+                in the Leaderboards table only. 
+            <li>Handling an error condition more "gracefully:" when in the "Low Point, First to Win Three Races in Final" a competitor
+                was assigned a number of carried wins, but that competitor then did not compete in either of the semi-final fleets, an internal
+                error would keep the entire leaderboard from displaying. This is now ameliorated by logging a warning and sorting
+                such a competitor as "worse" than others with equal points/wins.</li>
+            <li>When archiving a DNS-mapped replica set, the load balancer rules were removed only after even the master process
+                was stopped. Furthermore, all replicas were stopped even if the master was not part of the public target group, before
+                the load balancer rules were changed. This led to the unfortunate situation that
+                the reverse-proxy rule that was already active would not get triggered until the load balancer rules
+                for the replica set were finally removed, letting users receive error 500 status codes.
+                Now, the master is first added to the public target group if it wasn't already a part of it, then all replicas are stopped,
+                then the load balancer rules are removed, and then the master is stopped. This will increase availability, particularly
+                during a replica set archiving process.</li>
+            <li>In the landscape management panel it is now also possible to provide an already existing AWS session token together with
+                access key and secret for logging in. This can help, e.g., when a corporate standard requires signing in with non-IAM
+                roles or accounts where the typical IAM MFA login is not supported. See your <tt>~/.aws/credentials</tt> file for a possible
+                session token and see, for example, the <tt>aadawscli</tt> tool for producing such session credentials from an Azure
+                Active Directory authentication scheme.</li>
+            <li>Igtimi wind import now will trigger un-archiving of archived wind data. From the Igtimi web site: "All resources stored on the
+                Igtimi servers will be archived if they are older than 6 months and have not been accessed for 4 months. When data is archived
+                it is flagged as''“is_archived = true''". Note that when you hit archived data, while unarchiving is triggered, it will happen
+                in the background and take up to a few minutes. You will then have to try again to actually receive the unarchived data.</li>
+          </ul>
+          <h2 class="articleSubheadline">May 2023</h2>
+          <ul class="bulletList">
+            <li>When a user with landscape management permissions creates a new application replica set, e.g., for a new event and the user group created
+                for the new server ("...-server") is also new then the user creating it will now automatically be assigned the role <tt>server_admin</tt>
+                qualified for the new "...-server" group
+                which will allow him / her to manage all technical aspects of the server. The role is assigned "transitively" so that the user may pass
+                it on to other delegate users. This complements the transitive assignment of the <tt>user</tt> role qualified for the new "...-server"
+                group which the user creating a group has always received, also before this update. See
+                <a href="https://wiki.sapsailing.com/wiki/info/security/permission-concept">https://wiki.sapsailing.com/wiki/info/security/permission-concept</a>
+                for more details.</li>
+            <li>When removing a replica set, now the selection in the table showing the MongoDB endpoints is honored: when a selection has been made there,
+                after successfully removing the replica set, its master database will be moved to the MongoDB endpoint selected and will, after successful
+                comparison with the original, be removed from its original location. Likewise, a new parameter is available for the corresponding
+                REST API endpoint for removing replica sets.</li>
+            <li>An STP or SCP scoring code ("Standard Penalty" / "Scoring Penalty") now by default adds 1.0 to the competitor's score as calculated based on the ranking.
+                The STP / SCP code is shown already with the beginning of the race, but any official scoring result entered after the race will be
+                used during replay only once the competitor has finished the race. For the medal stages of the new Formula Kite scoring
+                (Low Point, First to Win Three Races, both, the A8.1 and A8.2 variants) an STP / SCP will add 1.1 to the competitor's score.</li>
+            <li>The "Low Point, First to Win Three Races" scoring schemes, which rank competitors in the medal series based on the number of
+                "races won" now count a win if the competitor has achieved the lowest score in that race. This changes the previous rule where
+                the competitor needed to score 1.0 points in order to be called the "winner" of that race. In particular, with this change
+                a competitor with, say, 2.0 points can be the "winner" of the race in case the competitor finishing first took a standard
+                penalty (STP) or scoring penalty (SCP) which adds 1.1 points to the 1.0 point awarded for finishing first, so a total of 2.1 points, thus worse
+                than the 2.0 points of the competitor finishing second. Should there still be a tie on points, the finishing order is
+                used to break that tie.</li>
+          </ul>
+          <h2 class="articleSubheadline">April 2023</h2>
+          <ul class="bulletList">
+            <li>Added boat classes "IMOCA", "VO65" and "VO60"</li>
+            <li>Implemented a new scoring scheme that ignores A8.1 tie-breaking and only uses A8.2 (last race,
+                second-to-last, etc.)</li>
+            <li>Implemented a new scoring scheme that supports the Formula Kite medal series format but
+                ignores A8.1 tie-breaking and only uses A8.2 (last race, second-to-last, etc.)</li>
+          </ul>
+          <h2 class="articleSubheadline">March 2023</h2>
+          <ul class="bulletList">
+            <li>Users with administrative permissions on a server replica set will now be notified by e-mail about important
+                events affecting the replica set, such as when the primary server instance is upgraded or moved and hence
+                the replica set temporarily cannot accept write requests, or when the replica set is being archived and
+                hence no other archiving should be run at the same time and the replica set being archived should not be
+                modified during the archiving process. The <tt>SERVER</tt> permissions checked are <tt>CAN_IMPORT_MASTERDATA</tt>
+                and <tt>CAN_EXPORT_MASTERDATA</tt> for the archiving process, and <tt>CONFIGURE_LOCAL_SERVER</tt> in case of
+                the primary server becoming unavailable. E-Mail is sent only to addresses that were previously validated
+                successfully.
+            </li>
+            <li>The landscape management panel in the administration console now offers a new action to move all application
+                processes away from a server instance to a new one of which the user can determine the instance type.
+                This is helpful, e.g., when a shared instance has an outdated image / installation, requires kernel updates
+                or other things that at least would require a re-boot. Instead, moving to a new instance which is launched
+                off the latest default image gives a fresh platform to launch the application processes on.
+            </li>
+            <li>The list of Amazon Machine Images in the landscape management panel now shows the AMI ID as a link that
+                will open an AWS console, showing the instances launched off that AMI. This way it becomes easy to see
+                which instances are using which of the managed AMIs.
+            </li>
+            <li>SSH keys produced with new versions of OpenSSH as well as the highly secure ED25519 keys are now supported
+                for AWS landscape management. This removes the requirement to convert new OpenSSH keys to PEM format before
+                starting to work with them.
+            </li>
+            <li>For the DNS name resulting from a new replica set name and an optional domain name or the default domain name
+                (<tt>sapsailing.com</tt>) it is now checked that this name is not taken yet. An error message will be shown
+                otherwise.
+            </li>
+            <li>Sorting of replica-set table by name is now case-insensitive.</li>
+            <li>Bug fix: when working cross-region with the Landscape panel, temporary upgrade replicas were identified
+                trying to obtain their host name from their IP address. When this is attempted, however, for an IP address
+                identifying a host in one region and the host name is determined from within another region then the
+                internal DNS name chosen is that of the other region and therefore incorrect. Instead, now the IP address's
+                numeric representation is used instead.</li>
+            <li>The scoring scheme "Low Point System, First with three wins in medals is winner" has been adjusted to meet the
+                Olympic requirements; see official ORIS document OG2024_SAL_ORIS_R8_V1.2_20230330.pdf. It should be used as follows:
+                An opening series, optionally split into qualification and final series in case the fleet is split, is followed
+                by two medal series: one for the semi-final, and another for the grand final. Both of these medal series should
+                start with a carry-forward which will be interpreted by the scoring scheme as the "number of wins carried forward."
+                These carried wins need to be entered manually into the leaderboard (two wins for the best-seeded, one for the
+                second-best seeded competitor for each fleet in those medal series). The semi-final series should consist of
+                two fleets (A/B, equal rank 0) and will need seven race columns in addition to the carry-forward column because
+                four competitors will race for the first to take three wins (defined as score 1.0 by the document), with a total
+                of three carried wins may take six races at most, but due to a  standard penalty (STP) no competitor may score a
+                win in the first race of a semi-final fleet.<p>
+                The grand-finalists also race for the first to take three wins (including the carried-forward wins). They are
+                ranked by wins, then by the last race rank, then by the second-to-last race rank and so on, up to the first
+                grand-final race, and then by the opening series rank. Likewise, the semi-finalists will be ranked in their
+                respective semi-final fleet. For their overall rank of the competitors ranking 2nd to 4th in their semi-final
+                the two equally-ranked competitors from fleets A and B will be compared based on their opening series rank.</li>
+          </ul>
           <h2 class="articleSubheadline">February 2023</h2>
           <ul class="bulletList">
             <li>Added ability to upload multiple video or image files of an event at once. It also includes some optimizations and bug fixes.

@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Regular operation: "failover" master;
+# assumes Internet is present, "primary" master still up and running,
+# and we need to send outbound replication messages to a local RabbitMQ
+# to not interfere with production RabbitMQ, so 5673 goes to local RabbitMQ.
+#
+killall autossh
+sleep 2
+autossh -M 21504 -f -A -N \
+  -L 22443:sapsailing.com:443 \
+  -L 22222:sapsailing.com:22 \
+  -R 9444:localhost:9443 \
+  -L 443:security-service.sapsailing.com:443 \
+  -R 10202:localhost:10202 \
+  -L 10203:localhost:10203 \
+  -L 15673:localhost:15673 \
+  -L 5675:rabbit.internal.sapsailing.com:5672 \
+  -L 15675:rabbit.internal.sapsailing.com:15672 \
+  -R 18222:localhost:22 \
+  -L 588:email-smtp.eu-west-1.amazonaws.com:587 \
+  ec2-user@paris-ssh.sapsailing.com
+autossh -M 0 -f -A -N \
+  -L 5673:localhost:5672 \
+  localhost
+#
+# The tunnel connection to sap-p1-1 is expected to be established from the sap-p1-1 side by a reverse port forward
+# Tunnel to localhost for TracTrac A port forwards
+tractrac-A

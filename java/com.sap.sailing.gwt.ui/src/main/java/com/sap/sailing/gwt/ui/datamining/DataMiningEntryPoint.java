@@ -312,7 +312,7 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                 });
                 // removing a tab from the result presenter shall remove its query from the current report
                 resultsPresenter.addPresenterRemovedListener((String presenterId, int presenterIndex, StatisticQueryDefinitionDTO queryDefinition) -> {
-                    if (queryDefinition != null) {
+                    if (queryDefinition != null && currentReport != null && currentReport.getReport() != null) {
                         currentReport.getReport().removeQueryDefinition(queryDefinition);
                     }
                 });
@@ -349,12 +349,6 @@ public class DataMiningEntryPoint extends AbstractSailingReadEntryPoint implemen
                 queryDefinitionProvider.addControl(orientationAnchor);
                 queryDefinitionProvider.addControl(new HelpButton(DataMiningHelpButtonResources.INSTANCE,
                         getStringMessages().videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019913740-An-Introduction-to-the-SAP-Sailing-Analytics-Data-Mining-Tool"));
-                /*
-                 * Running queries automatically when they've been changed is currently unnecessary, if not even
-                 * counterproductive. This removes the query runner settings to prevent that the user can enable the
-                 * automatic execution of queries. Re-enable this, when this functionality is desired again.
-                 */
-                // settingsControl.addSettingsComponent(queryRunner);
                 queryAndResultSplitPanel = new SplitLayoutPanel(10);
                 mainPanel.add(queryAndResultSplitPanel);
                 addDefinitionProviderAndResultPresenter();

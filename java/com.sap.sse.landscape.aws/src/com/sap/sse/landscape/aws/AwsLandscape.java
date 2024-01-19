@@ -27,15 +27,18 @@ import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.impl.AwsTargetGroupImpl;
 import com.sap.sse.landscape.aws.impl.DNSCache;
 import com.sap.sse.landscape.aws.orchestration.AwsApplicationConfiguration;
+import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
-import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
@@ -89,7 +92,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @param <MetricsT>
  */
 public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
-    static final long DEFAULT_DNS_TTL_SECONDS = 60l;
+    long DEFAULT_DNS_TTL_SECONDS = 60l;
     
     String ACCESS_KEY_ID_SYSTEM_PROPERTY_NAME = "com.sap.sse.landscape.aws.accesskeyid";
 
@@ -124,12 +127,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
     
     String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
-    
-    /**
-     * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
-     * be the port number (usually 5672) on which the RabbitMQ endpoint can be reached.
-     */
-    String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
     
@@ -305,14 +302,10 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Iterable<SSHKeyPair> getSSHKeyPairs();
 
     /**
-     * Assumes that the {@code keyPair}'s private key has been encrypted using this landscape's default encryption passphrase
-     * and uses that to decrypt it.
-     */
-    byte[] getDecryptedPrivateKey(SSHKeyPair keyPair, byte[] privateKeyEncryptionPassphrase) throws JSchException;
-
-    /**
      * Adds a key pair with {@link KeyPair#decrypt(byte[]) decrypted} private key to the AWS {@code region} identified
-     * and stores it persistently also in the local server's database with the private key encrypted.
+     * and stores it persistently also in the local server's database with the private key encrypted. This will currently
+     * not work for keys of type ED25519 because the {@code getPrivateKey()} method of {@link KeyPair} is not implemented
+     * for that key type and instead throws an {@link UnsupportedOperationException}.
      * <p>
      * 
      * The calling subject must have {@code CREATE} permission for the key and the {@code CREATE_OBJECT} permission for
@@ -321,7 +314,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     SSHKeyPair addSSHKeyPair(com.sap.sse.landscape.Region region, String creator, String keyName, KeyPair keyPairWithDecryptedPrivateKey) throws JSchException;
 
     /**
-     * Creates a key pair with the given name in the region specified and obtains the key details and stores them in
+     * Creates an RSA key pair with the given name in the region specified and obtains the key details and stores them in
      * this landscape persistently, such that {@link #getKeyPairInfo(Region, String)} as well as
      * {@link #getSSHKeyPair(Region, String)} will be able to obtain (information on) the key. The private key is
      * stored encrypted with the passphrase provided as parameter {@code privateKeyEncryptionPassphrase}.<p>
@@ -427,15 +420,21 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     ApplicationLoadBalancer<ShardingKey> getLoadBalancerByName(String name, Region region);
 
     /**
-     * Creates an application load balancer with the name and in the region specified. The method returns once the request
-     * has been responded to. The load balancer may still be in a pre-ready state. Use {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)}
-     * to find out more.<p>
+     * Creates an application load balancer with the name and in the region specified. The method returns once the
+     * request has been responded to. The load balancer may still be in a pre-ready state. Use
+     * {@link #getApplicationLoadBalancerStatus(ApplicationLoadBalancer)} to find out more.
+     * <p>
      * 
-     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port 443 with host, path, and query
-     * left unchanged; and an HTTPS listener that forwards to a default target group to which the default central reverse proxy of the {@code region}
-     * is added as a target.
+     * The load balancer features two listeners: an HTTP listener for port 80 that redirects all requests to HTTPS port
+     * 443 with host, path, and query left unchanged; and an HTTPS listener that forwards to a default target group to
+     * which the default central reverse proxy of the {@code region} is added as a target.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region) throws InterruptedException, ExecutionException;
+    ApplicationLoadBalancer<ShardingKey> createLoadBalancer(String name, Region region,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
 
     Iterable<Listener> getListeners(ApplicationLoadBalancer<ShardingKey> alb);
 
@@ -481,15 +480,15 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Creates a target group with a default configuration that includes a health check URL. Stickiness is enabled with
      * the default duration of one day. The load balancing algorithm is set to {@code least_outstanding_requests}. The
      * protocol (HTTP or HTTPS) is inferred from the port: 443 means HTTPS; anything else means HTTP.
-     * 
      * @param loadBalancerArn
      *            will be set as the resulting target group's {@link TargetGroup#getLoadBalancerArn() load balancer
      *            ARN}. This is helpful if you already know to which load balancer you will add rules in a moment that
      *            will forward to this target group. Just created, the target group's load balancer ARN in AWS will still
      *            be {@code null}, so cannot be discovered.
+     * @param vpcId if {@code null}, the {@code region}'s default VPC will be used
      */
     TargetGroup<ShardingKey> createTargetGroup(Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn);
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId);
     /**
      * Copies a target group from an existing target group. The name gets extended with {@code suffix}
      * @param parent 
@@ -568,6 +567,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     SecurityGroup getSecurityGroup(String securityGroupId, Region region);
 
+    Optional<SecurityGroup> getSecurityGroupByName(String securityGroupName, Region region);
+
     void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
             Iterable<AwsInstance<ShardingKey>> targets);
@@ -609,9 +610,14 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * only a wildcard DNS record exists for the domain. There is a naming rule in place such that
      * {@link #getNonDNSMappedLoadBalancer(Region, String)}, when called with an equal {@code wildcardDomain} and
      * {@code region}, will deliver the load balancer created by this call.
+     * 
+     * @param securityGroupForVpc
+     *            if provided, the security group's VPC association will be used to constrain the subnets for the AZs to
+     *            that VPC; if {@code null}, the default subnet for each respective AZ is used
      */
-    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain) throws InterruptedException, ExecutionException;
-    
+    ApplicationLoadBalancer<ShardingKey> createNonDNSMappedLoadBalancer(Region region, String wildcardDomain,
+            SecurityGroup securityGroupForVpc) throws InterruptedException, ExecutionException;
+
     /**
      * Looks up the hostname in the DNS and assumes to get a load balancer CNAME record for it that exists in the {@code region}
      * specified. The load balancer is then looked up by its {@link ApplicationLoadBalancer#getDNSName() host name}.
@@ -663,13 +669,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port);
 
     Iterable<MongoEndpoint> getMongoEndpoints(Region region);
-
-    /**
-     * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
-     * 
-     * TODO For now, the method searches for accordingly-tagged instances and picks the first one it finds. We need to extend this to RabbitMQ replication.
-     */
-    RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region);
 
     Database getDatabase(Region region, String databaseName);
 
@@ -800,20 +799,29 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     void updateInstanceTypeInAutoScalingGroup(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType);
 
-    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port);
+    TargetGroup<ShardingKey> createTargetGroupWithoutLoadbalancer(Region region, String targetGroupName, int port, String vpcId);
     
     /**
-     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the auto-scaling group
-     * based on the {@code shareName}, configuring it to create its instances into {@code targetGroup} instead of the
-     * {@code autoScalingParent}'s target group, and optionally adding the {@code tags} to those copied anyhow from
-     * the {@code autoScalingParent}. The minimum size is copied from the {@code autoScalingParent} unless it is less than two;
-     * in that case, the new auto-scaling group will be configured with a minimum size of two, ensuring availability in case
-     * one target fails.
+     * Creates a new auto-scaling group, using an existing one as a template and only deriving a new name for the
+     * auto-scaling group based on the {@code shareName}, configuring it to create its instances into
+     * {@code targetGroup} instead of the {@code autoScalingParent}'s target group, and optionally adding the
+     * {@code tags} to those copied anyhow from the {@code autoScalingParent}. The minimum size is the current size of
+     * the {@code autoScalingParent} unless it is less than two; in that case, the new auto-scaling group will be
+     * configured with a minimum size of two (see {@link ShardProcedure#DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE}), ensuring
+     * availability in case one target fails.
+     * 
+     * @return the new auto-scaling group's name.
      */
-    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
-    void createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
-            String shardName, TargetGroup<ShardingKey> targetGroup, Optional<Tags> tags);
-    
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> String createAutoScalingGroupFromExisting(
+            AwsAutoScalingGroup autoScalingParent, String shardName, TargetGroup<ShardingKey> targetGroup, int minSize,
+            Optional<Tags> tags);
+
+    /**
+     * Changes the autoscaling group with {@code autoscalinggroupName} as name in {@code region}. It sets the minSize of
+     * this autoscalingGroup to {@link ShardProcedure#DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE}.
+     */
+    public void resetShardMinAutoscalingGroupSize(String autoscalinggroupName, Region region);
+
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>> 
     void putScalingPolicy(
             int instanceWarmupTimeInSeconds, String shardname, TargetGroup<ShardingKey> targetgroup, int maxRequestPerTarget, com.sap.sse.landscape.Region region);
@@ -841,4 +849,16 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Tags addTargetGroupTag(String arn, String key, String value, com.sap.sse.landscape.Region region);
     
     String getAutoScalingGroupName(String replicaSetName);
+
+    /**
+     * If a {@link #sessionToken} was provided to this landscape, use it to create {@link AwsSessionCredentials}; otherwise
+     * an {@link AwsBasicCredentials} object will be produced from the {@link #accessKeyId} and the {@link #secretAccessKey}.
+     */
+    AwsCredentials getCredentials();
+
+    /**
+     * Lists the availability zones (AZs) in the {@code region}; if {@code vpcId} is {@link Optional#isPresent() present},
+     * it is used to filter for only those AZs that have a subnet configured in the VPC.
+     */
+    Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region region, Optional<String> vpcId);
 }

@@ -86,7 +86,6 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
             assert shardingKeys != null;
             assert replicaSet != null;
             assert region != null;
-            assert passphraseForPrivateKeyDecryption != null;
             return new CreateShard<ShardingKey, MetricsT, ProcessT>(this);
         }
     }
@@ -107,12 +106,13 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
         logger.info(
                 "Creating Targer group for Shard " + name + ". Inheriting from Replicaset: " + replicaSet.getName());
         final TargetGroup<ShardingKey> targetGroup = getLandscape().createTargetGroupWithoutLoadbalancer(region,
-                name.getTargetGroupName(), replicaSet.getMaster().getPort());
+                name.getTargetGroupName(), replicaSet.getMaster().getPort(), loadBalancer.getVpcId());
         getLandscape().addTargetGroupTag(targetGroup.getTargetGroupArn(), ShardTargetGroupName.TAG_KEY, name.getName(), region);
         final AwsAutoScalingGroup autoScalingGroup = replicaSet.getAutoScalingGroup();
-        logger.info("Creating Autoscalinggroup for Shard " + shardName + ". Inheriting from Autoscalinggroup: "
+        logger.info("Creating Auto-Scaling Group for Shard " + shardName + ". Inheriting from Auto-Scaling Group: "
                 + autoScalingGroup.getName());
-        getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, Optional.empty());
+        final int minAutoscalingSize = getMinShardingStartInstanceNumber(autoScalingGroup);
+        final String newAutoscalingGroupName = getLandscape().createAutoScalingGroupFromExisting(autoScalingGroup, shardName, targetGroup, minAutoscalingSize, Optional.empty());
         // create one rule to path unused by any application for linking ALB to target group.
         if (loadBalancer != null) {
             final Iterable<Rule> rules = loadBalancer.getRules();
@@ -146,7 +146,7 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                         boolean ret = true;
                         final Map<AwsInstance<ShardingKey>, TargetHealth> healths = getLandscape()
                                 .getTargetHealthDescriptions(targetGroup);
-                        if (healths.isEmpty()) {
+                        if (healths.isEmpty() || healths.size() < minAutoscalingSize) {
                             ret = false; // if there is no Aws in target
                         } else {
                             for (Map.Entry<AwsInstance<ShardingKey>, TargetHealth> instance : healths.entrySet()) {
@@ -170,6 +170,9 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                     }
                     // change ALB rules to new ones
                     addShardingRules(loadBalancer, shardingKeysToUse, targetGroup);
+                    // restore default minCapacity of shard's autoscalinggroup
+                    getLandscape().resetShardMinAutoscalingGroupSize(newAutoscalingGroupName, region);
+
                 } else {
                     throw new Exception("Unexpected Error - No prio left?");
                 }
@@ -177,6 +180,13 @@ public class CreateShard<ShardingKey, MetricsT extends ApplicationProcessMetrics
                 throw new Exception("Unexpected Error - Loadbalancer was null!");
             }
         }
+    }
+
+    protected int getMinShardingStartInstanceNumber(AwsAutoScalingGroup autoscalingGroupParent) {
+        final int currentMinSize = autoscalingGroupParent.getAutoScalingGroup().instances().size();
+        return (currentMinSize < ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE)
+                ? ShardProcedure.DEFAULT_MINIMUM_AUTO_SCALING_GROUP_SIZE
+                : currentMinSize; // ensure that the minsize is at least 2
     }
 
     public static <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, BuilderT extends Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT>, ShardingKey> Builder<BuilderT, CreateShard<ShardingKey, MetricsT, ProcessT>, ShardingKey, MetricsT, ProcessT> builder() {

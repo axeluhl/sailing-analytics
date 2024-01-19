@@ -2,7 +2,12 @@ package com.sap.sse.security.shared.subscription;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
@@ -28,17 +33,103 @@ public abstract class SubscriptionPlan implements Serializable {
      */
     private final SubscriptionPlanRole[] roles;
     
-    /*
+    /**
      * Used to make Plans of the same category mutually exclusive.
+     * BASIC is a dummy category used to define the features in the feature list.
      */
     public enum PlanCategory {
-        PREMIUM("premium"), DATA_MINING("data_mining");
+        BASIC("free_subscription_plan",
+                "features_organize_events",
+                "features_events_with_more_regatta",
+                "features_connect_to_tractrac",
+                "features_imports",
+                "features_media_management",
+                "features_limited_live_analytics",
+                "features_media_tags", 
+                "features_scoring"),
+        PREMIUM("premium", 
+                "features_organize_events",
+                "features_events_with_more_regatta",
+                "features_connect_to_tractrac",
+                "features_imports",
+                "features_media_management",
+                "features_limited_live_analytics",
+                "features_media_tags", 
+                "features_scoring", 
+                "features_wind_analytics", 
+                "features_maneuver_analytics", 
+                "features_competitor_analytics", 
+                "features_advanced_leaderboard_info", 
+                "features_simulator", 
+                "features_map_analytics"), 
+        DATA_MINING_ARCHIVE("data_mining_archive", 
+                "features_organize_events",
+                "features_events_with_more_regatta",
+                "features_connect_to_tractrac",
+                "features_imports",
+                "features_media_management",
+                "features_limited_live_analytics",
+                "features_media_tags", 
+                "features_scoring", 
+                "features_wind_analytics", 
+                "features_maneuver_analytics", 
+                "features_competitor_analytics", 
+                "features_advanced_leaderboard_info", 
+                "features_simulator", 
+                "features_map_analytics", 
+                "features_data_mining"), 
+        DATA_MINING_ALL("data_mining_all",
+                "features_organize_events",
+                "features_events_with_more_regatta",
+                "features_connect_to_tractrac",
+                "features_imports",
+                "features_media_management",
+                "features_limited_live_analytics",
+                "features_media_tags", 
+                "features_scoring", 
+                "features_wind_analytics", 
+                "features_maneuver_analytics", 
+                "features_competitor_analytics", 
+                "features_advanced_leaderboard_info", 
+                "features_simulator", 
+                "features_map_analytics", 
+                "features_data_mining", 
+                "features_data_mining_all"), 
+        TRIAL("trial");
+        
         final String id;
-        PlanCategory(String id) {
+        
+        final Set<String> featureIds;
+        
+        PlanCategory(String id, String...featureIds) {
             this.id = id;
+            this.featureIds = new HashSet<>(Arrays.asList(featureIds));
         }
+        
         public String getId() {
             return id;
+        }
+        
+        public boolean containsFeature(String featureId) {
+            return featureIds.contains(featureId);
+        }
+        
+        private boolean hasFeature() {
+            return !featureIds.isEmpty();
+        }
+        
+        public static List<PlanCategory> getCategoriesWithFeature() {
+            return Stream.of(PlanCategory.values())
+                    .filter(c -> c.hasFeature())
+                    .collect(Collectors.toList());
+        }
+        
+        public static Set<String> getAllFeatureIds() {
+            final Set<String> featureIds = new LinkedHashSet<>();
+            for (final PlanCategory category : PlanCategory.values()) {
+                featureIds.addAll(category.featureIds);
+            }
+            return featureIds;
         }
     }
     

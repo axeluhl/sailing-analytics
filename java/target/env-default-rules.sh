@@ -58,7 +58,13 @@ if [ -z "${MONGODB_PORT}" ]; then
   MONGODB_PORT=27017
 fi
 if [ -z "${MONGODB_HOST}" -a -z "${MONGODB_URI}" ]; then
-  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${MONGODB_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest"
+  if [ -n "$AUTO_REPLICATE" ]; then
+    # An auto-replication replica by default assumes it has a local MongoDB replica set running on localhost,
+    # called "replica" and running on the default port 27017:
+    MONGODB_URI="mongodb://localhost/${MONGODB_NAME}?replicaSet=replica&retryWrites=true&readPreference=nearest"
+  else
+    MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${MONGODB_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest"
+  fi
 fi
 if [ -z "${EXPEDITION_PORT}" ]; then
   EXPEDITION_PORT=2010
@@ -85,10 +91,10 @@ if [ -z "${REPLICATE_MASTER_EXCHANGE_NAME}" ]; then
   REPLICATE_MASTER_EXCHANGE_NAME=${SERVER_NAME}
 fi
 if [ -z "${BUILD_COMPLETE_NOTIFY}" ]; then
-  export BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+  export BUILD_COMPLETE_NOTIFY=axel.uhl@sap.com
 fi
 if [ -z "${SERVER_STARTUP_NOTIFY}" ]; then
-  export SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  export SERVER_STARTUP_NOTIFY=axel.uhl@sap.com
 fi
 if [ -z "${MEMORY}" ]; then
   # Compute a default amount of memory based on available physical RAM, with a minimum of 2GB:
@@ -106,4 +112,16 @@ if [ -z "${MEMORY}" ]; then
 fi
 if [ -n ${CHARGEBEE_SITE} -a -n ${CHARGEBEE_APIKEY} ]; then
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dchargebee.site=${CHARGEBEE_SITE} -Dchargebee.apikey=${CHARGEBEE_APIKEY}"
+fi
+if [ -n ${MANAGE2SAIL_ACCESS_TOKEN} ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN}"
+fi
+if [ -n ${IGTIMI_CLIENT_ID} ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.client.id=${IGTIMI_CLIENT_ID}"
+fi
+if [ -n ${IGTIMI_CLIENT_SECRET} ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.client.secret=${IGTIMI_CLIENT_SECRET}"
+fi
+if [ -n ${GOOGLE_MAPS_AUTHENTICATION_PARAMS} ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS}"
 fi

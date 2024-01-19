@@ -151,7 +151,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         final Button createFlexibleLeaderboardBtn = buttonPanel
                 .addCreateAction(stringMessages.createFlexibleLeaderboard() + " ...", this::createFlexibleLeaderboard);
         createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-
         final Supplier<Boolean> leaderboardCreateAndRegattaReadPermission = () -> userService
                 .hasCurrentUserPermissionToCreateObjectOfType(LEADERBOARD)
                 && userService.hasCurrentUserAnyPermission(REGATTA.getPermission(READ), null);
@@ -545,7 +544,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         actionsColumn.addAction(ACTION_SET_STARTTIME, UPDATE, object -> setStartTime(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_SET_FINISHING_AND_FINISH_TIME, UPDATE,
                 object -> setEndTime(object.getA(), object.getB()));
-        actionsColumn.addAction(ACTION_SHOW_RACELOG, UPDATE, object -> showRaceLog(object.getA(), object.getB()));
+        actionsColumn.addAction(ACTION_SHOW_RACELOG, READ, object -> showRaceLog(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, UPDATE,
                 object -> editCompetitorToBoatMappings(object.getA(), object.getB()));
         actionsColumn.addAction(ACTION_CERTIFICATE_ASSIGNMENT, READ, object -> assignCertificates(object));
@@ -873,9 +872,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 canDeleteAllSelected = false;
             }
         }
-
         leaderboardRemoveButton.setEnabled(!selectedLeaderboards.isEmpty() && canDeleteAllSelected);
-
         final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();

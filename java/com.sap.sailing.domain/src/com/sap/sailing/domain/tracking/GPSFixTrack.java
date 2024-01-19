@@ -197,5 +197,4 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * {@link #getFixes()} if and only if this method returns {@code true}.
      */
     boolean isValid(FixType e);
-
 }

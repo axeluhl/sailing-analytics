@@ -20,8 +20,9 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  com.sap.sse.security
 Bundle-ClassPath: .
 Automatic-Module-Name: com.sap.sailing.selenium.test
-Import-Package: javax.ws.rs.core;version="1.1.1",
+Import-Package: com.sap.sailing.server.security,
+ javax.ws.rs.core;version="1.1.1",
+ javax.xml.bind,
  org.apache.http.client;version="4.5.5",
  org.json.simple,
- org.json.simple.parser,
- javax.xml.bind
+ org.json.simple.parser

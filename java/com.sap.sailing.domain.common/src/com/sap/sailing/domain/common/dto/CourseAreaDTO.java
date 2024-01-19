@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.Distance;
 import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
@@ -9,17 +11,34 @@ import com.sap.sse.security.shared.dto.NamedDTO;
  */
 public class CourseAreaDTO extends NamedDTO {
     private static final long serialVersionUID = -5279690838452265454L;
-    public UUID id;
+    private UUID id;
+    private Position centerPosition;
+    private Distance radius;
     
     @Deprecated
     CourseAreaDTO() {} // for GWT RPC serialization only
 
-    public CourseAreaDTO(String name) {
+    public CourseAreaDTO(UUID id, String name) {
+        this(id, name, /* centerPosition */ null, /* radius */ null);
+    }
+    
+    public CourseAreaDTO(UUID id, String name, Position centerPosition, Distance radius) {
         super(name);
+        this.id = id;
+        this.centerPosition = centerPosition;
+        this.radius = radius;
     }
     
     public UUID getId() {
         return id;
+    }
+
+    public Position getCenterPosition() {
+        return centerPosition;
+    }
+
+    public Distance getRadius() {
+        return radius;
     }
 
     @Override
