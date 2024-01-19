@@ -1,5 +1,6 @@
 #!/bin/bash
 # Usage: ${0} [ -b {bugs-password] ] [ -r {root-password} ] {instance-ip}
+# Deploy with Amazon Linux 2023
 
 # Read options and assign to variables:
 options='b:r:'
@@ -40,36 +41,22 @@ else
   # Install packages for MariaDB and cron/anacron/crontab:
   sudo yum update -y
   sudo yum -y install mariadb105-server cronie
+  sudo su -c "printf '[mysqld]\nlog_bin = /var/log/mariadb/mysql-bin.log' >> /etc/my.cnf.d/mariadb-server.cnf"
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
   crontab /home/ec2-user/crontab
-  cat <<'EOF' >${BACKUP_FILE}
--- The following two lines added manually, based on
--- https://dba.stackexchange.com/questions/266480/mariadb-mysql-all-db-import-table-user-already-exists
-DROP TABLE IF EXISTS `mysql`.`global_priv`;
-DROP VIEW IF EXISTS `mysql`.`user`;
-EOF
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data" >> ${BACKUP_FILE}
   echo "Importing backup locally..."
-  sudo mysql -u root -h localhost <${BACKUP_FILE}
-  sudo mysql -u root -h localhost -e "FLUSH PRIVILEGES;"
+  sudo mysql -u root  <${BACKUP_FILE}
+  sudo mysql -u root -p${ROOT_PW} -e "FLUSH PRIVILEGES;"
   sudo systemctl stop mariadb.service
-  echo "Launching mysqld_safe to update user passwords..."
-  sudo mysqld_safe --skip-grant-tables --skip-networking &
-  while ! sudo mysql -u root -e "show databases;" >/dev/null; do
-    echo "Waiting for mysqld_safe to become available..."
-    sleep 5
-  done
-  mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('${ROOT_PW}') WHERE user='root';"
-  mysql -u root -e "UPDATE mysql.user SET password=PASSWORD('${BUGS_PW}') WHERE user='bugs';"
-  mysql -u root -e "FLUSH PRIVILEGES;"
-  sudo mysqladmin -u root --password=${ROOT_PW} shutdown
   sudo systemctl start mariadb.service
+  sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
   echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
-  echo "make sure the instance has the \"Database and Messaging\" security group set,
+  echo "make sure the instance has the \"Database and Messaging\" security group set,"
   echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi
