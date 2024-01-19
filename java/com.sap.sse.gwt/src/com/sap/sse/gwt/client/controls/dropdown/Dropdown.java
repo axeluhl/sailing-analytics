@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.LinkUtil;
 
@@ -27,6 +28,7 @@ public class Dropdown extends Composite {
     @UiField DivElement dropdownTitle;
     @UiField DivElement dropdownHeadTitleButton;
     @UiField SpanElement dropdownHeadTitle;
+    @UiField HTMLPanel dropdownPanel;
     private final DropdownResources local_res;
     final DropdownHandler dropdownHandler; // final to force initialization; default scope to avoid unused warning
 
@@ -39,6 +41,7 @@ public class Dropdown extends Composite {
         local_res = resources;
         resources.css().ensureInjected();
         dropdownHandler = createDropdownHandler();
+        dropdownPanel.addStyleName(local_res.css().dropdown_panel());
         dropdownTitle.addClassName(local_res.css().dropdown());
         dropdownTitle.addClassName(local_res.css().jsdropdown());
         dropdownTrigger.addClassName(local_res.css().dropdown_head());

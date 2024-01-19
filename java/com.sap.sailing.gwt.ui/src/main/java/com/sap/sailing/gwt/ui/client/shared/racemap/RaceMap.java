@@ -223,9 +223,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private DelegateCoordinateSystem coordinateSystem;
     
+    /**
+     * A panel with flex-box display, representing the semi-transparent header bar. It aligns its flex-items
+     * on the center line vertically and uses "space-between" for the horizontal alignment. It has a fixed height
+     * and uses "border-box" sizing. Things to display in the header bar at the top of the map must be added
+     * as elements to it, making the children "flex-items" which may again use "display: flex" in their styles
+     * to nest flex boxes in the header.
+     */
     private FlowPanel headerPanel;
-    private AbsolutePanel panelForLeftHeaderLabels;
-    private AbsolutePanel panelForRightHeaderLabels;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -838,10 +843,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
   </body>
 </html>
          */
-        panelForLeftHeaderLabels = new AbsolutePanel();
-        panelForLeftHeaderLabels.setHeight("60px");
-        panelForRightHeaderLabels = new AbsolutePanel();
-        panelForRightHeaderLabels.setHeight("60px");
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver, raceMapLifecycle.getRaceDTO());
@@ -1131,7 +1132,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                     if (ClientConfiguration.getInstance().isBrandingActive()) {
-                        getLeftHeaderPanel().insert(createSAPLogo(), 0);
+                        getHeaderPanel().insert(createSAPLogo(), 0);
                     }
                 }
                 createAdvancedFunctionsButtonGroup(showMapControls);
@@ -1280,6 +1281,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // we need a panel that does not have any transparency to have the
         // labels shown in the right color. This panel also needs to have
         // a higher z-index than other elements on the map
+        AbsolutePanel panelForLeftHeaderLabels = new AbsolutePanel();
+        panelForLeftHeaderLabels.setHeight("60px");
+        AbsolutePanel panelForRightHeaderLabels = new AbsolutePanel();
+        panelForRightHeaderLabels.setHeight("60px");
         map.setControls(ControlPosition.TOP_LEFT, panelForLeftHeaderLabels);
         panelForLeftHeaderLabels.getElement().getParentElement().getStyle().setProperty("zIndex", "1");
         panelForLeftHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
@@ -1294,7 +1299,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel.ensureDebugId("headerPanel");
         // some sort of hack: not positioning TOP_LEFT because then the
         // controls at RIGHT would not get the correct top setting
-        map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
+        map.setControls(ControlPosition.TOP_RIGHT, panelForRightHeaderLabels);
+        rootPanel.add(headerPanel);
+    }
+    
+    public FlowPanel getHeaderPanel() {
+        return headerPanel;
     }
     
     private Button createSettingsButton(MapWidget map) {
@@ -1458,17 +1468,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public RaceSimulationOverlay getSimulationOverlay() {
         return simulationOverlay;
-    }
-    
-    /**
-     * @return the Panel where labels or other controls for the header can be positioned
-     */
-    public AbsolutePanel getLeftHeaderPanel() {
-        return panelForLeftHeaderLabels;
-    }
-    
-    public AbsolutePanel getRightHeaderPanel() {
-        return panelForRightHeaderLabels;
     }
     
     @Override
@@ -3591,10 +3590,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
-        getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
-        getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
-        getLeftHeaderPanel().setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
-        getRightHeaderPanel().setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
+        headerPanel.setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        headerPanel.setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
         if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();

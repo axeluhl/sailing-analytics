@@ -4,10 +4,13 @@
 .jsdropdown_head,
 .jsdropdown_content {
   text-indent: 0;
+  width: 100%;
+}
+.dropdown_panel {
+    width: 100%;
 }
 .dropdown {
   font-size: 1rem;
-  width: 100%;
   max-width: 100%;
   display: inline-block;
   text-align: left;
@@ -18,19 +21,21 @@
   display: inline-block;
   position: relative;
   padding-left: 0.75em;
-  padding-right: 1.75em;
+  padding-right: 0.75em;
   border-radius: 0.107142857142857em;
   border: 1px solid transparent;
   cursor: pointer;
+  width: 100%;
 }
 .compactHeader .dropdown_head {
   display: inline-block;
   position: relative;
   padding-left: 0em;
-  padding-right: 1em;
+  padding-right: 0.5em;
   border-radius: 0.107142857142857em;
   border: 1px solid transparent;
   cursor: pointer;
+  width: 100%;
 }
 .dropdown_head:hover {
   border: 1px solid #cfcfcf;
@@ -38,54 +43,36 @@
   text-decoration: none;
 }
 .dropdown_head_title {
+  display: flex;
+  align-items: center;
   font-size: 1.6em;
   color: #fff;
-  height: 1.36em;
   line-height: 0.9;
   font-weight: bold;
+  max-height: 60px;
+  overflow: hidden;
 }
 .compactHeader .dropdown_head_title {
    font-size: 0.75em;
    color: #fff;
-   height: 0.7em;
    line-height: 1;
    font-weight: normal;
 }
 .dropdown_head_title_button {
-  position: absolute;
-  top: 0.75em;
-  right: 0;
   display: inline-block;
-  margin-left: 0.3em;
   height: 0.285714285714286em;
   width: 0.428571428571429em;
   background-image: resourceUrl("arrowDownFilledWhite");
   background-position: center bottom;
   background-repeat: no-repeat;
   background-size: 100%;
-  -webkit-transform: translate(-50%, -50%);
-     -moz-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
   float: none;
+  margin-left: 5px;
+  flex-shrink: 0;
 }
 .compactHeader .dropdown_head_title_button {
-  position: absolute;
-  top: 0.5em;
-  right: 0;
-  display: inline-block;
-  margin-left: 0.714285714285714em;
-  height: 0.285714285714286em;
-  width: 0.428571428571429em;
-  background-image: resourceUrl("arrowDownFilledWhite");
-  background-position: center bottom;
-  background-repeat: no-repeat;
-  background-size: 100%;
-  -webkit-transform: translate(-50%, -50%);
-     -moz-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
-  float: none;
+  height: 0.5em;
+  width: 0.7em;
 }
 .dropdown_content {
   position: absolute;

@@ -195,7 +195,7 @@ public class RaceBoardPanel
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     private final RaceMap raceMap;
     
-    private final FlowPanel raceInformationHeader;
+    private final FlowPanel racePicker;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
     private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
@@ -265,8 +265,8 @@ public class RaceBoardPanel
         this.raceboardContextDefinition = raceboardContextDefinition;
         FlowPanel mainPanel = new ResizableFlowPanel();
         mainPanel.setSize("100%", "100%");
-        raceInformationHeader = new FlowPanel();
-        raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
+        racePicker = new FlowPanel();
+        racePicker.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
         regattaAndRaceTimeInformationHeader.getElement().getStyle().setProperty("pointerEvents", "auto");
@@ -300,6 +300,10 @@ public class RaceBoardPanel
                 mainCss.usermanagement_open(), mainCss.user_menu_premium());
         this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("pointerEvents", "auto");
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("display", "inline-block");
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("position", "relative");
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("top", "0px");
+        this.userManagementMenuView.asWidget().getElement().getStyle().setProperty("right", "0px");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
@@ -370,9 +374,15 @@ public class RaceBoardPanel
                         return leaderboardPanel.getLeaderboard();
                     }
                 }, selectedRaceIdentifier, withSecurity.getUserService().getStorage());
-        raceMap.getLeftHeaderPanel().add(raceInformationHeader);
-        raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
-        raceMap.getRightHeaderPanel().add(userManagementMenuView);
+        raceMap.getHeaderPanel().add(racePicker);
+        final FlowPanel filler = new FlowPanel();
+        filler.setStyleName("RaceMap-Header-Filler"); // to create space between race picker and event/time/data-by display
+        raceMap.getHeaderPanel().add(filler);
+        raceMap.getHeaderPanel().add(regattaAndRaceTimeInformationHeader);
+        final FlowPanel userManagementMenuPanel = new FlowPanel();
+        userManagementMenuPanel.addStyleName("AuthenticationButton");
+        userManagementMenuPanel.add(userManagementMenuView);
+        raceMap.getHeaderPanel().add(userManagementMenuPanel);
         addChildComponent(raceMap);
         // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
         final String sharedTagURLParameter = parsedPerspectiveOwnSettings.getJumpToTag();
@@ -801,8 +811,8 @@ public class RaceBoardPanel
             final Dropdown raceDropDown = createRaceDropDown(raceColumn, fleet);
             final Label raceNameLabel = new Label(stringMessages.race() + " " + raceColumn.getRaceColumnName());
             raceNameLabel.setStyleName("RaceName-Label");
-            raceInformationHeader.clear();
-            raceInformationHeader.add(raceDropDown);
+            racePicker.clear();
+            racePicker.add(raceDropDown);
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
@@ -825,16 +835,16 @@ public class RaceBoardPanel
             final Label raceTimeLabel = computeRaceInformation(raceColumn, fleet);
             raceTimeLabel.setStyleName("RaceTime-Label");
             regattaAndRaceTimeInformationHeader.clear();
-            final FlowPanel helpButtonPanel = new FlowPanel();
+            final FlowPanel helpButtonAndRaceTimePanel = new FlowPanel();
+            helpButtonAndRaceTimePanel.setStyleName("Help-And-RaceTime");
             final HelpButton helpButton = new HelpButton(HelpButtonResources.INSTANCE,
                     stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview");
             if (!DeviceDetector.isMobile()) {
-                helpButtonPanel.add(helpButton);
-                helpButtonPanel.setStyleName("HelpButton");
-                regattaAndRaceTimeInformationHeader.add(helpButtonPanel);
+                helpButtonAndRaceTimePanel.add(helpButton);
             }
+            helpButtonAndRaceTimePanel.add(raceTimeLabel);
             regattaAndRaceTimeInformationHeader.add(regattaNameAnchor);
-            regattaAndRaceTimeInformationHeader.add(raceTimeLabel);
+            regattaAndRaceTimeInformationHeader.add(helpButtonAndRaceTimePanel);
             final DataByLogo dataByLogo = new DataByLogo();
             dataByLogo.setUp(trackingConnectorInfo == null ? Collections.emptySet()
                     : Collections.singleton(trackingConnectorInfo), /** colorIfPossible **/ false, /** enforceTextColor **/ true);

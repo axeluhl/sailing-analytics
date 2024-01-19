@@ -5,6 +5,9 @@
 .jsdropdown_content {
   text-indent: 0;
 }
+.dropdown_panel {
+    width: 100%;
+}
 .dropdown {
   font-size: 1rem;
   width: 100%;

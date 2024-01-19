@@ -21,5 +21,6 @@ public interface DropdownResources extends CommonIcons {
         String dropdown_content_link_title();
         String dropdown_content_link_subtitle();
         String dropdown_content_linkactive();
+        String dropdown_panel();
     }
 }
