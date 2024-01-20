@@ -51,6 +51,7 @@ import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping
 import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
+import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
 
@@ -534,5 +535,26 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         final HttpURLConnection healthCheckConnection = (HttpURLConnection) new URL("http://"+proxy.getHosts().iterator().next().getPublicAddress().getCanonicalHostName()+proxy.getHealthCheckPath()).openConnection();
         assertEquals(200, healthCheckConnection.getResponseCode());
         healthCheckConnection.disconnect();
+    }
+
+    @Test
+    public void getDefaultRabbitConfigForEuWest1() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.EU_WEST_1, landscape));
+        assertEquals("rabbit.internal.sapsailing.com", rabbitConfig.getNodeName());
+        assertEquals(5672, rabbitConfig.getPort());
+    }
+    
+    @Test
+    public void getDefaultRabbitConfigForEuWest2() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.EU_WEST_2, landscape));
+        assertTrue(rabbitConfig.getNodeName().startsWith("172.31."));
+        assertEquals(5672, rabbitConfig.getPort());
+    }
+    
+    @Test
+    public void getDefaultRabbitConfigForRegionWithNoTaggedInstanceInIt() {
+        final RabbitMQEndpoint rabbitConfig = landscape.getDefaultRabbitConfiguration(new AwsRegion(Region.US_EAST_2, landscape));
+        assertEquals("rabbit.internal.sapsailing.com", rabbitConfig.getNodeName());
+        assertEquals(5672, rabbitConfig.getPort());
     }
 }

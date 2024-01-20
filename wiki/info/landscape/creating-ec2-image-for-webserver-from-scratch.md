@@ -123,13 +123,13 @@ lrwxrwxrwx  1 root root       75 Oct 20 09:00 notify-operators -> /home/wiki/git
 lrwxrwxrwx  1 root root       78 Feb  8  2021 update_authorized_keys_for_landscape_managers -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers
 lrwxrwxrwx  1 root root       89 Feb  8  2021 update_authorized_keys_for_landscape_managers_if_changed -> /home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed
 ```
-* set up ``crontab`` for ``root`` user (remove the symbolic link to ``/home/sailing/code/configuration/crontab`` if that had been created earlier)
+* set up ``crontab`` for ``root`` user (remove the symbolic link to ``/home/sailing/code/configuration/crontab`` if that had been created earlier). Note that ``configuration/crontabs`` contains a selection of crontab files for different use cases, including the ``environments/crontab-reverse-proxy-instance``, which should be pointed to by a symbolic link in /root.
 ```
 0 10 1 * *  export PATH=/bin:/usr/bin:/usr/local/bin; mail-events-on-my >/dev/null 2>/dev/null
 * * * * *   export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_authorized_keys_for_landscape_managers_if_changed $( cat /root/ssh-key-reader.token ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
 0 7 2 * *   export PATH=/bin:/usr/bin:/usr/local/bin; docker exec -it registry-registry-1 registry garbage-collect /etc/docker/registry/config.yml
 ```
-* set up crontab for user `wiki` as `*/10 * * * * /home/wiki/syncgit` and make sure the script is in place
+* set up crontab for user `wiki` as a symbolic link to /configuration/crontabs/users/crontab-wiki.
 * ensure that ``/var/log/old/cache/docker`` makes it across from any previous installation to the new one; it contains the docker registry contents. See in particular ``/var/log/old/cache/docker/registry/docker/registry/v2/repositories``.
 * [install docker registry](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) so that the following containers are up and running:
 ```
@@ -190,9 +190,9 @@ write and quit, to install the cronjob.
 * * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
 ```
 
-If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`, in that directory.
+If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
 
-## Basic setup for reverse proxy instance
+## Basic setup for disposable reverse proxy instance
 
 From a fresh amazon linux 2023 instance (HVM) install perl, httpd, mod_proxy_html, tmux, nfs-utils, git, whois and jq. Then type `amazon-linux-extras install epel`, which adds the epel repo so you can then run install apachetop.
 Then you need to remove the automatic ec2 code which disabled root access; reconfigure the sshd_config; setup the keys update script; and initialise the crontab. Store a bearer token in the home dir.
@@ -211,7 +211,7 @@ Postmail is useful. The script for this procedure is in configuration and is tit
 
 Setup the logrotate target.
 
-Setup the fstab (not automated).
 Update amazon cli (because pricing list requires it)
+
 
 

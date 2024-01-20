@@ -1,6 +1,7 @@
 #!/bin/bash
 MONGODBS="mongodb://dbserver.internal.sapsailing.com:10201/?replicaSet=archive mongodb://dbserver.internal.sapsailing.com:10202/?replicaSet=slow mongodb://dbserver.internal.sapsailing.com:10203/?replicaSet=live"
-MAILINGLIST="/home/trac/mailinglists/unhealthy-mongo-list"
+#MAILINGLIST="/home/trac/mailinglists/unhealthy-mongo-list"
+MAILINGLIST=$(cat /var/cache/landscapeManagersMailingList)
 for db in $MONGODBS; do
   echo "rs.status()" | mongo --quiet "$db" | grep '\("set"\)\|\("name"\)\|\("health"\)\|\("stateStr"\)' | sed -e 's/^.* : "\?//' -e 's/"\?,$//' | (
     read replicaset
