@@ -22,8 +22,6 @@
   position: relative;
   padding-left: 0.75em;
   padding-right: 0.75em;
-  border-radius: 0.107142857142857em;
-  border: 1px solid transparent;
   cursor: pointer;
   width: 100%;
 }
@@ -45,17 +43,15 @@
 .dropdown_head_title {
   display: flex;
   align-items: center;
-  font-size: 1.6em;
+  font-size: large;
   color: #fff;
-  line-height: 0.9;
   font-weight: bold;
   max-height: 60px;
   overflow: hidden;
 }
 .compactHeader .dropdown_head_title {
-   font-size: 0.75em;
+   font-size: small;
    color: #fff;
-   line-height: 1;
    font-weight: normal;
 }
 .dropdown_head_title_button {
