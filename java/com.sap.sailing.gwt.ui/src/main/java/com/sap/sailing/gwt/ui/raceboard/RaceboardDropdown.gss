@@ -36,9 +36,7 @@
   width: 100%;
 }
 .dropdown_head:hover {
-  border: 1px solid #cfcfcf;
-  background-color: #eee;
-  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.75);
 }
 .dropdown_head_title {
   display: flex;
