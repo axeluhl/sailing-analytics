@@ -24,7 +24,7 @@ else
     scp root@sapsailing.com:dev-secrets /tmp
     scp root@sapsailing.com:hudson-aws-credentials /tmp
     sudo mv /tmp/dev-secrets /root/secrets
-    mkdir /root/.aws
+    sudo mkdir /root/.aws
     sudo mv /tmp/hudson-aws-credentials /root/.aws/credentials
     sudo chown root:root /root/secrets /root/.aws/credentials
     sudo chmod 600 /root/secrets /root/.aws/credentials
