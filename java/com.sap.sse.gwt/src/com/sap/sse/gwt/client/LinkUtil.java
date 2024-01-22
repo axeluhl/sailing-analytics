@@ -28,7 +28,7 @@ public final class LinkUtil {
      * @return true if the event is a "normal" click event, false otherwise
      */
     public static boolean handleLinkClick(Event event) {
-        if(event.getTypeInt() != Event.ONCLICK) {
+        if (event.getTypeInt() != Event.ONCLICK) {
             return false;
         }
         return HYPERLINK_IMPL.handleAsClick(event);
