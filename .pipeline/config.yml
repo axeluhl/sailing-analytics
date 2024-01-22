@@ -26,4 +26,4 @@ steps:
     versioningModel: 'semantic' # overwrite default from general section -> don't spam Cumulus
   # Rotating vault secret if it is expring soon:
   vaultRotateSecretId:
-    daysBeforeExpiry: 30
+    daysBeforeExpiry: 45
