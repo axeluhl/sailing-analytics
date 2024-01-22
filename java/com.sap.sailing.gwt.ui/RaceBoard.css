@@ -687,6 +687,7 @@ img.openColumn {
   cursor: pointer;
   font-family: 'Open Sans', Arial, Verdana, sans-serif;
   font-size: large;
+  line-height: normal;
 }
 
 @media (max-width: 500px) {
