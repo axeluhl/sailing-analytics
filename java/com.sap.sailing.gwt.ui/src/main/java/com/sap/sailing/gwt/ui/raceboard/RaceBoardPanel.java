@@ -793,6 +793,7 @@ public class RaceBoardPanel
                         final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(RACEBOARD_PATH, strippedRaceBoardContextDefinition);
                         final String url = linkWithSettingsGenerator.createUrl(getSettings()); // launch with the same settings as the current race
                         Window.open(url, raceIdentifier.toString(), "");
+                        result.hide();
                     });
                     if (selected) {
                         // select the race selected for this RaceBoardPanel

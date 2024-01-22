@@ -57,7 +57,7 @@ public class DropdownHandler {
         });
     }
     
-    private void hide() {
+    void hide() {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {

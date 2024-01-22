@@ -68,6 +68,10 @@ public class Dropdown extends Composite {
         };
     }
     
+    public void hide() {
+        dropdownHandler.hide();
+    }
+    
     public void setDisplayedText(String displayedText) {
         dropdownDisplayedText.setInnerText(displayedText);
     }
