@@ -314,3 +314,10 @@ input.com-sap-sse-gwt-client-controls-datetime-DateTimeInputResources-Style-date
         background-image: none !important;
     }
 }
+
+div.validation-error {
+	color: TEXT_COLOR_ERROR;
+}
+input.validation-error {
+    border-color: TEXT_COLOR_ERROR;
+}

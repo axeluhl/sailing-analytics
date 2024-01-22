@@ -95,7 +95,7 @@ public interface ManagementConsoleResources extends ClientBundle {
         String anchor();
 
         String button();
-        
+
         @ClassName("button-right")
         String buttonRight();
 
@@ -121,7 +121,7 @@ public interface ManagementConsoleResources extends ClientBundle {
         String flexItemAutoWidth();
 
         String ellipsis();
-        
+
         @ClassName("event-header")
         String eventHeader();
 
@@ -146,9 +146,12 @@ public interface ManagementConsoleResources extends ClientBundle {
 
         @ClassName("card-content")
         String cardContent();
-        
+
         @ClassName("icon-drop-down")
         String iconDropDown();
+
+        @ClassName("validation-error")
+        String validationError();
 
     }
 

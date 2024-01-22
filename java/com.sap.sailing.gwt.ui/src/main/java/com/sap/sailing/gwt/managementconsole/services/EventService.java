@@ -94,7 +94,6 @@ public class EventService {
             @Override
             public void onSuccess(final LeaderboardGroupDTO result) {
                 final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
-                // TODO: merge master to managementConsole
                 final List<CourseAreaDTO> courseAreaDtos = new ArrayList<CourseAreaDTO>();
                 courseAreaNames.forEach(name -> courseAreaDtos.add(new CourseAreaDTO(UUID.randomUUID(), name)));
                 sailingService.createEvent(name, null, date, null, venue, false, courseAreaDtos, null, null, new HashMap<String, String>(),

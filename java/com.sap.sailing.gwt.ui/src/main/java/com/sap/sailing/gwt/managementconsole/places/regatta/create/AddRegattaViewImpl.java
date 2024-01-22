@@ -61,39 +61,44 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         createRacesTextBox();
         initWidget(uiBinder.createAndBindUi(this));
         createRegattaDefaults();
-      
         back.addClickHandler(e -> presenter.cancelAddRegatta());
         addRegattaButton.addClickHandler(e -> validate());
     }
 
     private void validate() {
         validationUi.setInnerHTML("");
+        regattaNameInput.removeClassName(ManagementConsoleResources.INSTANCE.style().validationError());
+        boatClassNameTextBox.removeStyleName(ManagementConsoleResources.INSTANCE.style().validationError());
         if (regattaNameInput.getValue() == null || regattaNameInput.getValue().isEmpty()) {
             showValidationFailure("Please fill in regatta name");
+            regattaNameInput.addClassName(ManagementConsoleResources.INSTANCE.style().validationError());
         } 
         if (!isRegattaNameValid()) {
             showValidationFailure("Please change Regatta name. It is not unique");
+            regattaNameInput.addClassName(ManagementConsoleResources.INSTANCE.style().validationError());
         }
         if (boatClassNameTextBox.getValue() == null || boatClassNameTextBox.getValue().isEmpty()) {
             showValidationFailure("Please fill in boat class");
+            boatClassNameTextBox.addStyleName(ManagementConsoleResources.INSTANCE.style().validationError());
         }
         if (validationUi.getInnerHTML().isEmpty()) {
             presenter.addRegatta(regattaNameInput.getValue(), boatClassNameTextBox.getValue(), 
                     rankingListBox.getValue(), racesInput.getValue(), scoringSystemListBox.getValue());
         }
     }
-    
+
     private boolean isRegattaNameValid() {
         return presenter.validateRegattaName(regattaNameInput.getValue());
     }
-    
+
     private void showValidationFailure(String validationMessage) {
         DivElement validationMsg = Document.get().createDivElement();
-        validationMsg.setClassName(ManagementConsoleResources.INSTANCE.fonts().text());
+        validationMsg.addClassName(ManagementConsoleResources.INSTANCE.style().validationError());
+        validationMsg.addClassName(ManagementConsoleResources.INSTANCE.fonts().text());
         validationMsg.setInnerText(validationMessage);
         validationUi.appendChild(validationMsg);
     }
-    
+
     private void createScoringSystemListBox() {
         scoringSystemListBox = new ValueListBox<ScoringSchemeType>( new Renderer<ScoringSchemeType>() {
             @Override
@@ -110,11 +115,11 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         scoringSystemListBox.ensureDebugId("ScoringSystemListBox");
         scoringSystemListBox.setAcceptableValues(Arrays.asList(ScoringSchemeType.values()));
     }
-    
+
     private void createBoatClassNameTextBox() {
         this.boatClassNameTextBox = new SuggestBox(new BoatClassMasterdataSuggestOracle());
     }
-    
+
     private void createRankingListBox() {
         this.rankingListBox = new ValueListBox<RankingMetrics>( new Renderer<RankingMetrics>() {
             @Override
@@ -131,7 +136,7 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         rankingListBox.ensureDebugId("rankingListBox");
         rankingListBox.setAcceptableValues(Arrays.asList(RankingMetrics.values()));
     }
-    
+
     private void createRacesTextBox() {
         racesInput = new IntegerBox();
         racesInput.addKeyPressHandler(new KeyPressHandler() {
@@ -145,13 +150,13 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
         racesInput.setMaxLength(3);
         racesInput.setValue(10);
     }
-    
+
     private void createRegattaDefaults() {
         scoringSystemListBox.setValue(ScoringSchemeType.LOW_POINT);
         boatClassNameTextBox.setValue(BoatClassDTO.DEFAULT_NAME);     
         rankingListBox.setValue(RankingMetrics.ONE_DESIGN);
     }
-    
+
     @Override
     public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
@@ -161,5 +166,4 @@ public class AddRegattaViewImpl extends Composite implements AddRegattaView {
     public void onResize() {
         // TODO Auto-generated method stub
     }
-
 }
