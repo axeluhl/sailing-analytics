@@ -58,7 +58,13 @@ if [ -z "${MONGODB_PORT}" ]; then
   MONGODB_PORT=27017
 fi
 if [ -z "${MONGODB_HOST}" -a -z "${MONGODB_URI}" ]; then
-  MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${MONGODB_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest"
+  if [ -n "$AUTO_REPLICATE" ]; then
+    # An auto-replication replica by default assumes it has a local MongoDB replica set running on localhost,
+    # called "replica" and running on the default port 27017:
+    MONGODB_URI="mongodb://localhost/${MONGODB_NAME}?replicaSet=replica&retryWrites=true&readPreference=nearest"
+  else
+    MONGODB_URI="mongodb://mongo0.internal.sapsailing.com,mongo1.internal.sapsailing.com/${MONGODB_NAME}?replicaSet=live&retryWrites=true&readPreference=nearest"
+  fi
 fi
 if [ -z "${EXPEDITION_PORT}" ]; then
   EXPEDITION_PORT=2010

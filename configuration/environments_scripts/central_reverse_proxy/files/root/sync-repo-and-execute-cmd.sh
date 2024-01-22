@@ -1,1 +1,0 @@
-../../../repo/usr/local/bin/sync-repo-and-execute-cmd.sh

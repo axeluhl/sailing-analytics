@@ -1,1 +1,1 @@
-../environments_scripts/build_server/files/etc/init.d/hudson
+../environments_scripts/build_server/files/usr/local/bin/hudson
