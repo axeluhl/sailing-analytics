@@ -1,0 +1,12 @@
+[Unit]
+Description=Starts up the wiki
+Requires=-.mount
+After=-.mount  
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/home/wiki/serve.sh
