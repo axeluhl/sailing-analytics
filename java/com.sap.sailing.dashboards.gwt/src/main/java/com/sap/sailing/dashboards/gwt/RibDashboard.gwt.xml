@@ -14,6 +14,7 @@
 	<inherits name="com.sap.sse.Security" />
 	<inherits name="com.sap.sse.security.ui.SecurityCommon" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+        <inherits name='com.sap.sailing.gwt.ui.SourceRaceboard' />
 	
 	<inherits name="com.googlecode.mgwt.MGWT" />
 	<inherits name="com.googlecode.mgwt.linker.Linker" />
