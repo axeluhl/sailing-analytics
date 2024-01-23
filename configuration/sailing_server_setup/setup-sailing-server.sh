@@ -42,13 +42,13 @@ else
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
     # Clone Git to /home/sailing/code
     sudo su - sailing -c "git clone ssh://trac@sapsailing.com/home/trac/git code"
-    # Install SAP JVM 8:
-    sudo mkdir -p /opt
-    sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Keep Amazon Linux from patching root's authorized_keys file:
     sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
     # build-crontab
     sudo /home/sailing/code/configuration/environments_scripts/build-crontab sailing_server sailing code
+    # Install SAP JVM 8:
+    sudo mkdir -p /opt
+    sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
 PermitRootLogin without-password
@@ -61,7 +61,7 @@ EOF
 # number of connections the firewall can track
 net.ipv4.ip_conntrac_max = 131072
 EOF
-"  
+"
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
