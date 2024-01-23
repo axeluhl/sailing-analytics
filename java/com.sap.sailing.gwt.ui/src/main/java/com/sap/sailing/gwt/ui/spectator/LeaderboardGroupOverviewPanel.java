@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
@@ -454,7 +455,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
-                        String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
+                        String link = URLEncoder.encode(RaceBoardPanel.RACEBOARD_PATH+"?leaderboardName="
                                 + selectedLeaderboard.getName() + "&raceName=" + raceId.getRaceName() + "&regattaName="
                                 + raceId.getRegattaName() + "&leaderboardGroupId=" + selectedGroup.getId().toString()
                                 + "&root=overview"
