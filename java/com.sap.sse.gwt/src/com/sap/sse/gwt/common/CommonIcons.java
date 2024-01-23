@@ -33,4 +33,13 @@ public interface CommonIcons extends ClientBundle {
     
     @Source("email-icon.png")
     ImageResource email();
+
+    @Source("dropdown__check@2x.png")
+    ImageResource dropdownCheck();
+    
+    @Source("arrow-down-filled-black.png")
+    ImageResource arrowDownFilledBlack();
+    
+    @Source("arrow-down-filled-white.png")
+    ImageResource arrowDownFilledWhite();
 }
