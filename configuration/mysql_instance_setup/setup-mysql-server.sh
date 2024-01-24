@@ -32,11 +32,7 @@ else
   BACKUP_FILE=/home/ec2-user/backupdb.sql
   backupdbNOLOCK=/home/ec2-user/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
-  sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /tmp
-  sudo mv /tmp/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/ec2-user/
+  scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/ec2-user/environments_scripts
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/ec2-user
   sudo chown ec2-user /home/ec2-user/ssh-key-reader.token
   sudo chgrp ec2-user /home/ec2-user/ssh-key-reader.token
@@ -49,7 +45,7 @@ else
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
-  /home/ec2-user/environments_scripts/build-crontab "mysql_instance_setup" ec2-user environments_scripts
+  sudo su -c "/home/ec2-user/environments_scripts/build-crontab 'mysql_instance_setup' ec2-user environments_scripts"
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --skip-lock-tables  --lock-tables=0" >> ${BACKUP_FILE}
   # the two lock options are supposed to ignore table locks, but the following removes a problematic exception.
