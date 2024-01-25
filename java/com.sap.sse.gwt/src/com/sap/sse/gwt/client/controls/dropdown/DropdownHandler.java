@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.utils;
+package com.sap.sse.gwt.client.controls.dropdown;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -13,9 +13,8 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class DropdownHandler {
-
     private HandlerRegistration reg;
-    boolean dropdownShown = false;
+    private boolean dropdownShown = false;
     private final Element dropdownContainer;
     
     public DropdownHandler(Element dropdownTrigger, Element dropdownContainer) {
@@ -24,23 +23,19 @@ public class DropdownHandler {
         Event.setEventListener(dropdownTrigger, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                if(dropdownShown) {
-                    return;
+                if (!dropdownShown) {
+                    show();
                 }
-                
-                show();
             }
-
         });
     }
     
     public DropdownHandler(FocusWidget dropdownTrigger, Element dropdownContainer) {
         this.dropdownContainer = dropdownContainer;
         dropdownTrigger.addClickHandler(event -> {
-            if (dropdownShown) {
-                return;
+            if (!dropdownShown) {
+                show();
             }
-            show();
         });
     }
     
@@ -51,25 +46,24 @@ public class DropdownHandler {
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
                 EventTarget eventTarget = event.getNativeEvent().getEventTarget();
-                if(!Element.is(eventTarget)) {
-                    return;
-                }
-                Element evtElement = Element.as(eventTarget);
-                if(event.getTypeInt() == Event.ONCLICK && !dropdownContainer.isOrHasChild(evtElement)) {
-                    hide();
+                if (Element.is(eventTarget)) {
+                    Element evtElement = Element.as(eventTarget);
+                    if (event.getTypeInt() == Event.ONCLICK && !dropdownContainer.isOrHasChild(evtElement)) {
+                        hide();
+                    }
                 }
             }
             
         });
     }
     
-    private void hide() {
+    void hide() {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
                 dropdownShown = false;
                 dropdownStateChanged(false);
-                if(reg != null) {
+                if (reg != null) {
                     reg.removeHandler();
                     reg = null;
                 }
@@ -78,18 +72,17 @@ public class DropdownHandler {
     }
     
     public void setVisible(boolean visible) {
-        if(visible == dropdownShown) {
-            return;
-        }
-        if(visible) {
-            show();
-        } else {
-            hide();
+        if (visible != dropdownShown) {
+            if (visible) {
+                show();
+            } else {
+                hide();
+            }
         }
     }
     
     protected void dropdownStateChanged(boolean dropdownShown) {
-        if(dropdownShown) {
+        if (dropdownShown) {
             dropdownContainer.getStyle().clearDisplay();
         } else {
             dropdownContainer.getStyle().setDisplay(Display.NONE);
