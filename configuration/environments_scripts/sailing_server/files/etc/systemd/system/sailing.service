@@ -1,6 +1,6 @@
 [Unit]
 Description=The sailing start-up service reading through EC2 userdata and acting accordingly
-Requires=-.mount mongod.service
+Requires=-.mount
 After=-.mount mongod.service
 
 [Install]
