@@ -11,7 +11,7 @@ if [[ $urls == "null" || $? -ne 0 ]]; then
     echo "Mongo db returns null for tractrac url discovery" | notify-operators "MongoDB/tractrac urls issue"
     exit 1
 else
-    echo ${urls} | sort -u >"${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
+    echo "${urls}" | sort -u >"${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
     cd "${GIT_ROOT}"
     git add "${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
     git commit -m "Updated tractrac-json-urls"
