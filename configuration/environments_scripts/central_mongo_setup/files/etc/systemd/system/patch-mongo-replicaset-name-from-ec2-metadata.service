@@ -1,0 +1,1 @@
+../../../../../mongo_instance_setup/files/etc/systemd/system/patch-mongo-replicaset-name-from-ec2-metadata.service
