@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Purpose start and stop the wiki. No params means start to serve the wiki; if there is a parameter "stop", then the wiki is stopped.
 # kill any running gollums
 command() {
     ps axlw | grep rackup | grep ruby | awk '{ print $3; }'   # Extracts the long format. W is unlimited width. 
@@ -10,6 +12,7 @@ if [[ -n "$(command)" ]]; then
   echo "Not terminated gracefully"
   kill -SIGKILL $(command)
 fi
+# if the user enters stop as a parameter then no new wiki is started
 if [[ $# -eq 1 && "$1" == "stop" ]]; then
   echo "Stop command in parameter"
   exit 0
