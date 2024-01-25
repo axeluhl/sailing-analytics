@@ -10,3 +10,4 @@ RequiredBy=multi-user.target
 Type=oneshot
 RemainAfterExit=true
 ExecStart=/home/wiki/serve.sh
+ExecStop=/home/wiki/serve.sh stop
