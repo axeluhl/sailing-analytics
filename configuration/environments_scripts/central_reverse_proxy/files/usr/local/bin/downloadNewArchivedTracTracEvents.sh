@@ -4,7 +4,7 @@
 # into the target directory (specified as $1) for those event URLs whose specific folder
 # does not yet exist in the target directory.
 TARGET_DIR="${1}"
-if [[ $# -eq 0 ]]; then 
+if [[ $# -eq 1 ]]; then
     GIT_ROOT=/home/wiki/gitwiki
 else
     GIT_ROOT="${2}"
