@@ -10,7 +10,6 @@ else
   # Fix the non-sensical use of "dash" as the default shell:
   sudo rm /usr/bin/sh
   sudo ln -s /usr/bin/bash /usr/bin/sh
-  # Install cron job for ssh key update for landscape managers
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/admin
   sudo chown admin /home/admin/ssh-key-reader.token
   sudo chgrp admin /home/admin/ssh-key-reader.token
