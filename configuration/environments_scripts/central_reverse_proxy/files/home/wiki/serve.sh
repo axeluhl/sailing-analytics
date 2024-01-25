@@ -1,6 +1,7 @@
 #!/bin/bash
 # kill any running gollums
-command="ps axlw | grep rackup | grep ruby | awk '{ print \$3; }'"
+command="ps axlw | grep rackup | grep ruby | awk '{ print \$3; }'" # Extracts the long format. W is unlimited width. 
+# We grep the rackup process and grep again, to remove the first grep. Then get the pid. We have to reuse the command in case the pid has changed.
 kill -SIGTERM $(eval ${command})
 sleep 10
 if [[ -n "$(eval ${command})" ]]; then
