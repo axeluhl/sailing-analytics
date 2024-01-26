@@ -7,7 +7,7 @@ After=-.mount
 RequiredBy=multi-user.target
 
 [Service]
-Type=oneshot
+Type=forking
 RemainAfterExit=true
-ExecStart=/home/wiki/serve.sh
-ExecStop=/home/wiki/serve.sh stop
+ExecStart=/bin/bash -c "nohup rackup -p 4567 /home/wiki/config.ru 2>&1 >nohup.out &"
+ExecStop=/bin/kill -SIGTERM"$MAINPID"
