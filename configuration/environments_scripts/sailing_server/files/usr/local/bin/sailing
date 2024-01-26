@@ -23,8 +23,8 @@ elif [ -x /usr/bin/ec2-metadata ]; then
 else
   EC2_METADATA_CMD=/opt/aws/bin/ec2-metadata
 fi
-mkdir --parents /var/lib/sailing
 REBOOT_INDICATOR=/var/lib/sailing/is-rebooted
+mkdir --parents $( dirname ${REBOOT_INDICATOR} )
 SSH_KEY_READER_BEARER_TOKEN=/root/ssh-key-reader.token
 
 echo "Executing with $1 at `date`" >>/var/log/sailing.err
