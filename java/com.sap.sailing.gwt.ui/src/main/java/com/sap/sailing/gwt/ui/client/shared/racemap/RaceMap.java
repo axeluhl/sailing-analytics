@@ -475,6 +475,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean autoZoomInProgress;
     
     /**
+     * The length of the advantage line; default is 1000m, but upon map initialization and zoom it is set to the
+     * length of the diagonal spanning the map, so it should always cover the entire map. See also bug 616.
+     */
+    private Distance advantageLineLength = new MeterDistance(1000);
+
+    /**
      * Tells whether currently an orientation change is in progress; this is required handle map events during the configuration of the map
      * during an orientation change.
      */
@@ -1016,6 +1022,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
 
                     private void showLayoutsAfterAnimationFinishes() {
@@ -1072,6 +1080,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.setCanvasSettings();
                         }
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                         refreshMapWithoutAnimation();
                         if (!mapFirstZoomDone) {
                             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
@@ -1097,6 +1107,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
                 });
                 // If there was a time change before the API was loaded, reset the time
@@ -2157,7 +2169,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
     }
 
-    final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && !quickFlagDataProvider.getQuickRanks().isEmpty()
                 && lastCombinedWindTrackInfoDTO != null) {
@@ -2204,7 +2215,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     } else {
                         switch (lastBoatFix.legType) {
                         case UPWIND:
-                        case DOWNWIND: {
+                        case DOWNWIND:
                             rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
                             if (rotatedBearingDeg1 >= 360.0) {
                                 rotatedBearingDeg1 -= 360.0;
@@ -2213,9 +2224,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
-                                break;
-                        }
-                        case REACHING: {
+                            break;
+                        case REACHING:
                             rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
                             if (rotatedBearingDeg1 >= 360.0) {
                                 rotatedBearingDeg1 -= 360.0;
@@ -2224,8 +2234,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
-                                break;
-                        }
+                            break;
                         }
                         MVCArray<LatLng> nextPath = MVCArray.newInstance();
                         LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -3892,6 +3901,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public void setAddVideoToRaceButtonVisible(boolean visible) {
         this.addVideoToRaceButton.setVisible(visible);
+    }
+
+    private Distance getMapDiagonalVisibleDistance() {
+        return coordinateSystem.getPosition(currentMapBounds.getSouthWest()).getDistance(coordinateSystem.getPosition(currentMapBounds.getNorthEast()));
     }
 }
 
