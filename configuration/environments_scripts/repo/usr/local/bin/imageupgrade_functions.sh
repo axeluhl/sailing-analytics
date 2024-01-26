@@ -3,7 +3,7 @@
 # Upgrades the AWS EC2 instance that this script is assumed to be executed on.
 # The steps are as follows:
 
-REBOOT_INDICATOR=/var/reboot/sailing/is-rebooted
+REBOOT_INDICATOR=/var/lib/sailing/is-rebooted
 LOGON_USER_HOME=/root
 
 run_yum_update() {
