@@ -747,9 +747,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
-	echo "Building and installing forked GWT version..."
-	JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
-    
+        if [ $gwtcompile -eq 1 ]; then
+	  echo "Building and installing forked GWT version..."
+	  JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+        fi
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
         echo "JAVA_HOME used: $JAVA_HOME"
