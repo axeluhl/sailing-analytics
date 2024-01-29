@@ -87,8 +87,7 @@ rm -rf awscliv2.zip
 cd ~ && sudo ./aws/install
 
 # setup git
-## "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/setupHttpdGitLocal.sh" "httpdConf@18.135.5.168:repo.git"
-/root/setupHttpdGitLocal.sh "httpdConf@18.135.5.168:repo.git"
+/root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
 # copy key accross
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519" /root/.ssh
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp

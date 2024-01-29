@@ -362,7 +362,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final String command = "free -k | awk '(NR==2){print $7} | tr -d [:space:]'";
         Iterable<AwsInstanceDTO> suitableInstances = new ArrayList<>();
         for (AwsInstance<String> instance : getLandscape().getRunningHostsWithTag(region,
-                SharedLandscapeConstants.INSTANCE_SUITABLE_FOR_HTTPD, AwsInstanceImpl::new)) {
+                LandscapeConstants.INSTANCE_SUITABLE_FOR_HTTPD, AwsInstanceImpl::new)) {
             try {
                 final SshCommandChannel sshChannel = instance.createRootSshChannel(AwsLandscape.WAIT_FOR_PROCESS_TIMEOUT,
                         optionalKeyName, privateKeyEncryptionPassphrase);
