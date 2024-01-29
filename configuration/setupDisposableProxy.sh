@@ -7,8 +7,8 @@ BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_GIT_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
-HTTPD_GIT_REPO_IP="18.135.5.168"
-AWS_CREDENTIALS_IP="34.254.223.106"
+HTTPD_GIT_REPO_IP="18.171.184.127" # points to where git repo is
+AWS_CREDENTIALS_IP="34.251.204.62" # points to dev server which has no-mfa credentials. 
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo -E bash <<NESTEDEOF
@@ -37,18 +37,11 @@ GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking
 adduser ${GIT_COPY_USER}
 mv git ${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}
 scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/.ssh" "/home/${GIT_COPY_USER}"  # copies wiki users passwordless keys
-## crontab -u ${GIT_COPY_USER} "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/crontabs/users/crontab-wiki-user"
 chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "${GIT_COPY_USER}"
-# setup symbolic links
+# setup symbolic links and crontab
+cd "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/environments_scripts"
+./build-crontab reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_GIT_PATH_TO_GIT}"
 cd /usr/local/bin
-ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/update_authorized_keys_for_landscape_managers" /usr/local/bin/update_authorized_keys_for_landscape_managers
-ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/update_authorized_keys_for_landscape_managers_if_changed" /usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed
-ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/on-site-scripts/paris2024/notify-operators"
-ln -s  "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/sync-repo-and-execute-cmd.sh" /root
-ln -s  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/switchoverArchive.sh 
-ln -s  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/crontabs/environments/crontab-reverse-proxy /root/crontab   # make sure to check the correct crontab is used
-## cp  /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/httpd/cgi-bin/reverseProxyHealthcheck.sh /var/www/cgi-bin
-cp /root/reverseProxyHealthcheck.sh /var/www/cgi-bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
