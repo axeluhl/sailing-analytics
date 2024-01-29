@@ -43,7 +43,7 @@ public class CountingOutputStream extends FilterOutputStream {
     }
 
     private void log() {
-        logger.log(level, "wrote "+count+" bytes "+(count>1024*1024?"("+count/1024/1024+"MB)":"")+" to "+name);
+        logger.log(level, "wrote "+count+" bytes "+(count>1024*1024?"("+count/1024/1024+"MB) ":"")+"to "+name);
     }
     
     @Override

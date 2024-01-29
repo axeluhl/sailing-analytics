@@ -87,6 +87,15 @@ public abstract class CanvasOverlayV3 {
      * with the time set on the canvas element style's <code>transition</code> CSS property.
      */
     private long transitionTimeInMilliseconds;
+    
+    /**
+     * Remembers the old drawing angle as passed to {@link #setCanvasRotation()} to minimize rotation angle upon
+     * the next update. The rotation property will always be animated according to the magnitude of the values. A
+     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
+     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
+     * goes through 0.<p>
+     */
+    private Double drawingAngle;
 
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
@@ -349,9 +358,31 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
 
-    protected void setCanvasRotation(double rotationInDegrees) {
+    /**
+     * Updates {@link #drawingAngle} so that the CSS transition from the old {@link #drawingAngle} to
+     * <code>newBoatDrawingAngle</code> is minimal.
+     */
+    protected void updateDrawingAngleAndSetCanvasRotation(double newBoatDrawingAngle) {
+        if (drawingAngle == null) {
+            drawingAngle = newBoatDrawingAngle;
+        } else {
+            drawingAngle = getNewRotationWithMinimalDiff(newBoatDrawingAngle);
+        }
+        setCanvasRotation();
+    }
+    
+    private void setCanvasRotation() {
         setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
-        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + rotationInDegrees + "deg)");
+        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + drawingAngle + "deg)");
+    }
+
+    protected double getNewRotationWithMinimalDiff(double desiredAngle) {
+        double desiredMinusCurrent;
+        double result = desiredAngle;
+        while (Math.abs(desiredMinusCurrent = result - drawingAngle) > 180) {
+            result -= Math.signum(desiredMinusCurrent)*360;
+        }
+        return drawingAngle+desiredMinusCurrent;
     }
 
     protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, Distance length) {
