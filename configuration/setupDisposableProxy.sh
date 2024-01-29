@@ -68,16 +68,12 @@ service fail2ban start
 yum remove -y firewalld
 yum install -y mod_ssl
 # setup mounting of nvme
-ln -s "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/archive_instance_setup/mountnvmeswap.service"  /etc/systemd/system/mountnvmeswap.service
-## ln -s "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/archive_instance_setup/mountnvmeswap" /usr/local/bin/mountnvmeswap
 source /root/.bashrc
-./mountnvmeswap
+mountnvmeswap
 systemctl enable mountnvmeswap.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
-rm $HTTP_LOGROTATE_ABSOLUTE
-cp /home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/logrotate-httpd /etc/logrotate.d/httpd
 mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
 sed -i -e "s|\/var\/log\/old|\/var\/log\/old\/REVERSE_PROXIES\/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
@@ -107,7 +103,7 @@ scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sai
 # copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
 chown -R apache:apache /usr/share/httpd
-sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config
+sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
 # setup releases
 # rsync -av --delete root@sapsailing.com:/var/www/static/releases /var/www/static/releases
 # # setup p2
