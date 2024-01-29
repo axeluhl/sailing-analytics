@@ -39,7 +39,7 @@ else
     sudo chgrp hudson /var/log/hudson
     sudo chmod g+w /var/log/hudson
     sudo wget -O /usr/lib/hudson/hudson.war "https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2"
-    /home/sailing/code/configuration/environments_scripts/build-crontab build_server sailing code
+    sudo su - -c "/home/sailing/code/configuration/environments_scripts/build-crontab build_server sailing code"
     # Enable NFS server
     sudo systemctl enable nfs-server.service
     sudo systemctl start nfs-server.service

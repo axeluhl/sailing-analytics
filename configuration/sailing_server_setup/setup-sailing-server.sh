@@ -45,7 +45,7 @@ else
     # Keep Amazon Linux from patching root's authorized_keys file:
     sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
     # build-crontab
-    sudo /home/sailing/code/configuration/environments_scripts/build-crontab sailing_server sailing code
+    sudo su -c "/home/sailing/code/configuration/environments_scripts/build-crontab sailing_server sailing code"
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
@@ -82,8 +82,6 @@ replication:
 EOF
 "
     sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
-    # Install cron job for ssh key update for landscape managers
-    sudo su - -c "crontab /root/crontab"
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root /root/ssh-key-reader.token
