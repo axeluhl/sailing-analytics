@@ -49,9 +49,9 @@ start_servers() {
         done
       else
         echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
-        echo "Initializing local MongoDB replica set \"replica\"..."
+        echo "Initializing local MongoDB replica set \"replica\"..." >>/var/log/sailing.err
         while ! echo "rs.initiate()" | mongo; do
-          echo "MongoDB not ready yet; waiting and trying again..."
+          echo "MongoDB not ready yet; waiting and trying again..." >>/var/log/sailing.err
           sleep 5
         done
         FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
