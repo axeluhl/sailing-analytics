@@ -2734,7 +2734,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             timeForPositionTransitionMillis = -1;
         }
         boolean usedExistingCanvas = false;
-        GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = getBoatFix(competitorDTO, date);
+        final GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = getBoatFix(competitorDTO, date);
         if (lastBoatFix != null) {
             BoatOverlay boatOverlay = boatOverlaysByCompetitorIdsAsStrings.get(competitorDTO.getIdAsString());
             if (boatOverlay == null) {
