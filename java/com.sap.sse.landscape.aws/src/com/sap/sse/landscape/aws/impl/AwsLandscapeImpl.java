@@ -1484,26 +1484,32 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region) {
+    public RabbitMQEndpoint getDefaultRabbitConfiguration(com.sap.sse.landscape.Region region) {
+        final RabbitMQEndpoint defaultRabbitMQInDefaultRegion = ()->SharedLandscapeConstants.RABBIT_IN_DEFAULT_REGION_HOSTNAME; // using default port RabbitMQEndpoint.DEFAULT_PORT
         final RabbitMQEndpoint result;
-        final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(region, RABBITMQ_TAG_NAME, AwsInstanceImpl::new);
-        if (rabbitMQHostsInRegion.iterator().hasNext()) {
-            final AwsInstance<ShardingKey> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
-            result = new RabbitMQEndpoint() {
-                @Override
-                public int getPort() {
-                    return getTag(anyRabbitMQHost, RABBITMQ_TAG_NAME)
-                            .map(t -> t.trim().isEmpty() ? RabbitMQEndpoint.DEFAULT_PORT : Integer.valueOf(t.trim()))
-                            .orElse(RabbitMQEndpoint.DEFAULT_PORT);
-                }
-
-                @Override
-                public String getNodeName() {
-                    return anyRabbitMQHost.getPrivateAddress().getHostAddress();
-                }
-            };
+        if (region.getId().equals(Region.EU_WEST_1.id())) {
+            result = defaultRabbitMQInDefaultRegion; 
         } else {
-            result = null;
+            final Iterable<AwsInstance<ShardingKey>> rabbitMQHostsInRegion = getRunningHostsWithTag(
+                    region, SharedLandscapeConstants.RABBITMQ_TAG_NAME, AwsInstanceImpl::new);
+            if (rabbitMQHostsInRegion.iterator().hasNext()) {
+                final AwsInstance<ShardingKey> anyRabbitMQHost = rabbitMQHostsInRegion.iterator().next();
+                result = new RabbitMQEndpoint() {
+                    @Override
+                    public int getPort() {
+                        return getTag(anyRabbitMQHost, SharedLandscapeConstants.RABBITMQ_TAG_NAME)
+                                .map(t -> t.trim().isEmpty() ? RabbitMQEndpoint.DEFAULT_PORT : Integer.valueOf(t.trim()))
+                                .orElse(RabbitMQEndpoint.DEFAULT_PORT);
+                    }
+    
+                    @Override
+                    public String getNodeName() {
+                        return anyRabbitMQHost.getPrivateAddress().getHostAddress();
+                    }
+                };
+            } else {
+                result = defaultRabbitMQInDefaultRegion; // no instance with tag found; hope for VPC peering and use RabbitMQ hostname from default region
+            }
         }
         return result;
     }
@@ -1513,17 +1519,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return new DatabaseImpl(getDatabaseConfigurationForDefaultReplicaSet(region), databaseName);
     }
 
-    @Override
-    public RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(com.sap.sse.landscape.Region region) {
-        final RabbitMQEndpoint result;
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = ()->"rabbit.internal.sapsailing.com";
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>,
     HostT extends ApplicationProcessHost<ShardingKey, MetricsT, ProcessT>>

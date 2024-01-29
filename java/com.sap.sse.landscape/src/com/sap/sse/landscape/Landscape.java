@@ -49,10 +49,15 @@ public interface Landscape<ShardingKey> {
     /**
      * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified
      * explicitly, application server replica sets launched in the {@code region} shall use this for their replication
-     * message channels and exchanges.
+     * message channels and exchanges.<p>
+     * 
+     * For our default region, this will return a DNS name always pointing to the current private IP of
+     * the instance running the default RabbitMQ service in the region. In other regions, the private IP
+     * of the regional default RabbitMQ instance is discovered by scanning for running instances tagged
+     * with {@link SharedLandscapeConstants#RABBITMQ_TAG_NAME}.
      */
-    RabbitMQEndpoint getMessagingConfigurationForDefaultCluster(Region region);
-    
+    RabbitMQEndpoint getDefaultRabbitConfiguration(Region region);
+
     /**
      * Tells the regions supported. The underlying hyperscaler may have more, but we may not want to run in all.
      */

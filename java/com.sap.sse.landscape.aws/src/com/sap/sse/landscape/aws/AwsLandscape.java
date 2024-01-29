@@ -34,7 +34,6 @@ import com.sap.sse.landscape.mongodb.MongoProcess;
 import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
-import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -128,12 +127,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
     
     String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
-    
-    /**
-     * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
-     * be the port number (usually 5672) on which the RabbitMQ endpoint can be reached.
-     */
-    String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
     
     
     
@@ -676,13 +669,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     MongoProcessImpl getDatabaseConfigurationForSingleNode(AwsInstance<ShardingKey> host, int port);
 
     Iterable<MongoEndpoint> getMongoEndpoints(Region region);
-
-    /**
-     * Gets a default RabbitMQ configuration for the {@code region} specified.<p>
-     * 
-     * TODO For now, the method searches for accordingly-tagged instances and picks the first one it finds. We need to extend this to RabbitMQ replication.
-     */
-    RabbitMQEndpoint getDefaultRabbitConfiguration(AwsRegion region);
 
     Database getDatabase(Region region, String databaseName);
 

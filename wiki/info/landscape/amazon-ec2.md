@@ -196,14 +196,21 @@ A failover instance is kept ready to switch to in case the primary production ar
 ### Important Amazon Machine Images (AMIs)
 
 In our default region ``eu-west-1`` there are four Amazon Machine Image (AMI) types that are relevant for the operation of the landscape. They all have a base name to which, separated by a space character, a version number consisting of a major and minor version, separated by a dot, is appended. Each of these AMIs has a tag ``image-type`` whose value reflects the type of the image.
-- SAP Sailing Analytics, ``image-type`` is ``sailing-analytics-server``
-- MongoDB Live Replica Set NVMe, ``image-type`` is ``mongodb-server``
-- Hudson Ubuntu Slave, ``image-type`` is ``hudson-slave``
-- Webserver, ``image-type`` is ``webserver``
+- SAP Sailing Analytics, ``image-type`` is ``sailing-analytics-server``, see [here](/wiki/info/landscape/creating-ec2-image-from-scratch)
+- MongoDB Live Replica Set NVMe, ``image-type`` is ``mongodb-server``, see [here](/wiki/info/landscape/creating-ec2-mongodb-image-from-scratch)
+- Hudson Debian/Ubuntu Slave, ``image-type`` is ``hudson-slave``
+- Webserver, ``image-type`` is ``webserver``, see [here](/wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch)
+
+There are furthermore instance types that we can configure automatically, based on a clean Amazon Linux 2 instance launched from the respective default Amazon image:
+- Hudson / dev.sapsailing.com server, see [here](/wiki/info/landscape/creating-ec2-image-for-hudson-from-scratch)
+- MySQL / MariaDB database server holding the data for our ``bugzilla.sapsailing.com`` bug/issue tracker, see [here](/wiki/info/landscape/creating-ec2-image-for-mysql-from-scratch)
+- RabbitMQ default instance used by all default sailing servers for replication, see [here](/wiki/info/landscape/creating-ec2-image-for-rabbitmq-from-scratch)
+
+We try to maintain setup scripts that help us with setting up those instance types from scratch. See the respective Wiki pages referenced from the lists above for more details.
 
 The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. Instructions for setting up such an image from scratch can be found [here](/wiki/info/landscape/creating-ec2-image-from-scratch).
 
-The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date from the Git ``configuration/crontab`` file. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
+The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date by running `crontab /root/crontab`, under the assumption it points to the appropriately named crontab in `$OUR_GIT_HOME/configuration/crontabs` (as we have different crontabs for different instances/users). If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
 
 The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
 ```
@@ -361,11 +368,11 @@ With this, the three REST API end points `/landscape/api/landscape/get_time_poin
 Two new scripts and a crontab file are provided under the configuration/ folder:
 - `update_authorized_keys_for_landscape_managers_if_changed`
 - `update_authorized_keys_for_landscape_managers`
-- `crontab`
+- `crontab` (found within configuration for historical reasons, but we should be using those in configuration/crontabs)
 
 The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
 
-The `crontab` file which is used during image-upgrade (see `configuration/imageupdate.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
+The `crontab` file which is used during image-upgrade (see `configuration/imageupgrade.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
 
 ## Legacy Documentation for Manual Operations
 

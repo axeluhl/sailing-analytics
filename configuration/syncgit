@@ -1,12 +1,1 @@
-#!/bin/sh
-ADMIN_EMAIL="axel.uhl@sap.com jan.hamann@sapsailing.com"
-
-cd /home/wiki/gitwiki
-git pull >/tmp/wiki-git.out 2>/tmp/wiki-git.err
-if [ "$?" != "0" ]; then
-  cat /tmp/wiki-git.out /tmp/wiki-git.err | mail -s "Wiki git problem" $ADMIN_EMAIL
-fi
-git push >>/tmp/wiki-git.out 2>/tmp/wiki-git.err
-if [ "$?" != "0" ]; then
-  cat /tmp/wiki-git.out /tmp/wiki-git.err | mail -s "Wiki git problem" $ADMIN_EMAIL
-fi
+environments_scripts/repo/usr/local/bin/syncgit

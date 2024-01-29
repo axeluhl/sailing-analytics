@@ -1,0 +1,42 @@
+#!/bin/bash
+BEARER_TOKEN="$1"
+BASE_URL="$2"
+LOGON_USER_HOME="$3"
+LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys
+# Uncomment the following for production use, with no error output
+curl_output=$( curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null )
+curl_exit_code=$?
+if [ "${curl_exit_code}" = "0" ]; then
+  last_change_millis=$( echo "${curl_output}" | jq -r '."timePointOfLastChangeOfSetOfLandscapeManagers-millis"' )
+  jq_exit_code=$?
+  if [ "${jq_exit_code}" = "0" ]; then
+    if [ -f "${LAST_CHANGE_FILE}" ]; then
+      PREVIOUS_CHANGE=$(cat "${LAST_CHANGE_FILE}")
+      if [ -z ${PREVIOUS_CHANGE} ]; then
+    PREVIOUS_CHANGE=0
+      fi
+    else
+      PREVIOUS_CHANGE=0
+    fi
+    if [ -z ${last_change_millis} ]; then
+      logger -t sailing "Empty response from get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers; exiting"
+      exit 1
+    else
+      if [ ${PREVIOUS_CHANGE} -lt ${last_change_millis} ]; then
+    logger -t sailing "New SSH key changes for landscape managers (${last_change_millis} newer than ${PREVIOUS_CHANGE})"
+    if update_authorized_keys_for_landscape_managers "${BEARER_TOKEN}" "${BASE_URL}" "${LOGON_USER_HOME}" ; then
+      logger -t sailing "Updating SSH keys for landscape managers successful; updating ${LAST_CHANGE_FILE}"
+      echo ${last_change_millis} >${LAST_CHANGE_FILE}
+    else
+      logger -t sailing "Updating SSH keys for landscape managers failed with exit code $?; not updating ${LAST_CHANGE_FILE}"
+    fi
+      fi
+    fi
+  else
+    logger -t sailing "Parsing response of get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers failed with exit code ${jq_exit_code}"
+    exit ${jq_exit_code}
+  fi
+else
+  logger -t sailing "Getting response of get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers failed with exit code ${curl_exit_code}"
+  exit ${curl_exit_code}
+fi

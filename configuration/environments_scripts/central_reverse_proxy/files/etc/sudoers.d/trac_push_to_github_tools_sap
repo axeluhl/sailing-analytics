@@ -1,0 +1,2 @@
+# Enables the trac user, on all hosts, to execute commands as the root user. It can do this without a password but only to run the given command.
+trac ALL = (root) NOPASSWD: /usr/local/bin/push_hyperspace_to_github_tools_sap

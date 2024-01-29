@@ -123,6 +123,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.Hel
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadder;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.raceboard.RaceboardDropdownResources;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -222,9 +223,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private DelegateCoordinateSystem coordinateSystem;
     
+    /**
+     * A panel with flex-box display, representing the semi-transparent header bar. It aligns its flex-items
+     * on the center line vertically and uses "space-between" for the horizontal alignment. It has a fixed height
+     * and uses "border-box" sizing. Things to display in the header bar at the top of the map must be added
+     * as elements to it, making the children "flex-items" which may again use "display: flex" in their styles
+     * to nest flex boxes in the header.
+     */
     private FlowPanel headerPanel;
-    private AbsolutePanel panelForLeftHeaderLabels;
-    private AbsolutePanel panelForRightHeaderLabels;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -469,6 +475,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean autoZoomInProgress;
     
     /**
+     * The length of the advantage line; default is 1000m, but upon map initialization and zoom it is set to the
+     * length of the diagonal spanning the map, so it should always cover the entire map. See also bug 616.
+     */
+    private Distance advantageLineLength = new MeterDistance(1000);
+
+    /**
      * Tells whether currently an orientation change is in progress; this is required handle map events during the configuration of the map
      * during an orientation change.
      */
@@ -687,10 +699,156 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
-        panelForLeftHeaderLabels = new AbsolutePanel();
-        panelForLeftHeaderLabels.setHeight("60px");
-        panelForRightHeaderLabels = new AbsolutePanel();
-        panelForRightHeaderLabels.setHeight("60px");
+        /*
+         * Here goes a test file with flex box sizing:
+
+<html>
+  <head>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  overflow: hidden;
+  background: rgba(0, 3, 51, 0.5);
+  padding: 10px 5px;
+}
+
+.logo {
+  height: 32px;
+  width: 64px;
+  min-width: 64px;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNDEyLjM4IDIwNCI+PGRlZnM+PHN0eWxlPi5jbHMtMSwuY2xzLTJ7ZmlsbC1ydWxlOmV2ZW5vZGQ7fS5jbHMtMXtmaWxsOnVybCgjbGluZWFyLWdyYWRpZW50KTt9LmNscy0ye2ZpbGw6I2ZmZjt9PC9zdHlsZT48bGluZWFyR3JhZGllbnQgaWQ9ImxpbmVhci1ncmFkaWVudCIgeDE9IjIwNi4xOSIgeDI9IjIwNi4xOSIgeTI9IjIwNCIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzAwYjhmMSIvPjxzdG9wIG9mZnNldD0iMC4wMiIgc3RvcC1jb2xvcj0iIzAxYjZmMCIvPjxzdG9wIG9mZnNldD0iMC4zMSIgc3RvcC1jb2xvcj0iIzBkOTBkOSIvPjxzdG9wIG9mZnNldD0iMC41OCIgc3RvcC1jb2xvcj0iIzE3NzVjOCIvPjxzdG9wIG9mZnNldD0iMC44MiIgc3RvcC1jb2xvcj0iIzFjNjViZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFlNWZiYiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjx0aXRsZT5TQVBfZ3JhZF9SX3Njcm5fWmVpY2hlbmZsw6RjaGUgMTwvdGl0bGU+PHBvbHlsaW5lIGNsYXNzPSJjbHMtMSIgcG9pbnRzPSIwIDIwNCAyMDguNDEgMjA0IDQxMi4zOCAwIDAgMCAwIDIwNCIvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTTI0NC43MywzOC4zNmwtNDAuNiwwdjk2LjUyTDE2OC42NywzOC4zM0gxMzMuNTFsLTMwLjI3LDgwLjcyQzEwMCw5OC43LDc5LDkxLjY3LDYyLjQsODYuNCw1MS40Niw4Mi44OSwzOS44NSw3Ny43Miw0MCw3MmMuMDktNC42OCw2LjIzLTksMTguMzgtOC4zOCw4LjE3LjQzLDE1LjM3LDEuMDksMjkuNzEsOGwxNC4xLTI0LjU1Qzg5LjA2LDQwLjQyLDcxLDM2LjIxLDU2LjE3LDM2LjE5aC0uMDljLTE3LjI4LDAtMzEuNjgsNS42LTQwLjYsMTQuODNBMzQuMjMsMzQuMjMsMCwwLDAsNS43Nyw3NC43QzUuNTQsODcuMTUsMTAuMTEsOTYsMTkuNzEsMTAzYzguMSw1Ljk0LDE4LjQ2LDkuNzksMjcuNiwxMi42MiwxMS4yNywzLjQ5LDIwLjQ3LDYuNTMsMjAuMzYsMTNBOS41Nyw5LjU3LDAsMCwxLDY1LDEzNWMtMi44MSwyLjktNy4xMyw0LTEzLjA5LDQuMS0xMS40OS4yNC0yMC0xLjU2LTMzLjYxLTkuNTlMNS43NywxNTQuNDJhOTMuNzcsOTMuNzcsMCwwLDAsNDYsMTIuMjJsMi4xMSwwYzE0LjI0LS4yNSwyNS43NC00LjMxLDM0LjkyLTExLjcxLjUzLS40MSwxLS44NCwxLjQ5LTEuMjhMODYuMTcsMTY0LjVIMTIzbDYuMTktMTguODJhNjcuNDYsNjcuNDYsMCwwLDAsMjEuNjgsMy40Myw2OC4zMyw2OC4zMywwLDAsMCwyMS4xNi0zLjI1bDYsMTguNjRoNjAuMTR2LTM5aDEzLjExYzMxLjcxLDAsNTAuNDYtMTYuMTUsNTAuNDYtNDMuMkMzMDEuNzQsNTIuMTksMjgzLjUyLDM4LjM2LDI0NC43MywzOC4zNlpNMTUwLjkxLDEyMWEzNi45MywzNi45MywwLDAsMS0xMy0yLjI4bDEyLjg3LTQwLjU5SDE1MWwxMi42NSw0MC43MUEzOC41LDM4LjUsMCwwLDEsMTUwLjkxLDEyMVptOTYuMi0yMy4zM2gtOC45NFY2NC45MWg4Ljk0YzExLjkzLDAsMjEuNDQsNCwyMS40NCwxNi4xNCwwLDEyLjYtOS41MSwxNi41Ny0yMS40NCwxNi41NyIvPjwvc3ZnPg==");
+}
+
+.dropdown {
+  display: flex;
+  flex-shrink: 100;
+  align-items: center;
+  max-height: 64px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: large;
+}
+
+@media (max-width: 500px) {
+  .dropdown {
+    display: flex;
+    flex-shrink: 100;
+    align-items: center;
+    max-height: 64px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: small;
+  }
+}
+
+.dropdown-text {
+  max-height: 64px;
+}
+
+.dropdown-arrow {
+  margin-left: 10px;
+}
+
+.filler {
+  display: flex;
+  flex-grow: 10;
+}
+
+.event-date-data-by {
+  display: flex;
+  flex-grow: 100;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 5px;
+  min-width: 0;
+}
+
+.home-and-event {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.help-and-date {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+}
+
+.help-button, .home-button {
+}
+
+.event-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timestamp {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-provider {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  width: 100%;
+  text-align: right;
+}
+
+.sign-in {
+  flex-grow: 0;
+  flex-shrink: 100;
+}
+
+@media (max-width: 768px) {
+  .dropdown {
+    font-size: 14px;
+  }
+}
+</style>
+  </head>
+  <body>
+   <div style="z-index: -1; color: red; position: fixed; top: 0; left: 0">Hello World</div>
+   <div class="header-bar">
+      <div class="logo"></div>
+      <div class="dropdown">
+        <span class="dropdown-text">Series/Race Column/Fleet Names</span>
+        <div class="dropdown-arrow">&#x25BC;</div>
+      </div>
+      <div class="filler"></div>
+      <div class="event-date-data-by">
+        <div class="home-and-event">
+          <button class="home-button">Home</button>
+          <span class="event-name">Event/Leaderboard Group Name</span>
+        </div>
+        <div class="help-and-date">
+          <button class="help-button">Help</button>
+          <span class="timestamp">This is a very long Timestamp</span>
+        </div>
+        <a class="data-provider" href="#">This is a very long Data by...</a>
+      </div>
+      <span class="sign-in">Sign In/User</span>
+   </div>
+  </body>
+</html>
+         */
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver, raceMapLifecycle.getRaceDTO());
@@ -864,6 +1022,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
 
                     private void showLayoutsAfterAnimationFinishes() {
@@ -920,6 +1080,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                             streamletOverlay.setCanvasSettings();
                         }
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                         refreshMapWithoutAnimation();
                         if (!mapFirstZoomDone) {
                             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
@@ -945,6 +1107,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                        advantageLineLength = getMapDiagonalVisibleDistance();
+                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
                 });
                 // If there was a time change before the API was loaded, reset the time
@@ -980,7 +1144,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (showHeaderPanel) {
                     createHeaderPanel(map);
                     if (ClientConfiguration.getInstance().isBrandingActive()) {
-                        getLeftHeaderPanel().insert(createSAPLogo(), 0);
+                        getHeaderPanel().insert(createSAPLogo(), 0);
                     }
                 }
                 createAdvancedFunctionsButtonGroup(showMapControls);
@@ -1129,6 +1293,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // we need a panel that does not have any transparency to have the
         // labels shown in the right color. This panel also needs to have
         // a higher z-index than other elements on the map
+        AbsolutePanel panelForLeftHeaderLabels = new AbsolutePanel();
+        panelForLeftHeaderLabels.setHeight("60px");
+        AbsolutePanel panelForRightHeaderLabels = new AbsolutePanel();
+        panelForRightHeaderLabels.setHeight("60px");
         map.setControls(ControlPosition.TOP_LEFT, panelForLeftHeaderLabels);
         panelForLeftHeaderLabels.getElement().getParentElement().getStyle().setProperty("zIndex", "1");
         panelForLeftHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
@@ -1143,7 +1311,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         headerPanel.ensureDebugId("headerPanel");
         // some sort of hack: not positioning TOP_LEFT because then the
         // controls at RIGHT would not get the correct top setting
-        map.setControls(ControlPosition.TOP_RIGHT, headerPanel);
+        map.setControls(ControlPosition.TOP_RIGHT, panelForRightHeaderLabels);
+        rootPanel.add(headerPanel);
+    }
+    
+    public FlowPanel getHeaderPanel() {
+        return headerPanel;
     }
     
     private Button createSettingsButton(MapWidget map) {
@@ -1307,17 +1480,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public RaceSimulationOverlay getSimulationOverlay() {
         return simulationOverlay;
-    }
-    
-    /**
-     * @return the Panel where labels or other controls for the header can be positioned
-     */
-    public AbsolutePanel getLeftHeaderPanel() {
-        return panelForLeftHeaderLabels;
-    }
-    
-    public AbsolutePanel getRightHeaderPanel() {
-        return panelForRightHeaderLabels;
     }
     
     @Override
@@ -2007,7 +2169,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
     }
 
-    final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && !quickFlagDataProvider.getQuickRanks().isEmpty()
                 && lastCombinedWindTrackInfoDTO != null) {
@@ -2054,7 +2215,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     } else {
                         switch (lastBoatFix.legType) {
                         case UPWIND:
-                        case DOWNWIND: {
+                        case DOWNWIND:
                             rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
                             if (rotatedBearingDeg1 >= 360.0) {
                                 rotatedBearingDeg1 -= 360.0;
@@ -2063,9 +2224,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
-                                break;
-                        }
-                        case REACHING: {
+                            break;
+                        case REACHING:
                             rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
                             if (rotatedBearingDeg1 >= 360.0) {
                                 rotatedBearingDeg1 -= 360.0;
@@ -2074,8 +2234,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (rotatedBearingDeg2 < 0.0) {
                                 rotatedBearingDeg2 += 360.0;
                             }
-                                break;
-                        }
+                            break;
                         }
                         MVCArray<LatLng> nextPath = MVCArray.newInstance();
                         LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
@@ -3440,8 +3599,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
-        getLeftHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
-        getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        headerPanel.setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
+        headerPanel.setStyleName(RaceboardDropdownResources.INSTANCE.css().compactHeader(), isCompactHeader);
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
         if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();
@@ -3742,6 +3901,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public void setAddVideoToRaceButtonVisible(boolean visible) {
         this.addVideoToRaceButton.setVisible(visible);
+    }
+
+    private Distance getMapDiagonalVisibleDistance() {
+        return coordinateSystem.getPosition(currentMapBounds.getSouthWest()).getDistance(coordinateSystem.getPosition(currentMapBounds.getNorthEast()));
     }
 }
 
