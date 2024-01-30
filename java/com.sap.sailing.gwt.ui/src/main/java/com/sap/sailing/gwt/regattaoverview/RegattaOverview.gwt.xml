@@ -32,6 +32,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceActions'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
+	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
