@@ -48,6 +48,7 @@
   text-align: right;
   padding: 0 1rem;
   width: 100%;
+  justify-content: center;
 }
 .sitenavigation_link {
   display: inline-block;
@@ -163,6 +164,9 @@
   background-image: resourceUrl('loggedinOpen');
 }
 .user_menu_premium {
+  margin-bottom: 8px;
+}
+.user_menu_premium DIV {
   position: absolute;
   bottom: -2px;
   left: 50%;
@@ -184,9 +188,7 @@
   background-position: center center;
   background-size: contain;
   background-image: resourceUrl('navigation');
-  margin-left: 1rem;
   cursor: pointer;
-  margin-right: 1rem;
 }
 
 .header_navigation_icon:hover,

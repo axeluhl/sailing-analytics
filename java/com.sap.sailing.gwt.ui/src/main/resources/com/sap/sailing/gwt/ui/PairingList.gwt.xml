@@ -31,6 +31,7 @@
     <inherits name='com.sap.sailing.gwt.ui.SourceClient' />
     <inherits name='com.sap.sailing.gwt.ui.SourceShared' />
     <inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard" />
+    <inherits name='com.sap.sailing.gwt.ui.SourceRaceboard' />
     <inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole" />
     <inherits name="com.sap.sailing.gwt.ui.SourcePairingList" />
     <inherits name='com.sap.sailing.gwt.settings.Settings'/>
