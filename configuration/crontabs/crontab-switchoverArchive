@@ -1,1 +1,1 @@
-* * * * *	export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); switchoverArchive.sh /etc/httpd/conf.d/000-macros.conf 2 9 
+* * * * * export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); switchoverArchive.sh /etc/httpd/conf.d/000-macros.conf 2 9
