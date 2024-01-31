@@ -399,7 +399,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpPort = 80;
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
                 httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), LandscapeConstants.ALL_REVERSE_PROXIES);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
@@ -1057,23 +1057,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             tags[i] = tag;
         }
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
-        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
-                loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
-                .name(targetGroupName)
-                .healthyThresholdCount(2)
-                .unhealthyThresholdCount(2)
-                .healthCheckTimeoutSeconds(4)
-                .healthCheckEnabled(true)
-                .healthCheckIntervalSeconds(5)
-                .healthCheckPath(healthCheckPath)
-                .healthCheckPort(""+healthCheckPort)
-                .healthCheckProtocol(guessProtocolFromPort(healthCheckPort))
-                .port(port)
-                .vpcId(vpcId == null ? getVpcId(region) : vpcId)
-                .protocol(guessProtocolFromPort(port))
-                .targetType(TargetTypeEnum.INSTANCE)
-                .tags(tags)
-                .build()).targetGroups().iterator().next();
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest
+                .builder().name(targetGroupName).healthyThresholdCount(2).unhealthyThresholdCount(2)
+                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(5)
+                .healthCheckPath(healthCheckPath).healthCheckPort("" + healthCheckPort)
+                .healthCheckProtocol(guessProtocolFromPort(healthCheckPort)).port(port)
+                .vpcId(vpcId == null ? getVpcId(region) : vpcId).protocol(guessProtocolFromPort(port))
+                .targetType(TargetTypeEnum.INSTANCE);
+        if (tags.length > 0) {
+            targetGroupRequestBuilder.tags(tags);
+        }
+        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = loadBalancingClient
+                .createTargetGroup(targetGroupRequestBuilder.build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
         int numberOfRetries = 3;
         final Duration TIME_BETWEEN_RETRIES = Duration.ONE_SECOND;
