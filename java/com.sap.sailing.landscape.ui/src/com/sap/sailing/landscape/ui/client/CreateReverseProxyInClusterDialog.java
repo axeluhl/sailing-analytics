@@ -99,7 +99,7 @@ public class CreateReverseProxyInClusterDialog
     private final Label nameLabel;
     private final Label instanceTypeLabel;
     private final Label availabilityZoneLabel;
-    private Label instancesLabel;
+    private Label instancesIdLabel;
     /**
      * A list of all lables in the dialog box.
      */
@@ -150,12 +150,14 @@ public class CreateReverseProxyInClusterDialog
         nameLabel = new Label(stringMessages.name());
         instanceTypeLabel = new Label(stringMessages.instanceType());
         availabilityZoneLabel = new Label(stringMessages.availabilityZone());
-        instancesLabel = new Label(stringMessages.instanceId());
+        instancesIdLabel = new Label(stringMessages.instanceId());
         labels = new ArrayList<>(4);
         labels.add(nameLabel);
         labels.add(instanceTypeLabel);
         labels.add(availabilityZoneLabel);
-        labels.add(instancesLabel);
+        labels.add(instancesIdLabel);
+        instancesIdLabel.setVisible(false);
+        coDeployInstances.setVisible(false);
         validateAndUpdate();
     }
 
@@ -171,7 +173,7 @@ public class CreateReverseProxyInClusterDialog
             availabilityZone.setVisible(false);
             dedicatedInstanceTypeListBox.setVisible(false);
             labelVisibility(false);
-            instancesLabel.setVisible(true);
+            instancesIdLabel.setVisible(true);
             coDeployInstances.setVisible(true);
 
         } else {
@@ -180,7 +182,7 @@ public class CreateReverseProxyInClusterDialog
             availabilityZone.setVisible(true);
             dedicatedInstanceTypeListBox.setVisible(true);
             labelVisibility(true);
-            instancesLabel.setVisible(false);
+            instancesIdLabel.setVisible(false);
             coDeployInstances.setVisible(false);
 
         }
@@ -211,7 +213,7 @@ public class CreateReverseProxyInClusterDialog
         verticalPanel.add(availabilityZoneLabel);
         verticalPanel.add(availabilityZone);
         verticalPanel.add(useSharedInstance);
-        verticalPanel.add(instancesLabel);
+        verticalPanel.add(instancesIdLabel);
         verticalPanel.add(coDeployInstances);
         return result;
     }
