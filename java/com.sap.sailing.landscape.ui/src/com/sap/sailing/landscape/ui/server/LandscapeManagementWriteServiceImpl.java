@@ -280,7 +280,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 if (!description.tags().isEmpty()) {
                     for (Tag tag : description.tags()) {
 
-                        if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
+                        if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)
+                                && targetGroup.getLoadBalancerArn() != null
+                                && !targetGroup.getLoadBalancerArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                             targetGroupInQuestion = targetGroup;
                         }
                     }
