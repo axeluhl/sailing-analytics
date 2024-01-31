@@ -1,7 +1,9 @@
 package com.sap.sse.landscape.aws.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -11,6 +13,7 @@ import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.ConsumerWithException;
+import com.sap.sse.landscape.Landscape;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.MachineImage;
 import com.sap.sse.landscape.Region;
@@ -30,6 +33,7 @@ import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
 public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>, LogT extends Log>
@@ -85,6 +89,27 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
             throw new IllegalStateException(
                     "Trying to remove the last hosts of reverse proxy " + this + ". Use terminate() instead");
         }
+        AwsInstance<ShardingKey> instanceFromHost = new AwsInstanceImpl<ShardingKey>(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(Landscape.WAIT_FOR_PROCESS_TIMEOUT), host.getLaunchTimePoint(), getLandscape());
+        final List<TargetGroup<ShardingKey>> targetGroupsHostResidesIn = new ArrayList<>();
+        for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(host.getAvailabilityZone().getRegion())) {
+            if (!targetGroup.getTargetGroupArn().contains("EndpointRegistration")
+                    && !targetGroup.getTargetGroupArn().contains("Lambda")
+                    && !targetGroup.getLoadBalancerArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)
+                    && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
+                targetGroup.removeTarget(instanceFromHost);
+                targetGroupsHostResidesIn.add(targetGroup);
+            }
+        }
+        Wait.wait(() -> { 
+            for (TargetGroup<ShardingKey> tg: targetGroupsHostResidesIn) {
+                if (tg.getRegisteredTargets().get(instanceFromHost).state().equals(TargetHealthStateEnum.DRAINING)) {
+                    return false;
+                }
+            }
+            return true;
+        }, Optional.of(Duration.ofSeconds(60 * 5)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain");
+        
+        //TODO: the instance must remove and add itself to and from the nlb.
         ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = new ApacheReverseProxy<>(getLandscape(), host);
         proxy.rotateLogs(optionalKeyName, privateKeyEncryptionPassphrase);
         getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
