@@ -2,12 +2,8 @@ package com.sap.sse.metering;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
-import com.sap.sse.common.Duration;
 import com.sap.sse.concurrent.RunnableWithException;
 import com.sap.sse.metering.impl.CPUMeterImpl;
 
@@ -38,65 +34,8 @@ import com.sap.sse.metering.impl.CPUMeterImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CPUMeter extends ExecutorWithCPUMeter {
+public interface CPUMeter extends ExecutorWithCPUMeter, CPUMetrics {
     static CPUMeter create() {
         return new CPUMeterImpl();
-    }
-    
-    /**
-     * @return the total CPU time measured by this meter, aggregated across all keys, and regardless of whether CPU time
-     *         was spent in user or system mode
-     */
-    Duration getTotalCPUTime();
-    
-    Map<String, Duration> getTotalCPUTimesByKey();
-
-    /**
-     * @return the total CPU time measured by this meter spent in user mode, aggregated across all keys
-     */
-    Duration getTotalCPUTimeInUserMode();
-    
-    Map<String, Duration> getTotalCPUTimesInUserModeByKey();
-
-    /**
-     * @return the total CPU time measured by this meter spent in system mode, aggregated across all keys
-     */
-    default Duration getTotalCPUTimeInSystemMode() {
-        return getTotalCPUTime().minus(getTotalCPUTimeInUserMode());
-    }
-    
-    default Map<String, Duration> getTotalCPUTimesInSystemModeByKey() {
-        final Map<String, Duration> result = new HashMap<>();
-        for (final Entry<String, Duration> e: getTotalCPUTimesByKey().entrySet()) {
-            result.put(e.getKey(), e.getValue().minus(getTotalCPUTimeInUserMode(e.getKey())));
-        }
-        return result;
-    }
-
-    /**
-     * @param key
-     *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
-     * @return the total CPU time measured by this meter, aggregated for the {@code key} specified, and regardless of
-     *         whether CPU time was spent in user or system mode
-     */
-    Duration getTotalCPUTime(String key);
-
-    /**
-     * @param key
-     *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
-     * @return the total CPU time measured by this meter spent in user mode, aggregated for the {@code key} specified
-     */
-    Duration getTotalCPUTimeInUserMode(String key);
-
-    /**
-     * @param key
-     *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
-     * @return the total CPU time measured by this meter spent in system mode, aggregated for the {@code key} specified
-     */
-    default Duration getTotalCPUTimeInSystemMode(String key) {
-        return getTotalCPUTime().minus(getTotalCPUTimeInUserMode());
     }
 }
