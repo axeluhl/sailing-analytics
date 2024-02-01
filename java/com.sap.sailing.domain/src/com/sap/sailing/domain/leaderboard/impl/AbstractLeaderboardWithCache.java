@@ -72,6 +72,7 @@ import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.CPUMeteringType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -106,6 +107,7 @@ import com.sap.sse.common.TimingStats;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.metering.CPUMeter;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -129,6 +131,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      * Keeps statistics about the re-calculation times in different short-term time ranges.
      */
     private transient TimingStats timingStats;
+    
+    /**
+     * Keeps statistics about the CPU time consumed by this leaderboard
+     */
+    private transient CPUMeter cpuMeter;
     
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
@@ -238,9 +245,15 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         this.cacheInvalidationListeners = new HashSet<>();
         this.leaderboardChangeListeners = new HashSet<>();
         this.timingStats = createTimingStats();
+        this.cpuMeter = CPUMeter.create();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
+    }
+    
+    @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
     }
     
     /**
@@ -440,9 +453,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
             }
-            Future<List<CompetitorDTO>> task = executor.submit(
+            Future<List<CompetitorDTO>> task = executor.submit(cpuMeter(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
-                            raceColumn, timePoint, cache)));
+                            raceColumn, timePoint, cache)), CPUMeteringType.COMPETITORS_FROM_BEST_TO_WORST.name()));
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
