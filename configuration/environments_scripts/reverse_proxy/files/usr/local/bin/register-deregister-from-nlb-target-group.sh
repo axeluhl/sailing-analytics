@@ -3,10 +3,10 @@
 selfIp=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
 availabilityZone=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
 nlbName="HTTP-to-sapsailing-dot-com"
-nlbName="IP-NAMES"
 targetGroupArn=$(aws elbv2 describe-target-groups --name  "${nlbName}" | jq -r ".TargetGroups[].TargetGroupArn")
 if [[ "$#" -eq 0 ]];then
     echo "Use add-to-nlb OR remove-from-nlb as the first and only argument."
+    exit 2
 fi
 
 addSelfToNLB() {
@@ -29,3 +29,4 @@ case $1 in
     remove-from-nlb)
         removeSelfFromNLB
         ;;
+esac
