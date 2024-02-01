@@ -150,6 +150,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         cpuMeter = CompositeCPUMetrics.create();
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            final TrackedRace trackedRace = column.getTrackedRace(defaultFleet);
+            if (trackedRace != null) {
+                cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
+            }
         }
         regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
     }
@@ -167,6 +171,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public CPUMeter getCPUMeter() {
         return cpuMeter;
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        super.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
     }
 
     @Override
