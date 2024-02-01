@@ -106,12 +106,12 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         }
         Wait.wait(() -> { 
             for (TargetGroup<ShardingKey> tg: targetGroupsHostResidesIn) {
-                if (tg.getRegisteredTargets().get(instanceFromHost).state().equals(TargetHealthStateEnum.DRAINING)) {
+                if (tg.getRegisteredTargets().get(instanceFromHost) != null && tg.getRegisteredTargets().get(instanceFromHost).state().equals(TargetHealthStateEnum.DRAINING)) {
                     return false;
                 }
             }
             return true;
-        }, Optional.of(Duration.ofSeconds(60 * 5)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain");
+        }, Optional.of(Duration.ofSeconds(60 * 10)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain");
         
         //TODO: the instance must remove and add itself to and from the nlb.
         ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = new ApacheReverseProxy<>(getLandscape(), host);
