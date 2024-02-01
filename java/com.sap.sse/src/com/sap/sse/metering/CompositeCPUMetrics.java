@@ -3,7 +3,7 @@ package com.sap.sse.metering;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import com.sap.sse.common.Duration;
 
@@ -20,10 +20,13 @@ public interface CompositeCPUMetrics extends CPUMetrics {
 
     @Override
     default Map<String, Duration> getTotalCPUTimesByKey() {
-        final Supplier<Map<String, Duration>> timesMethod = CPUMetrics::getTotalCPUTimesByKey;
+        return getTimesByKey(CPUMetrics::getTotalCPUTimesByKey);
+    }
+
+    default Map<String, Duration> getTimesByKey(final Function<CPUMetrics, Map<String, Duration>> timesMethod) {
         final Map<String, Duration> result = new HashMap<>();
         for (final CPUMetrics componentMetric : getComponentMetrics()) {
-            for (final Entry<String, Duration> e : componentMetric.getTotalCPUTimesByKey().entrySet()) {
+            for (final Entry<String, Duration> e : timesMethod.apply(componentMetric).entrySet()) {
                 result.merge(e.getKey(), e.getValue(), (sum, value)->sum.plus(value));
             }
         }
@@ -32,7 +35,6 @@ public interface CompositeCPUMetrics extends CPUMetrics {
 
     @Override
     default Map<String, Duration> getTotalCPUTimesInUserModeByKey() {
-        // TODO Auto-generated method stub
-        return null;
+        return getTimesByKey(CPUMetrics::getTotalCPUTimesInUserModeByKey);
     }
 }

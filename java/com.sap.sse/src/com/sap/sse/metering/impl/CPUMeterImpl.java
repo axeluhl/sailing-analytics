@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,6 +13,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.concurrent.RunnableWithException;
+import com.sap.sse.concurrent.RunnableWithResult;
+import com.sap.sse.concurrent.RunnableWithResultAndException;
 import com.sap.sse.metering.CPUMeter;
 
 public class CPUMeterImpl implements CPUMeter {
@@ -42,22 +43,26 @@ public class CPUMeterImpl implements CPUMeter {
     
     @Override
     public void runWithCPUMeter(Runnable runnable, String key) {
-        try {
-            callWithCPUMeter(()->{
-                runnable.run();
-                return null;
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        callWithCPUMeter((RunnableWithResult<Void>) ()->{
+            runnable.run();
+            return null;
+        });
+    }
+    
+    @Override
+    public <T> T callWithCPUMeter(RunnableWithResult<T> callable, String key) {
+        return callWithCPUMeterWithException((RunnableWithResultAndException<T, RuntimeException>) ()->{
+            callable.run();
+            return null;
+        }, key);
     }
 
     @Override
-    public <T> T callWithCPUMeter(Callable<T> callable, String key) throws Exception {
+    public <T, E extends Throwable> T callWithCPUMeterWithException(RunnableWithResultAndException<T, E> callable, String key) throws E {
         final String nullEscapedKey = escapeNull(key);
         final long cpuAtStartInNanos = threadMxBean.getCurrentThreadCpuTime();
         final long cpuUserTimeAtStartInNanos = threadMxBean.getCurrentThreadUserTime();
-        final T result = callable.call();
+        final T result = callable.run();
         totalCPUTimePerKeyInNanos.computeIfAbsent(nullEscapedKey, k->new AtomicLong()).addAndGet(threadMxBean.getCurrentThreadCpuTime()-cpuAtStartInNanos);
         totalCPUTimePerKeyInUserModeInNanos.computeIfAbsent(nullEscapedKey, k->new AtomicLong()).addAndGet(threadMxBean.getCurrentThreadUserTime()-cpuUserTimeAtStartInNanos);
         return result;
@@ -66,7 +71,7 @@ public class CPUMeterImpl implements CPUMeter {
     @Override
     public <E extends Exception> void runWithCPUMeter(RunnableWithException<E> runnableWithException, String key) throws E {
         try {
-            callWithCPUMeter(()->{
+            callWithCPUMeterWithException(()->{
                 runnableWithException.run();
                 return null;
             }, key);

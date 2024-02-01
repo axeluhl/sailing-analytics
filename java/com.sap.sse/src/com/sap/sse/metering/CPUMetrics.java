@@ -62,7 +62,7 @@ public interface CPUMetrics {
     /**
      * @param key
      *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
+     *            {@link #callWithCPUMeterWithException(Callable, String)}; may be {@code null}
      * @return the total CPU time measured by this meter, aggregated for the {@code key} specified, and regardless of
      *         whether CPU time was spent in user or system mode
      */
@@ -73,7 +73,7 @@ public interface CPUMetrics {
     /**
      * @param key
      *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
+     *            {@link #callWithCPUMeterWithException(Callable, String)}; may be {@code null}
      * @return the total CPU time measured by this meter spent in user mode, aggregated for the {@code key} specified
      */
     default Duration getTotalCPUTimeInUserMode(String key) {
@@ -83,7 +83,7 @@ public interface CPUMetrics {
     /**
      * @param key
      *            the key used in any of {@link #runWithCPUMeter(Runnable, String)}, {@link #runWithCPUMeter(RunnableWithException, String)}, or
-     *            {@link #callWithCPUMeter(Callable, String)}; may be {@code null}
+     *            {@link #callWithCPUMeterWithException(Callable, String)}; may be {@code null}
      * @return the total CPU time measured by this meter spent in system mode, aggregated for the {@code key} specified
      */
     default Duration getTotalCPUTimeInSystemMode(String key) {

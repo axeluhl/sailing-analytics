@@ -37,6 +37,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
@@ -72,7 +73,6 @@ import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.BravoExtendedFix;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.leaderboard.CPUMeteringType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionMapping;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -400,199 +400,201 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory,
             final boolean fillTotalPointsUncorrected)
             throws NoWindException {
-        ShardingContext.checkConstraint(ShardingType.LEADERBOARDNAME, getName());
-        final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
-        final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
-        final BoatClass boatClass = getBoatClass();
-        final LeaderboardDTO result = new LeaderboardDTO(this.getName(), timePoint.asDate(), 
-                this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
-                        : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
-                this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                                .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(),
-                        addOverallDetails, boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
-        result.type = getLeaderboardType();
-        result.competitors = new ArrayList<>();
-        result.displayName = this.getDisplayName();
-        result.competitorDisplayNames = new HashMap<>();
-        boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
-        if (isLeaderboardThatHasRegattaLike) {
-            LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
-            result.canBoatsOfCompetitorsChangePerRace = regattaLikeLeaderboard.getRegattaLike().canBoatsOfCompetitorsChangePerRace();
-        } else {
-            result.canBoatsOfCompetitorsChangePerRace = false;
-        }
-        for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
-            result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
-        }
-        // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
-        // futures to finish:
-        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
-        for (final RaceColumn raceColumn : this.getRaceColumns()) {
-            boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
-            RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
-                    raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
-                    raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                    isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
-            if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
-                calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
+        return callWithCPUMeterWithException(()->{
+            ShardingContext.checkConstraint(ShardingType.LEADERBOARDNAME, getName());
+            final TimePoint startOfRequestHandling = MillisecondsTimePoint.now();
+            final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
+            final BoatClass boatClass = getBoatClass();
+            final LeaderboardDTO result = new LeaderboardDTO(this.getName(), timePoint.asDate(), 
+                    this.getScoreCorrection().getTimePointOfLastCorrectionsValidity() == null ? null
+                            : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
+                    this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(), this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
+                                    .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(),
+                            addOverallDetails, boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getHullLength(), boatClass.getHullBeam()));
+            result.type = getLeaderboardType();
+            result.competitors = new ArrayList<>();
+            result.displayName = this.getDisplayName();
+            result.competitorDisplayNames = new HashMap<>();
+            boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;
+            if (isLeaderboardThatHasRegattaLike) {
+                LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+                result.canBoatsOfCompetitorsChangePerRace = regattaLikeLeaderboard.getRegattaLike().canBoatsOfCompetitorsChangePerRace();
+            } else {
+                result.canBoatsOfCompetitorsChangePerRace = false;
             }
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RegattaAndRaceIdentifier raceIdentifier = null;
-                RaceDTO race = null;
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
-                if (trackedRace != null) {
-                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
-                            trackedRace.getRace().getName());
-                    race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
-                }
-                // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
-                // above by the result.createEmptyRaceColumn call
-                result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
+            for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
+                result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
+            }
+            // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
+            // futures to finish:
+            Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+            for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
+                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
-                        fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
-            }
-            Future<List<CompetitorDTO>> task = executor.submit(cpuMeter(
-                    () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
-                            raceColumn, timePoint, cache)), CPUMeteringType.COMPETITORS_FROM_BEST_TO_WORST.name()));
-            competitorsFromBestToWorstTasks.put(raceColumn, task);
-        }
-        // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
-            try {
-                result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
-                // null values.
-                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                // this helps robustness from a user's perspective.
-                logger.log(
-                        Level.SEVERE,
-                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
-                                + "): exception during computing competitor ordering for race column "+raceColumnAndTaskToJoin.getKey().getName(), e);
-            }
-        }
-        result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
-        result.rows = new HashMap<>();
-        result.hasCarriedPoints = this.hasCarriedPoints();
-        if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
-            result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
-                    .getDiscardIndexResultsStartingWithHowManyRaces();
-        } else {
-            result.discardThresholds = null;
-        }
-        // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep
-        // invalidating the ranks cache in TrackedLegImpl. The problem then is that the sorting based on wind data is repeated for
-        // each competitor, leading to square effort. We therefore need to compute the leg ranks for those races where leg
-        // details are requested only once and pass them into getLeaderboardEntryDTO
-        final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
-        for (final RaceColumn raceColumn : this.getRaceColumns()) {
-            // if details for the column are requested, cache the leg's ranks
-            if (namesOfRaceColumnsForWhichToLoadLegDetails != null
-                    && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName())) {
+                        isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
+                if (isMetaLeaderboardColumn && raceColumnDTO instanceof MetaLeaderboardRaceColumnDTO) {
+                    calculateRacesMetadata((MetaLeaderboardColumn) raceColumn, (MetaLeaderboardRaceColumnDTO) raceColumnDTO, baseDomainFactory);
+                }
                 for (Fleet fleet : raceColumn.getFleets()) {
+                    RegattaAndRaceIdentifier raceIdentifier = null;
+                    RaceDTO race = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
                     if (trackedRace != null) {
-                        trackedRace.getRace().getCourse().lockForRead();
-                        try {
-                            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
-                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache)); // TODO bug5147: leg ranks may also need to be merged across equal-weighted fleets if RaceColumn.hasCrossFleetMergedRanking() is true
+                        raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(),
+                                trackedRace.getRace().getName());
+                        race = baseDomainFactory.createRaceDTO(trackedRegattaRegistry, /* withGeoLocationData */ false, raceIdentifier, trackedRace);
+                    }
+                    // Note: the RaceColumnDTO won't be created by the following addRace call because it has been created
+                    // above by the result.createEmptyRaceColumn call
+                    result.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), getScoringScheme().getScoreFactor(raceColumn),
+                            raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
+                            raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
+                            fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn, raceColumn.isOneAlwaysStaysOne());
+                }
+                Future<List<CompetitorDTO>> task = executor.submit(cpuMeterCallable(
+                        () -> baseDomainFactory.getCompetitorDTOList(AbstractLeaderboardWithCache.this.getCompetitorsFromBestToWorst(
+                                raceColumn, timePoint, cache)), CPUMeteringType.COMPETITORS_FROM_BEST_TO_WORST.name()));
+                competitorsFromBestToWorstTasks.put(raceColumn, task);
+            }
+            // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
+            for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+                try {
+                    result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                    // null values.
+                    // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                    // this helps robustness from a user's perspective.
+                    logger.log(
+                            Level.SEVERE,
+                            AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                    + "): exception during computing competitor ordering for race column "+raceColumnAndTaskToJoin.getKey().getName(), e);
+                }
+            }
+            result.setDelayToLiveInMillisForLatestRace(this.getDelayToLiveInMillis());
+            result.rows = new HashMap<>();
+            result.hasCarriedPoints = this.hasCarriedPoints();
+            if (this.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
+                result.discardThresholds = ((ThresholdBasedResultDiscardingRule) this.getResultDiscardingRule())
+                        .getDiscardIndexResultsStartingWithHowManyRaces();
+            } else {
+                result.discardThresholds = null;
+            }
+            // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep
+            // invalidating the ranks cache in TrackedLegImpl. The problem then is that the sorting based on wind data is repeated for
+            // each competitor, leading to square effort. We therefore need to compute the leg ranks for those races where leg
+            // details are requested only once and pass them into getLeaderboardEntryDTO
+            final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor, Integer>>();
+            for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                // if details for the column are requested, cache the leg's ranks
+                if (namesOfRaceColumnsForWhichToLoadLegDetails != null
+                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName())) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                        if (trackedRace != null) {
+                            trackedRace.getRace().getCourse().lockForRead();
+                            try {
+                                for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                    legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint, cache)); // TODO bug5147: leg ranks may also need to be merged across equal-weighted fleets if RaceColumn.hasCrossFleetMergedRanking() is true
+                                }
+                            } finally {
+                                trackedRace.getRace().getCourse().unlockAfterRead();
                             }
-                        } finally {
-                            trackedRace.getRace().getCourse().unlockAfterRead();
                         }
                     }
                 }
             }
-        }
-        final ConcurrentMap<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new ConcurrentHashMap<>();
-        final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
-        for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-            LeaderboardRowDTO row = new LeaderboardRowDTO();
-            row.competitor = competitorDTO;
-            row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
-            row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
-            row.netPoints = this.getNetPoints(competitor, timePoint);
-            if (addOverallDetails) {
-                addOverallDetailsToRow(timePoint, competitor, row);
-            }
-            result.competitors.add(competitorDTO);
-            final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint, getScoringScheme());
-            for (final RaceColumn raceColumn : this.getRaceColumns()) {
-                // in case boats can't change set the also the boat on the row to simplify access
-                if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
-                    final Boat boatOfCompetitor = getBoatOfCompetitor(competitor, raceColumn);
-                    // find a raceColumn where a boat is available
-                    row.boat = boatOfCompetitor == null ? null : baseDomainFactory.convertToBoatDTO(boatOfCompetitor);
+            final ConcurrentMap<Pair<RaceColumn, Competitor>, RankingInfo> rankingInfoCache = new ConcurrentHashMap<>();
+            final ConcurrentMap<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> futuresForCompetitorAndColumnName = new ConcurrentHashMap<>();
+            for (final Competitor competitor : this.getCompetitorsFromBestToWorst(timePoint, cache)) {
+                CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+                LeaderboardRowDTO row = new LeaderboardRowDTO();
+                row.competitor = competitorDTO;
+                row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
+                row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
+                row.netPoints = this.getNetPoints(competitor, timePoint);
+                if (addOverallDetails) {
+                    addOverallDetailsToRow(timePoint, competitor, row);
                 }
-                final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
-                        namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
-                Future<LeaderboardEntryDTO> future = executor.submit(() -> {
-                    // if leg details are to be requested, the ranking info needs to be provided:
-                    // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
-                    final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
-                            raceColumnAndCompetitor->{
-                                final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
-                                return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
-                            }) : null;
-                    Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns, cache);
-                    return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
-                            rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
-                            fillTotalPointsUncorrected, cache);
-                });
-                futuresForCompetitorAndColumnName.put(new Pair<>(competitor, raceColumn.getName()), new Pair<>(row, future));
+                result.competitors.add(competitorDTO);
+                final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint, getScoringScheme());
+                for (final RaceColumn raceColumn : this.getRaceColumns()) {
+                    // in case boats can't change set the also the boat on the row to simplify access
+                    if (result.canBoatsOfCompetitorsChangePerRace == false && row.boat == null) {
+                        final Boat boatOfCompetitor = getBoatOfCompetitor(competitor, raceColumn);
+                        // find a raceColumn where a boat is available
+                        row.boat = boatOfCompetitor == null ? null : baseDomainFactory.convertToBoatDTO(boatOfCompetitor);
+                    }
+                    final boolean computeLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails != null &&
+                            namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName());
+                    Future<LeaderboardEntryDTO> future = executor.submit(() -> {
+                        // if leg details are to be requested, the ranking info needs to be provided:
+                        // TODO bug5143 (performance): shouldn't the rankingInfoCache be passed on because detail computations need them all?
+                        final RankingInfo rankingInfo = computeLegDetails ? rankingInfoCache.computeIfAbsent(new Pair<>(raceColumn, competitor),
+                                raceColumnAndCompetitor->{
+                                    final TrackedRace trackedRace = raceColumnAndCompetitor.getA().getTrackedRace(raceColumnAndCompetitor.getB());
+                                    return trackedRace==null?null:trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
+                                }) : null;
+                        Entry entry = AbstractLeaderboardWithCache.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns, cache);
+                        return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint, computeLegDetails,
+                                rankingInfo, waitForLatestAnalyses, legRanksCache, baseDomainFactory,
+                                fillTotalPointsUncorrected, cache);
+                    });
+                    futuresForCompetitorAndColumnName.put(new Pair<>(competitor, raceColumn.getName()), new Pair<>(row, future));
+                }
+                if (addOverallDetails) {
+                    //this reuses several prior calculated fields, so must be evaluated after them
+                    row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
+                }
+                result.rows.put(competitorDTO, row);
+                String displayName = this.getDisplayName(competitor);
+                if (displayName != null) {
+                    result.competitorDisplayNames.put(competitorDTO, displayName);
+                }
+                if (isLeaderboardThatHasRegattaLike) {
+                    LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
+                    final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
+                    final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
+                    row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
+                    row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
+                }
+            } // competitors
+            for (java.util.Map.Entry<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> competitorAndRaceColumnNameAndRowAndFuture : futuresForCompetitorAndColumnName.entrySet()) {
+                try {
+                    final LeaderboardRowDTO rowForCompetitor = competitorAndRaceColumnNameAndRowAndFuture.getValue().getA();
+                    final String columnName = competitorAndRaceColumnNameAndRowAndFuture.getKey().getB();
+                    final Future<LeaderboardEntryDTO> future = competitorAndRaceColumnNameAndRowAndFuture.getValue().getB();
+                    rowForCompetitor.fieldsByRaceColumnName.put(columnName, future.get());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (ExecutionException e) {
+                    // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
+                    // null values.
+                    // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
+                    // this helps robustness from a user's perspective.
+                    final Competitor competitor = competitorAndRaceColumnNameAndRowAndFuture.getKey().getA();
+                    logger.log(
+                            Level.SEVERE,
+                            AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
+                                    + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
+                                    + "): exception during computing leaderboard entry for competitor "
+                                    + competitor.getName() + " in race column " + competitorAndRaceColumnNameAndRowAndFuture.getKey()
+                                    + ". Leaving empty.", e);
+                }
             }
-            if (addOverallDetails) {
-                //this reuses several prior calculated fields, so must be evaluated after them
-                row.totalScoredRaces = this.getTotalRaces(competitor, row, timePoint);
-            }
-            result.rows.put(competitorDTO, row);
-            String displayName = this.getDisplayName(competitor);
-            if (displayName != null) {
-                result.competitorDisplayNames.put(competitorDTO, displayName);
-            }
-            if (isLeaderboardThatHasRegattaLike) {
-                LeaderboardThatHasRegattaLike regattaLikeLeaderboard = (LeaderboardThatHasRegattaLike) this;
-                final Duration regattaLevelTimeOnDistanceAllowancePerNauticalMile = regattaLikeLeaderboard.getRegattaLike().getTimeOnDistanceAllowancePerNauticalMile(competitor, Optional.empty());
-                final Double regattaLevelTimeOnTimeFactor = regattaLikeLeaderboard.getRegattaLike().getTimeOnTimeFactor(competitor, Optional.empty());
-                row.effectiveTimeOnDistanceAllowancePerNauticalMile = regattaLevelTimeOnDistanceAllowancePerNauticalMile;
-                row.effectiveTimeOnTimeFactor = regattaLevelTimeOnTimeFactor;
-            }
-        } // competitors
-        for (java.util.Map.Entry<Pair<Competitor, String>, Pair<LeaderboardRowDTO, Future<LeaderboardEntryDTO>>> competitorAndRaceColumnNameAndRowAndFuture : futuresForCompetitorAndColumnName.entrySet()) {
-            try {
-                final LeaderboardRowDTO rowForCompetitor = competitorAndRaceColumnNameAndRowAndFuture.getValue().getA();
-                final String columnName = competitorAndRaceColumnNameAndRowAndFuture.getKey().getB();
-                final Future<LeaderboardEntryDTO> future = competitorAndRaceColumnNameAndRowAndFuture.getValue().getB();
-                rowForCompetitor.fieldsByRaceColumnName.put(columnName, future.get());
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                // See also bug 1371: for stability reasons, don't let the exception percolate but rather accept
-                // null values.
-                // If new evidence is provided, a re-calculation of the leaderboard will be triggered anyway. So
-                // this helps robustness from a user's perspective.
-                final Competitor competitor = competitorAndRaceColumnNameAndRowAndFuture.getKey().getA();
-                logger.log(
-                        Level.SEVERE,
-                        AbstractSimpleLeaderboardImpl.class.getName() + ".computeDTO(" + this.getName() + ", "
-                                + timePoint + ", " + namesOfRaceColumnsForWhichToLoadLegDetails+", addOverallDetails="+addOverallDetails
-                                + "): exception during computing leaderboard entry for competitor "
-                                + competitor.getName() + " in race column " + competitorAndRaceColumnNameAndRowAndFuture.getKey()
-                                + ". Leaving empty.", e);
-            }
-        }
-        final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
-        logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
-                + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
-                + computeTime);
-        updateStats(startOfRequestHandling, computeTime);
-        return result;
+            final Duration computeTime = startOfRequestHandling.until(MillisecondsTimePoint.now());
+            logger.info("computeLeaderboardByName(" + this.getName() + ", " + timePoint + ", "
+                    + namesOfRaceColumnsForWhichToLoadLegDetails + ", addOverallDetails=" + addOverallDetails + ") took "
+                    + computeTime);
+            updateStats(startOfRequestHandling, computeTime);
+            return result;
+        }, CPUMeteringType.LEADERBOARD_COMPUTE_DTO.name());
     }
  
     /**

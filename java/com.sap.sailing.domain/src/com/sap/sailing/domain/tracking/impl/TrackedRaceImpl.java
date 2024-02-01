@@ -61,6 +61,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -832,20 +833,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     @Override
                     public List<Maneuver> computeCacheUpdate(Competitor competitor, EmptyUpdateInterval updateInterval)
                             throws NoWindException {
-                        Duration averageIntervalBetweenRawFixes = getTrack(competitor).getAverageIntervalBetweenRawFixes();
-                        if (averageIntervalBetweenRawFixes != null) {
-                            ManeuverDetector maneuverDetector;
-                            // FIXME The LowGPSSamplingRateManeuverDetectorImpl doesn't work very well; it recognizes many tacks only as bear-away and doesn't seem to have any noticeable benefits... See ORC Worlds 2019 ORC A Long Offshore
-//                            if (averageIntervalBetweenRawFixes.asSeconds() >= 30) {
-//                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
-//                            } else {
-                                maneuverDetector = maneuverDetectorPerCompetitorCache.getValue(competitor);
-//                            }
-                            List<Maneuver> maneuvers = computeManeuvers(competitor, maneuverDetector);
-                            return maneuvers;
-                        } else {
-                            return Collections.emptyList();
-                        }
+                        return getTrackedRegatta().callWithCPUMeterWithException(()->{
+                            Duration averageIntervalBetweenRawFixes = getTrack(competitor).getAverageIntervalBetweenRawFixes();
+                            if (averageIntervalBetweenRawFixes != null) {
+                                ManeuverDetector maneuverDetector;
+                                // FIXME The LowGPSSamplingRateManeuverDetectorImpl doesn't work very well; it recognizes many tacks only as bear-away and doesn't seem to have any noticeable benefits... See ORC Worlds 2019 ORC A Long Offshore
+    //                            if (averageIntervalBetweenRawFixes.asSeconds() >= 30) {
+    //                                maneuverDetector = new LowGPSSamplingRateManeuverDetectorImpl(TrackedRaceImpl.this, competitor);
+    //                            } else {
+                                    maneuverDetector = maneuverDetectorPerCompetitorCache.getValue(competitor);
+    //                            }
+                                List<Maneuver> maneuvers = computeManeuvers(competitor, maneuverDetector);
+                                return maneuvers;
+                            } else {
+                                return Collections.emptyList();
+                            }
+                        }, CPUMeteringType.MANEUVER_DETECTION.name());
                     }
                 }, /* nameForLocks */ "Maneuver cache for race " + getRace().getName());
     }
