@@ -24,8 +24,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     protected WindLadder windLadder;
 
-    protected double canvasRotationDegrees;
-
     protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture());
 
     protected Double windBearing;
@@ -66,7 +64,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         }
         if (mapProjection != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
             // Rotation
-            setCanvasRotation(Math.toDegrees(this.windBearing));
+            updateDrawingAngleAndSetCanvasRotation(Math.toDegrees(this.windBearing));
 
             // Offset from centered position
             Point fixPointInMap = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
@@ -191,7 +189,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()) - heightReserve / 2);
 
         setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
-        setCanvasRotation(0.0);
+        updateDrawingAngleAndSetCanvasRotation(0.0);
     }
 
     /**
@@ -225,16 +223,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 //        ctx.setFillStyle("red");
 //        ctx.fill();
         drawnPatternSize = tileSize * patternScale;
-    }
-
-    @Override
-    protected void setCanvasRotation(double rotationInDegrees) {
-        super.setCanvasRotation(rotationInDegrees);
-        canvasRotationDegrees = rotationInDegrees;
-    }
-
-    protected double getCanvasRotation() {
-        return canvasRotationDegrees;
     }
 
     @Override
