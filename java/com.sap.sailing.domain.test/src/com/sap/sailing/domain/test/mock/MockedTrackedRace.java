@@ -335,6 +335,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public CPUMeter getCPUMeter() {
+                        return null;
+                    }
+
+                    @Override
                     public Iterable<RaceDefinition> getAllRaces() {
                         return null;
                     }
