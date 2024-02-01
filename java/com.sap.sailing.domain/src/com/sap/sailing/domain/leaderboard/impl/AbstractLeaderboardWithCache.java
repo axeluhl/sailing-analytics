@@ -107,7 +107,6 @@ import com.sap.sse.common.TimingStats;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.metering.CPUMeter;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
@@ -131,11 +130,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
      * Keeps statistics about the re-calculation times in different short-term time ranges.
      */
     private transient TimingStats timingStats;
-    
-    /**
-     * Keeps statistics about the CPU time consumed by this leaderboard
-     */
-    private transient CPUMeter cpuMeter;
     
     /**
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
@@ -245,15 +239,9 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         this.cacheInvalidationListeners = new HashSet<>();
         this.leaderboardChangeListeners = new HashSet<>();
         this.timingStats = createTimingStats();
-        this.cpuMeter = CPUMeter.create();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-    }
-    
-    @Override
-    public CPUMeter getCPUMeter() {
-        return cpuMeter;
     }
     
     /**

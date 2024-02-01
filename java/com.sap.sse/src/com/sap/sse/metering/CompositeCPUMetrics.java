@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.metering.impl.CompositeCPUMetricsImpl;
 
 /**
  * A "composite" pattern for {@link CPUMetrics}. It sums up the metrics of the component {@link CPUMetrics}.
@@ -13,7 +14,15 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CompositeCPUMetrics extends CPUMetrics {
+public interface CompositeCPUMetrics extends CPUMeter {
+    static CompositeCPUMetrics create() {
+        return new CompositeCPUMetricsImpl();
+    }
+    
+    /**
+     * Adds another {@link CPUMetrics} component to this composite metrics, unless the {@code cpuMetrics}
+     * have already been added earlier; this way, no duplicates can be created.
+     */
     void add(CPUMetrics cpuMetrics);
     
     Iterable<CPUMetrics> getComponentMetrics();

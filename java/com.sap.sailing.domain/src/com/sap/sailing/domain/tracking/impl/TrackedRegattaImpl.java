@@ -77,8 +77,6 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
      */
     private transient ConcurrentMap<RaceListener, RunnableExecutor> raceListeners;
     
-    private transient CPUMeter cpuMeter;
-    
     /**
      * Guards access to {@link #raceListeners}.
      */
@@ -86,7 +84,6 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
     
     public TrackedRegattaImpl(Regatta regatta) {
         super();
-        this.cpuMeter = CPUMeter.create();
         this.trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
@@ -98,12 +95,11 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         this.raceListeners = new ConcurrentHashMap<>();
-        this.cpuMeter = CPUMeter.create();
     }
     
     @Override
     public CPUMeter getCPUMeter() {
-        return cpuMeter;
+        return getRegatta().getCPUMeter();
     }
 
     @Override
