@@ -8,7 +8,7 @@ HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_GIT_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
 HTTPD_GIT_REPO_IP="18.171.184.127" # points to where git repo is
-AWS_CREDENTIALS_IP="34.251.204.62" # points to dev server which has no-mfa credentials. 
+AWS_CREDENTIALS_IP="34.251.204.62" # points to a server which has no-mfa credentials within the root user, possibly the central reverse proxy. 
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo -E bash <<NESTEDEOF
@@ -101,6 +101,7 @@ mkdir letsencrypt/live/sail-insight.com
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 # copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
+cp -r /usr/share/httpd/.aws /root
 chown -R apache:apache /usr/share/httpd
 sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
 # setup releases
