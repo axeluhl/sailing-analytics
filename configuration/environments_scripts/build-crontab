@@ -8,20 +8,24 @@
 # Useful files are also copied across from the "files" dir within each image type.
 
 if [[ $# -ne 3 && $# -ne 4 && $# -ne 5 ]]; then
-    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
+    echo "$0 [-s | -n | -p] <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
     echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
     echo "Use the s(imple) flag to only do the crontab and not copy any files across. The n(o install) flag can be used to setup the crontabs but not install them."
+    echo "The p(reserve) flag preserves file mode when copied"
     exit 2
 fi
 INSTALL_CRONTAB="true"
-options='sn'
+ONLY_CRONTAB="false"
+PRESERVE_MODE="false"
+options='snp'
 while getopts $options option
 do
     case $option in
         n) INSTALL_CRONTAB="false";;
         s) ONLY_CRONTAB="true";;
+	p) PRESERVE_MODE="true";;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -50,7 +54,10 @@ if [[ -d "users" ]]; then
     done
     cd .. # exits users folder, which is essential for the next commands
 fi
-if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
+if [[ "$ONLY_CRONTAB" == "false" && -d "files" ]]; then
     cd "files"
-    \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
+    if [[ "$PRESERVE_MODE" == "true" ]]; then
+        \cp --preserve=mode -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
+    fi
+    \cp  -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
 fi
