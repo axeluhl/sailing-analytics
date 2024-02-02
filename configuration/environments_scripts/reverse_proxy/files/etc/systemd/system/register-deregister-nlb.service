@@ -1,7 +1,7 @@
 [Unit]
 Description=Upon launch add itself to the nlb target group and upon stopping, remove itself.
-Requires=-.mount
-After=-.mount
+Requires=-.mount network-online.target
+After=-.mount network-online.target
 
 [Install]
 RequiredBy=multi-user.target
