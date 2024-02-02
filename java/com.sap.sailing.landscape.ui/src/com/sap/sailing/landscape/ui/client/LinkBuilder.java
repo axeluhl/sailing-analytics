@@ -10,7 +10,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
 
     static public enum pathModes {
         InstanceSearch, InstanceByAmiIdSearch, ImageSearch, AmiSearch, Hostname,
-        ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch, publicIp
+        ReplicaLinks, Version, MasterHost, TargetGroupSearch, AutoScalingGroupSearch, publicIp, privateIp
     };
 
     private pathModes pathMode;
@@ -21,6 +21,7 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
     private String autoScalingGroupName;
     private String amiId;
     private String publicIp;
+    private String privateIp;
 
     LinkBuilder setPathMode(pathModes mode) {
         pathMode = mode;
@@ -56,6 +57,12 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
         this.publicIp = ip;
         return self();
     }
+    
+    LinkBuilder setPrivateIp(String ip) {
+        this.privateIp = ip;
+        return self();
+    }
+    
     LinkBuilder setReplicaSet(SailingApplicationReplicaSetDTO<String> replicaSet) {
         this.replicaSet = replicaSet;
         return self();
@@ -209,10 +216,18 @@ public class LinkBuilder implements Builder<LinkBuilder, SafeHtml> {
                 break;
             case publicIp:
                 checkAttribute(publicIp, "Public Ip");
-                final String ipLink = "https://" + publicIp;
+                final String ipLink = "http://" + publicIp;
                 builder.appendHtmlConstant("<a target=\"_blank\" href=\"" + ipLink + "\">");
                 builder.appendEscaped(publicIp);
                 builder.appendHtmlConstant("</a>");
+                break;
+            case privateIp:
+                checkAttribute(privateIp, "Private Ip");
+                final String privateIpLink = "http://" + privateIp;
+                builder.appendHtmlConstant("<a target=\"_blank\" href=\"" + privateIpLink + "\">");
+                builder.appendEscaped(privateIp);
+                builder.appendHtmlConstant("</a>");
+                break;
             }
         } catch (Exception e) {
             builder.appendHtmlConstant("<a target=\"_blank\" >");
