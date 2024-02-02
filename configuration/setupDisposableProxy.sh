@@ -71,6 +71,7 @@ yum install -y mod_ssl
 source /root/.bashrc
 mountnvmeswap
 systemctl enable mountnvmeswap.service
+systemctl enable register-deregister-nlb.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
@@ -101,9 +102,9 @@ mkdir letsencrypt/live/sail-insight.com
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 # copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
+sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
 cp -r /usr/share/httpd/.aws /root
 chown -R apache:apache /usr/share/httpd
-sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
 # setup releases
 # rsync -av --delete root@sapsailing.com:/var/www/static/releases /var/www/static/releases
 # # setup p2
