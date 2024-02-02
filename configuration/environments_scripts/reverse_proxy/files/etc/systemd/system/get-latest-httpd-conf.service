@@ -1,0 +1,14 @@
+[Unit]
+Description=An unformatted /dev/nvme0n1 is turned into swap space
+Requires=-.mount
+After=-.mount
+Before=httpd.service
+WantedBy=httpd.service
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/sync-repo-and-execute-cmd.sh "/etc/httpd" "echo synced"
