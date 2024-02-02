@@ -115,7 +115,6 @@ import com.sap.sailing.domain.tracking.RaceWindCalculator;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindSummary;
@@ -130,7 +129,6 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CPUMeterJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
