@@ -318,6 +318,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public DynamicTrackedRegatta getTrackedRegatta() {
         return new DynamicTrackedRegatta() {
             private static final long serialVersionUID = 2651590861333064588L;
+            private final CPUMeter cpuMeter = CPUMeter.create();
 
             @Override
             public Regatta getRegatta() {
@@ -336,7 +337,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public CPUMeter getCPUMeter() {
-                        return null;
+                        return cpuMeter;
                     }
 
                     @Override
@@ -648,7 +649,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public CPUMeter getCPUMeter() {
-                return null;
+                return cpuMeter;
             }
 
             @Override
