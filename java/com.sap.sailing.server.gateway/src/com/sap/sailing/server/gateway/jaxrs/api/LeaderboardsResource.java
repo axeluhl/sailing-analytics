@@ -124,6 +124,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseJsonSe
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CPUMeterJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
@@ -1824,5 +1825,17 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             }
         }
         return result;
+    }
+    
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{name}/cpu")
+    public Response getCPUMeter(@PathParam("name") String leaderboardName) throws NotFoundException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        return Response.ok().entity(streamingOutput(new CPUMeterJsonSerializer().serialize(leaderboard.getCPUMeter()))).build();
     }
 }

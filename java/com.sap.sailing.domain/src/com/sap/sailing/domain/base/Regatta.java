@@ -20,6 +20,7 @@ import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.HasCPUMeter;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -33,7 +34,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  *
  */
 public interface Regatta
-        extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike, WithQualifiedObjectIdentifier {
+        extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike, WithQualifiedObjectIdentifier, HasCPUMeter {
 
     /**
      * As taken from the Racing Rules of Sailing:

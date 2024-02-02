@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRanksDTO;
@@ -77,14 +79,17 @@ public class QuickRanksLiveCache {
                     @Override
                     public QuickRanksDTO computeCacheUpdate(RegattaAndRaceIdentifier key,
                             CalculateOrPurge updateInterval) throws Exception {
-                        logger.fine("Computing cache update for live QuickRanks of race "+key);
-                        final QuickRanksDTO quickRanks;
-                        if (updateInterval == CalculateOrPurge.PURGE) {
-                            quickRanks = null;
-                        } else {
-                            quickRanks = service.computeQuickRanks(key, /* time point; null means live */ null);
-                        }
-                        return quickRanks;
+                        final TrackedRegatta cpuMeter = service.getTrackedRace(key).getTrackedRegatta();
+                        return cpuMeter.callWithCPUMeterWithException(()->{
+                            logger.fine("Computing cache update for live QuickRanks of race "+key);
+                            final QuickRanksDTO quickRanks;
+                            if (updateInterval == CalculateOrPurge.PURGE) {
+                                quickRanks = null;
+                            } else {
+                                quickRanks = service.computeQuickRanks(key, /* time point; null means live */ null);
+                            }
+                            return quickRanks;
+                        }, CPUMeteringType.QUICK_RANKS.name());
                     }
                 }, getClass().getName());
         fromRefToRaceIdentifier = new HashMap<>();

@@ -104,6 +104,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -317,6 +318,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public DynamicTrackedRegatta getTrackedRegatta() {
         return new DynamicTrackedRegatta() {
             private static final long serialVersionUID = 2651590861333064588L;
+            private final CPUMeter cpuMeter = CPUMeter.create();
 
             @Override
             public Regatta getRegatta() {
@@ -331,6 +333,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public Serializable getId() {
                         return null;
+                    }
+
+                    @Override
+                    public CPUMeter getCPUMeter() {
+                        return cpuMeter;
                     }
 
                     @Override
@@ -638,6 +645,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                             boolean autoRestartTrackingUponCompetitorSetChange) {
                     }
                 };
+            }
+
+            @Override
+            public CPUMeter getCPUMeter() {
+                return cpuMeter;
             }
 
             @Override
