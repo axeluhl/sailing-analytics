@@ -42,6 +42,8 @@ import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.metering.CPUMeter;
+import com.sap.sse.metering.CompositeCPUMetrics;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be
@@ -75,6 +77,12 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private transient RaceLogStore raceLogStore;
     
     /**
+     * The CPU metrics of a flexible leaderboard are composed of a {@link CPUMeter} for CPU usage by code in this
+     * class, and further {@link Regatta} CPU meters for each regatta of which a race 
+     */
+    private transient CompositeCPUMetrics cpuMeter;
+    
+    /**
      * A synchronized list; obtain the object monitor in order to iterate over the contents!
      */
     private List<CourseArea> courseAreas;
@@ -103,6 +111,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             ScoringScheme scoringScheme, Iterable<CourseArea> courseAreas) {
         super(resultDiscardingRule);
         assert courseAreas != null;
+        this.cpuMeter = CompositeCPUMetrics.create();
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
@@ -138,8 +147,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
+        cpuMeter = CompositeCPUMetrics.create();
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            final TrackedRace trackedRace = column.getTrackedRace(defaultFleet);
+            if (trackedRace != null) {
+                cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
+            }
         }
         regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
     }
@@ -155,10 +169,22 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        super.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
+    }
+
+    @Override
     public FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
         FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */false);
         column.setTrackedRace(defaultFleet, race); // triggers listeners because this object was registered above as
                                                    // race column listener on the column
+        cpuMeter.add(race.getTrackedRegatta().getCPUMeter());
         return column;
     }
 

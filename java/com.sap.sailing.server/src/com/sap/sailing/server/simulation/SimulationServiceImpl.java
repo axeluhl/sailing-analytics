@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -67,6 +68,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.concurrent.RunnableWithResultAndException;
 import com.sap.sse.util.SmartFutureCache;
 
 public class SimulationServiceImpl implements SimulationService {
@@ -98,10 +100,12 @@ public class SimulationServiceImpl implements SimulationService {
                     new SmartFutureCache.AbstractCacheUpdater<LegIdentifier, SimulationResults, SmartFutureCache.EmptyUpdateInterval>() {
                         @Override
                         public SimulationResults computeCacheUpdate(LegIdentifier key, SmartFutureCache.EmptyUpdateInterval updateInterval) throws Exception {
-                            logger.info("Simulation Started: \"" + key.toString() + "\"");
-                            SimulationResults results = computeSimulationResults(key);
-                            logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.getVersion().asMillis()));
-                            return results;
+                            return racingEventService.getTrackedRace(key).getTrackedRegatta().callWithCPUMeterWithException(()->{
+                                logger.info("Simulation Started: \"" + key.toString() + "\"");
+                                SimulationResults results = computeSimulationResults(key);
+                                logger.info("Simulation Finished: \"" + key.toString() + "\", Results-Version: "+ (results==null?0:results.getVersion().asMillis()));
+                                return results;
+                            }, CPUMeteringType.SIMULATOR.name());
                         }
                     }, "SmartFutureCache.simulationService (" + racingEventService.toString() + ")");
             scheduler.scheduleAtFixedRate(()->expireCacheEntries(), CACHE_ENTRY_EXPIRY_DURATION.asMillis(), CACHE_ENTRY_EXPIRY_DURATION.asMillis(), TimeUnit.MILLISECONDS);
@@ -439,104 +443,112 @@ public class SimulationServiceImpl implements SimulationService {
     private SimulationResults computeSimulationResults(LegIdentifier legIdentifier) throws InterruptedException,
             ExecutionException {
         final TimePoint simulationStartTime = TimePoint.now();
-        SimulationResults result = null;
+        final SimulationResults result;
         TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
         if (trackedRace != null) {
-            boolean isLive = trackedRace.isLive(simulationStartTime);
-            int zeroBasedlegNumber = legIdentifier.getOneBasedLegIndex()-1;
-            Course raceCourse = trackedRace.getRace().getCourse();
-            Leg leg = raceCourse.getLegs().get(zeroBasedlegNumber);
-            // get previous mark or start line as start-position
-            Waypoint fromWaypoint = leg.getFrom();
-            // get next mark as end-position
-            Waypoint toWaypoint = leg.getTo();
-            final TimePoint startTimePoint;
-            final TimePoint endTimePoint;
-            final Duration legDuration; // FIXME the startTimePoint and endTimePoint may originate from different competitors; their difference therefore may not be any real time spent by any single competitor in that leg
-            final MarkPassing toMarkPassing = Util.first(trackedRace.getMarkPassingsInOrder(toWaypoint));
-            if (toMarkPassing != null) {
-                final Optional<MarkPassing> fromMarkPassing = trackedRace.getMarkPassings(toMarkPassing.getCompetitor()).stream().filter(mp->mp.getWaypoint() == fromWaypoint).findAny();
-                if (fromMarkPassing.isPresent()) {
-                    startTimePoint = fromMarkPassing.get().getTimePoint();
-                    // find the leg finish mark passing of the same competitor; the competitor may not have finished yet, may have been passed by
-                    // another competitor who then finished the leg already (this time as the fastest).
-                    endTimePoint = toMarkPassing.getTimePoint();
-                    legDuration = startTimePoint.until(endTimePoint);
+            result = trackedRace.getTrackedRegatta().callWithCPUMeterWithException((RunnableWithResultAndException<SimulationResults, ExecutionException>) ()->{
+                boolean isLive = trackedRace.isLive(simulationStartTime);
+                int zeroBasedlegNumber = legIdentifier.getOneBasedLegIndex()-1;
+                Course raceCourse = trackedRace.getRace().getCourse();
+                Leg leg = raceCourse.getLegs().get(zeroBasedlegNumber);
+                // get previous mark or start line as start-position
+                Waypoint fromWaypoint = leg.getFrom();
+                // get next mark as end-position
+                Waypoint toWaypoint = leg.getTo();
+                final TimePoint startTimePoint;
+                final TimePoint endTimePoint;
+                final Duration legDuration; // FIXME the startTimePoint and endTimePoint may originate from different competitors; their difference therefore may not be any real time spent by any single competitor in that leg
+                final MarkPassing toMarkPassing = Util.first(trackedRace.getMarkPassingsInOrder(toWaypoint));
+                if (toMarkPassing != null) {
+                    final Optional<MarkPassing> fromMarkPassing = trackedRace.getMarkPassings(toMarkPassing.getCompetitor()).stream().filter(mp->mp.getWaypoint() == fromWaypoint).findAny();
+                    if (fromMarkPassing.isPresent()) {
+                        startTimePoint = fromMarkPassing.get().getTimePoint();
+                        // find the leg finish mark passing of the same competitor; the competitor may not have finished yet, may have been passed by
+                        // another competitor who then finished the leg already (this time as the fastest).
+                        endTimePoint = toMarkPassing.getTimePoint();
+                        legDuration = startTimePoint.until(endTimePoint);
+                    } else {
+                        legDuration = Duration.NULL;
+                        if (isLive && zeroBasedlegNumber == 0) {
+                            endTimePoint = simulationStartTime;
+                            startTimePoint = simulationStartTime;
+                        } else {
+                            startTimePoint = null;
+                            endTimePoint = null;
+                        }
+                    }
                 } else {
                     legDuration = Duration.NULL;
-                    if (isLive && zeroBasedlegNumber == 0) {
-                        endTimePoint = simulationStartTime;
-                        startTimePoint = simulationStartTime;
-                    } else {
-                        startTimePoint = null;
-                        endTimePoint = null;
+                    startTimePoint = simulationStartTime;
+                    endTimePoint = simulationStartTime;
+                }
+                Position startPosition = null;
+                List<Position> startLine = null;
+                Position endPosition = null;
+                List<Position> endLine = null;
+                if (startTimePoint != null) {
+                    startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
+                    List<Position> line = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
+                    if (line.size() == 2) {
+                        startLine = line;
                     }
                 }
-            } else {
-                legDuration = Duration.NULL;
-                startTimePoint = simulationStartTime;
-                endTimePoint = simulationStartTime;
-            }
-            Position startPosition = null;
-            List<Position> startLine = null;
-            Position endPosition = null;
-            List<Position> endLine = null;
-            if (startTimePoint != null) {
-                startPosition = trackedRace.getApproximatePosition(fromWaypoint, startTimePoint);
-                List<Position> line = this.getLinePositions(fromWaypoint, startTimePoint, trackedRace);
-                if (line.size() == 2) {
-                    startLine = line;
+                if (endTimePoint != null) {
+                    endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
+                    List<Position> line = this.getLinePositions(toWaypoint, endTimePoint, trackedRace);
+                    if (line.size() == 2) {
+                        endLine = line;
+                    }
+                } else if (startTimePoint != null) {
+                    endPosition = trackedRace.getApproximatePosition(toWaypoint, startTimePoint);
                 }
-            }
-            if (endTimePoint != null) {
-                endPosition = trackedRace.getApproximatePosition(toWaypoint, endTimePoint);
-                List<Position> line = this.getLinePositions(toWaypoint, endTimePoint, trackedRace);
-                if (line.size() == 2) {
-                    endLine = line;
-                }
-            } else if (startTimePoint != null) {
-                endPosition = trackedRace.getApproximatePosition(toWaypoint, startTimePoint);
-            }
-            // determine legtype upwind/downwind/reaching
-            LegType legType = null;
-            if (startTimePoint != null) {
-                try {
-                    legType = trackedRace.getTrackedLeg(leg).getLegType(startTimePoint);
-                } catch (NoWindException e) {
+                // determine legtype upwind/downwind/reaching
+                LegType legType = null;
+                if (startTimePoint != null) {
+                    try {
+                        legType = trackedRace.getTrackedLeg(leg).getLegType(startTimePoint);
+                    } catch (NoWindException e) {
+                        return null;
+                    }
+                } else {
                     return null;
                 }
-            } else {
-                return null;
-            }
-            // get windfield
-            WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
-            Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
-            windField.generate(startTimePoint, null, timeStep);
-            // prepare simulation-parameters
-            List<Position> course = new ArrayList<Position>();
-            course.add(startPosition);
-            course.add(endPosition);
-            BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDataService polarDataService = getPolarDataService();
-            PolarDiagram polarDiagram;
-            try {
-                polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
-            } catch (SparseSimulationDataException e) {
-                polarDiagram = null;
-                // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
-            }
-            Map<PathType, Path> paths = null;
-            if (polarDiagram != null) {
-                double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
-                        / ((PolarDiagramGPS) polarDiagram).getAvgSpeedInKnots() * 3600 / 100;
-                Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
-                SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, endLine, polarDiagram,
-                        windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
-                paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
-            }
-            // prepare simulator-results
-            result = new SimulationResults(startTimePoint, timeStep, legDuration, startPosition,
-                    endPosition, paths, null, TimePoint.now());
+                // get windfield
+                WindFieldGenerator windField = new WindFieldTrackedRaceImpl(trackedRace);
+                Duration timeStep = new MillisecondsDurationImpl(15 * 1000);
+                windField.generate(startTimePoint, null, timeStep);
+                // prepare simulation-parameters
+                List<Position> course = new ArrayList<Position>();
+                course.add(startPosition);
+                course.add(endPosition);
+                BoatClass boatClass = trackedRace.getRace().getBoatClass();
+                PolarDataService polarDataService = getPolarDataService();
+                PolarDiagram polarDiagram;
+                try {
+                    polarDiagram = new PolarDiagramGPS(boatClass, polarDataService);
+                } catch (SparseSimulationDataException e) {
+                    polarDiagram = null;
+                    // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
+                }
+                Map<PathType, Path> paths = null;
+                if (polarDiagram != null) {
+                    double simuStepSeconds = startPosition.getDistance(endPosition).getNauticalMiles()
+                            / ((PolarDiagramGPS) polarDiagram).getAvgSpeedInKnots() * 3600 / 100;
+                    Duration simuStep = new MillisecondsDurationImpl(Math.round(simuStepSeconds) * 1000);
+                    SimulationParameters simulationPars = new SimulationParametersImpl(course, startLine, endLine, polarDiagram,
+                            windField, simuStep, SailingSimulatorConstants.ModeEvent, true, true, legType);
+                    try {
+                        paths = getAllPathsEvenTimed(simulationPars, timeStep.asMillis());
+                    } catch (InterruptedException e) {
+                        throw new ExecutionException(e);
+                    }
+                }
+                // prepare simulator-results
+                return new SimulationResults(startTimePoint, timeStep, legDuration, startPosition,
+                        endPosition, paths, null, TimePoint.now());
+            }, CPUMeteringType.SIMULATOR.name());
+        } else {
+            result = null;
         }
         return result;
     }
