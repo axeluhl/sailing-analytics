@@ -1,12 +1,12 @@
 [Unit]
-Description=An unformatted /dev/nvme0n1 is turned into swap space
-Requires=-.mount
-After=-.mount
+Description=Syncs git repo prior to httpd service starting
+Requires=-.mount network-online.target
+After=-.mount network-online.target
 Before=httpd.service
-WantedBy=httpd.service
 
 [Install]
 RequiredBy=multi-user.target
+WantedBy=httpd.service
 
 [Service]
 Type=oneshot
