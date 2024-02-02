@@ -479,6 +479,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         final SafeHtmlCell amiForProxyCell = new SafeHtmlCell();
         final SafeHtmlCell instanceIdCell = new SafeHtmlCell();
         final SafeHtmlCell instancePublicIpCell = new SafeHtmlCell();
+        final SafeHtmlCell instancePrivateIpCell = new SafeHtmlCell();
         final Column<ReverseProxyDTO,SafeHtml> amiProxyProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(amiForProxyCell) {
 
             @Override
@@ -507,6 +508,14 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
             
         };
+        final Column<ReverseProxyDTO, SafeHtml> instancePrivateIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml> (instancePrivateIpCell) {
+
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+                return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.privateIp).setPrivateIp(reverseProxy.getPrivateIpAddress()).build();
+            }
+            
+        };
         proxiesTable = new TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources>(
                 stringMessages, errorReporter, /* enablePager */ false,
                 /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
@@ -529,6 +538,7 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTable.addColumn(instanceIdProxiesColumn, stringMessages.instanceId());
        proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
        proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
+       proxiesTable.addColumn(instancePrivateIpProxiesColumn, stringMessages.privateIp());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        //setup actions
