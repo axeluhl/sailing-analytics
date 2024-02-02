@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -151,11 +152,11 @@ public class MarkPassingCalculator {
         Thread t = new Thread(() -> {
             final Set<Callable<Void>> tasks = new HashSet<>();
             for (Competitor c : race.getRace().getCompetitors()) {
-                tasks.add(() -> {
+                tasks.add(race.getTrackedRegatta().cpuMeterCallable(() -> {
                     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
                     chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
                     return null;
-                });
+                }, CPUMeteringType.MARK_PASSINGS.name()));
             }
             ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
                     "Error trying to compute initial set of mark passings for race " + race.getRace().getName()
@@ -369,7 +370,7 @@ public class MarkPassingCalculator {
                                 Set<Callable<Void>> tasks = new HashSet<>();
                                 for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
                                         .entrySet()) {
-                                    tasks.add(() -> {
+                                    tasks.add((race.getTrackedRegatta().cpuMeterCallable(() -> {
                                         Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
                                         try {
                                             chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
@@ -381,7 +382,7 @@ public class MarkPassingCalculator {
                                                     e);
                                             throw e;
                                         }
-                                    });
+                                    }, CPUMeteringType.MARK_PASSINGS.name())));
                                 }
                                 logger.finer(() -> "Calculating mark passing deltas after course change in executor");
                                 ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
@@ -480,7 +481,7 @@ public class MarkPassingCalculator {
                         newCompetitorFixes.get(competitorAndFixesFinderConsidersAffected.getKey()),
                         competitorFixesThatReplacedExistingOnes
                                 .get(competitorAndFixesFinderConsidersAffected.getKey()));
-                tasks.add(new Callable<Void>() {
+                tasks.add((race.getTrackedRegatta().cpuMeterCallable(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
                         runnable.run();
@@ -497,7 +498,7 @@ public class MarkPassingCalculator {
                                 + competitorAndFixesFinderConsidersAffected.getKey() + " with "
                                 + competitorAndFixesFinderConsidersAffected.getValue().size() + " fixes";
                     }
-                });
+                }, CPUMeteringType.MARK_PASSINGS.name())));
             }
             ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.INFO,
                     "Error during mark passing calculation: %s", tasks);
