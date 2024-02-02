@@ -34,6 +34,7 @@ import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
 public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends ApplicationProcessMetrics,
@@ -70,7 +71,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 getAmiId(az.getRegion()), instanceType, az, keyName,
                 getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "#!/bin/bash \n sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys");
                 addHost(host);
-        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ONE_MINUTE, Level.WARNING, "Reattempting to add to target group");
+        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.WARNING, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
@@ -98,6 +99,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(host.getAvailabilityZone().getRegion())) {
             if (!targetGroup.getTargetGroupArn().contains("EndpointRegistration")
                     && !targetGroup.getTargetGroupArn().contains("Lambda")
+                    && targetGroup.getLoadBalancerArn() != null
                     && !targetGroup.getLoadBalancerArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)
                     && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
                 targetGroup.removeTarget(instanceFromHost);
@@ -106,14 +108,13 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         }
         Wait.wait(() -> { 
             for (TargetGroup<ShardingKey> tg: targetGroupsHostResidesIn) {
-                if (tg.getRegisteredTargets().get(instanceFromHost) != null && tg.getRegisteredTargets().get(instanceFromHost).state().equals(TargetHealthStateEnum.DRAINING)) {
+                final TargetHealth targetHealth = tg.getRegisteredTargets().get(instanceFromHost);
+                if ( targetHealth != null && targetHealth.state().equals(TargetHealthStateEnum.DRAINING)) {
                     return false;
                 }
             }
             return true;
         }, Optional.of(Duration.ofSeconds(60 * 10)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain");
-        
-        //TODO: the instance must remove and add itself to and from the nlb.
         ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = new ApacheReverseProxy<>(getLandscape(), host);
         proxy.rotateLogs(optionalKeyName, privateKeyEncryptionPassphrase);
         getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
