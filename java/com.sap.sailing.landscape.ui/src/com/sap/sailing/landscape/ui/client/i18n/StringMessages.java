@@ -175,4 +175,5 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String availabilityZone();
     String runOnExisting();
     String publicIp();
+    String privateIp();
 }
