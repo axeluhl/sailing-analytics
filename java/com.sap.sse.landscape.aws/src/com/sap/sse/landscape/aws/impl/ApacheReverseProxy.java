@@ -89,9 +89,9 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
     
     public void rotateLogs(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String command = "logrotate --force /etc/logrotate.conf";
-        logger.info("Standard output from forced log rotate on" + this.getHostname() + ": " + runCommandAndReturnStdoutAndStderr(command, "Standard error fromlogrotate ",
-                        Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
+        final String command = "logrotate --force -v /etc/logrotate.conf 2>&1;  echo \"logrotate done\"";
+        logger.info("Standard output from forced log rotate on " + this.getHostname() + ": " + runCommandAndReturnStdoutAndStderr(command, "Standard error from logrotate ",
+                        Level.ALL, optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,

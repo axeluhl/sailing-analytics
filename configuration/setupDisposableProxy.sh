@@ -72,6 +72,7 @@ source /root/.bashrc
 mountnvmeswap
 systemctl enable mountnvmeswap.service
 systemctl enable register-deregister-nlb.service
+systemctl enable get-latest-httpd-conf.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
