@@ -90,7 +90,7 @@ if [[ ! -d "/root/aws" ]]; then
 fi
 # setup git
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
-# copy key accross
+# copy httpd key accross
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519" /root/.ssh
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
 cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
