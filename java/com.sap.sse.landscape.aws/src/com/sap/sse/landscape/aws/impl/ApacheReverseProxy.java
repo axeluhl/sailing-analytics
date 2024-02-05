@@ -84,22 +84,40 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         return scope.toString() + CONFIG_FILE_EXTENSION;
     }
 
+    /**
+     * Appends the {@link #CONFIG_FILE_EXTENSION} to the hostname.
+     */
     private String getConfigFileNameForHostname(String hostname) {
         return hostname + CONFIG_FILE_EXTENSION;
     }
     
+    /**
+     * Forces a logrotate on the instane and logs output.
+     * @param optionalKeyName The optional key to use for the ssh connection.
+     * @param privateKeyEncryptionPassphrase The password for the key.
+     */
     public void rotateLogs(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String command = "logrotate --force -v /etc/logrotate.conf 2>&1;  echo \"logrotate done\"";
         logger.info("Standard output from forced log rotate on " + this.getHostname() + ": " + runCommandAndReturnStdoutAndStderr(command, "Standard error from logrotate ",
                         Level.ALL, optionalKeyName, privateKeyEncryptionPassphrase));
     }
     
+    /**
+     * Creates a redirect file and updates the git repo.
+     * @param configFileNameForHostname The config file to create or edit, with appropriate extension.
+     * @param macroName The name of the macro to use.
+     * @param hostname The hostname the macro will affect. Typically the same as the file name.
+     * @param optionalKeyName Key name to use for ssh.
+     * @param privateKeyEncryptionPassphrase The passphrase for the passed key.
+     * @param macroArguments Optional macro arguments.
+     * @throws Exception
+     */
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {
         final String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
                 + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname) + "; service httpd reload && "
-                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "\"Set " +  configFileNameForHostname + " redirect\"", false);
+                + "cd " + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname, "Set " +  configFileNameForHostname + " redirect", true);
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
@@ -116,15 +134,15 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     /**
      *  Creates a string that can be ran on an instance to commit and optionally push changes to a file (within a git repo). ASSUMES the command is ran from within the repository.
-     * @param editedFileName The file name edited, created or deleted to commit.
-     * @param commitMsg The commit message. MAKE SURE the message is enclosed with escaped speech marks.
+     * @param editedFileName The file name edited, created or deleted to commit, with {@link #CONFIG_FILE_EXTENSION}, but without a path.
+     * @param commitMsg The commit message, without escaped speech marks.
      * @param performPush Boolean indicating whether to push changes or not.
      * @return Returns the created string command to perform a commit and optional push.
      */
     private String createCommitAndPushString(String editedFileName, String commitMsg, boolean performPush) {
-        StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName) + " && git commit -m " + commitMsg); // space at beginning and after -m, for safety
+        StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName) + " && git commit -m " + "\"" + commitMsg + "\""); // space at beginning and after -m, for safety
         if (performPush) {
-            command.append(" && git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
+            command.append(" ; git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
         }
         command.append(";");
         return command.toString();
@@ -216,13 +234,19 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         removeRedirect(configFilePath, hostname, optionalKeyName, privateKeyEncryptionPassphrase);
     }
     
-    private void removeRedirect(String configFilePath, String redirectNameForLogOutput,
+    
+    /**
+     * 
+     * @param configFileAbsolutePath Absolute path to file to remove.
+     * @param hostname The hostname which was removed.
+     */
+    private void removeRedirect(String configFileAbsolutePath, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String command = "rm " + configFilePath + "; service httpd reload" + " && cd " + CONFIG_REPO_PATH + createCommitAndPushString(redirectNameForLogOutput, "\"Removed " + redirectNameForLogOutput +"\"", false);
-        logger.info("Standard output from removing the re-direct for " + redirectNameForLogOutput
+        final String command = "rm " + configFileAbsolutePath + "; service httpd reload" + " && cd " + CONFIG_REPO_PATH + ";" + createCommitAndPushString(getConfigFileNameForHostname(hostname), "Removed " + hostname, true);
+        logger.info("Standard output from removing the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
-                        "Standard error from removing the re-direct for " + redirectNameForLogOutput
+                        "Standard error from removing the re-direct for " + hostname
                                 + " and reloading the Apache httpd server: ",
                         Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));
     }
