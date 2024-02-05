@@ -7,13 +7,11 @@ BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_GIT_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
-HTTPD_GIT_REPO_IP="18.171.184.127" # points to where git repo is
+HTTPD_GIT_REPO_IP="172.31.5.237" # points to where git repo is
 AWS_CREDENTIALS_IP="34.251.204.62" # points to a server which has no-mfa credentials within the root user, possibly the central reverse proxy. 
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
-sudo -E bash <<NESTEDEOF
-sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys
-NESTEDEOF
+sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
@@ -60,7 +58,7 @@ enabled  = true
 filter   = sshd[mode=aggressive]
 action   = iptables[name=SSH, port=ssh, protocol=tcp]
            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
-logpath  = /var/log/secure
+logpath  = /var/log/fail2ban.log
 maxretry = 5
 EOF
 chkconfig --level 23 fail2ban on
@@ -82,12 +80,14 @@ sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABS
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup latest cli
-yum remove -y awscli
-cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-cd ~ && unzip awscliv2.zip
-rm -rf awscliv2.zip
-cd ~ && sudo ./aws/install
 
+if [[ ! -d "/root/aws" ]]; then 
+    yum remove -y awscli
+    cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    cd ~ && unzip awscliv2.zip
+    rm -rf awscliv2.zip
+    cd ~ && sudo ./aws/install
+fi
 # setup git
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
 # copy key accross
