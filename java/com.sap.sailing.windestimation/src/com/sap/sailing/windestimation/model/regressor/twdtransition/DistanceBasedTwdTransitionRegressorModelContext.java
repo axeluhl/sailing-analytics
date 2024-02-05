@@ -41,7 +41,11 @@ public final class DistanceBasedTwdTransitionRegressorModelContext
      * 
      * Should you make changes here, also keep in mind that test cases and their test resources contains model files
      * that must match these ranges. See {@code IncrementalMstHmmWindEstimationForTrackedRaceTest.modelFilesNames} for
-     * details.
+     * details.<p>
+     * 
+     * Furthermore, note that you cannot import a model with incompatible value ranges into a server. You first need
+     * to upgrade the server so it has the new value range enum loaded. Then you can import a new model with the new
+     * value ranges successfully.
      * 
      * @author Vladislav Chumak (D069712)
      *

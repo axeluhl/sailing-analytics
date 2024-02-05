@@ -37,7 +37,15 @@ public final class DurationBasedTwdTransitionRegressorModelContext
      * Input value intervals with corresponding model configurations for the duration dimension which is treated in
      * seconds. For each enum element, a separate model will be trained with polynomial degree and bias as specified by
      * the enum element. Feel free to add/delete/modify enum elements as desired. The model training and discovery will
-     * still work. However, make sure that the specified intervals do not include holes between its transitions.
+     * still work. However, make sure that the specified intervals do not include holes between its transitions.<p>
+     * 
+     * Should you make changes here, also keep in mind that test cases and their test resources contains model files
+     * that must match these ranges. See {@code IncrementalMstHmmWindEstimationForTrackedRaceTest.modelFilesNames} for
+     * details.<p>
+     * 
+     * Furthermore, note that you cannot import a model with incompatible value ranges into a server. You first need
+     * to upgrade the server so it has the new value range enum loaded. Then you can import a new model with the new
+     * value ranges successfully.
      * 
      * @author Vladislav Chumak (D069712)
      *
