@@ -599,6 +599,7 @@ img.openColumn {
     display: inline-block;
     vertical-align: text-top;
     margin-left: 10px;
+    margin-right: -10px; /* allow elements to the right to slighly "under-cut" the SAP anvil */
     margin-top: 5px;
 }
 
