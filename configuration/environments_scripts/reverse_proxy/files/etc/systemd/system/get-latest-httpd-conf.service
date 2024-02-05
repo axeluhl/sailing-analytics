@@ -1,0 +1,14 @@
+[Unit]
+Description=Syncs git repo prior to httpd service starting
+Requires=-.mount network-online.target
+After=-.mount network-online.target
+Before=httpd.service
+
+[Install]
+RequiredBy=multi-user.target
+WantedBy=httpd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/sync-repo-and-execute-cmd.sh "/etc/httpd" "echo synced"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Upon launch add itself to the nlb target group and upon stopping, remove itself.
+Requires=-.mount network-online.target
+After=-.mount network-online.target
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/register-deregister-from-nlb-target-group.sh add-to-nlb
+ExecStop=/usr/local/bin/register-deregister-from-nlb-target-group.sh remove-from-nlb
