@@ -43,10 +43,10 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceAsWaypointList;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sse.common.Util;
 
 import difflib.DiffUtils;
@@ -82,7 +82,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
                 /* registrationLinkSecret */ UUID.randomUUID().toString());
-        TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
+        TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, 

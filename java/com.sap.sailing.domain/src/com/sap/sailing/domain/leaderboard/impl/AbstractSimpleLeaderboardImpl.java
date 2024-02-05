@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -710,9 +711,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
         for (final RaceColumn raceColumn : getRaceColumns()) {
             raceColumnsToConsider.add(raceColumn);
             final Iterable<RaceColumn> finalRaceColumnsToConsider = new ArrayList<>(raceColumnsToConsider);
-            futures.put(raceColumn, executor.submit(new Callable<Map<Competitor, Double>>() {
-                @Override
-                public Map<Competitor, Double> call() {
+            futures.put(raceColumn, executor.submit(cpuMeterCallable(()->{
                     Map<Competitor, Double> netPointsSumPerCompetitorInColumn = new HashMap<>();
                     for (Competitor competitor : getCompetitors()) {
                         netPointsSumPerCompetitorInColumn.put(competitor,
@@ -721,8 +720,7 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
                     synchronized (result) {
                         return netPointsSumPerCompetitorInColumn;
                     }
-                }
-            }));
+                }, CPUMeteringType.NET_POINTS_SUM.name())));
         }
         for (RaceColumn raceColumn : getRaceColumns()) {
             try {

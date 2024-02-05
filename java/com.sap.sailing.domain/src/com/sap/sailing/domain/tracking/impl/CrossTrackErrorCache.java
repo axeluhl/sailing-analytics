@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
@@ -164,15 +165,17 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                 new CacheUpdater<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval>() {
                     @Override
                     public CrossTrackErrorSumAndNumberOfFixesTrack computeCacheUpdate(Competitor competitor,
-                            FromTimePointToEndUpdateInterval updateInterval) throws Exception {
-                        final TimePoint from;
-                        if (updateInterval == null) {
-                            final GPSFixMoving firstRawFix = owner.getTrack(competitor).getFirstRawFix();
-                            from = firstRawFix == null ? new MillisecondsTimePoint(0) : firstRawFix.getTimePoint();
-                        } else {
-                            from = updateInterval.getFrom();
-                        }
-                        return computeFixesForCacheUpdate(competitor, from);
+                            FromTimePointToEndUpdateInterval updateInterval) throws NoWindException {
+                        return owner.getTrackedRegatta().callWithCPUMeterWithException(()->{
+                            final TimePoint from;
+                            if (updateInterval == null) {
+                                final GPSFixMoving firstRawFix = owner.getTrack(competitor).getFirstRawFix();
+                                from = firstRawFix == null ? new MillisecondsTimePoint(0) : firstRawFix.getTimePoint();
+                            } else {
+                                from = updateInterval.getFrom();
+                            }
+                            return computeFixesForCacheUpdate(competitor, from);
+                        }, CPUMeteringType.CROSS_TRACK_ERROR.name());
                     }
 
                     @Override

@@ -44,6 +44,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.HasCPUMeter;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -63,7 +64,7 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
+public interface Leaderboard extends LeaderboardBase, HasRaceColumns, HasCPUMeter {
     /**
      * If the leaderboard is a "matrix" with the cells being defined by a competitor / race "coordinate,"
      * then this interface defines the structure of the "cells."

@@ -33,6 +33,7 @@ import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A leaderboard whose columns are defined by leaderboards. This can be useful for a regatta series where many regattas
@@ -69,6 +70,8 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
      * and de-serialized into a new {@link WeakHashMap} in {@link #readObject(ObjectInputStream)} again.
      */
     private transient WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
+    
+    private transient CPUMeter cpuMeter;
     
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener, Serializable {
         private static final long serialVersionUID = 915433462154943441L;
@@ -116,6 +119,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
+        this.cpuMeter = CPUMeter.create();
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
@@ -123,6 +127,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
     
+    @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
+    }
+
     @Override
     protected SettableScoreCorrection createScoreCorrection() {
         return new MetaLeaderboardScoreCorrection(this);
@@ -136,6 +145,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        this.cpuMeter = CPUMeter.create();
         @SuppressWarnings("unchecked")
         Map<? extends Leaderboard, ? extends MetaLeaderboardColumn> columnsForLeaderboardAsStrongMap = (Map<? extends Leaderboard, ? extends MetaLeaderboardColumn>) ois.readObject();
         columnsForLeaderboards = new WeakHashMap<Leaderboard, MetaLeaderboardColumn>(columnsForLeaderboardAsStrongMap);
