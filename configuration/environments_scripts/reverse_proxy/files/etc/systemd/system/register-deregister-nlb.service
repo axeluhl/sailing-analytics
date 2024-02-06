@@ -2,12 +2,18 @@
 Description=Upon launch add itself to the nlb target group and upon stopping, remove itself.
 Requires=-.mount network-online.target
 After=-.mount network-online.target
+Before=shutdown.target
+RequiresMountsFor=/
+SurviveFinalKillSignal=yes
 
 [Install]
-RequiredBy=multi-user.target
+RequiredBy=graphical.target
+WantedBy=shutdown.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=true
+RemainAfterExit=yes
+KillMode=none
 ExecStart=/usr/local/bin/register-deregister-from-nlb-target-group.sh add-to-nlb
-ExecStop=/usr/local/bin/register-deregister-from-nlb-target-group.sh remove-from-nlb
+ExecStopPost=/bin/bash -c "/usr/local/bin/register-deregister-from-nlb-target-group.sh remove-from-nlb"
+TimeoutStopSec=50
