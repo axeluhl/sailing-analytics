@@ -27,7 +27,7 @@ PRODUCTION_IP=$(sed -n -e  "s/^Define ${PRODUCTION_IP_NAME}\> \(.*\)$/\1/p" ${MA
 if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]
 then
     # Check if main archive is in the same az by fetching the metadata
-    MY_AZ=$(curl -s  http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    MY_AZ=$(TOKEN=`curl --silent -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/availability-zone)
     # Extract the actual IP of the archive
     ARCHIVE_IP=$(grep -m 1 "^Define ${ARCHIVE_IP_NAME}\> .*"  ${MACROS_PATH} | grep -o "${IP_REGEX}")
     # Fetch the instances in the region and then extract arrays, iterate through them, select those with the correct ip, and then gets the AZ.
