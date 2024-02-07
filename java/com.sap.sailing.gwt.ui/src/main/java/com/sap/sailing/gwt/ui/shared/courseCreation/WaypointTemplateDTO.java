@@ -16,7 +16,8 @@ public class WaypointTemplateDTO implements Serializable {
     private String name;
     private String shortName;
 
-    public WaypointTemplateDTO() {
+    @Deprecated // GWT Serialization
+    WaypointTemplateDTO() {
     }
 
     public WaypointTemplateDTO(String name, String shortName, Iterable<MarkRoleDTO> markRolesForControlPoint,

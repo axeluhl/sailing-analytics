@@ -5,10 +5,11 @@ import java.io.Serializable;
 public class RepeatablePartDTO implements Serializable {
     private static final long serialVersionUID = -687014482562838593L;
 
-    int zeroBasedIndexOfRepeatablePartStart;
-    int zeroBasedIndexOfRepeatablePartEnd;
+    private int zeroBasedIndexOfRepeatablePartStart;
+    private int zeroBasedIndexOfRepeatablePartEnd;
 
-    public RepeatablePartDTO() {
+    @Deprecated
+    RepeatablePartDTO() {
         // GWT serialization
     }
 
