@@ -15,7 +15,7 @@ public class CommonMarkPropertiesDTO extends NamedDTO implements Serializable {
     private String pattern;
     private MarkType type;
 
-    public CommonMarkPropertiesDTO() {
+    CommonMarkPropertiesDTO() {
         super("");
     }
 
