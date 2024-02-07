@@ -217,4 +217,4 @@ Update amazon cli (because pricing list requires it)
 
 ## httpd config repo
 
-Make sure the disposable reverse proxy key from root/keys is in the authorized_keys of the httpdConf user, the user has its own key in id_25519(.pub) and the user has the correct aws credentials.
+Make sure the disposable reverse proxy key from root/keys is in the authorized_keys of the httpdConf user, the user has its own key in id_25519(.pub) and the user has the correct aws credentials. Finally make sure the hook is insured as a git clone --bare doesn't copy hooks.
