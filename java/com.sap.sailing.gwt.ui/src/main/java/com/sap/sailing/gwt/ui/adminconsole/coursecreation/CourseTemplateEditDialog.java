@@ -145,6 +145,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 sb.append(stringMessages.eitherNoneOrBothStartAndEndOfRepeatablePartMustBeSpecified());
                             } else if (valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() < valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart()) {
                                 sb.append(stringMessages.endOfRepeatablePartMustBeAtOfAfterStart());
+                            } else if (valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() > valueToValidate.getWaypointTemplates().size()) {
+                                sb.append(stringMessages.endOfRepeatablePartIsGreaterThanNumberOfWaypoints());
                             }
                         }
                         return sb.toString();
