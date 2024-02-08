@@ -23,6 +23,7 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.Scope;
+import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
@@ -69,13 +70,14 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
                         availabilityZone, privateIpAddress, launchTimePoint, landscape),
                 getAmiId(az.getRegion()), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "#!/bin/bash \n sed -i 's/.*sleep 10. //g' ~/.ssh/authorized_keys");
+                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "");
                 addHost(host);
         Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.WARNING, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
-                    if (targetGroup.getLoadBalancer().getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
+                    final ApplicationLoadBalancer<ShardingKey> loadBalancer = targetGroup.getLoadBalancer();
+                    if (loadBalancer != null && loadBalancer.getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                         getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
                     } else {
                         targetGroup.addTarget(host);
@@ -97,10 +99,11 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         AwsInstance<ShardingKey> instanceFromHost = new AwsInstanceImpl<ShardingKey>(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(Landscape.WAIT_FOR_PROCESS_TIMEOUT), host.getLaunchTimePoint(), getLandscape());
         final List<TargetGroup<ShardingKey>> targetGroupsHostResidesIn = new ArrayList<>();
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(host.getAvailabilityZone().getRegion())) {
+            final String loadBalancerArn = targetGroup.getLoadBalancerArn();
             if (!targetGroup.getTargetGroupArn().contains("EndpointRegistration")
                     && !targetGroup.getTargetGroupArn().contains("Lambda")
-                    && targetGroup.getLoadBalancerArn() != null
-                    && !targetGroup.getLoadBalancerArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)
+                    && loadBalancerArn != null
+                    && !loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)
                     && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
                 targetGroup.removeTarget(instanceFromHost);
                 targetGroupsHostResidesIn.add(targetGroup);
