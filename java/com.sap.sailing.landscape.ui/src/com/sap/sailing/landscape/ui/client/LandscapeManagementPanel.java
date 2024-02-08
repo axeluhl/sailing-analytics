@@ -472,6 +472,9 @@ public class LandscapeManagementPanel extends SimplePanel {
         final CaptionPanel machineImagesCaptionPanel = new CaptionPanel(stringMessages.machineImages());
         final VerticalPanel machineImagesVerticalPanel = new VerticalPanel();
         machineImagesCaptionPanel.add(machineImagesVerticalPanel);
+        final Button machineTableRefreshButton = new Button(stringMessages.refresh());
+        machineImagesVerticalPanel.add(machineTableRefreshButton);
+        machineTableRefreshButton.addClickHandler(event -> refreshMachineImagesTable());
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
