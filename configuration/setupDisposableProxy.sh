@@ -29,11 +29,12 @@ sudo systemctl enable crond.service
 
 # setup other users and crontabs to keep repo updated
 cd /home
-GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
 adduser ${GIT_COPY_USER}
+if [[ ! -d "/home/trac" ]]; then 
     mv git ${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}
 scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/.ssh" "/home/${GIT_COPY_USER}"  # copies wiki users passwordless keys
 chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "${GIT_COPY_USER}"
+fi
 # setup symbolic links and crontab
 cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
 ./build-crontab reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
@@ -124,5 +125,6 @@ chown -R apache:apache /usr/share/httpd
 systemctl start httpd
 sudo systemctl start crond.service
 sudo systemctl enable postfix
+systemctl enable imageupgrade.service
 SECONDEOF
 
