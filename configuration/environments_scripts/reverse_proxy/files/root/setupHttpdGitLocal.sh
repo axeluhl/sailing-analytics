@@ -3,6 +3,7 @@ REMOTE=$1
 cd /etc/httpd
 git status
 if [[ "$?" -ne 0 ]]; then
+    echo "Currently not a git repo, creating and pulling latest changes"
     rm -rf .git
     rm -rf conf   # Perhaps, this script should instead mv to a backup location
     rm -rf conf.d
