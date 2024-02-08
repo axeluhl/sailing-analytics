@@ -2455,4 +2455,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String defaultNumberOfLapsMustNotBeNegative();
     String eitherNoneOrBothStartAndEndOfRepeatablePartMustBeSpecified();
     String endOfRepeatablePartMustBeAtOfAfterStart();
+    String endOfRepeatablePartIsGreaterThanNumberOfWaypoints();
 }
