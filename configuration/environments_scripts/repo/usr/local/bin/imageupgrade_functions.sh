@@ -84,6 +84,7 @@ build_crontab() {
     chown root:root environments_scripts
     cd environments_scripts
     ./build-crontab "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    cd ..
     rm -rf /root/environments_scripts
 
 }
