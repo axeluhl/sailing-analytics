@@ -23,11 +23,9 @@ echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tc
 mount -a
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx
-amazon-linux-extras install epel -y && yum install -y apachetop
-# main conf mandates php7.1
-amazon-linux-extras enable php7.1
-yum install -y php  # also install mod_php
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx postfix cronie iptables
+service postfix restart
+sudo systemctl enable crond.service
 
 # setup other users and crontabs to keep repo updated
 cd /home
@@ -112,6 +110,7 @@ chown -R apache:apache /usr/share/httpd
 # rsync -av --delete trac@sapsailing.com:p2-repositories /home/trac
 
 systemctl start httpd
-
+sudo systemctl start crond.service
+sudo systemctl enable postfix
 SECONDEOF
 
