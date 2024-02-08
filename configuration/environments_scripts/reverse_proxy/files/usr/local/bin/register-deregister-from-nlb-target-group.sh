@@ -2,8 +2,9 @@
 
 selfIp=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
 availabilityZone=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
+LOG_LOCATION="/var/log/registration.err"
 if [[ -z "$selfIp" || -z "$availabilityZone"  ]]; then
-    echo "ec2-metadata not available" > /root/log
+    echo "ec2-metadata not available during nlb registration" > ${LOG_LOCATION}
     selfIp=$(cat /var/cache/local-ip)
     availabilityZone=$(cat /var/cache/availability-zone)
 fi
@@ -35,5 +36,6 @@ case $1 in
         ;;
     remove-from-nlb)
         removeSelfFromNLB
+        echo "${selfIp} ${availabilityZone} ${targetGroupArn} $(date)" >>  ${LOG_LOCATION}
         ;;
 esac
