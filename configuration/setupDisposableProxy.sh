@@ -29,11 +29,18 @@ sudo systemctl enable crond.service
 
 # setup other users and crontabs to keep repo updated
 cd /home
-adduser ${GIT_COPY_USER}
-if [[ ! -d "/home/trac" ]]; then 
+if [[ ! -d "/home/trac" ]]; then
+    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts" "/home/git"
+    adduser ${GIT_COPY_USER}
     mv git ${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}
-scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/.ssh" "/home/${GIT_COPY_USER}"  # copies wiki users passwordless keys
-chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "${GIT_COPY_USER}"
+    mkdir /home/${GIT_COPY_USER}/.ssh
+    # Setup root user and trac user with the right keys
+    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy" "/home/${GIT_COPY_USER}/.ssh/id_ed25519"
+    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy.pub" "/home/${GIT_COPY_USER}/.ssh/id_ed25519.pub"
+    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy" "/root/.ssh/id_ed25519"
+    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy.pub" "/root/.ssh/id_ed25519.pub"
+    chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "/home/${GIT_COPY_USER}"
+    
 fi
 # setup symbolic links and crontab
 cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
@@ -102,7 +109,7 @@ fi
 # setup git
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
 # copy httpd key accross
-scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519" /root/.ssh
+scp -o StrictHostKeyChecking=no "root@sapsailing.com:~/keys/disposableReverseProxy" /root/.ssh/id_ed25519
 scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
 cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
 rm /root/.ssh/temp
