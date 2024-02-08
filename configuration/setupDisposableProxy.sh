@@ -6,8 +6,8 @@ IP=$1
 BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
-RELATIVE_GIT_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
-HTTPD_GIT_REPO_IP="172.31.5.237" # points to where git repo is
+RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
+HTTPD_GIT_REPO_IP="172.31.40.235" # points to where git repo is
 AWS_CREDENTIALS_IP="34.251.204.62" # points to a server which has no-mfa credentials within the root user, possibly the central reverse proxy. 
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
@@ -33,12 +33,12 @@ yum install -y php  # also install mod_php
 cd /home
 GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git clone ssh://trac@sapsailing.com/home/trac/git
 adduser ${GIT_COPY_USER}
-mv git ${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}
+    mv git ${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}
 scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/home/wiki/.ssh" "/home/${GIT_COPY_USER}"  # copies wiki users passwordless keys
 chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "${GIT_COPY_USER}"
 # setup symbolic links and crontab
-cd "/home/${GIT_COPY_USER}/${RELATIVE_GIT_PATH_TO_GIT}/configuration/environments_scripts"
-./build-crontab reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_GIT_PATH_TO_GIT}"
+cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
+./build-crontab reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
