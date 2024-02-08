@@ -48,7 +48,20 @@ EOF
 systemctl enable httpd
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
-yum install -y fail2ban
+if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
+    yum install 2to3 -y
+    wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
+    tar -xvf 1.0.2.tar.gz
+    cd fail2ban-1.0.2/
+    ./fail2ban-2to3
+    python3.9 setup.py build
+    python3.9 setup.py install
+    cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
+    sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
+    systemctl enable fail2ban
+    systemctl start fail2ban
+    chkconfig --level 23 fail2ban on
+fi
 cat <<EOF > /etc/fail2ban/jail.d/customisation.local
 [ssh-iptables]
 
@@ -59,7 +72,6 @@ action   = iptables[name=SSH, port=ssh, protocol=tcp]
 logpath  = /var/log/fail2ban.log
 maxretry = 5
 EOF
-chkconfig --level 23 fail2ban on
 service fail2ban start
 yum remove -y firewalld
 yum install -y mod_ssl
