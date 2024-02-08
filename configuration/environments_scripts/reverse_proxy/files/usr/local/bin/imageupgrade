@@ -15,8 +15,10 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   echo "Image upgrade..."
   GIT_USER="trac"
   RELATIVE_PATH_TO_GIT="gitcopy"
+  BUILD_TYPE="reverse_proxy"
+  LOGON_USER_HOME="ec2-user"
   run_yum_update
-  build-crontab /home/trac/.ssh/id_dsa
+  build-crontab
   finalize
 fi
 
