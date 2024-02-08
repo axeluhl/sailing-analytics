@@ -89,7 +89,7 @@ setFailoverIfNotSet() {
         setProduction ${ARCHIVE_FAILOVER_IP_NAME}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         service httpd reload
-        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
+        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at the archive: ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi
