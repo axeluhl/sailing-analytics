@@ -478,7 +478,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
-        mainPanel.add(machineImagesCaptionPanel);     
+        mainPanel.add(machineImagesCaptionPanel);
         final SafeHtmlCell amiForProxyCell = new SafeHtmlCell();
         final SafeHtmlCell instanceIdCell = new SafeHtmlCell();
         final SafeHtmlCell instancePublicIpCell = new SafeHtmlCell();
@@ -608,7 +608,6 @@ public class LandscapeManagementPanel extends SimplePanel {
         // TODO try to identify archive servers
         // TODO support archive server upgrade
         // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
-     
     }
     
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
@@ -1521,8 +1520,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                     sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
-                            : new byte[0],
-                    new AsyncCallback<Boolean>() {     //TODO Should this be null/new byte[0]/""?
+                            : new byte[0],   //TODO Should this be null/new byte[0]/""?
+                    new AsyncCallback<Boolean>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -1637,7 +1636,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
-                            : null,  //should this be "" instead
+                            : null,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {

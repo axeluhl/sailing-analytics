@@ -168,7 +168,7 @@ public interface Host extends WithID {
     String getNameTag();
     
     /**
-     * Fetches the AMI id value.
+     * Fetches the AMI id value. We may assume that this is impossible to change, given any amount of time.
      */
     String getImageId();
 }

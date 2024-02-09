@@ -2,24 +2,25 @@ package com.sap.sse.landscape.aws;
 
 public interface LandscapeConstants {
     /**
-     * Indicates that an instance only acts as a reverse proxy. ie. it is not hosting other services. SO it can be
-     * terminated without risk.
+     * The key <strong>tag</strong>, indicating that an instance only acts as a reverse proxy
+     * (ie. it is not hosting other services). SO it can be terminated without risk.
      */
     String DISPOSABLE_PROXY = "DisposableProxy";
     
     /**
-     * The tag name for a target group which contains all the instances running httpd. Used to mark the
+     * The tag name for a target group, which contains all the instances running httpd. Used to mark the
      * target groups containing all of the reverse proxies, disposable and otherwise. This allows for health checks
      * to be accessed and marks which groups any new reverse proxy instances should be added to.
      */
     String ALL_REVERSE_PROXIES = "allReverseProxies";
     
     /**
-     * 
+     * A string that all network load balancers contain.
      */
     String NLB_ARN_CONTAINS = "loadbalancer/net";
+    
     /**
-     * Used to launch the correct ami based on the value of "image-type" tag.
+     * The value of "image-type" tag, which is used to identify which image to use to deploy a disposable reverse proxy.
      */
     String IMAGE_TYPE_REVERSE_PROXY = "disposable-reverse-proxy";
     
@@ -34,7 +35,7 @@ public interface LandscapeConstants {
     String REVERSE_PROXY_SG_TAG = "reverse-proxy-sg";
     
     /**
-     * Marks the most appropriate instance type for a reverse proxy.
+     * The most appropriate instance type for a disposable reverse proxy.
      */
     String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "C5_AD_XLARGE";
     
@@ -47,13 +48,14 @@ public interface LandscapeConstants {
      * The tag for a security group for an application server.
      */
     String SAILING_APPLICATION_SG_TAG = "application-server-sg";
+    
     /**
      * Indicates that an instance is suitable for co-deployment with httpd.
      */
     String INSTANCE_SUITABLE_FOR_HTTPD = "canCoDeployWithHttpd";
     
     /**
-     * The tag for the central reverse proxy, which hosts non-essential services.
+     * The tag for the central reverse proxy, which also hosts non-essential services.
      */
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 }

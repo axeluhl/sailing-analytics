@@ -36,7 +36,6 @@ public class CreateReverseProxyInClusterDialog
 
         @Deprecated
         public CreateReverseProxyDTO() { // essential line for GWT serialization
-
         }
 
         /**
@@ -89,7 +88,6 @@ public class CreateReverseProxyInClusterDialog
 
     }
 
-    private StringMessages stringMessages;
     private final TextBox proxyName;
     private final ListBox dedicatedInstanceTypeListBox;
     private final ListBox availabilityZone;
@@ -101,19 +99,15 @@ public class CreateReverseProxyInClusterDialog
     private final Label availabilityZoneLabel;
     private Label instancesIdLabel;
     /**
-     * A list of all lables in the dialog box.
+     * A list of all labels in the dialog box.
      */
     private ArrayList<Label> labels;
 
     /**
      * The dialog box allows users to choose the name, instance type and az.
-     * 
-     * @param stringMessages
-     * @param errorReporter
-     * @param landscapeManagementService
-     * @param region
-     * @param leastpopulatedAzName
-     * @param callback
+     *  
+     * @param leastpopulatedAzName The az containing the fewest disposable reverse proxies.
+     * @param callback This will call after the user selects the "ok" in the box, if they create a reverse proxy.
      */
     public CreateReverseProxyInClusterDialog(StringMessages stringMessages, ErrorReporter errorReporter,
             LandscapeManagementWriteServiceAsync landscapeManagementService, String region, String leastpopulatedAzName,
@@ -131,7 +125,6 @@ public class CreateReverseProxyInClusterDialog
                         }
                     }
                 }, callback);
-        this.stringMessages = stringMessages;
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
                 stringMessages, LandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
@@ -142,7 +135,7 @@ public class CreateReverseProxyInClusterDialog
         useSharedInstance = createCheckbox(stringMessages.runOnExisting());
         useSharedInstance.addValueChangeHandler(e -> updateInstanceTypesBasedOnSharedInstanceBox());
         useSharedInstance.setValue(false);
-        useSharedInstance.setEnabled(true);
+        useSharedInstance.setEnabled(false);
         // setup available instances box, which is initially hidden.
         coDeployInstances = createListBox(false);
         populateCoDeployInstances();

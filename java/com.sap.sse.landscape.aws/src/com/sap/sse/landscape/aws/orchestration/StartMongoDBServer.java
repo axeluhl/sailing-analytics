@@ -2,10 +2,8 @@ package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import java.util.Optional;
 import java.util.logging.Level;
-
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;

@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public enum AzFormat implements Serializable {
     /**
-     * A mixture of az id and name
+     * A mixture of az id and name, in the form &lt;name&gt;/&lt;id&gt;
      */
     MIXED,
 

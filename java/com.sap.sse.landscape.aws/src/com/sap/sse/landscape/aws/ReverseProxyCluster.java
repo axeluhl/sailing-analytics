@@ -2,11 +2,9 @@ package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
-
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;
-
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**

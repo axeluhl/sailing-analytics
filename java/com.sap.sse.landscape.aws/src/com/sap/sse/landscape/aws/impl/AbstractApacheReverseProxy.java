@@ -9,6 +9,9 @@ import com.sap.sse.landscape.aws.ReverseProxy;
 public abstract class AbstractApacheReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMetrics,
 ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
 implements ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
+    /**
+     * The path the target group will ping to check the health of the reverse proxy.
+     */
     protected static final String INTERNAL_SERVER_STATUS = "cgi-bin/reverseProxyHealthcheck.sh";
     private final AwsLandscape<ShardingKey> landscape;
     

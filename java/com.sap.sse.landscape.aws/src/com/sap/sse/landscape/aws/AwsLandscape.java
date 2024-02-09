@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
@@ -35,7 +34,6 @@ import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
-
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -127,8 +125,6 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     String MONGO_DEFAULT_REPLICA_SET_NAME = "live";
     
     String MONGO_REPLICA_SET_NAME_AND_PORT_SEPARATOR = ":";
-    
-    
     
     /**
      * Based on system properties for the AWS access key ID and the secret access key (see
@@ -581,10 +577,17 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     
     // --------------- abstract landscape view --------------
     /**
-     * Obtains the reverse proxy in the given {@code region} that is used to receive (and possibly redirect to HTTPS or
+     * Obtains the reverse proxies, which make up  a reverse proxy cluster, in the given {@code region} that are used to receive (and possibly redirect to HTTPS or
      * forward to a host proxied by the reverse proxy) all HTTP requests and any HTTPS request not handled by a
      * dedicated load balancer rule, such as "cold storage" hostnames that have been archived. May return {@code null}
-     * in case in the given {@code region} no such reverse proxy has been configured / set up yet.
+     * if, in the given {@code region}, no such reverse proxy has been configured / set up yet.
+     */
+    <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getReverseProxyCluster(Region region);
+    
+    /**
+     * Returns the reverse proxy in the given region, but encapsulated within a ReverseProxyCluster.
+     * @return
      */
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(Region region);
@@ -862,6 +865,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      */
     Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region region, Optional<String> vpcId);
 
+    /**
+     * Adds hosts to an IP-based target group.
+     */
     void addIpTargetToTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts);
-
 }

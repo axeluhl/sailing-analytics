@@ -65,5 +65,4 @@ public interface AwsInstance<ShardingKey> extends Host {
     }
     
     boolean verifySshKey(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase); 
-    
 }
