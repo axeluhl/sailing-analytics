@@ -44,7 +44,7 @@ if [[ ! -d "/home/trac" ]]; then
 fi
 # setup symbolic links and crontab
 cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
-./build-crontab reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+./build-crontab-and-cp-files reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 crontab /root/crontab
