@@ -78,7 +78,7 @@ update_root_crontab() {
   crontab crontab
 }
 
-build_crontab() {
+build_crontab_and_setup_files() {
     scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
     cd /root/
     chown root:root environments_scripts
