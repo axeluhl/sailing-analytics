@@ -78,6 +78,17 @@ update_root_crontab() {
   crontab crontab
 }
 
+build_crontab_and_setup_files() {
+    scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
+    cd /root/
+    chown root:root environments_scripts
+    cd environments_scripts
+    ./build-crontab-and-cp-files "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    cd ..
+    rm -rf /root/environments_scripts
+
+}
+
 clean_root_ssh_dir_and_tmp() {
   echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
   rm -rf ${LOGON_USER_HOME}/.ssh/*
