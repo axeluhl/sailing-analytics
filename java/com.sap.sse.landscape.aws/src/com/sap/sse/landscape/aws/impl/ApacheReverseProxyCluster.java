@@ -55,6 +55,9 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         return Collections.unmodifiableCollection(hosts);
     }
     
+    /**
+     * Gets an iterable converting the hosts to ApacheReverseProxies. Assumes the hosts "list/map" is up to date.
+     */
     private Iterable<ApacheReverseProxy<ShardingKey, MetricsT, ProcessT>> getReverseProxies() {
         return Util.map(hosts, host->new ApacheReverseProxy<>(getLandscape(), host));
     }
@@ -72,16 +75,17 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
                 getAmiId(az.getRegion()), instanceType, az, keyName,
                 getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "");
                 addHost(host);
-        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.WARNING, "Reattempting to add to target group");
+        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.INFO, "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
                     final ApplicationLoadBalancer<ShardingKey> loadBalancer = targetGroup.getLoadBalancer();
                     if (loadBalancer != null && loadBalancer.getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                         getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
+                        logger.info("Added " + host.getInstanceId() + " to NLB target group" + targetGroup.getTargetGroupArn());
                     } else {
                         targetGroup.addTarget(host);
-                        logger.info("Added " + host.getInstanceId() + " to target group");
+                        logger.info("Added " + host.getInstanceId() + " to target group" + targetGroup.getTargetGroupArn());
                     }
                 }
             }));
@@ -112,15 +116,15 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
         Wait.wait(() -> { 
             for (TargetGroup<ShardingKey> tg: targetGroupsHostResidesIn) {
                 final TargetHealth targetHealth = tg.getRegisteredTargets().get(instanceFromHost);
-                if ( targetHealth != null && targetHealth.state().equals(TargetHealthStateEnum.DRAINING)) {
+                if (targetHealth != null && targetHealth.state().equals(TargetHealthStateEnum.DRAINING)) {
                     return false;
                 }
             }
             return true;
-        }, Optional.of(Duration.ofSeconds(60 * 10)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain");
+        }, Optional.of(Duration.ofSeconds(60 * 10)), Duration.ofSeconds(20), Level.INFO , "Waiting for target to drain"); // Default is 5 minute draining time, as of writing.
         ApacheReverseProxy<ShardingKey, MetricsT, ProcessT> proxy = new ApacheReverseProxy<>(getLandscape(), host);
         proxy.rotateLogs(optionalKeyName, privateKeyEncryptionPassphrase);
-        getLandscape().terminate(host); // this assumes that the host is running only the reverse proxy process...
+        getLandscape().terminate(host); // This assumes that the host is running only the reverse proxy process.
     }
 
     /**
