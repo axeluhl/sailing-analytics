@@ -26,6 +26,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.events.mapchange.MapChangeEventFormatter;
@@ -226,35 +227,33 @@ public class MapHandlerRegistration {
     var jso = w.@com.google.gwt.maps.client.MapWidget::getJso()();
     $wnd.google.maps.event.trigger(jso, eventName);
   }-*/;
+  
 
-  /**
-   * experimental for the moment. I'm not satisfied as of yet with this strategy.
-   * 
-   * Cross browser event handler registration. This listener is removed by calling removeListener(handle) for the handle
-   * that is returned by this function.
-   * 
-   * @param jso
-   * @param type
-   * @param handler
-   * @param capture
-   */
-  public static <E> void addDomListener(JavaScriptObject jso,
-      com.google.gwt.event.dom.client.DomEvent.Type<ClickHandler> type, MapHandler<E> handler, boolean capture) {
-    addDomListener(jso, type.getName(), handler, capture);
+  @SuppressWarnings("rawtypes")
+  public static <E extends MapEvent> HandlerRegistration addEventListener(JavaScriptObject jso,
+          DomEvent.Type<?> eventType, MapHandler<E> handler, MapEventFormatter<E> formatter, boolean capture) {
+      final JavaScriptObject listener = addEventListenerImpl(jso, eventType.getName(), handler, formatter, capture);
+      HandlerRegistration registration = new HandlerRegistration() {
+          @Override
+          public void removeHandler() {
+              removeHandlerImpl(jso, eventType, listener, capture);
+          }
+      };
+      return registration;
   }
 
-  private static native <E> void addDomListener(JavaScriptObject object, String eventName, MapHandler<?> handler,
-      boolean capture) /*-{
-    var callback = function(event) {
-      @com.google.gwt.maps.client.events.MapHandlerRegistration::addDomListenerImpl(Lcom/google/gwt/ajaxloader/client/Properties;Lcom/google/gwt/maps/client/events/MapHandler;)(event, handler)
-    };
-    $wnd.google.maps.event.addDomListener(object, eventName, callback, capture);
+  @SuppressWarnings("rawtypes")
+  private static native <E extends MapEvent> JavaScriptObject addEventListenerImpl(JavaScriptObject jso,
+          String eventName, MapHandler<E> handler, MapEventFormatter<E> formatter, boolean capture) /*-{
+      var callback = function(event) {
+          $entry(@com.google.gwt.maps.client.events.MapHandlerRegistration::onCallback(Lcom/google/gwt/maps/client/events/MapHandler;Lcom/google/gwt/ajaxloader/client/Properties;Lcom/google/gwt/maps/client/events/MapEventFormatter;)(handler, event, formatter));
+      };
+      return jso.addEventListener(eventName, callback, capture);
   }-*/;
 
-  // is ugly, but is a cyclic generic type, so suppressed
-  private static void addDomListenerImpl(Properties properties, MapHandler<MapEvent> handler) {
-    MapChangeEventFormatter formatter = new MapChangeEventFormatter();
-    handler.onEvent(formatter.createEvent(properties));
-  }
+  private static native void removeHandlerImpl(JavaScriptObject jso, DomEvent.Type<?> eventType,
+          JavaScriptObject listener, boolean capture) /*-{
+      jso.removeEventListener(eventType, listener, capture);
+  }-*/;
 
 }
