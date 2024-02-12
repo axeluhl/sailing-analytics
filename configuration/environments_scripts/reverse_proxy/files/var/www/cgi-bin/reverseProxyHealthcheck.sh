@@ -14,6 +14,13 @@ status() {
     # parameter 1: status code and messages
     echo "Status: $1"
 }
+SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
+curl --location --fail "http://${SELF_IP}/internal-server-status"
+if [[ "$?" -ne 0 ]]; then
+    status "500 Reverse proxy itself is unhealthy"
+    outputMessage "Reverse proxy is unhealthy"
+    exit 0
+fi
 
 # The names of the variables in the macros file.
 ARCHIVE_IP_NAME="ARCHIVE_IP"
