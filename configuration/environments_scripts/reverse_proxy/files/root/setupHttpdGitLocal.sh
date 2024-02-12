@@ -14,6 +14,6 @@ if [[ "$?" -ne 0 ]]; then
     git remote add origin "${REMOTE}"
     GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git fetch 
     git checkout main
-    sed -i "/## SERVER STATUS/,/Use Status [0-9]/{s|[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+|${SELF_IP}|}" /etc/httpd/conf.d/${STATUS_DEFINITION_FILE} #assumes that there is 1 local ip definition, followed by the localhost. Alternative is to append to the end of the script.
+    echo "Use Status ${SELF_IP} internal-server-status" >> /etc/httpd/conf.d/${STATUS_DEFINITION_FILE}
 fi
 
