@@ -125,6 +125,5 @@ implements StartFromSailingAnalyticsImage {
     @Override
     public void run() throws Exception {
         super.run(); // this will trigger the "sailing" init.d script running in the background
-        getHost().getReverseProxy().createInternalStatusRedirect(optionalTimeout, Optional.of(getKeyName()), getPrivateKeyEncryptionPassphrase());
     }
 }
