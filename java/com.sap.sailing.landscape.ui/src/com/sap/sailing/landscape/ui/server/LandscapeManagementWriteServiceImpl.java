@@ -314,15 +314,15 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     private String extractHealth(Map<AwsInstance<String>, TargetHealth> healths, AwsInstance<String> instance) {
-        String no_health_value_found = "No health value found";
+        final String NO_HEALTH_VALUE_FOUND_MSG = "No health value found";
         if (healths == null) {
-            return no_health_value_found;
+            return NO_HEALTH_VALUE_FOUND_MSG;
         }
         TargetHealth health = healths.get(instance);
         if (health != null) {
             return health.state().toString();
         }
-        return no_health_value_found;
+        return NO_HEALTH_VALUE_FOUND_MSG;
     }
     
     @Override
