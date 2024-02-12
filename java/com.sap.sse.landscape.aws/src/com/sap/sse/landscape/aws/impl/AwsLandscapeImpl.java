@@ -833,7 +833,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return getHostsWithFilters(region, hostSupplier, getFilterForHostWithTag(Filter.builder(), tagName), getRunningHostsFilter());
     }
     
-    
     @Override
     public <HostT extends AwsInstance<ShardingKey>>
     Iterable<HostT> getHostsWithTag(com.sap.sse.landscape.Region region, String tagName, HostSupplier<ShardingKey, HostT> hostSupplier) {
@@ -1145,9 +1144,19 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getReverseProxyCluster(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
         for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
+            reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        return reverseProxyCluster;
+    }
+    
+    @Override
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
+        ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
         }
         return reverseProxyCluster;

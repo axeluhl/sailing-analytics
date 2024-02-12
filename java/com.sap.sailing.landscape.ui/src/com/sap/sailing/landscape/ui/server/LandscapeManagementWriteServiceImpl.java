@@ -117,7 +117,6 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
-
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
@@ -128,8 +127,6 @@ import software.amazon.awssdk.services.route53.model.ResourceRecordSet;
 
 public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         implements LandscapeManagementWriteService {
-    
-    
     private static final long serialVersionUID = -3332717645383784425L;
     private static final Logger logger = Logger.getLogger(LandscapeManagementWriteServiceImpl.class.getName());
     
@@ -138,7 +135,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     
     private final ServiceTracker<LandscapeService, LandscapeService> landscapeServiceTracker;
-
 
     public <ShardingKey, MetricsT extends ApplicationProcessMetrics,
     ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>> LandscapeManagementWriteServiceImpl() {
@@ -279,7 +275,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                                                                                   // description.
                 if (!description.tags().isEmpty()) {
                     for (Tag tag : description.tags()) {
-
                         if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)
                                 && targetGroup.getLoadBalancerArn() != null
                                 && !targetGroup.getLoadBalancerArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
@@ -294,7 +289,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             healths = landscape.getTargetHealthDescriptions(targetGroupInQuestion);
         }
         final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
-        for (AwsInstance<String> instance : landscape.getCentralReverseProxy(new AwsRegion(region, landscape))
+        for (AwsInstance<String> instance : landscape.getReverseProxyCluster(new AwsRegion(region, landscape))
                 .getHosts()) {
             ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
                     instance.getAvailabilityZone().getName(), instance.getPrivateAddress().toString(),
@@ -337,7 +332,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         AwsRegion awsRegion = new AwsRegion(region, getLandscape());
         AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(),
                 AwsInstanceImpl::new);
-        getLandscape().getCentralReverseProxy(awsRegion).removeHost(awsInstance, Optional.of(optionalKeyName), privateKeyEncryptionPassphrase);
+        getLandscape().getReverseProxyCluster(awsRegion).removeHost(awsInstance, Optional.of(optionalKeyName), privateKeyEncryptionPassphrase);
         return true;
     }
     
@@ -347,14 +342,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         String azName = azNameId[0];
         String azId = azNameId[1];
         try {
-        getLandscape().getCentralReverseProxy(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
-                .createHost(createProxyDTO.getName(), InstanceType.valueOf(createProxyDTO.getInstanceType()),
-                        new AwsAvailabilityZoneImpl(azId,
-                                azName,
-                                new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
-                        createProxyDTO.getKey());
+            getLandscape().getReverseProxyCluster(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
+                    .createHost(createProxyDTO.getName(), InstanceType.valueOf(createProxyDTO.getInstanceType()),
+                            new AwsAvailabilityZoneImpl(azId, azName,
+                                    new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
+                            createProxyDTO.getKey());
         } catch (Exception e) {
-            logger.log(Level.SEVERE,e.getMessage());
+            logger.log(Level.WARNING, e.getMessage());
         }
         
     }
@@ -368,8 +362,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             try {
                 final SshCommandChannel sshChannel = instance.createRootSshChannel(AwsLandscape.WAIT_FOR_PROCESS_TIMEOUT,
                         optionalKeyName, privateKeyEncryptionPassphrase);
-                
-                final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command,
+                sshChannel.runCommandAndReturnStdoutAndLogStderr(command,
                         "Getting host memory info", Level.INFO);
                 //TODO: convert to number and check if above threshold
                 

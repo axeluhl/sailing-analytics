@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.RotatingFileBasedLog;
@@ -55,6 +54,9 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      */
     private static final String CONFIG_REPO_PATH = "/etc/httpd";
     
+    /**
+     * The branch name that contains the production httpd configuration.
+     */
     private static final String CONFIG_REPO_MAIN_BRANCH_NAME = "main";
     
     /**

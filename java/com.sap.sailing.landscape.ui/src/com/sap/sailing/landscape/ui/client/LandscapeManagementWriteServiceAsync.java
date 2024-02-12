@@ -52,7 +52,7 @@ public interface LandscapeManagementWriteServiceAsync {
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
     
     /**
-     * Adds a reverse proxy to the cluster and the right target group.
+     * Adds a reverse proxy to the cluster and the right load balancer's target group.
      */
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO,   AsyncCallback<Void> callback);
     
