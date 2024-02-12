@@ -195,7 +195,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
-    // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private static final String SAILING_APP_SECURITY_GROUP_NAME = "Sailing Analytics App";
     private final String accessKeyId;
@@ -398,9 +397,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
         final int httpPort = 80;
         final int httpsPort = 443;
-        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
+        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getReverseProxyCluster(alb.getRegion());
+        HashMap<String, String> tagKeyandValue = new HashMap<>();
+        tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), LandscapeConstants.ALL_REVERSE_PROXIES);
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1045,20 +1046,25 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
         return createTargetGroup(region, targetGroupName, port, healthCheckPath, healthCheckPort, loadBalancerArn,
-                vpcId, new String[] {});
+                vpcId, new HashMap<String,String>());
     }
     
+    /**
+     * Overloaded method to allow tag-keys and values to be passed.
+     */
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, String... tagnames) {
-        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[] tags = new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[tagnames.length];
-        for (int i = 0; i < tags.length; i++) {
-            software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tag = software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(tagnames[i]).value("").build();
-            tags[i] = tag;
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, HashMap<String,String> tagKeyAndValues) {
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[] tags = new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[tagKeyAndValues.keySet().size()];
+        int arrayPosition = 0;
+        for (String key : tagKeyAndValues.keySet()) { 
+            software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tag = software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(tagKeyAndValues.get(key)).build();
+            tags[arrayPosition] = tag;
+            arrayPosition++;
         }
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest
                 .builder().name(targetGroupName).healthyThresholdCount(2).unhealthyThresholdCount(2)
-                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(5)
+                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(30)
                 .healthCheckPath(healthCheckPath).healthCheckPort("" + healthCheckPort)
                 .healthCheckProtocol(guessProtocolFromPort(healthCheckPort)).port(port)
                 .vpcId(vpcId == null ? getVpcId(region) : vpcId).protocol(guessProtocolFromPort(port))
