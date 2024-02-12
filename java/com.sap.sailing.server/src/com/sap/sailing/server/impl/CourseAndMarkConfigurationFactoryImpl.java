@@ -1173,7 +1173,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * 
      * Eventually, a list of {@code W} waypoint-like objects is created, one for each
      * {@link WaypointWithMarkConfiguration} in the original list provided to the constructor, based on the {@code M}
-     * objects to which the mark configurations were mapped.
+     * objects to which the mark configurations were mapped. The list can be found in {@link #effectiveWaypoints} after
+     * the constructor has completed.<p>
      *
      * @param <CP>
      *            a control point-like type; something that is one or has two object(s) of type {@code M}.
