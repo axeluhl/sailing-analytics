@@ -233,18 +233,25 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
+import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
-import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -407,12 +414,21 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.ControlPointWithMarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.FreestyleMarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPairWithConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointWithMarkConfigurationDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -441,6 +457,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.PairingListCreationException;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -452,6 +469,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.RepeatablePartImpl;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -6172,6 +6190,82 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO);
         return markRoleDTO;
+    }
+    
+    protected <P> MarkConfigurationDTO convertToMarkConfigurationDTO(MarkConfiguration<P> markConfig) {
+        return markConfig.accept(new MarkConfigurationVisitor<MarkConfigurationDTO, P>() {
+            @Override
+            public MarkConfigurationDTO visit(FreestyleMarkConfiguration<P> markConfiguration) {
+                final FreestyleMarkConfigurationDTO result = new FreestyleMarkConfigurationDTO();
+                result.setOptionalMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(MarkPropertiesBasedMarkConfiguration<P> markConfiguration) {
+                final MarkPropertiesBasedMarkConfigurationDTO result = new MarkPropertiesBasedMarkConfigurationDTO();
+                result.setMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(MarkTemplateBasedMarkConfiguration<P> markConfiguration) {
+                final MarkTemplateBasedMarkConfigurationDTO result = new MarkTemplateBasedMarkConfigurationDTO();
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(RegattaMarkConfiguration<P> markConfiguration) {
+                final RegattaMarkConfigurationDTO result = new RegattaMarkConfigurationDTO();
+                result.setMark(convertToMarkDTO(markConfiguration.getMark(), /* position */ null));
+                result.setOptionalMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+        });
+    }
+    
+    private <P> ControlPointWithMarkConfigurationDTO convertToControlPointWithMarkConfigurationDTO(ControlPointWithMarkConfiguration<P> controlPoint) {
+        final Iterable<MarkConfigurationDTO> markConfigurations = Util.map(controlPoint.getMarkConfigurations(), this::convertToMarkConfigurationDTO);
+        final ControlPointWithMarkConfigurationDTO result;
+        if (Util.size(markConfigurations) == 1) {
+            result = markConfigurations.iterator().next();
+        } else {
+            final MarkPairWithConfigurationDTO preResult = new MarkPairWithConfigurationDTO();
+            preResult.setName(controlPoint.getName());
+            preResult.setShortName(controlPoint.getShortName());
+            final Iterator<MarkConfigurationDTO> markConfigs = markConfigurations.iterator();
+            preResult.setLeft(markConfigs.next());
+            preResult.setRight(markConfigs.next());
+            result = preResult;
+        }
+        return result;
+    }
+    
+    protected <P> WaypointWithMarkConfigurationDTO convertToWaypointWithMarkConfigurationDTO(final WaypointWithMarkConfiguration<P> waypointWithMarkConfiguration) {
+        final WaypointWithMarkConfigurationDTO result = new WaypointWithMarkConfigurationDTO();
+        result.setControlPoint(convertToControlPointWithMarkConfigurationDTO(waypointWithMarkConfiguration.getControlPoint()));
+        result.setPassingInstruction(waypointWithMarkConfiguration.getPassingInstruction());
+        return result;
+    }
+    
+    protected <P> CourseConfigurationDTO convertToCourseConfigurationDTO(CourseConfiguration<P> courseConfiguration) {
+        final CourseConfigurationDTO result = new CourseConfigurationDTO();
+        result.setAssociatedRoles(new HashMap<>(courseConfiguration.getAssociatedRoles().entrySet().stream().collect(Collectors.toMap(
+                e->convertToMarkConfigurationDTO(e.getKey()), e->convertToMarkRoleDTO(e.getValue())))));
+        result.setAllMarks(Util.mapToArrayList(courseConfiguration.getAllMarks(), this::convertToMarkConfigurationDTO));
+        result.setName(courseConfiguration.getName());
+        result.setShortName(courseConfiguration.getShortName());
+        result.setNumberOfLaps(courseConfiguration.getNumberOfLaps());
+        result.setOptionalCourseTemplate(courseConfiguration.getOptionalCourseTemplate()==null?null:convertToCourseTemplateDTO(courseConfiguration.getOptionalCourseTemplate()));
+        result.setOptionalImageURL(courseConfiguration.getOptionalImageURL());
+        result.setOptionalRepeatablePart(courseConfiguration.getRepeatablePart());
+        result.setShortName(courseConfiguration.getShortName());
+        result.setWaypoints(new ArrayList<>(Util.asList(Util.map(courseConfiguration.getWaypoints(), wpWithMarkConfig->convertToWaypointWithMarkConfigurationDTO(wpWithMarkConfig)))));
+        return result;
     }
 
     @Override

@@ -13,6 +13,10 @@ public class RegattaMarkConfigurationDTO extends MarkConfigurationDTO {
         return mark.getName();
     }
 
+    public void setOptionalMarkProperties(MarkPropertiesDTO optionalMarkProperties) {
+        this.optionalMarkProperties = optionalMarkProperties;
+    }
+    
     @Override
     public MarkPropertiesDTO getOptionalMarkProperties() {
         return optionalMarkProperties;

@@ -7,6 +7,10 @@ public class MarkPropertiesBasedMarkConfigurationDTO extends MarkConfigurationDT
     private static final long serialVersionUID = 2204116830344315567L;
     private MarkPropertiesDTO markProperties;
     
+    public void setMarkProperties(MarkPropertiesDTO markProperties) {
+        this.markProperties = markProperties;
+    }
+    
     @Override
     public MarkPropertiesDTO getOptionalMarkProperties() {
         return markProperties;

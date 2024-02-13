@@ -12,8 +12,8 @@ import java.util.UUID;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedWithUUIDImpl;
 

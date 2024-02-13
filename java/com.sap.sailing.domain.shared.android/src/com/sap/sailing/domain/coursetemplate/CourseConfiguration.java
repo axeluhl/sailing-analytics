@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithOptionalRepeatablePart;
 
 /**
  * A course that does not necessarily consist of {@link Mark}s existing in a regatta but instead is defined by

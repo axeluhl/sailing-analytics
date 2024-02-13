@@ -22,12 +22,12 @@ import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithOptionalRepeatablePart;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 /**

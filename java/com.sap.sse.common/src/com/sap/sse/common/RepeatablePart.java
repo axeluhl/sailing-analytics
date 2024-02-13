@@ -1,10 +1,8 @@
-package com.sap.sailing.domain.coursetemplate;
+package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.sap.sse.common.Util;
 
 /**
  * Reusable implementation of the semantics for the repeatable part of a course sequence. The sequence is defined by the
@@ -45,7 +43,7 @@ public interface RepeatablePart extends Serializable {
      *             in case the given {@code sequenceWithRepeatablePart} contains less or equal elements to
      *             {@link #getZeroBasedIndexOfRepeatablePartEnd()}.
      */
-    default <T> Iterable<T> createSequence(int laps, Iterable<T> sequenceWithRepeatablePart) {
+    default <T> Iterable<T> createSequence(int repetitions, Iterable<T> sequenceWithRepeatablePart) {
         validateRepeatablePartForSequence(sequenceWithRepeatablePart);
         final int zeroBasedIndexOfRepeatablePartStart = getZeroBasedIndexOfRepeatablePartStart();
         final int zeroBasedIndexOfRepeatablePartEnd = getZeroBasedIndexOfRepeatablePartEnd();
@@ -58,7 +56,7 @@ public interface RepeatablePart extends Serializable {
             result.add(sequenceWithRepeatablePartAsList.get(i));
         }
         // Repeatable part of the sequence
-        for (int lap = 1; lap < laps; lap++) {
+        for (int lap = 1; lap < repetitions; lap++) {
             for (int i = zeroBasedIndexOfRepeatablePartStart; i < zeroBasedIndexOfRepeatablePartEnd; i++) {
                 result.add(sequenceWithRepeatablePartAsList.get(i));
             }
