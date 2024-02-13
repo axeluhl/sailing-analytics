@@ -219,11 +219,13 @@ Update amazon cli (because pricing list requires it)
 
 We serve the httpd config from a separate git repo hosted within another user.
 Make sure the disposable reverse proxy key from root/keys is in the authorized_keys of the httpdConf user; use the branch name "main"; ensure the user has its own key in id_25519(.pub) and the user has the correct aws credentials and region. Add a gitignore containing:
-- logs
-- modules
-- run
-- state
-- conf.modules.d
-- conf.d/internal-server-status.conf
+
+* logs
+* modules
+* run
+* state
+* conf.modules.d
+* conf.d/internal-server-status.conf
+
 Compare the git to that in the main git repo.
 Finally make sure the hook is installed, as a git clone --bare doesn't copy hooks.
