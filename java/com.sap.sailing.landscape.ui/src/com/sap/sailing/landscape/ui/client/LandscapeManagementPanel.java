@@ -1520,8 +1520,8 @@ public class LandscapeManagementPanel extends SimplePanel {
                     sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
-                            : new byte[0],   //TODO Should this be null/new byte[0]/""?
-                    new AsyncCallback<Boolean>() {
+                            : new byte[0],
+                    new AsyncCallback<Void>() {     //TODO Should this be null/new byte[0]/""?
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -1531,7 +1531,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         }
 
                         @Override
-                        public void onSuccess(Boolean result) {
+                        public void onSuccess(Void result) {
                             proxiesTableBusy.setBusy(false);
                             refreshProxiesTable();
                         }
