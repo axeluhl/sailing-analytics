@@ -1,6 +1,6 @@
 #!/bin/bash
 REMOTE=$1
-STATUS_DEFINITION_FILE="001-events.conf"
+STATUS_DEFINITION_FILE="internal-server-status.conf"
 SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
 cd /etc/httpd
 git status
