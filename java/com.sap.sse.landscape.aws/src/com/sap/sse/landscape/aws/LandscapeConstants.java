@@ -35,11 +35,6 @@ public interface LandscapeConstants {
     String REVERSE_PROXY_SG_TAG = "reverse-proxy-sg";
     
     /**
-     * The most appropriate instance type for a disposable reverse proxy.
-     */
-    String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "C5_AD_XLARGE";
-    
-    /**
      * The tag for any security groups for a mongo DB.
      */
     String MONGO_SG_TAG = "mongo-sg";
