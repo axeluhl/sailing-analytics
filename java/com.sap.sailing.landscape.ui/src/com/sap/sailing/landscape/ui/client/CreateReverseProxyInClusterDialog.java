@@ -127,7 +127,7 @@ public class CreateReverseProxyInClusterDialog
                 }, callback);
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, LandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
         // Displays the availability zones in the mixed format.
         availabilityZone = LandscapeDialogUtil.createInstanceAZTypeListBox(this, landscapeManagementService,
                 stringMessages, leastpopulatedAzName, errorReporter, region);
@@ -156,7 +156,6 @@ public class CreateReverseProxyInClusterDialog
 
     private void populateCoDeployInstances() {
         // TODO Fill with instanceID/name
-
     }
 
     private void updateInstanceTypesBasedOnSharedInstanceBox() {
@@ -168,7 +167,6 @@ public class CreateReverseProxyInClusterDialog
             labelVisibility(false);
             instancesIdLabel.setVisible(true);
             coDeployInstances.setVisible(true);
-
         } else {
             // box unchecked
             proxyName.setVisible(true);
@@ -177,7 +175,6 @@ public class CreateReverseProxyInClusterDialog
             labelVisibility(true);
             instancesIdLabel.setVisible(false);
             coDeployInstances.setVisible(false);
-
         }
     }
 
@@ -191,7 +188,6 @@ public class CreateReverseProxyInClusterDialog
         for (Label label : labels) {
             label.setVisible(visible);
         }
-
     }
 
     @Override
