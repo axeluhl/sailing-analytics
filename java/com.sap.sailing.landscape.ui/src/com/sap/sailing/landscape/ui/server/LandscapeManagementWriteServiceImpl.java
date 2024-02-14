@@ -292,14 +292,19 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         for (AwsInstance<String> instance : landscape.getReverseProxyCluster(new AwsRegion(region, landscape))
                 .getHosts()) {
             boolean isDisposable = landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false;
-            ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
-                    instance.getAvailabilityZone().getName(), instance.getPrivateAddress().toString(),
-                    instance.getAvailabilityZone().getId(), instance.getPublicAddress().toString(), region,
-                    instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
-                    instance.getImageId(), extractHealth(healths, instance), isDisposable);
+            ReverseProxyDTO dto = convertToReverseProxyDTO(region, healths, instance, isDisposable);
             results.add(dto);
         }
         return results;
+    }
+
+    private ReverseProxyDTO convertToReverseProxyDTO(String region, Map<AwsInstance<String>, TargetHealth> healths,
+            AwsInstance<String> instance, boolean isDisposable) {
+        return new ReverseProxyDTO(instance.getInstanceId(),
+                instance.getAvailabilityZone().getId(), instance.getPrivateAddress().toString(),
+                instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
+                instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
+                extractHealth(healths, instance), isDisposable, instance.getAvailabilityZone().getName());
     }
     
     @Override
@@ -406,10 +411,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
-        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getName(),
-                host.getPrivateAddress().getHostAddress(), host.getAvailabilityZone().getId(),
-                host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
-                host.getRegion().getId(), host.getLaunchTimePoint(), host.isSharedHost());
+        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(),
+                host.getPrivateAddress().getHostAddress(), host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
+                host.getRegion().getId(),
+                host.getLaunchTimePoint(), host.isSharedHost(), host.getAvailabilityZone().getName());
     }
     
     @Override
