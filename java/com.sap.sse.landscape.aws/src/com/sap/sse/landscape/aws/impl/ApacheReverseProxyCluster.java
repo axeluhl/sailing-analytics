@@ -131,7 +131,7 @@ implements ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBase
      * Gets the security groups in the region that a reverse proxy instance should or does have.
      */
     private Iterable<SecurityGroup> getSecurityGroups(Region region) {
-        return getLandscape().getDefaultSecurityGroupsForCentralReverseProxy(region); 
+        return getLandscape().getDefaultSecurityGroupsForReverseProxy(region);
     }
 
     /**
