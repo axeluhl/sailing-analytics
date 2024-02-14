@@ -32,7 +32,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     ArrayList<ReverseProxyDTO> getReverseProxies(String region) throws Exception;
     
-    boolean removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    void removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     

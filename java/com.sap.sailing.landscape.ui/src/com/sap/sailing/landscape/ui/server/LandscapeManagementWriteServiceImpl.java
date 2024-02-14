@@ -291,13 +291,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         final ArrayList<ReverseProxyDTO> results = new ArrayList<>();
         for (AwsInstance<String> instance : landscape.getReverseProxyCluster(new AwsRegion(region, landscape))
                 .getHosts()) {
+            boolean isDisposable = landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false;
             ReverseProxyDTO dto = new ReverseProxyDTO(instance.getInstanceId(),
                     instance.getAvailabilityZone().getName(), instance.getPrivateAddress().toString(),
                     instance.getAvailabilityZone().getId(), instance.getPublicAddress().toString(), region,
                     instance.getLaunchTimePoint(), instance.isSharedHost(), instance.getNameTag(),
-                    instance.getImageId(), extractHealth(healths, instance));
-            dto.setDisposable(
-                    landscape.getTag(instance, LandscapeConstants.DISPOSABLE_PROXY).isPresent() ? true : false);
+                    instance.getImageId(), extractHealth(healths, instance), isDisposable);
             results.add(dto);
         }
         return results;
@@ -330,14 +329,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public boolean removeReverseProxy(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
+    public void removeReverseProxy(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         checkLandscapeManageAwsPermission();
         AwsRegion awsRegion = new AwsRegion(region, getLandscape());
         AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(awsRegion, proxy.getInstanceId(),
                 AwsInstanceImpl::new);
         getLandscape().getReverseProxyCluster(awsRegion).removeHost(awsInstance, Optional.of(optionalKeyName), privateKeyEncryptionPassphrase);
-        return true;
     }
     
     @Override
