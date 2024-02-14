@@ -324,7 +324,7 @@
          id="org.osgi.service.event"
          download-size="0"
          install-size="0"
-         version="1.4.1"
+         version="1.4.1.202109301733"
          unpack="false"/>
 
    <plugin
