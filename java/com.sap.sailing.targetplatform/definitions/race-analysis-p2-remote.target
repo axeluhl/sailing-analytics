@@ -378,6 +378,7 @@
 <plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.eclipse.jetty.io.source"/>
+<plugin id="org.osgi.service.cm"/>
 <plugin id="org.osgi.service.packageadmin"/>
 <plugin id="org.osgi.service.url"/>
 <plugin id="org.osgi.service.event"/>
