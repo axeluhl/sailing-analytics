@@ -11,16 +11,16 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.landscape.aws.LandscapeConstants;
 
 /**
  * Creates a dialog box for adding a reverse proxy to the cluster.
  * 
- * @author Thomas
+ * @author Thomas Stokes
  *
  */
 public class CreateReverseProxyInClusterDialog

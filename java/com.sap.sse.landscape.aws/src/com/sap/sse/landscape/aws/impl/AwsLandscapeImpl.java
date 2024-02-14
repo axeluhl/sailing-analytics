@@ -1047,14 +1047,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
         return createTargetGroup(region, targetGroupName, port, healthCheckPath, healthCheckPort, loadBalancerArn,
-                vpcId, new HashMap<String,String>());
+                vpcId, Collections.emptyMap());
     }
     
     /**
      * Overloaded method to allow tag-keys and values to be passed.
      */
-    public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
-            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, HashMap<String,String> tagKeyAndValues) {
+    private TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, Map<String,String> tagKeyAndValues) {
         software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[] tags = new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[tagKeyAndValues.keySet().size()];
         int arrayPosition = 0;
         for (String key : tagKeyAndValues.keySet()) { 
@@ -1175,7 +1175,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         }
         return reverseProxyCluster;
     }
-    
+
     @Override
     public SecurityGroup getSecurityGroup(String securityGroupId, com.sap.sse.landscape.Region region) {
         final software.amazon.awssdk.services.ec2.model.SecurityGroup securityGroup =
