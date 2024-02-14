@@ -8,13 +8,20 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * A dialog that lets the user edit a {@link CourseConfigurationDTO}. It may be initialized from a server-side
- * {@code CourseConfiguration} which may in turn have been initialized from a {@code Regatta}'s course, or
- * from a {@code CourseTemplate}. At any time the user can select a course template from the library and
- * set up a course with the {@code MarkProperties} from the library, or generate new {@code Mark}s from
- * the {@code MarkTemplate}s coming with the {@code CourseTemplate}. All marks placed in the course configuration
- * may be selected for storing in the "inventory" as {@code MarkProperties} objects for future use.<p>
+ * {@code CourseConfiguration} which may in turn have been initialized from a {@code Regatta}'s course, or from a
+ * {@code CourseTemplate}. At any time the user can select a course template from the library and set up a course with
+ * the {@code MarkProperties} from the library, or generate new {@code Mark}s from the {@code MarkTemplate}s coming with
+ * the {@code CourseTemplate}. All marks placed in the course configuration may be selected for storing in the
+ * "inventory" as {@code MarkProperties} objects for future use.
+ * <p>
  * 
- * Positioning information for marks may be provided, either as a device ID
+ * Positioning information for marks may be provided, either as one or more a {@link DeviceMappingDTO} objects and/or a
+ * fixed {@link Position} indicating the last known position or the position to set for, e.g., a fixed land mark. Other
+ * request/response attributes may also be visualized and edited, such as whether a mark configuration shall be stored
+ * as {@code MarkProperties} in the user's "inventory" or a {@code MarkRole} with name and short name shall be created
+ * in a new {@code CourseTemplate} for the mark defined in the course.<p>
+ * 
+ * 
  * 
  * @author Axel Uhl (d043530)
  *

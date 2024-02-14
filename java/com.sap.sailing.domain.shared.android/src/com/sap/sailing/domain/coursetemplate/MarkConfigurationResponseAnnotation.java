@@ -15,5 +15,11 @@ import com.sap.sse.common.Util.Triple;
  */
 public interface MarkConfigurationResponseAnnotation {
     GPSFix getLastKnownPosition();
+    
+    /**
+     * @return a non-{@code null} but possibly empty sequence of device mappings; the triple holds the
+     * device identifier, the time range during which the device was assigned, and optionally the last
+     * known GPS fix if one has been received.
+     */
     Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> getDeviceMappings();
 }

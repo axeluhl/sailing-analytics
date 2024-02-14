@@ -386,6 +386,9 @@ public class CourseConfigurationBuilder {
         return bestMatchingDeviceMapping;
     }
     
+    /**
+     * @return a non-{@code null} iterable
+     */
     private static Iterable<Triple<DeviceIdentifier, TimeRange, GPSFix>> findAllDevicesAndMappedRangesForMark(
             final Regatta regatta, Mark mark, Function<DeviceIdentifier, GPSFix> positionResolver) {
         final Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> deviceMappings = new RegattaLogDeviceMappingFinder<>(
