@@ -301,8 +301,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private ReverseProxyDTO convertToReverseProxyDTO(String region, Map<AwsInstance<String>, TargetHealth> healths,
             AwsInstance<String> instance, boolean isDisposable) {
         return new ReverseProxyDTO(instance.getInstanceId(),
-                instance.getAvailabilityZone().getId(), instance.getPrivateAddress().toString(),
-                instance.getPublicAddress().toString(), region, instance.getLaunchTimePoint(),
+                instance.getAvailabilityZone().getId(), instance.getPrivateAddress().getHostAddress(),
+                instance.getPublicAddress().getHostAddress(), region, instance.getLaunchTimePoint(),
                 instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
                 extractHealth(healths, instance), isDisposable, instance.getAvailabilityZone().getName());
     }

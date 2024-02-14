@@ -1218,9 +1218,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     public void addIpTargetToTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts) {
-        TargetDescription[] descriptions = Util.toArray(Util.map(hosts, t->TargetDescription.builder().id(t.getPrivateAddress().toString().substring(1)).port(80).build()), new TargetDescription[0]);
+        final TargetDescription[] descriptions = Util.toArray(Util.map(hosts, t->TargetDescription.builder().id(t.getPrivateAddress().getHostAddress()).port(80).build()), new TargetDescription[0]);
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(t->t.targetGroupArn(targetGroup.getTargetGroupArn()).targets(descriptions));
-
     }
 
     private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey>> targets) {
