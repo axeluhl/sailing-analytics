@@ -514,7 +514,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
-            Position fixedPosition) {
+            Position fixedPosition) throws NoCorrespondingServiceRegisteredException, TransformationException {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (deviceIdentifier != null) {
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
@@ -3890,12 +3890,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         } else {
             lastFix = null;
         }
-        String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
+        final String deviceId = serializeDeviceIdentifier(mapping.getDevice());
+        final Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
                 null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
+        final Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
                 null : mapping.getTimeRange().to().asDate();
-        MappableToDevice item = null;
+        final MappableToDevice item;
         final WithID mappedTo = mapping.getMappedTo();
         if (mappedTo == null) {
             throw new RuntimeException("Device mapping not mapped to any object");
@@ -3909,12 +3909,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
                     + mappedTo.getClass().getName());
         }
-        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
-        //has a large performance implact for GWT.
-        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
-        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
-        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
-        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
+        // Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
+        // has a large performance impact for GWT.
+        // As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
+        // recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
+        final List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
+        for (final Serializable id : mapping.getOriginalRaceLogEventIds()) {
             if (! (id instanceof UUID)) {
                 logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
                 throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");

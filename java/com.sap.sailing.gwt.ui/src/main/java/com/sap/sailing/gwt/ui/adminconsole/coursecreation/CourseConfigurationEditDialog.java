@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * the {@code MarkTemplate}s coming with the {@code CourseTemplate}. All marks placed in the course configuration
  * may be selected for storing in the "inventory" as {@code MarkProperties} objects for future use.<p>
  * 
- * Positioning information 
+ * Positioning information for marks may be provided, either as a device ID
  * 
  * @author Axel Uhl (d043530)
  *

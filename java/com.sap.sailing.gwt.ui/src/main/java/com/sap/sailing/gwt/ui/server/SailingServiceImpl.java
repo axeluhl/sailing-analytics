@@ -239,6 +239,7 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
 import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
@@ -282,7 +283,6 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -4847,8 +4847,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return finder;
     }
-
-    private DeviceIdentifier deserializeDeviceIdentifier(String type, String deviceId) throws NoCorrespondingServiceRegisteredException,
+    
+    protected DeviceIdentifier deserializeDeviceIdentifier(String type, String deviceId) throws NoCorrespondingServiceRegisteredException,
     TransformationException {
         DeviceIdentifierStringSerializationHandler handler =
                 getDeviceIdentifierStringSerializerHandlerFinder(false).findService(type);
@@ -4888,13 +4888,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceIdentifier.deviceType, dto.deviceIdentifier.deviceId);
+        DeviceIdentifier device = convertDtoToDeviceIdentifier(dto.deviceIdentifier);
         TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
         TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
-            //expect UUIDs
+            // expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
@@ -6087,9 +6087,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 markProperties.getType());
     }
 
-    protected DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
-        return deviceIdentifier != null ? new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId))
-                : null;
+    protected DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return deserializeDeviceIdentifier(deviceIdentifier.deviceType, deviceIdentifier.deviceId);
     }
 
     @Override
@@ -6199,6 +6198,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 final FreestyleMarkConfigurationDTO result = new FreestyleMarkConfigurationDTO();
                 result.setOptionalMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
                 result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                // TODO factor out the annotation of MarkConfigurationDTO with either MarkConfigurationRequestAnnotation or MarkConfigurationResponseAnnotation
+                if (markConfiguration.getAnnotationInfo() instanceof MarkConfigurationRequestAnnotation) {
+                }
                 return result;
             }
 
