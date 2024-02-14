@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1164,6 +1165,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
         for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        Iterator<AwsInstance<ShardingKey>>  iterator = reverseProxyCluster.getHosts().iterator();
+        if (iterator.hasNext()) {
+            iterator.next();
+            if (iterator.hasNext()) {
+                throw new IllegalStateException("There should only be one central reverse proxy");
+            }
         }
         return reverseProxyCluster;
     }
