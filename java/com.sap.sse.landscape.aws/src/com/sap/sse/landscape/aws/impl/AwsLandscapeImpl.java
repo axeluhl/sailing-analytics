@@ -399,7 +399,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final int httpPort = 80;
         final int httpsPort = 443;
         final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getReverseProxyCluster(alb.getRegion());
-        HashMap<String, String> tagKeyandValue = new HashMap<>();
+        final HashMap<String, String> tagKeyandValue = new HashMap<>();
         tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
                 httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
@@ -1216,6 +1216,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             Iterable<AwsInstance<ShardingKey>> targets) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(getRegisterTargetsRequestBuilderConsumer(targetGroup, targets));
     }
+    
     public void addIpTargetToTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts) {
         TargetDescription[] descriptions = Util.toArray(Util.map(hosts, t->TargetDescription.builder().id(t.getPrivateAddress().toString().substring(1)).port(80).build()), new TargetDescription[0]);
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(t->t.targetGroupArn(targetGroup.getTargetGroupArn()).targets(descriptions));
@@ -1258,17 +1259,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
-            List<SecurityGroup> securityGroups = new ArrayList<>();
+            final List<SecurityGroup> securityGroups = new ArrayList<>();
             securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.SAILING_APPLICATION_SG_TAG, region));
             return securityGroups.isEmpty() ? null : securityGroups.get(0);
         });
     }
 
     @Override
-    public Iterable<SecurityGroup> getDefaultSecurityGroupsForCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        List<SecurityGroup> securityGroups = new ArrayList<>();
-        securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.REVERSE_PROXY_SG_TAG, region));
-        return securityGroups;
+    public Iterable<SecurityGroup> getDefaultSecurityGroupsForReverseProxy(com.sap.sse.landscape.Region region) {
+        return getSecurityGroupByTag(LandscapeConstants.REVERSE_PROXY_SG_TAG, region);
     }
 
     public List<SecurityGroup> getSecurityGroupByTag(String tag, com.sap.sse.landscape.Region region) {
@@ -1276,7 +1275,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 getRegion(region)).describeSecurityGroups(sg -> sg.filters(Filter.builder().name("tag-key").values(tag).build()))
                         .securityGroups();
         return securityGroups.stream().map(sg -> new SecurityGroup() {
-
             @Override
             public String getVpcId() {
                 return sg.vpcId();
@@ -1287,8 +1285,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 return sg.groupId();
             }
         }).collect(Collectors.toList());
-        
     }
+    
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(com.sap.sse.landscape.Region region) {
         return getDefaultSecurityGroupForApplicationHosts(region);
@@ -1296,9 +1294,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
 
     @Override
     public Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(com.sap.sse.landscape.Region region) {
-        List<SecurityGroup> securityGroups = new ArrayList<>();
-        securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.MONGO_SG_TAG, region));
-        return securityGroups;
+        return getSecurityGroupByTag(LandscapeConstants.MONGO_SG_TAG, region);
     }
 
     @Override
