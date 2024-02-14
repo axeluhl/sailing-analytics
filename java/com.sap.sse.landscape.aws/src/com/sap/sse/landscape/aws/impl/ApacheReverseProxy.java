@@ -50,7 +50,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String RELATIVE_CONFIG_PATH = "conf.d";
     
     /**
-     * The path to the "httpd/config" git repo which stores all httpd configuration files.
+     * The absolute path to the "httpd config" git repo which stores all httpd configuration files.
      */
     private static final String CONFIG_REPO_PATH = "/etc/httpd";
     
@@ -71,9 +71,6 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String HOME_ARCHIVE_REDIRECT_MACRO = "Home-ARCHIVE";
     private static final String EVENT_ARCHIVE_REDIRECT_MACRO = "Event-ARCHIVE";
     private static final String SERIES_ARCHIVE_REDIRECT_MACRO = "Series-ARCHIVE";
-    private static final String STATUS = "Status";
-    private static final String CONFIG_FILE_FOR_INTERNALS = "001-internals"+CONFIG_FILE_EXTENSION;
-    
     private final AwsInstance<ShardingKey> host;
     
     public ApacheReverseProxy(AwsLandscape<ShardingKey> landscape, AwsInstance<ShardingKey> host) {
@@ -105,14 +102,23 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     /**
      * Creates a redirect file and updates the git repo.
-     * @param configFileNameForHostname The config file to create or edit, with the appropriate extension appended (eg. .conf).
-     * @param macroName The name of the macro to use.
-     * @param hostname The hostname the macro will affect. Typically the same as the file name.
-     * @param optionalKeyName Key name to use for the ssh channel.
-     * @param privateKeyEncryptionPassphrase The passphrase for the passed key.
-     * @param doCommit Boolean indicating whether to commit. True if the changed file should be committed. 
-     * @param doPush Boolean indicating whether to push the committed changes. True if the commit should be pushed.
-     * @param macroArguments Optional macro arguments.
+     * 
+     * @param configFileNameForHostname
+     *            The config file to create or edit, with the appropriate extension appended (eg. .conf).
+     * @param macroName
+     *            The name of the macro to use.
+     * @param hostname
+     *            The hostname the macro will affect. Typically the same as the file name.
+     * @param optionalKeyName
+     *            Key name to use for the ssh channel.
+     * @param privateKeyEncryptionPassphrase
+     *            The passphrase for the passed key.
+     * @param doCommit
+     *            Boolean indicating whether to commit. True if the changed file should be committed.
+     * @param doPush
+     *            Boolean indicating whether to push the committed changes. True if the commit should be pushed.
+     * @param macroArguments
+     *            Optional macro arguments.
      */
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean doCommit, boolean doPush, String... macroArguments)
@@ -163,7 +169,6 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         if (performPush) {
             command.append(" ; git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
         }
-        command.append(";");
         return command.toString();
     }
     
@@ -239,11 +244,6 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     @Override
-    public void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        setRedirect(CONFIG_FILE_FOR_INTERNALS, STATUS, getHost().getPrivateAddress(optionalTimeout).getHostAddress(), optionalKeyName, privateKeyEncryptionPassphrase, false, false, INTERNAL_SERVER_STATUS);
-    }
-
-    @Override
     public void removeRedirect(Scope<ShardingKey> scope, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final String configFileName = getConfigFileNameForScope(scope);
         removeRedirect(configFileName, scope.toString(), optionalKeyName, privateKeyEncryptionPassphrase);
@@ -257,7 +257,6 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     
     /**
-     * 
      * @param configFileName The name of the file to remove.
      * @param hostname The hostname which was removed.
      */

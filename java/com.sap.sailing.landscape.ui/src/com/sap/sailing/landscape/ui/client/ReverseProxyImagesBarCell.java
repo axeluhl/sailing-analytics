@@ -25,7 +25,6 @@ public class ReverseProxyImagesBarCell extends ImagesBarCell{
         this.stringMessages = stringMessages;
     }
     
-    
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(new ImageSpec(ACTION_REMOVE, stringMessages.remove(), IconResources.INSTANCE.removeIcon()),
@@ -33,5 +32,4 @@ public class ReverseProxyImagesBarCell extends ImagesBarCell{
                 new ImageSpec(ACTION_RESTART_HTTPD, stringMessages.restartHttpd(), IconResources.INSTANCE.unlinkIcon())
                 );
     }
-
 }
