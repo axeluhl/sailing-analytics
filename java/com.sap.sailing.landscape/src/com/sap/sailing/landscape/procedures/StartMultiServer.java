@@ -8,7 +8,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.aws.HostSupplier;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.orchestration.StartEmptyServer;
-
+import com.sap.sse.shared.util.Wait;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 
 /**
@@ -125,5 +126,6 @@ implements StartFromSailingAnalyticsImage {
     @Override
     public void run() throws Exception {
         super.run(); // this will trigger the "sailing" init.d script running in the background
+        Wait.wait(() -> getHost().getInstance().state().name().equals(InstanceStateName.RUNNING), optionalTimeout, Duration.ONE_SECOND.times(10)); 
     }
 }
