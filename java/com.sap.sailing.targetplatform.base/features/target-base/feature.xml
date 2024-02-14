@@ -321,6 +321,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.service.event"
+         download-size="0"
+         install-size="0"
+         version="1.4.1"
+         unpack="false"/>
+
+   <plugin
          id="org.osgi.service.url"
          download-size="0"
          install-size="0"
