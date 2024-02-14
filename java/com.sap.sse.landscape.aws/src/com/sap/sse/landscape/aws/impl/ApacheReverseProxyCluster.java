@@ -3,6 +3,7 @@ package com.sap.sse.landscape.aws.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -35,6 +36,7 @@ import com.sap.sse.shared.util.Wait;
 
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealth;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthStateEnum;
 
@@ -67,24 +69,32 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
     }
 
     @Override
-    public AwsInstance<ShardingKey> createHost(String name, InstanceType instanceType, AwsAvailabilityZone az, String keyName) throws TimeoutException, Exception {
+    public AwsInstance<ShardingKey> createHost(String name, InstanceType instanceType, AwsAvailabilityZone az,
+            String keyName) throws TimeoutException, Exception {
         final AwsInstance<ShardingKey> host = getLandscape().launchHost(
-                (instanceId, availabilityZone, privateIpAddress, launchTimePoint, landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId,
-                        availabilityZone, privateIpAddress, launchTimePoint, landscape),
-                getAmiId(az.getRegion()), instanceType, az, keyName,
-                getSecurityGroups(az.getRegion()), Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "").and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")), "");
-                addHost(host);
-        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING), Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.INFO, "Reattempting to add to target group");
+                (instanceId, availabilityZone, privateIpAddress, launchTimePoint,
+                        landscape) -> new AwsInstanceImpl<ShardingKey>(instanceId, availabilityZone, privateIpAddress,
+                                launchTimePoint, landscape),
+                getAmiId(az.getRegion()), instanceType, az, keyName, getSecurityGroups(az.getRegion()),
+                Optional.of(Tags.with(StartAwsHost.NAME_TAG_NAME, name).and(LandscapeConstants.DISPOSABLE_PROXY, "")
+                        .and(LandscapeConstants.REVERSE_PROXY_TAG_NAME, "")),
+                "");
+        addHost(host);
+        Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING),
+                Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.INFO,
+                "Reattempting to add to target group");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
                     final ApplicationLoadBalancer<ShardingKey> loadBalancer = targetGroup.getLoadBalancer();
                     if (loadBalancer != null && loadBalancer.getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                         getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
-                        logger.info("Added " + host.getInstanceId() + " to NLB target group" + targetGroup.getTargetGroupArn());
+                        logger.info("Added " + host.getInstanceId() + " to NLB target group"
+                                + targetGroup.getTargetGroupArn());
                     } else {
                         targetGroup.addTarget(host);
-                        logger.info("Added " + host.getInstanceId() + " to target group" + targetGroup.getTargetGroupArn());
+                        logger.info(
+                                "Added " + host.getInstanceId() + " to target group" + targetGroup.getTargetGroupArn());
                     }
                 }
             }));
@@ -100,17 +110,27 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
             throw new IllegalStateException(
                     "Trying to remove the last hosts of reverse proxy " + this + ". Use terminate() instead");
         }
-        AwsInstance<ShardingKey> instanceFromHost = new AwsInstanceImpl<ShardingKey>(host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(Landscape.WAIT_FOR_PROCESS_TIMEOUT), host.getLaunchTimePoint(), getLandscape());
+        AwsInstance<ShardingKey> instanceFromHost = new AwsInstanceImpl<ShardingKey>(host.getInstanceId(),
+                host.getAvailabilityZone(), host.getPrivateAddress(Landscape.WAIT_FOR_PROCESS_TIMEOUT),
+                host.getLaunchTimePoint(), getLandscape());
         final List<TargetGroup<ShardingKey>> targetGroupsHostResidesIn = new ArrayList<>();
-        for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(host.getAvailabilityZone().getRegion())) {
-            final String loadBalancerArn = targetGroup.getLoadBalancerArn();
-            if (!targetGroup.getTargetGroupArn().contains("EndpointRegistration")
-                    && !targetGroup.getTargetGroupArn().contains("Lambda")
-                    && loadBalancerArn != null
-                    && !loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)
-                    && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
-                targetGroup.removeTarget(instanceFromHost);
-                targetGroupsHostResidesIn.add(targetGroup);
+        for (TargetGroup<ShardingKey> targetGroup : getLandscape()
+                .getTargetGroups(host.getAvailabilityZone().getRegion())) {
+            final Iterator<TagDescription> tagDescriptions = targetGroup.getTagDescriptions().iterator();
+            while (tagDescriptions.hasNext()) {
+                final TagDescription tagDescription = tagDescriptions.next();
+                if (tagDescription.hasTags()) {
+                    tagDescription.tags().forEach(tag -> {
+                        final String loadBalancerArn = targetGroup.getLoadBalancerArn();
+                        if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES) && loadBalancerArn != null
+                                && !loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)
+                                && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
+                            targetGroupsHostResidesIn.add(targetGroup);
+                            targetGroup.removeTarget(instanceFromHost);
+
+                        }
+                    });
+                }
             }
         }
         Wait.wait(() -> {
@@ -150,6 +170,13 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
         }
     }
 
+    /**
+     * Chooses any one instance in the cluster, in the region, to apply the redirect to. Upon a push, a Git hook is
+     * triggered to propagate the changes to the others in the cluster.
+     * 
+     * @param redirectSetter
+     *            The ConsumerWithException to apply the necessary redirect to the proxy.
+     */
     private void setRedirect(ConsumerWithException<ApacheReverseProxy<ShardingKey, MetricsT, ProcessT>> redirectSetter)
             throws Exception {
         if (getReverseProxies().iterator().hasNext()) {
