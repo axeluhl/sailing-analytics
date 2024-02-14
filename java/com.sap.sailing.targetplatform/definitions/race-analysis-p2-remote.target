@@ -381,6 +381,7 @@
 <plugin id="org.osgi.service.packageadmin"/>
 <plugin id="org.osgi.service.url"/>
 <plugin id="org.osgi.service.event"/>
+<plugin id="org.osgi.util.tracker"/>
 <plugin id="org.osgi.util.promise"/>
 <plugin id="org.osgi.util.promise.source"/>
 <plugin id="org.osgi.util.function"/>

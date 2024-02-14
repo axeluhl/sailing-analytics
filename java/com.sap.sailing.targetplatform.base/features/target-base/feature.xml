@@ -321,6 +321,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.util.tracker"
+         download-size="0"
+         install-size="0"
+         version="1.5.4.202109301733"
+         unpack="false"/>
+
+   <plugin
          id="org.osgi.service.event"
          download-size="0"
          install-size="0"
