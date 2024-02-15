@@ -9,4 +9,4 @@ RequiredBy=multi-user.target
 [Service]
 Type=oneshot
 RemainAfterExit=true
-ExecStart= /bin/bash -c "sed -i  \"s|/var/log/old.*|/var/log/old/REVERSE_PROXIES/$(ec2-metadata --public-ipv4 | grep   -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>')|\" /etc/logrotate.d/httpd "
+ExecStart=/bin/bash -c "sed -i  \"s|/var/log/old.*|/var/log/old/REVERSE_PROXIES/$(ec2-metadata --public-ipv4 | grep   -o '[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>')|\" /etc/logrotate.d/httpd "
