@@ -1598,21 +1598,24 @@ public class LandscapeManagementPanel extends SimplePanel {
      * This gets the availability zone (name), with the fewest reverse proxies in the region.
      * @param reverseProxies All the reverse proxies in the region.
      */
-    private void leastPopulatedAzName(ArrayList<ReverseProxyDTO> reverseProxies) {
-        HashMap<String, Integer> azFill  = new HashMap<>(); 
-        if (availabilityZones != null && availabilityZones.size() > 0 ) {
-            String minimum = availabilityZones.get(0);
-            availabilityZones.forEach(az -> azFill.put(az, 0));
-            for (ReverseProxyDTO reverseProxy : reverseProxies) {
-               azFill.put(reverseProxy.getAvailabilityZoneName(), azFill.get(reverseProxy.getAvailabilityZoneName()) + 1);
-            }
-            for (String  az : azFill.keySet()) {
-                minimum = azFill.get(az) < azFill.get(minimum) ? az : minimum;
-            }
-            leastpopulatedAzName = minimum;
-        } else {
-            leastpopulatedAzName = "";
-        }       
+    private void calculateLeastPopulatedAz(List<ReverseProxyDTO> reverseProxies) {
+        final Map<String, Integer> azFill = new HashMap<>();
+        List<String> availabilityZones = new ArrayList<>();
+        if (availabilityZones != null && availabilityZones.size() > 0) {
+            final Optional<String> leastUsedAzName = reverseProxies.stream()
+                    .reduce(new HashMap<String, Integer>(), (result, reverseProxy) -> {
+                        final HashMap<String, Integer> merged = new HashMap<String, Integer>(result);
+                        merged.merge(reverseProxy.getAvailabilityZoneName(), 1, (a, b) -> a + b);
+                        return merged;
+                    }, (map1, map2) -> {
+                        final HashMap<String, Integer> combined = new HashMap<>(map1);
+                        map2.entrySet().stream()
+                                .forEach(e -> combined.merge(e.getKey(), e.getValue(), (a, b) -> a + b));
+                        return combined;
+                    }).entrySet().stream().sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue())).findFirst()
+                    .map(e -> e.getKey());
+      
+        }
     }
     
     /**
