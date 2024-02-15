@@ -1,7 +1,7 @@
 [Unit]
-Description=Syncs git repo prior to httpd service starting
+Description=Creates httpd internal-status file.
 Requires=-.mount network-online.target
-After=-.mount network-online.target
+After=-.mount network-online.target get-latest-httpd-conf.service
 Before=httpd.service
 # Staring before means no "systemctl start httpd" is needed.
 [Install]
@@ -11,4 +11,4 @@ WantedBy=httpd.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-ExecStart=/usr/local/bin/sync-repo-and-execute-cmd.sh "/etc/httpd" "echo synced"
+ExecStart=/root/setupHttpdGitLocal.sh
