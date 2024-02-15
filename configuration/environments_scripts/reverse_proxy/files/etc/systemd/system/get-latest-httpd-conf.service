@@ -3,7 +3,7 @@ Description=Syncs git repo prior to httpd service starting
 Requires=-.mount network-online.target
 After=-.mount network-online.target
 Before=httpd.service
-# Staring before means not systemctl start httpd is needed.
+# Staring before means no "systemctl start httpd" is needed.
 [Install]
 RequiredBy=multi-user.target
 WantedBy=httpd.service
