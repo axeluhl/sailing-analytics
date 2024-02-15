@@ -56,4 +56,4 @@ if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
 fi
 
 systemctl daemon-reload
-systemctl renable /etc/systemd/system/*.service # to recreate all the dependency links.
+systemctl reenable $(find /etc/systemd/system/ -type f) # to recreate all the dependency links.
