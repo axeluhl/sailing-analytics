@@ -1,5 +1,5 @@
 [Unit]
-Description=Force logrotate upon shutdown
+Description=Force logrotate upon shutdown and clean files in var/cache
 Requires=-.mount network-online.target
 After=-.mount network-online.target
 Before=shutdown.target
@@ -15,5 +15,5 @@ Type=oneshot
 RemainAfterExit=yes
 KillMode=none
 ExecStart=/bin/true
-ExecStopPost=logrotate --force -v /etc/logrotate.conf
+ExecStopPost=/bin/bash -c "logrotate --force -v /etc/logrotate.conf; rm -f /var/cache/subnetMaskSize"
 TimeoutStopSec=50
