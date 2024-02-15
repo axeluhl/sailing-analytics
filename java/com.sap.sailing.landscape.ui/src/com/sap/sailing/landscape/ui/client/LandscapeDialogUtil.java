@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ListBox;
-import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -64,53 +63,5 @@ public class LandscapeDialogUtil {
                 break;
             }
         }
-    }
-
-    /**
-     * Creates a dropdown list of availability zones in the mixed format, initially selecting the item containing the az
-     * name, which is the least populated
-     * 
-     * @param defaultAZ
-     *            The least populated az name.
-     */
-    public static ListBox createInstanceAZTypeListBox(DataEntryDialog<?> dialog,
-            LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultAZ, ErrorReporter errorReporter, String region) {
-        return createInstanceAZTypeListBoxWithAdditionalDefaultEntry(dialog, /* additionalItem */ null,
-                /* additionalValue */ null, landscapeManagementService, stringMessages, defaultAZ, errorReporter,
-                region);
-    }
-
-
-    public static ListBox createInstanceAZTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
-            String additionalItem, String additionalValue,
-            LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultAZName, ErrorReporter errorReporter, String region) {
-        final ListBox availabilityZoneBox = dialog.createListBox(false);
-        if (additionalItem != null) {
-            availabilityZoneBox.addItem(additionalItem, additionalValue);
-            availabilityZoneBox.setSelectedIndex(0);
-        }
-        landscapeManagementService.getAvailabilityZones(region, AzFormat.MIXED,  new AsyncCallback<ArrayList<String>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(caught.getMessage());
-
-            }
-
-            @Override
-            public void onSuccess(ArrayList<String> result) {
-                Collections.sort(result);
-                int i = 0;
-                for (String az : result) {
-                    availabilityZoneBox.addItem(az, az);
-                    if (additionalItem == null && az.contains(defaultAZName)) {
-                        availabilityZoneBox.setSelectedIndex(i);
-                    }
-                    i++;
-                }
-            }
-        });
-        return availabilityZoneBox;
     }
 }

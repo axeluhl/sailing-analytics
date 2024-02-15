@@ -6,12 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -38,7 +34,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DataImportProgress;
-import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.client.CreateApplicationReplicaSetDialog.CreateApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.MoveMasterProcessDialog.MoveMasterToOtherInstanceInstructions;
@@ -46,6 +41,7 @@ import com.sap.sailing.landscape.ui.client.SwitchToReplicaOnSharedInstanceDialog
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
@@ -122,8 +118,6 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final AwsMfaLoginWidget mfaLoginWidget;
     private TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources> proxiesTable;
     private final BusyIndicator proxiesTableBusy;
-    protected String leastpopulatedAzName = "";
-    protected List<String> availabilityZones;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
     /**
@@ -535,7 +529,7 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
        proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
        proxiesTable.addColumn(instancePrivateIpProxiesColumn, stringMessages.privateIp());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneId(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        //setup actions
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
@@ -1467,34 +1461,12 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
     
     private void refreshAllThatNeedsAwsCredentials() {
-        availabilityZones = null;
         refreshMongoEndpointsTable();
         refreshApplicationReplicaSetsTable();
-        getAzs();
         refreshMachineImagesTable();
         refreshProxiesTable();
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
-    }
-    
-    /**
-     * Fetches and sets the list of all the availability zone <strong>names</strong>, in the region.
-     */
-    private void getAzs() {
-        if (mfaLoginWidget.hasValidSessionCredentials()
-                && regionsTable.getSelectionModel().getSelectedObject() != null) {
-            landscapeManagementService.getAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(), AzFormat.NAME,
-                    new AsyncCallback<ArrayList<String>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(caught.getMessage());
-                }
-                @Override
-                public void onSuccess(ArrayList<String> result) {
-                    availabilityZones = result;
-                }
-            });
-        }
     }
 
     /**
@@ -1533,39 +1505,55 @@ public class LandscapeManagementPanel extends SimplePanel {
 
     /**
      * Creates a reverse proxy based on the user's input.
-     * @param stringMessages
      * @param region The region to spawn the reverse proxy in.
      */
     private void addReverseProxyToCluster(StringMessages stringMessages, String region) {
-        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null || regionsTable.getSelectionModel().getSelectedObject() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-            new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService, region, leastpopulatedAzName,
-                    new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyDTO>() {
+            landscapeManagementService.describeAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<ArrayList<AvailabilityZoneDTO>>() {
                         @Override
-                        public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO editedObject) {
-                            editedObject.setKey(sshKeyManagementPanel.getSelectedKeyPair() == null ? null
-                                    : sshKeyManagementPanel.getSelectedKeyPair().getName());
-                            landscapeManagementService.addReverseProxy(editedObject, new AsyncCallback<Void>() {
-                                @Override
-                                public void onSuccess(Void result) {
-                                    Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
-                                    refreshProxiesTable();
-                                }
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError(caught.getMessage());
-
-                                }
-                            });
-
-                        }
-                        @Override
-                        public void cancel() {
+                        public void onSuccess(ArrayList<AvailabilityZoneDTO> result) {
+                            addReverseProxyDialog(stringMessages, region, result);
                         }
 
-                    }).show();
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
         }
+    }
+    
+    private void addReverseProxyDialog(StringMessages stringMessages, String region, ArrayList<AvailabilityZoneDTO> availabilityZones) {
+        new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService, region,
+                proxiesTable.getTable().getVisibleItems(), availabilityZones,
+                new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions>() {
+                    @Override
+                    public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions editedObject) {
+                        editedObject.setKey(sshKeyManagementPanel.getSelectedKeyPair() == null ? null
+                                : sshKeyManagementPanel.getSelectedKeyPair().getName());
+                        landscapeManagementService.addReverseProxy(editedObject.getName(),
+                                editedObject.getInstanceType(), editedObject.getRegion(), editedObject.getKey(), editedObject.getAvailabilityZoneDTO(),
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+                                        refreshProxiesTable();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
     
     /**
@@ -1586,7 +1574,6 @@ public class LandscapeManagementPanel extends SimplePanel {
                         
                         @Override
                         public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
-                            leastPopulatedAzName(reverseProxyDTOs);
                             proxiesTable.refresh(reverseProxyDTOs);
                             proxiesTableBusy.setBusy(false);
                         }
@@ -1595,33 +1582,8 @@ public class LandscapeManagementPanel extends SimplePanel {
     }
     
     /**
-     * This gets the availability zone (name), with the fewest reverse proxies in the region.
-     * @param reverseProxies All the reverse proxies in the region.
-     */
-    private void calculateLeastPopulatedAz(List<ReverseProxyDTO> reverseProxies) {
-        final Map<String, Integer> azFill = new HashMap<>();
-        List<String> availabilityZones = new ArrayList<>();
-        if (availabilityZones != null && availabilityZones.size() > 0) {
-            final Optional<String> leastUsedAzName = reverseProxies.stream()
-                    .reduce(new HashMap<String, Integer>(), (result, reverseProxy) -> {
-                        final HashMap<String, Integer> merged = new HashMap<String, Integer>(result);
-                        merged.merge(reverseProxy.getAvailabilityZoneName(), 1, (a, b) -> a + b);
-                        return merged;
-                    }, (map1, map2) -> {
-                        final HashMap<String, Integer> combined = new HashMap<>(map1);
-                        map2.entrySet().stream()
-                                .forEach(e -> combined.merge(e.getKey(), e.getValue(), (a, b) -> a + b));
-                        return combined;
-                    }).entrySet().stream().sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue())).findFirst()
-                    .map(e -> e.getKey());
-      
-        }
-    }
-    
-    /**
-     * Restarts httpd on the given reverse proxy via stop and then start.
-     * @param reverseProxy The instance to restart on.
-     * @param stringMessages
+     * Rotates the httpd logs on an instance.
+     * @param reverseProxy The instance to rotate the logs on.
      */
     private void rotateHttpdLogs(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {

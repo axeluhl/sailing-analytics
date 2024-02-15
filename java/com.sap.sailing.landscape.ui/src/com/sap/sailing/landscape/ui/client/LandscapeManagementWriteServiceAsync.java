@@ -6,9 +6,9 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
-import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
@@ -54,14 +54,13 @@ public interface LandscapeManagementWriteServiceAsync {
     /**
      * Adds a reverse proxy to the cluster and the right load balancer's target group.
      */
-    void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO,   AsyncCallback<Void> callback);
+    void addReverseProxy(String instanceName, String instanceType, String region, String launchKey, AvailabilityZoneDTO availabilityZoneDTO, AsyncCallback<Void> callback);
     
     
     /**
-     * Gets all availability zones in a region in a certain format. NAME is az name. ID is az id. MIXED is in format name/id.
-     * @param format The format of the strings returned to denote the az. 
+     * Gets all availability zones in a region.
      */
-    void getAvailabilityZones(String region, AzFormat format, AsyncCallback<ArrayList<String>> asyncCallback);
+    void describeAvailabilityZones(String region,AsyncCallback<ArrayList<AvailabilityZoneDTO>> asyncCallback);
     
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.

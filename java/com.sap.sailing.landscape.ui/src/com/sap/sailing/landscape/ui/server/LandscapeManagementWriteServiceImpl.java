@@ -22,7 +22,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +38,6 @@ import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
-import com.sap.sailing.landscape.common.AzFormat;
 import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.impl.SailingAnalyticsHostImpl;
@@ -49,10 +47,10 @@ import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsProcessFactory;
 import com.sap.sailing.landscape.procedures.UpgradeAmi;
-import com.sap.sailing.landscape.ui.client.CreateReverseProxyInClusterDialog;
 import com.sap.sailing.landscape.ui.client.LandscapeManagementWriteService;
 import com.sap.sailing.landscape.ui.impl.Activator;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
@@ -84,7 +82,6 @@ import com.sap.sse.landscape.aws.AmazonMachineImage;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
-import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsShard;
@@ -242,27 +239,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public ArrayList<String> getAvailabilityZones(String region, AzFormat format) {
-        Function<AwsAvailabilityZone, String> azStringSupplier = null;
-        switch (format) {
-        case MIXED:
-            azStringSupplier = item -> item.getName() + "/" + item.getId();
-            break;
-        case NAME:
-            azStringSupplier = item -> item.getName();
-            break;
-        case ID:
-            azStringSupplier = item -> item.getId();
-            break;
-        }
-        return getAvailabilityZones(region, azStringSupplier);
-    }
-    
-    private ArrayList<String> getAvailabilityZones(String region, Function<AwsAvailabilityZone, String> azStringSupplier) {
-        final ArrayList<String> zones = new ArrayList<String>();
+    public ArrayList<AvailabilityZoneDTO> describeAvailabilityZones(String region) {
+        final ArrayList<AvailabilityZoneDTO> availabilityZones = new ArrayList<>();
         getLandscape().getAvailabilityZones(new AwsRegion(region, getLandscape()))
-                .forEach(az -> zones.add(azStringSupplier.apply(az)));
-        return zones;
+        .forEach(az -> availabilityZones.add(new AvailabilityZoneDTO(az.getName(), region, az.getId())));
+        return availabilityZones;
     }
     
     @Override
@@ -301,10 +282,10 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private ReverseProxyDTO convertToReverseProxyDTO(String region, Map<AwsInstance<String>, TargetHealth> healths,
             AwsInstance<String> instance, boolean isDisposable) {
         return new ReverseProxyDTO(instance.getInstanceId(),
-                instance.getAvailabilityZone().getId(), instance.getPrivateAddress().getHostAddress(),
-                instance.getPublicAddress().getHostAddress(), region, instance.getLaunchTimePoint(),
-                instance.isSharedHost(), instance.getNameTag(), instance.getImageId(),
-                extractHealth(healths, instance), isDisposable, instance.getAvailabilityZone().getName());
+                instance.getPrivateAddress().getHostAddress(), instance.getPublicAddress().getHostAddress(),
+                region, instance.getLaunchTimePoint(), instance.isSharedHost(),
+                instance.getNameTag(), instance.getImageId(), extractHealth(healths, instance),
+                isDisposable, new AvailabilityZoneDTO(instance.getAvailabilityZone().getName(), instance.getRegion().getId(), instance.getAvailabilityZone().getId()));
     }
     
     @Override
@@ -344,16 +325,11 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO) {
-        String[] azNameId=createProxyDTO.getAvailabilityZone().split("/");
-        String azName = azNameId[0];
-        String azId = azNameId[1];
+    public void addReverseProxy(String instanceName, String instanceType,  String region, String launchKey, AvailabilityZoneDTO availabilityZoneDTO) {
         try {
-            getLandscape().getReverseProxyCluster(new AwsRegion(createProxyDTO.getRegion(), getLandscape()))
-                    .createHost(createProxyDTO.getName(), InstanceType.valueOf(createProxyDTO.getInstanceType()),
-                            new AwsAvailabilityZoneImpl(azId, azName,
-                                    new AwsRegion(createProxyDTO.getRegion(), getLandscape())),
-                            createProxyDTO.getKey());
+            getLandscape().getReverseProxyCluster(new AwsRegion(region, getLandscape())).createHost(instanceName,
+                    InstanceType.valueOf(instanceType),
+                    new AwsAvailabilityZoneImpl(availabilityZoneDTO.getAzId(), availabilityZoneDTO.getAzName(), new AwsRegion(region, getLandscape())), launchKey);
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());
         }
@@ -411,10 +387,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
 
     private AwsInstanceDTO convertToAwsInstanceDTO(Host host) {
-        return new AwsInstanceDTO(host.getId().toString(), host.getAvailabilityZone().getId(),
-                host.getPrivateAddress().getHostAddress(), host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
+        return new AwsInstanceDTO(host.getId().toString(), host.getPrivateAddress().getHostAddress(), host.getPublicAddress() == null ? null : host.getPublicAddress().getHostAddress(),
                 host.getRegion().getId(),
-                host.getLaunchTimePoint(), host.isSharedHost(), host.getAvailabilityZone().getName());
+                host.getLaunchTimePoint(), host.isSharedHost(), new AvailabilityZoneDTO(host.getAvailabilityZone().getName(), host.getRegion().getId(), host.getAvailabilityZone().getId()));
     }
     
     @Override
