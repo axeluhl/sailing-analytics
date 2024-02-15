@@ -167,10 +167,10 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
     String optionalSessionToken();
     String reverseProxies();
-    String restartHttpd();
-    String successfullyRestartedHttpdOnInstance(String instance);
+    String rotateHttpdLogs();
+    String successfullyRotatedHttpdLogsOnInstance(String instance);
     String invalidOperationForThisProxy();
-    String pleaseProvideNonEmptyName();
+    String pleaseProvideNonEmptyNameAndAZ();
     String success();
     String availabilityZone();
     String runOnExisting();

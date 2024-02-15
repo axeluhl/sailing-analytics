@@ -95,7 +95,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      * @param privateKeyEncryptionPassphrase The password for the key.
      */
     public void rotateLogs(Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String command = "logrotate --force -v /etc/logrotate.conf 2>&1;  echo \"logrotate done\"";
+        final String command = "logrotate --force -v /etc/logrotate.d/httpd 2>&1;  echo \"logrotate done\"";
         logger.info("Standard output from forced log rotate on " + this.getHostname() + ": " + runCommandAndReturnStdoutAndStderr(command, "Standard error from logrotate ",
                         Level.ALL, optionalKeyName, privateKeyEncryptionPassphrase));
     }
@@ -315,14 +315,4 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         }
     }
 
-    /**
-     * Restarts the httpd service on the proxy via stop and then start.
-     * @param optionalKeyName The keyname to use to connect, via ssh, to the instance to run the necessary commands.
-     * @param privateKeyEncryptionPassphrase The passphrase for the key.
-     */
-    public void restart(Optional<String> optionalKeyName,byte[] privateKeyEncryptionPassphrase) throws Exception {
-        String command = "service httpd stop; service httpd start";
-        runCommandAndReturnStdoutAndStderr(command, "Restarting Apache httpd server", Level.INFO, optionalKeyName,
-                privateKeyEncryptionPassphrase);
-    }
 }

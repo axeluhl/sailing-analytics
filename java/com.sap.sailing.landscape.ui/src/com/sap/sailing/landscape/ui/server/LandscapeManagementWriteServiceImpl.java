@@ -308,12 +308,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public void restartHttpdOnProxyInstance(ReverseProxyDTO instanceDTO, String region, String optionalKeyName,
+    public void rotateHttpdLogs(ReverseProxyDTO instanceDTO, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption) throws Exception {
         checkLandscapeManageAwsPermission();
         AwsInstance<String> awsInstance = getLandscape().getHostByInstanceId(new AwsRegion(region, getLandscape()),
                 instanceDTO.getInstanceId(), AwsInstanceImpl::new);
-        new ApacheReverseProxy<>(getLandscape(), awsInstance).restart(Optional.ofNullable(optionalKeyName),
+        new ApacheReverseProxy<>(getLandscape(), awsInstance).rotateLogs(Optional.ofNullable(optionalKeyName),
                 passphraseForPrivateKeyDecryption);
     }
     

@@ -119,7 +119,9 @@ public class CreateReverseProxyInClusterDialog
                     public String getErrorMessage(
                             CreateReverseProxyInClusterDialog.CreateReverseProxyDTO valueToValidate) {
                         if (!Util.hasLength(valueToValidate.getName())) {
-                            return stringMessages.pleaseProvideNonEmptyName();
+                            return stringMessages.pleaseProvideNonEmptyNameAndAZ();
+                        } else if (valueToValidate.availabilityZoneDTO == null) {
+                            return stringMessages.pleaseProvideNonEmptyNameAndAZ();
                         } else {
                             return null;
                         }

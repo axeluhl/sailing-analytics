@@ -34,7 +34,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
     
     void removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
+    void rotateHttpdLogs(ReverseProxyDTO proxy, String region, String optionalKeyName, byte[] passphraseForPrivateKeyDecryption)throws Exception;
     
     void addReverseProxy(CreateReverseProxyInClusterDialog.CreateReverseProxyDTO createProxyDTO);
     

@@ -44,11 +44,11 @@ public interface LandscapeManagementWriteServiceAsync {
     void removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
     
     /**
-     * Restarts the httpd on a reverse proxy, by stopping and then starting the service.
+     * Rotates the httpd logs on a proxy instance.
      * @param optionalKeyName Name of key used to connect to the instance to restart
      * @param passphraseForPrivateKeyDecryption the passphrase for the given key
      */
-    void restartHttpdOnProxyInstance(ReverseProxyDTO proxy, String region, String optionalKeyName,
+    void rotateHttpdLogs(ReverseProxyDTO proxy, String region, String optionalKeyName,
             byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
     
     /**

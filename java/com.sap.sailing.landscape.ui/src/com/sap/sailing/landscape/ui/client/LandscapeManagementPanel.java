@@ -547,7 +547,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                errorReporter.reportError(stringMessages.invalidOperationForThisProxy());
            }
        }); 
-       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_RESTART_HTTPD, reverseProxy -> restartHttpd(reverseProxy, stringMessages));
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_ROTATE_HTTPD_LOGS, reverseProxy -> rotateHttpdLogs(reverseProxy, stringMessages));
        proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
        final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
        final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
@@ -1623,11 +1623,11 @@ public class LandscapeManagementPanel extends SimplePanel {
      * @param reverseProxy The instance to restart on.
      * @param stringMessages
      */
-    private void restartHttpd(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
+    private void rotateHttpdLogs(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
         if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
             Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
         } else {
-            landscapeManagementService.restartHttpdOnProxyInstance(reverseProxy, reverseProxy.getRegion(),
+            landscapeManagementService.rotateHttpdLogs(reverseProxy, reverseProxy.getRegion(),
                     sshKeyManagementPanel.getSelectedKeyPair().getName(),
                     sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
                             ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
@@ -1641,7 +1641,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         @Override
                         public void onSuccess(Void result) {
                             Notification.notify(
-                                    stringMessages.successfullyRestartedHttpdOnInstance(reverseProxy.getInstanceId()),
+                                    stringMessages.successfullyRotatedHttpdLogsOnInstance(reverseProxy.getInstanceId()),
                                     NotificationType.SUCCESS);
                         }
                     });
