@@ -34,10 +34,6 @@ public class ReverseProxyDTO extends AwsInstanceDTO  {
         return health;
     }
 
-    public void setDisposable(boolean isDisposable) {
-        this.isDisposable= isDisposable;
-    }
-    
     public boolean isDisposable() {
         return isDisposable;
     }

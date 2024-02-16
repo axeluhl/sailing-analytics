@@ -129,10 +129,8 @@ public class CreateReverseProxyInClusterDialog
                     }
                 }, callback);
         this.region = region;
-        availabilityZoneIdToName = new HashMap<>();
-        availabilityZones.stream().forEach(az -> CreateReverseProxyInClusterDialog.this.availabilityZoneIdToName
-                .put(az.getAzId(), az.getAzName()));
-        availabilityZoneIdListBox = setupAvailabilityZones(landscapeManagementService, errorReporter,
+        availabilityZoneIdToName = availabilityZones.stream().collect(Collectors.toMap(entry -> entry.getAzId(), entry -> entry.getAzName()));
+        availabilityZoneIdListBox = setupAZChoiceListBox(landscapeManagementService, errorReporter,
                 existingReverseProxies);
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
@@ -167,7 +165,7 @@ public class CreateReverseProxyInClusterDialog
      * @param existingReverseProxies A list of all existing reverse proxies in a region.
      * @return A listbox with the reverse proxies. The least populated az is selected by default.
      */
-    private ListBox setupAvailabilityZones(LandscapeManagementWriteServiceAsync landscapeManagementService,
+    private ListBox setupAZChoiceListBox(LandscapeManagementWriteServiceAsync landscapeManagementService,
             ErrorReporter errorReporter, List<ReverseProxyDTO> existingReverseProxies) {
         ListBox availabilityZoneBox = createListBox(false);
         if (!availabilityZoneIdToName.isEmpty()) {

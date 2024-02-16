@@ -1515,7 +1515,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                     new AsyncCallback<ArrayList<AvailabilityZoneDTO>>() {
                         @Override
                         public void onSuccess(ArrayList<AvailabilityZoneDTO> result) {
-                            addReverseProxyDialog(stringMessages, region, result);
+                            showReverseProxyDialog(stringMessages, region, result);
                         }
 
                         @Override
@@ -1526,7 +1526,7 @@ public class LandscapeManagementPanel extends SimplePanel {
         }
     }
     
-    private void addReverseProxyDialog(StringMessages stringMessages, String region, ArrayList<AvailabilityZoneDTO> availabilityZones) {
+    private void showReverseProxyDialog(StringMessages stringMessages, String region, ArrayList<AvailabilityZoneDTO> availabilityZones) {
         new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService, region,
                 proxiesTable.getTable().getVisibleItems(), availabilityZones,
                 new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions>() {
