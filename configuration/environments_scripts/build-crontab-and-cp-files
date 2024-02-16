@@ -54,3 +54,6 @@ if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
     cd "files"
     \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
 fi
+
+systemctl daemon-reload
+systemctl reenable $(find /etc/systemd/system/ -type f) # to recreate all the dependency links.
