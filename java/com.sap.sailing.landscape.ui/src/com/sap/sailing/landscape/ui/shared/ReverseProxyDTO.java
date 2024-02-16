@@ -1,8 +1,10 @@
 package com.sap.sailing.landscape.ui.shared;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 
-public class ReverseProxyDTO extends AwsInstanceDTO  {
+public class ReverseProxyDTO extends AwsInstanceDTO implements Named {
+    private static final long serialVersionUID = 1576177375197043472L;
 
     @Deprecated
     ReverseProxyDTO() {} 

@@ -549,10 +549,14 @@ public class LandscapeManagementPanel extends SimplePanel {
        //setup buttons above rows
        final Button proxiesTableRefreshButton = new Button(stringMessages.refresh());
        final Button proxiesTableAddButton = new Button(stringMessages.add());
+       final SelectedElementsCountingButton<ReverseProxyDTO> removeProxiesButton = new SelectedElementsCountingButton<>(stringMessages.remove(), proxiesTable.getSelectionModel(), /* element name mapper */ proxy -> proxy.getName(),
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
+                e -> removeReverseProxies(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), proxiesTable.getSelectionModel().getSelectedSet()));
        proxiesTableRefreshButton.addClickHandler(event -> refreshProxiesTable());
        proxiesTableAddButton.addClickHandler(event -> addReverseProxyToCluster(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
        proxiesTableButtonPanel.add(proxiesTableRefreshButton);
        proxiesTableButtonPanel.add(proxiesTableAddButton);
+       proxiesTableButtonPanel.add(removeProxiesButton);
        proxiesTableVerticalPanel.add(proxiesTableButtonPanel);
        proxiesTableVerticalPanel.add(proxiesTable);
        proxiesTableBusy= new SimpleBusyIndicator();
@@ -1468,7 +1472,14 @@ public class LandscapeManagementPanel extends SimplePanel {
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
     }
-
+    
+    private void removeReverseProxies(StringMessages stringMessages, String regionId,
+            Iterable<ReverseProxyDTO> reverseProxiesToRemove) {
+        Iterator<ReverseProxyDTO> iterator = reverseProxiesToRemove.iterator();
+        while (iterator.hasNext()) {
+            removeReverseProxy(iterator.next(), regionId, stringMessages);
+        }
+    }
     /**
      * Removes a reverse proxy from the cluster and terminates it.
      * @param instance The reverse proxy to remove from the cluster.
