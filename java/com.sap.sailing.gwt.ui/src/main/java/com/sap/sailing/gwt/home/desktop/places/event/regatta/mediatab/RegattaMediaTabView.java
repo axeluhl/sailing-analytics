@@ -2,20 +2,19 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPage;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.places.MediaTabView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.security.shared.HasPermissions;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class RegattaMediaTabView extends Composite implements RegattaTabView<RegattaMediaPlace> {
+public class RegattaMediaTabView extends Composite implements RegattaTabView<RegattaMediaPlace>, MediaTabView<RegattaMediaPlace, Presenter> {
 
     private Presenter currentPresenter;
 
@@ -25,16 +24,13 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     }
 
     @Override
-    public Class<RegattaMediaPlace> getPlaceClassForActivation() {
-        return RegattaMediaPlace.class;
+    public Presenter getPresenter() {
+        return currentPresenter;
     }
 
     @Override
-    public TabView.State getState() {
-        return currentPresenter.hasMedia() || currentPresenter.getUserService()
-                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE)
-                        ? TabView.State.VISIBLE
-                        : TabView.State.INVISIBLE;
+    public Class<RegattaMediaPlace> getPlaceClassForActivation() {
+        return RegattaMediaPlace.class;
     }
 
     @Override
