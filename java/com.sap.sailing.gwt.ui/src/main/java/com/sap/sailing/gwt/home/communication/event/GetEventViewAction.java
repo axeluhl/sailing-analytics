@@ -109,7 +109,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             }
         });
         dto.setMultiRegatta(regattasOfEvent.size() != 1);
-        
         if (relevantLeaderboardGroupsOfEvent.size() == 1) {
             final LeaderboardGroup singleLeaderboardGroup = relevantLeaderboardGroupsOfEvent.iterator().next();
             if (singleLeaderboardGroup.hasOverallLeaderboard()) {
@@ -122,7 +121,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                         singleLeaderboardGroup.getId(), eventAndLeaderboardReferencesForSeriesOrdered));
             }
         }
-        
         Set<TrackingConnectorInfoDTO> trackingConnectorInfos = event.getTrackingConnectorInfos().stream()
                 .map(TrackingConnectorInfoDTO::new).collect(Collectors.toSet());
         dto.setTrackingConnectorInfos(trackingConnectorInfos);
