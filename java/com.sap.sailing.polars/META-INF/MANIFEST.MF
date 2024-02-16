@@ -12,7 +12,7 @@ Export-Package:
  com.sap.sailing.polars.regression,
  com.sap.sailing.polars.regression.impl,
  com.sap.sailing.polars.windestimation
-Require-Bundle: 
+Require-Bundle: org.eclipse.osgi,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sailing.polars.datamining,
