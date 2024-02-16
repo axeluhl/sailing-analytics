@@ -3,7 +3,7 @@
 # Upgrades the AWS EC2 instance that this script is assumed to be executed on.
 # The steps are as follows:
 
-REBOOT_INDICATOR=/var/run/is-rebooted
+REBOOT_INDICATOR=/var/lib/sailing/is-rebooted
 LOGON_USER_HOME=/root
 
 run_yum_update() {
@@ -76,6 +76,17 @@ update_root_crontab() {
   # which has previously been updated by a git pull:
   cd /root
   crontab crontab
+}
+
+build_crontab_and_setup_files() {
+    scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
+    cd /root/
+    chown root:root environments_scripts
+    cd environments_scripts
+    ./build-crontab-and-cp-files "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    cd ..
+    rm -rf /root/environments_scripts
+
 }
 
 clean_root_ssh_dir_and_tmp() {

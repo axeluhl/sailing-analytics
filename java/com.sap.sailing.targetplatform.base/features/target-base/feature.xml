@@ -107,42 +107,42 @@
          id="org.mongodb.bson"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.bson.source"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-core"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-core.source"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-sync"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin
          id="org.mongodb.driver-sync.source"
          download-size="0"
          install-size="0"
-         version="4.5.1"
+         version="4.11.1"
          unpack="false"/>
 
    <plugin

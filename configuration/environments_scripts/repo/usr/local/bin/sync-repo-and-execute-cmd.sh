@@ -18,6 +18,9 @@ cd ${GIT_PATH}
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)
 git fetch
+if [[ "$?" -ne 0 ]]; then
+    exit 1
+fi
 if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]  # Checks if there are new commits 
 then
     logger -t httpd "Changes found; merging now"

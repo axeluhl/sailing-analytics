@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -20,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -40,9 +44,18 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         regatta.addRaceColumnListener(this);
     }
 
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+    }
+    
     @Override
     public Regatta getRegatta() {
         return regatta;
+    }
+    
+    @Override
+    public CPUMeter getCPUMeter() {
+        return getRegatta().getCPUMeter();
     }
     
     public static String getLeaderboardNameForRegatta(Regatta regatta) {

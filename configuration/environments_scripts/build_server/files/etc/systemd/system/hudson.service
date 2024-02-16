@@ -1,7 +1,7 @@
 [Unit]
 Description=The Hudson start-up / shut-down service
-Requires=-.mount mongod.service
-After=-.mount mongod.service
+Requires=-.mount
+After=-.mount
 
 [Install]
 RequiredBy=multi-user.target

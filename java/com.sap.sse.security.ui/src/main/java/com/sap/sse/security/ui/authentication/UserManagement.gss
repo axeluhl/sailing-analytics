@@ -17,7 +17,7 @@
 @media ( min-width: 76em) {
     .flyover_position_grid {
         visibility: visible;
-        right: calc(( 100vw - 80.5rem)/2);
+        right: 0;
     }
 }
 .flyover_content_wrapper {
@@ -33,8 +33,8 @@
 }
 .flyover_content:before {
     content: '';
-    width: 1.333333333333333em;
-    height: 1.333333333333333em;
+    width: 10px;
+    height: 10px;
     display: block;
     background-color: #fff;
     -webkit-transform: rotate(45deg);
@@ -43,8 +43,8 @@
     transform: rotate(45deg);
     margin: 0 1em 0 1.333333333333333em;
     position: absolute;
-    top: -.666666666666667em;
-    right: 1.333333333333333em;
+    top: -5px;
+    right: 2em;
     border-top: 1px solid rgba(0,0,0,.1);
     border-left: 1px solid rgba(0,0,0,.1);
 }

@@ -15,8 +15,8 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 /**
  * A template for creating a {@link Mark}. It has a globally unique ID and can be used in zero or more
  * {@link CourseTemplate}s. It is immutable and contains all {@link CommonMarkProperties common properties for a mark}.
- * In the context of a {@link CourseTemplate} it can be {@link CourseTemplate#getDefaultMarkRolesForMarkTemplates() linked} to a {@link MarkRole}
- * that it wants to assume by default.
+ * In the context of a {@link CourseTemplate} it can be {@link CourseTemplate#getDefaultMarkRolesForMarkTemplates()
+ * linked} to a {@link MarkRole} that it wants to assume by default.<p>
  * 
  * @author Axel Uhl (d043530)
  *

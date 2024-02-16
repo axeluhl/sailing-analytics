@@ -41,6 +41,7 @@ import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A regatta leaderboard that is derived from another regatta leaderboard by eliminating a subset of the competitors and
@@ -89,6 +90,11 @@ public class DelegatingRegattaLeaderboardWithCompetitorElimination extends Abstr
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public CPUMeter getCPUMeter() {
+        return getDelegateLeaderboard().getCPUMeter();
     }
 
     private RegattaLeaderboard getDelegateLeaderboard() {

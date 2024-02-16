@@ -115,7 +115,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
             final Bearing rotation = markVectorGraphics.getRotationInDegrees(coursePositionsDTO);
             if (rotation != null) {
-                setCanvasRotation(coordinateSystem.mapDegreeBearing(rotation.getDegrees()));
+                updateDrawingAngleAndSetCanvasRotation(coordinateSystem.mapDegreeBearing(rotation.getDegrees()));
             }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {

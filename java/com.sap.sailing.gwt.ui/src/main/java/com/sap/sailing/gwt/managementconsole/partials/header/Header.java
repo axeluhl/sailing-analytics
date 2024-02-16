@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.HasVisibility;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.managementconsole.partials.mainframe.MainFrame;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
-import com.sap.sailing.gwt.ui.common.client.DropdownHandler;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownHandler;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 

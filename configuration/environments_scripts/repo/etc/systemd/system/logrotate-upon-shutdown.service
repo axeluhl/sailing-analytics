@@ -1,0 +1,19 @@
+[Unit]
+Description=Force logrotate upon shutdown
+Requires=-.mount network-online.target
+After=-.mount network-online.target
+Before=shutdown.target
+RequiresMountsFor=/
+SurviveFinalKillSignal=yes
+
+[Install]
+RequiredBy=graphical.target
+WantedBy=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+KillMode=none
+ExecStart=/bin/true
+ExecStopPost=logrotate --force -v /etc/logrotate.conf
+TimeoutStopSec=50

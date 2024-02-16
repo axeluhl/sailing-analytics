@@ -17,6 +17,7 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
     private final Anchor anchor;
     private final String loggedInStyle;
     private final String openStyle;
+    private final String premiumStyle;
     private final Label usermenuPremium;
 
     /**
@@ -33,6 +34,7 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
         this.anchor = anchor;
         this.loggedInStyle = loggedInStyle;
         this.openStyle = openStyle;
+        this.premiumStyle = premiumStyle;
         anchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -41,7 +43,6 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
         });
         this.anchor.ensureDebugId("authenticationMenu");
         usermenuPremium = new Label(StringMessages.INSTANCE.premium());
-        usermenuPremium.addStyleName(premiumStyle);
         usermenuPremium.setVisible(false);
         this.anchor.getElement().appendChild(usermenuPremium.getElement());
     }
@@ -71,6 +72,11 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
     @Override
     public void showPremium(boolean premium) {
         usermenuPremium.setVisible(premium);
+        if (premium) {
+            anchor.addStyleName(premiumStyle);
+        } else {
+            anchor.removeStyleName(premiumStyle);
+        }
     }
 
     private void setDebugDataAttribute(String name, boolean value) {

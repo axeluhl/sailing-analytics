@@ -73,7 +73,7 @@ setProductionMainIfNotSet() {
         # set production to archive
         logger -t archive "Healthy: setting production to main archive"
         setProduction ${ARCHIVE_IP_NAME}
-        systemctl reload httpd
+        service httpd reload
         echo "The main archive server is healthy again. Switching to it." | notify-operators "Healthy: main archive online"
     else
         # If already healthy then no reload or notification occurs.
@@ -88,8 +88,8 @@ setFailoverIfNotSet() {
         # fails but the production is already set to point to the backup
         setProduction ${ARCHIVE_FAILOVER_IP_NAME}
         logger -t archive "Unhealthy: second check failed, switching to failover"
-        systemctl reload httpd
-        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
+        service httpd reload
+        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at the archive: ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi

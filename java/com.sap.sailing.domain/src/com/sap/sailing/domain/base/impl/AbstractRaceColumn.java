@@ -496,5 +496,4 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         }
     }
-
 }
