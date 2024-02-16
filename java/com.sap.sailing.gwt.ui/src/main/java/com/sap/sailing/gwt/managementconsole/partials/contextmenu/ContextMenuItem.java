@@ -35,5 +35,9 @@ class ContextMenuItem extends Composite implements HasClickHandlers {
     public HandlerRegistration addClickHandler(final ClickHandler handler) {
         return control.addClickHandler(handler);
     }
+    
+    public void setFocus() {
+        control.setFocus(true);
+    }
 
 }

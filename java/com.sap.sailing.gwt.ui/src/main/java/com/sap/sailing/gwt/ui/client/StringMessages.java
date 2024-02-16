@@ -1497,6 +1497,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String thereIsAlreadyAConfigurationForThisDevice();
     String enterDeviceIdentifierName();
     String administration();
+    String redirectToWebsiteNotOptimizedForMobileDevices();
     String pleaseSelectALeaderboardGroup();
     String linkLeaderboardToLeaderboardGroupOfEvent();
     String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);

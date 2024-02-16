@@ -71,7 +71,7 @@ public class EventOverviewViewImpl extends Composite implements EventOverviewVie
     public void showContextMenu(final EventMetadataDTO event) {
         final ContextMenu contextMenu = new ContextMenu();
         contextMenu.setHeaderWidget(new EventInfo(event));
-        contextMenu.addItem(i18n.advanced(), app_res.icons().iconSettings(), e -> presenter.advancedSettings(event));
+        contextMenu.addItem(i18n.advanced(), app_res.icons().iconSettings(), e -> presenter.advancedSettings(app_res, event));
         contextMenu.addItem(i18n.delete(), app_res.icons().iconDelete(), e -> presenter.deleteEvent(event));
         contextMenu.show();
     }

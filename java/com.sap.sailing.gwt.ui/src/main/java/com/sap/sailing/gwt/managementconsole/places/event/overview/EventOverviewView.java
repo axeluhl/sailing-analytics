@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.mvp.View;
 import com.sap.sailing.gwt.managementconsole.partials.contextmenu.HasContextMenuView;
+import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 
 
 public interface EventOverviewView
@@ -22,7 +23,7 @@ public interface EventOverviewView
 
         void navigateToEvent(EventMetadataDTO event);
 
-        void advancedSettings(EventMetadataDTO event);
+        void advancedSettings(ManagementConsoleResources app_res, EventMetadataDTO event);
 
         void deleteEvent(EventMetadataDTO event);
     }

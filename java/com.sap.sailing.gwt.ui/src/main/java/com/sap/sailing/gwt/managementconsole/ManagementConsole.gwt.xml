@@ -40,6 +40,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon' />
+	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard' />
 
 	<inherits name='com.sap.sailing.gwt.ui.SourceControl' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceComponents' />

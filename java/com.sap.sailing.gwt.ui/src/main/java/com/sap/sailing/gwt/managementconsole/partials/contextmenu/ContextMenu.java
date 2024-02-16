@@ -3,10 +3,14 @@ package com.sap.sailing.gwt.managementconsole.partials.contextmenu;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Event.NativePreviewEvent;
+import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -25,6 +29,8 @@ public class ContextMenu extends Composite {
 
     private static ContextMenuUiBinder uiBinder = GWT.create(ContextMenuUiBinder.class);
     private static final int FADING_DURATION_MILLIS = 500;
+    
+    private HandlerRegistration registration;
 
     static String getFadingDuration() {
         return FADING_DURATION_MILLIS + "ms";
@@ -45,6 +51,18 @@ public class ContextMenu extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         this.local_res.style().ensureInjected();
         this.menuPopup = new MenuPopup();
+        registration = Event.addNativePreviewHandler(new NativePreviewHandler() {
+            @Override
+            public void onPreviewNativeEvent(NativePreviewEvent event) {
+                switch (event.getTypeInt()) {
+                    case Event.ONKEYDOWN:
+                        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                            menuPopup.hide();
+                        } 
+                        break;
+                }
+            }
+        });
     }
 
     public void setHeaderWidget(final IsWidget widget) {
@@ -65,7 +83,14 @@ public class ContextMenu extends Composite {
         });
         final HandlerRegistration resizeHandler = Window
                 .addResizeHandler(event -> Scheduler.get().scheduleDeferred(() -> menuPopup.center()));
-        menuPopup.addCloseHandler(event -> resizeHandler.removeHandler());
+        menuPopup.addCloseHandler(event -> {
+            onClose(event, resizeHandler);
+        });
+    }
+    
+    private void onClose(CloseEvent<PopupPanel> event, HandlerRegistration resizeHandler) {
+        resizeHandler.removeHandler();
+        registration.removeHandler();
     }
 
     private class MenuPopup extends PopupPanel {
