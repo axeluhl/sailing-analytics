@@ -1,12 +1,11 @@
 package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -20,8 +19,6 @@ import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -47,7 +44,7 @@ public class CreateReverseProxyInClusterDialog
          * @param instanceType
          *            The new instance type.
          * @param availabilityZoneIdListBox
-         *            The mixed format of the AZ with the fewest reverse proxies.
+         *            The id of the AZ with the fewest reverse proxies.
          * @param region
          */
         public CreateReverseProxyInstructions(String name, String instanceType,
@@ -89,8 +86,6 @@ public class CreateReverseProxyInClusterDialog
     private final ListBox availabilityZoneIdListBox;
     private final Map<String, String> availabilityZoneIdToName;
     private final String region;
-    private final CheckBox useSharedInstance;
-    private final ListBox coDeployInstances;
     private final Label nameLabel;
     private final Label instanceTypeLabel;
     private final Label availabilityZoneLabel;
@@ -135,15 +130,6 @@ public class CreateReverseProxyInClusterDialog
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
                 stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
-        // Displays the availability zones in the mixed format.
-
-        useSharedInstance = createCheckbox(stringMessages.runOnExisting());
-        useSharedInstance.addValueChangeHandler(e -> updateInstanceTypesBasedOnSharedInstanceBox());
-        useSharedInstance.setValue(false);
-        useSharedInstance.setEnabled(false);
-        // setup available instances box, which is initially hidden.
-        coDeployInstances = createListBox(false);
-        populateCoDeployInstances();
         // setup labels
         nameLabel = new Label(stringMessages.name());
         instanceTypeLabel = new Label(stringMessages.instanceType());
@@ -155,7 +141,6 @@ public class CreateReverseProxyInClusterDialog
         labels.add(availabilityZoneLabel);
         labels.add(instancesIdLabel);
         instancesIdLabel.setVisible(false);
-        coDeployInstances.setVisible(false);
         validateAndUpdate();
     }
 
@@ -187,42 +172,6 @@ public class CreateReverseProxyInClusterDialog
         return availabilityZoneBox;
     }
 
-    private void populateCoDeployInstances() {
-        // TODO Fill with instanceID/name
-    }
-
-    private void updateInstanceTypesBasedOnSharedInstanceBox() {
-        if (useSharedInstance.getValue()) {
-            // box checked
-            proxyName.setVisible(false);
-            availabilityZoneIdListBox.setVisible(false);
-            dedicatedInstanceTypeListBox.setVisible(false);
-            labelVisibility(false);
-            instancesIdLabel.setVisible(true);
-            coDeployInstances.setVisible(true);
-        } else {
-            // box unchecked
-            proxyName.setVisible(true);
-            availabilityZoneIdListBox.setVisible(true);
-            dedicatedInstanceTypeListBox.setVisible(true);
-            labelVisibility(true);
-            instancesIdLabel.setVisible(false);
-            coDeployInstances.setVisible(false);
-        }
-    }
-
-    /**
-     * Makes all labels in the dialog box, which have been added to {@link labels} visible or invisible.
-     * 
-     * @param visible
-     *            true to make all labels visible and false to hide them.
-     */
-    private void labelVisibility(boolean visible) {
-        for (Label label : labels) {
-            label.setVisible(visible);
-        }
-    }
-
     @Override
     protected Widget getAdditionalWidget() {
         final FormPanel result = new FormPanel();
@@ -234,9 +183,6 @@ public class CreateReverseProxyInClusterDialog
         verticalPanel.add(dedicatedInstanceTypeListBox);
         verticalPanel.add(availabilityZoneLabel);
         verticalPanel.add(availabilityZoneIdListBox);
-        verticalPanel.add(useSharedInstance);
-        verticalPanel.add(instancesIdLabel);
-        verticalPanel.add(coDeployInstances);
         return result;
     }
 

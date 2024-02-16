@@ -7,7 +7,7 @@ public class AvailabilityZoneDTO  implements IsSerializable {
     private String region; 
     private String azId;
     @Deprecated
-    AvailabilityZoneDTO() {}
+    AvailabilityZoneDTO() {} // GWT serialisation only
 
     public AvailabilityZoneDTO(String azName, String region, String azId) {
         this.azName = azName;
