@@ -1055,13 +1055,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      */
     private TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, Map<String,String> tagKeyAndValues) {
-        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[] tags = new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[tagKeyAndValues.keySet().size()];
-        int arrayPosition = 0;
-        for (String key : tagKeyAndValues.keySet()) { 
-            software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tag = software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(tagKeyAndValues.get(key)).build();
-            tags[arrayPosition] = tag;
-            arrayPosition++;
-        }
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tags[] = tagKeyAndValues.entrySet().stream().map(entry -> software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(entry.getKey()).value(entry.getValue()).build()).toArray(x -> new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[x]);
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest
                 .builder().name(targetGroupName).healthyThresholdCount(2).unhealthyThresholdCount(2)
