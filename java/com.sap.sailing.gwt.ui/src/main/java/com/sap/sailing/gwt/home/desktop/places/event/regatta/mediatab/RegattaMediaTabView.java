@@ -10,14 +10,15 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Pr
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.security.shared.HasPermissions;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
 public class RegattaMediaTabView extends Composite implements RegattaTabView<RegattaMediaPlace> {
-    
+
     private Presenter currentPresenter;
-    
+
     @Override
     public void setPresenter(EventRegattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
@@ -27,17 +28,20 @@ public class RegattaMediaTabView extends Composite implements RegattaTabView<Reg
     public Class<RegattaMediaPlace> getPlaceClassForActivation() {
         return RegattaMediaPlace.class;
     }
-    
+
     @Override
     public TabView.State getState() {
-        return currentPresenter.hasMedia() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.hasMedia() || currentPresenter.getUserService()
+                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE)
+                        ? TabView.State.VISIBLE
+                        : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(RegattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         ErrorAndBusyClientFactory errorAndBusyClientFactory = currentPresenter.getErrorAndBusyClientFactory();
-        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView(), currentPresenter.getEventBus(), 
-                currentPresenter.getUserService(), currentPresenter.getEventDTO());
+        final MediaPage mediaPage = new MediaPage(errorAndBusyClientFactory.createBusyView(),
+                currentPresenter.getEventBus(), currentPresenter.getUserService(), currentPresenter.getEventDTO());
         initWidget(mediaPage);
         currentPresenter.ensureMedia(new ActivityCallback<MediaDTO>(errorAndBusyClientFactory, contentArea) {
             @Override
