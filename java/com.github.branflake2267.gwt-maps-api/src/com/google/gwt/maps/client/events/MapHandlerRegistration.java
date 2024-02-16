@@ -229,7 +229,6 @@ public class MapHandlerRegistration {
   }-*/;
   
 
-  @SuppressWarnings("rawtypes")
   public static <E extends MapEvent> HandlerRegistration addEventListener(JavaScriptObject jso,
           DomEvent.Type<?> eventType, MapHandler<E> handler, MapEventFormatter<E> formatter, boolean capture) {
       final JavaScriptObject listener = addEventListenerImpl(jso, eventType.getName(), handler, formatter, capture);
@@ -242,7 +241,6 @@ public class MapHandlerRegistration {
       return registration;
   }
 
-  @SuppressWarnings("rawtypes")
   private static native <E extends MapEvent> JavaScriptObject addEventListenerImpl(JavaScriptObject jso,
           String eventName, MapHandler<E> handler, MapEventFormatter<E> formatter, boolean capture) /*-{
       var callback = function(event) {
