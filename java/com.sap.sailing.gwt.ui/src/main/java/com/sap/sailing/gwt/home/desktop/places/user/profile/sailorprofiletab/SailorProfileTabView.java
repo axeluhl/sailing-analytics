@@ -85,4 +85,9 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     public void setPresenter(UserProfileView.Presenter ownPresenter) {
         this.ownPresenter = ownPresenter;
     }
+
+    @Override
+    public UserProfileView.Presenter getPresenter() {
+        return ownPresenter;
+    }
 }
