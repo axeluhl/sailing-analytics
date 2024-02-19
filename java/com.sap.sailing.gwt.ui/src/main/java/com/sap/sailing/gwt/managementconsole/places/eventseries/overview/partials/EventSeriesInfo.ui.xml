@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="app_res" type="com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.eventseries.overview.EventSeriesOverviewResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    
+    <div class="{local_res.style.eventSeriesInfo}">
+        <div ui:field="title" class="{app_res.fonts.infoTitle}" />
+        <div class="{app_res.style.flexContainer}">
+            <div class="{app_res.icons.icon} {app_res.icons.iconLocation} {app_res.style.flexItemFixedWidth}" />
+            <div ui:field="details" class="{app_res.fonts.subtitle} {app_res.style.flexItemAutoWidth} {local_res.style.details}"/>
+        </div>
+    </div>
+</ui:UiBinder>

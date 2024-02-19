@@ -8,8 +8,21 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.managementconsole.places.eventseries.overview.EventSeriesOverviewResources" />
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.column}">
-            SERIES
+        <div ui:field="headerContainer" class="{res.mediaCss.grid}">
+            <div class="{res.mediaCss.column} {res.mediaCss.small12} {app_res.style.pageHeader} {app_res.style.flexContainer}">
+                <div class="{app_res.fonts.pageTitle} {app_res.style.ellipsis}">
+                    <ui:text from='{i18n.series}' />
+                </div>
+                <g:Anchor ui:field="addEventAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconAdd} {app_res.style.flexItemFixedWidth}" />
+                <div class="{app_res.style.flexItemAutoWidth}" />
+                <g:Anchor ui:field="filterEventAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconFilter} {app_res.style.flexItemFixedWidth}" />
+                <g:Anchor ui:field="searchEventAnchor" addStyleNames="{app_res.icons.icon} {app_res.icons.iconSearch} {app_res.style.flexItemFixedWidth}" />
+            </div>
         </div>
+        <g:ScrollPanel ui:field="scrollContainer">
+            <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
+                <g:FlowPanel ui:field="cards" addStyleNames="{local_res.style.eventSeriesCards}"/>
+            </g:FlowPanel>
+        </g:ScrollPanel>
     </g:HTMLPanel>
 </ui:UiBinder>
