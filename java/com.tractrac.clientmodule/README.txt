@@ -16,10 +16,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.1
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/02/2024
+
+ 1) Feature
+
+ - Adding a setter to register an implementation for the IClientSocketFactory (Requested by Axel Uhl, 19/02/2024)
+
+********************************************
        TracAPI 3.15.0
 ********************************************
 This is a final version. It adds some changes in the protocol used to exchange live data. It will be necessary to use
- this version to receive live data from the 19/20/2023. It also changes the signatures of some interfaces, breaking
+ this version to receive live data from the 19/02/2024. It also changes the signatures of some interfaces, breaking
  the backward compatibility. These interfaces are:
 
     - Removing the method IControlPassingsListener.gotControlPassings(IRaceCompetitor,IControlPassings). This method is not called by the
@@ -28,11 +39,13 @@ This is a final version. It adds some changes in the protocol used to exchange l
     - Updating the methods of the IPositionFactory. This factory should be used only internally so the thirds party apps should
     not be affected
 
-1) Features
+  Release date: 19/02/2024
+
+  1) Features
     - The IPosition has a new method to get the true heading (getTrueHeading) (Requested by Radek Masnica, 2023)
     - Adding two new entry statuses: STP and SCP  (Requested by Radek Masnica, 2023)
 
-2) Bugs
+  2) Bugs
     - Updating the protocol to send/receive messages between the dataserver and the library.
     - Fixing a bug when the route is updated and it has not metadata attached (reported by Jorge Piera, 11/11/2023)
 
