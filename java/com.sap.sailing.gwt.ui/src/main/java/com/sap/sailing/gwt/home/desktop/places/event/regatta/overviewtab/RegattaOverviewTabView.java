@@ -113,7 +113,6 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
     @Override
     public void stop() {
-
     }
 
     @Override
@@ -124,7 +123,10 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @Override
     public void setPresenter(EventRegattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
-
     }
 
+    @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
 }

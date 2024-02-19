@@ -131,6 +131,11 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
     }
 
     @Override
+    public SeriesView.Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public void updatedLeaderboard(final LeaderboardDTO leaderboard) {
         // adjust the competitor selection for the chart in case the leaderboard changed
         updateCompetitorSelection();
