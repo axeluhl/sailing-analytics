@@ -41,6 +41,10 @@
     margin: 1rem 0;
 }
 
+.context-menu .items .primary-item {
+    color: TEXT_COLOR_HIGHLIGHT;
+}
+
 @media (max-width: 44.99em) {
     .context-menu {
         top: initial !important;

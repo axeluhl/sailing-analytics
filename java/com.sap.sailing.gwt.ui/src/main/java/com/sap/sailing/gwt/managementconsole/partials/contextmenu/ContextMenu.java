@@ -29,7 +29,7 @@ public class ContextMenu extends Composite {
 
     private static ContextMenuUiBinder uiBinder = GWT.create(ContextMenuUiBinder.class);
     private static final int FADING_DURATION_MILLIS = 500;
-    
+
     private HandlerRegistration registration;
 
     static String getFadingDuration() {
@@ -47,6 +47,12 @@ public class ContextMenu extends Composite {
 
     private final MenuPopup menuPopup;
 
+    /**
+     * Field to indicate the ContextItem, which should be the primary item. In this case e.g. ENTER key pressed event
+     * will activate the item action (click). If primaryItemIndex is not set no primary item is defined (default).
+     */
+    private Integer primaryItemIndex;
+
     public ContextMenu() {
         initWidget(uiBinder.createAndBindUi(this));
         this.local_res.style().ensureInjected();
@@ -55,11 +61,16 @@ public class ContextMenu extends Composite {
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
                 switch (event.getTypeInt()) {
-                    case Event.ONKEYDOWN:
-                        if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
-                            menuPopup.hide();
-                        } 
-                        break;
+                case Event.ONKEYDOWN:
+                    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        menuPopup.hide();
+                    } else if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+                        ContextMenuItem primaryMenuItem = getPrimaryItem();
+                        if (primaryMenuItem != null) {
+                            primaryMenuItem.click();
+                        }
+                    }
+                    break;
                 }
             }
         });
@@ -87,7 +98,7 @@ public class ContextMenu extends Composite {
             onClose(event, resizeHandler);
         });
     }
-    
+
     private void onClose(CloseEvent<PopupPanel> event, HandlerRegistration resizeHandler) {
         resizeHandler.removeHandler();
         registration.removeHandler();
@@ -124,6 +135,38 @@ public class ContextMenu extends Composite {
             setStyleName(getGlassElement(), local_res.style().active(), active);
         }
 
+    }
+
+    /**
+     * Returns the ContextMenuItem which is set as primary, if set (this is optional).
+     * 
+     * @return the primary ContextMenuItem or null if primaryItemIndex is not defined.
+     */
+    private ContextMenuItem getPrimaryItem() {
+        ContextMenuItem primaryItem = null;
+        if (primaryItemIndex != null && itemsContainer.getWidgetCount() - 1 > primaryItemIndex) {
+            Object primaryWidget = itemsContainer.getWidget(primaryItemIndex);
+            if (primaryWidget instanceof ContextMenuItem) {
+                primaryItem = (ContextMenuItem) primaryWidget;
+            }
+        }
+        return primaryItem;
+    }
+
+    /**
+     * Setter of the index of an optional primary item.
+     * 
+     * @param index
+     *            index of the {@link ContextMenuItem}. Can be null to remove primary item definition.
+     */
+    public void setPrimaryItemIndex(Integer index) {
+        this.primaryItemIndex = index;
+        for (int i = 0; i < itemsContainer.getWidgetCount(); i++) {
+            itemsContainer.getWidget(i).removeStyleName(local_res.style().primaryItem());
+            if (i == primaryItemIndex) {
+                itemsContainer.getWidget(i).addStyleName(local_res.style().primaryItem());
+            }
+        }
     }
 
 }

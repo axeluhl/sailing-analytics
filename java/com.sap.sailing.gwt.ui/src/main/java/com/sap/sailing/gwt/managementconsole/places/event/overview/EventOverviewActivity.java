@@ -70,6 +70,8 @@ public class EventOverviewActivity extends AbstractManagementConsoleActivity<Eve
                     e -> jumpToAdminConsole(event.getDisplayName()));
             confirmSwitch.addItem(i18n.cancel(), app_res.icons().iconClose(),
                     e -> GWT.log("Jump to AdminConsole canceled."));
+            // set the confirm option as primary action
+            confirmSwitch.setPrimaryItemIndex(0);
             confirmSwitch.show();
         } else {
             jumpToAdminConsole(event.getDisplayName());

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.managementconsole.partials.contextmenu;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.ButtonElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
@@ -35,9 +36,9 @@ class ContextMenuItem extends Composite implements HasClickHandlers {
     public HandlerRegistration addClickHandler(final ClickHandler handler) {
         return control.addClickHandler(handler);
     }
-    
-    public void setFocus() {
-        control.setFocus(true);
+
+    public void click() {
+        control.getElement().<ButtonElement> cast().click();
     }
 
 }
