@@ -24,6 +24,7 @@ import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class ManageMediaModel {
@@ -190,21 +191,19 @@ public class ManageMediaModel {
      * Check permission on default object (eventViewDTO from init).
      */
     public boolean hasPermissions() {
-        final boolean hasPermission;
-        if (userService.hasPermission(eventViewDto, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(eventViewDto, EventActions.UPLOAD_MEDIA)) {
-            hasPermission = true;
-        } else {
-            hasPermission = false;
-        }
-        return hasPermission;
+        return hasEventMediaPermissions(eventViewDto, userService);
     }
 
     /**
      * Check permission on current EventDTO.
      */
     public boolean hasPermissions(EventDTO eventDto) {
+        return hasEventMediaPermissions(eventDto, userService);
+    }
+    
+    public static boolean hasEventMediaPermissions(SecuredDTO securedDTO, UserService userService) {
         final boolean hasPermission;
-        if (userService.hasPermission(eventDto, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(eventViewDto, EventActions.UPLOAD_MEDIA)) {
+        if (userService.hasPermission(securedDTO, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(securedDTO, EventActions.UPLOAD_MEDIA)) {
             hasPermission = true;
         } else {
             hasPermission = false;
