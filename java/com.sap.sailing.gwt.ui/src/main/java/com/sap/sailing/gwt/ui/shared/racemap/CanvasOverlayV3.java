@@ -17,6 +17,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.MapHandlerRegistration;
 import com.google.gwt.maps.client.events.click.ClickEventFormatter;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
@@ -157,7 +158,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addClickHandler(ClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ClickEvent.getType(), 
                 handler, new ClickEventFormatter(), true);
     }
 
@@ -167,7 +168,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addDblClickHandler(DblClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
                 handler, new DblClickEventFormatter(), true);
     }
 
@@ -177,7 +178,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseDownHandler(MouseDownMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
                 handler, new MouseDownEventFormatter(), true);
     }
 
@@ -187,7 +188,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseMoveHandler(MouseMoveMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
                 handler, new MouseMoveEventFormatter(), true);
     }
 
@@ -197,7 +198,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
                 handler, new MouseOutEventFormatter(), true);
     }
 
@@ -207,7 +208,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
                 handler, new MouseOverEventFormatter(), true);
     }
 
@@ -217,7 +218,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseUpHandler(MouseUpMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
                 handler, new MouseUpEventFormatter(), true);
     }
 
@@ -227,7 +228,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addRightClickHandler(RightClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
                 handler, new RightClickEventFormatter(), true);
     }
     

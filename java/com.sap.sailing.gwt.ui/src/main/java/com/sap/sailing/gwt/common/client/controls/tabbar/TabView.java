@@ -31,6 +31,8 @@ public interface TabView<PLACE extends Place, PRESENTER> {
     void start(PLACE requestedPlace, AcceptsOneWidget contentArea);
     
     void setPresenter(PRESENTER presenter);
+    
+    PRESENTER getPresenter();
 
     /**
      * Tells the tab that it is going to be deactiviated (not visible anymore), because of tab switch

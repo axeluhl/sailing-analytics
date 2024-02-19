@@ -77,6 +77,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     }
     
     @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public TabView.State getState() {
         return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }

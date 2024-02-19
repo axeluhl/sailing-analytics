@@ -48,14 +48,11 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
             RecentEventTeaser eventTeaser = new RecentEventTeaser(eventNavigation, eventOfSeries, eventOfSeries.getState().getStateMarker());
             eventsContainer.add(eventTeaser);
         }
-        
         contentArea.setWidget(this);
-        
     }
 
     @Override
     public void stop() {
-
     }
 
     @Override
@@ -66,5 +63,10 @@ public class SeriesEventsTabView extends Composite implements SeriesTabView<Seri
     @Override
     public void setPresenter(SeriesView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
+    }
+    
+    @Override
+    public SeriesView.Presenter getPresenter() {
+        return currentPresenter;
     }
 }
