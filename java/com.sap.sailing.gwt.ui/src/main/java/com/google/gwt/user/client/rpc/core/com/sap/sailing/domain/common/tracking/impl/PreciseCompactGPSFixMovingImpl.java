@@ -28,7 +28,7 @@ public final class PreciseCompactGPSFixMovingImpl {
             final double latDeg = streamReader.readDouble();
             final double lngDeg = streamReader.readDouble();
             return (PreciseCompactPosition) new com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl(
-                    new DegreePosition(latDeg, lngDeg), /* timePoint */null, /* speedWithBearing */ null).getPosition();
+                    new DegreePosition(latDeg, lngDeg), /* timePoint */null, /* speedWithBearing */ null, /* optionalTrueHeading */ null).getPosition();
         }
 
         @Override
@@ -70,7 +70,7 @@ public final class PreciseCompactGPSFixMovingImpl {
             final double speedInKnots = streamReader.readDouble();
             final double bearingDeg = streamReader.readDouble();
             return (PreciseCompactSpeedWithBearing) new com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl(
-                    /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(bearingDeg))).getSpeed();
+                    /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(bearingDeg)), /* optionalTrueHeading */ null).getSpeed();
         }
 
         @Override
@@ -113,7 +113,7 @@ public final class PreciseCompactGPSFixMovingImpl {
             final double bearingDeg = streamReader.readDouble();
             final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(bearingDeg));
             final com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl preciseCompactGPSFixMovingImpl = new com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl(
-                    /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, speed);
+                    /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, speed, /* optionalTrueHeading */ null);
             preciseCompactGPSFixMovingImpl.cacheEstimatedSpeed(speed);
             return (PreciseCompactEstimatedSpeed) preciseCompactGPSFixMovingImpl.getSpeed();
         }

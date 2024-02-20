@@ -232,7 +232,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
             Competitor competitor = competitors.get(competitorName);
             MarkPassingImpl markPassing = new MarkPassingImpl(startOfRace, start, competitor);
             GPSFixMovingImpl gpsFix = new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace,
-                    new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45)));
+                    new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null);
             addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, competitor, markPassing, gpsFix);
 
         }
@@ -257,7 +257,7 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
             Map<Competitor, Pair<List<MarkPassing>, List<GPSFixMovingImpl>>> competitorsAndMarkPassingsWithGpsFixes,
             String competitorName, DegreePosition position, TimePoint timePoint) {
         GPSFixMovingImpl gpsFix = new GPSFixMovingImpl(position, timePoint,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null);
         competitorsAndMarkPassingsWithGpsFixes.get(competitors.get(competitorName)).getB().add(gpsFix);
 
     }
@@ -478,13 +478,13 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         Competitor fastYellow = competitors.get("FastYellowBoat");
         MarkPassingImpl markPassingFastYellow = new MarkPassingImpl(markRounding, windward, fastYellow);
         GPSFixMovingImpl gpsFixFastYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastYellow, markPassingFastYellow, gpsFixFastYellow);
         // markRounding for SlowYellow
         Competitor slowYellow = competitors.get("SlowYellowBoat");
         MarkPassingImpl markPassingSlowYellow = new MarkPassingImpl(markRounding, windward, slowYellow);
         GPSFixMovingImpl gpsFixSlowYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowYellow, markPassingSlowYellow, gpsFixSlowYellow);
         // add current Position
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.4, 0),
@@ -516,25 +516,25 @@ public class TestCrossFleetScoring extends LeaderboardScoringAndRankingTestBase 
         Competitor fastYellow = competitors.get("FastYellowBoat");
         MarkPassingImpl markPassingFastYellow = new MarkPassingImpl(markRounding, windward, fastYellow);
         GPSFixMovingImpl gpsFixFastYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastYellow, markPassingFastYellow, gpsFixFastYellow);
         // markRounding for SlowYellow
         Competitor slowYellow = competitors.get("SlowYellowBoat");
         MarkPassingImpl markPassingSlowYellow = new MarkPassingImpl(markRounding, windward, slowYellow);
         GPSFixMovingImpl gpsFixSlowYellow = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowYellow, markPassingSlowYellow, gpsFixSlowYellow);
         // markRounding for FastBlue
         Competitor fastBlue = competitors.get("FastYellowBoat");
         MarkPassingImpl markPassingFastBlue = new MarkPassingImpl(markRounding, windward, fastBlue);
         GPSFixMovingImpl gpsFixFastBlue = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, fastBlue, markPassingFastBlue, gpsFixFastBlue);
         // markRounding for SlowYellow
         Competitor slowBlue = competitors.get("SlowYellowBoat");
         MarkPassingImpl markPassingSlowslowBlue = new MarkPassingImpl(markRounding, windward, slowBlue);
         GPSFixMovingImpl gpsFixSlowslowBlue = new GPSFixMovingImpl(new DegreePosition(1.0, 0), markRounding,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null);
         addMarkPassingAndGPSFix(competitorsAndMarkPassingsWithGpsFixes, slowBlue, markPassingSlowslowBlue, gpsFixSlowslowBlue);
         // add current Position
         appendGPSFixForCompetitor(competitorsAndMarkPassingsWithGpsFixes, "FastYellowBoat", new DegreePosition(0.1, 0),

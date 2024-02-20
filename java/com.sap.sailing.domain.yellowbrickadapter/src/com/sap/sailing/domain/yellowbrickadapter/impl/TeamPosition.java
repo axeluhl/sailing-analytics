@@ -41,7 +41,7 @@ public class TeamPosition implements Timed {
     }
     
     public GPSFixMoving getGPSFixMoving() {
-        return new GPSFixMovingImpl(getPosition(), getTimePoint(), getMotionVector());
+        return new GPSFixMovingImpl(getPosition(), getTimePoint(), getMotionVector(), /* optionalTrueHeading */ null);
     }
     
     @Override

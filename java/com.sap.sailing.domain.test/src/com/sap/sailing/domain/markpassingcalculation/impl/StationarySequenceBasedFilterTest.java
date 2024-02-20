@@ -50,7 +50,7 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
                 if (previousTimePoint != null) {
                     position = verySmallSpeed.travelTo(position, durationBetweenFixes);
                 }
-                track.add(new GPSFixMovingImpl(position, timePoint, verySmallSpeed));
+                track.add(new GPSFixMovingImpl(position, timePoint, verySmallSpeed, /* optionalTrueHeading */ null));
                 timePoint = timePoint.plus(durationBetweenFixes);
             }
             previousTimePoint = candidate.getTimePoint();
@@ -88,7 +88,7 @@ public class StationarySequenceBasedFilterTest extends AbstractCandidateFilterTe
                 outlierCourse, StationarySequence.CANDIDATE_FILTER_DISTANCE.scale(2));
         final TimePoint inBetweenTimePoint = fixAtC2.getTimePoint().plus(fixAtC2.getTimePoint().until(fixAfterFixAtC2.getTimePoint()).divide(2));
         final Speed outlierSpeed = fixAtC2.getPosition().getDistance(outlierPosition).inTime(fixAtC2.getTimePoint().until(inBetweenTimePoint));
-        final GPSFixMoving fixInBetween = new GPSFixMovingImpl(outlierPosition, inBetweenTimePoint, new KnotSpeedWithBearingImpl(outlierSpeed.getKnots(), outlierCourse));
+        final GPSFixMoving fixInBetween = new GPSFixMovingImpl(outlierPosition, inBetweenTimePoint, new KnotSpeedWithBearingImpl(outlierSpeed.getKnots(), outlierCourse), /* optionalTrueHeading */ null);
         track.add(fixInBetween);
         TreeSet<Candidate> candidatesEffectivelyAdded = new TreeSet<>(candidateComparator);
         TreeSet<Candidate> candidatesEffectivelyRemoved = new TreeSet<>(candidateComparator);

@@ -213,7 +213,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
                 Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
                 SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
                 if (estimatedPosition != null && estimatedSpeed != null) {
-                    GPSFixMoving estimatedFix = new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed);
+                    GPSFixMoving estimatedFix = new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed, /* optionalTrueHeading */ null); // TODO bug5970: could try to estimate heading from neighboring fixes
                     if (logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
                         logger.finest(""+competitor.getName()+": " + estimatedFix+" (estimated)");
                     }
@@ -282,7 +282,8 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
                         detailValue = null;
                     }
                 }
-                result = sailingService.createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
+                result = sailingService.createGPSFixDTO(fix, estimatedSpeed, fix.getOptionalTrueHeading(), windDTO,
+                        tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix), detailValue);
             } else if (isExtrapolate()) {
                 final TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, lastFix.getTimePoint());
                 Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
@@ -312,8 +313,8 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
                 WindDTO windDTO2 = wind2 == null ? null : sailingService.createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
                 result = new GPSFixDTOWithSpeedWindTackAndLegType(
                         toTimePointExcluding.asDate(), position==null?null:position,
-                        estimatedSpeed2==null?null:sailingService.createSpeedWithBearingDTO(estimatedSpeed2), windDTO2,
-                        tack2, legType2, /* extrapolated */ true);
+                        estimatedSpeed2==null?null:sailingService.createSpeedWithBearingDTO(estimatedSpeed2), /* optionalTrueHeading */ null, // no heading for extrapolated fixes
+                        windDTO2, tack2, legType2, /* extrapolated */ true);
             } else {
                 throw new NoSuchElementException();
             }

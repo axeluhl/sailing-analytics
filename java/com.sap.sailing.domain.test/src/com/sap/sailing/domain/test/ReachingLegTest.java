@@ -193,11 +193,11 @@ public class ReachingLegTest extends TrackBasedTest {
         getTrackedRace().recordFix(
                 hunger,
                 new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         assertEquals(0.,
                 getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(offsetMarkPos).getMeters(), 0.00001);
@@ -223,11 +223,11 @@ public class ReachingLegTest extends TrackBasedTest {
         getTrackedRace().recordFix(
                 hunger,
                 new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         assertEquals(0.,
                 getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(offsetMarkPos).getMeters(), 0.00001);
@@ -253,11 +253,11 @@ public class ReachingLegTest extends TrackBasedTest {
         getTrackedRace().recordFix(
                 hunger,
                 new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         assertEquals(0.,
                 getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
                         .getDistance(offsetMarkPos).getMeters(), 0.00001);
@@ -288,11 +288,11 @@ public class ReachingLegTest extends TrackBasedTest {
         getTrackedRace().recordFix(
                 hunger,
                 new GPSFixMovingImpl(offsetMarkPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(leewardPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(0))));
+                        new DegreeBearingImpl(0)), /* optionalTrueHeading */ null));
         assertEquals(0.,
                 getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
                         .getDistance(offsetMarkPos).getMeters(), 0.00001);
@@ -326,17 +326,17 @@ public class ReachingLegTest extends TrackBasedTest {
         getTrackedRace().recordFix(
                 hunger,
                 new GPSFixMovingImpl(offsetMarkPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 schomaeker,
                 new GPSFixMovingImpl(offsetMarkPos.translateGreatCircle(
                         offsetMarkPos.getBearingGreatCircle(leewardPos), offsetMarkPos.getDistance(leewardPos)
                                 .scale(0.5)), timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(180))));
+                        new DegreeBearingImpl(180)), /* optionalTrueHeading */ null));
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(leewardPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(0))));
+                        new DegreeBearingImpl(0)), /* optionalTrueHeading */ null));
         assertEquals(0.,
                 getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
                         .getDistance(offsetMarkPos).getMeters(), 0.00001);
@@ -367,13 +367,13 @@ public class ReachingLegTest extends TrackBasedTest {
                 hunger,
                 new GPSFixMovingImpl(windwardMarkPos.translateGreatCircle(new DegreeBearingImpl(reachingLegBearing.getDegrees()-45),
                         distanceOfReachingLeg.scale(1./Math.sqrt(2.))), timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         // Plattner turns right after the windward mark; both travel the same distance projected along the leg
         getTrackedRace().recordFix(
                 plattner,
                 new GPSFixMovingImpl(windwardMarkPos.translateGreatCircle(new DegreeBearingImpl(reachingLegBearing.getDegrees()+45),
                         distanceOfReachingLeg.scale(1./Math.sqrt(2.))), timePointToConsider, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(270))));
+                        new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         // with 90deg separating them, traveling 1/sqrt(2) the distance of the leg should put them the distance of the leg apart geometrically
         assertEquals(
                 distanceOfReachingLeg.getMeters(),
