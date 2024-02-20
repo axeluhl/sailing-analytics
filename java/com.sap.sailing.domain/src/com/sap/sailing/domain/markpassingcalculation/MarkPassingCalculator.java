@@ -72,7 +72,7 @@ public class MarkPassingCalculator {
      * This CALCULATOR_VERSION variable indicates the Version of the {@link MarkPassingCalculator} and must be changed
      * manually when changing the calculator. It should be changed by adding +1;
      */
-    public static final int CALCULATOR_VERSION = 1;
+    public static final int CALCULATOR_VERSION = 2;
 
     /**
      * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the
