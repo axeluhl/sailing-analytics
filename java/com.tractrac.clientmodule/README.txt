@@ -16,6 +16,17 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.2
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 20/02/2024
+
+ 1) Feature
+
+ - Removing the usage of the IMetricsService (Requested by Axel Uhl, 19/02/2024)
+
+********************************************
         TracAPI 3.15.1
 ********************************************
 This is a final version. It keeps the backward compatibility.
