@@ -61,6 +61,7 @@ Require-Bundle: org.apache.geronimo.specs.geronimo-jta_1.1_spec;bundle-version="
  com.sap.sailing.nmeaconnector,
  com.sap.sailing.geocoding,
  com.googlecode.java-diff-utils,
+ jaxb-api;bundle-version="2.3.0",
  com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0",
  com.sap.sailing.server.interface;bundle-version="1.0.0",
  org.mongodb.bson;bundle-version="4.3.1",
