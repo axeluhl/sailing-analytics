@@ -88,7 +88,7 @@ public class PostFixes extends AbstractJsonOverHttpTest {
                         lastFix = fix;
 
                         try {
-                            recordFix(new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speed));
+                            recordFix(new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speed, /* optionalTrueHeading */ null));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

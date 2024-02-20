@@ -220,7 +220,7 @@ public class BravoFixTrackFoiledDistanceCacheTest {
     
     private GPSFixMoving createGPSFix(long timePointAsMillis, double lat, double lng, double cogInDeg, double sogInKnots) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng), new MillisecondsTimePoint(timePointAsMillis),
-                new KnotSpeedWithBearingImpl(sogInKnots, new DegreeBearingImpl(cogInDeg)));
+                new KnotSpeedWithBearingImpl(sogInKnots, new DegreeBearingImpl(cogInDeg)), /* optionalTrueHeading */ null);
     }
 
     private MillisecondsTimePoint t(long timePointAsMillis) {

@@ -75,13 +75,15 @@ These can be mapped to a competitor or a mark via the DeviceMappings in the Race
       "longitude" : 10.148556,
       "speed" : 3.61,
       "course" : 258.11,
+      "hdt" : 259.0
     },
     {
       "timestamp" : 14144168490000,
       "latitude" : 55.12456,
       "longitude" : 8.03456,
       "speed" : 5.1,
-      "course" : 14.2,
+      "course" : 14.2
+      "hdt" : 14.7
     }
   ]
 }
@@ -89,7 +91,10 @@ These can be mapped to a competitor or a mark via the DeviceMappings in the Race
 		</td>
 	</tr>
 	Note that the "speed" field is provided in meters per second (m/s). The course is the course over ground (COG) in
-	true degrees.
+	true degrees. The "hdt" field is optional and may be used to represent a true (not magnetic) heading in degrees.
+    Note how this is different from "hdg" which can be used instead of "hdt" to specify a magnetic heading in degrees.
+    The magnetic declination at time and location of the fix will be used then to convert this internally to a true
+    heading.
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 

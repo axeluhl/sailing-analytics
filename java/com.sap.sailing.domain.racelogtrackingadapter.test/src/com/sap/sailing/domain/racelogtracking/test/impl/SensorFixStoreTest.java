@@ -18,13 +18,9 @@ import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
@@ -35,7 +31,6 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
-import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
@@ -48,11 +43,6 @@ public class SensorFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
     protected SensorFixStore store;
-
-    protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
-        return new GPSFixMovingImpl(new DegreePosition(lat, lng), new MillisecondsTimePoint(millis),
-                new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
-    }
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {

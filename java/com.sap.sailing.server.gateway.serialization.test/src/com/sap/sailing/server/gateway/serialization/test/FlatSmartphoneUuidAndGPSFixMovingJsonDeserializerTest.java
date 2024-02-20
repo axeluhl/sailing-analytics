@@ -31,14 +31,14 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
                 "      \"latitude\" : 54.325246,\n" + 
                 "      \"longitude\" : 10.148556,\n" + 
                 "      \"speed\" : 3.61,\n" + 
-                "      \"course\" : 258.11,\n" + 
+                "      \"course\" : 258.11\n" + 
                 "    },\n" + 
                 "    {\n" + 
                 "      \"timestamp\" : 14144168490000,\n" + 
                 "      \"latitude\" : 55.12456,\n" + 
                 "      \"longitude\" : 8.03456,\n" + 
                 "      \"speed\" : 5.1,\n" + 
-                "      \"course\" : 14.2,\n" + 
+                "      \"course\" : 14.2\n" + 
                 "    },\n" +
                 "    {\n" + 
                 "      \"timestamp-iso\" : \"2418-03-18T15:41:30Z\",\n" + 
@@ -46,19 +46,19 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonDeserializerTest {
                 "      \"longitude\" : -2.03456,\n" + 
                 "      \"speed\" : 19.3,\n" + 
                 "      \"course\" : 359.99,\n" + 
+                "      \"hdt\" : 358.57\n" + 
                 "    }\n" +
                 "  ]\n" + 
                 "}";
         JsonDeserializer<Pair<UUID, List<GPSFixMoving>>> deserializer = 
                 new FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer();
-        
         Pair<UUID, List<GPSFixMoving>> result = 
                 deserializer.deserialize(Helpers.toJSONObjectSafe(JSONValue.parseWithException(json)));
         assertThat("uuid", result.getA(), equalTo(UUID.fromString("af855a56-9726-4a9c-a77e-da955bd289bf")));
         assertThat("number of fixes", result.getB().size(), equalTo(3));
-        
         TimePoint tp3 = result.getB().get(2).getTimePoint();
         assertThat(tp3.asMillis(), equalTo(14144168490000L));
+        assertThat(result.getB().get(2).getOptionalTrueHeading().getDegrees(), equalTo(358.57));
     }
     
     @Test
