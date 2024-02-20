@@ -148,7 +148,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l, null));
         trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));
+                new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3)), /* optionalTrueHeading */ null));
         Thread.sleep(1000);
         TrackedRace replicatedTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicatedTrackedRace);

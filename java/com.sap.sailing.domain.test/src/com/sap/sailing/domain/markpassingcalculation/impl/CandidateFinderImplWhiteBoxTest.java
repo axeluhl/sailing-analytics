@@ -188,9 +188,9 @@ public class CandidateFinderImplWhiteBoxTest {
         final Position beforeStartPosition = startLinePosition.translateGreatCircle(startLineCrossingSpeed.getBearing().reverse(), startLineCrossingSpeed.travel(Duration.ONE_SECOND));
         final Position atStartPosition = startLinePosition;
         final Position afterStartPosition = startLinePosition.translateGreatCircle(startLineCrossingSpeed.getBearing(), startLineCrossingSpeed.travel(Duration.ONE_SECOND));
-        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(beforeStartPosition, timeForStartLinePassing.minus(Duration.ONE_SECOND), startLineCrossingSpeed));
-        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(atStartPosition, timeForStartLinePassing, startLineCrossingSpeed));
-        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(afterStartPosition, timeForStartLinePassing.plus(Duration.ONE_SECOND), startLineCrossingSpeed));
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(beforeStartPosition, timeForStartLinePassing.minus(Duration.ONE_SECOND), startLineCrossingSpeed, /* optionalTrueHeading */ null));
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(atStartPosition, timeForStartLinePassing, startLineCrossingSpeed, /* optionalTrueHeading */ null));
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(afterStartPosition, timeForStartLinePassing.plus(Duration.ONE_SECOND), startLineCrossingSpeed, /* optionalTrueHeading */ null));
     }
 
     @Test

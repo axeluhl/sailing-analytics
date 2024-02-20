@@ -57,9 +57,9 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
         final Position startPos = new DegreePosition(0, 0);
         final DegreeBearingImpl bearing = new DegreeBearingImpl(10);
         final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(10, bearing);
-        trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos, now, speed));
+        trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos, now, speed, /* optionalTrueHeading */ null));
         final Distance distance = speed.travel(Duration.ONE_SECOND);
-        trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos.translateGreatCircle(bearing, distance), now.plus(Duration.ONE_SECOND), speed));
+        trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos.translateGreatCircle(bearing, distance), now.plus(Duration.ONE_SECOND), speed, /* optionalTrueHeading */ null));
         trackedRace.onStatusChanged(tdl, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* progress */ 1.0));
         assertEquals(distance.getMeters(), trackedRace.getDistanceTraveled(competitor, now.plus(Duration.ONE_SECOND.times(2))).getMeters(), 0.01); // ask 1s after the second fix
     }

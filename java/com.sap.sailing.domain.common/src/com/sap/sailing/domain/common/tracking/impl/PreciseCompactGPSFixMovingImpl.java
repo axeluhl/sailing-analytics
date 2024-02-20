@@ -24,6 +24,12 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
     private final double lngDeg;
     private final double knotSpeed;
     private final double degBearing;
+    
+    /**
+     * Valid only if {@link #trueHeadingDegSet} is {@code true}
+     */
+    private final double trueHeadingDeg;
+    private final boolean trueHeadingDegSet;
 
     /**
      * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed's
@@ -58,6 +64,15 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
         @Override
         public double getDegrees() {
             return degBearing;
+        }
+    }
+    
+    private class PreciseCompactTrueHeading extends AbstractBearing {
+        private static final long serialVersionUID = -1837422977159746992L;
+
+        @Override
+        public double getDegrees() {
+            return trueHeadingDeg;
         }
     }
     
@@ -98,16 +113,23 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
         }
     }
     
-    public PreciseCompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
+    public PreciseCompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed, Bearing optionalTrueHeading) {
         super(timePoint);
         latDeg = position.getLatDeg();
         lngDeg = position.getLngDeg();
         knotSpeed = speed==null?0:speed.getKnots();
         degBearing = speed==null?0:speed.getBearing().getDegrees();
+        if (optionalTrueHeading == null) {
+            trueHeadingDegSet = false;
+            trueHeadingDeg = 0.0;
+        } else {
+            trueHeadingDegSet = true;
+            trueHeadingDeg = optionalTrueHeading.getDegrees();
+        }
     }
     
     public PreciseCompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) {
-        this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed());
+        this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed(), gpsFixMoving.getOptionalTrueHeading());
     }
 
     @Override
@@ -118,6 +140,11 @@ public class PreciseCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingI
     @Override
     public Position getPosition() {
         return new PreciseCompactPosition();
+    }
+    
+    @Override
+    public Bearing getOptionalTrueHeading() {
+        return trueHeadingDegSet ? new PreciseCompactTrueHeading() : null;
     }
 
     @Override

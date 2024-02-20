@@ -104,6 +104,6 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
                 0.0002 - rnd.nextDouble() * 0.0004);
         final TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
         final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
-        return new GPSFixMovingImpl(position, p, speed);
+        return new GPSFixMovingImpl(position, p, speed, /* optionalTrueHeading */ null);
     }
 }
