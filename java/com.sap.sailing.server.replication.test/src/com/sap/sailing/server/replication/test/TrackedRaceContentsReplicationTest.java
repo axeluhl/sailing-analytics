@@ -127,7 +127,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     @Test
     public void testGPSFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(1, 2), new MillisecondsTimePoint(12345),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ new DegreeBearingImpl(124));
         trackedRace.recordFix(competitor, fix);
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
@@ -137,8 +137,10 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         competitorTrack.lockForRead();
         try {
             assertEquals(1, Util.size(competitorTrack.getRawFixes()));
-            PositionAssert.assertGPSFixEquals(fix, competitorTrack.getRawFixes().iterator().next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
-            assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+            final GPSFixMoving replicatedFix = competitorTrack.getRawFixes().iterator().next();
+            PositionAssert.assertGPSFixEquals(fix, replicatedFix, /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
+            assertEquals(fix.getOptionalTrueHeading().getDegrees(), replicatedFix.getOptionalTrueHeading().getDegrees(), 0.01);
+            assertNotSame(fix, replicatedFix);
         } finally {
             competitorTrack.unlockAfterRead();
         }
@@ -166,7 +168,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     @Test
     public void testMarkFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
-                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
+                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)), /* optionalTrueHeading */ null);
         final Mark masterMark = trackedRace.getRace().getCourse().getFirstWaypoint().getMarks().iterator().next();
         trackedRace.recordFix(masterMark, fix);
         Thread.sleep(1000);

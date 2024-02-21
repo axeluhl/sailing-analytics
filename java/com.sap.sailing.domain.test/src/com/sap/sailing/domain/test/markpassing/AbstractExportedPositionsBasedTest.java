@@ -157,7 +157,7 @@ public abstract class AbstractExportedPositionsBasedTest {
                 GPSFixMoving fix = new GPSFixMovingImpl(new DegreePosition((Double) fixAsJson.get("lat-deg"), (Double) fixAsJson.get("lng-deg")),
                         new MillisecondsTimePoint((Long) fixAsJson.get("timepoint-ms")),
                                 new KnotSpeedWithBearingImpl((Double) fixAsJson.get("speed-kts"),
-                                        new DegreeBearingImpl((Double) fixAsJson.get("truebearing-deg"))));
+                                        new DegreeBearingImpl((Double) fixAsJson.get("truebearing-deg"))), /* optionalTrueHeading */ null);
                 fixes.add(fix);
             }
             result.put(competitor, fixes);

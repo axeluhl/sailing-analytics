@@ -389,6 +389,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return new KnotSpeedWithBearingImpl(((Number) object.get(FieldNames.KNOT_SPEED.name())).doubleValue(),
                 new DegreeBearingImpl(((Number) object.get(FieldNames.DEGREE_BEARING.name())).doubleValue()));
     }
+    
+    public Bearing loadOptionalTrueHeading(Document object) {
+        final Bearing result;
+        if (object.containsKey(FieldNames.TRUE_HEADING_DEG.name())) {
+            result = new DegreeBearingImpl(((Number) object.get(FieldNames.TRUE_HEADING_DEG.name())).doubleValue());
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     @Override
     public RaceIdentifier loadRaceIdentifier(Document dbObject) {

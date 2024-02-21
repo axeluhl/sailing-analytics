@@ -154,16 +154,16 @@ public class TestFarthestAheadWithSkippedMarkPassing {
                 Arrays.<MarkPassing> asList(new MarkPassingImpl(startOfRace, start, c1)));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // Both boats have climbed half of the first upwind beat; c1 is rated the faster boat (2.0), c2 has time-on-time factor 1.0.
         // Therefore, c2 is expected to lead after applying the corrections.
         final RankingInfo rankingInfo = rankingMetric.getRankingInfo(middleOfFirstLeg);
@@ -192,24 +192,24 @@ public class TestFarthestAheadWithSkippedMarkPassing {
         // they both start at the start line
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // both round the windward mark at the same time
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), endOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), endOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // c2 is further down the wind already at the middle of the second leg:
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfSecondLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(180))));
+                        new DegreeBearingImpl(180)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.2, 0), middleOfSecondLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(180))));
+                        new DegreeBearingImpl(180)), /* optionalTrueHeading */ null));
         // Assert that c2 is the boat farthest ahead
         final RankingInfo rankingInfo = rankingMetric.getRankingInfo(middleOfSecondLeg);
         assertSame(c2, rankingInfo.getCompetitorFarthestAhead());
