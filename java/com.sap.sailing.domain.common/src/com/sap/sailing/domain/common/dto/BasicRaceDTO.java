@@ -50,7 +50,7 @@ public class BasicRaceDTO extends NamedDTO {
             timePoint = new Date(startOfRace.getTime() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS + 1);
         }
 
-        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+        if (trackedRace != null && trackedRace.hasGPSData) {
             Util.Pair<Date, Date> minMax = RaceTimesCalculationUtil.calculateRaceMinMax(timePoint,
                     trackedRace.startOfTracking, startOfRace, raceFinishingTime, raceFinishedTime, endOfRace,
                     trackedRace.endOfTracking);
