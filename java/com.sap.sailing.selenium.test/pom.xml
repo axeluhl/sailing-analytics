@@ -82,7 +82,6 @@
               </excludes>
               <argLine>${argLine} ${tycho.tests.argLine}</argLine>
               <appArgLine>-consoleLog -console -clean</appArgLine>
-              <testRuntime>p2Installed</testRuntime>
               <product>raceanalysis.product</product>
               <application>raceanalysis.application</application>
               <bundleStartLevel>
