@@ -102,6 +102,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String trackWind();
     String regattaName();
     String eventName();
+    String eventSeriesName();
     String event();
     String startTime();
     String endTime();
@@ -2392,10 +2393,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String invitations();
     String eventWebPage();
     String createEvent();
+    String createEventSeries();
     String createEventSubtitle();
+    String createEventSeriesSubtitle();
     String createEventButton();
+    String createEventSeriesButton();
     String nameLabel();
     String eventNamePlaceholder();
+    String eventSeriesNamePlaceholder();
     String dateLabel();
     String datePlaceholder();
     String venueLabel();

@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
 import com.sap.sailing.gwt.managementconsole.app.ManagementConsoleClientFactory;
 import com.sap.sailing.gwt.managementconsole.events.EventSeriesListResponseEvent;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsoleActivity;
+import com.sap.sailing.gwt.managementconsole.places.eventseries.create.CreateEventSeriesPlace;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 
 public class EventSeriesOverviewActivity extends AbstractManagementConsoleActivity<EventSeriesOverviewPlace>
@@ -24,6 +25,7 @@ public class EventSeriesOverviewActivity extends AbstractManagementConsoleActivi
     @Override
     public void start(final AcceptsOneWidget container, final EventBus eventBus) {
         eventBus.addHandler(EventSeriesListResponseEvent.TYPE, list -> {
+            // TODO: remove after event list adding is implemented.
             if (list.size() == 0) {
                 EventSeriesMetadataDTO es = new EventSeriesMetadataDTO("Test Event Servies", UUID.randomUUID());
                 list.add(es);
@@ -41,8 +43,7 @@ public class EventSeriesOverviewActivity extends AbstractManagementConsoleActivi
 
     @Override
     public void navigateToCreateEventSeries() {
-        // TODO Auto-generated method stub
-        
+        getClientFactory().getPlaceController().goTo(new CreateEventSeriesPlace());
     }
 
     @Override

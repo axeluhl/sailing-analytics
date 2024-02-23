@@ -102,6 +102,22 @@ public class EventService {
         });
     }
 
+    public void createEventSeries(final String name, final AsyncCallback<EventDTO> callback) {
+        createDefaultLeaderboardGroup(new AsyncCallback<LeaderboardGroupDTO>() {
+            @Override
+            public void onFailure(final Throwable t) {
+                callback.onFailure(t);
+            }
+            @Override
+            public void onSuccess(final LeaderboardGroupDTO result) {
+                final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
+                final List<CourseAreaDTO> courseAreaDtos = new ArrayList<CourseAreaDTO>();
+                sailingService.createEvent(name, null, null, null, null, false, courseAreaDtos, null, null, new HashMap<String, String>(),
+                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback);
+            }
+        });
+    }
+
     private void createDefaultLeaderboardGroup(final AsyncCallback<LeaderboardGroupDTO> leaderboardGroupCallback) {
         final LeaderboardGroupDescriptor newGroup = LeaderboardGroupFactory.createDefaultLeaderboardGroupDescriptor();
         sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
