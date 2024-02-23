@@ -3011,7 +3011,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final GPSFixDTOWithSpeedWindTackAndLegType result;
         final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixesAndTails.getFixes(competitorDTO);
         if (competitorFixes != null && !competitorFixes.isEmpty()) {
-            int i = Collections.binarySearch(competitorFixes, new GPSFixDTOWithSpeedWindTackAndLegType(date, null, null, (WindDTO) null, null, null, false),
+            int i = Collections.binarySearch(competitorFixes, new GPSFixDTOWithSpeedWindTackAndLegType(date, null, null, /* optionalTrueHeading */ null, (WindDTO) null, null, null, false),
                     new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
                 @Override
                 public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
@@ -3060,8 +3060,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             factorForBefore*(fixBefore.speedWithBearing==null?0:fixBefore.speedWithBearing.speedInKnots) +
                             factorForAfter*(fixAfter.speedWithBearing==null?0:fixAfter.speedWithBearing.speedInKnots),
                             betweenBearing);
-                    result = new GPSFixDTOWithSpeedWindTackAndLegType(date, betweenPosition, betweenSpeed, closer.degreesBoatToTheWind,
-                            closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
+                    result = new GPSFixDTOWithSpeedWindTackAndLegType(date, betweenPosition, betweenSpeed,
+                            interpolateOptionalTrueHeading(fixBefore, factorForBefore, fixAfter, factorForAfter),
+                            closer.degreesBoatToTheWind, closer.tack, closer.legType, fixBefore.extrapolated || fixAfter.extrapolated);
                 }
             } else {
                 // perfect match
@@ -3072,6 +3073,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             result = null;
         }
         return result;
+    }
+    
+    private Bearing interpolateOptionalTrueHeading(GPSFixDTOWithSpeedWindTackAndLegType fixBefore, double factorForBefore, GPSFixDTOWithSpeedWindTackAndLegType fixAfter, double factorForAfter) {
+        assert fixBefore != null && fixAfter != null;
+        return (fixBefore == null || fixBefore.optionalTrueHeading == null) ? (fixAfter == null || fixAfter.optionalTrueHeading == null)
+                ? null
+                : fixAfter.optionalTrueHeading
+              : (fixAfter == null || fixAfter.optionalTrueHeading == null)
+                ? fixBefore.optionalTrueHeading
+                : new DegreeBearingImpl(factorForBefore * fixBefore.optionalTrueHeading.getDegrees() + factorForAfter * fixAfter.optionalTrueHeading.getDegrees());
     }
 
     public RaceMapSettings getSettings() {

@@ -153,7 +153,7 @@ public class TrackedRaceWithSensorFixStoreContentsReplicationTest extends Abstra
     @Test
     public void testGPSFixReplication() throws InterruptedException {
         final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(1, 2), new MillisecondsTimePoint(12345),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         trackedRace.recordFix(competitor, fix);
         Thread.sleep(1000);
         final TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);

@@ -207,7 +207,7 @@ implements TrackingDataLoader {
         for (final TeamPositions teamPositions : storedData.getTeams()) {
             progressCallback.ifPresent(cb->cb.accept((double) i[0]++ / numberOfTeams));
             for (final TeamPosition position : teamPositions.getPositions()) {
-                final GPSFixMoving fix = new GPSFixMovingImpl(position.getPosition(), position.getTimePoint(), position.getMotionVector());
+                final GPSFixMoving fix = new GPSFixMovingImpl(position.getPosition(), position.getTimePoint(), position.getMotionVector(), /* optionalTrueHeading */ null);
                 final int deviceSerialNumber = teamPositions.getDeviceSerialNumber();
                 trackedRace.getTrack(competitorByDeviceSerialNumber.get(deviceSerialNumber)).add(fix);
                 updateTimePointOfLastFixPerDeviceSerialNumber(deviceSerialNumber, position.getTimePoint());

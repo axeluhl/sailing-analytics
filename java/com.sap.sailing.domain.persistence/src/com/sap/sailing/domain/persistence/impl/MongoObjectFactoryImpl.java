@@ -238,7 +238,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeSpeedWithBearing(SpeedWithBearing speedWithBearing, Document result) {
         storeSpeed(speedWithBearing, result);
         storeBearing(speedWithBearing.getBearing(), result);
-
+    }
+    
+    public void storeOptionalTrueHeading(Bearing optionalTrueHeading, Document result) {
+        if (optionalTrueHeading != null) {
+            result.put(FieldNames.TRUE_HEADING_DEG.name(), optionalTrueHeading.getDegrees());
+        }
     }
 
     public void storeBearing(Bearing bearing, Document result) {

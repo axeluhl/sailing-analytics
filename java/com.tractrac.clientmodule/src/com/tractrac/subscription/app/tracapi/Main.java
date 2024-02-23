@@ -11,11 +11,8 @@ import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
-import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -28,17 +25,15 @@ public class Main {
 	/**
 	 * @param args
 	 *          the command line arguments
-	 * @throws CreateModelException
-	 */
-	public static void main(String[] args) throws URISyntaxException,
-			MalformedURLException, FileNotFoundException, IOException,
-			SubscriberInitializationException, CreateModelException, TimeOutException {
+     */
+	public static void main(String[] args) throws IOException,
+			SubscriberInitializationException, CreateModelException {
 
 		Object[] myArgs = parseArguments(args);
 		URI paramURI = (URI)myArgs[0];
-		boolean measureDelay = (boolean)myArgs[1];;
+		boolean measureDelay = (boolean)myArgs[1];
 
-		// Create the event object
+        // Create the event object
 		IEventFactory eventFactory = ModelLocator.getEventFactory();
 		IRace race = eventFactory.createRace(paramURI);
 		IEvent event = race.getEvent();
@@ -64,7 +59,7 @@ public class Main {
 		raceSubscriber.subscribeConnectionStatus(listener);
 		raceSubscriber.subscribeControlPositions(listener);
 		raceSubscriber.subscribePositions(listener);
-//		raceSubscriber.subscribePositionsSnapped(listener);
+		//raceSubscriber.subscribePositionsSnapped(listener);
 		raceSubscriber.subscribeControlPassings(listener);
 		raceSubscriber.subscribeCompetitorSensorData(listener);
 		raceSubscriber.subscribeRaceMessages(listener);

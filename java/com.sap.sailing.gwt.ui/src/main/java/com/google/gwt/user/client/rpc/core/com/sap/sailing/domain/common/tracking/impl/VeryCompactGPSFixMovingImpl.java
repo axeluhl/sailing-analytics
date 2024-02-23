@@ -35,7 +35,7 @@ public final class VeryCompactGPSFixMovingImpl {
             final double lngDeg = streamReader.readDouble();
             try {
                 return (VeryCompactPosition) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
-                        new DegreePosition(latDeg, lngDeg), /* timePoint */null, /* speed with bearing */ null).getPosition();
+                        new DegreePosition(latDeg, lngDeg), /* timePoint */null, /* speed with bearing */ null, /* optionalTrueHeading */ null).getPosition();
             } catch (CompactionNotPossibleException e) {
                 logger.log(Level.SEVERE, "Internal error: an object that was a very compact position and was serialized "+
                         "couldn't be de-serialized again as such an object", e);
@@ -83,7 +83,7 @@ public final class VeryCompactGPSFixMovingImpl {
             final double bearingDeg = streamReader.readDouble();
             try {
                 return (VeryCompactSpeedWithBearing) new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
-                        /* position */ null, /* timePoint */null, new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg))).getSpeed();
+                        /* position */ null, /* timePoint */null, new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg)), /* optionalTrueHeading */ null).getSpeed();
             } catch (CompactionNotPossibleException e) {
                 logger.log(Level.SEVERE, "Internal error: an object that was a very compact position and was serialized "+
                         "couldn't be de-serialized again as such an object", e);
@@ -132,7 +132,7 @@ public final class VeryCompactGPSFixMovingImpl {
             try {
                 final KnotSpeedWithBearingImpl speed = new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg));
                 com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl fix = new com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl(
-                        /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, speed);
+                        /* dummy position */ new DegreePosition(0, 0), /* timePoint */null, speed, /* optionalTrueHeading */ null);
                 fix.cacheEstimatedSpeed(speed);
                 return (VeryCompactEstimatedSpeed) fix.getCachedEstimatedSpeed();
             } catch (CompactionNotPossibleException e) {

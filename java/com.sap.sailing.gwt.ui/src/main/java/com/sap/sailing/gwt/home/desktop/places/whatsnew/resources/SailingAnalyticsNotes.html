@@ -10,6 +10,13 @@
             <li>Fixed an issue for users with event update rights that resulted in them being
                 unable to see the media tab of single regatta events for events without
                 pre-existing media objects.</li>
+            <li>When connectors support providing a heading (magnetic as in HDG, or true as
+                in HDT), the heading will be used for the boat orientation on the map. The
+                TracTrac connector, starting with its version 3.15.2, does support this if
+                the trackers in use provide a true heading value.</li>
+            <li>The "classic" <tt>/gwt/Spectator.html</tt> entry point now renders races also as
+                clickable if they do not have any valid wind readings.</li>
+            <li>Fixed non responsive sizing of the carousel header in home.html.</li>
          </ul>
          <h5 class="articleSubheadline">January 2024</h5>
          <ul class="bulletList">

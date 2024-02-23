@@ -364,6 +364,12 @@ public class RaceAndCompetitorStatusWithRaceLogReconciler {
         case TLE:
             result = MaxPointsReason.TLE;
             break;
+        case SCP:
+            result = MaxPointsReason.SCP;
+            break;
+        case STP:
+            result = MaxPointsReason.STP;
+            break;
         default:
             result = MaxPointsReason.NONE;
             break;

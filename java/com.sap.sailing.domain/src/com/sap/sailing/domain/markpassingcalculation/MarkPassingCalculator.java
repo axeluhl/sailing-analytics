@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -71,7 +72,7 @@ public class MarkPassingCalculator {
      * This CALCULATOR_VERSION variable indicates the Version of the {@link MarkPassingCalculator} and must be changed
      * manually when changing the calculator. It should be changed by adding +1;
      */
-    public static final int CALCULATOR_VERSION = 1;
+    public static final int CALCULATOR_VERSION = 2;
 
     /**
      * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the
@@ -592,6 +593,7 @@ public class MarkPassingCalculator {
                     suspended = false;
                 } else {
                     suspended = false;
+                    final CountDownLatch latchForRunningListenRun = new CountDownLatch(1);
                     enqueueUpdate(new StorePositionUpdateStrategy() {
                         @Override
                         public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
@@ -603,14 +605,23 @@ public class MarkPassingCalculator {
                                 List<Pair<Competitor, Integer>> suppressedMarkPassings,
                                 List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder,
                                 CandidateChooser candidateChooser) {
+                            latchForRunningListenRun.countDown();
+                            assert latchForRunningListenRun.getCount() == 0;
                         }
                     });
                     if (markPassingRaceFingerprintRegistry != null) {
+                        // FIXME bug5971: the thread must not be started before Listen.run() has obtained the MarkPassingCalculator's write lock!
                         new Thread(()->{
-                            final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
-                            markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
-                                    MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
-                                    markPassings, race.getRace().getCourse());
+                            try {
+                                latchForRunningListenRun.await();
+                                final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
+                                markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
+                                        MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
+                                        markPassings, race.getRace().getCourse());
+                            } catch (InterruptedException e) {
+                                logger.log(Level.SEVERE, "Exception while waiting for Listen.run() to start processing in MarkPassingCalculator for "+
+                                        race.getName(), e);
+                            }
                         }, "Waiting for mark passings for "+race.getName()+" after having resumed to store the results in registry")
                         .start();
                     }

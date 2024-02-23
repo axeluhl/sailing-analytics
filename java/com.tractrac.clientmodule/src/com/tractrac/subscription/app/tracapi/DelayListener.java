@@ -34,10 +34,10 @@ public class DelayListener  extends AbstractListener {
         }
 
         System.out.println(
-                String.valueOf(TimeUtils.formatDateInMillis(now)) + ": " +
-                String.valueOf(TimeUtils.formatDateInMillis(sampleTime)) + ": " +
+                TimeUtils.formatDateInMillis(now) + ": " +
+                        TimeUtils.formatDateInMillis(sampleTime) + ": " +
                 fillString(name, 25) + "-> " +
-                delay.toString()
+                        delay
         );
     }
 
