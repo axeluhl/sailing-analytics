@@ -55,11 +55,6 @@
                 <id>com.sap.sailing.server.gateway.test.support</id>
                 <versionRange>0.0.0</versionRange>
               </requirement>
-              <requirement>
-                <type>eclipse-plugin</type>
-                <id>com.sun.xml.bind.jaxb-impl</id>
-                <versionRange>0.0.0</versionRange>
-              </requirement>
             </extraRequirements>
           </dependency-resolution>
         </configuration>
