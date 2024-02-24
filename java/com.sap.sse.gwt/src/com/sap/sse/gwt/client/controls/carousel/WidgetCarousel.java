@@ -98,7 +98,7 @@ public class WidgetCarousel extends Composite {
         if (items.getFirst().getElement().getOffsetWidth() > 10
                 && items.getFirst().getElement().getOffsetHeight() > 10) {
             init();
-            sliderMainUi.getElement().getStyle().setWidth(items.getFirst().getElement().getOffsetWidth(), Unit.PX);
+            sliderMainUi.getElement().getStyle().setWidth(100, Unit.PCT);
             sliderMainUi.getElement().getStyle().setHeight(items.getFirst().getElement().getOffsetHeight(), Unit.PX);
             Scheduler.get().scheduleDeferred(sliderMainUi.getElement().getStyle()::clearOverflowY);
         } else {
