@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="222">
+<target name="Race Analysis Target" sequenceNumber="219">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -60,7 +60,6 @@
 <unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
 <unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
 <unit id="javax.xml" version="1.3.4.v201005080400"/>
-<unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="javax.xml.soap" version="1.2.0.v201005080501"/>
@@ -181,6 +180,7 @@
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
 <plugin id="javax.xml"/>
+<plugin id="jaxb-api"/>
 <plugin id="javax.xml.stream"/>
 <plugin id="javax.xml.ws"/>
 <plugin id="javax.xml.soap"/>
