@@ -5,6 +5,7 @@
 # Ensure that the security for requesting the metadata uses IMDSv1
 IP=$1
 BEARER_TOKEN=$2
+IMAGE_TYPE="reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
@@ -35,20 +36,23 @@ if [[ ! -d "/home/trac" ]]; then
     adduser ${GIT_COPY_USER}
     mv git ${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}
     mkdir /home/${GIT_COPY_USER}/.ssh
+    cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
+    ./build-crontab-and-cp-files reverse_proxy -n "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}" # -n option doesn't install the crontab so the correct keys get added before update_authorized_keys runs.
     # Setup root user and trac user with the right keys
-    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy" "/home/${GIT_COPY_USER}/.ssh/id_ed25519"
-    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy.pub" "/home/${GIT_COPY_USER}/.ssh/id_ed25519.pub"
-    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy" "/root/.ssh/id_ed25519"
-    scp -o StrictHostKeyChecking=no -r "root@sapsailing.com:/root/keys/disposableReverseProxy.pub" "/root/.ssh/id_ed25519.pub"
+    . imageupgrade_functions.sh
+    setup_keys "${IMAGE_TYPE}"
+    # copy httpd key accross
+    scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
+    cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
+    rm /root/.ssh/temp    
     chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "/home/${GIT_COPY_USER}"
-    
 fi
+echo "keys setup" >log.txt
 # setup symbolic links and crontab
 cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
-./build-crontab-and-cp-files reverse_proxy "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+./build-crontab-and-cp-files reverse_proxy -s "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
-crontab /root/crontab
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
@@ -109,11 +113,6 @@ if [[ ! -d "/root/aws" ]]; then
 fi
 # setup git
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
-# copy httpd key accross
-scp -o StrictHostKeyChecking=no "root@sapsailing.com:~/keys/disposableReverseProxy" /root/.ssh/id_ed25519
-scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
-cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
-rm /root/.ssh/temp
 # certs setup
 cd /etc
 mkdir letsencrypt
