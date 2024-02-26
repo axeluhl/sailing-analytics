@@ -1062,7 +1062,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
         software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest
                 .builder().name(targetGroupName).healthyThresholdCount(2).unhealthyThresholdCount(2)
-                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(30)
+                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(10)
                 .healthCheckPath(healthCheckPath).healthCheckPort("" + healthCheckPort)
                 .healthCheckProtocol(guessProtocolFromPort(healthCheckPort)).port(port)
                 .vpcId(vpcId == null ? getVpcId(region) : vpcId).protocol(guessProtocolFromPort(port))
