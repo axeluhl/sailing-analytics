@@ -17,6 +17,7 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   RELATIVE_PATH_TO_GIT="gitcopy"
   BUILD_TYPE="reverse_proxy"
   LOGON_USER_HOME="ec2-user"
+  IMAGE_TYPE="reverse_proxy"
   run_yum_update
   build_crontab_and_setup_files
   finalize

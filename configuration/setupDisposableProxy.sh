@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP. 
-# Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
+# Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir. 
+# Ensure that the security for requesting the metadata uses IMDSv1
 IP=$1
 BEARER_TOKEN=$2
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
