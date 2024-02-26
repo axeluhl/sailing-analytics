@@ -90,8 +90,9 @@ build_crontab_and_setup_files() {
 }
 
 setup_keys() {
-    mkdir /root/keysTemp
-    scp root@sapsailing.com:/root/keys/*${IMAGE_TYPE} /root/keysTemp/
+    #1: Image type.
+    mkdir --parents /root/keysTemp
+    scp root@sapsailing.com:/root/keys/*${1} /root/keysTemp/
     cd /root/keysTemp
     OLD_IFS="$IFS"
     SEPARATOR="@."
