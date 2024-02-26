@@ -1,1 +1,6 @@
 See https://wiki.sapsailing.com/wiki/info/landscape/typical-development-scenarios#typical-development-scenarios_adding-a-bundle-to-the-target-platform
+
+Note that the org.dom4j bundle has a patched MANIFEST.MF. In its original version
+it has an Import-Package for javax.xml.bind with a version specifier version="[2.2,3)" but
+this cannot be resolved against the JDK 8's versionless javax.xml.bind package.
+Therefore, we remove the version specifier in the MANIFEST.MF manually and re-pack.
