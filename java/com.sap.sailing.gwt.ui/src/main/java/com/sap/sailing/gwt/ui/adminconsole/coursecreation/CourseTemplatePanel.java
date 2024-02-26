@@ -18,21 +18,15 @@ import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -43,10 +37,10 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -68,7 +62,7 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
     private List<CourseTemplateDTO> allCourseTemplates;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private CellTable<CourseTemplateDTO> courseTemplateTable;
+    private FlushableCellTable<CourseTemplateDTO> courseTemplateTable;
     private ListDataProvider<CourseTemplateDTO> courseTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<CourseTemplateDTO> refreshableSelectionModel;
     private List<MarkRoleDTO> allMarkRoles;
@@ -179,64 +173,14 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
     }
 
     private void createCourseTemplateTable(final UserService userService) {
-        // Create a CellTable.
-
-        // Set a key provider that provides a unique key for each contact. If key is
-        // used to identify contacts when fields (such as the name and address)
-        // change.
-        courseTemplateTable = new BaseCelltable<>(1000, tableResources);
+        courseTemplateTable = new FlushableCellTable<>(1000, tableResources);
         courseTemplateTable.setWidth("100%");
 
         // Attach a column sort handler to the ListDataProvider to sort the list.
         ListHandler<CourseTemplateDTO> sortHandler = new ListHandler<>(courseTemplateListDataProvider.getList());
         courseTemplateTable.addColumnSortHandler(sortHandler);
-
-        // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
-                new EntityIdentityComparator<CourseTemplateDTO>() {
-                    @Override
-                    public boolean representSameEntity(CourseTemplateDTO dto1, CourseTemplateDTO dto2) {
-                        return dto1.getUuid().equals(dto2.getUuid());
-                    }
-
-                    @Override
-                    public int hashCode(CourseTemplateDTO t) {
-                        return t.getUuid().hashCode();
-                    }
-                }, filterableCourseTemplatePanel.getAllListDataProvider());
-        courseTemplateTable.setSelectionModel(refreshableSelectionModel, DefaultSelectionEventManager
-                .createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<CourseTemplateDTO>() {
-                    @Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<CourseTemplateDTO> event) {
-                        return !isCheckboxColumn(event.getColumn());
-                    }
-
-                    @Override
-                    public SelectAction translateSelectionEvent(CellPreviewEvent<CourseTemplateDTO> event) {
-                        NativeEvent nativeEvent = event.getNativeEvent();
-                        if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
-                            if (nativeEvent.getCtrlKey()) {
-                                CourseTemplateDTO value = event.getValue();
-                                refreshableSelectionModel.setSelected(value,
-                                        !refreshableSelectionModel.isSelected(value));
-                                return SelectAction.IGNORE;
-                            }
-                            if (!refreshableSelectionModel.getSelectedSet().isEmpty()
-                                    && !isCheckboxColumn(event.getColumn())) {
-                                return SelectAction.DEFAULT;
-                            }
-                        }
-                        return SelectAction.TOGGLE;
-                    }
-
-                    private boolean isCheckboxColumn(int columnIndex) {
-                        return columnIndex == 0;
-                    }
-                }));
-
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
-
         courseTemplateListDataProvider.addDataDisplay(courseTemplateTable);
         add(courseTemplateTable);
         allCourseTemplates.clear();
@@ -247,18 +191,22 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
      * Add the columns to the table.
      */
     private void initTableColumns(final ListHandler<CourseTemplateDTO> sortHandler, final UserService userService) {
-        Column<CourseTemplateDTO, Boolean> checkColumn = new Column<CourseTemplateDTO, Boolean>(
-                new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                        tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
-            @Override
-            public Boolean getValue(CourseTemplateDTO object) {
-                // Get the value from the selection model.
-                return refreshableSelectionModel.isSelected(object);
-            }
-        };
+        final SelectionCheckboxColumn<CourseTemplateDTO> checkColumn = new SelectionCheckboxColumn<CourseTemplateDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<CourseTemplateDTO>() {
+                    @Override
+                    public boolean representSameEntity(CourseTemplateDTO dto1, CourseTemplateDTO dto2) {
+                        return dto1.getUuid().equals(dto2.getUuid());
+                    }
+                    @Override
+                    public int hashCode(CourseTemplateDTO t) {
+                        return t.getUuid().hashCode();
+                    }
+                }, filterableCourseTemplatePanel.getAllListDataProvider(), courseTemplateTable);
+
         courseTemplateTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         courseTemplateTable.setColumnWidth(checkColumn, 40, Unit.PX);
-
         // id
         Column<CourseTemplateDTO, String> idColumn = new Column<CourseTemplateDTO, String>(new TextCell()) {
             @Override
@@ -336,6 +284,8 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
                 courseTemplate -> configACL.openDialog(courseTemplate));
         courseTemplateTable.addColumn(idColumn, stringMessages.id());
         courseTemplateTable.addColumn(actionsColumn, stringMessages.actions());
+        refreshableSelectionModel = checkColumn.getSelectionModel();
+        courseTemplateTable.setSelectionModel(refreshableSelectionModel, checkColumn.getSelectionManager());
     }
     
     public void refreshCourseTemplates() {

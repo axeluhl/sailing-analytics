@@ -10,21 +10,15 @@ import java.util.List;
 
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
@@ -34,10 +28,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -59,7 +53,7 @@ public class MarkTemplatePanel extends FlowPanel implements FilterablePanelProvi
     private List<MarkTemplateDTO> allMarkTemplates;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private CellTable<MarkTemplateDTO> markTemplateTable;
+    private FlushableCellTable<MarkTemplateDTO> markTemplateTable;
     private ListDataProvider<MarkTemplateDTO> markTemplateListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkTemplateDTO> refreshableSelectionModel;
 
@@ -129,58 +123,11 @@ public class MarkTemplatePanel extends FlowPanel implements FilterablePanelProvi
     }
 
     private void createMarkTemplatesTable(final UserService userService) {
-        // Create a CellTable.
-        // Set a key provider that provides a unique key for each contact. If key is
-        // used to identify contacts when fields (such as the name and address)
-        // change.
-        markTemplateTable = new BaseCelltable<>(1000, tableResources);
+        markTemplateTable = new FlushableCellTable<>(1000, tableResources);
         markTemplateTable.setWidth("100%");
         // Attach a column sort handler to the ListDataProvider to sort the list.
         ListHandler<MarkTemplateDTO> sortHandler = new ListHandler<>(markTemplateListDataProvider.getList());
         markTemplateTable.addColumnSortHandler(sortHandler);
-        // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
-                new EntityIdentityComparator<MarkTemplateDTO>() {
-                    @Override
-                    public boolean representSameEntity(MarkTemplateDTO dto1, MarkTemplateDTO dto2) {
-                        return dto1.getUuid().equals(dto2.getUuid());
-                    }
-
-                    @Override
-                    public int hashCode(MarkTemplateDTO t) {
-                        return t.getUuid().hashCode();
-                    }
-                }, filterableMarkTemplates.getAllListDataProvider());
-        markTemplateTable.setSelectionModel(refreshableSelectionModel, DefaultSelectionEventManager
-                .createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<MarkTemplateDTO>() {
-                    @Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<MarkTemplateDTO> event) {
-                        return !isCheckboxColumn(event.getColumn());
-                    }
-
-                    @Override
-                    public SelectAction translateSelectionEvent(CellPreviewEvent<MarkTemplateDTO> event) {
-                        NativeEvent nativeEvent = event.getNativeEvent();
-                        if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
-                            if (nativeEvent.getCtrlKey()) {
-                                MarkTemplateDTO value = event.getValue();
-                                refreshableSelectionModel.setSelected(value,
-                                        !refreshableSelectionModel.isSelected(value));
-                                return SelectAction.IGNORE;
-                            }
-                            if (!refreshableSelectionModel.getSelectedSet().isEmpty()
-                                    && !isCheckboxColumn(event.getColumn())) {
-                                return SelectAction.DEFAULT;
-                            }
-                        }
-                        return SelectAction.TOGGLE;
-                    }
-
-                    private boolean isCheckboxColumn(int columnIndex) {
-                        return columnIndex == 0;
-                    }
-                }));
-
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
         markTemplateListDataProvider.addDataDisplay(markTemplateTable);
@@ -193,15 +140,19 @@ public class MarkTemplatePanel extends FlowPanel implements FilterablePanelProvi
      * Add the columns to the table.
      */
     private void initTableColumns(final ListHandler<MarkTemplateDTO> sortHandler, final UserService userService) {
-        Column<MarkTemplateDTO, Boolean> checkColumn = new Column<MarkTemplateDTO, Boolean>(
-                new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                        tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
-            @Override
-            public Boolean getValue(MarkTemplateDTO object) {
-                // Get the value from the selection model.
-                return refreshableSelectionModel.isSelected(object);
-            }
-        };
+        final SelectionCheckboxColumn<MarkTemplateDTO> checkColumn = new SelectionCheckboxColumn<MarkTemplateDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<MarkTemplateDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkTemplateDTO dto1, MarkTemplateDTO dto2) {
+                        return dto1.getUuid().equals(dto2.getUuid());
+                    }
+                    @Override
+                    public int hashCode(MarkTemplateDTO t) {
+                        return t.getUuid().hashCode();
+                    }
+                }, filterableMarkTemplates.getAllListDataProvider(), markTemplateTable);
         markTemplateTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markTemplateTable.setColumnWidth(checkColumn, 40, Unit.PX);
         // id
@@ -283,6 +234,8 @@ public class MarkTemplatePanel extends FlowPanel implements FilterablePanelProvi
                 markTemplate -> configACL.openDialog(markTemplate));
         markTemplateTable.addColumn(idColumn, stringMessages.id());
         markTemplateTable.addColumn(actionsColumn, stringMessages.actions());
+        refreshableSelectionModel = checkColumn.getSelectionModel();
+        markTemplateTable.setSelectionModel(refreshableSelectionModel, checkColumn.getSelectionManager());
     }
 
     public void refreshMarkTemplates() {

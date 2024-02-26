@@ -171,7 +171,7 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
      * Add the columns to the table.
      */
     private void initTableColumns(final ListHandler<MarkPropertiesDTO> sortHandler, final UserService userService) {
-        SelectionCheckboxColumn<MarkPropertiesDTO> checkColumn = new SelectionCheckboxColumn<MarkPropertiesDTO>(
+        final SelectionCheckboxColumn<MarkPropertiesDTO> checkColumn = new SelectionCheckboxColumn<MarkPropertiesDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<MarkPropertiesDTO>() {
