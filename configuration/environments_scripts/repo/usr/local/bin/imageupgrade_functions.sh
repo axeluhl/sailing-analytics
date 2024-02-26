@@ -106,10 +106,10 @@ setup_keys() {
             output=""
             part=0
             for ((c=0; c < length; c++)) do
-                    if [[ "${filename:$c:2}" == "@@" ]]; then
+                    if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
                             output="$output""@"
                             ((c++))
-                    elif [[ "${filename:$c:2}" == "@." ]]; then
+                    elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
                             array[$part]="$output"
                             output=""
                             ((c++))
@@ -126,6 +126,7 @@ setup_keys() {
             id -u "$user"
             if [[ "$?" -eq 0 ]]; then
                 user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
+                mkdir --parents "${user_home_dir}/.ssh"
                 cp "$filename" "$user_home_dir"/.ssh/"$key"
             fi
     done
