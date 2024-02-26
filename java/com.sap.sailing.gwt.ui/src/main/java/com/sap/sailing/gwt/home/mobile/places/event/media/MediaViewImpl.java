@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.client.UserService;
 
 public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implements MediaView {
@@ -68,11 +67,12 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
                 mobileMediaUploadPopup.openFileUpload();
             }
         });
-        presenter.getEventBus().addHandler(AuthenticationContextEvent.TYPE, event -> {
-            logger.info("Sign out");
-            // for some reason this event is only send after logout. Never the less it will also handle login.
+        userService.addUserStatusEventHandler((userDTO, preAuthenticated)->{
+            logger.info(userDTO==null?"Sign out":"Signed in as "+userDTO.getName());
+            // for some reason this event is only sent after logout. Nevertheless it will also handle login.
             setMediaManaged(manageMediaModel.hasPermissions());
         });
+        setMediaManaged(manageMediaModel.hasPermissions());
     }
 
     @Override

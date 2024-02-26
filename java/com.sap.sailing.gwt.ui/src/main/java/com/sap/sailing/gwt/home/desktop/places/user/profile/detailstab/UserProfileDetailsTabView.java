@@ -13,8 +13,9 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class UserProfileDetailsTabView extends Composite implements UserProfileTabView<UserProfileDetailsPlace> {
 
     private UserProfileDetailsView.Presenter currentPresenter;
-
+    private UserProfileView.Presenter currentUserProfileViewPresenter;
     private UserProfileDetailsView view;
+
 
     public UserProfileDetailsTabView() {
     }
@@ -47,6 +48,12 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
         view = new UserProfileDetailsViewImpl();
+        this.currentUserProfileViewPresenter = currentPresenter;
         this.currentPresenter = new UserProfileDetailsPresenter(view, currentPresenter);
+    }
+
+    @Override
+    public UserProfileView.Presenter getPresenter() {
+        return currentUserProfileViewPresenter;
     }
 }

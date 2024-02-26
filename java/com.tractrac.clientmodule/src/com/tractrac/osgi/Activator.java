@@ -9,6 +9,8 @@ import com.tractrac.dataflow.lib.prov.live.tcp.provider.TCPLiveProviderFactory;
 import com.tractrac.dataflow.lib.prov.stored.mtb.MTBStoredDataProviderFactory;
 import com.tractrac.dataflow.lib.prov.stored.tcp.TCPStoredProviderFactory;
 import com.tractrac.dataflow.lib.spi.DataflowProviderLocator;
+import com.tractrac.message.system.lib.api.MessageSystemLocator;
+import com.tractrac.message.system.lib.impl.client.ClientSocketFactory;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.impl.attachment.DefaultAttachmentManager;
 import com.tractrac.model.lib.impl.data.DefaultPositionFactory;
@@ -38,6 +40,7 @@ public class Activator implements BundleActivator {
         ModelLocator.registerPositionFactory(new DefaultPositionFactory());
         ModelLocator.registerMetadataFactory(new DefaultMetadataFactory());
         SubscriptionLocator.registerSubscriberFactory(new SubscriberFactory());
+        MessageSystemLocator.registerClientSocketFactory(new ClientSocketFactory());
     }
 
     @Override

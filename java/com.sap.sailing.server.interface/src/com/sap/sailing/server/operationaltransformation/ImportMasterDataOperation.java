@@ -526,7 +526,7 @@ public class ImportMasterDataOperation extends
                         if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
                             VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
                             fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed(), gpsFix.getOptionalTrueHeading());
                         } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
                             VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
                             fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());

@@ -100,7 +100,7 @@ public class OceanRaceGPSFixImporter implements GPSFixImporter {
         } else {
             sogInKnots = 0.0;
         }
-        return new GPSFixMovingImpl(position, timePoint, new KnotSpeedWithBearingImpl(sogInKnots, cog));
+        return new GPSFixMovingImpl(position, timePoint, new KnotSpeedWithBearingImpl(sogInKnots, cog), /* optionalTrueHeading */ null);
     }
 
     @Override

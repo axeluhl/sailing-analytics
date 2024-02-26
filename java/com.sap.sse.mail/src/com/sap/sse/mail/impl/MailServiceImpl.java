@@ -125,7 +125,7 @@ public class MailServiceImpl extends AbstractReplicableWithObjectInputStream<Rep
         internalSendMail(toAddress, subject, new ContentSetter() {
             @Override
             public void setContent(MimeMessage msg) throws MessagingException {
-                msg.setContent(body, "text/plain");
+                msg.setContent(body, "text/plain; charset=UTF-8");
             }
         });
         return null;

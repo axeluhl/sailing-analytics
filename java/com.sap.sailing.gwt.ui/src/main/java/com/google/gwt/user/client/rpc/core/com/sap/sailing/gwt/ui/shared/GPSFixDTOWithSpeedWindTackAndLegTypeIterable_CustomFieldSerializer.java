@@ -15,6 +15,8 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Serializes the {@link GPSFixDTOWithSpeedWindTackAndLegType} objects one by one, writing only primitive values to the
@@ -33,6 +35,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable_CustomFieldSerializer 
     private static final int MASK_HAS_TACK                     = 1 << 4;
     private static final int MASK_HAS_POSITION                 = 1 << 5;
     private static final int MASK_HAS_TIMEPOINT                = 1 << 6;
+    private static final int MASK_HAS_TRUE_HEADING             = 1 << 7;
     
     @Override
     public void serializeInstance(SerializationStreamWriter streamWriter, GPSFixDTOWithSpeedWindTackAndLegTypeIterable instance)
@@ -67,6 +70,9 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable_CustomFieldSerializer 
             }
             if (fix.timepoint != null) {
                 streamWriter.writeLong(fix.timepoint.getTime());
+            }
+            if (fix.optionalTrueHeading != null) {
+                streamWriter.writeDouble(fix.optionalTrueHeading.getDegrees());
             }
         }
         streamWriter.writeInt(-1); // encodes a "mask" that marks the end of the iterable
@@ -124,7 +130,13 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable_CustomFieldSerializer 
             } else {
                 timepoint = null;
             }
-            list.add(new GPSFixDTOWithSpeedWindTackAndLegType(timepoint, position, speedWithBearing, degreesBoatToTheWind, tack, legType, extrapolated, detailValue));
+            final Bearing optionalTrueHeading;
+            if ((mask & MASK_HAS_TRUE_HEADING) != 0) {
+                optionalTrueHeading = new DegreeBearingImpl(streamReader.readDouble());
+            } else {
+                optionalTrueHeading = null;
+            }
+            list.add(new GPSFixDTOWithSpeedWindTackAndLegType(timepoint, position, speedWithBearing, optionalTrueHeading, degreesBoatToTheWind, tack, legType, extrapolated, detailValue));
         }
         return new GPSFixDTOWithSpeedWindTackAndLegTypeIterable(list);
     }
@@ -138,6 +150,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable_CustomFieldSerializer 
                 | (fix.tack                 == null ? 0 : MASK_HAS_TACK)
                 | (fix.position             == null ? 0 : MASK_HAS_POSITION)
                 | (fix.timepoint            == null ? 0 : MASK_HAS_TIMEPOINT)
+                | (fix.optionalTrueHeading  == null ? 0 : MASK_HAS_TRUE_HEADING)
                 ;
     }
     
