@@ -33,7 +33,7 @@ public abstract class BaseGPSFixImporterImpl implements GPSFixImporter {
                 return;
             }
             SpeedWithBearing speedWithBearing = previousFix.getSpeedAndBearingRequiredToReach(fix);
-            fix = new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speedWithBearing);
+            fix = new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speedWithBearing, /* optionalTrueHeading */ null);
         }
         previousFix = fix;
         callback.addFix(fix, device);

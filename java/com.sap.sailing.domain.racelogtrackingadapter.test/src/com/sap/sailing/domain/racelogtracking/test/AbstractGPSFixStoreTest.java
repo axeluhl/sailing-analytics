@@ -73,7 +73,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),
-                new MillisecondsTimePoint(millis), new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
+                new MillisecondsTimePoint(millis), new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)), /* optionalTrueHeading */ null);
     }
     
     protected GPSFix createFix(long millis, double lat, double lng) {

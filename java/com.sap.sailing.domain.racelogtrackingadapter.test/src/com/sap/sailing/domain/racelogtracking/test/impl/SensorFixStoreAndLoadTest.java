@@ -141,11 +141,6 @@ public class SensorFixStoreAndLoadTest {
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     private DynamicTrackedRace trackedRace;
 
-    protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
-        return new GPSFixMovingImpl(new DegreePosition(lat, lng), new MillisecondsTimePoint(millis),
-                new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
-    }
-
     @Before
     public void setUp() throws UnknownHostException, MongoException {
         dropPersistedData();
@@ -691,11 +686,11 @@ public class SensorFixStoreAndLoadTest {
         final MillisecondsTimePoint timePoint2 = new MillisecondsTimePoint(FIX_TIMESTAMP2);
         final MillisecondsTimePoint timePoint3 = new MillisecondsTimePoint(FIX_TIMESTAMP3);
         final TimePoint timePointBetween2And3 = new MillisecondsTimePoint((FIX_TIMESTAMP2+FIX_TIMESTAMP3)/2);
-        final GPSFixMoving fix1 = new GPSFixMovingImpl(pos1, timePoint, speed);
+        final GPSFixMoving fix1 = new GPSFixMovingImpl(pos1, timePoint, speed, /* optionalTrueHeading */ null);
         final Position pos2 = pos1.translateGreatCircle(course, speed.travel(timePoint.until(timePoint2)));
-        final GPSFixMoving fix2 = new GPSFixMovingImpl(pos2, timePoint2, speed);
+        final GPSFixMoving fix2 = new GPSFixMovingImpl(pos2, timePoint2, speed, /* optionalTrueHeading */ null);
         final Position pos3 = pos2.translateGreatCircle(course, speed.travel(timePoint2.until(timePoint3)));
-        final GPSFixMoving fix3 = new GPSFixMovingImpl(pos3, timePoint3, speed);
+        final GPSFixMoving fix3 = new GPSFixMovingImpl(pos3, timePoint3, speed, /* optionalTrueHeading */ null);
         gpsFixTrack.add(fix1);
         gpsFixTrack.add(fix2);
         gpsFixTrack.add(fix3);
@@ -710,7 +705,7 @@ public class SensorFixStoreAndLoadTest {
         final DegreeBearingImpl temporaryCourse = new DegreeBearingImpl(90);
         final GPSFixMoving fixBetween2And3 = new GPSFixMovingImpl(
                 pos2.translateGreatCircle(temporaryCourse, speed.add(new KnotSpeedWithBearingImpl(5, temporaryCourse)).travel(timePoint2.until(timePointBetween2And3))),
-                timePointBetween2And3, speed);
+                timePointBetween2And3, speed, /* optionalTrueHeading */ null);
         gpsFixTrack.add(fixBetween2And3);
         final Distance distanceTraveledDifferently = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
         assertTrue(distanceTraveledDifferently.compareTo(distanceTraveled) > 0);
@@ -721,7 +716,7 @@ public class SensorFixStoreAndLoadTest {
         final SpeedWithBearing doubledSpeed = speed.add(speed);
         final GPSFixMoving fix3Faster = new GPSFixMovingImpl(
                 pos2.translateGreatCircle(course, doubledSpeed.travel(timePoint2.until(timePoint3))),
-                timePoint3, doubledSpeed);
+                timePoint3, doubledSpeed, /* optionalTrueHeading */ null);
         gpsFixTrack.add(fix3Faster, /* replace */ true);
         final Distance distanceTraveledFaster = gpsFixTrack.getDistanceTraveled(timePoint, timePoint3);
         assertTrue(distanceTraveledFaster.compareTo(distanceTraveled) > 0);

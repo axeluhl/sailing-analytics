@@ -15,7 +15,7 @@ status() {
     echo "Status: $1"
 }
 SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
-curl --location --fail "http://${SELF_IP}/internal-server-status"
+curl --silent --location --fail "http://${SELF_IP}/internal-server-status" >/dev/null
 if [[ "$?" -ne 0 ]]; then
     status "500 Reverse proxy itself is unhealthy"
     outputMessage "Reverse proxy is unhealthy"

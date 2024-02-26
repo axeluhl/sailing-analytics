@@ -124,7 +124,7 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         TimePoint timePoint = new MillisecondsTimePoint(oi.readLong());
         Position position = new DegreePosition(oi.readDouble(), oi.readDouble());
         SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(oi.readDouble(), new DegreeBearingImpl(oi.readDouble()));
-        return new GPSFixMovingImpl(position, timePoint, speedWithBearing);
+        return new GPSFixMovingImpl(position, timePoint, speedWithBearing, /* optionalTrueHeading */ null); // legacy fixes only; no need to worry about true heading
     }
 
     protected void storeTrack(Competitor competitor, Boat boat, DynamicGPSFixTrack<Competitor, GPSFixMoving> track, String regattaName)

@@ -80,13 +80,13 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorATrack = trackedRace.getTrack(competitorA);
         final KnotSpeedWithBearingImpl sogCog = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45));
         TimePoint timePoint = trackedRace.getStartOfTracking().plus(10);
-        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint, sogCog);
+        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint, sogCog, /* optionalTrueHeading */ null);
         final Duration timeBetweenFixes = Duration.ofMillis(490);
         for (int i=0; i<20; i++) {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCog.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCog);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCog, /* optionalTrueHeading */ null);
         }
         TimePoint markPassingTimePoint = trackedRace.getStartOfTracking().plus(20);
         final List<MarkPassing> markPassingsForCompetitor = new ArrayList<>();
@@ -114,13 +114,13 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorATrack = trackedRace.getTrack(competitorA);
         final KnotSpeedWithBearingImpl sogCog = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45));
         TimePoint timePoint = trackedRace.getStartOfTracking().plus(10);
-        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint, sogCog);
+        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint, sogCog, /* optionalTrueHeading */ null);
         final Duration timeBetweenFixes = Duration.ofMillis(490);
         for (int i=0; i<20; i++) {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCog.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCog);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCog, /* optionalTrueHeading */ null);
         }
         // now run the actual test:
         final Iterable<HasTackTypeSegmentContext> allTTSegments = retrieveData();
@@ -138,14 +138,14 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
         final Position middleOfStartLine = trackedRace.getApproximatePosition(trackedRace.getRace().getCourse().getFirstWaypoint(), timePoint);
         final Position topMarkPosition = trackedRace.getApproximatePosition(Util.get(trackedRace.getRace().getCourse().getWaypoints(), 1), timePoint);
         // start straight "under" the top mark
-        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(middleOfStartLine.getLatDeg(), topMarkPosition.getLngDeg()), timePoint, sogCogPortTackUpwind);
+        GPSFixMovingImpl currentGPS = new GPSFixMovingImpl(new DegreePosition(middleOfStartLine.getLatDeg(), topMarkPosition.getLngDeg()), timePoint, sogCogPortTackUpwind, /* optionalTrueHeading */ null);
         expectedSegmentStarts.add(timePoint);
         final Duration timeBetweenFixes = Duration.ofMillis(490);
         for (int i=0; i<20; i++) {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCogPortTackUpwind.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackUpwind);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackUpwind, /* optionalTrueHeading */ null);
         }
         // now tack onto starboard tack:
         final KnotSpeedWithBearingImpl sogCogStarboardTackUpwind = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(315));
@@ -154,7 +154,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCogStarboardTackUpwind.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogStarboardTackUpwind);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogStarboardTackUpwind, /* optionalTrueHeading */ null);
         }
         final List<MarkPassing> markPassingsForCompetitor = new ArrayList<>();
         final TimePoint startMarkPassingTimePoint = trackedRace.getStartOfTracking().plus(20);
@@ -170,7 +170,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCogStarboardTackDownwind.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackUpwind);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackUpwind, /* optionalTrueHeading */ null);
         }
         // now gybe onto port tack:
         final KnotSpeedWithBearingImpl sogCogPortTackDownwind = new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(135));
@@ -179,7 +179,7 @@ public class TestSegmentsTackType extends StoredTrackBasedTest {
             competitorATrack.addGPSFix(currentGPS);
             final Position currentPosition = sogCogPortTackDownwind.travelTo(currentGPS.getPosition(), timeBetweenFixes);
             timePoint = timePoint.plus(timeBetweenFixes);
-            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackDownwind);
+            currentGPS = new GPSFixMovingImpl(currentPosition, timePoint, sogCogPortTackDownwind, /* optionalTrueHeading */ null);
         }
         // now run the actual test:
         final Iterable<HasTackTypeSegmentContext> allTTSegments = retrieveData();

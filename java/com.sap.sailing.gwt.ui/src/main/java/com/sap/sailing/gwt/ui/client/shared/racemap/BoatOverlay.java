@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Color;
@@ -99,11 +98,10 @@ public class BoatOverlay extends CanvasOverlayV3 {
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
             // now rotate the canvas accordingly
-            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
-            if (speedWithBearing == null) {
-                speedWithBearing = new SpeedWithBearingDTO(0, 0);
-            }
-            updateDrawingAngleAndSetCanvasRotation(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
+            final double trueHeadingInDegrees = boatFix.optionalTrueHeading != null
+                    ? boatFix.optionalTrueHeading.getDegrees()
+                    : (boatFix.speedWithBearing == null ? 0 : boatFix.speedWithBearing.bearingInDegrees);
+            updateDrawingAngleAndSetCanvasRotation(coordinateSystem.mapDegreeBearing(trueHeadingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
         }
     }
     

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * A memory-conserving representation of a {@link GPSFixMoving} object that produces the fine-grained
@@ -96,6 +97,7 @@ public abstract class AbstractCompactGPSFixMovingImpl extends AbstractCompactGPS
     
     @Override
     public boolean equals(Object other) {
-        return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed());
+        return super.equals(other) && other instanceof GPSFixMoving && getSpeed().equals(((GPSFixMoving) other).getSpeed())
+                && Util.equalsWithNull(getOptionalTrueHeading(), ((GPSFixMoving) other).getOptionalTrueHeading());
     }
 }

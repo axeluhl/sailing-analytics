@@ -68,6 +68,11 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
     }
     
     @Override
+    public SeriesView.Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public TabView.State getState() {
         return currentPresenter.getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }

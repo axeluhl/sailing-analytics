@@ -1933,9 +1933,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 .getBearing().getDegrees());
     }
 
-    public GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+    public GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing,
+            Bearing optionalTrueHeading, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
         return new GPSFixDTOWithSpeedWindTackAndLegType(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
-                speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated, detailValue);
+                speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), optionalTrueHeading, windDTO, tack, legType, extrapolated, detailValue);
     }
 
     @Override
@@ -3262,8 +3263,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
         Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
         WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
-        GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, speedWithBearing, windDTO, tack, legType, /* extrapolated */
-                false, null);
+        GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, speedWithBearing, /* optionalTrueHeading */ null, windDTO, tack, /* extrapolated */
+                legType, false, null);
         return fixDTO;
     }
 

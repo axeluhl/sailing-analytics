@@ -25,11 +25,9 @@ public class GPSFixMovingJsonDeserializerTest {
 
     @Test
     public void testGPSFixMovingDeserializer() throws ParseException, JsonDeserializationException {
-        GPSFixMoving gpsFix = GPSFixMovingImpl.create(8.0, 55.0, System.currentTimeMillis(), 5.0, 14.0);
-        
+        GPSFixMoving gpsFix = GPSFixMovingImpl.create(8.0, 55.0, System.currentTimeMillis(), 5.0, 14.0, /* optionalTrueHeadingDeg */ 15.0);
         JSONObject gpsFixSerialized = serializer.serialize(gpsFix);
         GPSFixMoving gpsFixDeserialized = deserializer.deserialize(gpsFixSerialized);
-        
         assertEquals(gpsFix, gpsFixDeserialized);
     }
 }
