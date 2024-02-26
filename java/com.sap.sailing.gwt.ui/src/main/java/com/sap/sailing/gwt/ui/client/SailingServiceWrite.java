@@ -308,6 +308,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws UnauthorizedException, IOException;
+    
+    LeaderboardGroupDTO createEventSeries(String name, String description, String shortName, boolean isPublic, String baseUrlAsString, 
+            ScoringSchemeType scoringSchemeType, int[] discardThresholds);
 
     void updateLeaderboardGroup(UUID leaderboardGroupId, String oldName, String newName, String newDescription,
             String newDisplayName, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds,

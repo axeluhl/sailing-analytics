@@ -6,8 +6,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.managementconsole.places.UiUtils;
 
 public class CreateEventSeriesViewImpl extends Composite implements CreateEventSeriesView {
@@ -21,6 +23,12 @@ public class CreateEventSeriesViewImpl extends Composite implements CreateEventS
     Anchor back;
     @UiField
     InputElement nameInput;
+    @UiField
+    InputElement description;
+    @UiField
+    InputElement shortName;
+    @UiField
+    CheckBox isPublic;
     
     private Presenter presenter;
     
@@ -32,7 +40,8 @@ public class CreateEventSeriesViewImpl extends Composite implements CreateEventS
 
     private void validateAndCreateEventSeries() {
         if (validate()) {
-            presenter.createEventSeries(nameInput.getValue());
+            presenter.createEventSeries(nameInput.getValue(), description.getValue(), shortName.getValue(), 
+                    isPublic.getValue(), /* baseUrlAsString */ null, ScoringSchemeType.HIGH_POINT, /* discardThresholds */ new int[0]);
         }
     }
     

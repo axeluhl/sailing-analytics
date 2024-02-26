@@ -12,8 +12,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.managementconsole.places.event.EventPresenter;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewResources;
-import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewView.Presenter;
 import com.sap.sailing.gwt.managementconsole.resources.ManagementConsoleResources;
 
 public class EventCard extends Composite {
@@ -37,7 +37,7 @@ public class EventCard extends Composite {
 
     private final Runnable openContextMenu;
 
-    public EventCard(final EventMetadataDTO event, final Presenter presenter) {
+    public EventCard(final EventMetadataDTO event, final EventPresenter presenter) {
         info = new EventInfo(event);
         initWidget(uiBinder.createAndBindUi(this));
 

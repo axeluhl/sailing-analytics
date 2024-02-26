@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaActivi
 import com.sap.sailing.gwt.managementconsole.places.event.media.EventMediaPlace;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewActivityProxy;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewPlace;
+import com.sap.sailing.gwt.managementconsole.places.eventseries.create.CreateEventSeriesActivityProxy;
+import com.sap.sailing.gwt.managementconsole.places.eventseries.create.CreateEventSeriesPlace;
 import com.sap.sailing.gwt.managementconsole.places.eventseries.events.EventSeriesEventsActivityProxy;
 import com.sap.sailing.gwt.managementconsole.places.eventseries.events.EventSeriesEventsPlace;
 import com.sap.sailing.gwt.managementconsole.places.eventseries.overview.EventSeriesOverviewActivityProxy;
@@ -62,6 +64,8 @@ public class ManagementConsoleActivityMapper implements ActivityMapper {
             return new RegattaOverviewActivityProxy(clientFactory, (RegattaOverviewPlace) place);
         } else if (place instanceof CreateEventPlace) {
             return new CreateEventActivityProxy(clientFactory, (CreateEventPlace) place);
+        } else if (place instanceof CreateEventSeriesPlace) {
+            return new CreateEventSeriesActivityProxy(clientFactory, (CreateEventSeriesPlace) place);
         } else if (place instanceof AddRegattaPlace) {
             return new AddRegattaActivityProxy(clientFactory, (AddRegattaPlace) place);
         }

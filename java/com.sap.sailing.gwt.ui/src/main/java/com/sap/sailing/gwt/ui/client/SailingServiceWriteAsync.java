@@ -515,6 +515,9 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURL,
             String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
             List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds, AsyncCallback<EventDTO> callback);
+    
+    void createEventSeries(String name, String description, String shortName, boolean isPublic, String baseUrlAsString, 
+            ScoringSchemeType scoringSchemeType, int[] discardThresholds, AsyncCallback<LeaderboardGroupDTO> callback);
 
     void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas, AsyncCallback<Void> callback);
 

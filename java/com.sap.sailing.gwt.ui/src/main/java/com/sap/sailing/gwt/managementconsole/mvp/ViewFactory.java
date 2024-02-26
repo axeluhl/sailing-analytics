@@ -20,6 +20,7 @@ public class ViewFactory {
     private EventOverviewView eventOverviewView;
     private RegattaOverviewView regattaOverviewView;
     private EventMediaView eventMediaView;
+    private EventSeriesEventsView eventSeriesEventsView;
 
     public DashboardView getDashboardView() {
         return new DashboardViewImpl();
@@ -33,7 +34,10 @@ public class ViewFactory {
     }
 
     public EventSeriesEventsView getEventSeriesEventsView() {
-        return new EventSeriesEventsViewImpl();
+        if (eventSeriesEventsView == null) {
+            eventSeriesEventsView = new EventSeriesEventsViewImpl();
+        }
+        return eventSeriesEventsView;
     }
 
     public EventOverviewView getEventOverviewView() {

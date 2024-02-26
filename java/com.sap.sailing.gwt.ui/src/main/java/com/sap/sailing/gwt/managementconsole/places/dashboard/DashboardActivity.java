@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.managementconsole.places.dashboard;
 
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.managementconsole.app.ManagementConsoleClientFactory;
 import com.sap.sailing.gwt.managementconsole.places.AbstractManagementConsoleActivity;
 import com.sap.sailing.gwt.managementconsole.places.event.create.CreateEventPlace;
 import com.sap.sailing.gwt.managementconsole.places.event.overview.EventOverviewPlace;
+import com.sap.sailing.gwt.managementconsole.places.eventseries.create.CreateEventSeriesPlace;
 import com.sap.sailing.gwt.managementconsole.places.eventseries.overview.EventSeriesOverviewPlace;
 
 public class DashboardActivity extends AbstractManagementConsoleActivity<DashboardPlace>
@@ -31,7 +31,7 @@ public class DashboardActivity extends AbstractManagementConsoleActivity<Dashboa
 
     @Override
     public void navigateToCreateEventSeries() {
-        Window.alert("Creating an Event Series - Comming soon!");
+        getClientFactory().getPlaceController().goTo(new CreateEventSeriesPlace());
     }
 
     @Override

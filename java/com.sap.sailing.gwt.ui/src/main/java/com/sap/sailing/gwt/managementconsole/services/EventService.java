@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.common.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.common.communication.event.EventSeriesMetadataDTO;
@@ -85,37 +86,32 @@ public class EventService {
         }
     }
 
-    public void createEvent(final String name, final String venue, final Date date, final List<String> courseAreaNames, final AsyncCallback<EventDTO> callback) {
+    public void createEvent(final String name, final String venue, final Date startDate,
+            final List<String> courseAreaNames, final AsyncCallback<EventDTO> callback) {
         createDefaultLeaderboardGroup(new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onFailure(final Throwable t) {
                 callback.onFailure(t);
             }
+
             @Override
             public void onSuccess(final LeaderboardGroupDTO result) {
                 final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
                 final List<CourseAreaDTO> courseAreaDtos = new ArrayList<CourseAreaDTO>();
                 courseAreaNames.forEach(name -> courseAreaDtos.add(new CourseAreaDTO(UUID.randomUUID(), name)));
-                sailingService.createEvent(name, null, date, null, venue, false, courseAreaDtos, null, null, new HashMap<String, String>(),
-                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback);
+                sailingService.createEvent(name, /* eventDescription */ null, startDate, /* endDate */ null, venue,
+                        /* isPublic */ false, courseAreaDtos, /* officialWebsiteURL */null, /* baseURL */ null,
+                        /* sailorsInfoWebsiteURLsByLocaleName */ new HashMap<String, String>(),
+                        /* images */ new ArrayList<ImageDTO>(), /* videos */ new ArrayList<VideoDTO>(),
+                        leaderboardGroupIDs, callback);
             }
         });
     }
 
-    public void createEventSeries(final String name, final AsyncCallback<EventDTO> callback) {
-        createDefaultLeaderboardGroup(new AsyncCallback<LeaderboardGroupDTO>() {
-            @Override
-            public void onFailure(final Throwable t) {
-                callback.onFailure(t);
-            }
-            @Override
-            public void onSuccess(final LeaderboardGroupDTO result) {
-                final List<UUID> leaderboardGroupIDs = Arrays.asList(result.getId());
-                final List<CourseAreaDTO> courseAreaDtos = new ArrayList<CourseAreaDTO>();
-                sailingService.createEvent(name, null, null, null, null, false, courseAreaDtos, null, null, new HashMap<String, String>(),
-                        new ArrayList<ImageDTO>(), new ArrayList<VideoDTO>(), leaderboardGroupIDs, callback);
-            }
-        });
+    public void createEventSeries(String name, String description, String shortName, boolean isPublic, String baseUrlAsString, 
+            ScoringSchemeType scoringSchemeType, int[] discardThresholds, final AsyncCallback<LeaderboardGroupDTO> callback) {
+        sailingService.createEventSeries(name, description, shortName, isPublic, baseUrlAsString, scoringSchemeType, 
+                discardThresholds, callback);
     }
 
     private void createDefaultLeaderboardGroup(final AsyncCallback<LeaderboardGroupDTO> leaderboardGroupCallback) {

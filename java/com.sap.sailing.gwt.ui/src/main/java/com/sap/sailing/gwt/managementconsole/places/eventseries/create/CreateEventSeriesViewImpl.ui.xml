@@ -26,19 +26,16 @@
                 <input ui:field="nameInput" placeholder="{i18n.eventSeriesNamePlaceholder}"/>
             </div>
              <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <label for="date"><ui:text from='{i18n.dateLabel}' /></label>
-                <dt:DateInput ui:field="dateInput"/>
+                <label for="description"><ui:text from='{i18n.description}' /></label>
+                <input ui:field="description" placeholder="{i18n.description}"/>
             </div>
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <label for="venue"><ui:text from='{i18n.venueLabel}' /></label>
-                <input ui:field="venueInput" placeholder="{i18n.venuePlaceholder}"/>
+                <label for="shortName"><ui:text from='{i18n.shortName}' /></label>
+                <input ui:field="shortName" placeholder="{i18n.shortName}"/>
             </div>
-            
             <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6}">
-                <div class="{res.mediaCss.small12} {res.mediaCss.medium12}">
-                    <label for="course_areas"><ui:text from='{i18n.courseAreasLabel}' /></label> 
-                </div>
-                <los:ListOfStringsInput ui:field="courseAreasInput"></los:ListOfStringsInput>
+                <label for="isPublic"><ui:text from='{i18n.isListedOnHomepage}' /></label>
+                <g:CheckBox ui:field="isPublic"/>
             </div>
         </div>
         <div class="{res.mediaCss.grid}">

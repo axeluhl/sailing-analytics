@@ -1548,6 +1548,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 });
     }
 
+
+    @Override
+    public LeaderboardGroupDTO createEventSeries(String name, String description, String shortName, boolean isPublic, String baseUrlAsString,
+            ScoringSchemeType scoringSchemeType, int[] discardThresholds) {
+        return createLeaderboardGroup(name, description, name, false, discardThresholds, scoringSchemeType);
+    }
+
     @Override
     public void createCourseAreas(UUID eventId, List<CourseAreaDTO> courseAreas) {
         getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
