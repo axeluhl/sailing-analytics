@@ -13,7 +13,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * Configures the authentication framework in a common way that is suitable for generic flyout based authentication.
@@ -26,7 +26,7 @@ public class GenericAuthentication {
     private final EventBus eventBus = new SimpleEventBus();
     private final AuthenticationManager manager;
     
-    public GenericAuthentication(UserService userService, PaywallResolverImpl paywallResolver, AuthenticationMenuView menuView,
+    public GenericAuthentication(UserService userService, PaywallResolver paywallResolver, AuthenticationMenuView menuView,
             FlyoutAuthenticationView display, GenericAuthenticationLinkFactory linkFactory, CommonSharedResources res) {
         manager = new AuthenticationManagerImpl(userService, paywallResolver, eventBus,
                 linkFactory.createEmailValidationLink(), linkFactory.createPasswordResetLink());

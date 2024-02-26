@@ -18,6 +18,7 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
@@ -90,7 +91,7 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     protected PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> createLeaderboardComponentContext(
             String leaderboardName, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, String placeToken,
             Iterable<DetailType> availableDetailTypes) {
-        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         final MultiRaceLeaderboardPanelLifecycle lifecycle = new MultiRaceLeaderboardPanelLifecycle(null, StringMessages.INSTANCE, availableDetailTypes, paywallResolver);
         final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory.createStoredSettingsLocatorForEventRegattaLeaderboard(leaderboardName);
 

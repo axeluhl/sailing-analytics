@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanel
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * A special stand alone Leaderboard with an SAP Header is handled by this lifecycle
@@ -22,7 +22,7 @@ public class LeaderboardWithZoomingPerspectiveLifecycle extends AbstractPerspect
     public static final String ID = "lbwh";
 
     public LeaderboardWithZoomingPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes,
-            PaywallResolverImpl paywallResolver) {
+            PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +

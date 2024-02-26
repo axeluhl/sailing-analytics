@@ -19,7 +19,7 @@ import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class CombinedWindPanel extends FlowPanel {
     
@@ -38,7 +38,7 @@ public class CombinedWindPanel extends FlowPanel {
     private final CoordinateSystem coordinateSystem;
     
     public CombinedWindPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
-            StringMessages stringMessages, CoordinateSystem coordinateSystem, PaywallResolverImpl paywallResolver, SecuredDTO raceDTO) {
+            StringMessages stringMessages, CoordinateSystem coordinateSystem, PaywallResolver paywallResolver, SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;

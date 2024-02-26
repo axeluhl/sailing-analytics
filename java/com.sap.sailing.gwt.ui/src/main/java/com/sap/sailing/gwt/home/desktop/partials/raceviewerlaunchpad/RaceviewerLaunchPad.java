@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
 
@@ -37,11 +37,11 @@ class RaceviewerLaunchPad<T extends SimpleRaceMetadataDTO> extends Composite {
     private final Function<? super T, String> mapAndWindChartUrlFactory;
 
     private final PopupPanel parent;
-    private final PaywallResolverImpl paywallResolver;
+    private final PaywallResolver paywallResolver;
     private Set<RaceviewerLaunchPadItem> launchpadItems = new HashSet<>();
 
     RaceviewerLaunchPad(final T data, final BiFunction<? super T, String, String> raceboardUrlFactory,
-            final Function<? super T, String> mapAndWindChartUrlFactory, final PopupPanel parent, PaywallResolverImpl paywallResolver) {
+            final Function<? super T, String> mapAndWindChartUrlFactory, final PopupPanel parent, PaywallResolver paywallResolver) {
         this.raceboardUrlFactory = raceboardUrlFactory;
         this.mapAndWindChartUrlFactory = mapAndWindChartUrlFactory;
         this.parent = parent;

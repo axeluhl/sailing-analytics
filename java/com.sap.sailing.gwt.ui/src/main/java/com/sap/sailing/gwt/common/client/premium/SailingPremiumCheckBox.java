@@ -7,12 +7,12 @@ import com.google.gwt.user.client.ui.Image;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 public class SailingPremiumCheckBox extends PremiumCheckBox {
 
-    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolverImpl paywallResolver, SecuredDTO contextDTO) {
+    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver, SecuredDTO contextDTO) {
         super(label, action, paywallResolver, contextDTO);
     }
 

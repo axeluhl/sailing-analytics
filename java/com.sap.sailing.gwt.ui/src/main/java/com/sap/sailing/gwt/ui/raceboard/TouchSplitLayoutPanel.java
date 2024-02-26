@@ -51,7 +51,7 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumToggleButton;
 
 /**
@@ -240,7 +240,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
          *                      the splitters height will get less.
          */
         public Splitter(Widget target, Component<?> associatedComponent, boolean reverse,
-                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
+                PaywallResolver paywallResolver, SecuredDTO dtoContext, Action action) {
             super();
             getElement().getStyle().setOverflow(Overflow.VISIBLE);
             // add dragger - style will be set by implementing classes
@@ -401,7 +401,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      */
     class HSplitter extends Splitter {
         public HSplitter(Widget target, Component<?> associatedComponent, boolean reverse,
-                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
+                PaywallResolver paywallResolver, SecuredDTO dtoContext, Action action) {
             super(target, associatedComponent, reverse, paywallResolver, dtoContext, action);
             addStyleName("SplitLayoutPanel-Divider-Horizontal");
             getDragger().getElement().getStyle().setPropertyPx("width", horizontalSplitterSize);
@@ -463,7 +463,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      */
     class VSplitter extends Splitter {
         public VSplitter(final Widget target, final Component<?> associatedComponent, boolean reverse,
-                PaywallResolverImpl paywallResolver, SecuredDTO dtoContext, Action action) {
+                PaywallResolver paywallResolver, SecuredDTO dtoContext, Action action) {
             super(target, associatedComponent, reverse, paywallResolver, dtoContext, action);
             addStyleName("SplitLayoutPanel-Divider-Vertical");
             getDragger().getElement().getStyle().setPropertyPx("height", verticalSplitterSize);
@@ -522,13 +522,13 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
 
     private final int horizontalSplitterSize;
     private final int verticalSplitterSize;
-    private final PaywallResolverImpl paywallResolver;
+    private final PaywallResolver paywallResolver;
     private SecuredDTO dtoContext;
     
     /**
      * Construct a new {@link TouchSplitLayoutPanel} with the default splitter size of 8px.
      */
-    public TouchSplitLayoutPanel(PaywallResolverImpl paywallResolver, RaceDTO dtoContext) {
+    public TouchSplitLayoutPanel(PaywallResolver paywallResolver, RaceDTO dtoContext) {
         this(DEFAULT_SPLITTER_SIZE, DEFAULT_SPLITTER_SIZE, paywallResolver, dtoContext);
     }
 
@@ -538,7 +538,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
      * 
      */
     public TouchSplitLayoutPanel(int horizonatalSplitterSize, int verticalSplitterSize, 
-            PaywallResolverImpl paywallResolver, SecuredDTO dtoContext) {
+            PaywallResolver paywallResolver, SecuredDTO dtoContext) {
         super(Unit.PX);
         this.horizontalSplitterSize = horizonatalSplitterSize;
         this.verticalSplitterSize = verticalSplitterSize;

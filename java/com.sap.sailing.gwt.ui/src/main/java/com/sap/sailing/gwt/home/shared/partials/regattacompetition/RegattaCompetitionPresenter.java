@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class RegattaCompetitionPresenter
         implements RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>,
@@ -32,9 +32,9 @@ public abstract class RegattaCompetitionPresenter
     
     private Map<RegattaCompetitionSeriesView, Map<RegattaCompetitionFleetView, 
             Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO>>> structure = new HashMap<>();
-    private final PaywallResolverImpl paywallResolver;
+    private final PaywallResolver paywallResolver;
 
-    public RegattaCompetitionPresenter(RegattaCompetitionView view, PaywallResolverImpl paywallResolver) {
+    public RegattaCompetitionPresenter(RegattaCompetitionView view, PaywallResolver paywallResolver) {
         this.view = view;
         this.paywallResolver = paywallResolver;
     }
@@ -109,7 +109,7 @@ public abstract class RegattaCompetitionPresenter
     
     protected abstract String getMapAndWindChartUrl(String leaderboardName, String raceName, String fleetName);
 
-    public PaywallResolverImpl getPaywallResolver() {
+    public PaywallResolver getPaywallResolver() {
         return paywallResolver;
     }
 

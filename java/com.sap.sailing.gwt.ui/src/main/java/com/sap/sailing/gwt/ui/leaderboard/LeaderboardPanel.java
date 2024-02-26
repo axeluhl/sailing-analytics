@@ -132,6 +132,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
@@ -341,7 +342,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private HandlerRegistration leaderboardAsTableSelectionModelRegistration;
 
     private final FlowPanel contentPanel = new FlowPanel();
-    protected final PaywallResolverImpl paywallResolver;
+    protected final PaywallResolver paywallResolver;
 
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -3663,7 +3664,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         sb.appendHtmlConstant("</div>");
     }
 
-    public PaywallResolverImpl getPaywallResolver() {
+    public PaywallResolver getPaywallResolver() {
         return this.paywallResolver;
     }
 }

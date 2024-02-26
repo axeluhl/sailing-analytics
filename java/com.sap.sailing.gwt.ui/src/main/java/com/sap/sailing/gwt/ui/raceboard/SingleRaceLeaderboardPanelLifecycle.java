@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSett
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle<SingleRaceLeaderboardSettings> {
     
@@ -19,11 +19,11 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
     private final boolean canBoatsOfCompetitorsChangePerRace;
-    private final PaywallResolverImpl paywallResolver;
+    private final PaywallResolver paywallResolver;
     private final AbstractLeaderboardDTO leaderboardDTO;
 
     public SingleRaceLeaderboardPanelLifecycle(final StringMessages stringMessages,
-            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolverImpl paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
+            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
         super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;

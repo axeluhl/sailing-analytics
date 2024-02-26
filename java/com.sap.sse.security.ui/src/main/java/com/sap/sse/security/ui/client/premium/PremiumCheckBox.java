@@ -61,7 +61,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
      */
-    protected PremiumCheckBox(final String label, final Action action, final PaywallResolverImpl paywallResolver, final SecuredDTO contextDTO) {
+    protected PremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver, final SecuredDTO contextDTO) {
         super(action, paywallResolver, contextDTO);
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);

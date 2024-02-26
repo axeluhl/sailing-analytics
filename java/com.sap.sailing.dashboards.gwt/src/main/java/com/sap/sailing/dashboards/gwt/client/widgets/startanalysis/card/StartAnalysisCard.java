@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
@@ -168,7 +169,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.BUOYS);
         }
-        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         //TODO bug5774 fill dtoContext
         final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
         final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);

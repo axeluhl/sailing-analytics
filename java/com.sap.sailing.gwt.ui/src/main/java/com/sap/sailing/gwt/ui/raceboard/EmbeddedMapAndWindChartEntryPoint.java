@@ -70,6 +70,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
@@ -84,7 +85,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
     
     @Override
     protected void doOnModuleLoad() {
-        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+        final PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
         //TODO: bug5774 get securedDTO later with callback
         final SecuredDTOProxy securedDTO = new SecuredDTOProxy();
         super.doOnModuleLoad();
@@ -163,7 +164,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                 });
     }
     
-    private void createErrorPage(String message, PaywallResolverImpl paywallResolver) {
+    private void createErrorPage(String message, PaywallResolver paywallResolver) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         final SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication();
         new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
@@ -224,7 +225,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider, competitorsAndBoats); // show no competitors
         }
-        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+        final PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
         final RaceMap raceMap = new RaceMap(/* parent */ null, /* context */ null, new RaceMapLifecycle(getStringMessages(), paywallResolver, raceDTOProxy),
                 raceMapSettings, getSailingService(), asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, new RaceCompetitorSet(competitorSelection), getStringMessages(), selectedRaceIdentifier,
@@ -262,7 +263,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         return result;
     }
 
-    private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart, PaywallResolverImpl paywallResolver, SecuredDTO dtoContext) {
+    private void createRaceBoardInOneScreenMode(final RaceMap raceMap, final WindChart windChart, PaywallResolver paywallResolver, SecuredDTO dtoContext) {
         final TouchSplitLayoutPanel panel = new TouchSplitLayoutPanel(/* horizontal splitter width */ 3, /* vertical splitter height */ 25, paywallResolver, dtoContext);
         if (windChart != null) {
             panel.insert(windChart.getEntryWidget(), windChart, Direction.SOUTH, DEFAULT_WIND_CHART_HEIGHT);

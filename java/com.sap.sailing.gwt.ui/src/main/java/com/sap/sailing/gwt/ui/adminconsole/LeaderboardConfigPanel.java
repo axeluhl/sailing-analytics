@@ -109,6 +109,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
@@ -634,7 +635,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
      */
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard,
             Iterable<DetailType> availableDetailType) {
-        PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
 
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {

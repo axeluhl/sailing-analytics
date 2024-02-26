@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PremiumCheckBox;
 
 public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSettings> implements SettingsDialogComponent<T> {
@@ -52,11 +52,11 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected T initialSettings;
     protected Iterable<DetailType> availableDetailTypes;
     
-    protected final PaywallResolverImpl paywallResolver;
+    protected final PaywallResolver paywallResolver;
     private final AbstractLeaderboardDTO leaderboardDTO;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolverImpl paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;

@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
@@ -290,7 +291,7 @@ public class AutoplayHelper {
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
         typesToConsiderOnZoom.add(ZoomTypes.BOATS);
         RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
-        final PaywallResolverImpl paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
         final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,

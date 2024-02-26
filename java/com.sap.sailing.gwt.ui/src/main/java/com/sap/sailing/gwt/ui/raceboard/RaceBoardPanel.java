@@ -139,6 +139,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
@@ -308,7 +309,7 @@ public class RaceBoardPanel
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
         raceMapResources.raceMapStyle().ensureInjected();
-        final PaywallResolverImpl paywallResolverRace = new PaywallResolverImpl(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
+        final PaywallResolver paywallResolverRace = new PaywallResolverImpl(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolverRace, raceDTO);
         RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
@@ -483,7 +484,7 @@ public class RaceBoardPanel
             String leaderboardGroupName, UUID leaderboardGroupId, UUID event, FlowPanel mainPanel,
             boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService,
             boolean showChartMarkEditMediaButtonsAndVideo, StrippedLeaderboardDTO leaderboard,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, PaywallResolverImpl paywallResolver) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, PaywallResolver paywallResolver) {
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = settings
                 .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
@@ -616,7 +617,7 @@ public class RaceBoardPanel
         racetimePanel.setBarOverlays(overlays);
     }
 
-    private void setupUserManagementControlPanel(UserService userService, PaywallResolverImpl paywallResolver) {
+    private void setupUserManagementControlPanel(UserService userService, PaywallResolver paywallResolver) {
         mainCss.ensureInjected();
         final FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
         final GenericAuthentication genericAuthentication = new GenericAuthentication(userService, paywallResolver, userManagementMenuView, display, 

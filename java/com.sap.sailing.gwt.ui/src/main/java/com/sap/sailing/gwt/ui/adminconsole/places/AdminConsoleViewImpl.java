@@ -127,6 +127,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.RoleDefinitionsPanel;
 import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
@@ -151,7 +152,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private final StringMessages stringMessages = StringMessages.INSTANCE;
 
     private UserService userService;
-    private PaywallResolverImpl paywallResolver;
+    private PaywallResolver paywallResolver;
 
     private ErrorReporter errorReporter;
 

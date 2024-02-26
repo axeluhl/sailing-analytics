@@ -6,12 +6,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
 import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class EditableLeaderboardLifecycle extends AbstractMultiRaceLeaderboardPanelLifecycle<EditableLeaderboardSettings> {
 
     public EditableLeaderboardLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard,
-            Iterable<DetailType> availableDetailTypes, PaywallResolverImpl paywallResolver) {
+            Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
         super(leaderboard, stringMessages, availableDetailTypes, paywallResolver);
     }
 

@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
@@ -31,7 +31,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public static final String ID = "rb";
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
-            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, PaywallResolverImpl paywallResolver, 
+            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService, PaywallResolver paywallResolver, 
             Iterable<DetailType> availableDetailTypes, final SecuredDTO raceDTO) {
         this.stringMessages = stringMessages;
         raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolver, raceDTO);

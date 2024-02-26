@@ -5,12 +5,12 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardPerspectiveOwnSettings> {
 
     protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
-            AbstractLeaderboardDTO leaderboard, boolean isOverall, Iterable<DetailType> availableDetailTypes, PaywallResolverImpl paywallResolver) {
+            AbstractLeaderboardDTO leaderboard, boolean isOverall, Iterable<DetailType> availableDetailTypes, PaywallResolver paywallResolver) {
         addLifeCycle(new MultiRaceLeaderboardPanelLifecycle(leaderboard, stringMessages, availableDetailTypes, paywallResolver));
         addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle(isOverall));
     }

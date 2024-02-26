@@ -38,7 +38,7 @@ public abstract class PremiumToggleButton extends PremiumUiElement implements Ha
      * A Composite component, that includes a checkbox and an additional premium icon, indicating that the feature to be
      * enabled is a premium feature if the user does not have the permission.
      */
-    protected PremiumToggleButton(final String label, final Action action, final PaywallResolverImpl paywallResolver,
+    protected PremiumToggleButton(final String label, final Action action, final PaywallResolver paywallResolver,
             Component<?> associatedComponent, SecuredDTO dtoContext) {
         super(action, paywallResolver, dtoContext);
         PremiumToogleButtonResource.INSTANCE.css().ensureInjected();

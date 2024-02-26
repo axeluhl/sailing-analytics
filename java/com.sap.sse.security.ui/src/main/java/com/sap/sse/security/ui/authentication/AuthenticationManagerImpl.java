@@ -22,6 +22,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -40,7 +41,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
-    private final PaywallResolverImpl paywallResolver;
+    private final PaywallResolver paywallResolver;
     
     private final StringMessages i18n = StringMessages.INSTANCE;
     private final ErrorMessageView view = new ErrorMessageViewImpl();
@@ -77,13 +78,13 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      * @param passwordResetUrl
      *            URL which is send to users to reset their password
      */
-    public AuthenticationManagerImpl(UserService userService, PaywallResolverImpl paywallResolver, 
+    public AuthenticationManagerImpl(UserService userService, PaywallResolver paywallResolver, 
             EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
         this(userService.getUserManagementWriteService(), userService, paywallResolver,  eventBus, emailConfirmationUrl, passwordResetUrl);
     }
     
     private AuthenticationManagerImpl(UserManagementWriteServiceAsync userManagementWriteService, UserService userService,
-            PaywallResolverImpl paywallResolver, final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
+            PaywallResolver paywallResolver, final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
         this.userManagementWriteService = userManagementWriteService;
         this.userService = userService;
         this.eventBus = eventBus;

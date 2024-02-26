@@ -5,7 +5,7 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.sapheader.FixedFlyoutAuthenticationView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * Sailing-specific extension of {@link GenericAuthentication} using a {@link FixedFlyoutAuthenticationView}, which is
@@ -14,7 +14,7 @@ import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 public class FixedSailingAuthentication extends GenericAuthentication {
     private static final CommonSharedResources res = CommonSharedResources.INSTANCE;
     
-    public FixedSailingAuthentication(UserService userService, PaywallResolverImpl paywallResolver, 
+    public FixedSailingAuthentication(UserService userService, PaywallResolver paywallResolver, 
             AuthenticationMenuView userManagementMenuView) {
         super(userService, paywallResolver, userManagementMenuView, new FixedFlyoutAuthenticationView(res),
                 SailingAuthenticationEntryPointLinkFactory.INSTANCE, res);

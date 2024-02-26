@@ -41,6 +41,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
@@ -143,7 +144,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                                     }
                                 });
                         if (leaderboardDTO.type.isMetaLeaderboard()) {
-                            PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+                            PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
                             // overall
                             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
                                     stringmessages, leaderboardDTO, result, paywallResolver);
@@ -251,7 +252,7 @@ public class LeaderboardEntryPoint extends AbstractSailingReadEntryPoint impleme
                 leaderboardDisplayName = leaderboardName;
             }
             SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
-            PaywallResolverImpl paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+            PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
             new FixedSailingAuthentication(getUserService(), paywallResolver, header.getAuthenticationMenuView());
             mainPanel.addNorth(header, 75);
         }
