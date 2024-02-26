@@ -85,7 +85,7 @@
             <name>!ldi.releaseBuild</name>
           </property>
         </activation>
-        <!-- The repository declarations are only active when running ion a non Lean DI environment.
+        <!-- The repository declarations are only active when running in a non Lean DI environment.
              On Lean DI we are not allowed to define our own repositories because everything must be hosted in SAP's Nexus server. -->
         <repositories>
           <repository>
