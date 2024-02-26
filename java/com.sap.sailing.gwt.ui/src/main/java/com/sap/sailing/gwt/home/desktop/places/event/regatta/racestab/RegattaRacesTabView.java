@@ -108,6 +108,11 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
     
     @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public void start(RegattaRacesPlace myPlace, final AcceptsOneWidget contentArea) {
         if(currentPresenter.getRegattaMetadata() == null) {
             contentArea.setWidget(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));

@@ -64,7 +64,7 @@ public class PositionTest {
     public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(49.2, 008.3);
         SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
-        VeryCompactGPSFixMovingImpl compactFix = new VeryCompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
+        VeryCompactGPSFixMovingImpl compactFix = new VeryCompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb, /* optionalTrueHeading */ null);
         assertNotSame(p1, compactFix.getPosition());
         PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
         assertNotSame(swb, compactFix.getSpeed());

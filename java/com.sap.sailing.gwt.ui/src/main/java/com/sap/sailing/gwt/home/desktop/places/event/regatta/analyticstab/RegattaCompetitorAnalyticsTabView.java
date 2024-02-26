@@ -139,6 +139,11 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         this.currentPresenter = currentPresenter;
     }
 
+    @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
+
     public boolean isSmallWidth() {
         int width = Window.getClientWidth();
         return width <= 720;

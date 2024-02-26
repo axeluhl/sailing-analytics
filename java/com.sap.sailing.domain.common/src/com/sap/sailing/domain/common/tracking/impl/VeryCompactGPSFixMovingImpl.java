@@ -47,6 +47,13 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
     private final short degreeBearingScaled;
     
     /**
+     * See {@link CompactPositionHelper}; valid if and only if {@link #trueHeadingDegreesSet} is {@code true}.
+     */
+    private final short trueHeadingDegreesScaled;
+    
+    private final boolean trueHeadingDegreesSet;
+    
+    /**
      * When <code>{@link #whatIsCached}&amp;{@link #IS_ESTIMATED_SPEED_CACHED} != 0</code>, this field tells the estimated speed's
      * true "bearing" (true course over ground) in degrees, scaled into a short value using {@link CompactPositionHelper}.
      */
@@ -95,6 +102,15 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
         }
     }
     
+    private class VeryCompactTrueHeading extends AbstractBearing {
+        private static final long serialVersionUID = 1130980861113826462L;
+
+        @Override
+        public double getDegrees() {
+            return CompactPositionHelper.getDegreeBearing(trueHeadingDegreesScaled);
+        }
+    }
+    
     private class VeryCompactEstimatedSpeedBearing extends AbstractBearing {
         private static final long serialVersionUID = 8549231429037883121L;
 
@@ -118,7 +134,7 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
         }
     }
     
-    public VeryCompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) throws CompactionNotPossibleException {
+    public VeryCompactGPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed, Bearing optionalTrueHeading) throws CompactionNotPossibleException {
         super(timePoint);
         latDegScaled = CompactPositionHelper.getLatDegScaled(position);
         lngDegScaled = CompactPositionHelper.getLngDegScaled(position);
@@ -129,15 +145,27 @@ public class VeryCompactGPSFixMovingImpl extends AbstractCompactGPSFixMovingImpl
             speedInKnotsScaled = CompactPositionHelper.getKnotSpeedScaled(speed);
             degreeBearingScaled = CompactPositionHelper.getDegreeBearingScaled(speed.getBearing());
         }
+        if (optionalTrueHeading == null) {
+            trueHeadingDegreesSet = false;
+            trueHeadingDegreesScaled = 0;
+        } else {
+            trueHeadingDegreesSet = true;
+            trueHeadingDegreesScaled = CompactPositionHelper.getDegreeBearingScaled(optionalTrueHeading);
+        }
     }
     
     public VeryCompactGPSFixMovingImpl(GPSFixMoving gpsFixMoving) throws CompactionNotPossibleException {
-        this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed());
+        this(gpsFixMoving.getPosition(), gpsFixMoving.getTimePoint(), gpsFixMoving.getSpeed(), gpsFixMoving.getOptionalTrueHeading());
     }
 
     @Override
     public SpeedWithBearing getSpeed() {
         return new VeryCompactSpeedWithBearing();
+    }
+    
+    @Override
+    public Bearing getOptionalTrueHeading() {
+        return trueHeadingDegreesSet ? new VeryCompactTrueHeading() : null;
     }
 
     @Override

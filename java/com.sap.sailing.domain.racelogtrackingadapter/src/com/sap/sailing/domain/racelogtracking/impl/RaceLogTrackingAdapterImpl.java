@@ -302,7 +302,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private MailService getMailService() {
         ServiceReference<MailService> ref = Activator.getContext().getServiceReference(MailService.class);
         if (ref == null) {
-            logger.warning("No file storage management service registered");
+            logger.warning("No mail service registered");
             return null;
         }
         return Activator.getContext().getService(ref);

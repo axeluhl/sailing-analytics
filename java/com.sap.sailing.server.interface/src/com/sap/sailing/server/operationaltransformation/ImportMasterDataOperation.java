@@ -339,7 +339,7 @@ public class ImportMasterDataOperation extends
                 } else if (override) {
                     for (RaceColumn raceColumn : existingLeaderboards.get(leaderboard.getName()).getRaceColumns()) {
                         for (Fleet fleet : raceColumn.getFleets()) {
-                            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                             if (trackedRace != null) {
                                 raceColumn.releaseTrackedRace(fleet);
                             }
@@ -414,7 +414,7 @@ public class ImportMasterDataOperation extends
 
     private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
             final RaceLog log, RaceLogIdentifier identifier) {
-        RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
+        final RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
         log.lockForRead();
         try {
@@ -526,7 +526,7 @@ public class ImportMasterDataOperation extends
                         if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
                             VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
                             fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed(), gpsFix.getOptionalTrueHeading());
                         } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
                             VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
                             fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());

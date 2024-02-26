@@ -18,6 +18,8 @@ import com.tractrac.util.lib.api.TimeUtils;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -27,11 +29,11 @@ import java.util.UUID;
 public class EventListener extends AbstractListener {
 
 	private static void show(Object obj) {
-		System.out.println(String.valueOf(TimeUtils.formatDateInMillis(new Date().getTime())) + ": " + obj);
+		System.out.println(TimeUtils.formatDateInMillis(new Date().getTime()) + ": " + obj);
 	}
 
-	private static long controlPos = 0;
-	private static long compPos = 0;
+	private static Map<UUID, Integer> controlPos = new HashMap<>();
+	private static Map<UUID, Integer> compPos = new HashMap<>();
 		
 	@Override
 	public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
@@ -62,17 +64,21 @@ public class EventListener extends AbstractListener {
 	public void gotControlPassings(long timestamp, IRaceCompetitor raceCompetitor,
 			IControlPassings markPassings) {
 		show("New markpassings " + markPassings + " for the competitor " + raceCompetitor.getCompetitor().toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
-
 	}
 
 	@Override
 	public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
-		StringBuilder message = new StringBuilder();
-		message.append("COTRLPOS " + markNumber);
-		message.append("\t").append(control.getShortName()).append("\t");
-		message.append(position.toString());
-		//show(message.toString());
-		controlPos++;
+        String message = "COTRLPOS " + control.getName() + " - " + markNumber +
+                "\t" + control.getShortName() + "\t" +
+                position.toString();
+		int posNumber = increasePos(controlPos, control.getId());
+		message += (", TOTAL POS: " + posNumber);
+		show(message);
+	}
+
+	private int increasePos(Map<UUID, Integer> map, UUID id) {
+        map.merge(id, 1, Integer::sum);
+		return map.get(id);
 	}
 
 	@Override
@@ -95,8 +101,9 @@ public class EventListener extends AbstractListener {
 			message.append("\t").append(raceCompetitor.getCompetitor().getShortName()).append("\t");
 		}
 		message.append(position.toString());
-	//	show(message.toString());
-		compPos++;
+		int posNumber = increasePos(compPos, raceCompetitor.getCompetitor().getId());
+		message.append(", TOTAL POS: ").append(posNumber);
+		//show(message.toString());
 	}
 
 	@Override
@@ -167,14 +174,24 @@ public class EventListener extends AbstractListener {
 
 	@Override
 	public void addRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
-		show("ADD RACE COMPETITOR " + raceCompetitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+		show("ADD RACE COMPETITOR " + raceCompetitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp) +
+				"\n\t ENTRY STATUS: " + raceCompetitor.getStatus() +
+				"\n\t ENTRY STATUS TIME: " + TimeUtils.formatDate(raceCompetitor.getStatusTime()) +
+				"\n\t UPDATE ENTRY STATUS: " + TimeUtils.formatDateInMillis(raceCompetitor.getStatusLastChangedTime()) +
+				"\n\t OFFICIAL RANK: " + (raceCompetitor.getOfficialRank() == 0 ? "-" : raceCompetitor.getOfficialRank()) +
+				"\n\t OFFICIAL RANK TIME: " + (raceCompetitor.getOfficialFinishTime() == 0 ? "-" : TimeUtils.formatDateInMillis(raceCompetitor.getOfficialFinishTime()))
+		);
 	}
 
 	@Override
 	public void updateRaceCompetitor(long timestamp, IRaceCompetitor raceCompetitor) {
 		show("UPDATE RACE COMPETITOR " + raceCompetitor.toString() + " at " + TimeUtils.formatDateInMillis(timestamp) +
 				"\n\t ENTRY STATUS: " + raceCompetitor.getStatus() +
-				"\n\t ENTRY STATUS TIME: " + TimeUtils.formatDate(raceCompetitor.getStatusTime()));
+				"\n\t ENTRY STATUS TIME: " + TimeUtils.formatDate(raceCompetitor.getStatusTime()) +
+				"\n\t UPDATE ENTRY STATUS: " + TimeUtils.formatDateInMillis(raceCompetitor.getStatusLastChangedTime()) +
+				"\n\t OFFICIAL RANK: " + (raceCompetitor.getOfficialRank() == 0 ? "-" : raceCompetitor.getOfficialRank()) +
+				"\n\t OFFICIAL RANK TIME: " + (raceCompetitor.getOfficialFinishTime() == 0 ? "-" : TimeUtils.formatDateInMillis(raceCompetitor.getOfficialFinishTime()))
+		);
 	}
 
 	@Override
@@ -191,13 +208,22 @@ public class EventListener extends AbstractListener {
 				"\n\tRaceStartTime = " + TimeUtils.formatDate(race.getRaceStartTime()) +
 				"\n\tLiveDelay = " + race.getLiveDelay() +
 				"\n\tRaceStatus = " + race.getStatus() +
-				"\n\tRaceStatusTime = " + TimeUtils.formatDate(race.getStatusTime())
+				"\n\tRaceStatusTime = " + TimeUtils.formatDate(race.getStatusTime()) +
+				"\n\tRaceStatusUpdatedAt: " + TimeUtils.formatDate(race.getStatusLastChangedTime())
 		);
 	}
 
 	@Override
 	public void addRace(long timestamp, IRace race) {
-		show("ADD RACE " + race.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+		show("ADD RACE " + race.toString() + " at " + TimeUtils.formatDateInMillis(timestamp) +
+				"\n\tTrackingStartTime = " + TimeUtils.formatDate(race.getTrackingStartTime()) +
+				"\n\tTrackingEndTime = " + TimeUtils.formatDate(race.getTrackingEndTime()) +
+				"\n\tRaceStartTime = " + TimeUtils.formatDate(race.getRaceStartTime()) +
+				"\n\tLiveDelay = " + race.getLiveDelay() +
+				"\n\tRaceStatus = " + race.getStatus() +
+				"\n\tRaceStatusTime = " + TimeUtils.formatDate(race.getStatusTime()) +
+				"\n\tRaceStatusUpdatedAt: " + TimeUtils.formatDate(race.getStatusLastChangedTime())
+		);
 	}
 
 	@Override

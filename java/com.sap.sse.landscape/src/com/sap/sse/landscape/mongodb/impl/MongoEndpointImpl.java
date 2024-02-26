@@ -59,7 +59,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
                 if (i>=BATCH_SIZE) {
                     targetCollection.insertMany(documentsToInsert);
                     i = 0;
-                    documentsToInsert = new ArrayList<>(BATCH_SIZE);
+                    documentsToInsert.clear();
                 }
             }
             if (i>0) {

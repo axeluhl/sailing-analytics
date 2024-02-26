@@ -6,10 +6,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements IsSerializable {
     public SpeedWithBearingDTO speedWithBearing;
+    
+    public Bearing optionalTrueHeading;
 
     /**
      * tells if this fix was computed by extrapolation instead of having been captured by a device directly
@@ -37,33 +40,35 @@ public class GPSFixDTOWithSpeedWindTackAndLegType extends GPSFixDTO implements I
     
     public Double detailValue;
     
-    public GPSFixDTOWithSpeedWindTackAndLegType() {}
+    @Deprecated // GWT serialization only
+    GPSFixDTOWithSpeedWindTackAndLegType() {}
 
-    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
-            Tack tack, LegType legType, boolean extrapolated) {
-        this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
-                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
-                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Bearing optionalTrueHeading,
+            WindDTO wind, Tack tack, LegType legType, boolean extrapolated) {
+        this(timepoint, position, speedWithBearing, optionalTrueHeading, (speedWithBearing != null && wind != null) ?
+                                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated);
     }
     
-    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
-            Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
-        this(timepoint, position, speedWithBearing, (speedWithBearing != null && wind != null) ?
-                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
-                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated, detailValue);
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Bearing optionalTrueHeading,
+            WindDTO wind, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+        this(timepoint, position, speedWithBearing, optionalTrueHeading, (speedWithBearing != null && wind != null) ?
+                                new DegreeBearingImpl(speedWithBearing.bearingInDegrees).getDifferenceTo(
+                                        new DegreeBearingImpl(wind.dampenedTrueWindFromDeg)).getDegrees() : null, tack, legType, extrapolated, detailValue);
     }
 
-    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
-            Tack tack, LegType legType, boolean extrapolated) {
-        this(timepoint, position, speedWithBearing, degreesBoatToTheWind, tack, legType, extrapolated, /* detailValue */ null);
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Bearing optionalTrueHeading,
+            Double degreesBoatToTheWind, Tack tack, LegType legType, boolean extrapolated) {
+        this(timepoint, position, speedWithBearing, optionalTrueHeading, degreesBoatToTheWind, tack, legType, extrapolated, /* detailValue */ null);
     }
     
-    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Double degreesBoatToTheWind,
-            Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
+    public GPSFixDTOWithSpeedWindTackAndLegType(Date timepoint, Position position, SpeedWithBearingDTO speedWithBearing, Bearing optionalTrueHeading,
+            Double degreesBoatToTheWind, Tack tack, LegType legType, boolean extrapolated, Double detailValue) {
         super(timepoint, position);
         this.timepoint = timepoint;
         this.position = position;
         this.speedWithBearing = speedWithBearing;
+        this.optionalTrueHeading = optionalTrueHeading;
         this.tack = tack;
         this.legType = legType;
         this.extrapolated = extrapolated;

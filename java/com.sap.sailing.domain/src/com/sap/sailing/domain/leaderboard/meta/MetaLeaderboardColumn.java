@@ -232,6 +232,10 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void setRaceLogInformationAndLoad(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
+    }
+
+    @Override
     public void setRaceLogInformation(RaceLogStore raceLogStore, RegattaLikeIdentifier regattaLikeParent) {
     }
 

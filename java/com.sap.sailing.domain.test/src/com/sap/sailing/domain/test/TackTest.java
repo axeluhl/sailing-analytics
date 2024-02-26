@@ -67,7 +67,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         TimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45))));
+                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         assertEquals(Tack.PORT, getTrackedRace().getTack(competitor, now));
     }
 
@@ -76,7 +76,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         TimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(270))));
+                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(270)), /* optionalTrueHeading */ null));
         assertEquals(Tack.STARBOARD, getTrackedRace().getTack(competitor, now));
     }
 
@@ -85,7 +85,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> hassosTrack = getTrackedRace().getTrack(competitor);
         TimePoint now = MillisecondsTimePoint.now();
         hassosTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), now,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180))));
+                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180)), /* optionalTrueHeading */ null));
         assertEquals(Tack.PORT, getTrackedRace().getTack(competitor, now));
     }
 

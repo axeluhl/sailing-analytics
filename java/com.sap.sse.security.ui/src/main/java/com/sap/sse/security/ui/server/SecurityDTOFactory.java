@@ -332,7 +332,8 @@ public class SecurityDTOFactory {
 
     /**
      * prunes the {@link AccessControlList} for the given {@link SecurityUser filterForUser} by removing all user groups
-     * the user is not in from the resulting ACL.
+     * the user is not in from the resulting ACL. The {@code null} user group will remain because all users are assumed
+     * to be in the pseudo-group of "anonymous" users.
      */
     public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, Iterable<StrippedUserGroupDTO> groupsOfUser,
             Iterable<StrippedUserGroupDTO> allUserGroups) {
@@ -342,7 +343,6 @@ public class SecurityDTOFactory {
         Util.addAll(groupsOfUser, userGroups);
         // add user groups of alluser
         Util.addAll(allUserGroups, userGroups);
-
         if (acl != null) {
             final Map<StrippedUserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();
             for (final Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {

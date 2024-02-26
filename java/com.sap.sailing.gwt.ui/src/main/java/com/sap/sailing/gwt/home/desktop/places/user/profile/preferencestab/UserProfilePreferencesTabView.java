@@ -12,6 +12,7 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class UserProfilePreferencesTabView extends Composite implements UserProfileTabView<UserProfilePreferencesPlace> {
 
     private UserProfilePreferencesView.Presenter currentPresenter;
+    private UserProfileView.Presenter currentUserProfileViewPresenter;
     private UserProfilePreferencesView view;
     private final FlagImageResolver flagImageResolver;
     
@@ -50,7 +51,13 @@ public class UserProfilePreferencesTabView extends Composite implements UserProf
 
     @Override
     public void setPresenter(UserProfileView.Presenter currentPresenter) {
+        this.currentUserProfileViewPresenter = currentPresenter;
         view = new UserProfilePreferencesViewImpl(flagImageResolver);
         this.currentPresenter = new UserProfilePreferencesPresenter(view, currentPresenter);
+    }
+
+    @Override
+    public UserProfileView.Presenter getPresenter() {
+        return currentUserProfileViewPresenter;
     }
 }

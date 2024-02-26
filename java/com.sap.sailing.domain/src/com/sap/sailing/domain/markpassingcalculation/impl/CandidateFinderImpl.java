@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -399,7 +400,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             final Set<Callable<Void>> tasks = new HashSet<>();
             final Thread executingThread = Thread.currentThread(); // most likely the MarkPassingCalculator.Listen thread
             for (Competitor c : race.getRace().getCompetitors()) {
-                tasks.add(()->{
+                tasks.add((race.getTrackedRegatta().cpuMeterCallable(()->{
                     LockUtil.propagateLockSetFrom(executingThread); // "inherit" the course read lock from the "calling" thread into the thread pool executor thread
                     try {
                         List<Candidate> badCans = new ArrayList<>();
@@ -420,7 +421,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     } finally {
                         LockUtil.unpropagateLockSetFrom(executingThread); // "return" the course read lock from the thread pool executor thread to the "calling" thread
                     }
-                });
+                }, CPUMeteringType.MARK_PASSINGS.name())));
             }
             ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
                     "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
