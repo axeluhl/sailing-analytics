@@ -15,6 +15,11 @@ public interface LandscapeConstants {
     String ALL_REVERSE_PROXIES = "allReverseProxies";
     
     /**
+     * The tag name for a target group containing only the central reverse proxy.
+     */
+    String JUST_CENTRAL_REVERSE_PROXY = "CentralReverseProxy";
+    
+    /**
      * A string that all network load balancers contain.
      */
     String NLB_ARN_CONTAINS = "loadbalancer/net";
