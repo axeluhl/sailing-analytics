@@ -90,14 +90,15 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
-    cd /root/keysTemp
     OLD_IFS="$IFS"
     SEPARATOR="@."
     ACTUAL_SYMBOL="@@"
     TEMP_KEY_DIR="/root/keysTemp"
 	mkdir --parents "${TEMP_KEY_DIR}"
     scp -p root@sapsailing.com:/root/keys/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
+    scp -p root@sapsailing.com:/root/aws_credentials/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
     IFS=$'\n'
+    cd "${TEMP_KEY_DIR}"
     for filename  in $(find . -type f | sed "s|./||"  ); do
         IFS=$OLD_IFS
         length=$(echo $filename | wc -c )
@@ -127,9 +128,12 @@ setup_keys() {
         if [[ "$?" -eq 0 ]]; then
             user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
             mkdir --parents "${user_home_dir}/.ssh"
+            mkdir --parents "${user_home_dir}/.aws"
             chmod 700 "${user_home_dir}/.ssh"
             if [[ "$key" == *.pub ]]; then 
                 cat "$filename" >> "$user_home_dir"/.ssh/authorized_keys
+            elif [[ "$key" == "credentials" || "$key" == "config" ]]; then
+                cp "$filename" "$user_home_dir"/.aws/"$key"
             else
                 cp "$filename" "$user_home_dir"/.ssh/"$key"            
             fi
