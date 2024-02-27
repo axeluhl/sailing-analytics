@@ -27,6 +27,7 @@ mount -a
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx postfix cronie iptables
 service postfix restart
+sudo systemctl enable postfix
 sudo systemctl enable crond.service
 
 # setup other users and crontabs to keep repo updated
@@ -44,7 +45,7 @@ if [[ ! -d "/home/trac" ]]; then
     # copy httpd key accross
     scp -o StrictHostKeyChecking=no "httpdConf@${HTTPD_GIT_REPO_IP}:~/.ssh/id_ed25519.pub" /root/.ssh/temp
     cat /root/.ssh/temp  >> /root/.ssh/authorized_keys
-    rm /root/.ssh/temp    
+    rm /root/.ssh/temp
     chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "/home/${GIT_COPY_USER}"
 fi
 # setup symbolic links and crontab
@@ -88,11 +89,7 @@ service fail2ban start
 yum remove -y firewalld
 yum install -y mod_ssl
 # setup mounting of nvme
-source /root/.bashrc
 mountnvmeswap
-systemctl enable mountnvmeswap.service
-systemctl enable register-deregister-nlb.service
-systemctl enable get-latest-httpd-conf.service
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
@@ -102,7 +99,6 @@ sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABS
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup latest cli
-
 if [[ ! -d "/root/aws" ]]; then 
     yum remove -y awscli
     cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -114,23 +110,15 @@ fi
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
 # certs setup
 cd /etc
-mkdir letsencrypt
-mkdir letsencrypt/live
-mkdir letsencrypt/live/sail-insight.com
+mkdir  --parents letsencrypt/live/sail-insight.com
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 # copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
 sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
-cp -r /usr/share/httpd/.aws /root
+cp -rp /usr/share/httpd/.aws /root
 chown -R apache:apache /usr/share/httpd
-# setup releases
-# rsync -av --delete root@sapsailing.com:/var/www/static/releases /var/www/static/releases
-# # setup p2
-# rsync -av --delete trac@sapsailing.com:p2-repositories /home/trac
-
+# Final enabling and starting of services.
 systemctl start httpd
 sudo systemctl start crond.service
-sudo systemctl enable postfix
 systemctl enable imageupgrade.service
 SECONDEOF
-
