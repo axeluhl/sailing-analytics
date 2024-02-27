@@ -83,13 +83,13 @@ build_crontab_and_setup_files() {
     cd /root/
     chown root:root environments_scripts
     cd environments_scripts
-    ./build-crontab-and-cp-files "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
     cd ..
     rm -rf /root/environments_scripts
 }
 
 setup_keys() {
-    #1: Image type.
+    #1: Environment type.
     cd /root/keysTemp
     OLD_IFS="$IFS"
     SEPARATOR="@."
