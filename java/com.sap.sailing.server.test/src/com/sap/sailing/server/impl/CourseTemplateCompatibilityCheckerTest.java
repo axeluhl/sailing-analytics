@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,13 +37,15 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.RepeatablePartImpl;
 
 public class CourseTemplateCompatibilityCheckerTest {
-    private CourseTemplateCompatibilityCheckerForCourseBase checker;
     private MarkRole startFinishBoatRole, startFinishPinRole, windwardMarkRole, leewardGatePortRole, leewardGateStarboardRole;
     private MarkTemplate startFinishBoatTemplate, startFinishPinTemplate, windwardMarkTemplate, leewardGatePortTemplate, leewardGateStarboardTemplate;
     private MarkRolePair startFinishLineRoles, leewardGateRoles;
     private WaypointTemplate startWaypointTemplate, firstWindwardMarkWaypointTemplate, leewardGateWaypointTemplate, repeatableWindwardMarkWaypointTemplate, finishWaypointTemplate; 
     private CourseTemplate windwardLeewardWithLeewardFinishCourseTemplate;
-    
+    private CourseBase courseBase;
+    private Mark startBoat, startPin, windward, gatePort, gateStarboard;
+    private ControlPointWithTwoMarks startFinishLine, gate;
+
     @Before
     public void setUp() {
         // mark roles:
@@ -88,14 +91,8 @@ public class CourseTemplateCompatibilityCheckerTest {
                         repeatableWindwardMarkWaypointTemplate, finishWaypointTemplate),
                 defaultMarkTemplatesForMarkRoles, defaultMarkRolesForMarkTemplates, /* optionalImageURL */ null,
                 /* optionalRepeatablePart */ new RepeatablePartImpl(2, 4), /* defaultNumberOfLaps */ 1);
-    }
-    
-    @Test
-    public void testSimpleCourseComplianceWithNoRepeatablePart() {
-        final CourseBase courseBase = new CourseDataImpl("L2", windwardLeewardWithLeewardFinishCourseTemplate.getId());
-        final Mark startBoat, startPin, windward, gatePort, gateStarboard;
-        final ControlPointWithTwoMarks startFinishLine, gate;
-        final Waypoint startWP, windward1WP, gateWP, windward2WP, finishWP;
+        // now for the CourseBase set-up:
+        courseBase = new CourseDataImpl("L2", windwardLeewardWithLeewardFinishCourseTemplate.getId());
         // marks:
         startBoat = new MarkImpl(UUID.randomUUID(), "Start Boat", MarkType.STARTBOAT, /* color */ null, /* shape */ null, /* pattern */ null);
         startPin = new MarkImpl(UUID.randomUUID(), "Start Pin");
@@ -105,6 +102,11 @@ public class CourseTemplateCompatibilityCheckerTest {
         // control points with two marks:
         startFinishLine = new ControlPointWithTwoMarksImpl(startPin, startBoat, "Start/Finish Line", "SFL");
         gate = new ControlPointWithTwoMarksImpl(gatePort, gateStarboard, "Leeward Gate", "LG");
+    }
+    
+    @Test
+    public void testSimpleCourseComplianceWithTwoLaps() {
+        final Waypoint startWP, windward1WP, gateWP, windward2WP, finishWP;
         // waypoints:
         startWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
         windward1WP = new WaypointImpl(windward, PassingInstruction.Port);
@@ -122,9 +124,88 @@ public class CourseTemplateCompatibilityCheckerTest {
         courseBase.addRoleMapping(gateStarboard, leewardGateStarboardRole.getId());
         courseBase.addWaypoint(3, windward2WP);
         courseBase.addWaypoint(4, finishWP);
-        checker = new CourseAndMarkConfigurationFactoryImpl(/* sharedSailingDataTracker */ null, /* sensorFixStore */ null, /* raceLogResolver */ null, DomainFactory.INSTANCE)
-                .new CourseTemplateCompatibilityCheckerForCourseBase(courseBase, windwardLeewardWithLeewardFinishCourseTemplate);
-        final Integer numberOfLaps = checker.isCourseInstanceOfCourseTemplate();
+        final Integer numberOfLaps = getNumberOfLaps();
         assertEquals(2, (int) numberOfLaps);
+    }
+
+    @Test
+    public void testSimpleCourseComplianceWithThreeLaps() {
+        final Waypoint startWP, windward1WP, gate1WP, windward2WP, gate2WP, windward3WP, finishWP;
+        // waypoints:
+        startWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
+        windward1WP = new WaypointImpl(windward, PassingInstruction.Port);
+        gate1WP = new WaypointImpl(gate, PassingInstruction.Gate);
+        windward2WP = new WaypointImpl(windward, PassingInstruction.Port);
+        gate2WP = new WaypointImpl(gate, PassingInstruction.Gate);
+        windward3WP = new WaypointImpl(windward, PassingInstruction.Port);
+        finishWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
+        // course:
+        courseBase.addWaypoint(0, startWP);
+        courseBase.addRoleMapping(startBoat, startFinishBoatRole.getId());
+        courseBase.addRoleMapping(startPin, startFinishPinRole.getId());
+        courseBase.addWaypoint(1, windward1WP);
+        courseBase.addRoleMapping(windward, windwardMarkRole.getId());
+        courseBase.addWaypoint(2, gate1WP);
+        courseBase.addRoleMapping(gatePort, leewardGatePortRole.getId());
+        courseBase.addRoleMapping(gateStarboard, leewardGateStarboardRole.getId());
+        courseBase.addWaypoint(3, windward2WP);
+        courseBase.addWaypoint(4, gate2WP);
+        courseBase.addWaypoint(5, windward3WP);
+        courseBase.addWaypoint(6, finishWP);
+        final Integer numberOfLaps = getNumberOfLaps();
+        assertEquals(3, (int) numberOfLaps);
+    }
+
+    @Test
+    public void testSimpleCourseComplianceWithIncompatibleSetup() {
+        final Waypoint startWP, windward1WP, gate1WP, windward2WP, gate2WP;
+        // waypoints:
+        startWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
+        windward1WP = new WaypointImpl(windward, PassingInstruction.Port);
+        gate1WP = new WaypointImpl(gate, PassingInstruction.Gate);
+        windward2WP = new WaypointImpl(windward, PassingInstruction.Port);
+        gate2WP = new WaypointImpl(gate, PassingInstruction.Line);
+        // course:
+        courseBase.addWaypoint(0, startWP);
+        courseBase.addRoleMapping(startBoat, startFinishBoatRole.getId());
+        courseBase.addRoleMapping(startPin, startFinishPinRole.getId());
+        courseBase.addWaypoint(1, windward1WP);
+        courseBase.addRoleMapping(windward, windwardMarkRole.getId());
+        courseBase.addWaypoint(2, gate1WP);
+        courseBase.addRoleMapping(gatePort, leewardGatePortRole.getId());
+        courseBase.addRoleMapping(gateStarboard, leewardGateStarboardRole.getId());
+        courseBase.addWaypoint(3, windward2WP);
+        courseBase.addWaypoint(4, gate2WP);
+        final Integer numberOfLaps = getNumberOfLaps();
+        assertNull(numberOfLaps);
+    }
+
+    @Test
+    public void testSimpleCourseComplianceWithOneLap() {
+        final Waypoint startWP, windward1WP, finishWP;
+        // waypoints:
+        startWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
+        windward1WP = new WaypointImpl(windward, PassingInstruction.Port);
+        finishWP = new WaypointImpl(startFinishLine, PassingInstruction.Line);
+        // course:
+        courseBase.addWaypoint(0, startWP);
+        courseBase.addRoleMapping(startBoat, startFinishBoatRole.getId());
+        courseBase.addRoleMapping(startPin, startFinishPinRole.getId());
+        courseBase.addWaypoint(1, windward1WP);
+        courseBase.addRoleMapping(windward, windwardMarkRole.getId());
+        courseBase.addRoleMapping(gatePort, leewardGatePortRole.getId());
+        courseBase.addRoleMapping(gateStarboard, leewardGateStarboardRole.getId());
+        courseBase.addWaypoint(2, finishWP);
+        final Integer numberOfLaps = getNumberOfLaps();
+        assertEquals(1, (int) numberOfLaps);
+    }
+
+    private Integer getNumberOfLaps() {
+        final CourseTemplateCompatibilityCheckerForCourseBase checker = new CourseAndMarkConfigurationFactoryImpl(
+                /* sharedSailingDataTracker */ null, /* sensorFixStore */ null, /* raceLogResolver */ null,
+                DomainFactory.INSTANCE).new CourseTemplateCompatibilityCheckerForCourseBase(courseBase,
+                        windwardLeewardWithLeewardFinishCourseTemplate);
+        final Integer numberOfLaps = checker.isCourseInstanceOfCourseTemplate();
+        return numberOfLaps;
     }
 }
