@@ -296,9 +296,8 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
 
     void openEditCourseTemplateDialog(final CourseTemplateDTO originalCourseTemplate, final UserService userService,
             final boolean isNew) {
-        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, userService,
-                stringMessages, originalCourseTemplate, allMarkRoles, allMarkTemplates,
-                new DialogCallback<CourseTemplateDTO>() {
+        final CourseTemplateEditDialog dialog = new CourseTemplateEditDialog(sailingService, stringMessages,
+                originalCourseTemplate, allMarkRoles, allMarkTemplates, new DialogCallback<CourseTemplateDTO>() {
                     @Override
                     public void ok(CourseTemplateDTO courseTemplate) {
                         sailingService.createOrUpdateCourseTemplate(courseTemplate,
@@ -333,7 +332,8 @@ public class CourseTemplatePanel extends FlowPanel implements FilterablePanelPro
                     @Override
                     public void cancel() {
                     }
-                }, isNew);
+                },
+                isNew);
         dialog.ensureDebugId("CourseTemplateEditDialog");
         dialog.show();
     }

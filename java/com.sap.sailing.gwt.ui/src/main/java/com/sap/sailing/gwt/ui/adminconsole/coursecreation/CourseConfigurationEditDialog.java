@@ -1,9 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 
+import java.util.List;
+
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -55,7 +63,10 @@ public class CourseConfigurationEditDialog extends DataEntryDialog<CourseConfigu
         }
     }
 
-    public CourseConfigurationEditDialog(StringMessages stringMessages, DialogCallback<CourseConfigurationDTO> callback) {
+    public CourseConfigurationEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+            CourseConfigurationDTO courseConfigurationToEdit, List<CourseTemplateDTO> allCourseTemplates,
+            List<MarkRoleDTO> allMarkRoles, List<MarkTemplateDTO> allMarkTemplates,
+            DialogCallback<CourseConfigurationDTO> callback) {
         super(stringMessages.configureCourse(), stringMessages.configureCourse(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator(), callback);
     }

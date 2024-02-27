@@ -48,7 +48,6 @@ import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO> {
@@ -92,10 +91,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private static final RegExp urlRegExp = RegExp
             .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
 
-    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final UserService userService,
-            final StringMessages stringMessages, CourseTemplateDTO courseTemplateToEdit,
-            List<MarkRoleDTO> allMarkRoles, List<MarkTemplateDTO> allMarkTemplates,
-            DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
+    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+            CourseTemplateDTO courseTemplateToEdit, List<MarkRoleDTO> allMarkRoles,
+            List<MarkTemplateDTO> allMarkTemplates, DialogCallback<CourseTemplateDTO> callback,
+            final boolean isNew) {
         super(stringMessages.edit() + " " + stringMessages.courseTemplates(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
@@ -173,7 +172,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.allMarkRolesSelectionListPlusEmptyString = new LinkedList<>(allMarkRoles.stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
         allMarkRolesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
         this.markTemplatesForMarkRoles = new ArrayList<>();
-        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, markTemplatesForMarkRoles, userService);
+        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, markTemplatesForMarkRoles);
         buttonAddMarkRoleToMarkTemplateMapping = new Button(stringMessages.add());
         buttonAddMarkRoleToMarkTemplateMapping.addClickHandler(c -> {
             markTemplatesForMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
@@ -182,7 +181,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             validateAndUpdate();
         });
         this.spareMarkTemplatesAndTheirDefaultMarkRoles = new ArrayList<>();
-        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, spareMarkTemplatesAndTheirDefaultMarkRoles, userService);
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, spareMarkTemplatesAndTheirDefaultMarkRoles);
         buttonAddMarkRoleToMarkTemplateMapping.setEnabled(isNew);
         buttonAddSpareMarkTemplate = new Button(stringMessages.add());
         buttonAddSpareMarkTemplate.addClickHandler(c -> {
@@ -226,7 +225,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     }
 
     private CellTable<MarkTemplateDTOAndMarkRoleDTO> createMarkTemplateAndMarkRoleTable(final boolean readOnly,
-            final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesAndMarkRoles, final UserService userService) {
+            final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesAndMarkRoles) {
         final CellTable<MarkTemplateDTOAndMarkRoleDTO> table = new BaseCelltable<>(1000, tableResources);
         table.setWidth("100%");
         final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);

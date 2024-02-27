@@ -995,7 +995,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return result;
     }
     
-    private class CourseTemplateCompatibilityCheckerForCourseBase
+    class CourseTemplateCompatibilityCheckerForCourseBase
             extends CourseTemplateCompatibilityChecker<CourseBase, Mark, Waypoint> {
         public CourseTemplateCompatibilityCheckerForCourseBase(CourseBase course, CourseTemplate courseTemplate) {
             super(course, courseTemplate);
