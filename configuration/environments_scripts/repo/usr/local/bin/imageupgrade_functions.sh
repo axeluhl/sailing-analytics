@@ -99,36 +99,36 @@ setup_keys() {
     ACTUAL_SYMBOL="@@"
     IFS=$'\n'
     for filename  in $(find . -type f | sed "s|./||"  ); do
-            IFS=$OLD_IFS
-            length=$(echo $filename | wc -c )
-            echo "length: $length"
-            echo "filename: $filename"
-            output=""
-            part=0
-            for ((c=0; c < length; c++)) do
-                    if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
-                            output="$output""@"
-                            ((c++))
-                    elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
-                            array[$part]="$output"
-                            output=""
-                            ((c++))
-                            ((part++))
-                    else
-                            output="$output""${filename:$c:1}"
-                    fi
-            done
-            key="${array[0]}"
-            user="${array[1]}"
-            environment="$output"
-            echo "key: \"$key\" user: \"$user\" environ: \"$environment\""
-            echo "end **********"
-            id -u "$user"
-            if [[ "$?" -eq 0 ]]; then
-                user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
-                mkdir --parents "${user_home_dir}/.ssh"
-                cp "$filename" "$user_home_dir"/.ssh/"$key"
-            fi
+        IFS=$OLD_IFS
+        length=$(echo $filename | wc -c )
+        echo "length: $length"
+        echo "filename: $filename"
+        output=""
+        part=0
+        for ((c=0; c < length; c++)) do
+                if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
+                        output="$output""@"
+                        ((c++))
+                elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
+                        array[$part]="$output"
+                        output=""
+                        ((c++))
+                        ((part++))
+                else
+                        output="$output""${filename:$c:1}"
+                fi
+        done
+        key="${array[0]}"
+        user="${array[1]}"
+        environment="$output"
+        echo "key: \"$key\" user: \"$user\" environ: \"$environment\""
+        echo "end **********"
+        id -u "$user"
+        if [[ "$?" -eq 0 ]]; then
+            user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
+            mkdir --parents "${user_home_dir}/.ssh"
+            cp "$filename" "$user_home_dir"/.ssh/"$key"
+        fi
     done
     IFS="$OLD_IFS"
     rm -rf /root/keysTemp
