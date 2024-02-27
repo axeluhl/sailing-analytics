@@ -86,17 +86,17 @@ build_crontab_and_setup_files() {
     ./build-crontab-and-cp-files "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
     cd ..
     rm -rf /root/environments_scripts
-
 }
 
 setup_keys() {
     #1: Image type.
-    mkdir --parents /root/keysTemp
-    scp root@sapsailing.com:/root/keys/*${1} /root/keysTemp/
     cd /root/keysTemp
     OLD_IFS="$IFS"
     SEPARATOR="@."
     ACTUAL_SYMBOL="@@"
+    TEMP_KEY_DIR="/root/keysTemp"
+	mkdir --parents "${TEMP_KEY_DIR}"
+    scp -p root@sapsailing.com:/root/keys/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
     IFS=$'\n'
     for filename  in $(find . -type f | sed "s|./||"  ); do
         IFS=$OLD_IFS
@@ -106,17 +106,17 @@ setup_keys() {
         output=""
         part=0
         for ((c=0; c < length; c++)) do
-                if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
-                        output="$output""@"
-                        ((c++))
-                elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
-                        array[$part]="$output"
-                        output=""
-                        ((c++))
-                        ((part++))
-                else
-                        output="$output""${filename:$c:1}"
-                fi
+            if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
+                output="$output""@"
+                ((c++))
+            elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
+                array[$part]="$output"
+                output=""
+                ((c++))
+                ((part++))
+            else
+                output="$output""${filename:$c:1}"
+            fi
         done
         key="${array[0]}"
         user="${array[1]}"
@@ -127,11 +127,12 @@ setup_keys() {
         if [[ "$?" -eq 0 ]]; then
             user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
             mkdir --parents "${user_home_dir}/.ssh"
+            chmod 700 "${user_home_dir}/.ssh"
             cp "$filename" "$user_home_dir"/.ssh/"$key"
         fi
     done
     IFS="$OLD_IFS"
-    rm -rf /root/keysTemp
+    rm -rf "${TEMP_KEY_DIR}"
 }
 
 clean_root_ssh_dir_and_tmp() {
