@@ -37,7 +37,7 @@ if [[ ! -d "/home/trac" ]]; then
     mv git ${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}
     mkdir /home/${GIT_COPY_USER}/.ssh
     cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
-    ./build-crontab-and-cp-files reverse_proxy -n "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}" # -n option doesn't install the crontab so the correct keys get added before update_authorized_keys runs.
+    ./build-crontab-and-cp-files -n reverse_proxy  "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}" # -n option doesn't install the crontab so the correct keys get added before update_authorized_keys runs.
     # Setup root user and trac user with the right keys
     . imageupgrade_functions.sh
     setup_keys "${IMAGE_TYPE}"
@@ -47,10 +47,9 @@ if [[ ! -d "/home/trac" ]]; then
     rm /root/.ssh/temp    
     chown -R "${GIT_COPY_USER}":"${GIT_COPY_USER}" "/home/${GIT_COPY_USER}"
 fi
-echo "keys setup" >log.txt
 # setup symbolic links and crontab
 cd "/home/${GIT_COPY_USER}/${RELATIVE_PATH_TO_GIT}/"
-./build-crontab-and-cp-files reverse_proxy -s "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+./build-crontab-and-cp-files -s reverse_proxy  "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # add basic test page which won't cause redirect error code if used as a health check.
