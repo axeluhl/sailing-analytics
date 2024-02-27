@@ -128,7 +128,11 @@ setup_keys() {
             user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
             mkdir --parents "${user_home_dir}/.ssh"
             chmod 700 "${user_home_dir}/.ssh"
-            cp "$filename" "$user_home_dir"/.ssh/"$key"
+            if [[ "$key" == *.pub ]]; then 
+                cat "$filename" >> "$user_home_dir"/.ssh/authorized_keys
+            else
+                cp "$filename" "$user_home_dir"/.ssh/"$key"            
+            fi
         fi
     done
     IFS="$OLD_IFS"
