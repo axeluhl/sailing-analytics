@@ -21,7 +21,6 @@ public class MarkTemplateBasedMarkConfigurationDTO extends MarkConfigurationDTO 
 
     @Override
     public String getShortName() {
-        // TODO Auto-generated method stub
         return getOptionalMarkTemplate().getCommonMarkProperties().getShortName();
     }
 }

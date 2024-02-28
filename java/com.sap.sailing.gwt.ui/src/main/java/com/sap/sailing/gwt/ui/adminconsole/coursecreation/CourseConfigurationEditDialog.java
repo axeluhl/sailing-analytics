@@ -15,9 +15,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.FreestyleMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPairWithConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
@@ -89,7 +93,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * properties from the user's inventory qualify, a default mark configuration is created based on the
  * {@link MarkTemplateDTO} serving as the {@link CourseTemplateDTO#getDefaultMarkTemplatesForMarkRoles() default} for
  * the role and hence requesting the creation of a regatta mark with its properties defined by the mark template. Extra
- * {@link MarkTemplateDTO}s not being the default for any mark role are shown as "spares."</li>
+ * {@link MarkTemplateDTO}s not being the default for any mark role are shown as "spares." Should the course template
+ * contain a repeatable part, the lap count field will be enabled and set to the default number of laps, or 1 in case
+ * the default lap count is 0.</li>
  * <li>Switch a mark configuration to an existing regatta mark; regatta marks will show in the selection list sorted by
  * their last usage time point for the mark template(s) associated with the mark role to be filled, from most recently
  * used to not used at all.</li>
@@ -100,17 +106,27 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * suggest or even force the use of that regatta mark already existing?)</li>
  * <li>Create a "free-style" mark configuration from scratch in the waypoint sequence; the editor may be the same used
  * for creating a new regatta mark, collecting name, short name, color, pattern, shape, and type (see
- * {@link MarkEditDialog}). If the mark configuration refers to a mark role from the course template, the freestyle
- * mark configuration is {@link CourseConfigurationDTO#setAssociatedRoles(java.util.HashMap) linked to the mark role}
- * in the course configuration under edit.</li>
- * <li>Change the number of laps (assuming a course template is selected and the waypoint sequence still conforms to
- * the course template) to any number greater than zero; this will adjust the occurrence of the repeatable part
- * in the sequence of {@link WaypointWithMarkConfigurationDTO}s. While doing so, smart logic needs to apply that
- * when adding one or more laps clones the last lap's waypoint configurations, and when removing one or more laps
- * removes them starting at the last lap, moving backwards. This will probably not work with the
+ * {@link MarkEditDialog}). If the mark configuration refers to a mark role from the course template, the freestyle mark
+ * configuration is {@link CourseConfigurationDTO#setAssociatedRoles(java.util.HashMap) linked to the mark role} in the
+ * course configuration under edit.</li>
+ * <li>Change the number of laps (assuming a course template is selected and the waypoint sequence still conforms to the
+ * course template) to any number greater than zero; this will adjust the occurrence of the repeatable part in the
+ * sequence of {@link WaypointWithMarkConfigurationDTO}s. While doing so, smart logic needs to apply that when adding
+ * one or more laps clones the last lap's waypoint configurations, and when removing one or more laps removes them
+ * starting at the last lap, moving backwards. This will probably not work with the
  * {@link RepeatablePart#createSequence(int, Iterable)} method.</li>
- * <li></li>
- * <li></li>
+ * <li>Add or remove a waypoint; this will disconnect the course configuration from any course template that may still
+ * be selected at that time, and the course template selector will switch to "none/empty." The lap count selector will
+ * be disabled. All {@link CourseConfigurationDTO#getAssociatedRoles() associations of mark configurations to roles}
+ * will be removed. All {@link MarkTemplateBasedMarkConfigurationDTO} mark configurations are replaced by content-wise
+ * equivalent {@link FreestyleMarkConfigurationDTO}s. The addition of a waypoint brings up the challenge of now
+ * selecting from the {@link ControlPointWithMarkConfigurationDTO}s or allowing the user to create a new one. The user
+ * may be presented with a selection of all existing {@link ControlPointWithMarkConfigurationDTO}s coming from all
+ * {@link MarkConfigurationDTO}s and the {@link MarkPairWithConfigurationDTO} (TODO this may need at least a getter in
+ * the {@link CourseConfigurationDTO} class that collects the mark pairs created/used so far) assembled for the course
+ * so far; additionally, users may want to pick from the {@link MarkPropertiesDTO} inventory (creating a
+ * {@link MarkPropertiesBasedMarkConfigurationDTO} as the mark configuration), or create a new "free-style" mark (see
+ * {@link FreestyleMarkConfigurationDTO}).</li>
  * </ul>
  * <p>
  * 
@@ -133,6 +149,19 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * sorted by the {@link SharedSailingData#getUsedMarkProperties(MarkRole)} time points.</li>
  * <li>A tag filter field allows the user to restrict suggestions for {@link MarkPropertiesDTO}s</li>
  * </ul>
+ * <p>
+ * 
+ * Further thoughts: compared to our existing AdminConsole-style course editor which first requires users to set up the
+ * control points with two marks which can only then be used in new waypoint definitions, we should let users assemble
+ * gates and lines dynamically as they go (similar to the "by-marks" course editor from the Race Manager App),
+ * remembering and offering for selection those mark pairs that have already been used in the course configuration. So,
+ * instead of first having to create the "control point with two marks", when the user select "line" or "gate" (or
+ * "offset") the dialog would present existing {@link MarkPairWithConfigurationDTO}s for selection, and alternatively
+ * allow for the selection / creation of two mark configurations (all existing regatta mark or free-style or mark
+ * properties-based mark configurations, or creating a new mark properties-based mark configuration from the mark
+ * properties inventory, or allow for another free-style mark configuration creation). Ideally, we would have a unified
+ * way of creating new mark configuration for filling one of the two mark pair's "slots" as well as for the creation
+ * of a new single mark configuration.<p>
  * 
  * @author Axel Uhl (d043530)
  *
