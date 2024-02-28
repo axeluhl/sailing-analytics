@@ -97,6 +97,7 @@ setup_keys() {
 	mkdir --parents "${TEMP_KEY_DIR}"
     scp -p root@sapsailing.com:/root/keys/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
     scp -p root@sapsailing.com:/root/aws_credentials/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
+    sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" ${TEMP_KEY_DIR}/config*  #ensure the IMDSv2 metadata is optional
     IFS=$'\n'
     cd "${TEMP_KEY_DIR}"
     for filename  in $(find . -type f | sed "s|./||"  ); do
@@ -130,6 +131,9 @@ setup_keys() {
             mkdir --parents "${user_home_dir}/.ssh"
             mkdir --parents "${user_home_dir}/.aws"
             chmod 700 "${user_home_dir}/.ssh"
+            chmod 766 "${user_home_dir}/.aws"
+            chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+            chown -R  ${user}:${user} "${user_home_dir}/.aws"
             if [[ "$key" == *.pub ]]; then 
                 cat "$filename" >> "$user_home_dir"/.ssh/authorized_keys
             elif [[ "$key" == "credentials" || "$key" == "config" ]]; then
