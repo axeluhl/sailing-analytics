@@ -39,8 +39,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
-import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -459,8 +459,8 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 defaultMarkRolesForSpareMarkTemplates.put(mt.getMarkTemplate(), mt.getMarkRole());
             }
         });
-        final RepeatablePartDTO repeatablePart = zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue() == null && zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue() == null ? null :
-            new RepeatablePartDTO(
+        final RepeatablePart repeatablePart = zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue() == null && zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue() == null ? null :
+            RepeatablePart.of(
                 zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue() == null ? -1 : zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue(),
                         zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue() == null ? -1 : zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue()+1);
         final Integer defaultNumberOfLaps = numberOfLapsTextBox.getValue();

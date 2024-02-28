@@ -428,7 +428,6 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointWithMarkConfigurationDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
@@ -459,7 +458,6 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.PairingListCreationException;
-import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -472,7 +470,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.RepeatablePartImpl;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -6148,16 +6145,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 courseTemplate.getShortName(), convertedMarkTemplates, convertedWaypointTemplates,
                 convertedDefaultMarkRolesForMarkTemplates, convertedDefaultMarkTemplatesForMarkRoles, optionalImageURL,
                 courseTemplate.getTags(),
-                convertToRepeatablePartDTO(courseTemplate.getRepeatablePart()), courseTemplate.getDefaultNumberOfLaps());
+                courseTemplate.getRepeatablePart(), courseTemplate.getDefaultNumberOfLaps());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), result);
         return result;
-    }
-
-    private RepeatablePartDTO convertToRepeatablePartDTO(RepeatablePart repeatablePart) {
-        return repeatablePart != null
-                ? new RepeatablePartDTO(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
-                        repeatablePart.getZeroBasedIndexOfRepeatablePartEnd())
-                : null;
     }
 
     private WaypointTemplateDTO convertToWaypointTemplateDTO(WaypointTemplate waypointTemplate) {
@@ -6182,11 +6172,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
 
         return new WaypointTemplateImpl(controlPointTemplate, waypointTemplate.getPassingInstruction());
-    }
-
-    protected RepeatablePart convertToRepeatablePart(RepeatablePartDTO repeatablePart) {
-        return new RepeatablePartImpl(repeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
-                repeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
     }
 
     protected MarkRoleDTO convertToMarkRoleDTO(final MarkRole markRole) {

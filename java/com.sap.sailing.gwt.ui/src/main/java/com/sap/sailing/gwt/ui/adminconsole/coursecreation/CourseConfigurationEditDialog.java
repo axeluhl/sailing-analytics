@@ -3,15 +3,26 @@ package com.sap.sailing.gwt.ui.adminconsole.coursecreation;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.adminconsole.MarkEditDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointWithMarkConfigurationDTO;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
@@ -23,24 +34,33 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * "inventory" as {@code MarkProperties} objects for future use.
  * <p>
  * 
- * If the user edits the course configuration in a way incompatible with a previously selected course template,
- * the course template selection is reset so that the user can know that the course is no longer governed by the
- * template.<p>
+ * If the user edits the course configuration in a way incompatible with a previously selected course template, the
+ * course template selection is reset so that the user can know that the course is no longer governed by the template.
+ * <p>
  * 
- * As long as the course configuration is "in sync" with a selected course template, the mark roles of which the
- * course consists will be displayed for each mark configuration. When the course configuration runs "out of sync"
- * with the course template, the mark role labels disappear.<p>
+ * As long as the course configuration is "in sync" with a selected course template, the mark roles of which the course
+ * consists will be displayed for each mark configuration. When the course configuration runs "out of sync" with the
+ * course template, the mark role labels disappear.
+ * <p>
+ * 
+ * The center piece of the editing dialog is a sequence of {@link WaypointWithMarkConfigurationDTO}s. In the background,
+ * a set of {@link MarkConfigurationDTO}s and the links of those to {@link MarkRoleDTO}s from the optional
+ * {@link CourseTemplateDTO} is maintained.
+ * <p>
  * 
  * Existing and new regatta marks can be assigned to the mark roles and to additional (spare) mark templates. Missing
  * marks for mark roles will be initialized from the mark templates assigned to the respective mark role and will lead
  * to the respective regatta marks to be created. Optionally, the user may select the spare mark templates from which
- * regatta marks shall be created or to which existing regatta marks shall be associated.<p>
+ * regatta marks shall be created or to which existing regatta marks shall be associated.
+ * <p>
  * 
  * When offering the user the possible assignments to a mark role, the marks linked to the mark templates which in turn
- * act as spares for the mark role to be assigned will be shown at the top of the list.<p>
+ * act as spares for the mark role to be assigned will be shown at the top of the list.
+ * <p>
  * 
  * Warnings may be emitted in case a mark configuration is used in multiple places where the course template does not
- * use the same mark template for those. This suggests the user accidentally used the same mark at incorrect places.<p>
+ * use the same mark template for those. This suggests the user accidentally used the same mark at incorrect places.
+ * <p>
  * 
  * Positioning information for marks may be provided, either as one or more {@link DeviceMappingDTO} objects (TODO show
  * a QR code that allows a user to bind a device; the binding would, once complete, have to be read from the server to
@@ -51,10 +71,71 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * mark defined in the course.
  * <p>
  * 
+ * Possible user interactions:
+ * <ul>
+ * <li>Select a course template: This initializes the waypoints list from the course template, using a one-lap
+ * configuration if a repeatable part is defined, so that all {@link WaypointTemplateDTO waypoint templates}
+ * {@link CourseTemplateDTO#getWaypointTemplates() used in the course template} will show as a
+ * {@link WaypointWithMarkConfigurationDTO} exactly once. For all waypoints' mark roles, a default
+ * {@link MarkConfigurationDTO mark configuration} will be determined, and all these mark configurations will then be
+ * contained in {@link CourseConfigurationDTO#getAllMarks()}, and their mapping to {@link MarkRoleDTO}s is captured in
+ * {@link CourseConfigurationDTO#setAssociatedRoles(java.util.HashMap)}. Existing regatta marks will be used in
+ * {@link RegattaMarkConfigurationDTO}s if the {@link SharedSailingData} service lists recent usages of those marks for
+ * the mark templates that belong to the mark role for which a mark configuration needs to be provided. Should
+ * {@link MarkPropertiesDTO}s from the user's inventory have been used recently for any of the remaining mark roles,
+ * they will be suggested, newest first, possibly restricted by a tag filter. If neither regatta marks nor mark
+ * properties from the user's inventory qualify, a default mark configuration is created based on the
+ * {@link MarkTemplateDTO} serving as the {@link CourseTemplateDTO#getDefaultMarkTemplatesForMarkRoles() default} for
+ * the role and hence requesting the creation of a regatta mark with its properties defined by the mark template. Extra
+ * {@link MarkTemplateDTO}s not being the default for any mark role are shown as "spares."</li>
+ * <li>Switch a mark configuration to an existing regatta mark; regatta marks will show in the selection list sorted by
+ * their last usage time point for the mark template(s) associated with the mark role to be filled, from most recently
+ * used to not used at all.</li>
+ * <li>Use a {@link MarkPropertiesDTO} from the user's inventory to request a new regatta mark with these properties,
+ * including the tracking properties defined by the {@link MarkPropertiesDTO} object.</li>
+ * <li>Switch to a spare {@link MarkTemplateDTO} which requests the creation of a corresponding regatta mark. (Should we
+ * allow for this if a regatta mark already exists that links back to the mark template selected? Or should we then
+ * suggest or even force the use of that regatta mark already existing?)</li>
+ * <li>Create a "free-style" mark configuration from scratch in the waypoint sequence; the editor may be the same used
+ * for creating a new regatta mark, collecting name, short name, color, pattern, shape, and type (see
+ * {@link MarkEditDialog}). If the mark configuration refers to a mark role from the course template, the freestyle
+ * mark configuration is {@link CourseConfigurationDTO#setAssociatedRoles(java.util.HashMap) linked to the mark role}
+ * in the course configuration under edit.</li>
+ * <li></li>
+ * <li></li>
+ * <li></li>
+ * </ul>
+ * <p>
+ * 
+ * Implications for UI elements required, as well as their behavior:
+ * <ul>
+ * <li>Each {@link WaypointWithMarkConfigurationDTO} is represented as a line in a grid or table, showing information
+ * about the one or two {@link MarkConfigurationDTO}s forming the control point underlying the waypoint, as well as the
+ * {@link PassingInstruction}.</li>
+ * <li>Each {@link WaypointWithMarkConfigurationDTO} may be removed (delete button?).</li>
+ * <li>Between each pair of {@link WaypointWithMarkConfigurationDTO} lines and before the first and after the last, a
+ * "+" / "Insert" control is shown, allowing the user to manually add another {@link WaypointWithMarkConfigurationDTO}
+ * to the course configuration. (This will most likely, at least temporarily, break the conformance with any course
+ * template selected.)</li>
+ * <li>Each {@link MarkConfigurationDTO} is displayed as a drop-down list box which contains---ideally sorted into
+ * labeled categories and with an iconic representation---the existing regatta marks (sorting those to the top whose
+ * optional reference to a mark template fits any mark template linking to the mark role to fill), the
+ * {@link MarkTemplateDTO mark templates} taken from {@link CourseTemplateDTO#getDefaultMarkRolesForMarkTemplates()}
+ * with the one returned by {@link CourseTemplateDTO#getDefaultMarkTemplatesForMarkRoles()} for the {@link MarkRoleDTO}
+ * that the mark is filling sorted to the top; furthermore, all {@link MarkPropertiesDTO}s from the user's inventory,
+ * sorted by the {@link SharedSailingData#getUsedMarkProperties(MarkRole)} time points.</li>
+ * <li>A tag filter field allows the user to restrict suggestions for {@link MarkPropertiesDTO}s</li>
+ * </ul>
+ * 
  * @author Axel Uhl (d043530)
  *
  */
 public class CourseConfigurationEditDialog extends DataEntryDialog<CourseConfigurationDTO> {
+    private final TextBox nameBox;
+    private final TextBox shortNameBox;
+    private final ListBox courseTemplateListBox;
+    private final IntegerBox numberOfLapsBox;
+    
     private static class Validator implements DataEntryDialog.Validator<CourseConfigurationDTO> {
         @Override
         public String getErrorMessage(CourseConfigurationDTO valueToValidate) {
@@ -69,6 +150,12 @@ public class CourseConfigurationEditDialog extends DataEntryDialog<CourseConfigu
             DialogCallback<CourseConfigurationDTO> callback) {
         super(stringMessages.configureCourse(), stringMessages.configureCourse(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator(), callback);
+        courseTemplateListBox = createGenericListBox((CourseTemplateDTO courseTemplateDTO)->
+            courseTemplateDTO.getName()+(courseTemplateDTO.getShortName()==null?"":(" - "+courseTemplateDTO.getShortName())),
+            /* isMultipleSelect */ false);
+        nameBox = createTextBox(courseConfigurationToEdit == null ? "" : courseConfigurationToEdit.getName());
+        shortNameBox = createTextBox(courseConfigurationToEdit == null ? "" : courseConfigurationToEdit.getShortName());
+        numberOfLapsBox = createIntegerBox(courseConfigurationToEdit == null ? null : courseConfigurationToEdit.getNumberOfLaps(), 2);
     }
 
     @Override

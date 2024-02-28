@@ -356,7 +356,6 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -491,13 +490,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     .collect(Collectors.toMap(
                             entry -> getSharedSailingData().getMarkRoleById(entry.getKey().getUuid()),
                             entry -> getSharedSailingData().getMarkTemplateById(entry.getValue().getUuid())));
-            final RepeatablePart optionalRepeatablePart = courseTemplate.getRepeatablePart() != null
-                    ? convertToRepeatablePart(courseTemplate.getRepeatablePart())
-                    : null;
             result = convertToCourseTemplateDTO(
                     getSharedSailingData().createCourseTemplate(courseTemplate.getName(), courseTemplate.getShortName(), marks,
                             waypoints, defaultMarkRolesForMarkTemplates, defaultMarkTemplatesForMarkRoles,
-                            optionalRepeatablePart, courseTemplate.getTags(), optionalImageURL, courseTemplate.getDefaultNumberOfLaps()));
+                            courseTemplate.getRepeatablePart(), courseTemplate.getTags(), optionalImageURL,
+                            courseTemplate.getDefaultNumberOfLaps()));
         }
         return result;
     }

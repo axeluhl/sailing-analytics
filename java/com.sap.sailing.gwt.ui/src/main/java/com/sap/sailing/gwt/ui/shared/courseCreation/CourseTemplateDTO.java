@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -30,7 +31,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     private HashMap<MarkRoleDTO, MarkTemplateDTO> defaultMarkTemplatesForMarkRoles = new HashMap<>();
     private ArrayList<String> tags = new ArrayList<>();
     private String optionalImageUrl;
-    private RepeatablePartDTO repeatablePart;
+    private RepeatablePart repeatablePart;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private Integer defaultNumberOfLaps;
     
@@ -41,7 +42,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
     public CourseTemplateDTO(UUID uuid, String name, String shortName,
             Iterable<MarkTemplateDTO> markTemplates, Iterable<WaypointTemplateDTO> waypointTemplates,
             Map<MarkTemplateDTO, MarkRoleDTO> defaultMarkRolesForMarkTemplates, Map<MarkRoleDTO, MarkTemplateDTO> defaultMarkTemplatesForMarkRoles, String optionalImageUrl,
-            Iterable<String> tags, RepeatablePartDTO repeatablePart, Integer defaultNumberOfLaps) {
+            Iterable<String> tags, RepeatablePart repeatablePart, Integer defaultNumberOfLaps) {
         super(name);
         this.shortName = shortName;
         this.uuid = uuid;
@@ -125,7 +126,7 @@ public class CourseTemplateDTO extends NamedDTO implements SecuredDTO {
         return tags;
     }
 
-    public RepeatablePartDTO getRepeatablePart() {
+    public RepeatablePart getRepeatablePart() {
         return repeatablePart;
     }
 

@@ -76,12 +76,12 @@ public interface CourseConfiguration<P> extends WithOptionalRepeatablePart, Name
     Iterable<WaypointWithMarkConfiguration<P>> getWaypoints();
     
     /**
-     * Returns all {@link MarkConfiguration MarkConfigurations} that are part of the {@link CourseConfigurationBase} and
-     * have a role explicitly associated. A mark role links back to a {@link CourseTemplate} and makes it possible to
+     * Returns all {@link MarkConfiguration MarkConfigurations} that are part of the {@link CourseConfiguration} and
+     * have a role explicitly associated. A mark role "links" back to a {@link CourseTemplate} and makes it possible to
      * recognize congruence between the course described by this configuration and the course described by a course
-     * template, regardless of the actual marks that are used in certain roles. This enables, for example, to use two
-     * different marks for the same role in different laps and still find the course configuration to be congruent to
-     * its original course template. This information is also useful when creating another course template from this
+     * template, regardless of the actual marks that are used in certain roles. This enables, for example, the use of
+     * two different marks for the same role in different laps and still find the course configuration to be congruent
+     * to its original course template. This information is also useful when creating another course template from this
      * configuration ("save as...") because then the roles to which the mark configurations refer can be (re-)used in
      * the new course template constructed from this configuration.
      */

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sse.common.impl.RepeatablePartImpl;
+
 /**
  * Reusable implementation of the semantics for the repeatable part of a course sequence. The sequence is defined by the
  * start and end of the zero-based repeatable part of the complete sequence. The following requirements need to be
@@ -15,6 +17,10 @@ import java.util.List;
  * </ul>
  */
 public interface RepeatablePart extends Serializable {
+    static RepeatablePart of(int zeroBasedIndexOfRepeatablePartStart, int zeroBasedIndexOfRepeatablePartEnd) {
+        return new RepeatablePartImpl(zeroBasedIndexOfRepeatablePartStart, zeroBasedIndexOfRepeatablePartEnd);
+    }
+    
     /**
      * The index into {@link #waypoints} of the first waypoint that is to be cloned for repetitive laps.
      */

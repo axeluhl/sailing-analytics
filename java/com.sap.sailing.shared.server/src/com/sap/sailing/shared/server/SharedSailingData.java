@@ -129,8 +129,8 @@ public interface SharedSailingData extends ReplicableWithObjectInputStream<Repli
 
     /**
      * Records the fact that the {@code markProperties} were used to configure a mark that takes the given role name.
-     * Keeps the {@link MillisecondsTimePoint#now() current time} of this call which will be returned for the role name
-     * when invoking {@link #getUsedMarkProperties(String)}.
+     * Keeps the {@link TimePoint#now() current time} of this call which will be returned for the role name
+     * when invoking {@link #getUsedMarkProperties(MarkRole)}.
      */
     void recordUsage(MarkProperties markProperties, MarkRole markRole);
     

@@ -39,7 +39,7 @@ public class CourseConfigurationDTO implements IsSerializable {
      * one occurrence of a repeatable part in its waypoint template sequence, here the {@link #waypoints} sequence must
      * have at least one but may have multiple occurrences of the repeatable part. The special handling that happens in
      * this class is that when more than one occurrence already exists in {@link #waypoints}, upon adding more
-     * repetitions the <em>last</em> occurrence will be repeated. See also {@link #getWaypoints(int)}.
+     * repetitions the <em>last</em> occurrence will be repeated. See also {@link #getWaypoints()}.
      */
     private RepeatablePart optionalRepeatablePart;
 

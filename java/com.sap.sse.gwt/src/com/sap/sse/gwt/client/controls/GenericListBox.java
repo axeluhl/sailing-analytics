@@ -39,7 +39,7 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
     
     @Override
     public void setValue(T value) {
-        int i = items.indexOf(value);
+        final int i = items.indexOf(value);
         if (i > -1) {
             setSelectedIndex(i);
         }
@@ -54,7 +54,7 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
 
     @Override
     public T getValue() {
-        int i = getSelectedIndex();
+        final int i = getSelectedIndex();
         if (i < 0) {
             return null;
         }
@@ -75,6 +75,5 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
     @Override
     public void setItemSelected(int index, boolean selected) {
         super.setItemSelected(index, selected);
-
     }
 }
