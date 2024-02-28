@@ -27,7 +27,6 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate.MarkTemplateResolver;
 import com.sap.sailing.domain.coursetemplate.Positioning;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
@@ -50,6 +49,7 @@ import com.sap.sailing.shared.server.operations.RecordUsageForMarkTemplateOperat
 import com.sap.sailing.shared.server.operations.SetPositioningInformationForMarkPropertiesOperation;
 import com.sap.sailing.shared.server.operations.UpdateCourseTemplateOperation;
 import com.sap.sailing.shared.server.operations.UpdateMarkPropertiesOperation;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;

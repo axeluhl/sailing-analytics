@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.coursetemplate.impl;
+package com.sap.sse.common.impl;
 
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sse.common.RepeatablePart;
 
 public class RepeatablePartImpl implements RepeatablePart {
     private static final long serialVersionUID = -7432656529810302123L;

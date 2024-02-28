@@ -160,7 +160,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -207,7 +206,6 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -223,7 +221,6 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -359,10 +356,10 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -514,7 +511,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
-            Position fixedPosition) {
+            Position fixedPosition) throws NoCorrespondingServiceRegisteredException, TransformationException {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (deviceIdentifier != null) {
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
@@ -3880,49 +3877,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             return new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
         }
         return null;
-    }
-
-    private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
-        final Timed lastFix;
-        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
-            lastFix = lastFixes.get(mapping.getDevice());
-        } else {
-            lastFix = null;
-        }
-        String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
-                null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
-                null : mapping.getTimeRange().to().asDate();
-        MappableToDevice item = null;
-        final WithID mappedTo = mapping.getMappedTo();
-        if (mappedTo == null) {
-            throw new RuntimeException("Device mapping not mapped to any object");
-        } else if (mappedTo instanceof Competitor) {
-            item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
-        } else if (mappedTo instanceof Mark) {
-            item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
-        } else if (mappedTo instanceof Boat) {
-            item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
-        } else {
-            throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
-                    + mappedTo.getClass().getName());
-        }
-        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
-        //has a large performance implact for GWT.
-        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
-        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
-        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
-        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
-            if (! (id instanceof UUID)) {
-                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
-                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
-            }
-            originalRaceLogEventUUIDs.add((UUID) id);
-        }
-        return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
     }
 
     private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog) throws TransformationException {

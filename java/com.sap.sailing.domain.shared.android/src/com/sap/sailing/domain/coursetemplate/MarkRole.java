@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sse.common.Named;
 import com.sap.sse.common.NamedWithUUID;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -33,7 +32,7 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * be solved.
 
  */
-public interface MarkRole extends Named, NamedWithUUID, WithQualifiedObjectIdentifier, ControlPointTemplate {
+public interface MarkRole extends NamedWithUUID, WithQualifiedObjectIdentifier, ControlPointTemplate {
     public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(UUID markPropertiesUUID) {
         return new TypeRelativeObjectIdentifier(markPropertiesUUID.toString());
     }

@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.shared.json.JsonSerializer;
 
 public class RepeatablePartJsonSerializer implements JsonSerializer<RepeatablePart> {
