@@ -167,7 +167,7 @@ setup_fail2ban() {
         systemctl enable fail2ban
         chkconfig --level 23 fail2ban on
     fi
-    cat <<EOF > /etc/fail2ban/jail.d/customisation.local
+    cat << EOF > /etc/fail2ban/jail.d/customisation.local
     [ssh-iptables]
 
     enabled  = true
@@ -176,7 +176,7 @@ setup_fail2ban() {
             sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
     logpath  = /var/log/fail2ban.log
     maxretry = 5
-    EOF
+EOF
     service fail2ban start
     yum remove -y firewalld
     
