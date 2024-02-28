@@ -90,60 +90,37 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
-    OLD_IFS="$IFS"
     SEPARATOR="@."
     ACTUAL_SYMBOL="@@"
-    TEMP_KEY_DIR="/root/keysTemp"
-	mkdir --parents "${TEMP_KEY_DIR}"
-    scp -p root@sapsailing.com:/root/keys/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
-    scp -p root@sapsailing.com:/root/aws_credentials/*${SEPARATOR}${1} "${TEMP_KEY_DIR}"
-    sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" ${TEMP_KEY_DIR}/config*  #ensure the IMDSv2 metadata is optional
-    IFS=$'\n'
+    TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
+    REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
+    && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
+    scp -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
-    for filename  in $(find . -type f | sed "s|./||"  ); do
-        IFS=$OLD_IFS
-        length=$(echo $filename | wc -c )
-        echo "length: $length"
-        echo "filename: $filename"
-        output=""
-        part=0
-        for ((c=0; c < length; c++)) do
-            if [[ "${filename:$c:2}" == "${ACTUAL_SYMBOL}" ]]; then
-                output="$output""@"
-                ((c++))
-            elif [[ "${filename:$c:2}" == "${SEPARATOR}" ]]; then
-                array[$part]="$output"
-                output=""
-                ((c++))
-                ((part++))
-            else
-                output="$output""${filename:$c:1}"
-            fi
-        done
-        key="${array[0]}"
-        user="${array[1]}"
-        environment="$output"
-        echo "key: \"$key\" user: \"$user\" environ: \"$environment\""
-        echo "end **********"
-        id -u "$user"
-        if [[ "$?" -eq 0 ]]; then
+    for user in $(ls); do 
+        if id -u "$user"; then
             user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
-            mkdir --parents "${user_home_dir}/.ssh"
-            mkdir --parents "${user_home_dir}/.aws"
-            chmod 700 "${user_home_dir}/.ssh"
-            chmod 766 "${user_home_dir}/.aws"
-            chown -R  ${user}:${user} "${user_home_dir}/.ssh"
-            chown -R  ${user}:${user} "${user_home_dir}/.aws"
-            if [[ "$key" == *.pub ]]; then 
-                cat "$filename" >> "$user_home_dir"/.ssh/authorized_keys
-            elif [[ "$key" == "credentials" || "$key" == "config" ]]; then
-                cp "$filename" "$user_home_dir"/.aws/"$key"
-            else
-                cp "$filename" "$user_home_dir"/.ssh/"$key"            
+            # aws setup
+            if [[ -d "${user}/aws" ]]; then 
+                mkdir --parents "${user_home_dir}/.aws"
+                chmod 766 "${user_home_dir}/.aws"
+                chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
+                sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
+            fi
+            # ssh setup
+            if [[ -d "${user}/ssh" ]]; then
+                mkdir --parents "${user_home_dir}/.ssh"
+                chmod 700 "${user_home_dir}/.ssh"
+                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                \cp --preserve --dereference $(find ${user}/ssh -maxdepth 1 -type f)  "${user_home_dir}/.ssh"
+                for key in $(find ${user}/ssh/authorized_keys -type f); do
+                    cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
+                done
             fi
         fi
     done
-    IFS="$OLD_IFS"
+    cd /
     rm -rf "${TEMP_KEY_DIR}"
 }
 
