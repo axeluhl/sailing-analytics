@@ -8,11 +8,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.gwt.ui.adminconsole.MarkEditDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkConfigurationDTO;
@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointWithMarkConfigurationDTO;
+import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -101,7 +103,12 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * {@link MarkEditDialog}). If the mark configuration refers to a mark role from the course template, the freestyle
  * mark configuration is {@link CourseConfigurationDTO#setAssociatedRoles(java.util.HashMap) linked to the mark role}
  * in the course configuration under edit.</li>
- * <li></li>
+ * <li>Change the number of laps (assuming a course template is selected and the waypoint sequence still conforms to
+ * the course template) to any number greater than zero; this will adjust the occurrence of the repeatable part
+ * in the sequence of {@link WaypointWithMarkConfigurationDTO}s. While doing so, smart logic needs to apply that
+ * when adding one or more laps clones the last lap's waypoint configurations, and when removing one or more laps
+ * removes them starting at the last lap, moving backwards. This will probably not work with the
+ * {@link RepeatablePart#createSequence(int, Iterable)} method.</li>
  * <li></li>
  * <li></li>
  * </ul>
