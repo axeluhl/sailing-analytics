@@ -112,19 +112,19 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         HorizontalPanel buttonsPanel = new HorizontalPanel();
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    courseManagementWidget.refresh();
-                }
+            @Override
+            public void onClick(ClickEvent event) {
+                courseManagementWidget.refresh();
+            }
         });
         buttonsPanel.add(refreshBtn);
         Button saveBtn = new Button(stringMessages.save());
         saveBtn.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    courseManagementWidget.save();
-                }
-            });
+            @Override
+            public void onClick(ClickEvent event) {
+                courseManagementWidget.save();
+            }
+        });
         trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(h -> {
             saveBtn.setVisible(presenter.getUserService().hasPermission(selectedRaceDTO, DefaultActions.UPDATE));
         });
