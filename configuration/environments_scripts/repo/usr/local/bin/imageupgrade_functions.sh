@@ -80,11 +80,16 @@ update_root_crontab() {
 
 build_crontab_and_setup_files() {
     #1: Environment type.
+    local ENVIRONMENT_TYPE="$1"
+    #2 git copy user
+    local GIT_COPY_USER="$2"
+    #3 relative path to git within the git user
+    local RELATIVE_PATH_TO_GIT="$3"
     scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
     cd /root/
     chown root:root environments_scripts
     cd environments_scripts
-    ./build-crontab-and-cp-files "${1}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
     cd ..
     rm -rf /root/environments_scripts
 }

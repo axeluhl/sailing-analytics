@@ -18,7 +18,7 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   LOGON_USER_HOME="ec2-user"
   ENVIRONMENT_TYPE="reverse_proxy"
   run_yum_update
-  build_crontab_and_setup_files
+  build_crontab_and_setup_files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
   finalize
 fi
 
