@@ -187,37 +187,3 @@ EOF
     yum remove -y firewalld
     
 }
-
-setup_cloud_cfg_and_root_login() {
-    sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
-    sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
-}
-
-setup_fail2ban() {
-    if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
-        yum install 2to3 -y
-        wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
-        tar -xvf 1.0.2.tar.gz
-        cd fail2ban-1.0.2/
-        ./fail2ban-2to3
-        python3.9 setup.py build
-        python3.9 setup.py install
-        cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
-        sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
-        systemctl enable fail2ban
-        chkconfig --level 23 fail2ban on
-    fi
-    cat << EOF > /etc/fail2ban/jail.d/customisation.local
-    [ssh-iptables]
-
-    enabled  = true
-    filter   = sshd[mode=aggressive]
-    action   = iptables[name=SSH, port=ssh, protocol=tcp]
-            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
-    logpath  = /var/log/fail2ban.log
-    maxretry = 5
-EOF
-    service fail2ban start
-    yum remove -y firewalld
-    
-}
