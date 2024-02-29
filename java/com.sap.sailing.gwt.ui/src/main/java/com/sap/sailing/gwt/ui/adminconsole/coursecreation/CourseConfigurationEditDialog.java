@@ -80,9 +80,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * 
  * Possible user interactions:
  * <ul>
- * <li>Select a course template: This initializes the waypoints list from the course template, using a one-lap
- * configuration if a repeatable part is defined, so that all {@link WaypointTemplateDTO waypoint templates}
- * {@link CourseTemplateDTO#getWaypointTemplates() used in the course template} will show as a
+ * <li>Select a course template: This initializes the waypoints list from the course template, using the default number
+ * of laps (but at least one) if a repeatable part is defined, so that all {@link WaypointTemplateDTO waypoint
+ * templates} {@link CourseTemplateDTO#getWaypointTemplates() used in the course template} will show as a
  * {@link WaypointWithMarkConfigurationDTO} exactly once. For all waypoints' mark roles, a default
  * {@link MarkConfigurationDTO mark configuration} will be determined, and all these mark configurations will then be
  * contained in {@link CourseConfigurationDTO#getAllMarks()}, and their mapping to {@link MarkRoleDTO}s is captured in
@@ -161,13 +161,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * allow for the selection / creation of two mark configurations (all existing regatta mark or free-style or mark
  * properties-based mark configurations, or creating a new mark properties-based mark configuration from the mark
  * properties inventory, or allow for another free-style mark configuration creation). Ideally, we would have a unified
- * way of creating new mark configuration for filling one of the two mark pair's "slots" as well as for the creation
- * of a new single mark configuration.<p>
+ * way of creating new mark configuration for filling one of the two mark pair's "slots" as well as for the creation of
+ * a new single mark configuration.
+ * <p>
  *
  * This edit dialog could potentially replace {@link CourseManagementWidget} and its specializations at some point,
- * harmonizing the course editing across at least the AdminConsole. Should we try to evolve {@link CourseManagementWidget}
- * into this? Or shall we start over and when done try to make this usable in the contexts where currently
- * {@link CourseManagementWidget} has been deployed?
+ * harmonizing the course editing across at least the AdminConsole. Should we try to evolve
+ * {@link CourseManagementWidget} into this? Or shall we start over and when done try to make this usable in the
+ * contexts where currently {@link CourseManagementWidget} has been deployed?
  * 
  * @author Axel Uhl (d043530)
  *
