@@ -112,6 +112,8 @@ setup_keys() {
                 chmod 766 "${user_home_dir}/.aws"
                 chown -R  ${user}:${user} "${user_home_dir}/.aws"
                 \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
+                printf "[default]\n" >> "${user_home_dir}/.aws/config"
+                printf "region = placeholder" >> "${user_home_dir}/.aws/config"
                 sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
             fi
             # ssh setup
