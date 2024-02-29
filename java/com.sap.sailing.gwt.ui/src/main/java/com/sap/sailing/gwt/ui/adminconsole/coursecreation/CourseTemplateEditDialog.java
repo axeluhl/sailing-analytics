@@ -204,9 +204,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         refreshWaypointsTable();
         buttonAddWaypointTemplate = new Button(stringMessages.add());
         buttonAddWaypointTemplate.addClickHandler(c -> {
-            final MarkRoleDTO firstMarkTemplate = allMarkRoles.stream().findFirst().orElse(null);
+            final MarkRoleDTO firstMarkRole = allMarkRoles.stream().findFirst().orElse(null);
             waypointTemplates
-                    .add(new WaypointTemplateDTO(/* name */ null, /* shortName */ null, Arrays.asList(firstMarkTemplate, firstMarkTemplate),
+                    .add(new WaypointTemplateDTO(/* name */ null, /* shortName */ null, Arrays.asList(firstMarkRole, firstMarkRole),
                             Arrays.stream(PassingInstruction.relevantValues()).findFirst().orElse(null)));
             refreshWaypointsTable();
             validateAndUpdate();
