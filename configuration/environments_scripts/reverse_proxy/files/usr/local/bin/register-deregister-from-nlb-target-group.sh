@@ -24,13 +24,9 @@ addSelfToNLB() {
     fi 
 }
 
-
 removeSelfFromNLB() {
         aws elbv2 deregister-targets --target-group-arn "${targetGroupArn}" --targets Id="${selfIp}",Port=80,AvailabilityZone="${availabilityZone}"
-
 }
-
-
 
 case $1 in 
     add-to-nlb)
