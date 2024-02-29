@@ -79,11 +79,12 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
+    #1: Environment type.
     scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
     cd /root/
     chown root:root environments_scripts
     cd environments_scripts
-    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    ./build-crontab-and-cp-files "${1}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
     cd ..
     rm -rf /root/environments_scripts
 }
