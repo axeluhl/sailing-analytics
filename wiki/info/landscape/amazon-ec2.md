@@ -66,7 +66,8 @@ The webserver is registered as target in various locations:
 * As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
 * as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
 * as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
-* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
+* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively
+* as regular instance target in ``DNSMapped-0``'s target group ``DNSMapped0-Central-HTTP`` to which requests for services available only on the *central* reverse proxy are forwarded to, such as ``releases.sapsailing.com``, ``bugzilla.sapsailing.com``, and so on
 * as target of the elastic IP address ``54.229.94.254``
 
 Changing the DNS entry especially for ``logfiles.internal.sapsailing.com`` requires re-mounting those NFS shares wherever they were used. Go to at least all instances tagged with ``sailing-analytics-server`` and, as user ``root``, execute the following commands:
