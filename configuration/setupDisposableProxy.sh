@@ -17,15 +17,13 @@ sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
-sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
-sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
 # fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx postfix cronie iptables
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx postfix cronie iptables mod_ssl
 service postfix restart
 sudo systemctl enable postfix
 sudo systemctl enable crond.service
@@ -61,33 +59,8 @@ EOF
 systemctl enable httpd
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
-if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
-    yum install 2to3 -y
-    wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
-    tar -xvf 1.0.2.tar.gz
-    cd fail2ban-1.0.2/
-    ./fail2ban-2to3
-    python3.9 setup.py build
-    python3.9 setup.py install
-    cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
-    sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
-    systemctl enable fail2ban
-    systemctl start fail2ban
-    chkconfig --level 23 fail2ban on
-fi
-cat <<EOF > /etc/fail2ban/jail.d/customisation.local
-[ssh-iptables]
-
-enabled  = true
-filter   = sshd[mode=aggressive]
-action   = iptables[name=SSH, port=ssh, protocol=tcp]
-           sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
-logpath  = /var/log/fail2ban.log
-maxretry = 5
-EOF
-service fail2ban start
-yum remove -y firewalld
-yum install -y mod_ssl
+. imageupgrade_functions.sh
+setup_fail2ban
 # setup mounting of nvme
 mountnvmeswap
 # setup logrotate.d/httpd 
@@ -98,20 +71,9 @@ sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABS
 # logrotate.conf setup
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
-# setup latest cli
-if [[ ! -d "/root/aws" ]]; then 
-    yum remove -y awscli
-    cd ~ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    cd ~ && unzip awscliv2.zip
-    rm -rf awscliv2.zip
-    cd ~ && sudo ./aws/install
-fi
 # setup git
 /root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
-# certs setup
 cd /etc
-mkdir  --parents letsencrypt/live/sail-insight.com
-scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
 # copy aws credentials to apache user
 scp -o StrictHostKeyChecking=no  -r "root@${AWS_CREDENTIALS_IP}:~/.aws"  /usr/share/httpd
 sed -i "s/region = .*/region = \$(curl http://169.254.169.254/latest/meta-data/placement/region)/" /usr/share/httpd/.aws/config  #ensure the IMDSv2 metadata is optional
