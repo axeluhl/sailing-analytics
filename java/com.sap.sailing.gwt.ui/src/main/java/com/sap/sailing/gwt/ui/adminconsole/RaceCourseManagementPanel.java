@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
@@ -107,8 +106,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             }
         };
-        FlowPanel courseManagementPanel = new FlowPanel();
-        courseManagementPanel.add(courseManagementWidget);
         HorizontalPanel buttonsPanel = new HorizontalPanel();
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
