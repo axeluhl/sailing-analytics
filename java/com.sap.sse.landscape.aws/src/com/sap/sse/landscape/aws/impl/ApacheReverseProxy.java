@@ -167,7 +167,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
         StringBuilder command = new StringBuilder(" git add " + getRelativeConfigFilePath(editedFileName)
                 + " && git commit -m " + "\"" + commitMsg + "\""); // space at beginning and after -m, for safety
         if (performPush) {
-            command.append(" ; git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
+            command.append(" ; GIT_SSH_COMMAND=\"ssh -o StrictHostKeyChecking=no\" git push origin " + CONFIG_REPO_MAIN_BRANCH_NAME);
         }
         return command.toString();
     }
