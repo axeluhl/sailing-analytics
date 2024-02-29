@@ -110,21 +110,21 @@ setup_keys() {
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
                 chmod 766 "${user_home_dir}/.aws"
-                chown -R  ${user}:${user} "${user_home_dir}/.aws"
                 \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
                 printf "[default]\n" >> "${user_home_dir}/.aws/config"
-                printf "region = placeholder" >> "${user_home_dir}/.aws/config"
+                printf "region = placeholder\n" >> "${user_home_dir}/.aws/config"
                 sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
+                chown -R  ${user}:${user} "${user_home_dir}/.aws"
             fi
             # ssh setup
             if [[ -d "${user}/ssh" ]]; then
                 mkdir --parents "${user_home_dir}/.ssh"
                 chmod 700 "${user_home_dir}/.ssh"
-                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
                 \cp --preserve --dereference $(find ${user}/ssh -maxdepth 1 -type f)  "${user_home_dir}/.ssh"
                 for key in $(find ${user}/ssh/authorized_keys -type f); do
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
+                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
             fi
         fi
     done
