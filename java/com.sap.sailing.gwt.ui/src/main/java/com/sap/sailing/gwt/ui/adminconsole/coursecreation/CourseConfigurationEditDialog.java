@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
+import com.sap.sailing.gwt.ui.adminconsole.CourseManagementWidget;
 import com.sap.sailing.gwt.ui.adminconsole.MarkEditDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -150,7 +151,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * <li>A tag filter field allows the user to restrict suggestions for {@link MarkPropertiesDTO}s</li>
  * </ul>
  * <p>
- * 
+ *
  * Further thoughts: compared to our existing AdminConsole-style course editor which first requires users to set up the
  * control points with two marks which can only then be used in new waypoint definitions, we should let users assemble
  * gates and lines dynamically as they go (similar to the "by-marks" course editor from the Race Manager App),
@@ -162,6 +163,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * properties inventory, or allow for another free-style mark configuration creation). Ideally, we would have a unified
  * way of creating new mark configuration for filling one of the two mark pair's "slots" as well as for the creation
  * of a new single mark configuration.<p>
+ *
+ * This edit dialog could potentially replace {@link CourseManagementWidget} and its specializations at some point,
+ * harmonizing the course editing across at least the AdminConsole. Should we try to evolve {@link CourseManagementWidget}
+ * into this? Or shall we start over and when done try to make this usable in the contexts where currently
+ * {@link CourseManagementWidget} has been deployed?
  * 
  * @author Axel Uhl (d043530)
  *

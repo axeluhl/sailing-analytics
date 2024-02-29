@@ -332,7 +332,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }
     }
 
-    protected void save(){};
+    protected void save() {}
     
     private <T> T getFirstSelected(SetSelectionModel<T> selectionModel) {
         if (selectionModel.getSelectedSet().isEmpty()) {

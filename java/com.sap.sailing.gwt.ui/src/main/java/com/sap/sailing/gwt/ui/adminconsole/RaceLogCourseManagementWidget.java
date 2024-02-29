@@ -147,6 +147,20 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
         refreshMarks();
     }
 
+    @Override
+    protected void save() {
+        sailingServiceWrite.setORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName, getORCPerformanceCurveLegInfoByOneBasedWaypointIndex(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+        });
+    }
+
     private void refreshORCPerformanceCurveLegs() {
         sailingServiceWrite.getORCPerformanceCurveLegInfo(leaderboardName, raceColumnName, fleetName,
                 new AsyncCallback<Map<Integer, ORCPerformanceCurveLegImpl>>() {
