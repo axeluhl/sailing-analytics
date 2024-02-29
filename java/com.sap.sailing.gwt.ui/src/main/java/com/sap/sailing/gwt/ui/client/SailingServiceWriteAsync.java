@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.orc.ImpliedWindSource;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
-import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.EventActions;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
@@ -216,10 +216,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getSecretForRegattaByName(String leaderboardName, AsyncCallback<String> asyncCallback);
 
     void setORCPerformanceCurveLegInfo(RegattaAndRaceIdentifier raceIdentifier,
-            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
+            Map<Integer, ORCPerformanceCurveLeg> legInfo, AsyncCallback<Void> callback);
 
     void setORCPerformanceCurveLegInfo(String leaderboardName, String raceColumnName, String fleetName,
-            Map<Integer, ORCPerformanceCurveLegImpl> legInfo, AsyncCallback<Void> callback);
+            Map<Integer, ORCPerformanceCurveLeg> legInfo, AsyncCallback<Void> callback);
 
     void assignORCPerformanceCurveCertificates(RegattaIdentifier regattaIdentifier,
             Map<String, ORCCertificate> certificatesForBoatsWithIdAsString,

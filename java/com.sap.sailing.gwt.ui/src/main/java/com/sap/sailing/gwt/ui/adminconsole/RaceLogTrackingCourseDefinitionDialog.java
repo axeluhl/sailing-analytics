@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -29,9 +29,9 @@ public class RaceLogTrackingCourseDefinitionDialog extends
     
     public static class Result {
         private final List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> waypoints;
-        private final Map<Integer, ORCPerformanceCurveLegImpl> orcLegData;
+        private final Map<Integer, ORCPerformanceCurveLeg> orcLegData;
         private final Integer priority;
-        public Result(List<Pair<ControlPointDTO, PassingInstruction>> waypoints, Map<Integer, ORCPerformanceCurveLegImpl> orcLegData, Integer priority) {
+        public Result(List<Pair<ControlPointDTO, PassingInstruction>> waypoints, Map<Integer, ORCPerformanceCurveLeg> orcLegData, Integer priority) {
             super();
             this.waypoints = waypoints;
             this.orcLegData = orcLegData;
@@ -43,7 +43,7 @@ public class RaceLogTrackingCourseDefinitionDialog extends
         public Integer getPriority() {
             return priority;
         }
-        public Map<Integer, ORCPerformanceCurveLegImpl> getORCLegData() {
+        public Map<Integer, ORCPerformanceCurveLeg> getORCLegData() {
             return orcLegData;
         }
     }

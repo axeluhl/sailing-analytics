@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
 import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.adminconsole.CourseManagementWidget.LegGeometrySupplier;
@@ -31,7 +32,7 @@ import com.sap.sse.gwt.client.dialog.DoubleBox;
  * @author Axel Uhl (D043530)
  *
  */
-public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurveLegDialog<ORCPerformanceCurveLegImpl[]> {
+public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurveLegDialog<ORCPerformanceCurveLeg[]> {
     private final ListBox commonLegTypeBox;
     private final DoubleBox desiredTotalCourseDistanceInNauticalMilesBox;
     private final ListBox[] legTypeBoxes;
@@ -54,9 +55,9 @@ public class ORCPerformanceCurveAllLegsDialog extends AbstractORCPerformanceCurv
      *            zero-based index 1 and one-based index 2, respectively.
      */
     public ORCPerformanceCurveAllLegsDialog(StringMessages stringMessages, ListDataProvider<WaypointDTO> waypointList,
-            ORCPerformanceCurveLegImpl[] orcLegParametersSoFar, LegGeometrySupplier legGeometrySupplier,
-            Validator<ORCPerformanceCurveLegImpl[]> validator,
-            DialogCallback<ORCPerformanceCurveLegImpl[]> callback) {
+            ORCPerformanceCurveLeg[] orcLegParametersSoFar, LegGeometrySupplier legGeometrySupplier,
+            Validator<ORCPerformanceCurveLeg[]> validator,
+            DialogCallback<ORCPerformanceCurveLeg[]> callback) {
         super(stringMessages.orcPerformanceCurveLegs(), stringMessages.orcPerformanceCurveLegs(), stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         this.waypointList = waypointList;

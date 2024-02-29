@@ -4,8 +4,8 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.user.client.ui.ListBox;
+import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLeg;
 import com.sap.sailing.domain.common.orc.ORCPerformanceCurveLegTypes;
-import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DoubleBox;
@@ -19,7 +19,7 @@ public abstract class AbstractORCPerformanceCurveLegDialog<T> extends DataEntryD
         this.stringMessages = stringMessages;
     }
 
-    protected ListBox createLegTypeBox(ORCPerformanceCurveLegImpl orcLegParametersSoFar) {
+    protected ListBox createLegTypeBox(ORCPerformanceCurveLeg orcLegParametersSoFar) {
         final ListBox legTypeBox = createListBox(/* isMultipleSelect */ false);
         legTypeBox.addItem("", (String) null);
         int i=1;
