@@ -95,7 +95,7 @@ setup_keys() {
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
     for user in $(ls); do 
         if id -u "$user"; then
