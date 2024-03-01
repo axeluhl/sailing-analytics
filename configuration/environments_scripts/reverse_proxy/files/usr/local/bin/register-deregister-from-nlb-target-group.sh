@@ -16,7 +16,7 @@ if [[ "$#" -eq 0 ]];then
 fi
 
 addSelfToNLB() {
-    if  ! ec2-metadata --user-data | grep  "image-upgrade" ; then
+    if  ! ec2-metadata --user-data | grep  "^image-upgrade$" ; then
         ec2-metadata --local-ipv4 | grep  -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>" > /var/cache/local-ip
         ec2-metadata --availability-zone |  grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>" > /var/cache/availability-zone
         aws elbv2 register-targets --target-group-arn "${targetGroupArn}" --targets Id="${selfIp}",Port=80,AvailabilityZone="${availabilityZone}"
