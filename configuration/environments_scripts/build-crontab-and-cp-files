@@ -10,7 +10,7 @@
 # in which the crontab will be installed. 
 # Useful files are also copied across from the "files" dir within each image type.
 # Finally, the script ends by performing a deamon reload and reenabling all the systemd units so the correct wants,
-# requires, etc. are installed/linked.
+# requires, etc. are installed/linked. Any systemd units, within the mimicked filesystem, will be automatically enabled. 
 
 if [[ $# -lt 3 || $# -gt 5 ]]; then
     echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
@@ -62,4 +62,6 @@ if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
 fi
 
 systemctl daemon-reload
-systemctl reenable $(find /etc/systemd/system/ -type f) # to recreate all the dependency links.
+for unit in $(find etc/systemd/system -type f); do
+    systemctl reenable /"${unit}" # to recreate all the dependency links.
+done
