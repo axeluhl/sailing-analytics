@@ -79,58 +79,55 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
-    scp -o StrictHostKeyChecking=no -r "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts" /root
-    cd /root/
-    chown root:root environments_scripts
-    cd environments_scripts
-    ./build-crontab-and-cp-files "${BUILD_TYPE}" "${GIT_USER}" "${RELATIVE_PATH_TO_GIT}"
+    #1: Environment type.
+    local ENVIRONMENT_TYPE="$1"
+    #2 git copy user
+    local GIT_COPY_USER="$2"
+    #3 relative path to git within the git user
+    local RELATIVE_PATH_TO_GIT="$3"
+    TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+    scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+    chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+    cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
+    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
     cd ..
-    rm -rf /root/environments_scripts
-
+    rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
 }
 
 setup_keys() {
-    #1: Image type.
-    mkdir --parents /root/keysTemp
-    scp root@sapsailing.com:/root/keys/*${1} /root/keysTemp/
-    cd /root/keysTemp
-    OLD_IFS="$IFS"
+    #1: Environment type.
     SEPARATOR="@."
     ACTUAL_SYMBOL="@@"
-    IFS=$'\n'
-    for filename  in $(find . -type f | sed "s|./||"  ); do
-            IFS=$OLD_IFS
-            length=$(echo $filename | wc -c )
-            echo "length: $length"
-            echo "filename: $filename"
-            output=""
-            part=0
-            for ((c=0; c < length; c++)) do
-                    if [[ "${filename:$c:2}" == "@@" ]]; then
-                            output="$output""@"
-                            ((c++))
-                    elif [[ "${filename:$c:2}" == "@." ]]; then
-                            array[$part]="$output"
-                            output=""
-                            ((c++))
-                            ((part++))
-                    else
-                            output="$output""${filename:$c:1}"
-                    fi
-            done
-            key="${array[0]}"
-            user="${array[1]}"
-            environment="$output"
-            echo "key: \"$key\" user: \"$user\" environ: \"$environment\""
-            echo "end **********"
-            id -u "$user"
-            if [[ "$?" -eq 0 ]]; then
-                user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
-                cp "$filename" "$user_home_dir"/.ssh/"$key"
+    TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
+    REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
+    && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
+    cd "${TEMP_KEY_DIR}"
+    for user in $(ls); do 
+        if id -u "$user"; then
+            user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
+            # aws setup
+            if [[ -d "${user}/aws" ]]; then 
+                mkdir --parents "${user_home_dir}/.aws"
+                chmod 766 "${user_home_dir}/.aws"
+                chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
+                sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
             fi
+            # ssh setup
+            if [[ -d "${user}/ssh" ]]; then
+                mkdir --parents "${user_home_dir}/.ssh"
+                chmod 700 "${user_home_dir}/.ssh"
+                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                \cp --preserve --dereference $(find ${user}/ssh -maxdepth 1 -type f)  "${user_home_dir}/.ssh"
+                for key in $(find ${user}/ssh/authorized_keys -type f); do
+                    cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
+                done
+            fi
+        fi
     done
-    IFS="$OLD_IFS"
-    rm -rf /root/keysTemp
+    cd /
+    rm -rf "${TEMP_KEY_DIR}"
 }
 
 clean_root_ssh_dir_and_tmp() {
@@ -155,4 +152,38 @@ finalize() {
     rm -f /var/log/sailing.err
     shutdown -h now &
   fi
+}
+
+setup_cloud_cfg_and_root_login() {
+    sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
+    sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
+}
+
+setup_fail2ban() {
+    if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
+        yum install 2to3 -y
+        wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
+        tar -xvf 1.0.2.tar.gz
+        cd fail2ban-1.0.2/
+        ./fail2ban-2to3
+        python3.9 setup.py build
+        python3.9 setup.py install
+        cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
+        sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
+        systemctl enable fail2ban
+        chkconfig --level 23 fail2ban on
+    fi
+    cat << EOF > /etc/fail2ban/jail.d/customisation.local
+    [ssh-iptables]
+
+    enabled  = true
+    filter   = sshd[mode=aggressive]
+    action   = iptables[name=SSH, port=ssh, protocol=tcp]
+            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
+    logpath  = /var/log/fail2ban.log
+    maxretry = 5
+EOF
+    service fail2ban start
+    yum remove -y firewalld
+    
 }
