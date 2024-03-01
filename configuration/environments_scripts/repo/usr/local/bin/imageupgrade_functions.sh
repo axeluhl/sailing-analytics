@@ -101,7 +101,7 @@ setup_keys() {
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
     for user in $(ls); do 
         if id -u "$user"; then
@@ -109,12 +109,12 @@ setup_keys() {
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 766 "${user_home_dir}/.aws"
+                chmod 755 "${user_home_dir}/.aws"
                 \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
-                printf "[default]\n" >> "${user_home_dir}/.aws/config"
-                printf "region = placeholder\n" >> "${user_home_dir}/.aws/config"
-                sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
+                echo "[default]" >> "${user_home_dir}/.aws/config"
+                echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
                 chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                chmod 600 "${user_home_dir}"/.aws/*
             fi
             # ssh setup
             if [[ -d "${user}/ssh" ]]; then
@@ -125,6 +125,7 @@ setup_keys() {
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
                 chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                chmod 600 "${user_home_dir}"/.ssh/*
             fi
         fi
     done
