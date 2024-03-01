@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Purpose: The first parameter is an image type. This script iterates over the image types' USER folders, concatenating all the symbolic
-# links (referencing locations within configuration/crontabs) into one file for each user. It also takes the name of the user containing a copy of the git repo
+# Purpose: The first parameter is an image type. This script iterates over the image types' USER folders,
+# concatenating all the symbolic links (referencing locations within configuration/crontabs) into one crontab
+# file for each user. It also takes the name of the user containing a copy of the git repo
 # as well as the name of the dir within that user to go to. The created files for each user go into that user's
 # home dir and are installed for that user too. Within these crontab stubs, are certain string literals, which are replaced:
 # PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of
@@ -39,6 +40,7 @@ if [[ -d "users" ]]; then
     for dir in $(ls -d */ ); do
         USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
         HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
+        # Clear the crontab file before assembling it from the snippets:
         > $HOME_DIR/crontab
         for crontab in $(ls ${USERNAME}/crontab*); do
 	    cat "${crontab}">> $HOME_DIR/crontab
