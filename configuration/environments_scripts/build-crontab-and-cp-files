@@ -3,11 +3,13 @@
 # Purpose: The first parameter is an image type. This script iterates over the image types' USER folders, concatenating all the symbolic
 # links (referencing locations within configuration/crontabs) into one file for each user. It also takes the name of the user containing a copy of the git repo
 # as well as the name of the dir within that user to go to. The created files for each user go into that user's
-# home dir and are installed for that user too. Note: within these crontabs are certain regexes, which are replaced by the path to the git home dir and the matching
-# user's home.
+# home dir and are installed for that user too. Within these crontab stubs, are certain string literals, which are replaced:
+# PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of
+# the home directory in which the crontab will be installed. 
 # Useful files are also copied across from the "files" dir within each image type.
+# Finally, the script ends by performing a deamon reload and reenabling all the systemd units so the correct wants, requires, etc. are installed/linked.
 
-if [[ $# -ne 3 && $# -ne 4 && $# -ne 5 ]]; then
+if [[ $# -lt 3 || $# -gt 5 ]]; then
     echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
