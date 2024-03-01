@@ -9,7 +9,6 @@ IMAGE_TYPE="reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
-HTTPD_GIT_REPO_IP="172.31.40.235" # points to where git repo is  #TODO: Will be sapsailing.com
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
@@ -45,9 +44,8 @@ EOF
 systemctl enable httpd
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
-. imageupgrade_functions.sh
 setup_fail2ban
-# setup mounting of nvme
+# mount nvme if available
 mountnvmeswap
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
@@ -58,10 +56,9 @@ sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABS
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup git
-/root/setupHttpdGitLocal.sh "httpdConf@${HTTPD_GIT_REPO_IP}:repo.git"
+/root/setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git"
 # Final enabling and starting of services.
 systemctl start httpd
 sudo systemctl start crond.service
 systemctl enable imageupgrade.service
-cd /
 SECONDEOF
