@@ -9,6 +9,9 @@
          <ul class="bulletList">
             <li>Bug fix: when collapsing the leaderboard while a few competitor info flags are already
                 showing on the map, speeds were not updated properly anymore. This is now fixed.</li>
+            <li>Bug fix: when the last score update date/time was displayed with the user being in a non-UTC
+                time zone, date and time were formatted using different time zones (time: UTC; date: local time zone).
+                This may have led to inconsistent displays.</li>
          </ul>
          <h5 class="articleSubheadline">February 2024</h5>
          <ul class="bulletList">

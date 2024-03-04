@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.util;
 
-import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.hoursAndMinutesTimeFormatter;
-import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.minutesTimeFormatter;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.hoursAndMinutesTimeFormatterUTC;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.minutesTimeFormatterUTC;
 
 import java.util.Date;
 
@@ -18,10 +18,10 @@ public class ConditionalDateTimeFormatter {
             result = stringMessages.now();
         } else if (lessThanOneHourAgo(currentTimestamp, newsTimestamp)) {
             Date timespanBetween = timespanBetween(currentTimestamp, newsTimestamp);
-            result = stringMessages.minutesAgo(minutesTimeFormatter.render(timespanBetween));
+            result = stringMessages.minutesAgo(minutesTimeFormatterUTC.render(timespanBetween));
         } else if (sameDay(currentTimestamp, newsTimestamp)) {
             Date timespanBetween = timespanBetween(currentTimestamp, newsTimestamp);
-            result = stringMessages.hoursAgo(hoursAndMinutesTimeFormatter.render(timespanBetween));
+            result = stringMessages.hoursAgo(hoursAndMinutesTimeFormatterUTC.render(timespanBetween));
         } else {
             result = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT).format(newsTimestamp);
         }
