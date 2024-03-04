@@ -13,6 +13,8 @@ public class DateAndTimeFormatterUtil {
     
     public static DateTimeFormatRenderer defaultDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
+    public static DateTimeFormatRenderer defaultDateFormatterUTC = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT), timeZoneWithoutOffset);
     public static DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
@@ -24,18 +26,18 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
     public static DateTimeFormatRenderer longDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
-    public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
+    public static DateTimeFormatRenderer longTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss zzz"), timeZoneWithoutOffset);
-    public static DateTimeFormatRenderer minutesTimeFormatter = new DateTimeFormatRenderer(
+    public static DateTimeFormatRenderer minutesTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m"), timeZoneWithoutOffset);
-    public static DateTimeFormatRenderer hoursAndMinutesTimeFormatter = new DateTimeFormatRenderer(
+    public static DateTimeFormatRenderer hoursAndMinutesTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm"), timeZoneWithoutOffset);
 
-    private static DateTimeFormatRenderer secondsTimeFormatter = new DateTimeFormatRenderer(
+    private static DateTimeFormatRenderer secondsTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"), timeZoneWithoutOffset);
-    private static DateTimeFormatRenderer minutesAndSecondsTimeFormatter = new DateTimeFormatRenderer(
+    private static DateTimeFormatRenderer minutesAndSecondsTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("mm:ss"), timeZoneWithoutOffset);
-    private static DateTimeFormatRenderer hoursAndMinutesAndSecondsTimeFormatter = new DateTimeFormatRenderer(
+    private static DateTimeFormatRenderer hoursAndMinutesAndSecondsTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss"), timeZoneWithoutOffset);
 
     public static String formatDateRange(Date startDate, Date endDate) {
@@ -58,11 +60,11 @@ public class DateAndTimeFormatterUtil {
         int minutes = (int) ((timeInMilliseconds / (1000*60)) % 60);
         int hours   = (int) ((timeInMilliseconds / (1000*60*60)) % 24);
         if(hours > 0) {
-            result = hoursAndMinutesAndSecondsTimeFormatter.render(new Date(timeInMilliseconds));
+            result = hoursAndMinutesAndSecondsTimeFormatterUTC.render(new Date(timeInMilliseconds));
         } else if (minutes > 0) {
-            result = minutesAndSecondsTimeFormatter.render(new Date(timeInMilliseconds));
+            result = minutesAndSecondsTimeFormatterUTC.render(new Date(timeInMilliseconds));
         } else if (seconds > 0) {
-            result = secondsTimeFormatter.render(new Date(timeInMilliseconds));
+            result = secondsTimeFormatterUTC.render(new Date(timeInMilliseconds));
         }
         
         return result;
@@ -78,7 +80,7 @@ public class DateAndTimeFormatterUtil {
     }
     
     public static String formatLongDateAndTimeGMT(Date date) {
-        return longDateFormatter.render(date) + ", " + longTimeFormatter.render(date);
+        return longDateFormatter.render(date) + ", " + longTimeFormatterUTC.render(date);
     }
 
     public static String getClientTimeZoneAsGMTString() {
