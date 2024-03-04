@@ -19,6 +19,7 @@ cd ${GIT_PATH}
 CURRENT_HEAD=$(git rev-parse HEAD)
 git fetch
 if [[ "$?" -ne 0 ]]; then
+    echo "Error encountered: issue with fetching or there is no repo."
     exit 1
 fi
 if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]  # Checks if there are new commits 

@@ -21,9 +21,7 @@ echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tc
 mount -a
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq mailx postfix cronie iptables mod_ssl
-service postfix restart
-sudo systemctl enable postfix
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mod_ssl
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
 cd /root
@@ -34,6 +32,8 @@ setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
 # setup symbolic links and crontab
 build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+# setup mail
+setup_mail_sending
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # add basic test page which won't cause redirect error code if used as a health check.

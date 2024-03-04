@@ -182,7 +182,7 @@ setup_fail2ban() {
     enabled  = true
     filter   = sshd[mode=aggressive]
     action   = iptables[name=SSH, port=ssh, protocol=tcp]
-            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
+            sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
     logpath  = /var/log/fail2ban.log
     maxretry = 5
 EOF
@@ -193,12 +193,13 @@ EOF
 setup_mail_sending() {
     yum install mailx postfix
     systemctl enable postfix
-    scp -o StrictHostKeyChecking=no root@sapsailing.com:mail.properties /root
-    cd /root
-    local smtp_host="$(sed -n "s/mail.smtp.host \?= \?\(.*\)/\1/p" mail.properties)"
-    local smtp_port="$(sed -n "s/mail.smtp.port \?= \?\(.*\)/\1/p" mail.properties)"
-    local smtp_user="$(sed -n "s/mail.smtp.user \?= \?\(.*\)/\1/p" mail.properties)"
-    local smtp_pass="$(sed -n "s/mail.smtp.password \?= \?\(.*\)/\1/p" mail.properties)"
+    temp_mail_properties_location=$(mktemp /root/mail.properties_XXX)
+    scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
+    cd $(dirname "${temp_mail_properties_location}")
+    local smtp_host="$(sed -n "s/mail.smtp.host \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_port="$(sed -n "s/mail.smtp.port \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_user="$(sed -n "s/mail.smtp.user \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_pass="$(sed -n "s/mail.smtp.password \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
     local password_file_location="/etc/postfix/sasl_passwd"
     echo "relayhost = [${smtp_host}]:${smtp_port}
 smtp_sasl_auth_enable = yes
@@ -214,4 +215,5 @@ myorigin =\$myhostname.sapsailing.com
     echo "[${smtp_host}]:${smtp_port} ${smtp_user}:${smtp_pass}" >> ${password_file_location}
     postmap hash:${password_file_location}
     systemctl restart postfix
+    rm -f "${temp_mail_properties_location}"
 }
