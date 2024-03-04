@@ -20,7 +20,9 @@ import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverProxy;
 import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
@@ -55,37 +57,37 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     private static final long DEFAULT_TAIL_LENGTH_IN_MILLISECONDS = Duration.ONE_SECOND.times(100l).asMillis();
 
-    private BooleanSetting showSatelliteLayer;
+    private BooleanSetting showSatelliteLayerSetting;
 
-    private BooleanSetting showDouglasPeuckerPoints;
+    private BooleanSetting showDouglasPeuckerPointsSetting;
 
-    private EnumSetSetting<ManeuverType> maneuverTypesToShow;
+    private EnumSetSetting<ManeuverType> maneuverTypesToShowSetting;
 
-    private BooleanSetting showOnlySelectedCompetitors;
+    private BooleanSetting showOnlySelectedCompetitorsSetting;
 
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
     
-    private BooleanSetting transparentHoverlines;
+    private BooleanSetting transparentHoverlinesSetting;
     
-    private IntegerSetting hoverlineStrokeWeight;
+    private IntegerSetting hoverlineStrokeWeightSetting;
 
-    private LongSetting tailLengthInMilliseconds;
+    private LongSetting tailLengthInMillisecondsSetting;
 
-    private DistanceSetting buoyZoneRadius;
+    private DistanceSetting buoyZoneRadiusSetting;
 
-    private BooleanSetting showSelectedCompetitorsInfo;
+    private BooleanSetting showSelectedCompetitorsInfoSetting;
     
-    private SecuredBooleanSetting showWindStreamletColors;
+    private SecuredBooleanSetting showWindStreamletColorsSetting;
     
-    private SecuredBooleanSetting showWindStreamletOverlay;
+    private SecuredBooleanSetting showWindStreamletOverlaySetting;
 
-    private BooleanSetting showSimulationOverlay;
+    private BooleanSetting showSimulationOverlaySetting;
     
-    private BooleanSetting showMapControls;
+    private BooleanSetting showMapControlsSetting;
     
-    private BooleanSetting showManeuverLossVisualization;
+    private BooleanSetting showManeuverLossVisualizationSetting;
     
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
@@ -95,47 +97,51 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * positions to any other coordinate space that is translated and rotated compared to the original
      * coordinate space.
      */
-    private BooleanSetting windUp;
+    private BooleanSetting windUpSetting;
     
-    private BooleanSetting showEstimatedDuration;
+    private BooleanSetting showEstimatedDurationSetting;
 
-    private BooleanSetting showWindLadder;
+    private BooleanSetting showWindLadderSetting;
 
     /**
      * The factor by which the start count down shown at one side of the start line shall be scaled compared to the
      * other small info overlays such as the course geometry. Defaults to 1.0.
      */
-    private DoubleSetting startCountDownFontSizeScaling;
+    private DoubleSetting startCountDownFontSizeScalingSetting;
 
-    private SecuredDTOProxy securedDTO;
+    private SecuredDTOProxy securedDTOProxy;
 
-    private PaywallResolver paywallResolver;
-    
+    private PaywallResolverProxy paywallResolverProxy;
+
     @Override
     protected void addChildSettings() {
-        showSatelliteLayer = new BooleanSetting(PARAM_SHOW_SATELLITE_LAYER, this, false);
-        showMapControls = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
+        // The addCildSettings is called in AbstractGenericSerializableSettings constructor.
+        // This lazy initialization is needed, because it's not possible in GWT context to initialize the field before.
+        lazySettingOfPaywallresolverAndSecuredDTO(null, null);
+        showSatelliteLayerSetting = new BooleanSetting(PARAM_SHOW_SATELLITE_LAYER, this, false);
+        showMapControlsSetting = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
         helpLinesSettings = new RaceMapHelpLinesSettings(HELP_LINES_SETTINGS, this);
-        windUp = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
-        buoyZoneRadius = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
-        showWindStreamletOverlay = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, paywallResolver, TrackedRaceActions.VIEWSTREAMLETS, getSecuredDTO());
-        showWindStreamletColors = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, paywallResolver, TrackedRaceActions.VIEWSTREAMLETS, getSecuredDTO());
-        showSimulationOverlay = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
-        showWindLadder = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
+        windUpSetting = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
+        buoyZoneRadiusSetting = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
+        showWindStreamletOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, paywallResolverProxy, TrackedRaceActions.VIEWSTREAMLETS, securedDTOProxy);
+        showWindStreamletColorsSetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, paywallResolverProxy, TrackedRaceActions.VIEWSTREAMLETS, securedDTOProxy);
+        showSimulationOverlaySetting = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
+        showWindLadderSetting = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
         zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
-        transparentHoverlines = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
-        hoverlineStrokeWeight = new IntegerSetting(HOVERLINE_STROKE_WEIGHT, this, 15);
-        tailLengthInMilliseconds = new LongSetting(TAIL_LENGTH_IN_MILLISECONDS, this, DEFAULT_TAIL_LENGTH_IN_MILLISECONDS);
-        showOnlySelectedCompetitors = new BooleanSetting(SHOW_ONLY_SELECTED_COMPETITORS, this, false);
-        showSelectedCompetitorsInfo = new BooleanSetting(SHOW_SELECTED_COMPETITORS_INFO, this, true);
-        maneuverTypesToShow = new EnumSetSetting<>(MANEUVER_TYPES_TO_SHOW, this, getDefaultManeuvers(), ManeuverType::valueOf);
-        showDouglasPeuckerPoints = new BooleanSetting(SHOW_DOUGLAS_PEUCKER_POINTS, this, false);
-        showEstimatedDuration = new BooleanSetting(SHOW_ESTIMATED_DURATION, this, false); 
-        startCountDownFontSizeScaling = new DoubleSetting(START_COUNT_DOWN_FONT_SIZE_SCALING, this, 1.0);
-        showManeuverLossVisualization = new BooleanSetting(SHOW_MANEUVER_LOSS_VISUALIZATION, this, false);
+        transparentHoverlinesSetting = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
+        hoverlineStrokeWeightSetting = new IntegerSetting(HOVERLINE_STROKE_WEIGHT, this, 15);
+        tailLengthInMillisecondsSetting = new LongSetting(TAIL_LENGTH_IN_MILLISECONDS, this, DEFAULT_TAIL_LENGTH_IN_MILLISECONDS);
+        showOnlySelectedCompetitorsSetting = new BooleanSetting(SHOW_ONLY_SELECTED_COMPETITORS, this, false);
+        showSelectedCompetitorsInfoSetting = new BooleanSetting(SHOW_SELECTED_COMPETITORS_INFO, this, true);
+        maneuverTypesToShowSetting = new EnumSetSetting<>(MANEUVER_TYPES_TO_SHOW, this, getDefaultManeuvers(), ManeuverType::valueOf);
+        showDouglasPeuckerPointsSetting = new BooleanSetting(SHOW_DOUGLAS_PEUCKER_POINTS, this, false);
+        showEstimatedDurationSetting = new BooleanSetting(SHOW_ESTIMATED_DURATION, this, false); 
+        startCountDownFontSizeScalingSetting = new DoubleSetting(START_COUNT_DOWN_FONT_SIZE_SCALING, this, 1.0);
+        showManeuverLossVisualizationSetting = new BooleanSetting(SHOW_MANEUVER_LOSS_VISUALIZATION, this, false);
     }
-    
-    public RaceMapSettings() {
+
+    public RaceMapSettings(PaywallResolver paywallResolver, SecuredDTO securedDTO) {
+        lazySettingOfPaywallresolverAndSecuredDTO(paywallResolver, securedDTO);
     }
 
     public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
@@ -144,34 +150,52 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
             Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization,
-            Boolean showSatelliteLayer, Boolean showWindLadder, PaywallResolver paywallResolver, SecuredDTOProxy securedDTO) {
+            Boolean showSatelliteLayer, Boolean showWindLadder, PaywallResolver paywallResolver, SecuredDTO securedDTO) {
+        lazySettingOfPaywallresolverAndSecuredDTO(paywallResolver, securedDTO);
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
-        this.transparentHoverlines.setValue(transparentHoverlines);
-        this.hoverlineStrokeWeight.setValue(hoverlineStrokeWeight);
-        this.tailLengthInMilliseconds.setValue(tailLengthInMilliseconds);
-        this.windUp.setValue(windUp);
-        this.buoyZoneRadius.setValue(buoyZoneRadius);
-        this.showOnlySelectedCompetitors.setValue(showOnlySelectedCompetitors);
-        this.showSelectedCompetitorsInfo.setValue(showSelectedCompetitorsInfo);
-        this.showWindStreamletColors.setValue(showWindStreamletColors);
-        this.showWindStreamletOverlay.setValue(showWindStreamletOverlay);
-        this.showSimulationOverlay.setValue(showSimulationOverlay);
-        this.showMapControls.setValue(showMapControls);
-        this.maneuverTypesToShow.setValues(maneuverTypesToShow);
-        this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
-        this.showEstimatedDuration.setValue(showEstimatedDuration);
-        this.startCountDownFontSizeScaling.setValue(startCountDownFontSizeScaling);
-        this.showManeuverLossVisualization.setValue(showManeuverLossVisualization);
-        this.showSatelliteLayer.setValue(showSatelliteLayer);
-        this.showWindLadder.setValue(showWindLadder);
-        this.paywallResolver = paywallResolver;
-        this.securedDTO = securedDTO;
+        this.transparentHoverlinesSetting.setValue(transparentHoverlines);
+        this.hoverlineStrokeWeightSetting.setValue(hoverlineStrokeWeight);
+        this.tailLengthInMillisecondsSetting.setValue(tailLengthInMilliseconds);
+        this.windUpSetting.setValue(windUp);
+        this.buoyZoneRadiusSetting.setValue(buoyZoneRadius);
+        this.showOnlySelectedCompetitorsSetting.setValue(showOnlySelectedCompetitors);
+        this.showSelectedCompetitorsInfoSetting.setValue(showSelectedCompetitorsInfo);
+        this.showWindStreamletColorsSetting.setValue(showWindStreamletColors);
+        this.showWindStreamletOverlaySetting.setValue(showWindStreamletOverlay);
+        this.showSimulationOverlaySetting.setValue(showSimulationOverlay);
+        this.showMapControlsSetting.setValue(showMapControls);
+        this.maneuverTypesToShowSetting.setValues(maneuverTypesToShow);
+        this.showDouglasPeuckerPointsSetting.setValue(showDouglasPeuckerPoints);
+        this.showEstimatedDurationSetting.setValue(showEstimatedDuration);
+        this.startCountDownFontSizeScalingSetting.setValue(startCountDownFontSizeScaling);
+        this.showManeuverLossVisualizationSetting.setValue(showManeuverLossVisualization);
+        this.showSatelliteLayerSetting.setValue(showSatelliteLayer);
+        this.showWindLadderSetting.setValue(showWindLadder);
     }
-    
+
+    /**
+     * Set the paywall resolver and secured DTO to it's proxy holder. Proxy objects will be created if they are not
+     * already initialized.
+     */
+    private void lazySettingOfPaywallresolverAndSecuredDTO(PaywallResolver paywallResolver, SecuredDTO securedDTO) {
+        setPaywallResolver(paywallResolver);
+        setSecuredDTO(securedDTO);
+    }
+
+    /**
+     * Return an empty {@link RaceMapSettings}, but set the showMapControlls already. The {@link PaywallResolver} and
+     * {@link SecuredDTO} are initializes with NULL. Before using the settings the values has to be set with
+     * {@link RaceMapSettings#setPaywallResolver(PaywallResolver)} and
+     * {@link RaceMapSettings#setSecuredDTO(SecuredDTO)}.
+     * 
+     * @param showMapControlls
+     *            initial value for showMapControlls of the settings object.
+     * @return empty default setting with showMapControlls already set.
+     */
     public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
-        RaceMapSettings raceMapSetting = new RaceMapSettings();
-        raceMapSetting.showMapControls.setValue(showMapControlls);
+        RaceMapSettings raceMapSetting = new RaceMapSettings(null, null);
+        raceMapSetting.showMapControlsSetting.setValue(showMapControlls);
         return raceMapSetting;
     }
 
@@ -198,31 +222,31 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * {@link #isShowTails()} is <code>true</code>.
      */
     public long getTailLengthInMilliseconds() {
-        return tailLengthInMilliseconds.getValue();
+        return tailLengthInMillisecondsSetting.getValue();
     }
 
     public boolean isShowDouglasPeuckerPoints() {
-        return showDouglasPeuckerPoints.getValue();
+        return showDouglasPeuckerPointsSetting.getValue();
     }
     
     public boolean isShowWindStreamletOverlay() {
-        return showWindStreamletOverlay.getValue();
+        return showWindStreamletOverlaySetting.getValue();
     }
 
     public boolean isShowWindStreamletColors() {
-        return showWindStreamletColors.getValue();
+        return showWindStreamletColorsSetting.getValue();
     }
 
     public boolean isShowSimulationOverlay() {
-        return showSimulationOverlay.getValue();
+        return showSimulationOverlaySetting.getValue();
     }
 
     public boolean isShowManeuverType(ManeuverType maneuverType) {
-        return Util.contains(maneuverTypesToShow.getValues(), maneuverType);
+        return Util.contains(maneuverTypesToShowSetting.getValues(), maneuverType);
     }
 
     public boolean isShowOnlySelectedCompetitors() {
-        return showOnlySelectedCompetitors.getValue();
+        return showOnlySelectedCompetitorsSetting.getValue();
     }
 
     public RaceMapZoomSettings getZoomSettings() {
@@ -234,47 +258,55 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public boolean getTransparentHoverlines() {
-        return this.transparentHoverlines.getValue();
+        return transparentHoverlinesSetting.getValue();
     }
     
     public int getHoverlineStrokeWeight() {
-        return this.hoverlineStrokeWeight.getValue();
+        return hoverlineStrokeWeightSetting.getValue();
     }
     
     public boolean isShowSelectedCompetitorsInfo() {
-        return showSelectedCompetitorsInfo.getValue();
+        return showSelectedCompetitorsInfoSetting.getValue();
     }
 
     public Distance getBuoyZoneRadius() {
-        return buoyZoneRadius.getValue();
+        return buoyZoneRadiusSetting.getValue();
     }
     
     public boolean isBuoyZoneRadiusDefaultValue() {
-        return buoyZoneRadius.isDefaultValue();
+        return buoyZoneRadiusSetting.isDefaultValue();
     }
     
     public double getStartCountDownFontSizeScaling() {
-        return startCountDownFontSizeScaling.getValue();
+        return startCountDownFontSizeScalingSetting.getValue();
     }
     
     public boolean isShowManeuverLossVisualization() {
-        return showManeuverLossVisualization.getValue();
+        return showManeuverLossVisualizationSetting.getValue();
     }
     
     public boolean isWindUp() {
-        return windUp.getValue();
+        return windUpSetting.getValue();
     }
 
     public boolean isShowMapControls() {
-        return showMapControls.getValue();
+        return showMapControlsSetting.getValue();
     }
 
     public boolean isShowSatelliteLayer() {
-        return showSatelliteLayer.getValue();
+        return showSatelliteLayerSetting.getValue();
     }
 
     public boolean isShowWindLadder() {
-        return showWindLadder.getValue();
+        return showWindLadderSetting.getValue();
+    }
+
+    public Set<ManeuverType> getManeuverTypesToShow() {
+        return Util.asSet(maneuverTypesToShowSetting.getValues());
+    }
+
+    public boolean isShowEstimatedDuration() {
+        return showEstimatedDurationSetting.getValue();
     }
 
     public static HashSet<ManeuverType> getDefaultManeuvers() {
@@ -288,7 +320,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     public static RaceMapSettings readSettingsFromURL(boolean defaultForShowMapControls,
             boolean defaultForShowCourseGeometry, boolean defaultForMapOrientationWindUp,
             boolean defaultForViewShowStreamlets, boolean defaultForViewShowStreamletColors,
-            boolean defaultForViewShowSimulation, Long defaultForTailLengthInMilliseconds, PaywallResolver paywallResolver, SecuredDTOProxy securedDTO) {
+            boolean defaultForViewShowSimulation, Long defaultForTailLengthInMilliseconds, PaywallResolver paywallResolver, SecuredDTO securedDTO) {
         final boolean showSatelliteLayer = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_SATELLITE_LAYER, false /* default */);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, defaultForShowMapControls /* default */);
         final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, defaultForShowCourseGeometry /* default */);
@@ -301,30 +333,55 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS_IN_METERS,
                 DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */);
         final MeterDistance meterDistance = new MeterDistance(buoyZoneRadiusInMeters);
-        return new RaceMapSettingsBuilder().withShowSatelliteLayer(showSatelliteLayer).withShowMapControls(showMapControls)
-                .withHelpLinesSettings(raceMapHelpLinesSettings).withWindUp(windUp).withBuoyZoneRadius(meterDistance)
+        return new RaceMapSettingsBuilder(securedDTO, paywallResolver)
+                .withShowSatelliteLayer(showSatelliteLayer)
+                .withShowMapControls(showMapControls)
+                .withHelpLinesSettings(raceMapHelpLinesSettings)
+                .withWindUp(windUp)
+                .withBuoyZoneRadius(meterDistance)
                 .withShowWindStreamletOverlay(showWindStreamletOverlay)
-                .withShowWindStreamletColors(showWindStreamletColors).withShowSimulationOverlay(showSimulationOverlay)
-                .withTailLengthInMilliseconds(tailLengthInMilliseconds).withPaywallResolver(paywallResolver)
-                .withSecuredDTO(securedDTO).build();
-    }
-
-    public Set<ManeuverType> getManeuverTypesToShow() {
-        return Util.asSet(maneuverTypesToShow.getValues());
-    }
-
-    public boolean isShowEstimatedDuration() {
-        return showEstimatedDuration.getValue();
+                .withShowWindStreamletColors(showWindStreamletColors)
+                .withShowSimulationOverlay(showSimulationOverlay)
+                .withTailLengthInMilliseconds(tailLengthInMilliseconds)
+                .build();
     }
 
     protected PaywallResolver getPaywallResolver() {
-        return this.paywallResolver;
+        final PaywallResolver paywallResolver;
+        if (paywallResolverProxy == null) {
+            paywallResolver = null;
+        } else {
+            paywallResolver = paywallResolverProxy.getPaywallResolver();
+        }
+        return paywallResolver;
     }
-    
-    protected SecuredDTOProxy getSecuredDTO() {
+
+    public void setPaywallResolver(PaywallResolver paywallResolver) {
+        if (paywallResolverProxy == null) {
+            paywallResolverProxy = new PaywallResolverProxy(paywallResolver);
+        } else {
+            paywallResolverProxy.setPaywallResolver(paywallResolver);
+        }
+    }
+
+    protected SecuredDTO getSecuredDTO() {
+        final SecuredDTO securedDTO;
+        if (securedDTOProxy == null) {
+            securedDTO = null;
+        } else {
+            securedDTO = securedDTOProxy.getSecuredDTO();
+        }
         return securedDTO;
     }
-    
+
+    public void setSecuredDTO(SecuredDTO securedDTO) {
+        if (securedDTOProxy == null) {
+            securedDTOProxy = new SecuredDTOProxy(securedDTO);
+        } else {
+            securedDTOProxy.setSecuredDTO(securedDTO);
+        }
+    }
+
     public static class RaceMapSettingsBuilder {
         private Boolean showSatelliteLayer;
         private Boolean showDouglasPeuckerPoints;
@@ -346,17 +403,28 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         private Boolean showEstimatedDuration;
         private Boolean showWindLadder;
         private Double startCountDownFontSizeScaling;
-        private SecuredDTOProxy securedDTO;
+        private SecuredDTO securedDTO;
         private PaywallResolver paywallResolver;
-        
-        public RaceMapSettingsBuilder() {
+
+        public RaceMapSettingsBuilder(SecuredDTO securedDTO, PaywallResolver paywallResolver) {
+            this.securedDTO = securedDTO;
+            this.paywallResolver = paywallResolver;
         }
-        
-        public RaceMapSettingsBuilder(RaceMapSettings settings) {
+
+        public RaceMapSettingsBuilder(RaceMapSettings settings, SecuredDTO securedDTO, PaywallResolver paywallResolver) {
+            this(securedDTO, paywallResolver);
             copyValues(settings);
         }
-        
+
         private void copyValues(RaceMapSettings settings) {
+            // if the paywall resolver and secured DTO are not set already in the origin settings, we have to set them now
+            // to the origin object as well, because we will need them in the copy process later, when we call the getter.
+            if (settings.getPaywallResolver() == null) {
+                settings.setPaywallResolver(paywallResolver);
+            }
+            if (settings.getSecuredDTO() != null && settings.getSecuredDTO() == null) {
+                settings.setSecuredDTO(securedDTO);
+            }
             this.showSatelliteLayer = settings.isShowSatelliteLayer();
             this.showDouglasPeuckerPoints = settings.isShowDouglasPeuckerPoints();
             this.maneuverTypesToShow = settings.getManeuverTypesToShow();
@@ -377,8 +445,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             this.showEstimatedDuration = settings.isShowEstimatedDuration();
             this.showWindLadder = settings.isShowWindLadder();
             this.startCountDownFontSizeScaling = settings.getStartCountDownFontSizeScaling();
-            this.securedDTO = settings.getSecuredDTO();
-            this.paywallResolver = settings.getPaywallResolver();
         }
 
         public RaceMapSettings build() {
@@ -500,7 +566,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             return this;
         }
 
-        public RaceMapSettingsBuilder withSecuredDTO(SecuredDTOProxy securedDTO) {
+        public RaceMapSettingsBuilder withSecuredDTO(SecuredDTO securedDTO) {
             this.securedDTO = securedDTO;
             return this;
         }

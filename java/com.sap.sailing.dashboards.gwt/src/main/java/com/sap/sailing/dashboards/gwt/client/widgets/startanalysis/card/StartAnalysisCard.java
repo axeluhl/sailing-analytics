@@ -48,7 +48,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class StartAnalysisCard extends Composite implements HasWidgets, StartAnalysisPageChangeListener {
@@ -170,25 +169,19 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             zoomTypes.add(ZoomTypes.BUOYS);
         }
         final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
-        //TODO bug5774 fill dtoContext
-        final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
+        //TODO bug5774 fill dtoContext on setting objects
         final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
                 /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
                 /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false, 
-                /* defaultForTailLengthInMilliseconds */ null, paywallResolver, dtoContext);
-        final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, getHelpLineSettings(),
-                defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
-                startAnalysisDTO.tailLenghtInMilliseconds, defaultRaceMapSettings.isWindUp(),
-                defaultRaceMapSettings.getBuoyZoneRadius(), defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
-                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
-                defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
-                defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints(), defaultRaceMapSettings.isShowEstimatedDuration(),
-                defaultRaceMapSettings.getStartCountDownFontSizeScaling(), defaultRaceMapSettings.isShowManeuverLossVisualization(),
-                defaultRaceMapSettings.isShowSatelliteLayer(), defaultRaceMapSettings.isShowWindLadder(), paywallResolver, dtoContext);
+                /* defaultForTailLengthInMilliseconds */ null, paywallResolver, null);
+        final RaceMapSettings raceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultRaceMapSettings, null, paywallResolver)
+                .withTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds)
+                .withHelpLinesSettings(getHelpLineSettings())
+                .withZoomSettings(raceMapZoomSettings)
+                .build();
         final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);

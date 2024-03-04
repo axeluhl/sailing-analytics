@@ -6,6 +6,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 /**
  * A true north indicator that can be added as a control to the map. Clicking / tapping the control toggles
@@ -26,14 +28,18 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     
     private RaceMapStyle raceMapStyle;
     private final CoordinateSystem coordinateSystem;
+    private final SecuredDTO securedDTO;
+    private final PaywallResolver paywallResolver;
     
     public TrueNorthIndicatorPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
-            final StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+            final StringMessages stringMessages, CoordinateSystem coordinateSystem, SecuredDTO securedDTO, PaywallResolver paywallResolver) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
         this.map = map;
+        this.securedDTO = securedDTO;
+        this.paywallResolver = paywallResolver;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
         addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
@@ -51,7 +57,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     public void toggle() {
         RaceMapSettings oldRaceMapSettings = map.getSettings();
         boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
-        final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder()
+        final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(securedDTO, paywallResolver)
                 .withWindUp(newWindUpSettings).build();
         if (map.getComponentContext() != null && map.getComponentContext().isStorageSupported(map)) {
             map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,

@@ -360,7 +360,9 @@ public class RaceBoardPanel
                     if (existingMapSettings.isBuoyZoneRadiusDefaultValue()
                             && !Util.equalsWithNull(buoyZoneRadius, existingMapSettings.getBuoyZoneRadius())) {
                         final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(
-                                existingMapSettings).withBuoyZoneRadius(buoyZoneRadius).build();
+                                existingMapSettings, regattaDTO, paywallResolverRace)
+                                .withBuoyZoneRadius(buoyZoneRadius)
+                                .build();
                         raceMap.updateSettings(newRaceMapSettings);
                     }
                 }

@@ -696,14 +696,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
         mapInitializedListener = new ArrayList<>();
-        this.hasPolar = false;
+        hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         raceMapStyle = raceMapResources.raceMapStyle();
         raceMapStyle.ensureInjected();
         combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, paywallResolver, raceMapLifecycle.getRaceDTO());
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem, raceMapLifecycle.getRaceDTO(), paywallResolver);
         trueNorthIndicatorPanel.setVisible(false);
         topLeftControlsWrapperPanel = new FlowPanel();
         topLeftControlsWrapperPanel.addStyleName(raceMapStyle.topLeftControlsWrapperPanel());
@@ -712,7 +712,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         addVideoToRaceButton = createAddVideoToRaceButton();
-        this.trueNorthIndicatorButtonButtonGroup = createTrueNorthIndicatorButton();
+        trueNorthIndicatorButtonButtonGroup = createTrueNorthIndicatorButton();
         // TODO bug 494: reset zoom settings to user preferences
         initWidget(rootPanel);
         initializeData(settings.isShowMapControls(), showHeaderPanel);
@@ -863,7 +863,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                             RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
                                     settings.getZoomSettings().isZoomToSelectedCompetitors());
-                            settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(clearedZoomSettings).build();
+                            settings = new RaceMapSettings
+                                    .RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
+                                    .withZoomSettings(clearedZoomSettings)
+                                    .build();
                             simulationOverlay.setVisible(false);
                             showLayoutsAfterAnimationFinishes();
                         }
@@ -895,7 +898,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                         RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
                                 settings.getZoomSettings().isZoomToSelectedCompetitors());
-                        settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(clearedZoomSettings).build();
+                        settings = new RaceMapSettings
+                                .RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
+                                .withZoomSettings(clearedZoomSettings).build();
                         refreshMapWithoutAnimation();
                         if (streamletOverlay != null 
                                 && settings.isShowWindStreamletOverlay()
@@ -984,7 +989,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // initialize simulation canvas
                 simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService,
                         stringMessages, asyncActionsExecutor, coordinateSystem,
-                        () -> updateSettings(new RaceMapSettings.RaceMapSettingsBuilder(settings)
+                        () -> updateSettings(new RaceMapSettings.RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
                                 .withShowSimulationOverlay(false).build()));
                 simulationOverlay.addToMap();
                 showSimulationOverlay(settings.isShowSimulationOverlay() && paywallResolver
@@ -1235,7 +1240,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         fullScreenButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                GWT.log("Click fullscreen");
                 hideAdvancedFunctionsPopup();
                 FullscreenUtil.requestFullScreenToggle("googleMapsArea");
             }
@@ -2546,7 +2550,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 autoZoomLatLngBounds = newBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings,
                         settings.getZoomSettings().isZoomToSelectedCompetitors());
-                settings = new RaceMapSettings.RaceMapSettingsBuilder(settings).withZoomSettings(restoredZoomSettings)
+                settings = new RaceMapSettings.RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
+                        .withZoomSettings(restoredZoomSettings)
                         .build();
                 setAutoZoomInProgress(false);
                 mapFirstZoomDone = true;
@@ -3756,9 +3761,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     public void addMediaPlayerManagerComponent(final MediaPlayerManagerComponent mediaPlayerManagerComponent) {
-        GWT.log("addMediaPlayerManagerComponent");
-        this.addVideoToRaceButton.addClickHandler(clickEvent->{
-            GWT.log("clicked addVideoToRaceButton");
+        this.addVideoToRaceButton.addClickHandler(clickEvent -> {
             mediaPlayerManagerComponent.addMediaTrack();
         });
     }

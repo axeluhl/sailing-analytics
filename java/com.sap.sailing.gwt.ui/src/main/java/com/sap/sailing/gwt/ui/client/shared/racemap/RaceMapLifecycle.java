@@ -25,6 +25,10 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     public SecuredDTO getRaceDTO() {
         return raceDTO;
     }
+    
+    public PaywallResolver getPaywallResolver() {
+        return paywallResolver;
+    }
 
     @Override
     public RaceMapSettingsDialogComponent getSettingsDialogComponent(RaceMapSettings settings) {
@@ -34,7 +38,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
 
     @Override
     public RaceMapSettings createDefaultSettings() {
-        return new RaceMapSettings();
+        return new RaceMapSettings(paywallResolver, raceDTO);
     }
 
     @Override

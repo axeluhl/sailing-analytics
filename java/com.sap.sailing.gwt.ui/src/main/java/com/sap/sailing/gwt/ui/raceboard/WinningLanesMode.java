@@ -59,9 +59,10 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
     private void adjustMapSettings() {
         RaceMap raceMap = getRaceBoardPanel().getMap();
         final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
-        final RaceMapSettings additiveSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultSettings)
-                .withTailLengthInMilliseconds(tailLength.asMillis()).withWindUp(true)
-                .withShowOnlySelectedCompetitors(true).build();
+        final RaceMapSettings additiveSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultSettings,
+                raceMap.getLifecycle().getRaceDTO(), raceMap.getLifecycle().getPaywallResolver())
+                        .withTailLengthInMilliseconds(tailLength.asMillis()).withWindUp(true)
+                        .withShowOnlySelectedCompetitors(true).build();
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {

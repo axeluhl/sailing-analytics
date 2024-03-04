@@ -16,18 +16,26 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
             resetToDefault();
         }
     }
-    
+
     @Override
     public T getValue() {
+        T result = null;
         Value value = settings.getValue(settingName);
-        if (value == null) {
-            return null;
+        if (value != null) {
+            result = getValueConverter().fromValue(value);
         }
-        return getValueConverter().fromValue(value);
+        if (result == null) {
+            result = defaultValue;
+        }
+        return result;
     }
 
     @Override
     public void setValue(T value) {
+        setValueWithoutPermittionCheck(value);
+    }
+
+    private void setValueWithoutPermittionCheck(T value) {
         settings.setValue(settingName, getValueConverter().toValue(value));
     }
 
@@ -46,7 +54,8 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     
     @Override
     public void resetToDefault() {
-        this.setValue(defaultValue);
+        //setValue(defaultValue);
+        setValueWithoutPermittionCheck(defaultValue);
     }
     
     @Override

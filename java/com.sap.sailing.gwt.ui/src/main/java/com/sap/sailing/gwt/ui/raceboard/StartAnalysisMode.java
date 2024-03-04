@@ -65,7 +65,11 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false);
         boolean isWindUp = true;
-        final RaceMapSettings additiveSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultSettings).withZoomSettings(raceMapZoomSettings).withWindUp(isWindUp).build();
+        final RaceMapSettings additiveSettings = new RaceMapSettings
+                .RaceMapSettingsBuilder(defaultSettings, raceMap.getLifecycle().getRaceDTO(), raceMap.getLifecycle().getPaywallResolver())
+                .withZoomSettings(raceMapZoomSettings)
+                .withWindUp(isWindUp)
+                .build();
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {

@@ -140,13 +140,11 @@ public abstract class AbstractGenericSerializableSettings extends AbstractSettin
      * 
      */
     protected abstract void addChildSettings();
-    
-    // TODO make protected
+
     public Value getValue(String settingName) {
         return value.getValue(settingName);
     }
-    
-    // TODO make protected
+
     public void setValue(String settingName, Value value) {
         this.value.setValue(settingName, value);
     }

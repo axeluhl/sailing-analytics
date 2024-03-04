@@ -48,7 +48,6 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.subscription.SubscriptionServiceFactory;
 
 public class AutoplayHelper {
@@ -292,17 +291,16 @@ public class AutoplayHelper {
         typesToConsiderOnZoom.add(ZoomTypes.BOATS);
         RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
         final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
-        final SecuredDTOProxy dtoContext = new SecuredDTOProxy();
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
                 RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
                 /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false,
-                paywallResolver, dtoContext);
+                paywallResolver, null);
         userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
                 currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
                     @Override
                     public void onSuccess(SecuredDTO raceDtoProxy) {
-                        dtoContext.setSecuredDTO(raceDtoProxy);
+                        settings.setSecuredDTO(raceDtoProxy);
                         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE,
                                 paywallResolver, raceDtoProxy);
                         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace,
