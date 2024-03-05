@@ -131,7 +131,7 @@ public class CreateReverseProxyInClusterDialog
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
                 stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
         // setup labels
-        nameLabel = new Label(stringMessages.name());
+        nameLabel = new Label(stringMessages.instanceName());
         instanceTypeLabel = new Label(stringMessages.instanceType());
         availabilityZoneLabel = new Label(stringMessages.availabilityZone());
         instancesIdLabel = new Label(stringMessages.instanceId());

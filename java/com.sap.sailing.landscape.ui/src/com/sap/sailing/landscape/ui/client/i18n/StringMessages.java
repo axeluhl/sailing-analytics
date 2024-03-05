@@ -52,6 +52,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String priority();
     String votes();
     String instanceType();
+    String instanceName();
     String youHaveToProvideAPositiveNumberOfInstancesToLaunch();
     String youHaveToProvideANonNegativePriority();
     String youHaveToProvideANonNegativeNumberOfVotes();
