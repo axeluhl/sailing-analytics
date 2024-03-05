@@ -1139,10 +1139,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Map<AwsInstance<ShardingKey>, TargetHealth> result = new HashMap<>();
         final Region region = getRegion(targetGroup.getRegion());
         getLoadBalancingClient(region)
-                .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
-                .targetHealthDescriptions().forEach(
-                    targetHealthDescription->result.put(
-                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id(), AwsInstanceImpl::new), targetHealthDescription.targetHealth()));
+                .describeTargetHealth(
+                        DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
+                .targetHealthDescriptions().forEach(targetHealthDescription -> {
+                    if (targetHealthDescription.target().id().matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")) {
+                        AwsInstance<ShardingKey> awsInstance = getHostByPrivateIpAddress(targetGroup.getRegion(), targetHealthDescription.target().id().trim(),
+                                AwsInstanceImpl::new);
+                        result.put(awsInstance, targetHealthDescription.targetHealth());
+                    } else {
+                        result.put(getHost(targetGroup.getRegion(), targetHealthDescription.target().id(),
+                                AwsInstanceImpl::new), targetHealthDescription.targetHealth());
+                    }
+                });
         return result;
     }
 
