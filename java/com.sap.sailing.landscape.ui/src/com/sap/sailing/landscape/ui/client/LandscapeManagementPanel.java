@@ -529,7 +529,7 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
        proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
        proxiesTable.addColumn(instancePrivateIpProxiesColumn, stringMessages.privateIp());
-       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneId(), stringMessages.availabilityZone());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
        //setup actions
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(

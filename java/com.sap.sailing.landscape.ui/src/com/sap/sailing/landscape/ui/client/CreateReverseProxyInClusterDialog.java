@@ -43,7 +43,7 @@ public class CreateReverseProxyInClusterDialog
          *            The name of the reverse proxy to spawn.
          * @param instanceType
          *            The new instance type.
-         * @param availabilityZoneIdListBox
+         * @param availabilityZoneNameListBox
          *            The id of the AZ with the fewest reverse proxies.
          * @param region
          */
@@ -83,8 +83,8 @@ public class CreateReverseProxyInClusterDialog
 
     private final TextBox proxyName;
     private final ListBox dedicatedInstanceTypeListBox;
-    private final ListBox availabilityZoneIdListBox;
-    private final Map<String, String> availabilityZoneIdToName;
+    private final ListBox availabilityZoneNameListBox;
+    private final Map<String, String> availabilityZoneNametoId;
     private final String region;
     private final Label nameLabel;
     private final Label instanceTypeLabel;
@@ -98,8 +98,8 @@ public class CreateReverseProxyInClusterDialog
     /**
      * The dialog box allows users to choose the name, instance type and az.
      * 
-     * @param leastpopulatedAzName
-     *            The az containing the fewest disposable reverse proxies.
+     * @param existingReverseProxies A list of reverse proxy DTOs that exist in the region.
+     * @param availabilityZones A list of the availability zone (in DTO format) in the region.
      * @param callback
      *            This will call after the user selects the "ok" in the box, if they create a reverse proxy.
      */
@@ -124,8 +124,8 @@ public class CreateReverseProxyInClusterDialog
                     }
                 }, callback);
         this.region = region;
-        availabilityZoneIdToName = availabilityZones.stream().collect(Collectors.toMap(entry -> entry.getAzId(), entry -> entry.getAzName()));
-        availabilityZoneIdListBox = setupAZChoiceListBox(landscapeManagementService, errorReporter,
+        availabilityZoneNametoId = availabilityZones.stream().collect(Collectors.toMap(entry -> entry.getAzName(), entry -> entry.getAzId()));
+        availabilityZoneNameListBox = setupAZChoiceListBox(landscapeManagementService, errorReporter,
                 existingReverseProxies);
         proxyName = createTextBox("", 20);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
@@ -153,16 +153,16 @@ public class CreateReverseProxyInClusterDialog
     private ListBox setupAZChoiceListBox(LandscapeManagementWriteServiceAsync landscapeManagementService,
             ErrorReporter errorReporter, List<ReverseProxyDTO> existingReverseProxies) {
         ListBox availabilityZoneBox = createListBox(false);
-        if (!availabilityZoneIdToName.isEmpty()) {
-            Map<String, Long> azCounts = existingReverseProxies.stream() // Maps the AZs ID to the number of times a reverse proxy is in that AZ.
-                    .collect(Collectors.groupingBy(w -> w.getAvailabilityZoneId(), Collectors.counting()));
-            availabilityZoneIdToName.keySet().forEach(azId -> azCounts.merge(azId, 0L, (a, b) -> a + b));  // Merges in any AZ which has no reverse proxies. 
-            String leastPopulatedAzId = azCounts.entrySet().stream()
+        if (!availabilityZoneNametoId.isEmpty()) {
+            Map<String, Long> azCounts = existingReverseProxies.stream() // Maps the AZs name to the number of times a reverse proxy is in that AZ.
+                    .collect(Collectors.groupingBy(w -> w.getAvailabilityZoneName(), Collectors.counting()));
+            availabilityZoneNametoId.keySet().forEach(azName -> azCounts.merge(azName, 0L, (a, b) -> a + b));  // Merges in any AZ which has no reverse proxies. 
+            String leastPopulateAzName = azCounts.entrySet().stream()
                     .min((a, b) -> Long.compare(a.getValue(), b.getValue())).get().getKey();
             int i = 0;
-            for (String az : availabilityZoneIdToName.keySet().stream().sorted().collect(Collectors.toList())) {
+            for (String az : availabilityZoneNametoId.keySet().stream().sorted().collect(Collectors.toList())) {
                 availabilityZoneBox.addItem(az, az);
-                if (az.equals(leastPopulatedAzId)) {
+                if (az.equals(leastPopulateAzName)) {
                     availabilityZoneBox.setSelectedIndex(i);
                 }
                 i++;
@@ -182,7 +182,7 @@ public class CreateReverseProxyInClusterDialog
         verticalPanel.add(instanceTypeLabel);
         verticalPanel.add(dedicatedInstanceTypeListBox);
         verticalPanel.add(availabilityZoneLabel);
-        verticalPanel.add(availabilityZoneIdListBox);
+        verticalPanel.add(availabilityZoneNameListBox);
         return result;
     }
 
@@ -195,7 +195,7 @@ public class CreateReverseProxyInClusterDialog
     protected CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions getResult() {
         return new CreateReverseProxyInstructions(proxyName.getValue(), dedicatedInstanceTypeListBox.getSelectedValue(),
                 region,
-                new AvailabilityZoneDTO(availabilityZoneIdToName.get(availabilityZoneIdListBox.getSelectedValue()),
-                        region, availabilityZoneIdListBox.getSelectedValue()));
+                new AvailabilityZoneDTO(availabilityZoneNameListBox.getSelectedValue(), region,
+                        availabilityZoneNametoId.get(availabilityZoneNameListBox.getSelectedValue())));
     }
 }
