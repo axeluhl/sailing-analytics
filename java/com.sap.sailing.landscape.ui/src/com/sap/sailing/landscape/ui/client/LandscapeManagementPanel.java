@@ -1545,17 +1545,20 @@ public class LandscapeManagementPanel extends SimplePanel {
                     public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions editedObject) {
                         editedObject.setKey(sshKeyManagementPanel.getSelectedKeyPair() == null ? null
                                 : sshKeyManagementPanel.getSelectedKeyPair().getName());
+                        proxiesTableBusy.setBusy(true);
                         landscapeManagementService.addReverseProxy(editedObject.getName(),
                                 editedObject.getInstanceType(), editedObject.getRegion(), editedObject.getKey(), editedObject.getAvailabilityZoneDTO(),
                                 new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
                                         Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+                                        proxiesTableBusy.setBusy(false);
                                         refreshProxiesTable();
                                     }
 
                                     @Override
                                     public void onFailure(Throwable caught) {
+                                        proxiesTableBusy.setBusy(false);
                                         errorReporter.reportError(caught.getMessage());
                                     }
                                 });
