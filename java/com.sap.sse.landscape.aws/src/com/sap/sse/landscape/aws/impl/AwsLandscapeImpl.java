@@ -611,8 +611,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        return getHost(region, getInstanceByPrivateIpAddress(region, publicIpAddress), hostSupplier);
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPrivateIpAddress(region, privateIpAddress), hostSupplier);
     }
 
     private Route53Client getRoute53Client() {
