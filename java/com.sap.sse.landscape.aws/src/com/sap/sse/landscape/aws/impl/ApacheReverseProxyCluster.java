@@ -116,20 +116,24 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
         final List<TargetGroup<ShardingKey>> targetGroupsHostResidesIn = new ArrayList<>();
         for (TargetGroup<ShardingKey> targetGroup : getLandscape()
                 .getTargetGroups(host.getAvailabilityZone().getRegion())) {
-            final Iterator<TagDescription> tagDescriptions = targetGroup.getTagDescriptions().iterator();
-            while (tagDescriptions.hasNext()) {
-                final TagDescription tagDescription = tagDescriptions.next();
-                if (tagDescription.hasTags()) {
-                    tagDescription.tags().forEach(tag -> {
-                        final String loadBalancerArn = targetGroup.getLoadBalancerArn();
-                        if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES) && loadBalancerArn != null
-                                && !loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)
-                                && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
-                            targetGroupsHostResidesIn.add(targetGroup);
-                            targetGroup.removeTarget(instanceFromHost);
-
-                        }
-                    });
+            final String loadBalancerArn = targetGroup.getLoadBalancerArn();
+            if (loadBalancerArn != null) {
+                final Iterator<TagDescription> tagDescriptions = targetGroup.getTagDescriptions().iterator();
+                while (tagDescriptions.hasNext()) {
+                    final TagDescription tagDescription = tagDescriptions.next();
+                    if (tagDescription.hasTags()) {
+                        tagDescription.tags().forEach(tag -> {
+                            if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES) && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
+                                if (loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
+                                    getLandscape().removeIpTargetFromTargetGroup(targetGroup, Collections.singleton(instanceFromHost));
+                                    targetGroupsHostResidesIn.add(targetGroup);
+                                } else {
+                                    targetGroupsHostResidesIn.add(targetGroup);
+                                    targetGroup.removeTarget(instanceFromHost);
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }
