@@ -191,7 +191,7 @@ EOF
 }
 
 setup_mail_sending() {
-    yum install mailx postfix
+    yum install -y mailx postfix
     systemctl enable postfix
     temp_mail_properties_location=$(mktemp /root/mail.properties_XXX)
     scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
