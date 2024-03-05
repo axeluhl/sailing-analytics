@@ -17,7 +17,7 @@ COMMAND_ON_COMPLETION=$2
 cd ${GIT_PATH}
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)
-git fetch
+GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git fetch
 if [[ "$?" -ne 0 ]]; then
     echo "Error encountered: issue with fetching or there is no repo."
     exit 1
