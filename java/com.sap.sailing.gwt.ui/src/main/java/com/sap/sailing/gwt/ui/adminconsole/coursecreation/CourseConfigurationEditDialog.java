@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.adminconsole.MarkEditDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.FreestyleMarkConfigurationDTO;
@@ -169,6 +170,17 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * harmonizing the course editing across at least the AdminConsole. Should we try to evolve
  * {@link CourseManagementWidget} into this? Or shall we start over and when done try to make this usable in the
  * contexts where currently {@link CourseManagementWidget} has been deployed?
+ * <p>
+ * 
+ * Equal {@link MarkConfigurationDTO}s should also be <em>identical</em> in order to have the back-end represent equal
+ * mark pairs by the same object. This means that for all regatta {@link MarkDTO}s and inventory
+ * {@link MarkPropertiesDTO} and all {@link MarkTemplateDTO}s there must be a canonicalizing cache so that creating a
+ * configuration for the same regatta mark results in the <em>same</em> {@link RegattaMarkConfigurationDTO}, etc. For
+ * {@link FreestyleMarkConfigurationDTO}s this seems a bit more straightforward because they stand for their own and
+ * ultimately lead to the creation of a regatta mark on the server. As such, we should even wonder if it makes sense to
+ * distinguish between regatta mark configurations and free-style mark configurations from a user's perspective. We
+ * could display the free-style marks to the user just in the same way we show regatta marks, only that those free-style
+ * marks that have not yet led to the creation of a regatta mark can still be deleted from the course configuration.<p>
  * 
  * @author Axel Uhl (d043530)
  *

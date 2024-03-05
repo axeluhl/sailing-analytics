@@ -1212,6 +1212,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
                     final MarkConfiguration<P> markConfiguration = (MarkConfiguration<P>) controlPointWithMarkConfiguration;
                     effectiveWaypoints.add(createWaypoint(mapMarkConfiguration(markConfiguration), waypointWithMarkConfiguration.getPassingInstruction()));
                 } else {
+                    // Note: the following relies on the MarkConfiguration objects for left and right being *identical* to those of another MarkPairWithConfiguration to produce a "match"
                     final CP controlPoint = markPairCache
                             .computeIfAbsent((MarkPairWithConfiguration<P>) controlPointWithMarkConfiguration, mpwc -> {
                                 final M left = mapMarkConfiguration(mpwc.getLeft());
