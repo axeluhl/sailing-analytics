@@ -82,16 +82,16 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
         addHost(host);
         Wait.wait(() -> host.getInstance().state().name().equals(InstanceStateName.RUNNING),
                 Optional.of(Duration.ofSeconds(60 * 7)), Duration.ofSeconds(30), Level.INFO,
-                "Reattempting to add to target group");
+                "Is instance in the running state check");
         for (TargetGroup<ShardingKey> targetGroup : getLandscape().getTargetGroups(az.getRegion())) {
             targetGroup.getTagDescriptions().forEach(description -> description.tags().forEach(tag -> {
                 if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES)) {
                     final ApplicationLoadBalancer<ShardingKey> loadBalancer = targetGroup.getLoadBalancer();
                     if (loadBalancer != null && loadBalancer.getArn().contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                         getLandscape().addIpTargetToTargetGroup(targetGroup, Collections.singleton(host));
-                        logger.info("Added " + host.getInstanceId() + " to NLB target group"
+                        logger.info("Added " + host.getPrivateAddress().getHostAddress() + " to NLB target group"
                                 + targetGroup.getTargetGroupArn());
-                    } else {
+                    } else if (loadBalancer != null) {
                         targetGroup.addTarget(host);
                         logger.info(
                                 "Added " + host.getInstanceId() + " to target group" + targetGroup.getTargetGroupArn());
