@@ -97,4 +97,14 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
      */
     Duration getTimeOnDistanceAllowancePerNauticalMile();
 
+    /**
+     * When two competitors score the same in a leaderboard and the tie cannot be broken, in order to avoid oscillations
+     * when users roam across different replicas, a stable ordering criterion is still required. This may be the name
+     * or the sail number (in case this is a competitor with boat).<p>
+     * 
+     * This default implementation uses the {@link #getName() name}.
+     */
+    default String getStableLastResortOrderingCriterion() {
+        return getName();
+    }
 }
