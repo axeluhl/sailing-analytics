@@ -357,7 +357,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
-        return o1.getName().compareTo(o2.getName());
+        return o1.getStableLastResortOrderingCriterion().compareTo(o2.getStableLastResortOrderingCriterion());
     }
 
     private static class FleetComparisonResult {

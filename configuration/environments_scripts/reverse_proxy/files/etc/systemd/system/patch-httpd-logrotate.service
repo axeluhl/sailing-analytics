@@ -1,7 +1,7 @@
 [Unit]
 Description=Patches httpd log rotate file and creates the necessary directories for log rotation to occur.
-Requires=-.mount network-online.target
-After=-.mount network-online.target
+Requires=-.mount network-online.target remote-fs.target
+After=-.mount network-online.target remote-fs.target
 
 [Install]
 RequiredBy=multi-user.target

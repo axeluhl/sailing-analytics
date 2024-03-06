@@ -14,9 +14,9 @@ public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
             String defaultInstanceTypeName, ErrorReporter errorReporter) {
-        return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog,
-                /* additionalItem */ null, /* additionalValue */ null,
-                landscapeManagementService, stringMessages, defaultInstanceTypeName, errorReporter);
+        return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog, /* additionalItem */ null,
+                /* additionalValue */ null, landscapeManagementService, stringMessages, defaultInstanceTypeName,
+                errorReporter);
     }
 
     /**
@@ -29,7 +29,7 @@ public class LandscapeDialogUtil {
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
             String defaultInstanceTypeName, ErrorReporter errorReporter) {
-        final ListBox instanceTypeBox = dialog.createListBox(/*isMultipleSelect*/false);
+        final ListBox instanceTypeBox = dialog.createListBox(/* isMultipleSelect */false);
         if (additionalItem != null) {
             instanceTypeBox.addItem(additionalItem, additionalValue);
             instanceTypeBox.setSelectedIndex(0);
@@ -39,11 +39,11 @@ public class LandscapeDialogUtil {
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-            
+
             @Override
             public void onSuccess(ArrayList<String> result) {
                 Collections.sort(result, new NaturalComparator());
-                int i=0;
+                int i = 0;
                 for (final String instanceType : result) {
                     instanceTypeBox.addItem(instanceType, instanceType);
                     if (additionalItem == null && instanceType.equals(defaultInstanceTypeName)) {
@@ -57,7 +57,7 @@ public class LandscapeDialogUtil {
     }
 
     public static void selectInstanceType(ListBox instanceTypeListBox, String instanceTypeName) {
-        for (int i=0; i<instanceTypeListBox.getItemCount(); i++) {
+        for (int i = 0; i < instanceTypeListBox.getItemCount(); i++) {
             if (instanceTypeListBox.getValue(i).equals(instanceTypeName)) {
                 instanceTypeListBox.setSelectedIndex(i);
                 break;

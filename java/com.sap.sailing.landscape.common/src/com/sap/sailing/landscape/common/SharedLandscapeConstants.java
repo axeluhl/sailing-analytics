@@ -90,4 +90,9 @@ public interface SharedLandscapeConstants {
      * of a typical process instance.
      */
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
+
+    /**
+     * The most appropriate instance type for a disposable reverse proxy.
+     */
+    String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "T3_MEDIUM";
 }

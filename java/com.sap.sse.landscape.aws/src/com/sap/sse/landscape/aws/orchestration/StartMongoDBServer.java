@@ -2,10 +2,8 @@ package com.sap.sse.landscape.aws.orchestration;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.logging.Level;
-
 import com.jcraft.jsch.JSchException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -217,7 +215,7 @@ extends StartAwsHost<ShardingKey, AwsInstance<ShardingKey>> {
         public StartMongoDBServer<ShardingKey, ProcessT> build() throws URISyntaxException, JSchException, IOException, InterruptedException {
             setTags(getLandscape().getTagForMongoProcess(getTags().orElse(Tags.empty()), getReplicaSetName(), MongoDBConstants.DEFAULT_PORT));
             if (!isSecurityGroupsSet()) {
-                setSecurityGroups(Collections.singleton(getLandscape().getDefaultSecurityGroupForMongoDBHosts(getRegion())));
+                setSecurityGroups(getLandscape().getDefaultSecurityGroupsForMongoDBHosts(getRegion()));
             }
             return new StartMongoDBServer<>(this);
         }

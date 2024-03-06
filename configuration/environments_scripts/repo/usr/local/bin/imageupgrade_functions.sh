@@ -101,7 +101,7 @@ setup_keys() {
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/${1}/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
     for user in $(ls); do 
         if id -u "$user"; then
@@ -109,20 +109,23 @@ setup_keys() {
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 766 "${user_home_dir}/.aws"
-                chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                chmod 755 "${user_home_dir}/.aws"
                 \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
-                sed -i "s/region = .*/region = ${REGION}/" "${user_home_dir}/.aws/config"
+                echo "[default]" >> "${user_home_dir}/.aws/config"
+                echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                chmod 600 "${user_home_dir}"/.aws/*
             fi
             # ssh setup
             if [[ -d "${user}/ssh" ]]; then
                 mkdir --parents "${user_home_dir}/.ssh"
                 chmod 700 "${user_home_dir}/.ssh"
-                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
                 \cp --preserve --dereference $(find ${user}/ssh -maxdepth 1 -type f)  "${user_home_dir}/.ssh"
                 for key in $(find ${user}/ssh/authorized_keys -type f); do
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
+                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                chmod 600 "${user_home_dir}"/.ssh/*
             fi
         fi
     done
@@ -179,11 +182,38 @@ setup_fail2ban() {
     enabled  = true
     filter   = sshd[mode=aggressive]
     action   = iptables[name=SSH, port=ssh, protocol=tcp]
-            sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
+            sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
     logpath  = /var/log/fail2ban.log
     maxretry = 5
 EOF
     service fail2ban start
     yum remove -y firewalld
-    
+}
+
+setup_mail_sending() {
+    yum install -y mailx postfix
+    systemctl enable postfix
+    temp_mail_properties_location=$(mktemp /root/mail.properties_XXX)
+    scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
+    cd $(dirname "${temp_mail_properties_location}")
+    local smtp_host="$(sed -n "s/mail.smtp.host \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_port="$(sed -n "s/mail.smtp.port \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_user="$(sed -n "s/mail.smtp.user \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local smtp_pass="$(sed -n "s/mail.smtp.password \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
+    local password_file_location="/etc/postfix/sasl_passwd"
+    echo "relayhost = [${smtp_host}]:${smtp_port}
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:${password_file_location}
+smtp_use_tls = yes
+smtp_tls_security_level = encrypt
+smtp_tls_note_starttls_offer = yes
+
+myorigin =\$myhostname.sapsailing.com
+" >> /etc/postfix/main.cf
+    sed -i  "/smtp_tls_security_level = may/d" /etc/postfix/main.cf
+    echo "[${smtp_host}]:${smtp_port} ${smtp_user}:${smtp_pass}" >> ${password_file_location}
+    postmap hash:${password_file_location}
+    systemctl restart postfix
+    rm -f "${temp_mail_properties_location}"
 }
