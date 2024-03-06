@@ -1013,6 +1013,20 @@
          unpack="false"/>
 
    <plugin
+         id="redisson"
+         download-size="0"
+         install-size="0"
+         version="3.27.1"
+         unpack="false"/>
+   
+   <plugin
+         id="com.esotericsoftware.kryo"
+         download-size="0"
+         install-size="0"
+         version="5.6.0"
+         unpack="false"/>
+
+   <plugin
          id="com.github.haifengl.smile-core"
          download-size="0"
          install-size="0"

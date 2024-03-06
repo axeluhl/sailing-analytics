@@ -393,6 +393,7 @@
 <plugin id="org.osgi.util.xml"/>
 <plugin id="org.osgi.util.xml.source"/>
 <plugin id="redisson"/>
+<plugin id="com.esotericsoftware.kryo"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
