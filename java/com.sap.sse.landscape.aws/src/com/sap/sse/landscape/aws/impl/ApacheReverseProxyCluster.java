@@ -124,11 +124,10 @@ public class ApacheReverseProxyCluster<ShardingKey, MetricsT extends Application
                     if (tagDescription.hasTags()) {
                         tagDescription.tags().forEach(tag -> {
                             if (tag.key().equals(LandscapeConstants.ALL_REVERSE_PROXIES) && targetGroup.getRegisteredTargets().containsKey(instanceFromHost)) {
+                                targetGroupsHostResidesIn.add(targetGroup);
                                 if (loadBalancerArn.contains(LandscapeConstants.NLB_ARN_CONTAINS)) {
                                     getLandscape().removeIpTargetFromTargetGroup(targetGroup, Collections.singleton(instanceFromHost));
-                                    targetGroupsHostResidesIn.add(targetGroup);
                                 } else {
-                                    targetGroupsHostResidesIn.add(targetGroup);
                                     targetGroup.removeTarget(instanceFromHost);
                                 }
                             }
