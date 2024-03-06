@@ -84,7 +84,7 @@ public class CreateReverseProxyInClusterDialog
     private final TextBox proxyName;
     private final ListBox dedicatedInstanceTypeListBox;
     private final ListBox availabilityZoneNameListBox;
-    private final Map<String, String> availabilityZoneNametoId;
+    private final Map<String, String> availabilityZoneNameToId;
     private final String region;
     private final Label nameLabel;
     private final Label instanceTypeLabel;
@@ -124,7 +124,7 @@ public class CreateReverseProxyInClusterDialog
                     }
                 }, callback);
         this.region = region;
-        availabilityZoneNametoId = availabilityZones.stream().collect(Collectors.toMap(entry -> entry.getAzName(), entry -> entry.getAzId()));
+        availabilityZoneNameToId = availabilityZones.stream().collect(Collectors.toMap(entry -> entry.getAzName(), entry -> entry.getAzId()));
         availabilityZoneNameListBox = setupAZChoiceListBox(landscapeManagementService, errorReporter,
                 existingReverseProxies);
         proxyName = createTextBox("", 20);
@@ -153,14 +153,14 @@ public class CreateReverseProxyInClusterDialog
     private ListBox setupAZChoiceListBox(LandscapeManagementWriteServiceAsync landscapeManagementService,
             ErrorReporter errorReporter, List<ReverseProxyDTO> existingReverseProxies) {
         ListBox availabilityZoneBox = createListBox(false);
-        if (!availabilityZoneNametoId.isEmpty()) {
+        if (!availabilityZoneNameToId.isEmpty()) {
             Map<String, Long> azCounts = existingReverseProxies.stream() // Maps the AZs name to the number of times a reverse proxy is in that AZ.
                     .collect(Collectors.groupingBy(w -> w.getAvailabilityZoneName(), Collectors.counting()));
-            availabilityZoneNametoId.keySet().forEach(azName -> azCounts.merge(azName, 0L, (a, b) -> a + b));  // Merges in any AZ which has no reverse proxies. 
+            availabilityZoneNameToId.keySet().forEach(azName -> azCounts.merge(azName, 0L, (a, b) -> a + b));  // Merges in any AZ which has no reverse proxies. 
             String leastPopulateAzName = azCounts.entrySet().stream()
                     .min((a, b) -> Long.compare(a.getValue(), b.getValue())).get().getKey();
             int i = 0;
-            for (String az : availabilityZoneNametoId.keySet().stream().sorted().collect(Collectors.toList())) {
+            for (String az : availabilityZoneNameToId.keySet().stream().sorted().collect(Collectors.toList())) {
                 availabilityZoneBox.addItem(az, az);
                 if (az.equals(leastPopulateAzName)) {
                     availabilityZoneBox.setSelectedIndex(i);
@@ -196,6 +196,6 @@ public class CreateReverseProxyInClusterDialog
         return new CreateReverseProxyInstructions(proxyName.getValue(), dedicatedInstanceTypeListBox.getSelectedValue(),
                 region,
                 new AvailabilityZoneDTO(availabilityZoneNameListBox.getSelectedValue(), region,
-                        availabilityZoneNametoId.get(availabilityZoneNameListBox.getSelectedValue())));
+                        availabilityZoneNameToId.get(availabilityZoneNameListBox.getSelectedValue())));
     }
 }
