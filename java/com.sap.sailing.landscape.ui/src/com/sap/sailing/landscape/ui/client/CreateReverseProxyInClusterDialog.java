@@ -38,7 +38,6 @@ public class CreateReverseProxyInClusterDialog
         private final AvailabilityZoneDTO availabilityZoneDTO;
 
         /**
-         * 
          * @param name
          *            The name of the reverse proxy to spawn.
          * @param instanceType
@@ -73,7 +72,6 @@ public class CreateReverseProxyInClusterDialog
 
         public void setKey(String key) {
             keyName = key;
-
         }
 
         public AvailabilityZoneDTO getAvailabilityZoneDTO() {
@@ -90,6 +88,7 @@ public class CreateReverseProxyInClusterDialog
     private final Label instanceTypeLabel;
     private final Label availabilityZoneLabel;
     private Label instancesIdLabel;
+    
     /**
      * A list of all labels in the dialog box.
      */
@@ -152,23 +151,22 @@ public class CreateReverseProxyInClusterDialog
      */
     private ListBox setupAZChoiceListBox(LandscapeManagementWriteServiceAsync landscapeManagementService,
             ErrorReporter errorReporter, List<ReverseProxyDTO> existingReverseProxies) {
-        ListBox availabilityZoneBox = createListBox(false);
+        final ListBox availabilityZoneBox = createListBox(false);
         if (!availabilityZoneNameToId.isEmpty()) {
-            Map<String, Long> azCounts = existingReverseProxies.stream() // Maps the AZs name to the number of times a reverse proxy is in that AZ.
+            final Map<String, Long> azCounts = existingReverseProxies.stream() // Maps the AZs name to the number of times a reverse proxy is in that AZ.
                     .collect(Collectors.groupingBy(w -> w.getAvailabilityZoneName(), Collectors.counting()));
             availabilityZoneNameToId.keySet().forEach(azName -> azCounts.merge(azName, 0L, (a, b) -> a + b));  // Merges in any AZ which has no reverse proxies. 
-            String leastPopulateAzName = azCounts.entrySet().stream()
+            final String leastPopulatedAzName = azCounts.entrySet().stream()
                     .min((a, b) -> Long.compare(a.getValue(), b.getValue())).get().getKey();
             int i = 0;
             for (String az : availabilityZoneNameToId.keySet().stream().sorted().collect(Collectors.toList())) {
                 availabilityZoneBox.addItem(az, az);
-                if (az.equals(leastPopulateAzName)) {
+                if (az.equals(leastPopulatedAzName)) {
                     availabilityZoneBox.setSelectedIndex(i);
                 }
                 i++;
             }
         }
-
         return availabilityZoneBox;
     }
 
