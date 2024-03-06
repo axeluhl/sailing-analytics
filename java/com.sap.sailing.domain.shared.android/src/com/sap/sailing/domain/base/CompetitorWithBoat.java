@@ -8,6 +8,6 @@ package com.sap.sailing.domain.base;
 public interface CompetitorWithBoat extends Competitor, WithBoat {
     @Override
     default String getStableLastResortOrderingCriterion() {
-        return getBoat().getSailID();
+        return getBoat().getSailID() == null ? getName() : getBoat().getSailID();
     }
 }
