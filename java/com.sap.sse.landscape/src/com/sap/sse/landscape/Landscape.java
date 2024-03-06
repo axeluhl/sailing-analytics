@@ -35,16 +35,16 @@ public interface Landscape<ShardingKey> {
     SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(Region region);
 
     /**
-     * @return the security group that shall be assigned by default to any host used as part of the central reverse
-     *         proxy cluster in a region
+     * @return The security groups that shall be assigned, by default, to any host that is used as part of the central reverse
+     *         proxy cluster in a region.
      */
-    SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(Region region);
+    Iterable<SecurityGroup> getDefaultSecurityGroupsForReverseProxy(Region region);
 
     /**
-     * @return the security group that shall be assigned by default to any host used as part of a MongoDB replica set;
+     * @return The security groups that shall be assigned, by default, to any host used as part of a MongoDB replica set;
      *         we expect public SSH access and local access to the default MongoDB port (usually 27017).
      */
-    SecurityGroup getDefaultSecurityGroupForMongoDBHosts(Region region);
+    Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(Region region);
     
     /**
      * Obtains the default RabbitMQ configuration for the {@code region} specified. If nothing else is specified
