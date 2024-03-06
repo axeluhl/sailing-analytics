@@ -14,7 +14,7 @@ ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
-ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
+ssh -A "root@${IP}" "bash -s" << SECONDEOF  >stdoutLog.txt
 # fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
