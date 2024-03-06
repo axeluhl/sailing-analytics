@@ -23,7 +23,8 @@ public class AWSInOutHandler {
     public JSONObject parseInputToJson(InputStream inputAsStream)
             throws IOException, JsonDeserializationException, ParseException {
         final byte[] streamAsBytes = IoUtils.toByteArray(inputAsStream);
-        final Object awsRequestObject = JSONValue.parseWithException(new String(streamAsBytes));
+        final String s = new String(streamAsBytes);
+        final Object awsRequestObject = JSONValue.parseWithException(s);
         final JSONObject awsRequestJson = Helpers.toJSONObjectSafe(awsRequestObject);
         final AWSRequestWrapper requestWrapped = awsRequestDeserializer.deserialize(awsRequestJson);
         final Object requestBody = JSONValue.parseWithException(requestWrapped.getBody());
