@@ -394,6 +394,10 @@
 <plugin id="org.osgi.util.xml"/>
 <plugin id="org.osgi.util.xml.source"/>
 <plugin id="redisson"/>
+<plugin id="com.esotericsoftware.kryo"/>
+<plugin id="com.esotericsoftware.minlog"/>
+<plugin id="com.esotericsoftware.reflectasm"/>
+<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
