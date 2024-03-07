@@ -40,4 +40,11 @@
          version="1.9.13"
          unpack="false"/>
 
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
+
 </feature>

@@ -494,6 +494,13 @@
          unpack="false"/>
 
    <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.commons.collections"
          download-size="0"
          install-size="0"

@@ -174,6 +174,7 @@
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
+<plugin id="com.fasterxml.jackson.core.jackson-core"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.validation"/>
