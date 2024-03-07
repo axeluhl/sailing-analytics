@@ -1060,6 +1060,13 @@
          install-size="0"
          version="2.16.1"
          unpack="false"/>
+        
+   <plugin
+         id="com.fasterxml.jackson.dataformat.jackson-dataformat-yaml"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
          
    <plugin
          id="com.github.haifengl.smile-core"
