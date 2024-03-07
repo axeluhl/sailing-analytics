@@ -1055,7 +1055,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.fasterxml.jackson.databind"
+         id="com.fasterxml.jackson.core.jackson-databind"
          download-size="0"
          install-size="0"
          version="2.16.1"
