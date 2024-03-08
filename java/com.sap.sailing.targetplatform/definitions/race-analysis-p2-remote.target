@@ -406,6 +406,7 @@
 <plugin id="io.netty.common"/>
 <plugin id="io.netty.resolver"/>
 <plugin id="io.netty.transport-classes-epoll"/>
+<plugin id="io.netty.transport-native-unix-common"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
