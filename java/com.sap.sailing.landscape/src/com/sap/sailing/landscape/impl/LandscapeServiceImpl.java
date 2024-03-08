@@ -1416,7 +1416,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         name.ifPresent(nameTag->startMultiServerProcedureBuilder.setInstanceName(nameTag));
         final StartMultiServer<String> startMultiServerProcedure = startMultiServerProcedureBuilder.build();
         startMultiServerProcedure.run();
-        return startMultiServerProcedure.getHost();
+        return Wait.wait(() -> startMultiServerProcedure.getHost(), multiServer -> {
+            try {
+                return multiServer.isReady(optionalKeyName, privateKeyEncryptionPassphrase);
+            } catch (Exception e) {
+                return false;
+            }
+        }, true, Landscape.WAIT_FOR_HOST_TIMEOUT, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Waiting until host "+startMultiServerProcedure.getHost().getId()+" is ready");
     }
 
     @Override
@@ -1877,8 +1883,6 @@ public class LandscapeServiceImpl implements LandscapeService {
                 Optional.of(host.getAvailabilityZone()),
                 Optional.of(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME),
                 Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-        Wait.wait(()->targetHost.isReady(Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase), Landscape.WAIT_FOR_HOST_TIMEOUT,
-                /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Waiting until host "+host.getId()+" is ready");
         final Map<String, SailingAnalyticsProcess<String>> masterProcessesMoved = new HashMap<>();
         final Map<String, SailingAnalyticsProcess<String>> replicaProcessesMoved = new HashMap<>();
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : getLandscape()
