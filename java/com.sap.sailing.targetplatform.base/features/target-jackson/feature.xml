@@ -61,4 +61,11 @@
          version="2.16.1"
          unpack="false"/>
          
+   <plugin
+         id="org.yaml.snakeyaml"
+         download-size="0"
+         install-size="0"
+         version="2.2.0"
+         unpack="false"/>
+         
 </feature>
