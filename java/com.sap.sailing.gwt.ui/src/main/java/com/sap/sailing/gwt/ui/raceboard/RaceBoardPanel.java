@@ -952,8 +952,8 @@ public class RaceBoardPanel
         if (timer != null && racetimePanel != null) {
             final Date currentTimerDate = timer.getTime();
             final Date startOfRace = racetimePanel.getLastRaceTimesInfo().startOfRace;
-            newInitialDurationAfterRaceStartInReplay = new MillisecondsDurationImpl(
-                    currentTimerDate.getTime() - startOfRace.getTime());
+            newInitialDurationAfterRaceStartInReplay = startOfRace == null ? null :
+                new MillisecondsDurationImpl(currentTimerDate.getTime() - startOfRace.getTime());
         } else {
             newInitialDurationAfterRaceStartInReplay = initialSettings.getInitialDurationAfterRaceStartInReplay();
         }

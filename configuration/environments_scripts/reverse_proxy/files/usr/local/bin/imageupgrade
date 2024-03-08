@@ -13,12 +13,12 @@ METADATA=$( get_ec2_user_data )
 echo "Metadata: ${METADATA}"
 if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   echo "Image upgrade..."
-  GIT_USER="trac"
+  GIT_COPY_USER="trac"
   RELATIVE_PATH_TO_GIT="gitcopy"
-  BUILD_TYPE="reverse_proxy"
   LOGON_USER_HOME="ec2-user"
+  ENVIRONMENT_TYPE="reverse_proxy"
   run_yum_update
-  build_crontab_and_setup_files
+  build_crontab_and_setup_files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
   finalize
 fi
 

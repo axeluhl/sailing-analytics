@@ -26,9 +26,9 @@ import com.sap.sailing.domain.coursetemplate.impl.CourseTemplateImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRoleImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkRolePairImpl;
 import com.sap.sailing.domain.coursetemplate.impl.MarkTemplateImpl;
-import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RepeatablePartImpl;
 
 public class TestLapConfiguration {
     private CourseTemplate courseTemplate;

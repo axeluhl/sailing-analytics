@@ -5,6 +5,20 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">March 2024</h5>
+         <ul class="bulletList">
+            <li>Bug fix: when collapsing the leaderboard while a few competitor info flags are already
+                showing on the map, speeds were not updated properly anymore. This is now fixed.</li>
+            <li>Bug fix: when the last score update date/time was displayed with the user being in a non-UTC
+                time zone, date and time were formatted using different time zones (time: UTC; date: local time zone).
+                This may have led to inconsistent displays.</li>
+            <li>Bug fix: the new drop-down race choose in the Race Board failed to work if the race from which it
+                was used does not have a valid start time yet.</li>
+            <li>In case of an unbreakable tie, instead of always using the competitor name to arrive at some stable
+                sorting, now we use the sail number in case boats cannot change during the regatta (as they could in,
+                say, a league format). This makes sorting more consistent with regatta management systems such
+                as Manage2Sail.</li>
+         </ul>
          <h5 class="articleSubheadline">February 2024</h5>
          <ul class="bulletList">
             <li>Fixed an issue for users with event update rights that resulted in them being

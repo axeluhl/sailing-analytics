@@ -22,8 +22,8 @@ import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguratio
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.shared.json.JsonSerializer;

@@ -222,6 +222,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
@@ -233,18 +234,27 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.ControlPointTemplate;
+import com.sap.sailing.domain.coursetemplate.ControlPointWithMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.CourseConfiguration;
 import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.FixedPositioning;
+import com.sap.sailing.domain.coursetemplate.FreestyleMarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation;
+import com.sap.sailing.domain.coursetemplate.MarkConfigurationVisitor;
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
+import com.sap.sailing.domain.coursetemplate.MarkPropertiesBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
+import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
+import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
-import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -275,7 +285,6 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
@@ -407,12 +416,21 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.YellowBrickRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CommonMarkPropertiesDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.ControlPointWithMarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.CourseConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.FreestyleMarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPairWithConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkPropertiesDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateBasedMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RegattaMarkConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointWithMarkConfigurationDTO;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -441,9 +459,11 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.PairingListCreationException;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -452,6 +472,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.RepeatablePartImpl;
 import com.sap.sse.common.impl.SecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -4830,8 +4851,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
         return finder;
     }
-
-    private DeviceIdentifier deserializeDeviceIdentifier(String type, String deviceId) throws NoCorrespondingServiceRegisteredException,
+    
+    protected DeviceIdentifier deserializeDeviceIdentifier(String type, String deviceId) throws NoCorrespondingServiceRegisteredException,
     TransformationException {
         DeviceIdentifierStringSerializationHandler handler =
                 getDeviceIdentifierStringSerializerHandlerFinder(false).findService(type);
@@ -4871,13 +4892,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected DeviceMapping<?> convertToDeviceMapping(DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DeviceIdentifier device = deserializeDeviceIdentifier(dto.deviceIdentifier.deviceType, dto.deviceIdentifier.deviceId);
+        DeviceIdentifier device = convertDtoToDeviceIdentifier(dto.deviceIdentifier);
         TimePoint from = dto.from == null ? null : new MillisecondsTimePoint(dto.from);
         TimePoint to = dto.to == null ? null : new MillisecondsTimePoint(dto.to);
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
-            //expect UUIDs
+            // expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
@@ -6070,9 +6091,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 markProperties.getType());
     }
 
-    protected DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) {
-        return deviceIdentifier != null ? new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceIdentifier.deviceId))
-                : null;
+    protected DeviceIdentifier convertDtoToDeviceIdentifier(DeviceIdentifierDTO deviceIdentifier) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return deserializeDeviceIdentifier(deviceIdentifier.deviceType, deviceIdentifier.deviceId);
     }
 
     @Override
@@ -6173,6 +6193,172 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final MarkRoleDTO markRoleDTO = new MarkRoleDTO(markRole.getId(), markRole.getName(), markRole.getShortName());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), markRoleDTO);
         return markRoleDTO;
+    }
+    
+    protected DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
+        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
+        final Timed lastFix;
+        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
+            lastFix = lastFixes.get(mapping.getDevice());
+        } else {
+            lastFix = null;
+        }
+        final Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
+                null : mapping.getTimeRange().from().asDate();
+        final Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
+                null : mapping.getTimeRange().to().asDate();
+        final MappableToDevice item;
+        final WithID mappedTo = mapping.getMappedTo();
+        if (mappedTo == null) {
+            throw new RuntimeException("Device mapping not mapped to any object");
+        } else if (mappedTo instanceof Competitor) {
+            item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
+        } else if (mappedTo instanceof Mark) {
+            item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
+        } else if (mappedTo instanceof Boat) {
+            item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
+        } else {
+            throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
+                    + mappedTo.getClass().getName());
+        }
+        // Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
+        // has a large performance impact for GWT.
+        // As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
+        // recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
+        final List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
+        for (final Serializable id : mapping.getOriginalRaceLogEventIds()) {
+            if (! (id instanceof UUID)) {
+                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
+                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
+            }
+            originalRaceLogEventUUIDs.add((UUID) id);
+        }
+        return new DeviceMappingDTO(convertDeviceIdentifierToDTO(mapping.getDevice()), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
+    }
+
+    private <P> void addMarkConfigurationAnnotationsToDTO(MarkConfiguration<P> markConfig, MarkConfigurationDTO addTo) {
+        if (markConfig.getAnnotationInfo() instanceof MarkConfigurationRequestAnnotation) {
+            final MarkConfigurationRequestAnnotation requestAnnotation = (MarkConfigurationRequestAnnotation) markConfig.getAnnotationInfo();
+            addTo.setAddToMarkPropertiesInventoryRequest(requestAnnotation.isStoreToInventory());
+            addTo.setCreateMarkRoleRequest(requestAnnotation.getOptionalMarkRoleCreationRequest() != null);
+            if (requestAnnotation.getOptionalPositioning() != null) {
+                requestAnnotation.getOptionalPositioning().accept(new PositioningVisitor<Void>() {
+                    @Override
+                    public Void visit(FixedPositioning fixedPositioning) {
+                        addTo.setFixedPositionRequest(fixedPositioning.getFixedPosition());
+                        return null;
+                    }
+
+                    @Override
+                    public Void visit(TrackingDeviceBasedPositioning trackingDeviceBasedPositioning) {
+                        try {
+                            addTo.setDeviceMappingRequest(convertDeviceIdentifierToDTO(trackingDeviceBasedPositioning.getDeviceIdentifier()));
+                        } catch (TransformationException e) {
+                            throw new RuntimeException(e);
+                        }
+                        return null;
+                    }
+                });
+            }
+        } else if (markConfig.getAnnotationInfo() instanceof MarkConfigurationResponseAnnotation) {
+            final MarkConfigurationResponseAnnotation responseAnnotation = (MarkConfigurationResponseAnnotation) markConfig.getAnnotationInfo();
+            if (responseAnnotation.getLastKnownPosition() != null) {
+                addTo.setLastKnownPosition(new GPSFixDTO(responseAnnotation.getLastKnownPosition().getTimePoint().asDate(), responseAnnotation.getLastKnownPosition().getPosition()));
+                addTo.setExistingDeviceMappings(Util.mapToArrayList(responseAnnotation.getDeviceMappings(), deviceIdAndTimeRangeAndLastGPSFix->{
+                    try {
+                        return new Triple<>(convertDeviceIdentifierToDTO(deviceIdAndTimeRangeAndLastGPSFix.getA()),
+                                            deviceIdAndTimeRangeAndLastGPSFix.getB(),
+                                            new GPSFixDTO(deviceIdAndTimeRangeAndLastGPSFix.getC().getTimePoint().asDate(), deviceIdAndTimeRangeAndLastGPSFix.getC().getPosition()));
+                    } catch (TransformationException e) {
+                        throw new RuntimeException();
+                    }
+                }));
+            }
+        }
+    }
+    
+    protected DeviceIdentifierDTO convertDeviceIdentifierToDTO(final DeviceIdentifier deviceIdentifier)
+            throws TransformationException {
+        return new DeviceIdentifierDTO(deviceIdentifier.getIdentifierType(),
+                serializeDeviceIdentifier(deviceIdentifier));
+    }
+
+    protected <P> MarkConfigurationDTO convertToMarkConfigurationDTO(MarkConfiguration<P> markConfig) {
+        final MarkConfigurationDTO result = markConfig.accept(new MarkConfigurationVisitor<MarkConfigurationDTO, P>() {
+            @Override
+            public MarkConfigurationDTO visit(FreestyleMarkConfiguration<P> markConfiguration) {
+                final FreestyleMarkConfigurationDTO result = new FreestyleMarkConfigurationDTO();
+                result.setOptionalMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(MarkPropertiesBasedMarkConfiguration<P> markConfiguration) {
+                final MarkPropertiesBasedMarkConfigurationDTO result = new MarkPropertiesBasedMarkConfigurationDTO();
+                result.setMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(MarkTemplateBasedMarkConfiguration<P> markConfiguration) {
+                final MarkTemplateBasedMarkConfigurationDTO result = new MarkTemplateBasedMarkConfigurationDTO();
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+
+            @Override
+            public MarkConfigurationDTO visit(RegattaMarkConfiguration<P> markConfiguration) {
+                final RegattaMarkConfigurationDTO result = new RegattaMarkConfigurationDTO();
+                result.setMark(convertToMarkDTO(markConfiguration.getMark(), /* position */ null));
+                result.setOptionalMarkProperties(markConfiguration.getOptionalMarkProperties()==null?null:convertToMarkPropertiesDTO(markConfiguration.getOptionalMarkProperties()));
+                result.setOptionalMarkTemplate(markConfiguration.getOptionalMarkTemplate()==null?null:convertToMarkTemplateDTO(markConfiguration.getOptionalMarkTemplate()));
+                return result;
+            }
+        });
+        addMarkConfigurationAnnotationsToDTO(markConfig, result);
+        return result;
+    }
+    
+    private <P> ControlPointWithMarkConfigurationDTO convertToControlPointWithMarkConfigurationDTO(ControlPointWithMarkConfiguration<P> controlPoint) {
+        final Iterable<MarkConfigurationDTO> markConfigurations = Util.map(controlPoint.getMarkConfigurations(), this::convertToMarkConfigurationDTO);
+        final ControlPointWithMarkConfigurationDTO result;
+        if (Util.size(markConfigurations) == 1) {
+            result = markConfigurations.iterator().next();
+        } else {
+            final MarkPairWithConfigurationDTO preResult = new MarkPairWithConfigurationDTO();
+            preResult.setName(controlPoint.getName());
+            preResult.setShortName(controlPoint.getShortName());
+            final Iterator<MarkConfigurationDTO> markConfigs = markConfigurations.iterator();
+            preResult.setLeft(markConfigs.next());
+            preResult.setRight(markConfigs.next());
+            result = preResult;
+        }
+        return result;
+    }
+    
+    protected <P> WaypointWithMarkConfigurationDTO convertToWaypointWithMarkConfigurationDTO(final WaypointWithMarkConfiguration<P> waypointWithMarkConfiguration) {
+        final WaypointWithMarkConfigurationDTO result = new WaypointWithMarkConfigurationDTO();
+        result.setControlPoint(convertToControlPointWithMarkConfigurationDTO(waypointWithMarkConfiguration.getControlPoint()));
+        result.setPassingInstruction(waypointWithMarkConfiguration.getPassingInstruction());
+        return result;
+    }
+    
+    protected <P> CourseConfigurationDTO convertToCourseConfigurationDTO(CourseConfiguration<P> courseConfiguration) {
+        final CourseConfigurationDTO result = new CourseConfigurationDTO();
+        result.setAssociatedRoles(new HashMap<>(courseConfiguration.getAssociatedRoles().entrySet().stream().collect(Collectors.toMap(
+                e->convertToMarkConfigurationDTO(e.getKey()), e->convertToMarkRoleDTO(e.getValue())))));
+        result.setAllMarks(Util.mapToArrayList(courseConfiguration.getAllMarks(), this::convertToMarkConfigurationDTO));
+        result.setName(courseConfiguration.getName());
+        result.setShortName(courseConfiguration.getShortName());
+        result.setNumberOfLaps(courseConfiguration.getNumberOfLaps());
+        result.setOptionalCourseTemplate(courseConfiguration.getOptionalCourseTemplate()==null?null:convertToCourseTemplateDTO(courseConfiguration.getOptionalCourseTemplate()));
+        result.setOptionalImageURL(courseConfiguration.getOptionalImageURL());
+        result.setOptionalRepeatablePart(courseConfiguration.getRepeatablePart());
+        result.setShortName(courseConfiguration.getShortName());
+        result.setWaypoints(new ArrayList<>(Util.asList(Util.map(courseConfiguration.getWaypoints(), wpWithMarkConfig->convertToWaypointWithMarkConfigurationDTO(wpWithMarkConfig)))));
+        return result;
     }
 
     @Override

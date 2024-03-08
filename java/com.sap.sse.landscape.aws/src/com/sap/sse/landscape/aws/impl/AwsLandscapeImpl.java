@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,10 +32,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.util.stream.Collectors;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -81,7 +83,6 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.util.ThreadPoolUtil;
-
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -195,11 +196,6 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private static final Logger logger = Logger.getLogger(AwsLandscapeImpl.class.getName());
     public static final long DEFAULT_DNS_TTL_SECONDS = 60l;
     private static final String DEFAULT_CERTIFICATE_DOMAIN = "*.sapsailing.com";
-    // TODO <config> the "Java Application with Reverse Proxy" security group in eu-west-2 for experimenting; we need this security group per region
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1 = "sg-eaf31e85";
-    private static final String DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2 = "sg-0b2afd48960251280";
-    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1 = "sg-0a9bc2fb61f10a342";
-    private static final String DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2 = "sg-02649c35a73ee0ae5";
     private static final String DEFAULT_NON_DNS_MAPPED_ALB_NAME = "DefDyn";
     private static final String SAILING_APP_SECURITY_GROUP_NAME = "Sailing Analytics App";
     private final String accessKeyId;
@@ -402,9 +398,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<String> defaultCertificateArnFuture = getDefaultCertificateArn(alb.getRegion(), DEFAULT_CERTIFICATE_DOMAIN);
         final int httpPort = 80;
         final int httpsPort = 443;
-        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getCentralReverseProxy(alb.getRegion());
-        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX+alb.getName()+"-"+ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId());
+        final ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxy = getReverseProxyCluster(alb.getRegion());
+        final HashMap<String, String> tagKeyandValue = new HashMap<>();
+        tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
+        final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -613,8 +611,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String publicIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
-        return getHost(region, getInstanceByPrivateIpAddress(region, publicIpAddress), hostSupplier);
+    public <HostT extends AwsInstance<ShardingKey>> HostT getHostByPrivateIpAddress(com.sap.sse.landscape.Region region, String privateIpAddress, HostSupplier<ShardingKey, HostT> hostSupplier) {
+        return getHost(region, getInstanceByPrivateIpAddress(region, privateIpAddress), hostSupplier);
     }
 
     private Route53Client getRoute53Client() {
@@ -1044,27 +1042,36 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     public TargetGroup<ShardingKey> getTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName) {
         return getTargetGroup(region, targetGroupName, /* discover load balancer ARN from target group */ null);
     }
-
+    
     @Override
     public TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
             String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId) {
+        return createTargetGroup(region, targetGroupName, port, healthCheckPath, healthCheckPort, loadBalancerArn,
+                vpcId, Collections.emptyMap());
+    }
+    
+    /**
+     * Overloaded method to allow tag-keys and values to be passed.
+     */
+    private TargetGroup<ShardingKey> createTargetGroup(com.sap.sse.landscape.Region region, String targetGroupName, int port,
+            String healthCheckPath, int healthCheckPort, String loadBalancerArn, String vpcId, Map<String,String> tagKeyAndValues) {
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag tags[] = tagKeyAndValues.entrySet().stream()
+                .map(entry -> software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder()
+                        .key(entry.getKey()).value(entry.getValue()).build())
+                .toArray(x -> new software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag[x]);
         final ElasticLoadBalancingV2Client loadBalancingClient = getLoadBalancingClient(getRegion(region));
-        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup =
-                loadBalancingClient.createTargetGroup(CreateTargetGroupRequest.builder()
-                .name(targetGroupName)
-                .healthyThresholdCount(2)
-                .unhealthyThresholdCount(2)
-                .healthCheckTimeoutSeconds(4)
-                .healthCheckEnabled(true)
-                .healthCheckIntervalSeconds(5)
-                .healthCheckPath(healthCheckPath)
-                .healthCheckPort(""+healthCheckPort)
-                .healthCheckProtocol(guessProtocolFromPort(healthCheckPort))
-                .port(port)
-                .vpcId(vpcId == null ? getVpcId(region) : vpcId)
-                .protocol(guessProtocolFromPort(port))
-                .targetType(TargetTypeEnum.INSTANCE)
-                .build()).targetGroups().iterator().next();
+        software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest
+                .builder().name(targetGroupName).healthyThresholdCount(2).unhealthyThresholdCount(2)
+                .healthCheckTimeoutSeconds(4).healthCheckEnabled(true).healthCheckIntervalSeconds(10)
+                .healthCheckPath(healthCheckPath).healthCheckPort("" + healthCheckPort)
+                .healthCheckProtocol(guessProtocolFromPort(healthCheckPort)).port(port)
+                .vpcId(vpcId == null ? getVpcId(region) : vpcId).protocol(guessProtocolFromPort(port))
+                .targetType(TargetTypeEnum.INSTANCE);
+        if (tags.length > 0) {
+            targetGroupRequestBuilder.tags(tags);
+        }
+        final software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup targetGroup = loadBalancingClient
+                .createTargetGroup(targetGroupRequestBuilder.build()).targetGroups().iterator().next();
         final String targetGroupArn = targetGroup.targetGroupArn();
         int numberOfRetries = 3;
         final Duration TIME_BETWEEN_RETRIES = Duration.ONE_SECOND;
@@ -1132,19 +1139,44 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Map<AwsInstance<ShardingKey>, TargetHealth> result = new HashMap<>();
         final Region region = getRegion(targetGroup.getRegion());
         getLoadBalancingClient(region)
-                .describeTargetHealth(DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
-                .targetHealthDescriptions().forEach(
-                    targetHealthDescription->result.put(
-                            getHost(targetGroup.getRegion(), targetHealthDescription.target().id(), AwsInstanceImpl::new), targetHealthDescription.targetHealth()));
+                .describeTargetHealth(
+                        DescribeTargetHealthRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).build())
+                .targetHealthDescriptions().forEach(targetHealthDescription -> {
+                    if (targetHealthDescription.target().id().matches("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+")) {
+                        AwsInstance<ShardingKey> awsInstance = getHostByPrivateIpAddress(targetGroup.getRegion(), targetHealthDescription.target().id().trim(),
+                                AwsInstanceImpl::new);
+                        result.put(awsInstance, targetHealthDescription.targetHealth());
+                    } else {
+                        result.put(getHost(targetGroup.getRegion(), targetHealthDescription.target().id(),
+                                AwsInstanceImpl::new), targetHealthDescription.targetHealth());
+                    }
+                });
         return result;
     }
 
     @Override
     public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
+    ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getReverseProxyCluster(com.sap.sse.landscape.Region region) {
+        ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
+            reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        return reverseProxyCluster;
+    }
+    
+    @Override
+    public <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     ReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> getCentralReverseProxy(com.sap.sse.landscape.Region region) {
         ApacheReverseProxyCluster<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> reverseProxyCluster = new ApacheReverseProxyCluster<>(this);
-        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
+        for (final AwsInstance<ShardingKey> reverseProxyHost : getRunningHostsWithTag(region, LandscapeConstants.CENTRAL_REVERSE_PROXY_TAG_NAME, AwsInstanceImpl::new)) {
             reverseProxyCluster.addHost(reverseProxyHost);
+        }
+        Iterator<AwsInstance<ShardingKey>>  iterator = reverseProxyCluster.getHosts().iterator();
+        if (iterator.hasNext()) {
+            iterator.next();
+            if (iterator.hasNext()) {
+                throw new IllegalStateException("There should only be one central reverse proxy");
+            }
         }
         return reverseProxyCluster;
     }
@@ -1189,6 +1221,18 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             Iterable<AwsInstance<ShardingKey>> targets) {
         getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(getRegisterTargetsRequestBuilderConsumer(targetGroup, targets));
     }
+    
+    @Override
+    public void addIpTargetToTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts) {
+        final TargetDescription[] descriptions = Util.toArray(Util.map(hosts, t->TargetDescription.builder().id(t.getPrivateAddress().getHostAddress()).port(80).build()), new TargetDescription[0]);
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).registerTargets(t->t.targetGroupArn(targetGroup.getTargetGroupArn()).targets(descriptions));
+    }
+    
+    @Override
+    public void removeIpTargetFromTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts) {
+        final TargetDescription[] descriptions = Util.toArray(Util.map(hosts, t->TargetDescription.builder().id(t.getPrivateAddress().getHostAddress()).port(80).build()), new TargetDescription[0]);
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).deregisterTargets(builder -> builder.targetGroupArn(targetGroup.getTargetGroupArn()).targets(descriptions));
+    }
 
     private TargetDescription[] getTargetDescriptions(Iterable<AwsInstance<ShardingKey>> targets) {
         return Util.toArray(Util.map(targets, t->TargetDescription.builder().id(t.getInstanceId()).build()), new TargetDescription[0]);
@@ -1226,40 +1270,42 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationHosts(com.sap.sse.landscape.Region region) {
         return getSecurityGroupByName(SAILING_APP_SECURITY_GROUP_NAME, region).orElseGet(()->{
-            final SecurityGroup result;
-            if (region.getId().equals(Region.EU_WEST_1.id())) {
-                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_1, region);
-            } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-                result = getSecurityGroup(DEFAULT_APPLICATION_SERVER_SECURITY_GROUP_ID_EU_WEST_2, region);
-            } else {
-                result = null;
-            }
-            return result;
+            final List<SecurityGroup> securityGroups = new ArrayList<>();
+            securityGroups.addAll(getSecurityGroupByTag(LandscapeConstants.SAILING_APPLICATION_SG_TAG, region));
+            return securityGroups.isEmpty() ? null : securityGroups.get(0);
         });
     }
 
     @Override
-    public SecurityGroup getDefaultSecurityGroupForCentralReverseProxy(com.sap.sse.landscape.Region region) {
-        return getDefaultSecurityGroupForApplicationHosts(region);
+    public Iterable<SecurityGroup> getDefaultSecurityGroupsForReverseProxy(com.sap.sse.landscape.Region region) {
+        return getSecurityGroupByTag(LandscapeConstants.REVERSE_PROXY_SG_TAG, region);
     }
 
+    public List<SecurityGroup> getSecurityGroupByTag(String tag, com.sap.sse.landscape.Region region) {
+        final List<software.amazon.awssdk.services.ec2.model.SecurityGroup> securityGroups = getEc2Client(
+                getRegion(region)).describeSecurityGroups(sg -> sg.filters(Filter.builder().name("tag-key").values(tag).build()))
+                        .securityGroups();
+        return securityGroups.stream().map(sg -> new SecurityGroup() {
+            @Override
+            public String getVpcId() {
+                return sg.vpcId();
+            }
+
+            @Override
+            public String getId() {
+                return sg.groupId();
+            }
+        }).collect(Collectors.toList());
+    }
+    
     @Override
     public SecurityGroup getDefaultSecurityGroupForApplicationLoadBalancer(com.sap.sse.landscape.Region region) {
         return getDefaultSecurityGroupForApplicationHosts(region);
     }
 
     @Override
-    public SecurityGroup getDefaultSecurityGroupForMongoDBHosts(com.sap.sse.landscape.Region region) {
-        final SecurityGroup result;
-        // TODO find a better way, e.g., by tagging, to identify the security group per region to use for MongoDB hosts
-        if (region.getId().equals(Region.EU_WEST_1.id())) {
-            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_1, region);
-        } else if (region.getId().equals(Region.EU_WEST_2.id())) {
-            result = getSecurityGroup(DEFAULT_MONGODB_SECURITY_GROUP_ID_EU_WEST_2, region);
-        } else {
-            result = null;
-        }
-        return result;
+    public Iterable<SecurityGroup> getDefaultSecurityGroupsForMongoDBHosts(com.sap.sse.landscape.Region region) {
+        return getSecurityGroupByTag(LandscapeConstants.MONGO_SG_TAG, region);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.coursetemplate;
+package com.sap.sse.common;
 
 public interface WithOptionalRepeatablePart {
     default boolean hasRepeatablePart() {

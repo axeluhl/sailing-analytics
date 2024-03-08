@@ -479,13 +479,13 @@ public class LandscapeServiceImpl implements LandscapeService {
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
-                            getLandscape().getCentralReverseProxy(region);
+                    final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> reverseProxyCluster =
+                            getLandscape().getReverseProxyCluster(region);
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
                     // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
                     logger.info("Adding reverse proxy rules for migrated content pointing to ARCHIVE");
                     defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
-                            centralReverseProxy, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
+                            reverseProxyCluster, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
                         logger.info("Removing remote sailing server references to "+from+" from archive server "+archive);
                         try {
