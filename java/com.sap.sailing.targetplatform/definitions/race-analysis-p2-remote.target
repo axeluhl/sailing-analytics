@@ -409,6 +409,7 @@
 <plugin id="io.netty.transport-native-unix-common"/>
 <plugin id="io.netty.transport-classes-kqueue"/>
 <plugin id="io.netty.codec"/>
+<plugin id="io.netty.handler"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
