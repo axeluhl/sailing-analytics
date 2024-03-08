@@ -403,6 +403,7 @@
 <plugin id="org.yaml.snakeyaml"/>
 <plugin id="io.netty.transport"/>
 <plugin id="io.netty.buffer"/>
+<plugin id="io.netty.common"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
