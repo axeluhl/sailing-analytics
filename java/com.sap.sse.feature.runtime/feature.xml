@@ -1073,6 +1073,13 @@
          download-size="0"
          install-size="0"
          version="2.2.0"
+         unpack="false"/>       
+         
+   <plugin
+         id="io.netty.transport"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
          unpack="false"/>
        
    <plugin
