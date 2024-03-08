@@ -1096,6 +1096,13 @@
          version="4.1.107.Final"
          unpack="false"/>
                
+    <plugin
+         id="io.netty.resolver"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
    <plugin
          id="com.github.haifengl.smile-core"
          download-size="0"
