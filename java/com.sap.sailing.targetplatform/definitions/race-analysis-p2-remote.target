@@ -411,6 +411,7 @@
 <plugin id="io.netty.codec"/>
 <plugin id="io.netty.handler"/>
 <plugin id="io.netty.resolver-dns"/>
+<plugin id="io.netty.codec-dns"/>
 <plugin id="io.netty.incubator.netty-incubator-transport-classes-io_uring"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
