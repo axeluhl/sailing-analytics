@@ -132,6 +132,13 @@
          unpack="false"/>
                
     <plugin
+         id="io.netty.resolver-dns"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
          id="io.netty.incubator.netty-incubator-transport-classes-io_uring"
          download-size="0"
          install-size="0"
