@@ -1139,7 +1139,7 @@
          unpack="false"/>
                
     <plugin
-         id="io.netty.incubator.channel.uring"
+         id="io.netty.incubator.netty-incubator-transport-classes-io_uring"
          download-size="0"
          install-size="0"
          version="0.0.25.Final"

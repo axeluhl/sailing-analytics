@@ -410,7 +410,7 @@
 <plugin id="io.netty.transport-classes-kqueue"/>
 <plugin id="io.netty.codec"/>
 <plugin id="io.netty.handler"/>
-<plugin id="io.netty.incubator.channel.uring"/>
+<plugin id="io.netty.incubator.netty-incubator-transport-classes-io_uring"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
