@@ -131,4 +131,11 @@
          version="4.1.107.Final"
          unpack="false"/>
                
+    <plugin
+         id="io.netty.incubator.channel.uring"
+         download-size="0"
+         install-size="0"
+         version="0.0.25.Final"
+         unpack="false"/>
+               
 </feature>
