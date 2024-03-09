@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
 
@@ -42,8 +43,8 @@ public class EditableLeaderboardSettings extends MultiRaceLeaderboardSettings {
     }
 
     @Override
-    protected void addChildSettings() {
-        super.addChildSettings();
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+        super.addChildSettings(context);
         showCarryColumn = new BooleanSetting(SHOW_CARRY_COLUMN_KEY,  this, SHOW_CARRY_COLUMN_DEFAULT);
     }
     

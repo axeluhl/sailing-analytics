@@ -6,8 +6,9 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings {
+public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     
     private static final long serialVersionUID = -3155593082712145485L;
 
@@ -21,7 +22,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
     private EnumSetSetting<HelpLineTypes> visibleHelpLines;
     
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         Set<HelpLineTypes> defaultVisibleHelpLines = new HashSet<HelpLineTypes>();
         defaultVisibleHelpLines.add(HelpLineTypes.STARTLINE);
         defaultVisibleHelpLines.add(HelpLineTypes.FINISHLINE);
@@ -36,14 +37,15 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
     public RaceMapHelpLinesSettings() {
+        super(null);
     }
     
     /**
      * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
-    public RaceMapHelpLinesSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
-        super(propertyName, parentSettings);
+    public RaceMapHelpLinesSettings(String propertyName, AbstractGenericSerializableSettings<SecurityChildSettingsContext> parentSettings) {
+        super(propertyName, parentSettings, null);
     }
     
     /**
@@ -57,6 +59,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      }
     
     public RaceMapHelpLinesSettings(Iterable<HelpLineTypes> visibleHelpLines) {
+        this();
         this.visibleHelpLines.setValues(visibleHelpLines);
     }
 

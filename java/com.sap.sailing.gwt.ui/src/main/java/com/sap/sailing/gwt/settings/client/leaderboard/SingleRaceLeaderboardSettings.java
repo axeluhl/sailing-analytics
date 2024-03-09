@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     private static final long serialVersionUID = 2891220120957743158L;
@@ -31,8 +32,8 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     }
     
     @Override
-    protected void addChildSettings() {
-        super.addChildSettings();
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+        super.addChildSettings(context);
         showRaceRankColumn = new BooleanSetting("racerank", this, false);
     }
 

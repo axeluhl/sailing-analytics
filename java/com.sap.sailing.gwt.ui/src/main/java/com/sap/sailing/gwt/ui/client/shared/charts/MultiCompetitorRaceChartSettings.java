@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.EnumSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class MultiCompetitorRaceChartSettings extends ChartSettings {
     private static final long serialVersionUID = 2885108745814848018L;
@@ -10,8 +11,8 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     private EnumSetting<DetailType> secondDetailType;
     
     @Override
-    protected void addChildSettings() {
-        super.addChildSettings();
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+        super.addChildSettings(context);
         firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, DetailType::valueOfString);
         secondDetailType = new EnumSetting<>("secondDetailType", this, null, DetailType::valueOfString);
     }

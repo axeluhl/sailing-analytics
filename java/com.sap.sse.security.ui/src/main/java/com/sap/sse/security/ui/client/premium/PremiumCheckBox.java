@@ -71,11 +71,12 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
                 () -> paywallResolver.getUnlockingSubscriptionPlans(action, contextDTO, this::onSubscribeDialogConfirmation));
         updateUserPermission();
     }
-    
-    protected PremiumCheckBox(final String label, AbstractSecuredValueSetting<?> setting) {
-        super(setting.getAction(), setting.getPaywallResolver(), setting.getDtoContext().getSecuredDTO());
+
+    protected PremiumCheckBox(final String label, AbstractSecuredValueSetting<Boolean> setting) {
+        super(setting.getAction(), setting.getPaywallResolver(), setting.getSecuredDTO());
         this.image = createPremiumIcon();
         this.checkBox = new CheckBox(label);
+        checkBox.setValue(setting.getValue());
         initWidget(uiBinder.createAndBindUi(this));
         this.subscribeDialog = ConfirmationDialog.create(i18n.subscriptionSuggestionTitle(),
                 i18n.pleaseSubscribeToUse(), i18n.takeMeToSubscriptions(), i18n.cancel(),

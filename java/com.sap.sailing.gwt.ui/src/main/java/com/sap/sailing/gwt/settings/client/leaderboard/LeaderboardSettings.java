@@ -12,6 +12,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -21,7 +22,7 @@ import com.sap.sse.common.settings.generic.LongSetting;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class LeaderboardSettings extends AbstractGenericSerializableSettings {
+public abstract class LeaderboardSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     private static final long serialVersionUID = 2625004077963291333L;
     
     protected EnumSetSetting<DetailType> maneuverDetailsToShow;
@@ -41,7 +42,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     protected BooleanSetting showCompetitorBoatInfoColumn;
         
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         isShowCompetitorNationality = new BooleanSetting("showCompetitorNationality", this, false);
         List<DetailType> maneuverDetails = new ArrayList<>();
         maneuverDetails.add(DetailType.TACK);
@@ -68,6 +69,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     }
     
     public LeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
+        super(null);
         showCompetitorBoatInfoColumn.setDefaultValue(showCompetitorBoatInfoColumnDefault);
     }
     
@@ -80,6 +82,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
             boolean showAddedScores, boolean showCompetitorShortNameColumn, 
             boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
             boolean isCompetitorNationalityColumnVisible) {
+        this(showCompetitorBoatInfoColumn);
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);
@@ -88,7 +91,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         this.showAddedScores.setValue(showAddedScores);
         this.showCompetitorShortNameColumn.setValue(showCompetitorShortNameColumn);
         this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
-        this.showCompetitorBoatInfoColumn.setValue(showCompetitorBoatInfoColumn);
         this.isShowCompetitorNationality.setValue(isCompetitorNationalityColumnVisible);
     }
   

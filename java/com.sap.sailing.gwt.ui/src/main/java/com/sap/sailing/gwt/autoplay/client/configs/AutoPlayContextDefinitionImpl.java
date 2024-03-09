@@ -7,8 +7,9 @@ import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.StringToEnumConverter;
 import com.sap.sse.common.settings.generic.UUIDSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSettings implements AutoPlayContextDefinition {
+public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> implements AutoPlayContextDefinition {
     private static final long serialVersionUID = 2880854263616658272L;
 
     private transient EnumSetting<AutoPlayType> type;
@@ -16,16 +17,18 @@ public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSe
     private transient StringSetting leaderboardName;
 
     public AutoPlayContextDefinitionImpl(AutoPlayType type, UUID eventUUID, String leaderboardName) {
+        this();
         this.eventUUID.setValue(eventUUID);
         this.leaderboardName.setValue(leaderboardName);
         this.type.setValue(type);
     }
 
     public AutoPlayContextDefinitionImpl() {
+        super(null);
     }
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         type = new EnumSetting<AutoPlayType>("autoplayType", this, AutoPlayType.CLASSIC,
                 new StringToEnumConverter<AutoPlayType>() {
                     @Override

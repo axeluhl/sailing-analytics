@@ -6,11 +6,11 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;
 
 public class DistanceSetting extends AbstractValueSetting<Distance> {
-    public DistanceSetting(String name, AbstractGenericSerializableSettings settings) {
+    public DistanceSetting(String name, AbstractGenericSerializableSettings<?> settings) {
         this(name, settings, null);
     }
     
-    public DistanceSetting(String name, AbstractGenericSerializableSettings settings, Distance defaultValue) {
+    public DistanceSetting(String name, AbstractGenericSerializableSettings<?> settings, Distance defaultValue) {
         super(name, settings, defaultValue, DistanceConverter.INSTANCE);
     }
 

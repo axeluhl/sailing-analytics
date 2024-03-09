@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.autoplay.client.app;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
+public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     private static final long serialVersionUID = -9013901094746556797L;
 
     private BooleanSetting fullscreen;
@@ -13,11 +14,12 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     private IntegerSetting waitTimeAfterRaceEndInSeconds;
 
     public AutoplayPerspectiveOwnSettings() {
+        super(null);
     }
 
     public AutoplayPerspectiveOwnSettings(boolean fullscreen, boolean switchToLive,
             int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds) {
-        super();
+        this();
         this.fullscreen.setValue(fullscreen);
         this.switchToLive.setValue(switchToLive);
         this.timeToSwitchBeforeRaceStartInSeconds.setValue(timeToSwitchBeforeRaceStartInSeconds);
@@ -25,7 +27,7 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     }
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         fullscreen = new BooleanSetting("fullscreen", this, true);
         switchToLive = new BooleanSetting("switchToLive", this, true);
         timeToSwitchBeforeRaceStartInSeconds = new IntegerSetting("timeToSwitchBeforeRaceStart", this, 180);

@@ -7,14 +7,15 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
+public class ManeuverTableSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     private static final long serialVersionUID = -3250243915670349222L;
 
     private EnumSetSetting<ManeuverType> selectedManeuverTypes;
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         selectedManeuverTypes = new EnumSetSetting<>("selectedManeuverTypes", this,
                 Arrays.asList(ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE),
                 ManeuverType::valueOf);
@@ -24,9 +25,11 @@ public class ManeuverTableSettings extends AbstractGenericSerializableSettings {
      * The default settings
      */
     public ManeuverTableSettings() {
+        super(null);
     }
 
     public ManeuverTableSettings(Set<ManeuverType> selectedManeuverTypes) {
+        this();
         this.selectedManeuverTypes.setValues(selectedManeuverTypes);
     }
 

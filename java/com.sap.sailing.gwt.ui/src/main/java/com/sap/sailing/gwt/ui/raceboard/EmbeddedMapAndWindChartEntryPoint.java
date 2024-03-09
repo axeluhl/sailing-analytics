@@ -110,13 +110,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
         if (settings.isShowCourseGeometry()) {
             helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
         }
-        RaceMapHelpLinesSettings raceMapHelpLinesSettings = new RaceMapHelpLinesSettings(helpLineTypes);
-        final RaceMapSettings raceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultRaceMapSettings, null, paywallResolver)
-                .withHelpLinesSettings(raceMapHelpLinesSettings)
-                .withZoomSettings(raceMapZoomSettings)
-                .withShowEstimatedDuration(true)
-                .withWindUp(settings.isWindUp())
-                .build();
         final String regattaLikeName = contextDefinition.getRegattaLikeName();
         final String raceColumnName = contextDefinition.getRaceColumnName();
         final String fleetName = contextDefinition.getFleetName();
@@ -127,8 +120,14 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                             final Pair<RegattaAndRaceIdentifier, SecuredDTO> selectedRaceIdentifierAndTrackedRaceSecuredDTO) {
                         final RegattaAndRaceIdentifier selectedRaceIdentifier = selectedRaceIdentifierAndTrackedRaceSecuredDTO
                                 .getA();
-                        final SecuredDTO raceDTOProxy = selectedRaceIdentifierAndTrackedRaceSecuredDTO.getB();
-                        raceMapSettings.setSecuredDTO(raceDTOProxy);
+                        final SecuredDTO raceDTO = selectedRaceIdentifierAndTrackedRaceSecuredDTO.getB();
+                        RaceMapHelpLinesSettings raceMapHelpLinesSettings = new RaceMapHelpLinesSettings(helpLineTypes);
+                        final RaceMapSettings raceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultRaceMapSettings, raceDTO, paywallResolver)
+                                .withHelpLinesSettings(raceMapHelpLinesSettings)
+                                .withZoomSettings(raceMapZoomSettings)
+                                .withShowEstimatedDuration(true)
+                                .withWindUp(settings.isWindUp())
+                                .build();
                         if (selectedRaceIdentifier == null) {
                             createErrorPage(getStringMessages().couldNotObtainRace(regattaLikeName, raceColumnName,
                                     fleetName, /* technicalErrorMessage */ ""), paywallResolver);
@@ -138,7 +137,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingReadEntryP
                                         @Override
                                         public void onSuccess(Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
                                             createEmbeddedMap(selectedRaceIdentifier, competitorsAndTheirBoats,
-                                                    raceboardPerspectiveSettings, raceMapSettings, raceDTOProxy);
+                                                    raceboardPerspectiveSettings, raceMapSettings, raceDTO);
                                         }
 
                                         @Override

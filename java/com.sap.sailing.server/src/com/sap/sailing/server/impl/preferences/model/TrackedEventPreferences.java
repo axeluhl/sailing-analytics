@@ -3,7 +3,7 @@ package com.sap.sailing.server.impl.preferences.model;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsList;
 
-public class TrackedEventPreferences extends AbstractGenericSerializableSettings {
+public class TrackedEventPreferences extends AbstractGenericSerializableSettings<Object> {
 
     private static final long serialVersionUID = -290209497308646446L;
 
@@ -12,10 +12,11 @@ public class TrackedEventPreferences extends AbstractGenericSerializableSettings
     private transient SettingsList<TrackedEventPreference> trackedEvents;
 
     public TrackedEventPreferences() {
+        super(null);
     }
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(Object context) {
         trackedEvents = new SettingsList<>("trackedEvents", this, TrackedEventPreference::new);
     }
 

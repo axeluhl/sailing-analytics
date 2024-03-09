@@ -23,57 +23,61 @@ import com.sap.sse.common.settings.generic.StringToEnumConverter;
 
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
-    private static class TestOuterSettings extends AbstractGenericSerializableSettings {
+    private static class TestOuterSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -7379232503773525915L;
         private transient SimpleTestSettings nested;
 
         public TestOuterSettings() {
+            super(null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             nested = new SimpleTestSettings("nested", this);
         }
     }
 
-    private static class TestListSettings extends AbstractGenericSerializableSettings {
+    private static class TestListSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = 6919127895749914961L;
         private transient SettingsList<SimpleTestSettings> l;
 
         public TestListSettings() {
+            super(null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             l = new SettingsList<>("l", this, SimpleTestSettings::new);
         }
     }
 
-    private static class SimpleTestSettings extends AbstractGenericSerializableSettings {
+    private static class SimpleTestSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -4134836978411240572L;
         private transient StringSetting string;
         private transient DecimalSetting num;
 
         public SimpleTestSettings() {
+            super(null);
         }
 
         public SimpleTestSettings(String string, BigDecimal num) {
+            super(null);
             this.string.setValue(string);
             this.num.setValue(num);
         }
 
-        public SimpleTestSettings(String name, AbstractGenericSerializableSettings parent) {
-            super(name, parent);
+        public SimpleTestSettings(String name, AbstractGenericSerializableSettings<Object> parent) {
+            super(name, parent, null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             string = new StringSetting("string", this);
             num = new DecimalSetting("num", this);
         }
     }
 
-    private static class TestSettings extends AbstractGenericSerializableSettings {
+    private static class TestSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -611806711715538293L;
         private transient StringSetting humba;
         private transient BooleanSetting bumpa;
@@ -82,10 +86,11 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient DecimalListSetting l;
 
         public TestSettings() {
+            super(null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             humba = new StringSetting("humba", this);
             bumpa = new BooleanSetting("bumpa", this);
             trala = new EnumSetting<>("trala", this, TextOperator.Operators::valueOf);
@@ -137,15 +142,16 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         
     }
 
-    private static class TestEnumListSettings extends AbstractGenericSerializableSettings {
+    private static class TestEnumListSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = 93688955681544920L;
         private transient EnumListSetting<TextOperator.Operators> l;
         
         public TestEnumListSettings() {
+            super(null);
         }
 
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             l = new EnumListSetting<>("l", this,
                     new StringToEnumConverter<TextOperator.Operators>() {
                 @Override
@@ -156,7 +162,11 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class DuplicateFieldSettings extends AbstractGenericSerializableSettings {
+    private static class DuplicateFieldSettings extends AbstractGenericSerializableSettings<Object> {
+        public DuplicateFieldSettings() {
+            super(null);
+        }
+
         private static final long serialVersionUID = 4058775568295038177L;
         @SuppressWarnings("unused")
         private transient StringSetting humba;
@@ -164,19 +174,23 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient DecimalSetting bumba;
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             humba = new StringSetting("humba", this);
             bumba = new DecimalSetting("humba", this);
         }
     }
     
-    private static class DisallowedKeySettings extends AbstractGenericSerializableSettings {
+    private static class DisallowedKeySettings extends AbstractGenericSerializableSettings<Object> {
+        public DisallowedKeySettings() {
+            super(null);
+        }
+
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient StringSetting disallowedKey;
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             disallowedKey = new StringSetting("disallowed.key", this);
         }
     }

@@ -21,12 +21,11 @@ import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.PaywallResolverProxy;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
-public class RaceMapSettings extends AbstractGenericSerializableSettings {
+public class RaceMapSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
 
     private static final long serialVersionUID = 6283369783437892096L;
     
@@ -109,23 +108,19 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      */
     private DoubleSetting startCountDownFontSizeScalingSetting;
 
-    private SecuredDTOProxy securedDTOProxy;
-
-    private PaywallResolverProxy paywallResolverProxy;
+    private final PaywallResolver paywallResolver;
+    private final SecuredDTO securedDTO;
 
     @Override
-    protected void addChildSettings() {
-        // The addCildSettings is called in AbstractGenericSerializableSettings constructor.
-        // This lazy initialization is needed, because it's not possible in GWT context to initialize the field before.
-        lazySettingOfPaywallresolverAndSecuredDTO(null, null);
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         showSatelliteLayerSetting = new BooleanSetting(PARAM_SHOW_SATELLITE_LAYER, this, false);
         showMapControlsSetting = new BooleanSetting(PARAM_SHOW_MAPCONTROLS, this, true);
         helpLinesSettings = new RaceMapHelpLinesSettings(HELP_LINES_SETTINGS, this);
         windUpSetting = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
         buoyZoneRadiusSetting = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
-        showWindStreamletOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, paywallResolverProxy, TrackedRaceActions.VIEWSTREAMLETS, securedDTOProxy);
-        showWindStreamletColorsSetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, paywallResolverProxy, TrackedRaceActions.VIEWSTREAMLETS, securedDTOProxy);
-        showSimulationOverlaySetting = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false);
+        showWindStreamletOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, true, context.getPaywallResolver(), TrackedRaceActions.VIEWSTREAMLETS, context.getSecuredDTO());
+        showWindStreamletColorsSetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, true, context.getPaywallResolver(), TrackedRaceActions.VIEWSTREAMLETS, context.getSecuredDTO());
+        showSimulationOverlaySetting = new BooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, true);
         showWindLadderSetting = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
         zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
         transparentHoverlinesSetting = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);
@@ -141,7 +136,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public RaceMapSettings(PaywallResolver paywallResolver, SecuredDTO securedDTO) {
-        lazySettingOfPaywallresolverAndSecuredDTO(paywallResolver, securedDTO);
+        super(new SecurityChildSettingsContext(securedDTO, paywallResolver));
+        this.paywallResolver = paywallResolver;
+        this.securedDTO = securedDTO;
     }
 
     public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
@@ -151,7 +148,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints,
             Boolean showEstimatedDuration, Double startCountDownFontSizeScaling, Boolean showManeuverLossVisualization,
             Boolean showSatelliteLayer, Boolean showWindLadder, PaywallResolver paywallResolver, SecuredDTO securedDTO) {
-        lazySettingOfPaywallresolverAndSecuredDTO(paywallResolver, securedDTO);
+        this(paywallResolver, securedDTO);
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlinesSetting.setValue(transparentHoverlines);
@@ -172,15 +169,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showManeuverLossVisualizationSetting.setValue(showManeuverLossVisualization);
         this.showSatelliteLayerSetting.setValue(showSatelliteLayer);
         this.showWindLadderSetting.setValue(showWindLadder);
-    }
-
-    /**
-     * Set the paywall resolver and secured DTO to it's proxy holder. Proxy objects will be created if they are not
-     * already initialized.
-     */
-    private void lazySettingOfPaywallresolverAndSecuredDTO(PaywallResolver paywallResolver, SecuredDTO securedDTO) {
-        setPaywallResolver(paywallResolver);
-        setSecuredDTO(securedDTO);
     }
 
     /**
@@ -347,39 +335,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     protected PaywallResolver getPaywallResolver() {
-        final PaywallResolver paywallResolver;
-        if (paywallResolverProxy == null) {
-            paywallResolver = null;
-        } else {
-            paywallResolver = paywallResolverProxy.getPaywallResolver();
-        }
         return paywallResolver;
     }
 
-    public void setPaywallResolver(PaywallResolver paywallResolver) {
-        if (paywallResolverProxy == null) {
-            paywallResolverProxy = new PaywallResolverProxy(paywallResolver);
-        } else {
-            paywallResolverProxy.setPaywallResolver(paywallResolver);
-        }
-    }
-
     protected SecuredDTO getSecuredDTO() {
-        final SecuredDTO securedDTO;
-        if (securedDTOProxy == null) {
-            securedDTO = null;
-        } else {
-            securedDTO = securedDTOProxy.getSecuredDTO();
-        }
         return securedDTO;
-    }
-
-    public void setSecuredDTO(SecuredDTO securedDTO) {
-        if (securedDTOProxy == null) {
-            securedDTOProxy = new SecuredDTOProxy(securedDTO);
-        } else {
-            securedDTOProxy.setSecuredDTO(securedDTO);
-        }
     }
 
     public static class RaceMapSettingsBuilder {
@@ -419,12 +379,12 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         private void copyValues(RaceMapSettings settings) {
             // if the paywall resolver and secured DTO are not set already in the origin settings, we have to set them now
             // to the origin object as well, because we will need them in the copy process later, when we call the getter.
-            if (settings.getPaywallResolver() == null) {
-                settings.setPaywallResolver(paywallResolver);
-            }
-            if (settings.getSecuredDTO() != null && settings.getSecuredDTO() == null) {
-                settings.setSecuredDTO(securedDTO);
-            }
+//            if (settings.getPaywallResolver() == null) {
+//                settings.setPaywallResolver(paywallResolver);
+//            }
+//            if (settings.getSecuredDTO() != null && settings.getSecuredDTO() == null) {
+//                settings.setSecuredDTO(securedDTO);
+//            }
             this.showSatelliteLayer = settings.isShowSatelliteLayer();
             this.showDouglasPeuckerPoints = settings.isShowDouglasPeuckerPoints();
             this.maneuverTypesToShow = settings.getManeuverTypesToShow();

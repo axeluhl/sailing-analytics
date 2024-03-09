@@ -7,11 +7,12 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * @author Lennart Hensler (D054527)
  */
-public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
+public class RaceMapZoomSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     
     private static final long serialVersionUID = 7283052942434130497L;
 
@@ -38,7 +39,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     private BooleanSetting zoomToSelectedCompetitors;
     
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         typesToConsiderOnZoom = new EnumSetSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), ZoomTypes::valueOf);
         zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
     }
@@ -48,18 +49,19 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
     public RaceMapZoomSettings() {
-        super();
+        super(null);
     }
 
     /**
      * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
-    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
-        super(propertyName, parentSettings);
+    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings<SecurityChildSettingsContext> parentSettings) {
+        super(propertyName, parentSettings, null);
     }
     
     public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
+        this();
         this.typesToConsiderOnZoom.setValues(typesToConsider);
         this.zoomToSelectedCompetitors.setValue(zoomToSelected);
     }

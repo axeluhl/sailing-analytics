@@ -14,7 +14,7 @@ import com.sap.sse.common.settings.value.Value;
  */
 public class BoatClassSetting extends AbstractValueSetting<BoatClass> {
 
-    protected BoatClassSetting(String name, AbstractGenericSerializableSettings settings, DomainFactory domainFactory) {
+    protected BoatClassSetting(String name, AbstractGenericSerializableSettings<?> settings, DomainFactory domainFactory) {
         super(name, settings, null, new Converter(domainFactory));
     }
 

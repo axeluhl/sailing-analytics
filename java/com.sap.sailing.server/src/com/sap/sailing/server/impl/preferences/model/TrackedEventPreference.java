@@ -10,7 +10,7 @@ import com.sap.sse.common.settings.generic.SettingsList;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-public class TrackedEventPreference extends AbstractGenericSerializableSettings {
+public class TrackedEventPreference extends AbstractGenericSerializableSettings<Object> {
     private static final long serialVersionUID = 234711768869820003L;
 
     private transient UUIDSetting eventId;
@@ -22,6 +22,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     private transient SettingsList<TrackedElementWithDeviceId> trackedElements;
 
     public TrackedEventPreference() {
+        super(null);
     }
 
     /** copy constructor */
@@ -65,7 +66,7 @@ public class TrackedEventPreference extends AbstractGenericSerializableSettings 
     }
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(Object context) {
         eventId = new UUIDSetting("eventId", this);
         leaderboardName = new StringSetting("leaderboardName", this);
         trackedElements = new SettingsList<TrackedElementWithDeviceId>("trackedElements", this,

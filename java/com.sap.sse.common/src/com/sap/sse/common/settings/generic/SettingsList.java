@@ -10,7 +10,7 @@ import com.sap.sse.common.settings.value.ValueCollectionValue;
 import com.sap.sse.common.settings.value.ValueListValue;
 
 
-public class SettingsList<T extends AbstractGenericSerializableSettings> extends AbstractSetting implements SettingsListSetting<T> {
+public class SettingsList<T extends AbstractGenericSerializableSettings<?>> extends AbstractSetting implements SettingsListSetting<T> {
     
     private SettingsFactory<T> settingsFactory;
 
@@ -22,7 +22,7 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
      */
     private final List<T> values = new ArrayList<>();
     
-    public SettingsList(String name, AbstractGenericSerializableSettings settings, SettingsFactory<T> settingsFactory) {
+    public SettingsList(String name, AbstractGenericSerializableSettings<?> settings, SettingsFactory<T> settingsFactory) {
         super(name, settings);
         this.settingsFactory = settingsFactory;
         adoptValue();

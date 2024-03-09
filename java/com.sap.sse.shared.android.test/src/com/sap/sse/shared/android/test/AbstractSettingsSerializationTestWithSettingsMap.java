@@ -23,7 +23,7 @@ import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 
 public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> extends AbstractSettingsSerializationTest<SOT> {
-    private static class UntypedSettings extends AbstractGenericSerializableSettings {
+    private static class UntypedSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -2265305217290147424L;
         private transient StringSetting enumSetting;
         private transient StringSetSetting enumSetSetting;
@@ -31,6 +31,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         private transient StringSetting booleanSetting;
         
         public UntypedSettings(String enumValue, Collection<String> enumValues, String numberValue, String booleanValue) {
+            super(null);
             enumSetting.setValue(enumValue);
             enumSetSetting.setValues(enumValues);
             numberSetting.setValue(numberValue);
@@ -38,7 +39,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             enumSetting = new StringSetting("enumSetting", this);
             enumSetSetting = new StringSetSetting("enumSetSetting", this);
             numberSetting = new StringSetting("numberSetting", this);
@@ -46,7 +47,11 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         }
     }
     
-    private static class TypedSettings extends AbstractGenericSerializableSettings {
+    private static class TypedSettings extends AbstractGenericSerializableSettings<Object> {
+        public TypedSettings() {
+            super(null);
+        }
+
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient EnumSetting<TextOperator.Operators> enumSetting;
@@ -57,7 +62,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         private transient BooleanSetting booleanSetting;
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             enumSetting = new EnumSetting<>("enumSetting", this, TextOperator.Operators::valueOf);
             enumSetSetting = new EnumSetSetting<>("enumSetSetting", this, TextOperator.Operators::valueOf);
             numberSetting = new DecimalSetting("numberSetting", this);

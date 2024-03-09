@@ -15,7 +15,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     private D defaultValues;
     private final boolean emptyIsDefault;
     
-    public AbstractValueCollectionSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter, boolean emptyIsDefault) {
+    public AbstractValueCollectionSetting(String name, AbstractGenericSerializableSettings<?> settings, ValueConverter<T> valueConverter, boolean emptyIsDefault) {
         super(name, settings, valueConverter);
         this.emptyIsDefault = emptyIsDefault;
     }

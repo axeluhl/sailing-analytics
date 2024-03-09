@@ -14,13 +14,14 @@ import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * The settings of the raceboard perspective
  * @author Frank
  *
  */
-public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
+public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
     
     private static final long serialVersionUID = 5471954179434008459L;
     
@@ -59,9 +60,11 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
 
 
     public RaceBoardPerspectiveOwnSettings() {
+        super(null);
     }
 
     public RaceBoardPerspectiveOwnSettings(Duration initialDurationAfterRaceStartInReplay) {
+        this();
         this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
     }
     
@@ -73,7 +76,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     }
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(SecurityChildSettingsContext context) {
         this.showLeaderboard = new BooleanSetting("showLeaderboard", this, true);
         this.showWindChart = new BooleanSetting("showWindChart", this, false);
         this.showCompetitorsChart = new BooleanSetting("showCompetitorsChart", this, false);
@@ -94,6 +97,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, 
             Boolean showTags, Boolean showManeuverTable, String jumpToTag, Long zoomStart, Long zoomEnd, Boolean autoExpandPreSelectedRace) {
+        super(null);
         this.showTags.setValue(showTags);
         this.showManeuverTable.setValue(showManeuverTable);
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);

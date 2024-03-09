@@ -10,6 +10,7 @@ import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.support.SettingsUtil;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     private static final long serialVersionUID = -3445146715292390755L;
@@ -54,8 +55,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     }
 
     @Override
-    protected void addChildSettings() {
-        super.addChildSettings();
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+        super.addChildSettings(context);
         namesOfRaceColumnsToShow = new StringSetSetting("namesOfRaceColumnsToShow", this);
         numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, RaceColumnSelectionStrategies::valueOf);

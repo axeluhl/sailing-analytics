@@ -25,31 +25,32 @@ public class SettingsUtilTest {
     private static final String defaultString = "abc";
     private static final HashSet<String> defaultStrings = new HashSet<>(Arrays.asList(defaultString, "def"));
 
-    private static class OuterSettings extends AbstractGenericSerializableSettings {
+    private static class OuterSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -7379232503773525915L;
         private transient TestSettings nested;
 
         public OuterSettings() {
+            super(null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             nested = new TestSettings("nested", this);
         }
     }
 
-    private static class TestSettings extends AbstractGenericSerializableSettings {
+    private static class TestSettings extends AbstractGenericSerializableSettings<Object> {
         private static final long serialVersionUID = -4134836978411240572L;
         private transient StringSetting string;
         private transient DecimalSetting number;
         private transient StringSetSetting strings;
 
-        public TestSettings(String name, AbstractGenericSerializableSettings parent) {
-            super(name, parent);
+        public TestSettings(String name, AbstractGenericSerializableSettings<Object> parent) {
+            super(name, parent, null);
         }
         
         @Override
-        protected void addChildSettings() {
+        protected void addChildSettings(Object context) {
             string = new StringSetting("string", this);
             number = new DecimalSetting("number", this);
             strings = new StringSetSetting("strings", this);

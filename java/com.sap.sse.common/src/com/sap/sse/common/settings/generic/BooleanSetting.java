@@ -5,11 +5,11 @@ import com.sap.sse.common.settings.generic.converter.BooleanConverter;
 
 public class BooleanSetting extends AbstractValueSetting<Boolean> {
 
-    public BooleanSetting(String name, AbstractGenericSerializableSettings settings) {
+    public BooleanSetting(String name, AbstractGenericSerializableSettings<?> settings) {
         this(name, settings, null);
     }
 
-    public BooleanSetting(String name, AbstractGenericSerializableSettings settings, Boolean defaultValue) {
+    public BooleanSetting(String name, AbstractGenericSerializableSettings<?> settings, Boolean defaultValue) {
         super(name, settings, defaultValue, BooleanConverter.INSTANCE);
     }
 }

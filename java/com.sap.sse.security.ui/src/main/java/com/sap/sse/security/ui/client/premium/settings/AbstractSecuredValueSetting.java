@@ -5,35 +5,35 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
-import com.sap.sse.security.ui.client.premium.PaywallResolverProxy;
-import com.sap.sse.security.ui.client.premium.SecuredDTOProxy;
 
 public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSetting<T> {
 
-    private final PaywallResolverProxy paywallResolverProxy;
+    private final PaywallResolver paywallResolver;
     private final Action action;
-    private final SecuredDTOProxy dtoContextProxy;
+    private final SecuredDTO securedDTO;
 
-    protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettings settings, T defaultValue,
-            ValueConverter<T> valueConverter, PaywallResolverProxy paywallResolverProxy, Action action,
-            SecuredDTOProxy dtoContextProxy) {
+    protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettings<SecurityChildSettingsContext> settings, T defaultValue,
+            ValueConverter<T> valueConverter, PaywallResolver paywallResolver, Action action, SecuredDTO securedDTO) {
         super(name, settings, defaultValue, valueConverter);
-        this.paywallResolverProxy = paywallResolverProxy;
+        this.paywallResolver = paywallResolver;
         this.action = action;
-        this.dtoContextProxy = dtoContextProxy;
+        this.securedDTO = securedDTO;
     }
 
     @Override
     public T getValue() {
-        if (paywallResolverProxy.getPaywallResolver() == null) {
+        if (paywallResolver == null) {
             GWT.log("getValue paywall resolver not available.");
         }
-        if (dtoContextProxy.getSecuredDTO() == null) {
+        if (securedDTO == null) {
             GWT.log("getValue securedDTO context not available!");
         }
-        if (dtoContextProxy != null && dtoContextProxy.isPresent() && paywallResolverProxy != null
-                && paywallResolverProxy.getPaywallResolver().hasPermission(action, dtoContextProxy.getSecuredDTO())) {
+        if (securedDTO == null 
+                || paywallResolver != null 
+                && paywallResolver.hasPermission(action, securedDTO)) {
             return super.getValue();
         } else {
             return super.getDefaultValue();
@@ -42,31 +42,27 @@ public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSettin
 
     @Override
     public void setValue(T value) {
-        if (paywallResolverProxy.getPaywallResolver() == null) {
+        if (paywallResolver == null) {
             GWT.log("setValue Paywall resolver not available.");
         }
-        if (dtoContextProxy == null) {
+        if (securedDTO == null) {
             GWT.log("setValue DTOContext not set!");
         }
-        if (dtoContextProxy != null && dtoContextProxy.isPresent() && paywallResolverProxy.getPaywallResolver() != null
-                && paywallResolverProxy.getPaywallResolver().hasPermission(action, dtoContextProxy.getSecuredDTO())) {
+        if (securedDTO != null
+                ||  paywallResolver != null && paywallResolver.hasPermission(action, securedDTO)) {
             super.setValue(value);
         }
     }
 
     public PaywallResolver getPaywallResolver() {
-        return paywallResolverProxy.getPaywallResolver();
-    }
-
-    public void setPaywallResolver(PaywallResolver paywallResolver) {
-        paywallResolverProxy.setPaywallResolver(paywallResolver);
+        return paywallResolver;
     }
 
     public Action getAction() {
         return action;
     }
 
-    public SecuredDTOProxy getDtoContext() {
-        return dtoContextProxy;
+    public SecuredDTO getSecuredDTO() {
+        return securedDTO;
     }
 }

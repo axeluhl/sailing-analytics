@@ -12,19 +12,19 @@ import com.sap.sse.common.settings.value.ValueCollectionValue;
 
 public abstract class ValueLinkedHashSetSetting<T> extends AbstractValueCollectionSetting<T, Set<Value>, Set<T>> implements ValueSetSetting<T> {
     
-    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter) {
+    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings<?> settings, ValueConverter<T> valueConverter) {
         this(name, settings, false, valueConverter);
     }
     
-    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings settings, boolean emptyIsDefault, ValueConverter<T> valueConverter) {
+    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings<?> settings, boolean emptyIsDefault, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter, emptyIsDefault);
     }
     
-    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings settings, Iterable<T> defaultValues, ValueConverter<T> valueConverter) {
+    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings<?> settings, Iterable<T> defaultValues, ValueConverter<T> valueConverter) {
         this(name, settings, defaultValues, false, valueConverter);
     }
     
-    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings settings, Iterable<T> defaultValues, boolean emptyIsDefault, ValueConverter<T> valueConverter) {
+    public ValueLinkedHashSetSetting(String name, AbstractGenericSerializableSettings<?> settings, Iterable<T> defaultValues, boolean emptyIsDefault, ValueConverter<T> valueConverter) {
         this(name, settings, emptyIsDefault, valueConverter);
         setDefaultValues(defaultValues);
         resetToDefault();

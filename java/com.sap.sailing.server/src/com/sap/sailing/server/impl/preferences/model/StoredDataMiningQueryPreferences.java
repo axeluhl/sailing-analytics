@@ -4,7 +4,11 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsList;
 
 /** Holds a list of {@link StoredDataMiningQueryPreferences}. */
-public class StoredDataMiningQueryPreferences extends AbstractGenericSerializableSettings {
+public class StoredDataMiningQueryPreferences extends AbstractGenericSerializableSettings<Object> {
+
+    public StoredDataMiningQueryPreferences() {
+        super(null);
+    }
 
     private static final long serialVersionUID = -8088467604778160161L;
     public static final String PREF_NAME = SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES;
@@ -12,7 +16,7 @@ public class StoredDataMiningQueryPreferences extends AbstractGenericSerializabl
     private transient SettingsList<StoredDataMiningQueryPreference> storedQueries;
 
     @Override
-    protected void addChildSettings() {
+    protected void addChildSettings(Object context) {
         storedQueries = new SettingsList<>("storedQueries", this, StoredDataMiningQueryPreference::new);
     }
 

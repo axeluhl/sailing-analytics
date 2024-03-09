@@ -285,24 +285,23 @@ public class AutoplayHelper {
             long clientTimeWhenRequestWasSent, Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos,
             RaceTimesInfoProvider creationTimeProvider, AbstractQuickFlagDataProvider provider,
             SubscriptionServiceFactory subscriptionServiceFactory) {
-        ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
-        // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
-        typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
-        RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
-        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
-        RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
-                100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
-                RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
-                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false,
-                paywallResolver, null);
         userService.createEssentialSecuredDTOByIdAndType(currentLiveRace.getPermissionType(), currentLiveRace.getName(),
                 currentLiveRace.getTypeRelativeObjectIdentifier(), new AsyncCallback<SecuredDTO>() {
                     @Override
-                    public void onSuccess(SecuredDTO raceDtoProxy) {
-                        settings.setSecuredDTO(raceDtoProxy);
+                    public void onSuccess(SecuredDTO raceDto) {
+                        ArrayList<ZoomTypes> typesToConsiderOnZoom = new ArrayList<>();
+                        // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
+                        typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
+                        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
+                        RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
+                        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+                        RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
+                                100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
+                                RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5,
+                                /* showManeuverLossVisualization */ false, /* showSatelliteLayer */ false, /* showWindLadder */ false,
+                                paywallResolver, raceDto);
                         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE,
-                                paywallResolver, raceDtoProxy);
+                                paywallResolver, raceDto);
                         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace,
                                 competitorsAndTheirBoats);
                         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(
