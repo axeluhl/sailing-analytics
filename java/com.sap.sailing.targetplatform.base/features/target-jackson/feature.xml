@@ -159,4 +159,11 @@
          version="3.1.8"
          unpack="false"/>
                
+    <plugin
+         id="reactive-streams"
+         download-size="0"
+         install-size="0"
+         version="1.0.4"
+         unpack="false"/>
+               
 </feature>
