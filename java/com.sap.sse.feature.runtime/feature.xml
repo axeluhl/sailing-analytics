@@ -1250,4 +1250,11 @@
          version="2.8.9.v20220111-1409"
          unpack="false"/>
 
+   <plugin
+         id="org.eclipse.osgi"
+         download-size="0"
+         install-size="0"
+         version="3.19.100"
+         unpack="false"/>
+
 </feature>
