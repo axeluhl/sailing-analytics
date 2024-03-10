@@ -413,6 +413,7 @@
 <plugin id="io.netty.resolver-dns"/>
 <plugin id="io.netty.codec-dns"/>
 <plugin id="io.netty.incubator.netty-incubator-transport-classes-io_uring"/>
+<plugin id="io.reactivex.rxjava3.rxjava"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
