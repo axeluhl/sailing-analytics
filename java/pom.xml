@@ -37,7 +37,6 @@
          in java/com.amazon.aws.aws-java-api/pom.xml
      -->
     <tycho-version>1.7.0</tycho-version>
-    <org.osgi.framework.system.packages.extra>jdk.net</org.osgi.framework.system.packages.extra>
     <gwt.version>2.11.0</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.0</gwt.plugin.version>
@@ -48,7 +47,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
+      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E -Dosgi.framework.system.packages.extra=jdk.net
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx8192m -XX:+UseG1GC
