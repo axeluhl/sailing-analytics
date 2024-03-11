@@ -143,6 +143,12 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
 
     @Override
+    public ConnectionString getMongoClientURI() {
+        ensureConfigurationDefaultingToTest();
+        return configuration.getMongoClientURI();
+    }
+
+    @Override
     public MongoClient getMongoClient() {
         ensureConfigurationDefaultingToTest();
         return getMongoClient(configuration);

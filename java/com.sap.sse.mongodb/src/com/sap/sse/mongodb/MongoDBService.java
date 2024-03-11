@@ -2,6 +2,7 @@ package com.sap.sse.mongodb;
 
 import java.lang.ref.WeakReference;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -53,4 +54,6 @@ public interface MongoDBService {
     ClientSession startCausallyConsistentSession();
 
     MongoClient getMongoClient();
+    
+    ConnectionString getMongoClientURI();
 }

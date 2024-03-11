@@ -66,7 +66,7 @@ public class StatusServlet extends HttpServlet {
             result.put("numberofracesrestoreddoneloading", numberOfTrackedRacesRestoredDoneLoading);
             final int numberOfTrackedRacesStillLoading = service.getNumberOfTrackedRacesStillLoading();
             result.put("numberofracesstillloading", numberOfTrackedRacesStillLoading);
-            result.put("mongoDbReplicaSetNodes", getMongoDBReplicaSetNodes());
+            result.put("mongoDbConfiguration", getMongoDBReplicaSetNodes());
             final ReplicationService replicationService = getReplicationService(servletContext);
             final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
             if (replicationStatus != null) {
@@ -93,6 +93,7 @@ public class StatusServlet extends HttpServlet {
         final ClusterDescription clusterDescription = MongoDBService.INSTANCE.getMongoClient().getClusterDescription();
         result.put("connectionMode", clusterDescription.getConnectionMode().name());
         result.put("replicaSet", clusterDescription.getClusterSettings().getRequiredReplicaSetName());
+        result.put("database", MongoDBService.INSTANCE.getMongoClientURI().getDatabase());
         final JSONArray servers = new JSONArray();
         for (final ServerDescription serverDescription : clusterDescription.getServerDescriptions()) {
             final JSONObject serverHostAndPort = new JSONObject();
