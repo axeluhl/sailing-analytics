@@ -47,6 +47,6 @@ then
         fi
     fi
     sleep 2
-    $($COMMAND_ON_COMPLETION)
+    ${COMMAND_ON_COMPLETION}
 fi
 
