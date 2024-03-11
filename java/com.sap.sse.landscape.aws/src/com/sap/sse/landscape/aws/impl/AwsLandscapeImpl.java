@@ -345,12 +345,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private Subnet getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(AwsAvailabilityZone az, SecurityGroup securityGroup, Region region) {
         final Ec2Client ec2Client = getEc2Client(region);
         final String vpcId = ec2Client.describeSecurityGroups(b->b.groupIds(securityGroup.getId())).securityGroups().iterator().next().vpcId();
-        return ec2Client.describeSubnets(b->b.filters(
-                Filter.builder().name("vpc-id").values(vpcId).build(),
-                Filter.builder().name("availability-zone-id").values(az.getId()).build()))
-                .subnets().iterator().next();
+        return ec2Client
+                .describeSubnets(b -> b.filters(Filter.builder().name("vpc-id").values(vpcId).build(),
+                        Filter.builder().name("availability-zone-id").values(az.getId()).build()))
+                .subnets().stream().filter(subnet -> !subnet.tags().stream().map(tag -> tag.key())
+                        .collect(Collectors.toList()).contains(LandscapeConstants.NO_INSTANCE_DEPLOYMENT))
+                .iterator().next();
     }
-    
+
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     Listener createLoadBalancerHttpListener(ApplicationLoadBalancer<ShardingKey> alb) {
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -524,11 +526,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
      */
     private Iterable<Subnet> getSubnetsForAvailabilityZones(Region region, Iterable<AwsAvailabilityZone> azs, SecurityGroup securityGroupForVpc) {
         final Ec2Client ec2Client = getEc2Client(region);
-        final Optional<String> vpcId = Optional.ofNullable(securityGroupForVpc).map(
-                sg->ec2Client.describeSecurityGroups(b->b.groupIds(sg.getId())).securityGroups().get(0).vpcId());
+        final Optional<String> securityGroupVpcId = Optional.ofNullable(securityGroupForVpc).map(
+                sg->ec2Client.describeSecurityGroups(b->b.groupIds(sg.getId())).securityGroups().get(0).vpcId()); // Maps the security group to its vpc id.
         return Util.filter(ec2Client.describeSubnets().subnets(),
-                subnet -> vpcId.map(i->i.equals(subnet.vpcId())).orElse(subnet.defaultForAz()) &&
-                          Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId()));
+                subnet -> securityGroupVpcId.map(vpcId -> vpcId.equals(subnet.vpcId())).orElse(subnet.defaultForAz())
+                        && Util.contains(Util.map(azs, az -> az.getId()), subnet.availabilityZoneId())
+                        && subnet.tags().stream().map(tag -> tag.key())
+                                .filter(key -> key.equals(LandscapeConstants.NO_INSTANCE_DEPLOYMENT)).count() == 0);
+        // Checks whether the subnet vpcId matches the vpcId of the security group. In the cases they are not equal, or the security group vpc is not found, instead it checks that the subnet is the default for the AZ.
+        // AND, it checks whether the subnet is in any of the AZs passed in the parameter.
+        // AND it checks that the subnet is actually usable for deployment (eg. subnets may be used exclusively for lambda NAT gateways).
+
     }
 
     @Override
@@ -1017,12 +1025,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion, Optional<String> vpcId) {
+    public Iterable<AwsAvailabilityZone> getAvailabilityZones(com.sap.sse.landscape.Region awsRegion,
+            Optional<String> vpcId) {
         final Ec2Client ec2Client = getEc2Client(getRegion(awsRegion));
         // filter for the VPC ID if present; otherwise list all subnets in the region
-        return Util.map(ec2Client.describeSubnets(b->vpcId.ifPresent(theVpcId->b.filters(
-                    Filter.builder().name("vpc-id").values(theVpcId).build()))).subnets(), subnet->
-                            getAvailabilityZoneByName(awsRegion, subnet.availabilityZone()));
+        return ec2Client
+                .describeSubnets(b -> vpcId
+                        .ifPresent(theVpcId -> b.filters(Filter.builder().name("vpc-id").values(theVpcId).build())))
+                .subnets().stream().map(subnet -> getAvailabilityZoneByName(awsRegion, subnet.availabilityZone()))
+                .distinct().collect(Collectors.toList());
     }
     
     @Override
@@ -2047,17 +2058,15 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                 .instanceType(instanceType.toString()));
         logger.info("Creating auto-scaling group for replica set "+replicaSetName);
-        autoScalingClient.createAutoScalingGroup(b->{
-            b
-                .minSize(minReplicas)
-                .maxSize(maxReplicas)
-                .healthCheckGracePeriod(instanceWarmupTimeInSeconds)
-                .autoScalingGroupName(autoScalingGroupName)
-                .vpcZoneIdentifier(Util.joinStrings(",", Util.map(availabilityZones,
-                        az->getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion).subnetId())))
-                .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
-                .launchConfigurationName(launchConfigurationName);
-            tags.ifPresent(t->{
+        String vpcIdentifier = String.join(",", Util.mapToArrayList(availabilityZones,
+                az -> getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(az, securityGroup, awsRegion).subnetId())
+                .stream().filter(az -> az == null ? false : true).distinct().toArray(String[]::new)); // Fetches all unique subnets that are in the specified AZs and the same VPC as the security group.
+        autoScalingClient.createAutoScalingGroup(b -> {
+            b.minSize(minReplicas).maxSize(maxReplicas).healthCheckGracePeriod(instanceWarmupTimeInSeconds)
+                    .autoScalingGroupName(autoScalingGroupName).vpcZoneIdentifier(vpcIdentifier)
+                    .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
+                    .launchConfigurationName(launchConfigurationName);
+            tags.ifPresent(t -> {
                 final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
                 for (final Entry<String, String> tag : t) {
                     awsTags.add(software.amazon.awssdk.services.autoscaling.model.Tag.builder().key(tag.getKey()).value(tag.getValue()).build());
