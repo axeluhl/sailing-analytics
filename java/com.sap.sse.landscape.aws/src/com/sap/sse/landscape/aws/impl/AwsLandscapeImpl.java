@@ -348,14 +348,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         return ec2Client
                 .describeSubnets(b -> b.filters(Filter.builder().name("vpc-id").values(vpcId).build(),
                         Filter.builder().name("availability-zone-id").values(az.getId()).build()))
-                .subnets().stream().filter(subnet -> {
-                    if (!subnet.tags().stream().map(tag -> tag.key()).collect(Collectors.toList())
-                            .contains(LandscapeConstants.NO_INSTANCE_DEPLOYMENT)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }).iterator().next();
+                .subnets().stream().filter(subnet -> !subnet.tags().stream().map(tag -> tag.key())
+                        .collect(Collectors.toList()).contains(LandscapeConstants.NO_INSTANCE_DEPLOYMENT))
+                .iterator().next();
     }
 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends ApplicationProcess<ShardingKey, MetricsT, ProcessT>>
