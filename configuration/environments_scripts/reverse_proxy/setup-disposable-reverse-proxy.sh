@@ -21,7 +21,7 @@ echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tc
 mount -a
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mod_ssl
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
 cd /root
