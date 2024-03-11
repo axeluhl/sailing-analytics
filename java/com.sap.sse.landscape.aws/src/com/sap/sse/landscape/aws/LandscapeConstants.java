@@ -58,4 +58,9 @@ public interface LandscapeConstants {
      * The tag for the central reverse proxy, which also hosts non-essential services.
      */
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
+    
+    /**
+     * A tag key indicating that a subnet is not to be used for deploying instances, by autoscaling groups or by load balancers.
+     */
+    String NO_INSTANCE_DEPLOYMENT = "noInstanceDeployment";
 }
