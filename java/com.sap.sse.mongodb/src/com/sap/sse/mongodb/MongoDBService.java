@@ -51,4 +51,6 @@ public interface MongoDBService {
     ClientSession startAutoRefreshingSession();
 
     ClientSession startCausallyConsistentSession();
+
+    MongoClient getMongoClient();
 }

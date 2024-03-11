@@ -10,13 +10,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.mongodb.connection.ClusterDescription;
+import com.mongodb.connection.ServerDescription;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.ReplicationStatus;
 
@@ -62,6 +66,7 @@ public class StatusServlet extends HttpServlet {
             result.put("numberofracesrestoreddoneloading", numberOfTrackedRacesRestoredDoneLoading);
             final int numberOfTrackedRacesStillLoading = service.getNumberOfTrackedRacesStillLoading();
             result.put("numberofracesstillloading", numberOfTrackedRacesStillLoading);
+            result.put("mongoDbReplicaSetNodes", getMongoDBReplicaSetNodes());
             final ReplicationService replicationService = getReplicationService(servletContext);
             final ReplicationStatus replicationStatus = replicationService == null ? null : replicationService.getStatus();
             if (replicationStatus != null) {
@@ -81,5 +86,21 @@ public class StatusServlet extends HttpServlet {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private JSONObject getMongoDBReplicaSetNodes() {
+        final JSONObject result = new JSONObject();
+        final ClusterDescription clusterDescription = MongoDBService.INSTANCE.getMongoClient().getClusterDescription();
+        result.put("connectionMode", clusterDescription.getConnectionMode().name());
+        result.put("replicaSet", clusterDescription.getClusterSettings().getRequiredReplicaSetName());
+        final JSONArray servers = new JSONArray();
+        for (final ServerDescription serverDescription : clusterDescription.getServerDescriptions()) {
+            final JSONObject serverHostAndPort = new JSONObject();
+            serverHostAndPort.put("host", serverDescription.getAddress().getHost());
+            serverHostAndPort.put("port", serverDescription.getAddress().getPort());
+            servers.add(serverHostAndPort);
+        }
+        result.put("servers", servers);
+        return result;
     }
 }

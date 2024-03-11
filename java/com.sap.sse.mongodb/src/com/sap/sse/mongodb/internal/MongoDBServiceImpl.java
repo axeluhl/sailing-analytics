@@ -138,8 +138,18 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoClient getMongo(MongoDBConfiguration mongoDBConfiguration) {
         MongoClient mongo = mongos.computeIfAbsent(mongoDBConfiguration.getMongoClientURI(),
-                k-> MongoClients.create(mongoDBConfiguration.getMongoClientURI()));
+                k-> getMongoClient(mongoDBConfiguration));
         return mongo;
+    }
+
+    @Override
+    public MongoClient getMongoClient() {
+        ensureConfigurationDefaultingToTest();
+        return getMongoClient(configuration);
+    }
+    
+    private MongoClient getMongoClient(MongoDBConfiguration mongoDBConfiguration) {
+        return MongoClients.create(mongoDBConfiguration.getMongoClientURI());
     }
 
     @Override
