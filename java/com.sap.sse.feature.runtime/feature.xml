@@ -563,19 +563,20 @@
          install-size="0"
          version="3.18.0.v20220516-2155"
          unpack="false"/>
--->
-   <plugin
-         id="org.eclipse.osgi"
-         download-size="0"
-         install-size="0"
-         version="3.19.100"
-         unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.source"
          download-size="0"
          install-size="0"
          version="3.18.0.v20220516-2155"
+         unpack="false"/>
+-->
+
+   <plugin
+         id="org.eclipse.osgi"
+         download-size="0"
+         install-size="0"
+         version="3.19.100"
          unpack="false"/>
 
    <plugin
