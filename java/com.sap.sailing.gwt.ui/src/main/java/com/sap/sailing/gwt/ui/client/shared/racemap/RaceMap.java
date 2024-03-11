@@ -3213,7 +3213,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, hasPolar, paywallResolver, raceMapLifecycle.getRaceDTO());
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, hasPolar);
     }
 
     @Override

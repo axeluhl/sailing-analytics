@@ -128,8 +128,10 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
 
     @Override
     public void setEnabled(final boolean enabled) {
-        super.setEnabled(enabled);
-        checkBox.setEnabled(enabled);
+        if (hasPermission()) {
+            super.setEnabled(enabled);
+            checkBox.setEnabled(enabled);
+        }
     }
 
     @Override

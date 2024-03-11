@@ -33,7 +33,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     @Override
     public RaceMapSettingsDialogComponent getSettingsDialogComponent(RaceMapSettings settings) {
         return new RaceMapSettingsDialogComponent(settings, stringMessages,
-                /* hasPolar */ true, paywallResolver, raceDTO);
+                /* hasPolar */ true);
     }
 
     @Override
