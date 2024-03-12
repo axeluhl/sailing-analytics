@@ -28,6 +28,12 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
+    /**
+     * 
+     * @param canBeDeployedInNlbInstanceBasedTargetGroup
+     *            A boolean indicating, if true, that the list of available instance types should not contain those,
+     *            which cannot be added to an instance-based Network Load Balancer.
+     */
     void getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup, AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
