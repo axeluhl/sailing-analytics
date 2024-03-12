@@ -99,6 +99,7 @@ public class StatusServlet extends HttpServlet {
             final JSONObject serverHostAndPort = new JSONObject();
             serverHostAndPort.put("host", serverDescription.getAddress().getHost());
             serverHostAndPort.put("port", serverDescription.getAddress().getPort());
+            serverHostAndPort.put("type", serverDescription.getType().name());
             servers.add(serverHostAndPort);
         }
         result.put("servers", servers);
