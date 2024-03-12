@@ -56,4 +56,6 @@ public interface MongoDBService {
     MongoClient getMongoClient();
     
     ConnectionString getMongoClientURI();
+
+    MongoClient getMongo(ConnectionString mongoConnectionString);
 }
