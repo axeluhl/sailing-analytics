@@ -28,7 +28,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
-    void getInstanceTypeNames(AsyncCallback<ArrayList<String>> callback);
+    void getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup, AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
 

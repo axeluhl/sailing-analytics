@@ -61,10 +61,10 @@ public interface LandscapeConstants {
      */
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
 
-    InstanceType[] instanceTypesBannedFromInstanceBasedTargetGroups = new InstanceType[] { InstanceType.CC1_4_XLARGE, InstanceType.C1_MEDIUM, InstanceType.C1_XLARGE,
+    InstanceType[] INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASED_NLB_TARGET_GROUPS = new InstanceType[] { InstanceType.CC1_4_XLARGE, InstanceType.C1_MEDIUM, InstanceType.C1_XLARGE,
             InstanceType.CC2_8_XLARGE, InstanceType.CG1_4_XLARGE, InstanceType.CR1_8_XLARGE, InstanceType.G2_2_XLARGE,
             InstanceType.G2_8_XLARGE, InstanceType.HI1_4_XLARGE, InstanceType.HS1_8_XLARGE, InstanceType.M1_LARGE,
             InstanceType.M1_MEDIUM, InstanceType.M1_SMALL, InstanceType.M1_XLARGE, InstanceType.M2_2_XLARGE,
             InstanceType.M2_4_XLARGE, InstanceType.M2_XLARGE, InstanceType.M3_2_XLARGE, InstanceType.M3_LARGE,
-            InstanceType.M3_MEDIUM, InstanceType.M3_XLARGE, InstanceType.T1_MICRO };
+            InstanceType.M3_MEDIUM, InstanceType.M3_XLARGE, InstanceType.T1_MICRO};
 }

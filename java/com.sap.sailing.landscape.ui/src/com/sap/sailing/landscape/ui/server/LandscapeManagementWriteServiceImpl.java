@@ -210,9 +210,12 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     }
     
     @Override
-    public ArrayList<String> getInstanceTypeNames() {
+    public ArrayList<String> getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup) {
         final ArrayList<String> result = new ArrayList<>();
         Util.addAll(Util.map(Arrays.asList(InstanceType.values()), instanceType->instanceType.name()), result);
+        if (canBeDeployedInNlbInstanceBasedTargetGroup) {
+           Arrays.asList(LandscapeConstants.INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASED_NLB_TARGET_GROUPS).forEach(type -> result.remove(type.name())); 
+        }
         return result;
     }
     
