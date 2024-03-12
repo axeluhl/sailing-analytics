@@ -20,10 +20,6 @@
 <unit id="org.objectweb.asm.util.source" version="9.4.0.v20221107-1714"/>
 <unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
 <unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
-<unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent.source" version="1.12.18.v20221114-2102"/>
 <unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>

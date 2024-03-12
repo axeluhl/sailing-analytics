@@ -431,4 +431,32 @@
          install-size="0"
          version="5.1.6"
          unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy.source"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy-agent"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy-agent.source"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
 </feature>
