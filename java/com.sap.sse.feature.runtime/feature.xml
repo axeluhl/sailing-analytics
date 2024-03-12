@@ -1249,4 +1249,11 @@
          install-size="0"
          version="2.8.9.v20220111-1409"
          unpack="false"/>
+
+   <plugin
+         id="jodd-bean"
+         download-size="0"
+         install-size="0"
+         version="5.1.6"
+         unpack="false"/>
 </feature>
