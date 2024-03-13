@@ -414,6 +414,7 @@
 <plugin id="jodd-bean"/>
 <plugin id="org.jboss.marshalling.jboss-marshalling-osgi"/>
 <plugin id="io.projectreactor.reactor-core"/>
+<plugin id="com.diffplug.osgi.extension.sun.misc"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
