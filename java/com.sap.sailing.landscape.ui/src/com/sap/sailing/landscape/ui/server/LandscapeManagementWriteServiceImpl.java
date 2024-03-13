@@ -251,7 +251,6 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     @Override
     public ArrayList<AvailabilityZoneDTO> describeAvailabilityZones(String region) {
         final ArrayList<AvailabilityZoneDTO> availabilityZones = new ArrayList<>();
-        logger.info(getLandscape().getDefaultSecurityGroupForApplicationLoadBalancer(new AwsRegion(region, getLandscape())).getId());
         getLandscape()
                 .getAvailabilityZones(new AwsRegion(region, getLandscape()),
                         Optional.of(getLandscape().getDefaultSecurityGroupForApplicationLoadBalancer(
