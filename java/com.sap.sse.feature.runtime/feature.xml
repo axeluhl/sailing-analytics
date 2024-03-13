@@ -1298,4 +1298,11 @@
          install-size="0"
          version="2.1.4.SP1"
          unpack="false"/>
+
+   <plugin
+         id="reactor-core"
+         download-size="0"
+         install-size="0"
+         version="3.6.4"
+         unpack="false"/>
 </feature>
