@@ -208,14 +208,21 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
         Util.addAll(Util.map(AwsLandscape.obtain(RemoteServiceMappingConstants.pathPrefixForShardingKey).getRegions(), r->r.getId()), result);
         return result;
     }
-    
+
+    private static final Set<InstanceType> INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASE_NLB_TARGET_GROUPS_AS_SET =
+            new HashSet<>(Arrays.asList(LandscapeConstants.INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASED_NLB_TARGET_GROUPS)); 
+
     @Override
     public ArrayList<String> getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup) {
         final ArrayList<String> result = new ArrayList<>();
-        Util.addAll(Util.map(Arrays.asList(InstanceType.values()), instanceType->instanceType.name()), result);
-        if (canBeDeployedInNlbInstanceBasedTargetGroup) {
-           Arrays.asList(LandscapeConstants.INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASED_NLB_TARGET_GROUPS).forEach(type -> result.remove(type.name())); 
-        }
+        Util.addAll(
+            Util.map(
+                // if deployment to NLB instance-based target group is to be possible, remove those
+                // instance types that are banned from those sorts of target groups
+                Util.filter(Arrays.asList(InstanceType.values()), it->
+                        !canBeDeployedInNlbInstanceBasedTargetGroup ||
+                        !INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASE_NLB_TARGET_GROUPS_AS_SET.contains(it)),
+                instanceType->instanceType.name()), result);
         return result;
     }
     

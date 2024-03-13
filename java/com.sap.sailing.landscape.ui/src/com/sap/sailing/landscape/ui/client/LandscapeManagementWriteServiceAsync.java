@@ -29,7 +29,6 @@ public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
     /**
-     * 
      * @param canBeDeployedInNlbInstanceBasedTargetGroup
      *            A boolean indicating, if true, that the list of available instance types should not contain those,
      *            which cannot be added to an instance-based Network Load Balancer.
