@@ -31,12 +31,15 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.Landscape;
+import com.sap.sse.landscape.Region;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.ReleaseRepository;
 import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.MongoUriParser;
 import com.sap.sse.landscape.aws.impl.AwsApplicationProcessImpl;
 import com.sap.sse.landscape.impl.ReleaseImpl;
+import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
@@ -48,6 +51,7 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private static final String STATUS_SERVERNAME_PROPERTY_NAME = "servername";
     private static final String STATUS_SERVERDIRECTORY_PROPERTY_NAME = "serverdirectory";
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
+    private static final String MONGODB_CONFIGURATION_PROPERTY_NAME = "mongoDbConfiguration";
     private Integer expeditionUdpPort;
     private Release release;
     private TimePoint startTimePoint;
@@ -113,6 +117,13 @@ implements SailingAnalyticsProcess<ShardingKey> {
             }
         }
         return release;
+    }
+    
+    @Override
+    public Database getDatabaseConfiguration(Region region, Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final JSONObject mongoDBConfiguration = (JSONObject) getStatus(optionalTimeout).get(MONGODB_CONFIGURATION_PROPERTY_NAME);
+        return new MongoUriParser<ShardingKey>(getLandscape(), region).parseMongoDBConfigurationFromStatus(mongoDBConfiguration);
     }
     
     private void updateServerNameFromStatus(JSONObject status) {

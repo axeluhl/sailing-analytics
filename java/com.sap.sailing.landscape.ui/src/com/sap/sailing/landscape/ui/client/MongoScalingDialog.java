@@ -106,7 +106,7 @@ public class MongoScalingDialog extends DataEntryDialog<MongoScalingInstructions
         voteBox = createIntegerBox(0, /* visibleLength */ 2);
         grid.setWidget(row++, 1, voteBox);
         grid.setWidget(row, 0, new Label(stringMessages.instanceType()));
-        instanceTypeBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter);
+        instanceTypeBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService, stringMessages, DEFAULT_INSTANCE_TYPE, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         grid.setWidget(row++, 1, instanceTypeBox);
         launchPanel.add(grid);
         panel.add(launchPanel);
