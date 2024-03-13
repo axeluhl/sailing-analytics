@@ -459,4 +459,11 @@
          install-size="0"
          version="1.14.12"
          unpack="false"/>
+
+   <plugin
+         id="org.jboss.marshalling.jboss-marshalling-osgi"
+         download-size="0"
+         install-size="0"
+         version="2.1.4.SP1"
+         unpack="false"/>
 </feature>

@@ -412,6 +412,7 @@
 <plugin id="io.reactivex.rxjava3.rxjava"/>
 <plugin id="reactive-streams"/>
 <plugin id="jodd-bean"/>
+<plugin id="org.jboss.marshalling.jboss-marshalling-osgi"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
