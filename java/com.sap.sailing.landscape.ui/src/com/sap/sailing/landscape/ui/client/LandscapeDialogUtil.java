@@ -13,10 +13,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class LandscapeDialogUtil {
     public static ListBox createInstanceTypeListBox(DataEntryDialog<?> dialog,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultInstanceTypeName, ErrorReporter errorReporter) {
+            String defaultInstanceTypeName, ErrorReporter errorReporter, boolean canBeDeployedInNlbInstanceBasedTargetGroup) {
         return createInstanceTypeListBoxWithAdditionalDefaultEntry(dialog, /* additionalItem */ null,
                 /* additionalValue */ null, landscapeManagementService, stringMessages, defaultInstanceTypeName,
-                errorReporter);
+                errorReporter, canBeDeployedInNlbInstanceBasedTargetGroup);
     }
 
     /**
@@ -24,17 +24,20 @@ public class LandscapeDialogUtil {
      *            if not {@code null}, an item with this name is created, and then {@code additionalValue} must not be
      *            {@code null} because it is then used as that item's value. The item will then be set as the one
      *            selected.
+     * @param canBeDeployedInNlbInstanceBasedTargetGroup A boolean indicating whether the instance list should filter out those
+     *          which cannot be added to NLB, instance-based target groups. True indicates that it needs to be deployable
+     *          to this type of target group, so the resulting listbox should not contain the banned instance types.
      */
     public static ListBox createInstanceTypeListBoxWithAdditionalDefaultEntry(DataEntryDialog<?> dialog,
             String additionalItem, String additionalValue,
             LandscapeManagementWriteServiceAsync landscapeManagementService, StringMessages stringMessages,
-            String defaultInstanceTypeName, ErrorReporter errorReporter) {
+            String defaultInstanceTypeName, ErrorReporter errorReporter, boolean canBeDeployedInNlbInstanceBasedTargetGroup) {
         final ListBox instanceTypeBox = dialog.createListBox(/* isMultipleSelect */false);
         if (additionalItem != null) {
             instanceTypeBox.addItem(additionalItem, additionalValue);
             instanceTypeBox.setSelectedIndex(0);
         }
-        landscapeManagementService.getInstanceTypeNames(new AsyncCallback<ArrayList<String>>() {
+        landscapeManagementService.getInstanceTypeNames(canBeDeployedInNlbInstanceBasedTargetGroup, new AsyncCallback<ArrayList<String>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
