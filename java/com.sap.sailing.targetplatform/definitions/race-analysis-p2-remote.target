@@ -413,7 +413,7 @@
 <plugin id="reactive-streams"/>
 <plugin id="jodd-bean"/>
 <plugin id="org.jboss.marshalling.jboss-marshalling-osgi"/>
-<plugin id="reactor-core"/>
+<plugin id="io.projectreactor.reactor-core"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>

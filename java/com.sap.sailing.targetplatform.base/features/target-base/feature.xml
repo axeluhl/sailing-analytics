@@ -468,9 +468,9 @@
          unpack="false"/>
 
    <plugin
-         id="reactor-core"
+         id="io.projectreactor.reactor-core"
          download-size="0"
          install-size="0"
-         version="3.6.4"
+         version="3.6.4.RELEASE"
          unpack="false"/>
 </feature>
