@@ -15,3 +15,6 @@ if ! git status; then
     git checkout main
 fi
 echo "Use Status ${SELF_IP} internal-server-status" > /etc/httpd/conf.d/${STATUS_DEFINITION_FILE}
+cd /etc/httpd
+git config user.name "Disposable Reverse Proxy"
+git config user.email "$(hostname)"
