@@ -25,5 +25,4 @@ public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProc
      */
     void refreshToRelease(Release release, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws IOException, InterruptedException, JSchException, Exception;
-
 }

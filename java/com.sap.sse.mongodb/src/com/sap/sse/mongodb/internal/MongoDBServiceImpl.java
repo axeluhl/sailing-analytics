@@ -137,11 +137,28 @@ public class MongoDBServiceImpl implements MongoDBService {
     }
 
     private MongoClient getMongo(MongoDBConfiguration mongoDBConfiguration) {
-        MongoClient mongo = mongos.computeIfAbsent(mongoDBConfiguration.getMongoClientURI(),
-                k-> MongoClients.create(mongoDBConfiguration.getMongoClientURI()));
+        return getMongo(mongoDBConfiguration.getMongoClientURI());
+    }
+
+    @Override
+    public MongoClient getMongo(ConnectionString mongoConnectionString) {
+        MongoClient mongo = mongos.computeIfAbsent(mongoConnectionString,
+                k-> MongoClients.create(mongoConnectionString));
         return mongo;
     }
 
+    @Override
+    public ConnectionString getMongoClientURI() {
+        ensureConfigurationDefaultingToTest();
+        return configuration.getMongoClientURI();
+    }
+
+    @Override
+    public MongoClient getMongoClient() {
+        ensureConfigurationDefaultingToTest();
+        return getMongo(getConfiguration());
+    }
+    
     @Override
     public void registerExclusively(Class<?> registerForInterface, String collectionName)
             throws AlreadyRegisteredException {
