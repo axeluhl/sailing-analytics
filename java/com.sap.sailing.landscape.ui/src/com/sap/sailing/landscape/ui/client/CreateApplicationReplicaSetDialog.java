@@ -193,10 +193,10 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
         dynamicLoadBalancerCheckBox = mayUseDynamicLoadBalancer ? createCheckbox(stringMessages.useDynamicLoadBalancer()) : null;
         domainNameBox = createTextBox(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, 40);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         dedicatedInstanceTypeLabel = new Label();
         sharedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         sharedInstanceTypeLabel = new Label();
         memoryInMegabytesBox = createIntegerBox(null, 7);
         memoryTotalSizeFactorBox = createIntegerBox(null, 2);
