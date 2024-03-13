@@ -219,9 +219,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             Util.map(
                 // if deployment to NLB instance-based target group is to be possible, remove those
                 // instance types that are banned from those sorts of target groups
-                Util.filter(Arrays.asList(InstanceType.values()), it->
+                Util.filter(Arrays.asList(InstanceType.values()), instanceType->
                         !canBeDeployedInNlbInstanceBasedTargetGroup ||
-                        !INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASE_NLB_TARGET_GROUPS_AS_SET.contains(it)),
+                        !INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASE_NLB_TARGET_GROUPS_AS_SET.contains(instanceType)),
                 instanceType->instanceType.name()), result);
         return result;
     }
