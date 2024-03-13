@@ -1023,7 +1023,7 @@
          id="redisson"
          download-size="0"
          install-size="0"
-         version="3.27.1"
+         version="3.27.2"
          unpack="false"/>
    
    <plugin
@@ -1248,5 +1248,47 @@
          download-size="0"
          install-size="0"
          version="2.8.9.v20220111-1409"
+         unpack="false"/>
+
+   <plugin
+         id="jodd-bean"
+         download-size="0"
+         install-size="0"
+         version="5.1.6"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy.source"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy-agent"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="net.bytebuddy.byte-buddy-agent.source"
+         download-size="0"
+         install-size="0"
+         version="1.14.12"
+         unpack="false"/>
+
+   <plugin
+         id="org.jboss.marshalling.jboss-marshalling-osgi"
+         download-size="0"
+         install-size="0"
+         version="2.1.4.SP1"
          unpack="false"/>
 </feature>
