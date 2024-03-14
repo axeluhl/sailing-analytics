@@ -154,6 +154,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         } else {
             final String creatorName = SessionUtils.getPrincipal().toString();
             final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
+                    // FIXME bug5983: stored/live URIs should be captured in the configuration only if they were specified explicitly when the parameters were created
                     (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
                     /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
                         : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
