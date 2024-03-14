@@ -36,7 +36,7 @@ MACROS_PATH="/etc/httpd/conf.d/000-macros.conf"
 IP_REGEX="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 # Extracts which IP is in production.
 PRODUCTION_IP=$(sed -n -e  "s/^Define ${PRODUCTION_IP_NAME}\> \(.*\)$/\1/p" ${MACROS_PATH})
-SUBNET_MASK_SIZE_VAR_LOCATION="/var/cache/subnetMaskSize"
+SUBNET_MASK_SIZE_VAR_LOCATION="/var/cache/httpd/subnetMaskSize"
 if [[ ! -e "$SUBNET_MASK_SIZE_VAR_LOCATION" ]]; then
     # Get subnet mask size
     MY_AZ=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
