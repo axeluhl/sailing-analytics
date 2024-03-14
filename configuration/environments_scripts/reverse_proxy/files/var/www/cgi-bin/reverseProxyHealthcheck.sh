@@ -18,7 +18,7 @@ SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-
 curl --silent --location --fail "http://${SELF_IP}/internal-server-status" >/dev/null
 if [[ "$?" -eq 0 ]]; then
     status "200"
-    outputMessage "Healthy"
+    outputMessage "failover at play: force healthy"
 else
     status "500 Reverse proxy itself is unhealthy"
     outputMessage "Reverse proxy is unhealthy"
