@@ -4,11 +4,12 @@
 # that given branch; and - if new commits are found - merges them into the branch and runs a command.
 
 if [ $# -eq 0 ]; then
-    echo "$0 PATH_TO_GIT_REPO COMMAND_TO_RUN_ON_COMPLETION_IN_REPO"
+    echo "$0 PATH_TO_GIT_REPO COMMAND_TO_RUN_ON_COMPLETION_IN_REPO BRANCH_TO_CHECK_OUT"
     echo ""
     echo "EXAMPLE: sync-repo-and-execute-cmd.sh \"/etc/httpd\"  \"sudo service httpd reload\""
-    echo "This script is used to automatically fetch from a git repo and, if there are new commits, merge the changes."
-    echo "And then run a command, passed as an argument."
+    echo "This script is used to automatically fetch the latest changes to a given branch of a git repo and,"
+    echo "if there are new commits, merge the changes into that branch."
+    echo "And then run a command, passed as an argument. This leaves the repo checked out to the branch in the argument."
     exit 2
 fi
 
@@ -55,4 +56,3 @@ then
         echo "Config error"
     fi
 fi
-
