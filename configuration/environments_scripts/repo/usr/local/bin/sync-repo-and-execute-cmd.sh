@@ -47,6 +47,10 @@ then
         fi
     fi
     sleep 2
-    ${COMMAND_ON_COMPLETION}
+    if httpd -t ; then
+        ${COMMAND_ON_COMPLETION}
+    else 
+        echo "Config error"
+    fi
 fi
 
