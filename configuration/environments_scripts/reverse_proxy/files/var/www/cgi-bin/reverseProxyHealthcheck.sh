@@ -40,7 +40,7 @@ SUBNET_MASK_SIZE_VAR_LOCATION="/var/cache/httpd/subnetMaskSize"
 if [[ ! -e "$SUBNET_MASK_SIZE_VAR_LOCATION" ]]; then
     # Get subnet mask size
     MY_AZ=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
-    aws ec2 describe-subnets | jq -r '.Subnets[] | select( .AvailabilityZone =="'"$MY_AZ"'") | .CidrBlock | split("/") | .[1]' > $SUBNET_MASK_SIZE_VAR_LOCATION
+    aws ec2 describe-subnets | jq -r '.Subnets[] | select( .AvailabilityZone =="'"$MY_AZ"'")  | select (.Tags ==null or (.Tags | any(.Key == "noInstanceDeployment") | not )) | .CidrBlock | split("/") | .[1]' > $SUBNET_MASK_SIZE_VAR_LOCATION
 fi
 if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]
 then
@@ -62,6 +62,7 @@ then
         status "200"
         outputMessage "Healthy: in the same az as the archive"
     else 
+        # TODO: Perform check to see if there is anything healthy in the same AZ as the archive. Force healthy if no.
         status "503 Not in the same az"
         outputMessage "Unhealthy: Not in the same az as the archive"
     fi
