@@ -217,3 +217,9 @@ myorigin =\$myhostname.sapsailing.com
     systemctl restart postfix
     rm -f "${temp_mail_properties_location}"
 }
+
+setup_sshd_resilience() {
+    echo "ClientAliveInterval 3
+ClientAliveCountMax 3
+GatewayPorts yes" >> /etc/ssh/sshd_config
+}
