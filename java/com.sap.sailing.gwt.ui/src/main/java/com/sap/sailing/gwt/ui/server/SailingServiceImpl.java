@@ -1632,7 +1632,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(legIdentifier.getRaceIdentifier());
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(legIdentifier.getRaceIdentifier());
         if (trackedRace == null) {
             throw new IllegalArgumentException("Race for leg " + legIdentifier + " not found!");
         }
@@ -3346,10 +3346,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
-        Regatta regatta = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
-        RaceDefinition race = getRaceByName(regatta, regattaNameAndRaceName.getRaceName());
-        DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-        getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        final Regatta regatta = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
+        final RaceDefinition race = getRaceByName(regatta, regattaNameAndRaceName.getRaceName());
+        final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        }
         return trackedRace;
     }
 
@@ -5637,9 +5639,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race) {
         getSecurityService().checkCurrentUserReadPermission(race);
         boolean result = false;
-        DynamicTrackedRace trace = getService().getTrackedRace(race);
-        if (trace != null) {
-            final TrackedRaceStatusEnum status = trace.getStatus().getStatus();
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
+        if (trackedRace != null) {
+            final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
             if (status == TrackedRaceStatusEnum.LOADING || status == TrackedRaceStatusEnum.TRACKING) {
                 result = true;
             }
@@ -6387,22 +6389,25 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public boolean canSliceRace(RegattaAndRaceIdentifier raceIdentifier) {
+        final boolean result;
         final Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
         final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(raceIdentifier.getRegattaName());
         final DynamicTrackedRace trackedRace = getService().getTrackedRace(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
-        getSecurityService().checkCurrentUserUpdatePermission(regatta);
-
-        final boolean result;
-        if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
-                || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
+        if (trackedRace == null ) {
             result = false;
         } else {
-            final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard
-                    .getRaceColumnAndFleet(trackedRace);
-            result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given
-                                                                // RegattaLeaderboard?
+            getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
+            getSecurityService().checkCurrentUserUpdatePermission(regattaLeaderboard);
+            getSecurityService().checkCurrentUserUpdatePermission(regatta);
+            if (regatta == null || !(regattaLeaderboard instanceof RegattaLeaderboard) || trackedRace == null
+                    || trackedRace.getStartOfTracking() == null || !isSmartphoneTrackingEnabled(trackedRace)) {
+                result = false;
+            } else {
+                final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard
+                        .getRaceColumnAndFleet(trackedRace);
+                result = (raceColumnAndFleetOfRaceToSlice != null); // is the TrackedRace associated to the given
+                                                                    // RegattaLeaderboard?
+            }
         }
         return result;
     }

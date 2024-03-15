@@ -219,7 +219,7 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
                 public void raceAdded(TrackedRace trackedRace) {
                     synchronized (mutex) { // TODO possible improvement: only notify if trackedRace.getRace() == race; otherwise it cannot have made a difference for getExistingTrackedRace(race)...
                         mutex.notifyAll();
-                    } // TODO can't we remove the listener again here?
+                    }
                 }
             };
             addRaceListener(listener, Optional.empty(), /* synchronous */ false);
@@ -228,6 +228,7 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
                     result = getExistingTrackedRace(race);
                     while (!interrupted && result == null) {
                         try {
+                            // FIXME bug5982: if we didn't find the TrackedRace for the RaceDefinition "race" because "race" and its TrackedRace were just *removed*, we will never find it anymore!
                             mutex.wait();
                             result = getExistingTrackedRace(race);
                         } catch (InterruptedException e) {

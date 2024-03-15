@@ -3054,7 +3054,7 @@ Replicator {
                      * already have been removed by the stopAllTrackersForWhichRaceIsLastReachable(...) above; maybe a
                      * Java memory model idiosyncrasy with the queue thread not "seeing" the change to dataTrackers?).
                      * We must make sure to not block its execution, e.g., by synchronization, because otherwise
-                     * the the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
+                     * the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
                      * tasks it may enqueue after the task enqueued here. See bug 5879.
                      */
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
@@ -3104,6 +3104,9 @@ Replicator {
                 }
             }
         }
+        // FIXME bug5982: when the TrackedRace is removed already, queries for the RaceDefinition would still be satisfied up to this point, with a RaceDefinition that is about to disappear;
+        // FIXME bug5982: no TrackedRace will ever appear again for that RaceDefinition; we should consider introducing a locking pattern around the transaction of removing TrackedRace+RaceDefinition
+        // FIXME bug5982: and synchronize accordingly with TrackedRegattaImpl.getTrackedRace(RaceDefinition).
         // remove the race from the (default) regatta if the regatta is not persistently stored
         regatta.removeRace(race);
         if (!regatta.isPersistent() && Util.isEmpty(regatta.getAllRaces())) {
@@ -3170,7 +3173,7 @@ Replicator {
 
     @Override
     public DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) {
-        return getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
+        return getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
     }
 
     private DynamicTrackedRace getExistingTrackedRace(Regatta regatta, RaceDefinition race) {
@@ -3234,9 +3237,9 @@ Replicator {
         if (regatta != null) {
             DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.get(regatta);
             if (trackedRegatta != null) {
-                RaceDefinition race = getRace(raceIdentifier);
+                RaceDefinition race = regatta.getRaceByName(raceIdentifier.getRaceName());
                 if (race != null) {
-                    result = trackedRegatta.getTrackedRace(race);
+                    result = trackedRegatta.getExistingTrackedRace(race);
                 }
             }
         }
