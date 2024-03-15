@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Purpose: This script identifies whether the instance the script runs on is in the same AZ as the archive.
+# Purpose: This script identifies whether the instance the script runs on is in the same AZ as the archive, and is used as the healthcheck for the ALBs.
+# It returns healthy if in the same AZ as the archive or if there is no other healthy instance in the same AZ. This is done to save costs by reducing cross-AZ
+# traffic. Note, that all extra checks only occur if the internal-server-status is healthy.
 # The user it is installed on must have aws credentials that don't need mfa. Install to  /usr/share/httpd/.aws.
 
 outputMessage() {
@@ -29,7 +31,7 @@ mkdir --parents ${CACHE_LOCATION}
 ID_TO_AZ_FILENAME="${CACHE_LOCATION}/id_to_az"
 ARCHIVE_IP_FILENAME="${CACHE_LOCATION}/archive_ip"
 ARCHIVE_AZ_FILENAME="${CACHE_LOCATION}/archive_az"
-LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME="${CACHE_LOCATION}/last_target_group_healthcheck"
+LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME="${CACHE_LOCATION}/last_target_group_healthcheck_result"
 # The time it takes before the cache is reset.
 CACHE_TIMEOUT_SECONDS=120
 # Target group healthcheck timeout
@@ -60,7 +62,7 @@ if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHI
     tmp_az=$(echo "$instances" | jq -r '.Reservations | .[] | .Instances | .[] | select(.Tags | any(.Key=="'${ARCHIVE_TAG_KEY}'" and .Value=="'${ARCHIVE_TAG_VALUE}'")) | "\(.Placement.AvailabilityZone)"')
     if [[ -z "$tmp_az" ]]; then
         status "500 Unable to retrieve archive AZ"
-        outputMessage "Cannot retrieve archive AZ, ensure the correct tags are in place"
+        outputMessage "Cannot retrieve archive AZ, ensure the correct tags are in place."
         exit 1
     fi
     echo "$tmp_az" > ${ARCHIVE_AZ_FILENAME}
@@ -68,21 +70,38 @@ if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHI
 fi
 if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]
 then
-    # Check if main archive is in the same AZ as the archive.
     archive_az=$(cat ${ARCHIVE_AZ_FILENAME})
     if [[ "$archive_az" == "$MY_AZ" ]]; then
         status "200"
         outputMessage "Healthy: in the same az as the archive"
     else
-        # TODO: Perform check to see if there is anything healthy in the same AZ as the archive. Force healthy if no.
-        if [[ ! -e "${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}" || "$(($current_time - $(stat --format "%Y" ${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}) ))" -gt "$(($TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS))"]]; then
-            for instance_id in $(aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/}  | jq -r '.TargetHealthDescriptions | .[] | select(.TargetHealth.State=="healthy") | .Target.Id'); do
-                echo $instance_id 
+        if [[ ! -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" || "$(($current_time - $(stat --format '%Y' ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}) ))" -gt "$TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS"]]; then
+            # This branch runs if the cached timestamp, of the last target group healthcheck, doesn't exist, or if it exceeds TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS.
+            healthy_target_exists_in_same_az_as_archive="false"
+            for instance_id in $(aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/} | jq -r '.TargetHealthDescriptions | .[] | select(.TargetHealth.State=="healthy") | .Target.Id'); do  ## TODO: Continues iterating if healthy instance is found.
+                healthy_instance_az="$(sed -n "s/$instance_id \(.*\)/\1/p" $ID_TO_AZ_FILENAME)"
+                if [[ "$healthy_instance_az" == "$(cat $ARCHIVE_AZ_FILENAME)" ]]; then
+                    healthy_target_exists_in_same_az_as_archive="true"
+                fi
             done
-            echo $(date +"%s") > ${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}
-        else 
-            status "503 Not in the same az"
-            outputMessage "Unhealthy: Not in the same az as the archive \$1: $1 qstring: $QUERY_STRING"
+            if [[ "$healthy_target_exists_in_same_az_as_archive" == "true" ]]; then
+                echo "unhealthy" > ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}
+                status "503 Not in the same az"
+                outputMessage "Not in the same AZ; healthy instance in the same AZ."
+            else
+                echo "healthy" > ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}
+                status "200"
+                outputMessage "No healthy instance in the same AZ; forcing healthy for a short while."
+            fi
+        else
+            # This branch runs in the case that there is a timestamp file but the target group healthcheck has been performed within the TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS.
+            if [[ -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" && "$(cat $LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME)" == "healthy" ]]; then 
+                status "200"
+                outputMessage "No healthy instance in the same AZ; forcing healthy for a short while."
+            else
+                status "503 Not in the same az"
+                outputMessage "Unhealthy: Not in the same az as the archive."
+            fi
         fi
     fi
 else
