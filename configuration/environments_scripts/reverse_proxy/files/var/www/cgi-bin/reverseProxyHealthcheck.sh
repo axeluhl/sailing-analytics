@@ -25,10 +25,15 @@ IP_REGEX="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 PRODUCTION_IP=$(sed -n -e  "s/^Define ${PRODUCTION_IP_NAME}\> \(.*\)$/\1/p" ${MACROS_PATH})
 # Cache locations
 CACHE_LOCATION="/var/cache/httpd/healthcheck" # Folder storing all the cached info, which the Apache user can access.
+mkdir --parents ${CACHE_LOCATION}
 ID_TO_AZ_FILENAME="${CACHE_LOCATION}/id_to_az"
 ARCHIVE_IP_FILENAME="${CACHE_LOCATION}/archive_ip"
 ARCHIVE_AZ_FILENAME="${CACHE_LOCATION}/archive_az"
-mkdir --parents ${CACHE_LOCATION}
+LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME="${CACHE_LOCATION}/last_target_group_healthcheck"
+# The time it takes before the cache is reset.
+CACHE_TIMEOUT_SECONDS=120
+# Target group healthcheck timeout
+TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS=30
 # IPs and AZs of instance
 MY_IP=$( ec2-metadata --local-ipv4 | grep   -o "${IP_REGEX}")
 MY_AZ=$( ec2-metadata --availability-zone | grep -o "${IP_REGEX}")
@@ -47,7 +52,8 @@ if [[ "$?" -ne 0 ]]; then
     outputMessage "Reverse proxy is unhealthy"
     exit 0
 fi
-if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHIVE_IP_FILENAME})" != "${ARCHIVE_IP}" ]]; then
+current_time=$(date +"%s")
+if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHIVE_IP_FILENAME})" != "${ARCHIVE_IP}" || "$(($current_time - $(stat --format "%Y" ${ARCHIVE_AZ_FILENAME}) ))" -gt "$(($CACHE_TIMEOUT_SECONDS))" ]]; then
     # Cache instance IDs, archive AZ and the archive IP (as a sort of cache invalidator).
     instances=$(aws ec2 describe-instances)
     echo "$instances" | jq -r ".Reservations | .[] | .Instances | .[]" | jq -r '"\(.InstanceId) \(.Placement.AvailabilityZone)"' > ${ID_TO_AZ_FILENAME}
@@ -58,7 +64,7 @@ if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHI
         exit 1
     fi
     echo "$tmp_az" > ${ARCHIVE_AZ_FILENAME}
-    echo "$ARCHIVE_IP" > $ARCHIVE_IP_FILENAME
+    echo "$ARCHIVE_IP" > ${ARCHIVE_IP_FILENAME}
 fi
 if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]
 then
@@ -69,9 +75,15 @@ then
         outputMessage "Healthy: in the same az as the archive"
     else
         # TODO: Perform check to see if there is anything healthy in the same AZ as the archive. Force healthy if no.
-        aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/} >/dev/null
-        status "503 Not in the same az"
-        outputMessage "Unhealthy: Not in the same az as the archive"
+        if [[ ! -e "${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}" || "$(($current_time - $(stat --format "%Y" ${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}) ))" -gt "$(($TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS))"]]; then
+            for instance_id in $(aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/}  | jq -r '.TargetHealthDescriptions | .[] | select(.TargetHealth.State=="healthy") | .Target.Id'); do
+                echo $instance_id 
+            done
+            echo $(date +"%s") > ${LAST_TARGET_GROUP_HEALTHCHECK_TIMESTAMP_FILENAME}
+        else 
+            status "503 Not in the same az"
+            outputMessage "Unhealthy: Not in the same az as the archive \$1: $1 qstring: $QUERY_STRING"
+        fi
     fi
 else
     # We don't check if failover archive is in the same az
