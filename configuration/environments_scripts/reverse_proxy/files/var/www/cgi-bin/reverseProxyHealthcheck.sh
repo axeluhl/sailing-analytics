@@ -20,13 +20,6 @@ convert_ip_to_num() {
     IFS=. read -r a b c d <<< "$1"
     echo "$(( ( $a << 24 ) + ( $b << 16 ) +  ($c << 8 ) + ($d) ))"
 }
-SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
-curl --silent --location --fail "http://${SELF_IP}/internal-server-status" >/dev/null
-if [[ "$?" -ne 0 ]]; then
-    status "500 Reverse proxy itself is unhealthy"
-    outputMessage "Reverse proxy is unhealthy"
-    exit 0
-fi
 # The names of the variables in the macros file.
 ARCHIVE_IP_NAME="ARCHIVE_IP"
 ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
@@ -37,6 +30,19 @@ IP_REGEX="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
 # Extracts which IP is in production.
 PRODUCTION_IP=$(sed -n -e  "s/^Define ${PRODUCTION_IP_NAME}\> \(.*\)$/\1/p" ${MACROS_PATH})
 SUBNET_MASK_SIZE_VAR_LOCATION="/var/cache/httpd/subnetMaskSize"
+if [[ "$1" == "cleanup" ]]; then
+    rm -f $SUBNET_MASK_SIZE_VAR_LOCATION
+    status "200"
+    outputMessage "cleanup complete"
+    exit 0
+fi
+SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
+curl --silent --location --fail "http://${SELF_IP}/internal-server-status" >/dev/null
+if [[ "$?" -ne 0 ]]; then
+    status "500 Reverse proxy itself is unhealthy"
+    outputMessage "Reverse proxy is unhealthy"
+    exit 0
+fi
 if [[ ! -e "$SUBNET_MASK_SIZE_VAR_LOCATION" ]]; then
     # Get subnet mask size
     MY_AZ=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
@@ -57,7 +63,7 @@ then
     # Extract the actual IP of the archive
     ARCHIVE_IP=$(grep -m 1 "^Define ${ARCHIVE_IP_NAME}\> .*"  ${MACROS_PATH} | grep -o "${IP_REGEX}")
     ARCHIVE_IP_VALUE=$(convert_ip_to_num "$ARCHIVE_IP")
-    ARCHIVE_SUBNET_VALUE=$(($BITMASK_VALUE & $ARCHIVE_IP_VALUE ))  #A Aply the mask to the archive IP value.
+    ARCHIVE_SUBNET_VALUE=$(($BITMASK_VALUE & $ARCHIVE_IP_VALUE ))  #Apply the mask to the archive IP value.
     if [[ "$ARCHIVE_SUBNET_VALUE"  -eq  "$MY_SUBNET_VALUE" ]]; then 
         status "200"
         outputMessage "Healthy: in the same az as the archive"
