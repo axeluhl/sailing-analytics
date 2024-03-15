@@ -16,6 +16,10 @@ status() {
     # parameter 1: status code and messages
     echo "Status: $1"
 }
+randomise() {
+    # $1: A number to slightly randomise
+    echo $(($RANDOM % 10 + $1 ))
+}
 # The names of the variables in the macros file.
 ARCHIVE_IP_NAME="ARCHIVE_IP"
 ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
@@ -55,7 +59,7 @@ if [[ "$?" -ne 0 ]]; then
     exit 0
 fi
 current_time=$(date +"%s")
-if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHIVE_IP_FILENAME})" != "${ARCHIVE_IP}" || "$(($current_time - $(stat --format "%Y" ${ARCHIVE_AZ_FILENAME}) ))" -gt "$(($CACHE_TIMEOUT_SECONDS))" ]]; then
+if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHIVE_IP_FILENAME})" != "${ARCHIVE_IP}" || "$(($current_time - $(stat --format "%Y" ${ARCHIVE_AZ_FILENAME}) ))" -gt "$(randomise $CACHE_TIMEOUT_SECONDS)" ]]; then
     # Cache instance IDs, archive AZ and the archive IP (as a sort of cache invalidator).
     instances=$(aws ec2 describe-instances)
     echo "$instances" | jq -r ".Reservations | .[] | .Instances | .[]" | jq -r '"\(.InstanceId) \(.Placement.AvailabilityZone)"' > ${ID_TO_AZ_FILENAME}
@@ -75,10 +79,10 @@ then
         status "200"
         outputMessage "Healthy: in the same az as the archive"
     else
-        if [[ ! -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" || "$(($current_time - $(stat --format '%Y' ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}) ))" -gt "$TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS"]]; then
+        if [[ ! -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" || "$(($current_time - $(stat --format '%Y' ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}) ))" -gt "$(randomise $TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS)" ]]; then
             # This branch runs if the cached timestamp, of the last target group healthcheck, doesn't exist, or if it exceeds TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS.
             healthy_target_exists_in_same_az_as_archive="false"
-            for instance_id in $(aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/} | jq -r '.TargetHealthDescriptions | .[] | select(.TargetHealth.State=="healthy") | .Target.Id'); do  ## TODO: Continues iterating if healthy instance is found.
+            for instance_id in $(aws elbv2 describe-target-health --target-group-arn ${QUERY_STRING//arn=/} | jq -r '.TargetHealthDescriptions | .[] | select(.TargetHealth.State=="healthy") | .Target.Id'); do  ## TODO: Stop iterating if healthy instance is found.
                 healthy_instance_az="$(sed -n "s/$instance_id \(.*\)/\1/p" $ID_TO_AZ_FILENAME)"
                 if [[ "$healthy_instance_az" == "$(cat $ARCHIVE_AZ_FILENAME)" ]]; then
                     healthy_target_exists_in_same_az_as_archive="true"
@@ -95,9 +99,9 @@ then
             fi
         else
             # This branch runs in the case that there is a timestamp file but the target group healthcheck has been performed within the TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS.
-            if [[ -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" && "$(cat $LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME)" == "healthy" ]]; then 
+            if [[ -e "${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}" && "$(cat $LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME)" == "healthy" ]]; then
                 status "200"
-                outputMessage "No healthy instance in the same AZ; forcing healthy for a short while."
+                outputMessage "Using stored healthcheck, value healthy"
             else
                 status "503 Not in the same az"
                 outputMessage "Unhealthy: Not in the same az as the archive."
