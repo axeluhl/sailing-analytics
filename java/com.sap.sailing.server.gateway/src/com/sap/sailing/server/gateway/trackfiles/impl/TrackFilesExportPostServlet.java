@@ -28,32 +28,34 @@ public class TrackFilesExportPostServlet extends SailingServerHttpServlet {
     private static final Logger log = Logger.getLogger(TrackFilesExportPostServlet.class.toString());
 
     private TrackedRace getTrackedRace(String regattaString, String raceString) {
-        Regatta regatta = getService().getRegattaByName(regattaString);
-        if (regatta == null)
-            return null;
-        RaceDefinition race = regatta.getRaceByName(raceString);
-        if (race == null)
-            return null;
-
-        return getService().getTrackedRace(regatta, race);
+        final TrackedRace result;
+        final Regatta regatta = getService().getRegattaByName(regattaString);
+        if (regatta == null) {
+            result = null;
+        } else {
+            final RaceDefinition race = regatta.getRaceByName(raceString);
+            if (race == null) {
+                result = null;
+            } else {
+                result = getService().getTrackedRace(regatta, race);
+            }
+        }
+        return result;   
     }
 
     private List<TrackedRace> getTrackedRaces(String[] regattaRaces) {
-        List<TrackedRace> races = new ArrayList<TrackedRace>();
-
+        final List<TrackedRace> races = new ArrayList<TrackedRace>();
         for (String regattaRace : regattaRaces) {
-            String[] split = regattaRace.split(":");
-            if (split.length == 0)
-                continue;
-            String regattaString = split[0];
-            String raceString = split[1];
-            TrackedRace trackedRace = getTrackedRace(regattaString, raceString);
-            if (trackedRace == null)
-                continue;
-
-            races.add(trackedRace);
+            final String[] split = regattaRace.split(":");
+            if (split.length != 0) {
+                final String regattaString = split[0];
+                final String raceString = split[1];
+                final TrackedRace trackedRace = getTrackedRace(regattaString, raceString);
+                if (trackedRace != null) {
+                    races.add(trackedRace);
+                }
+            }
         }
-
         return races;
     }
 

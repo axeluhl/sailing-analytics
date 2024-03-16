@@ -1429,7 +1429,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
+                final DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
                 if (trackedRace != null) {
                     TargetTimeInfo targetTime;
                     try {

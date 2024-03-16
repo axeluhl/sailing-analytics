@@ -161,11 +161,18 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
+    /**
+     * Looks for a {@link DynamicTrackedRace} inside the {@link TrackedRegatta} identified by {@code regatta},
+     * keyed by the race definition {@code race}. If no such race is found, e.g., because it is still in its "loading"
+     * phase and the {@link TrackedRace} hasn't been created and added to the {@link TrackedRegatta} yet, or because
+     * it is in the process of being removed, with the {@link TrackedRace} already gone but the {@link RaceDefinition}
+     * still available (see also bug 5982), this method will return {@code null} without any waiting or blocking.
+     */
     DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
     /**
-     * When the regatta, tracked regatta and race definition are found, this method waits for the
-     * tracked race to appear.
+     * This method does not for the tracked race to appear. If any of regatta, race definition or tracked race are not
+     * found, {@code null} is returned.
      */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
     
