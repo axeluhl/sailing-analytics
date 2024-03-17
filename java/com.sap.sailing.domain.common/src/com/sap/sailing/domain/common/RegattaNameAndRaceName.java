@@ -24,10 +24,6 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
         return raceFetcher.getRace(this);
     }
     @Override
-    public Object getTrackedRace(RaceFetcher raceFetcher) {
-        return raceFetcher.getTrackedRace(this);
-    }
-    @Override
     public Object getExistingTrackedRace(RaceFetcher raceFetcher) {
         return raceFetcher.getExistingTrackedRace(this);
     }
