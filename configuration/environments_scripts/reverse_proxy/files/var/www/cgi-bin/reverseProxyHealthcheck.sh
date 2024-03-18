@@ -42,7 +42,7 @@ CACHE_TIMEOUT_SECONDS=120
 TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS=30
 # IPs and AZs of instance
 MY_IP=$( ec2-metadata --local-ipv4 | grep   -o "${IP_REGEX}")
-MY_AZ=$( ec2-metadata --availability-zone | grep -o "${IP_REGEX}")
+MY_AZ=$( ec2-metadata --availability-zone | grep -o "[a-zA-Z]\+-[a-zA-Z]\+-[0-9a-z]\+\>")
 ARCHIVE_IP=$(grep -m 1 "^Define ${ARCHIVE_IP_NAME}\> .*"  ${MACROS_PATH} | grep -o "${IP_REGEX}")
 ARCHIVE_TAG_KEY="temp-key"
 ARCHIVE_TAG_VALUE="ARCHIVE"
