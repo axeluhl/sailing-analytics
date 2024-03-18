@@ -128,7 +128,7 @@ public class QuickRanksLiveCache {
     public QuickRanksDTO get(RegattaAndRaceIdentifier raceIdentifier) {
         QuickRanksDTO result = cache.get(raceIdentifier, false);
         if (result == null) {
-            TrackedRace trackedRace = service.getExistingTrackedRace(raceIdentifier);
+            final TrackedRace trackedRace = service.getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 trackedRace.addListener(new Listener(raceIdentifier)); // register for all changes that may affect the quick ranks
                 cache.triggerUpdate(raceIdentifier, CalculateOrPurge.CALCULATE);

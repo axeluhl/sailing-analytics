@@ -2105,11 +2105,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
-                DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
-                // In case the user selected a distinct set of races, we want the call to completely fail if
-                // tracking wind isn't allowed for at least one race
-                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-                trackedRaces.add(trackedRace);
+                final DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
+                if (trackedRace != null) {
+                    // In case the user selected a distinct set of races, we want the call to completely fail if
+                    // tracking wind isn't allowed for at least one race
+                    getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+                    trackedRaces.add(trackedRace);
+                }
             }
         } else {
             for (DynamicTrackedRace race : getAllTrackedRaces()) {
@@ -2601,11 +2603,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
         RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName());
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-        trackedRace.setStartTimeReceived(
-                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
-        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            trackedRace.setStartTimeReceived(
+                    newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        }
+        return trackedRace == null ? null : baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
 
     @Override
@@ -2958,6 +2962,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throw new ServiceException(serverStringMessages.get(locale, "slicingRaceColumnAlreadyUsedThe"));
         }
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
+        // If tracked race isn't found, a NullPointerException will be thrown next, and that's okay because
+        // it's a bit unusual to not find a race that is just about to be sliced. We couldn't continue anyway.
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
         if (sliceFrom == null || sliceTo == null || startOfTrackingOfRaceToSlice.after(sliceFrom)
@@ -2997,7 +3003,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             hasFinishingTime = false;
             hasFinishedTime = false;
         }
-
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);
