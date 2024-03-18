@@ -20,7 +20,7 @@ sync_repo() {
             for IP in $(aws ec2 describe-instances --filters Name=tag-key,Values="${1}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
                 # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
                 echo $IP
-                ssh -o "StrictHostKeyChecking=no" root@${IP} "cd ~ && sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' '${2}'";
+                ssh -o "StrictHostKeyChecking=no" -o "ConnectTimeout=10" root@${IP} "cd ~ && sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' '${2}'";
             done;
 }
 merge_main_into_branch() {
