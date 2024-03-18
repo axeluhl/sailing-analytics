@@ -12,7 +12,7 @@ if ! git status; then
     git init
     git remote add origin "${REMOTE}"
     GIT_SSH_COMMAND="ssh -A -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"  git fetch 
-    git checkout main
+    git checkout disposable
 fi
 echo "Use Status ${SELF_IP} internal-server-status" > /etc/httpd/conf.d/${STATUS_DEFINITION_FILE}
 cd /etc/httpd

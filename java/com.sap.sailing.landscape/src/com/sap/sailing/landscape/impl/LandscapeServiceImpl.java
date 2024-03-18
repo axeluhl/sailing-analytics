@@ -480,7 +480,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                         Util.addAll(eids, eventIDs);
                     }
                     final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> reverseProxyCluster =
-                            getLandscape().getReverseProxyCluster(region);
+                            getLandscape().getCentralReverseProxy(region);
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
                     // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
                     logger.info("Adding reverse proxy rules for migrated content pointing to ARCHIVE");
