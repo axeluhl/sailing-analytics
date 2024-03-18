@@ -53,6 +53,6 @@ then
     if httpd -t ; then
         ${COMMAND_ON_COMPLETION}
     else 
-        echo "Config error"
+        logger -t httpdMerge "Config error"
     fi
 fi
