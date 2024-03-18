@@ -225,10 +225,13 @@ public abstract class TrackedRegattaImpl implements TrackedRegatta {
             addRaceListener(listener, Optional.empty(), /* synchronous */ false);
             try {
                 synchronized (mutex) {
+                    if (getRegatta().getRaceByName(race.getName()) == null) {
+                        throw new IllegalStateException("Race "+race.getName()+" not in regatta "+getRegatta().getName()+
+                                "; not blocking for it to appear. It most likely won't");
+                    }
                     result = getExistingTrackedRace(race);
                     while (!interrupted && result == null) {
                         try {
-                            // FIXME bug5982: if we didn't find the TrackedRace for the RaceDefinition "race" because "race" and its TrackedRace were just *removed*, we will never find it anymore!
                             mutex.wait();
                             result = getExistingTrackedRace(race);
                         } catch (InterruptedException e) {
