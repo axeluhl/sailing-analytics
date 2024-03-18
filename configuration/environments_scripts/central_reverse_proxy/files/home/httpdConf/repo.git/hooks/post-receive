@@ -27,8 +27,8 @@ merge_main_into_branch() {
         #$1 branch name. Assumes you are in the git repo.
         git checkout "${1}"
         git pull
-        echo "merging ${MAIN_NAME} into ${1}"
-        git merge ${MAIN_NAME}
+        echo "merging ${MAIN_BRANCH_NAME} into ${1}"
+        git merge ${MAIN_BRANCH_NAME}
         git push
 }
 while read oldrev newrev refname; do   # These vars are passed on stdin to this hook.
@@ -47,13 +47,13 @@ while read oldrev newrev refname; do   # These vars are passed on stdin to this 
                 unset GIT_DIR
                 cd ${CHECKED_OUT_WORKSPACE_NAME}
                 # get the latest main
-                git checkout ${MAIN_NAME}
+                git checkout ${MAIN_BRANCH_NAME}
                 git pull
                 # get the latest diposable branch and merge in changes
-                merge_main_into_branch "$DISPOSABLE_NAME"
+                merge_main_into_branch "$DISPOSABLE_BRANCH_NAME"
                 # get the latest central branch and merge in changes
-                merge_main_into_branch "$CENTRAL_NAME"
-                git checkout ${MAIN_NAME}
+                merge_main_into_branch "$CENTRAL_BRANCH_NAME"
+                git checkout ${MAIN_BRANCH_NAME}
         fi
     fi
 done
