@@ -17,7 +17,11 @@ GIT_PATH=$1
 COMMAND_ON_COMPLETION=$2
 GIT_BRANCH=$3
 cd ${GIT_PATH}
-git checkout ${GIT_BRANCH} >/dev/null
+git checkout ${GIT_BRANCH} >/dev/null 2>&1
+if [[ "$?" -ne 0 ]]; then
+    echo "Error encountered: issue checking out branch"
+    exit 1
+fi
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)
 GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git fetch
