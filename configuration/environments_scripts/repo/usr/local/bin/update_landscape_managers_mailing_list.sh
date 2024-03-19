@@ -13,7 +13,10 @@ echo $curl_output | jq -r .[] | while read user; do
     echo $email >> $temp_file_path
 done
 if [[ ! -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak" && -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}" ]]; then
-    mv -f ${PATH_TO_STORE}/${NAME_TO_STORE_IN} ${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak
+    cp -f ${PATH_TO_STORE}/${NAME_TO_STORE_IN} ${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak
 fi
-cat "$temp_file_path" > ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
-rm ${temp_file_path}
+if [[ "$(cat ${PATH_TO_STORE}/${NAME_TO_STORE_IN})" != "$(cat ${temp_file_path})" ]]; then
+    mv "$temp_file_path" ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
+else
+    rm ${temp_file_path}
+fi
