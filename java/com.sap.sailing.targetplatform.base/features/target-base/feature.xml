@@ -476,6 +476,7 @@
 
    <plugin
          id="com.diffplug.osgi.extension.sun.misc"
+         feature="true"
          download-size="0"
          install-size="0"
          version="1.0.0"
