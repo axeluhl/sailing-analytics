@@ -19,9 +19,9 @@ Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in
 
 In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can manage records for any sub-domains. The "apex" record for sapsailing.com points to a Network Load Balancer (NLB), currently ``NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com``, which does the following things:
 
-* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com``, currently with the internal IP target ``172.31.28.212``
-* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
-* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
+* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com-2``, currently with the internal IP target ``172.31.28.212``
+* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com-2`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
+* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com-2`` target group
 * optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
 
 Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing at a default application load balancer (ALB) (currently ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com``) in our default region (eu-west-1). Thie default ALB is also called our "dynamic ALB" because it doesn't depend on DNS rules other than the default one for ``*.sapsailing.com``, so other than changes to the DNS which can take minutes to hours to propagate through the world-wide DNS, changes to the default ALB's rule set take effect immediately. Like all ALBs, this one also has a default rule that refers all traffic not matched by other rules to a target group that forwards traffic to an (in the future probably multiple) Apache httpd webserver. All these ALBs handle SSL termination by means of an ACM-managed certificate that AWS automatically renews before it expires. The traffic routed to the target groups is always HTTP only.
@@ -37,6 +37,8 @@ Other services, such as p2 remain to be decided. Any traffic to the Hudson build
 The IPs for all reverse proxies will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
 and to the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
 Currently, the new approach tags instances with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+
+For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The diposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -64,8 +66,8 @@ If you see ``Syntax OK`` then reload the configuration using
 The webserver is registered as target in various locations:
 
 * As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
-* as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
-* as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
+* as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com-2`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
+* as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com-2`` target group, accepting the SSH traffic for ``sapsailing.com``
 * as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively
 * as regular instance target in ``DNSMapped-0``'s target group ``DNSMapped0-Central-HTTP`` to which requests for services available only on the *central* reverse proxy are forwarded to, such as ``releases.sapsailing.com``, ``bugzilla.sapsailing.com``, and so on
 * as target of the elastic IP address ``54.229.94.254``
