@@ -749,14 +749,14 @@
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.20.59"
+         version="2.25.11"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api.source"
          download-size="0"
          install-size="0"
-         version="2.20.59"
+         version="2.25.11"
          unpack="false"/>
 
    <plugin
