@@ -20,10 +20,6 @@
 <unit id="org.objectweb.asm.util.source" version="9.4.0.v20221107-1714"/>
 <unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
 <unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
-<unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent.source" version="1.12.18.v20221114-2102"/>
 <unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>
@@ -174,6 +170,7 @@
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
+<plugin id="com.fasterxml.jackson.core.jackson-core"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.validation"/>
@@ -393,6 +390,31 @@
 <plugin id="org.osgi.util.xml"/>
 <plugin id="org.osgi.util.xml.source"/>
 <plugin id="redisson"/>
+<plugin id="com.esotericsoftware.kryo"/>
+<plugin id="com.esotericsoftware.minlog"/>
+<plugin id="com.esotericsoftware.reflectasm"/>
+<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
+<plugin id="com.fasterxml.jackson.core.jackson-databind"/>
+<plugin id="com.fasterxml.jackson.dataformat.jackson-dataformat-yaml"/>
+<plugin id="org.yaml.snakeyaml"/>
+<plugin id="io.netty.transport"/>
+<plugin id="io.netty.buffer"/>
+<plugin id="io.netty.common"/>
+<plugin id="io.netty.resolver"/>
+<plugin id="io.netty.transport-classes-epoll"/>
+<plugin id="io.netty.transport-native-unix-common"/>
+<plugin id="io.netty.transport-classes-kqueue"/>
+<plugin id="io.netty.codec"/>
+<plugin id="io.netty.handler"/>
+<plugin id="io.netty.resolver-dns"/>
+<plugin id="io.netty.codec-dns"/>
+<plugin id="io.netty.incubator.netty-incubator-transport-classes-io_uring"/>
+<plugin id="io.reactivex.rxjava3.rxjava"/>
+<plugin id="reactive-streams"/>
+<plugin id="jodd-bean"/>
+<plugin id="org.jboss.marshalling.jboss-marshalling-osgi"/>
+<plugin id="io.projectreactor.reactor-core"/>
+<plugin id="com.diffplug.osgi.extension.sun.misc"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
