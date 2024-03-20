@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="219">
+<target name="Race Analysis Target" sequenceNumber="222">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -366,8 +366,8 @@
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
 <plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
-<plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
-<plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
 <plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>
@@ -419,6 +419,7 @@
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
 <plugin id="com.amazonaws.aws-lambda-java-core.source"/>
+<plugin id="javax.cache.api"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>
