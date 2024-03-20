@@ -1,9 +1,9 @@
 #!/bin/bash
 # Upgrades the entire landscape of servers to a new release ${RELEASE}
 # The procedure works in the following steps:
-#  - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service] so
+#  - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|master|security_service] so
 #    their INSTALL_FROM_RELEASE points to the new ${RELEASE}
-#  - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service]
+#  - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|master|security_service]
 #  - Update all launch configurations and auto-scaling groups in the cloud (update-launch-configuration.sh)
 #  - Tell all replicas in the cloud to stop replicating (stop-all-cloud-replicas.sh)
 #  - Tell sap-p1-2 secondary_master to restart (./stop; ./start)
@@ -29,9 +29,9 @@ if [ $# -eq 0 ]; then
     echo "Example: $0 -R build-202106041327 -k Jan"
 
     echo "The procedure works in the following steps:"
-    echo " - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service] so"
+    echo " - patch *.conf files in sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|master|security_service] so"
     echo "   their INSTALL_FROM_RELEASE points to the new ${RELEASE}"
-    echo " - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|replica|master|security_service]"
+    echo " - Install new releases to sap-p1-1:servers/[master|security_service] and sap-p1-2:servers/[secondary_master|master|security_service]"
     echo " - Update all launch configurations and auto-scaling groups in the cloud (update-launch-configuration.sh)"
     echo " - Tell all replicas in the cloud to stop replicating (stop-all-cloud-replicas.sh)"
     echo " - Tell sap-p1-2 secondary_master to restart (./stop; ./start)"
