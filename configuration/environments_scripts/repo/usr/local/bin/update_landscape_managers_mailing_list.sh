@@ -12,9 +12,6 @@ echo $curl_output | jq -r .[] | while read user; do
     email=$(curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/security/api/restsecurity/user?username=$user" 2>/dev/null| jq -r '.email' )
     echo $email >> $temp_file_path
 done
-if [[ ! -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak" && -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}" ]]; then
-    cp -f ${PATH_TO_STORE}/${NAME_TO_STORE_IN} ${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak
-fi
 if diff ${PATH_TO_STORE}/${NAME_TO_STORE_IN} ${temp_file_path}; then
     mv "$temp_file_path" ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
 else
