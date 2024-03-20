@@ -563,6 +563,12 @@ REPLICATION_HOST=localhost
 REPLICATION_PORT=5673
 USE_ENVIRONMENT=live-master-server
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sailing.omegatiming.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sailing\.omegatiming\.com(:[0-9]*)?$"
+# Place additional secrets here, e.g., from root@sapsailing.com:secrets
+MANAGE2SAIL_ACCESS_TOKEN=...
+IGTIMI_CLIENT_ID=...
+IGTIMI_CLIENT_SECRET=...
+GOOGLE_MAPS_AUTHENTICATION_PARAMS="..."
 ```
 
 ### Secondary Master
@@ -591,6 +597,12 @@ REPLICATION_HOST=localhost
 REPLICATION_PORT=5673
 USE_ENVIRONMENT=live-master-server
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true -Dpolardata.source.url=https://www.sapsailing.com:22443 -Dwindestimation.source.url=https://www.sapsailing.com:22443"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sailing.omegatiming.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sailing\.omegatiming\.com(:[0-9]*)?$"
+# Place additional secrets here, e.g., from root@sapsailing.com:secrets
+MANAGE2SAIL_ACCESS_TOKEN=...
+IGTIMI_CLIENT_ID=...
+IGTIMI_CLIENT_SECRET=...
+GOOGLE_MAPS_AUTHENTICATION_PARAMS="..."
 ```
 
 
@@ -622,6 +634,9 @@ REPLICATION_PORT=5672
 REPLICATION_CHANNEL=${SERVER_NAME}-replica
 USE_ENVIRONMENT=live-replica-server
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sailing.omegatiming.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sailing\.omegatiming\.com(:[0-9]*)?$"
+# Place additional secrets here, e.g., from root@sapsailing.com:secrets
+GOOGLE_MAPS_AUTHENTICATION_PARAMS="..."
 ```
 
 (Adjust the release accordingly, of course). (NOTE: During the first production days of the event we noticed that it was really a BAD IDEA to have all replicas use the same DB set-up, all writing to the MongoDB PRIMARY of the "live" replica set in eu-west-1. With tens of replicas running concurrently, this led to a massive block-up based on MongoDB not writing fast enough. This gave rise to a new application server AMI which now has a MongoDB set-up included, using "replica" as the MongoDB replica set name. Now, each replica hence can write into its own MongoDB instance, isolated from all others and scaling linearly.)
@@ -641,6 +656,9 @@ REPLICATE_MASTER_EXCHANGE_NAME=paris2024
 REPLICATE_MASTER_QUEUE_HOST=rabbit-eu-west-3.sapsailing.com
 REPLICATE_MASTER_BEARER_TOKEN="***"
 ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dcom.sap.sse.debranding=true"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dsecurity.sharedAcrossSubdomainsOf=sailing.omegatiming.com -Dsecurity.baseUrlForCrossDomainStorage=https://security-service.sapsailing.com -Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\.)?sailing\.omegatiming\.com(:[0-9]*)?$"
+# Place additional secrets here, e.g., from root@sapsailing.com:secrets
+GOOGLE_MAPS_AUTHENTICATION_PARAMS="..."
 ```
 
 ### Application Servers
