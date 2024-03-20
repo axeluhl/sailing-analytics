@@ -15,7 +15,7 @@ done
 if [[ ! -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak" && -f "${PATH_TO_STORE}/${NAME_TO_STORE_IN}" ]]; then
     cp -f ${PATH_TO_STORE}/${NAME_TO_STORE_IN} ${PATH_TO_STORE}/${NAME_TO_STORE_IN}.bak
 fi
-if [[ "$(cat ${PATH_TO_STORE}/${NAME_TO_STORE_IN})" != "$(cat ${temp_file_path})" ]]; then
+if [[ -n "$(diff ${PATH_TO_STORE}/${NAME_TO_STORE_IN}  ${temp_file_path})" ]]; then
     mv "$temp_file_path" ${PATH_TO_STORE}/${NAME_TO_STORE_IN}
 else
     rm ${temp_file_path}
