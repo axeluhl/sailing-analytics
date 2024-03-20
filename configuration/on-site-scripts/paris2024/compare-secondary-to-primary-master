@@ -1,6 +1,6 @@
 #!/bin/bash
-PRIMARY_MASTER=https://paris2024-master.sapsailing.com:9443
-SECONDARY_MASTER=https://paris2024-secondary-master.sapsailing.com:9443
+PRIMARY_MASTER=https://palma2024-master.sailing.omegatiming.com:9443
+SECONDARY_MASTER=https://palma2024-secondary-master.sailing.omegatiming.com:9443
 COMPARE_OUTPUT=$( /home/sailing/code/java/target/compareServers -ael ${SECONDARY_MASTER} ${PRIMARY_MASTER} )
 if [ "$?" != "0" ]; then
   echo "Comparing ${SECONDARY_MASTER} with ${PRIMARY_MASTER} showed differences:
