@@ -76,7 +76,6 @@ echo " * Patching configurations on sap-p1-1 and sap-p1-2 to new release ${RELEA
 patch_conf_and_install sap-p1-1 master
 patch_conf_and_install sap-p1-1 security_service
 patch_conf_and_install sap-p1-2 secondary_master
-patch_conf_and_install sap-p1-2 replica
 patch_conf_and_install sap-p1-2 master
 patch_conf_and_install sap-p1-2 security_service
 echo " * Updating launch configurations and auto-scaling groups"
