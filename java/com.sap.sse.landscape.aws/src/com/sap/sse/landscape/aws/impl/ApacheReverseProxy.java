@@ -50,9 +50,14 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private static final String RELATIVE_CONFIG_PATH = "conf.d";
     
     /**
+     * The user which contains the checked-out copy of the httpd configuration git.
+     */
+    private static final String CONFIG_USER = "httpdConf";
+   
+    /**
      * The absolute path to the "httpd config" git repo which stores all httpd configuration files.
      */
-    private static final String CONFIG_REPO_PATH = "/etc/httpd";
+    private static final String CONFIG_REPO_PATH = "~" + CONFIG_USER + "/checked-out";
     
     /**
      * The branch name that contains the production httpd configuration.
@@ -123,13 +128,14 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean doCommit, boolean doPush, String... macroArguments)
             throws Exception {
-        String command = "echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments)
-                + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname) + "; service httpd reload" ;
+        String command = "su - " + CONFIG_USER + " -c 'cd " + CONFIG_REPO_PATH + " && git checkout " + CONFIG_REPO_MAIN_BRANCH_NAME + " && echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments) + "\" > "
+                + getAbsoluteConfigFilePath(configFileNameForHostname);
         if (doCommit) {
            command = command + "  && cd "
             + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname,
                     "Set " + configFileNameForHostname + " redirect", doPush);
         }
+        command = command + "'; service httpd reload"; // Concludes the su. And reloads as the root user.
         logger.info("Standard output from setting up the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
                 + runCommandAndReturnStdoutAndStderr(command,
@@ -158,7 +164,7 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     
     /**
      *  Creates a command, that can be ran on an instance to commit, and optionally push, changes to a file (within a git repository). ASSUMES the command is ran from within the repository.
-     * @param editedFileName The file name edited, created or deleted to commit. This includes the {@link #CONFIG_FILE_EXTENSION}, but not a path.
+     * @param editedFileName The file name edited, created or deleted to commit. This includes the {@link #CONFIG_FILE_EXTENSION}, but not a path. The method appends the relative path.
      * @param commitMsg The commit message, without escaped speech marks.
      * @param performPush Boolean indicating whether to push changes or not. True for performing a push.
      * @return Returns the created command (in String form) to perform a commit and optional push.
@@ -262,10 +268,19 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
      */
     private void removeRedirect(String configFileName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final String command = "rm " + getAbsoluteConfigFilePath(configFileName) + "; service httpd reload" + " && cd " + CONFIG_REPO_PATH + ";" + createCommitAndPushString(configFileName, "Removed " + hostname, true);
+        StringBuilder command = new StringBuilder("su - " + CONFIG_USER + " -c '"); // The Git commit must be ran as the CONFIG_USER.
+        command.append("cd ");
+        command.append(CONFIG_REPO_PATH);
+        command.append(" && git checkout ");
+        command.append(CONFIG_REPO_MAIN_BRANCH_NAME);
+        command.append(" && rm ");
+        command.append(getRelativeConfigFilePath(configFileName));
+        command.append("; ");
+        command.append(createCommitAndPushString(configFileName, "Removed " + hostname, /* Perform push */ true));
+        command.append("'; service httpd reload;"); // ' closes the su. The reload must be run as the root user.
         logger.info("Standard output from removing the re-direct for " + hostname
                 + " and reloading the Apache httpd server: "
-                + runCommandAndReturnStdoutAndStderr(command,
+                + runCommandAndReturnStdoutAndStderr(command.toString(),
                         "Standard error from removing the re-direct for " + hostname
                                 + " and reloading the Apache httpd server: ",
                         Level.INFO, optionalKeyName, privateKeyEncryptionPassphrase));

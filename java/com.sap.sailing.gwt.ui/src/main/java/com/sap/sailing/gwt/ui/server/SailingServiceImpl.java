@@ -662,7 +662,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      * Stops this service and frees its resources. In particular, caching services and threads owned by this service will be
      * notified to stop their jobs.
      */
-    //UNCLEAR
     public void stop() {
         quickRanksLiveCache.stop();
     }
