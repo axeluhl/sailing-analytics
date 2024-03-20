@@ -10,7 +10,8 @@ if [[ -z "$selfIp" || -z "$availabilityZone"  ]]; then
     availabilityZone=$(cat /var/cache/availability-zone)
 fi
 nlbName="HTTP-to-sapsailing-dot-com"
-targetGroupArn=$(aws elbv2 describe-target-groups --name  "${nlbName}" | jq -r ".TargetGroups[].TargetGroupArn")
+# First we describe the target groups which are served by a load balancer, which has an ARN containing the substring "loadbalancer/net". Then, we get the tags of these target groups and iterate over the tag descriptions (a list of resourceArns paired with tags), selecting those resources which have a key "allReverseProxies". Finally we extract the resource ARN. Note: .[] means to iterate over an array.
+targetGroupArn=$(aws elbv2 describe-tags --resource-arns $(aws elbv2 describe-target-groups | jq -r '.TargetGroups | .[] | select(.LoadBalancerArns | .[] | contains("loadbalancer/net")  ) | .TargetGroupArn') | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="allReverseProxies") ) | .ResourceArn')
 if [[ "$#" -eq 0 ]];then
     echo "Use add-to-nlb OR remove-from-nlb as the first and only argument."
     exit 2
