@@ -712,7 +712,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationsToM
                     .redirectConnectionWithBearerToken(initialLoadURL, /* HTTP request method */ "POST", master.getBearerToken());
             final InputStream is = (InputStream) initialLoadConnection.getContent();
             final InputStreamReader queueNameReader = new InputStreamReader(is, HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(initialLoadConnection, "UTF-8"));
-            final String queueName = new BufferedReader(queueNameReader).readLine();
+            final String queueName;
+            try (BufferedReader reader = new BufferedReader(queueNameReader)) {
+                queueName = reader.readLine();
+            }
             queueNameReader.close();
             final Channel channel = master.createChannel();
             initialLoadChannels.put(master, new InitialLoadRequest(channel, replicables, queueName));

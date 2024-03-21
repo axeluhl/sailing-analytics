@@ -142,9 +142,10 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     @Override
     public MongoClient getMongo(ConnectionString mongoConnectionString) {
-        MongoClient mongo = mongos.computeIfAbsent(mongoConnectionString,
-                k-> MongoClients.create(mongoConnectionString));
-        return mongo;
+        try (MongoClient mongo = mongos.computeIfAbsent(mongoConnectionString,
+                k-> MongoClients.create(mongoConnectionString))) {
+            return mongo;
+        }
     }
 
     @Override
