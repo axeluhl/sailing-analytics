@@ -18,6 +18,9 @@ public interface FlagImageResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/flags/AI.png")
     ImageResource flagAI();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/AIN.png")
+    ImageResource flagAIN();
 
     @Source("com/sap/sailing/gwt/ui/client/images/flags/AL.png")
     ImageResource flagAL();
