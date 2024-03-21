@@ -105,6 +105,7 @@ then
             else
                 status "503 Not in the same az"
                 outputMessage "Unhealthy: Not in the same az as the archive and the value cached is unhealthy."
+                rm ${LAST_TARGET_GROUP_HEALTHCHECK_RESULT_FILENAME}   # This ensures the unhealthy cache is shorter. We want the switchover to be quick, but if it stays healthy a little too long, that is not problematic.
             fi
         fi
     fi
