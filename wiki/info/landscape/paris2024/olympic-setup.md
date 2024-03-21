@@ -369,7 +369,7 @@ borgbackup is used to backup the ``/`` folder of both laptops towards the other 
 
 The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from sap-p1-2 to sap-p1-1 runs at 02:00 each day. Details about the configuration can be found in ``/root/borg-backup.sh`` on either machine. Log files for the backup run are in ``/var/log/backup.log``. Crontab file is in ``/root``.
 
-Both ``/backup`` folders have been mirrored to a S3 bucket called ``backup-sap-p1`` on June 14th.
+Both ``/backup`` folders have been mirrored to a S3 bucket called ``backup-sap-p1`` on June 14th 2021 and March 29th 2023.
 
 ### Monitoring and e-Mail Alerting
 
