@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Purpose: Deployed in a file named "post-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
-# triggers an update to instances in the region with a specified tag. A command is ran in the repo 
+# triggers an update to instances in the region with a specified tag. A command is ran in the repo
 # after the merge completes. The user, in which the bare repo and hook are installed, must have aws credentials, that
 # don't need mfa. (These may need to be installed manually -- within the correct user -- if starting from a clean instance.)
 
@@ -62,11 +62,11 @@ while read oldrev newrev refname; do   # These vars are passed on stdin to this 
                 git checkout ${MAIN_BRANCH_NAME}
                 check_conflict "$?" "Uncommitted files in the working directory"
                 git pull
+                check_conflict "$?" "Merge conflict in main branch"
                 if [[ "$(git rev-parse ${MAIN_BRANCH_NAME})" != "$(git rev-parse origin/${MAIN_BRANCH_NAME})" ]]; then
                     echo "Merge induced by pull. Pushing latest changes in ${MAIN_BRANCH_NAME} to origin"  # In case of a merge from diverging branches. This seems cyclic as we are pushing to the same branch, but should resolve, when "Everything up-to-date".
                     git push
                 else
-                    check_conflict "$?" "Merge conflict in main branch"
                     # Get the latest diposable branch and merge in changes
                     merge_main_into_branch "$DISPOSABLE_BRANCH_NAME"
                     # Get the latest central branch and merge in changes
