@@ -4,11 +4,11 @@
 
 ## Local Installation
 
-For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with similar hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices. One is the old ``sap-p1-1`` that was already used for the "Paris 2024" event; the other one will be a newly ordered one (we already have the approval).
+For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with similar hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices. One is the old ``sap-p1-1`` that was already used for the "Paris 2024" event; the other one is a newly ordered one (which we have received).
 
 ### Installation Packages
 
-The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
+The old laptop runs Mint Linux with a fairly modern 5.4 kernel, whilst the newer one runs Ubuntu. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
 Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this. Installing an older version of ``libssl`` may be required on newer Ubuntu versions (starting with 22.04) to be able to install MongoDB 4.4.
 
