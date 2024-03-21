@@ -1,0 +1,13 @@
+[Unit]
+Description=Removes welcome.conf.
+Requires=-.mount network-online.target
+After=-.mount network-online.target
+Before=httpd.service get-latest-httpd-conf.service
+# Staring before means no "systemctl start httpd" is needed.
+[Install]
+RequiredBy=multi-user.target
+WantedBy=httpd.service get-latest-httpd-conf.service
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/bin/bash -c "cd /etc/httpd; if [[ -e conf.d/welcome.conf ]]; then rm -f conf.d/welcome.conf; fi"
