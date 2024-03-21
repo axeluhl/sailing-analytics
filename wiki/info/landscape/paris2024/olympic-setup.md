@@ -4,11 +4,11 @@
 
 ## Local Installation
 
-For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with similar hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices. One is the old ``sap-p1-1`` that was already used for the "Paris 2024" event; the other one will be a newly ordered one (we already have the approval).
+For the Olympic Summer Games 2024 Paris/Marseille we use a dedicated hardware set-up to accommodate the requirements on site. In particular, two Lenovo P1 laptops with similar hardware configuration (32GB RAM, Intel Core i9-9880H) will be established as server devices running various services in a way that we can tolerate, with minimal downtimes, failures of either of the two devices. One is the old ``sap-p1-1`` that was already used for the "Paris 2024" event; the other one is a newly ordered one (which we have received).
 
 ### Installation Packages
 
-The two laptops run Mint Linux with a fairly modern 5.4 kernel. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
+The old laptop runs Mint Linux with a fairly modern 5.4 kernel, whilst the newer one runs Ubuntu. We keep both up to date with regular ``apt-get update && apt-get upgrade`` executions. Both have an up-to-date SAP JVM 8 (see [https://tools.hana.ondemand.com/#cloud](https://tools.hana.ondemand.com/#cloud)) installed under /opt/sapjvm_8. This is the runtime VM used to run the Java application server process.
 
 Furthermore, both laptops have a MongoDB 4.4 installation configured through ``/etc/apt/sources.list.d/mongodb-org-4.4.list`` containing the line ``deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/4.4 main``. Their respective configuration can be found under ``/etc/mongod.conf``. The WiredTiger storage engine cache size should be limited. Currently, the following entry in ``/etc/mongod.conf`` does this. Installing an older version of ``libssl`` may be required on newer Ubuntu versions (starting with 22.04) to be able to install MongoDB 4.4.
 
@@ -369,7 +369,7 @@ borgbackup is used to backup the ``/`` folder of both laptops towards the other 
 
 The backup from sap-p1-1 to sap-p1-2 runs at 01:00 each day, and the backup from sap-p1-2 to sap-p1-1 runs at 02:00 each day. Details about the configuration can be found in ``/root/borg-backup.sh`` on either machine. Log files for the backup run are in ``/var/log/backup.log``. Crontab file is in ``/root``.
 
-Both ``/backup`` folders have been mirrored to a S3 bucket called ``backup-sap-p1`` on June 14th.
+Both ``/backup`` folders have been mirrored to a S3 bucket called ``backup-sap-p1`` on June 14th 2021 and March 29th 2023.
 
 ### Monitoring and e-Mail Alerting
 
@@ -529,7 +529,7 @@ One way to monitor the health and replication status of the replica set is runni
 
 It shows the replication state and in particular the delay of the replicas. A cronjob exists for ``sailing@sap-p1-1`` which triggers ``/usr/local/bin/monitor-mongo-replica-set-delay`` every minute which will use ``/usr/local/bin/notify-operators`` in case the average replication delay for the last ten read-outs exceeds a threshold (currently 3s). We have a cron job monitoring this (see above) and sending out alerts if things start slowing down.
 
-In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db-safe-exit`` script (versioned in git under ``configuration/on-site-scripts/clone-security-service-db-safe-exit``) once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@paris-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``paris2024`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
+In order to have a local copy of the ``security_service`` database, a CRON job exists for user ``sailing`` on ``sap-p1-1`` which executes the ``/usr/local/bin/clone-security-service-db-safe-exit`` script (versioned in git under ``configuration/on-site-scripts/paris2024/clone-security-service-db-safe-exit``) once per hour. See ``/home/sailing/crontab``. The script dumps ``security_service`` from the ``live`` replica set in ``eu-west-1`` to the ``/tmp/dump`` directory on ``ec2-user@paris-ssh.sapsailing.com`` and then sends the directory content as a ``tar.gz`` stream through SSH and restores it on the local ``mongodb://sap-p1-1:27017,sap-p1-2/security_service?replicaSet=security_service`` replica set, after copying an existing local ``security_service`` database to ``security_service_bak``. This way, even if the Internet connection dies during this cloning process, a valid copy still exists in the local ``paris2024`` replica set which can be copied back to ``security_service`` using the MongoDB shell command
 
 ```
     db.copyDatabase("security_service_bak", "security_service")
