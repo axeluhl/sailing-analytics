@@ -33,7 +33,7 @@
 # These CIDRs are not assumed to change during the life-cycle of this instance, so this needs
 # to happen only one time. Using 
 #
-#     nmap -sL -n <net> | head -n -1 | sed -e '1d' | grep -q <IP>"
+#     nmap -sL -n <net> | head -n -1 | tail -n +2 | grep -q <IP>"
 #
 # we can check quickly whether an <IP> address is within a <net> CIDR.
 #
@@ -42,8 +42,7 @@
 # internal IP address of the ARCHIVE server currently used. From this, the AZ CIDR
 # can be determined using the "nmap" approach described above.
 #
-# The same can be done for this instance's internal IP address, and since that is
-# not assumed to change the local CIDR/subnet/AZ can also be cached persistently.
+# The same can be done for this instance's internal IP address.
 #
 # If the local instance is in the same AZ as the current live ARCHIVE server,
 # we'll report "healthy" because our traffic to the ARCHIVE will not be cross-AZ.
@@ -76,6 +75,8 @@
 #
 # The user it is run by must have aws credentials that don't need mfa. Install to /usr/share/httpd/.aws.
 #
+# Optional parameter: "cleanup"; this will clean the cache and exit
+#
 # Exit status:
 #  0 means all necessary checks could be performed and we're healthy (status 200)
 #  1 means we were technically not healthy because the internal-server-status check failed (500)
@@ -97,14 +98,14 @@ status() {
 
 randomise() {
     # $1: A number to slightly randomise
-    echo $(($RANDOM % 20 + $1 ))
+    echo $(($RANDOM % 5 + $1 ))
 }
 
 getAzCidr() {
     # $1: path to a file containing one CIDR per line
     # $2: an IP address to obtain the subnet CIDR for
     for cidr in $( cat "${1}" ); do
-	if nmap -sL -n ${cidr} | head -n -1 | sed -e '1d' | grep -q ${2}; then
+	if nmap -sL -n ${cidr} | head -n -1 | tail -n +2 | grep -q ${2}; then
 	    echo ${cidr}
 	fi
     done
@@ -130,20 +131,17 @@ if [[ "$1" == "cleanup" ]]; then
     exit 0
 fi
 # Ensure we have a cached copy of the AZs' CIDRs:
-ID_TO_AZ_FILENAME="${CACHE_LOCATION}/id_to_az"
 AZ_CIDRS_FILENAME="${CACHE_LOCATION}/az_cidrs"
 if [ ! -f "${AZ_CIDRS_FILENAME}" ]; then
   aws ec2 describe-subnets | jq -r '.Subnets[].CidrBlock' >"${AZ_CIDRS_FILENAME}"
 fi
 # The names of the variables in the macros file.
+MACROS_PATH="/etc/httpd/conf.d/000-macros.conf"
 ARCHIVE_IP_NAME="ARCHIVE_IP"
 ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
 PRODUCTION_ARCHIVE_NAME="PRODUCTION_ARCHIVE"
-MACROS_PATH="/etc/httpd/conf.d/000-macros.conf"
 # Extracts which IP is in production.
 PRODUCTION_ARCHIVE=$(sed -n -e  "s/^Define ${PRODUCTION_ARCHIVE_NAME}\> \(.*\)$/\1/p" ${MACROS_PATH})
-# AZ of instance
-MY_AZ_CIDR=$( getAzCidr "${AZ_CIDRS_FILENAME}" ${MY_IP} )
 ARCHIVE_IP=$(grep -m 1 "^Define ${ARCHIVE_IP_NAME}\> .*"  ${MACROS_PATH} | grep -o "${IP_REGEX}")
 ARCHIVE_FAILOVER_IP=$(grep -m 1 "^Define ${ARCHIVE_FAILOVER_IP_NAME}\> .*"  ${MACROS_PATH} | grep -o "${IP_REGEX}")
 if [[ "$PRODUCTION_ARCHIVE" == "\${${ARCHIVE_IP_NAME}}" ]]; then
@@ -152,10 +150,8 @@ else
     PRODUCTION_ARCHIVE_IP=${ARCHIVE_FAILOVER_IP}
 fi
 PRODUCTION_ARCHIVE_CIDR=$( getAzCidr "${AZ_CIDRS_FILENAME}" ${PRODUCTION_ARCHIVE_IP} )
-
-# TODO remove debug output again
-echo "PRODUCTION_ARCHIVE_IP: ${PRODUCTION_ARCHIVE_IP}; MY_AZ_CIDR: ${MY_AZ_CIDR}; PRODUCTION_ARCHIVE_CIDR: ${PRODUCTION_ARCHIVE_CIDR}"
-
+# AZ of instance
+MY_AZ_CIDR=$( getAzCidr "${AZ_CIDRS_FILENAME}" ${MY_IP} )
 # Check if in the same AZ as the live ARCHIVE server and report healthy in that case
 if [ "${PRODUCTION_ARCHIVE_CIDR}" = "${MY_AZ_CIDR}" ]; then
     status "200"
@@ -177,15 +173,9 @@ else
     else
 	INSTANCE_PRIVATE_IPS=$( cat "${LAST_TARGET_GROUP_IPS}" )
     fi
-    # TODO remove debug output again
-    echo "INSTANCE_PRIVATE_IPS: ${INSTANCE_PRIVATE_IPS}"
     for INSTANCE_PRIVATE_IP in ${INSTANCE_PRIVATE_IPS}; do
 	INSTANCE_CIDR=$( getAzCidr "${AZ_CIDRS_FILENAME}" $INSTANCE_PRIVATE_IP )
-	# TODO remove debug output again
-	echo "INSTANCE_CIDR: ${INSTANCE_CIDR}"
 	if [ "${INSTANCE_CIDR}" = "${PRODUCTION_ARCHIVE_CIDR}" ]; then
-	    # TODO remove debug output again
-	    echo "Checking health of reverse proxy in production ARCHIVE's AZ: ${INSTANCE_PRIVATE_IP}"
 	    # found a reverse proxy in the same AZ as the current live/production ARCHIVE; check its health:
 	    curl --silent --location --fail "http://${INSTANCE_PRIVATE_IP}/internal-server-status" >/dev/null
 	    if [[ "$?" = "0" ]]; then
@@ -198,6 +188,6 @@ else
     done
     # No healthy reverse proxy found in the same AZ as live/production ARCHIVE, so we'll report healthy
     status "200"
-    outputMessage "Healthy: No healthy instance in the same AZ; forcing healthy for ${TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS} seconds. (Result cached)"
+    outputMessage "Healthy: No healthy instance in the same AZ; forcing healthy for ${TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS} seconds."
     exit 0
 fi
