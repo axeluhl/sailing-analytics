@@ -72,8 +72,7 @@ if [[ ! -e "$ID_TO_AZ_FILENAME" || ! -e "$ARCHIVE_AZ_FILENAME" || "$(cat ${ARCHI
     echo "$tmp_az" > ${ARCHIVE_AZ_FILENAME}
     echo "$ARCHIVE_IP" > ${ARCHIVE_IP_FILENAME}
 fi
-if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]
-then
+if [[ "$PRODUCTION_IP" == "\${${ARCHIVE_IP_NAME}}" ]]; then
     archive_az=$(cat ${ARCHIVE_AZ_FILENAME})
     if [[ "$archive_az" == "$MY_AZ" ]]; then
         status "200"
