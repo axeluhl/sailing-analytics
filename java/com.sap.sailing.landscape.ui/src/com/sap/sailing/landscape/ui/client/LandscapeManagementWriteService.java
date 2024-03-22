@@ -26,7 +26,7 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<String> getRegions();
     
-    ArrayList<String> getInstanceTypeNames();
+    ArrayList<String> getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup);
 
     ArrayList<MongoEndpointDTO> getMongoEndpoints(String region) throws Exception;
     

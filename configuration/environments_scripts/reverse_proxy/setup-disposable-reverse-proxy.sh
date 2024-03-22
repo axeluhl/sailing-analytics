@@ -34,6 +34,9 @@ setup_cloud_cfg_and_root_login
 build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 # setup mail
 setup_mail_sending
+# setup sshd config
+setup_sshd_resilience
+systemctl reload sshd.service
 cd /usr/local/bin
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # add basic test page which won't cause redirect error code if used as a health check.
