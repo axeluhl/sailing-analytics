@@ -188,6 +188,6 @@ else
     done
     # No healthy reverse proxy found in the same AZ as live/production ARCHIVE, so we'll report healthy
     status "200"
-    outputMessage "Healthy: No healthy instance in the same AZ; forcing healthy for ${TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS} seconds."
+    outputMessage "Healthy: No healthy instance in the same AZ as the archive"
     exit 0
 fi
