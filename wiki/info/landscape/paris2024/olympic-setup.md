@@ -213,7 +213,8 @@ ClientAliveCountMax 3
 GatewayPorts yes
 ```
 
-The ``GatewayPorts`` directive is required in order to get port forwards (including reverse port forwards) accept the "*" as bind address to bind to 0.0.0.0 instead of 127.0.0.1.
+The ``GatewayPorts`` directive is required in order to get port forwards (including reverse port forwards) accept the "*" as bind address to bind to 0.0.0.0 instead of 127.0.0.1. Without it a tunnel would only allow localhost connections to the forwarded ports. So for example from one of the P1s, autossh -R portOnRemote:address:portLocally  ec2-user@paris-ssh.sapsailing.com, would only allow connections from the ec2-user@paris-ssh.sapsailing.com instance to the port. By adding "yes", any host can access this port and be connected on to the portLocally.
+
 
 ExitOnForwardFailure will force ssh to exit if one of the port forwards fails. ConnectTimeout manages the time in seconds until an initial connection fails. AliveInterval (client and server) manages the time in seconds after ssh/sshd are sending client and server alive probes. CountMax is the number of retries for those probes. 
 
