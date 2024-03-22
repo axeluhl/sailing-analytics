@@ -85,25 +85,25 @@ public class TrackTest {
         gpsFix1 = new GPSFixMovingImpl(
                 position1, now1, new KnotSpeedWithBearingImpl(position1.getDistance(position2)
                         .inTime(now2.asMillis() - now1.asMillis()).getKnots(),
-                        new DegreeBearingImpl(90)));
+                        new DegreeBearingImpl(90)), /* optionalTrueHeading */ null);
         gpsFix2 = new GPSFixMovingImpl(position2, now2, new KnotSpeedWithBearingImpl(position1.getDistance(position2)
-                .inTime(now2.asMillis() - gpsFix1.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(90)));
+                .inTime(now2.asMillis() - gpsFix1.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(90)), /* optionalTrueHeading */ null);
         TimePoint now3 = addMillisToTimepoint(now2, MILLIS_BETWEEN_FIXES);
         Position position3 = new DegreePosition(1, 4);
         gpsFix3 = new GPSFixMovingImpl(
                 position3, now3, new KnotSpeedWithBearingImpl(position2.getDistance(position3)
                         .inTime(now3.asMillis() - gpsFix2.getTimePoint().asMillis()).getKnots(),
-                        new DegreeBearingImpl(0)));
+                        new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         TimePoint now4 = addMillisToTimepoint(now3, MILLIS_BETWEEN_FIXES);
         Position position4 = new DegreePosition(3, 4);
         gpsFix4 = new GPSFixMovingImpl(
                 position4, now4, new KnotSpeedWithBearingImpl(position3.getDistance(position4)
                         .inTime(now4.asMillis() - gpsFix3.getTimePoint().asMillis()).getKnots(),
-                        new DegreeBearingImpl(0)));
+                        new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         TimePoint now5 = addMillisToTimepoint(now4, MILLIS_BETWEEN_FIXES);
         Position position5 = new DegreePosition(5, 4);
         gpsFix5 = new GPSFixMovingImpl(position5, now5, new KnotSpeedWithBearingImpl(position4.getDistance(position5)
-                .inTime(now5.asMillis() - gpsFix4.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(0)));
+                .inTime(now5.asMillis() - gpsFix4.getTimePoint().asMillis()).getKnots(), new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(gpsFix1);
         track.addGPSFix(gpsFix2);
         track.addGPSFix(gpsFix3);
@@ -136,8 +136,8 @@ public class TrackTest {
         DegreePosition p2 = new DegreePosition(90, 0);
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = t1.plus(30);
-        gpsFix1 = new GPSFixMovingImpl(p1, t1, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
-        gpsFix2 = new GPSFixMovingImpl(p2, t2, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)));
+        gpsFix1 = new GPSFixMovingImpl(p1, t1, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        gpsFix2 = new GPSFixMovingImpl(p2, t2, new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(gpsFix1);
         track.addGPSFix(gpsFix2);
         track.lockForRead();
@@ -246,7 +246,7 @@ public class TrackTest {
             TimePoint start, Position pos, SpeedWithBearing speed, int numberOfFixes) {
         TimePoint now = start;
         for (int i = 0; i < numberOfFixes; i++) {
-            GPSFixMoving fix1 = new GPSFixMovingImpl(pos, now, speed);
+            GPSFixMoving fix1 = new GPSFixMovingImpl(pos, now, speed, /* optionalTrueHeading */ null);
             track.addGPSFix(fix1);
             now = now.plus(1000);
         }
@@ -299,7 +299,7 @@ public class TrackTest {
             }
         };
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix1);
         // The following getMaximumSpeedOverGround call will trigger a computeMaxSpeed(...) and a cache(...) call
         new Thread(()->
@@ -308,17 +308,17 @@ public class TrackTest {
         // now don't release the cacheBarrier as yet but add more fixes
         new Thread(() -> {
             GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000),
-                    new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(123)));
+                    new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
             track.addGPSFix(fix2);
         }).start();
         new Thread(() -> {
             GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000),
-                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
+                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
             track.addGPSFix(fix3);
         }).start();
         new Thread(() -> {
             GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000),
-                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)));
+                    new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
             track.addGPSFix(fix4);
         }).start();
         cacheBarrier.await(); // releasing the creation of the cache entry from way above; this would now add a stale entry
@@ -375,18 +375,18 @@ public class TrackTest {
     public void testMaxSpeedForMovingTrackWithFixAtIntervalBoundary() {
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix1);
         GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
-                2, new DegreeBearingImpl(123)));
+                2, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix2);
         GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix3);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
                 getB().getKnots(), 0.01); // produces a cache entry that ends 
         GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix4);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
                 getB().getKnots(), 0.01);
@@ -396,9 +396,9 @@ public class TrackTest {
     public void testMaxSpeedForFixOverwrittenWithLowerSpeed() {
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
         GPSFixMoving slow = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         GPSFixMoving fast = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
-                2, new DegreeBearingImpl(123)));
+                2, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fast);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
                 getB().getKnots(), 0.01);
@@ -417,18 +417,18 @@ public class TrackTest {
     public void testMaxSpeedForMovingTrackWithFixAtIntervalBoundaryAfterQuery() {
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix1);
         GPSFixMoving fix2 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
-                2, new DegreeBearingImpl(123)));
+                2, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix2);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
                 getB().getKnots(), 0.01); // produces a cache entry that ends 
         GPSFixMoving fix3 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(7200000), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix3);
         GPSFixMoving fix4 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(10800000), new KnotSpeedWithBearingImpl(
-                1, new DegreeBearingImpl(123)));
+                1, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         track.addGPSFix(fix4);
         assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
                 getB().getKnots(), 0.01);
@@ -489,9 +489,9 @@ public class TrackTest {
         TimePoint t1 = new MillisecondsTimePoint(1000);
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
-        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
@@ -504,9 +504,9 @@ public class TrackTest {
         TimePoint t1 = new MillisecondsTimePoint(1000);
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
-        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(150./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(150./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
@@ -519,9 +519,9 @@ public class TrackTest {
         TimePoint t1 = new MillisecondsTimePoint(1000);
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
-        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
@@ -535,9 +535,9 @@ public class TrackTest {
         TimePoint t1 = new MillisecondsTimePoint(1000);
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
-        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0))); // outrageous speed; to be ignored by getEstimatedSpeed
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(1./3600.*1./60., 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(2./3600.*1./60., 0), t2, new KnotSpeedWithBearingImpl(150, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null); // outrageous speed; to be ignored by getEstimatedSpeed
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(3./3600.*1./60., 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
@@ -552,9 +552,9 @@ public class TrackTest {
         TimePoint t1 = new MillisecondsTimePoint(1000);
         TimePoint t2 = new MillisecondsTimePoint(2000);
         TimePoint t3 = new MillisecondsTimePoint(3000);
-        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(0, 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(45)));
-        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(0.00001, 0.00001), t2, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)));
-        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(0.00002, 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(315)));
+        GPSFixMoving f1 = new GPSFixMovingImpl(new DegreePosition(0, 0), t1, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null);
+        GPSFixMoving f2 = new GPSFixMovingImpl(new DegreePosition(0.00001, 0.00001), t2, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
+        GPSFixMoving f3 = new GPSFixMovingImpl(new DegreePosition(0.00002, 0), t3, new KnotSpeedWithBearingImpl(1, new DegreeBearingImpl(315)), /* optionalTrueHeading */ null);
         track.addGPSFix(f1);
         track.addGPSFix(f2);
         track.addGPSFix(f3);
@@ -582,7 +582,7 @@ public class TrackTest {
         // now add a fix:
         TimePoint now6 = addMillisToTimepoint(gpsFix5.getTimePoint(), 3);
         track.addGPSFix(new GPSFixMovingImpl(
-                new DegreePosition(6, 5), now6, new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0))));
+                new DegreePosition(6, 5), now6, new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null));
         try {
             GPSFixMoving secondOfSubset = subsetIter.next();
             PositionAssert.assertGPSFixEquals(gpsFix3, secondOfSubset, /* pos deg delta */ 0.000001, /* bearing deg delta */ 0.01, /* knot delta */ 0.01);
@@ -903,7 +903,7 @@ public class TrackTest {
         TimePoint next = null;
         GPSFixMoving fix = null;
         for (int i=0; i<steps; i++) {
-            fix = new GPSFixMovingImpl(p, start, speed);
+            fix = new GPSFixMovingImpl(p, start, speed, /* optionalTrueHeading */ null);
             track.addGPSFix(fix);
             next = start.plus(timeBetweenFixesInMillis);
             p = p.translateGreatCircle(bearing, speed.travel(start, next));
@@ -918,7 +918,7 @@ public class TrackTest {
         assertEquals(distance1, distance3); // no progress after time point "next" because no further fixes are known
         assertEquals(distance1, distance4); // no progress after time point "next" because no further fixes are known
         // now add one more fix
-        fix = new GPSFixMovingImpl(p, start, speed);
+        fix = new GPSFixMovingImpl(p, start, speed, /* optionalTrueHeading */ null);
         track.addGPSFix(fix);
         Distance distance1_new = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis));
         Distance distance2_new = track.getDistanceTraveled(now, next.minus(2*timeBetweenFixesInMillis/3));
@@ -1065,7 +1065,7 @@ public class TrackTest {
         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(normalFixesTime);
         GPSFixMovingImpl gpsFixFarInTheFuture = new GPSFixMovingImpl(
                 new DegreePosition(89, 180), new MillisecondsTimePoint(
-                        System.currentTimeMillis()+10000000l), new KnotSpeedWithBearingImpl(200000, new DegreeBearingImpl(0)));
+                        System.currentTimeMillis()+10000000l), new KnotSpeedWithBearingImpl(200000, new DegreeBearingImpl(0)), /* optionalTrueHeading */ null);
         track.addGPSFix(gpsFixFarInTheFuture);
         Position estimatedPosNew = track.getEstimatedPosition(normalFixesTime, /* extrapolate */ false);
         // expecting to get the coordinates of gpsFix2's position
@@ -1084,8 +1084,8 @@ public class TrackTest {
         AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
-        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
-        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing), /* optionalTrueHeading */ null);
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(1, bearing), /* optionalTrueHeading */ null);
         myTrack.addGPSFix(myGpsFix1);
         myTrack.addGPSFix(myGpsFix2);
         myTrack.lockForRead();
@@ -1105,8 +1105,8 @@ public class TrackTest {
         AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
-        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
-        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing), /* optionalTrueHeading */ null);
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(10, bearing), /* optionalTrueHeading */ null);
         myTrack.addGPSFix(myGpsFix1);
         myTrack.addGPSFix(myGpsFix2);
         myTrack.lockForRead();
@@ -1126,8 +1126,8 @@ public class TrackTest {
         AbstractBearing bearing = new DegreeBearingImpl(90);
         Position position1 = new DegreePosition(1, 2);
         Position position2 = position1.translateGreatCircle(bearing, new MeterDistance(1));
-        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
-        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing));
+        GPSFixMovingImpl myGpsFix1 = new GPSFixMovingImpl(position1, now1, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing), /* optionalTrueHeading */ null);
+        GPSFixMovingImpl myGpsFix2 = new GPSFixMovingImpl(position2, now2, new MeterPerSecondSpeedWithDegreeBearingImpl(0.1, bearing), /* optionalTrueHeading */ null);
         myTrack.addGPSFix(myGpsFix1);
         myTrack.addGPSFix(myGpsFix2);
         myTrack.lockForRead();
@@ -1155,7 +1155,7 @@ public class TrackTest {
         TimePoint slightlyBeforeFirstFix = firstFixSoFar.getTimePoint().minus(timespan);
         Position newPosition = firstFixSoFar.getPosition().translateGreatCircle(speed.getBearing().reverse(),
                 speed.travel(firstFixSoFar.getTimePoint(), firstFixSoFar.getTimePoint().plus(timespan)));
-        GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed);
+        GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed, /* optionalTrueHeading */ null);
         track.addGPSFix(newFirstFix);
         TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
         Position newPositionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
@@ -1174,7 +1174,7 @@ public class TrackTest {
         TimePoint slightlyAfterLastFix = lastFixSoFar.getTimePoint().plus(timespan);
         Position newPosition = lastFixSoFar.getPosition().translateGreatCircle(speed.getBearing(),
                 speed.travel(lastFixSoFar.getTimePoint(), lastFixSoFar.getTimePoint().plus(timespan)));
-        GPSFixMoving newLastFix = new GPSFixMovingImpl(newPosition, slightlyAfterLastFix, speed);
+        GPSFixMoving newLastFix = new GPSFixMovingImpl(newPosition, slightlyAfterLastFix, speed, /* optionalTrueHeading */ null);
         track.addGPSFix(newLastFix);
         TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
         Position newPositionAtEndOfTime = track.getEstimatedPosition(endOfTime, /* extrapolate */false);
@@ -1192,7 +1192,7 @@ public class TrackTest {
         Position positionAtEndOfTime = myTrack.getEstimatedPosition(endOfTime, /* extrapolate */false);
         assertNull(positionAtBeginningOfTime);
         assertNull(positionAtEndOfTime);
-        GPSFixMoving newFix = new GPSFixMovingImpl(new DegreePosition(12, 34), now, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
+        GPSFixMoving newFix = new GPSFixMovingImpl(new DegreePosition(12, 34), now, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         myTrack.addGPSFix(newFix);
         TimeRange intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
         Position newPositionAtBeginningOfTime = myTrack.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
@@ -1273,7 +1273,7 @@ public class TrackTest {
         TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(isoDateTime));
         Position position = new DegreePosition(lat, lng);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(knotSpeed, new DegreeBearingImpl(bearingDeg));
-        GPSFixMoving fix = new GPSFixMovingImpl(position, timePoint, speed);
+        GPSFixMoving fix = new GPSFixMovingImpl(position, timePoint, speed, /* optionalTrueHeading */ null);
         return fix;
     }
     
@@ -1286,7 +1286,7 @@ public class TrackTest {
     @Test
     public void testEstimatedSpeedCaching() throws CompactionNotPossibleException {
         GPSFixMoving originalFix = new GPSFixMovingImpl(new DegreePosition(12, 34), MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(9, new DegreeBearingImpl(123)));
+                new KnotSpeedWithBearingImpl(9, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null);
         GPSFixMoving fix = new VeryCompactGPSFixMovingImpl(originalFix);
         assertFalse(fix.isEstimatedSpeedCached());
         final KnotSpeedWithBearingImpl estimatedSpeed = new KnotSpeedWithBearingImpl(9.1, new DegreeBearingImpl(124));
@@ -1309,7 +1309,7 @@ public class TrackTest {
                 /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1); // fetch again from the cache
         // assuming that all test fixes are within a few milliseconds and the averaging interval is much larger than that,
         // adding a single fix in the middle should invalidate the cache
-        track.add(new GPSFixMovingImpl(gpsFix3.getPosition(), gpsFix3.getTimePoint().plus(1), gpsFix3.getSpeed()));
+        track.add(new GPSFixMovingImpl(gpsFix3.getPosition(), gpsFix3.getTimePoint().plus(1), gpsFix3.getSpeed(), /* optionalTrueHeading */ null));
         assertFalse(compactFix3.isEstimatedSpeedCached());
     }
 }

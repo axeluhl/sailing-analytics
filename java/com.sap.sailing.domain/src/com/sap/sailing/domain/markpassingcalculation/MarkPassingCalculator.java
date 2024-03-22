@@ -11,12 +11,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import com.sap.sailing.domain.base.CPUMeteringType;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -70,7 +72,7 @@ public class MarkPassingCalculator {
      * This CALCULATOR_VERSION variable indicates the Version of the {@link MarkPassingCalculator} and must be changed
      * manually when changing the calculator. It should be changed by adding +1;
      */
-    public static final int CALCULATOR_VERSION = 1;
+    public static final int CALCULATOR_VERSION = 2;
 
     /**
      * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the
@@ -151,11 +153,11 @@ public class MarkPassingCalculator {
         Thread t = new Thread(() -> {
             final Set<Callable<Void>> tasks = new HashSet<>();
             for (Competitor c : race.getRace().getCompetitors()) {
-                tasks.add(() -> {
+                tasks.add(race.getTrackedRegatta().cpuMeterCallable(() -> {
                     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
                     chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
                     return null;
-                });
+                }, CPUMeteringType.MARK_PASSINGS.name()));
             }
             ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
                     "Error trying to compute initial set of mark passings for race " + race.getRace().getName()
@@ -369,7 +371,7 @@ public class MarkPassingCalculator {
                                 Set<Callable<Void>> tasks = new HashSet<>();
                                 for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
                                         .entrySet()) {
-                                    tasks.add(() -> {
+                                    tasks.add((race.getTrackedRegatta().cpuMeterCallable(() -> {
                                         Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
                                         try {
                                             chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
@@ -381,7 +383,7 @@ public class MarkPassingCalculator {
                                                     e);
                                             throw e;
                                         }
-                                    });
+                                    }, CPUMeteringType.MARK_PASSINGS.name())));
                                 }
                                 logger.finer(() -> "Calculating mark passing deltas after course change in executor");
                                 ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.SEVERE,
@@ -480,7 +482,7 @@ public class MarkPassingCalculator {
                         newCompetitorFixes.get(competitorAndFixesFinderConsidersAffected.getKey()),
                         competitorFixesThatReplacedExistingOnes
                                 .get(competitorAndFixesFinderConsidersAffected.getKey()));
-                tasks.add(new Callable<Void>() {
+                tasks.add((race.getTrackedRegatta().cpuMeterCallable(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
                         runnable.run();
@@ -497,7 +499,7 @@ public class MarkPassingCalculator {
                                 + competitorAndFixesFinderConsidersAffected.getKey() + " with "
                                 + competitorAndFixesFinderConsidersAffected.getValue().size() + " fixes";
                     }
-                });
+                }, CPUMeteringType.MARK_PASSINGS.name())));
             }
             ThreadPoolUtil.INSTANCE.invokeAllAndLogExceptions(executor, Level.INFO,
                     "Error during mark passing calculation: %s", tasks);
@@ -591,6 +593,7 @@ public class MarkPassingCalculator {
                     suspended = false;
                 } else {
                     suspended = false;
+                    final CountDownLatch latchForRunningListenRun = new CountDownLatch(1);
                     enqueueUpdate(new StorePositionUpdateStrategy() {
                         @Override
                         public void storePositionUpdate(Map<Competitor, List<GPSFixMoving>> competitorFixes,
@@ -602,14 +605,23 @@ public class MarkPassingCalculator {
                                 List<Pair<Competitor, Integer>> suppressedMarkPassings,
                                 List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder,
                                 CandidateChooser candidateChooser) {
+                            latchForRunningListenRun.countDown();
+                            assert latchForRunningListenRun.getCount() == 0;
                         }
                     });
                     if (markPassingRaceFingerprintRegistry != null) {
+                        // FIXME bug5971: the thread must not be started before Listen.run() has obtained the MarkPassingCalculator's write lock!
                         new Thread(()->{
-                            final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
-                            markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
-                                    MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
-                                    markPassings, race.getRace().getCourse());
+                            try {
+                                latchForRunningListenRun.await();
+                                final Map<Competitor, Map<Waypoint, MarkPassing>> markPassings = race.getMarkPassings(/* waitForLatestUpdates */ true);
+                                markPassingRaceFingerprintRegistry.storeMarkPassings(race.getRaceIdentifier(),
+                                        MarkPassingRaceFingerprintFactory.INSTANCE.createFingerprint(race),
+                                        markPassings, race.getRace().getCourse());
+                            } catch (InterruptedException e) {
+                                logger.log(Level.SEVERE, "Exception while waiting for Listen.run() to start processing in MarkPassingCalculator for "+
+                                        race.getName(), e);
+                            }
                         }, "Waiting for mark passings for "+race.getName()+" after having resumed to store the results in registry")
                         .start();
                     }

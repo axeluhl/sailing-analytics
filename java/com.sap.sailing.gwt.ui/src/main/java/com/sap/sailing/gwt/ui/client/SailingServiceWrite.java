@@ -453,7 +453,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String yellowBrickPassword);
 
     MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
-            Position fixedPosition);
+            Position fixedPosition) throws Exception;
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
 

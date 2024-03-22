@@ -70,7 +70,7 @@ public class LineAnalysisTest extends TrackBasedTest {
         final Position lineMiddle = leftPos.translateGreatCircle(lineBearingFromLeftToRight, leftPos.getDistance(rightPos).scale(0.5));
         final Distance distanceBehindLine = new MeterDistance(10);
         final Position behindMiddleOfLine = lineMiddle.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
-        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindMiddleOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindMiddleOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         assertEquals(distanceBehindLine.getMeters(), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.01);
     }
 
@@ -85,7 +85,7 @@ public class LineAnalysisTest extends TrackBasedTest {
         final Position outsideOfLine = rightPos.translateGreatCircle(lineBearingFromLeftToRight, new MeterDistance(30)); // 30m right of start boat
         final Distance distanceBehindLine = new MeterDistance(10);
         final Position behindOutsideOfLine = outsideOfLine.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
-        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindOutsideOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
+        trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindOutsideOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         // the distance is that of the hypotenuse formed by the two cathesuses of 10m and 30m length, respectively:
         assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.01);
     }

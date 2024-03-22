@@ -614,7 +614,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     }
     
     public void addMarkFix(final MarkDTO mark, final Date timepoint, final Position fixPosition) {
-        final GPSFixDTOWithSpeedWindTackAndLegType fix = new GPSFixDTOWithSpeedWindTackAndLegType(timepoint, fixPosition, null, new WindDTO(), null, null, false);
+        final GPSFixDTOWithSpeedWindTackAndLegType fix = new GPSFixDTOWithSpeedWindTackAndLegType(timepoint, fixPosition, null, /* optionalTrueHeading */ null, new WindDTO(), null, null, false);
         markPositionService.addMarkFix(
                 raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
                 mark, fix, new AsyncCallback<Void>() {

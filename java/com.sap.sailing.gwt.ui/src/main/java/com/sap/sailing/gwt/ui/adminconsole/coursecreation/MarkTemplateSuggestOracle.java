@@ -29,7 +29,7 @@ public class MarkTemplateSuggestOracle extends AbstractListSuggestOracle<MarkTem
         refresh();
     }
 
-    public void refresh() {
+    private void refresh() {
         sailingServiceAsync.getMarkTemplates(new AsyncCallback<List<MarkTemplateDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -64,7 +64,6 @@ public class MarkTemplateSuggestOracle extends AbstractListSuggestOracle<MarkTem
         if (this.getSelectableValues() == null) {
             throw new NullPointerException("Mark Templates are not loaded yet or could not be loaded.");
         }
-
         for (MarkTemplateDTO template : this.getSelectableValues()) {
             if (template.getName().equals(templateName)) {
                 return template;

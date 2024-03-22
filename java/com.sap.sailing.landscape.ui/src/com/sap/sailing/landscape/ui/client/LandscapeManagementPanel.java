@@ -41,12 +41,14 @@ import com.sap.sailing.landscape.ui.client.SwitchToReplicaOnSharedInstanceDialog
 import com.sap.sailing.landscape.ui.client.UpgradeApplicationReplicaSetDialog.UpgradeApplicationReplicaSetInstructions;
 import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
 import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingAnalyticsProcessDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
@@ -114,9 +116,10 @@ public class LandscapeManagementPanel extends SimplePanel {
     private final SimpleBusyIndicator applicationReplicaSetsBusy;
     private final ErrorReporter errorReporter;
     private final AwsMfaLoginWidget mfaLoginWidget;
+    private TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources> proxiesTable;
+    private final BusyIndicator proxiesTableBusy;
     private final static String AWS_DEFAULT_REGION_USER_PREFERENCE = "aws.region.default";
     private final static Duration DURATION_TO_WAIT_BETWEEN_REPLICA_SET_UPGRADE_REQUESTS = Duration.ONE_MINUTE;
-    
     /**
      * The time to wait after archiving a replica set and before starting a "compare servers" run for the content
      * archived. This waiting period is owed to the process of loading the race content which is an asynchronous
@@ -465,46 +468,137 @@ public class LandscapeManagementPanel extends SimplePanel {
         final CaptionPanel machineImagesCaptionPanel = new CaptionPanel(stringMessages.machineImages());
         final VerticalPanel machineImagesVerticalPanel = new VerticalPanel();
         machineImagesCaptionPanel.add(machineImagesVerticalPanel);
+        final Button machineTableRefreshButton = new Button(stringMessages.refresh());
+        machineImagesVerticalPanel.add(machineTableRefreshButton);
+        machineTableRefreshButton.addClickHandler(event -> refreshMachineImagesTable());
         machineImagesVerticalPanel.add(machineImagesTable);
         machineImagesBusy = new SimpleBusyIndicator();
         machineImagesVerticalPanel.add(machineImagesBusy);
         mainPanel.add(machineImagesCaptionPanel);
-        regionsTable.getSelectionModel().addSelectionChangeHandler(e->
-        {
-            final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
-            refreshAllThatNeedsAwsCredentials();
-            storeRegionSelection(userService, selectedRegion);
-        });
-        AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
-                @Override
-                public void onSuccess(Boolean result) {
-                    sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(), stringMessages);
-                    addApplicationReplicaSetButton.setVisible(result);
-                    applicationReplicaSetsRefreshButton.setVisible(result);
-                    applicationReplicaSetsCaptionPanel.setVisible(result);
-                    machineImagesCaptionPanel.setVisible(result);
-                    mongoEndpointsCaptionPanel.setVisible(result);
-                    if (result) {
-                        refreshApplicationReplicaSetsTable();
-                    }
+        final SafeHtmlCell amiForProxyCell = new SafeHtmlCell();
+        final SafeHtmlCell instanceIdCell = new SafeHtmlCell();
+        final SafeHtmlCell instancePublicIpCell = new SafeHtmlCell();
+        final SafeHtmlCell instancePrivateIpCell = new SafeHtmlCell();
+        final Column<ReverseProxyDTO,SafeHtml> amiProxyProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(amiForProxyCell) {
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO proxy) {
+                return new LinkBuilder()
+                       .setAmiId(proxy.getImageId())
+                       .setRegion(regionsTable.getSelectionModel().getSelectedObject())
+                       .setPathMode(LinkBuilder.pathModes.InstanceByAmiIdSearch)
+                       .build();
+            }
+        };
+        final Column<ReverseProxyDTO, SafeHtml> instanceIdProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instanceIdCell) {
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+                return new LinkBuilder().setInstanceId(reverseProxy.getInstanceId()).setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.InstanceSearch).build();
+            }
+        };
+        final Column<ReverseProxyDTO, SafeHtml> instancePublicIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml>(instancePublicIpCell) {
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+              return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.publicIp).setPublicIp(reverseProxy.getPublicIpAddress()).build();
+            }
+        };
+        final Column<ReverseProxyDTO, SafeHtml> instancePrivateIpProxiesColumn = new Column<ReverseProxyDTO, SafeHtml> (instancePrivateIpCell) {
+            @Override
+            public SafeHtml getValue(ReverseProxyDTO reverseProxy) {
+                return new LinkBuilder().setRegion(regionsTable.getSelectionModel().getSelectedObject()).setPathMode(LinkBuilder.pathModes.privateIp).setPrivateIp(reverseProxy.getPrivateIpAddress()).build();
+            }
+        };
+        proxiesTable = new TableWrapperWithMultiSelectionAndFilter<ReverseProxyDTO, StringMessages, AdminConsoleTableResources>(
+                stringMessages, errorReporter, /* enablePager */ false,
+                /* entity identity comparator */ Optional.empty(), GWT.create(AdminConsoleTableResources.class),
+                /* checkbox filter function */ Optional.empty(), /* filter label */ Optional.empty(),
+                /* filter checkbox label */ null) {
+            @Override
+            protected Iterable<String> getSearchableStrings(ReverseProxyDTO reverseProxyDTO) {
+                final Set<String> result = new HashSet<>();
+                if (reverseProxyDTO.getInstanceId() != null) {
+                    result.add(reverseProxyDTO.getInstanceId());
+                    result.add(reverseProxyDTO.getPrivateIpAddress());
+                    result.add(reverseProxyDTO.getPublicIpAddress());
+                    result.add(reverseProxyDTO.getRegion());
                 }
+                return result;
+            }
+        };
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
+       proxiesTable.addColumn(instanceIdProxiesColumn, stringMessages.instanceId());
+       proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
+       proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
+       proxiesTable.addColumn(instancePrivateIpProxiesColumn, stringMessages.privateIp());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
+       //setup actions
+       final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
+               new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_REMOVE, reverseProxy -> {
+           if (reverseProxy.isDisposable()) {
+               removeReverseProxy(reverseProxy, reverseProxy.getRegion(), stringMessages);
+           } else {
+               errorReporter.reportError(stringMessages.invalidOperationForThisProxy());
+           }
+       }); 
+       proxiesActionColumn.addAction(ReverseProxyImagesBarCell.ACTION_ROTATE_HTTPD_LOGS, reverseProxy -> rotateHttpdLogs(reverseProxy, stringMessages));
+       proxiesTable.addColumn(proxiesActionColumn, stringMessages.actions());
+       final CaptionPanel proxiesTableCaptionPanel = new CaptionPanel(stringMessages.reverseProxies());
+       final VerticalPanel proxiesTableVerticalPanel = new VerticalPanel();
+       final HorizontalPanel proxiesTableButtonPanel = new HorizontalPanel();
+       //setup buttons above rows
+       final Button proxiesTableRefreshButton = new Button(stringMessages.refresh());
+       final Button proxiesTableAddButton = new Button(stringMessages.add());
+       final SelectedElementsCountingButton<ReverseProxyDTO> removeProxiesButton = new SelectedElementsCountingButton<>(stringMessages.remove(), proxiesTable.getSelectionModel(), /* element name mapper */ proxy -> proxy.getName(),
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements,
+                e -> removeReverseProxies(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), proxiesTable.getSelectionModel().getSelectedSet()));
+       proxiesTableRefreshButton.addClickHandler(event -> refreshProxiesTable());
+       proxiesTableAddButton.addClickHandler(event -> addReverseProxyToCluster(stringMessages, regionsTable.getSelectionModel().getSelectedObject()));
+       proxiesTableButtonPanel.add(proxiesTableRefreshButton);
+       proxiesTableButtonPanel.add(proxiesTableAddButton);
+       proxiesTableButtonPanel.add(removeProxiesButton);
+       proxiesTableVerticalPanel.add(proxiesTableButtonPanel);
+       proxiesTableVerticalPanel.add(proxiesTable);
+       proxiesTableBusy= new SimpleBusyIndicator();
+       proxiesTableVerticalPanel.add(proxiesTableBusy);
+       proxiesTableCaptionPanel.add(proxiesTableVerticalPanel);
+       mainPanel.add(proxiesTableCaptionPanel);
+       regionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
+           final String selectedRegion = regionsTable.getSelectionModel().getSelectedObject();
+           refreshAllThatNeedsAwsCredentials();
+           storeRegionSelection(userService, selectedRegion);
+       });
+       AsyncCallback<Boolean> validatePassphraseCallback = new AsyncCallback<Boolean>() {
+           @Override
+           public void onSuccess(Boolean result) {
+               sshKeyManagementPanel.setPassphraseValidation(result.booleanValue(), stringMessages);
+               addApplicationReplicaSetButton.setVisible(result);
+               applicationReplicaSetsRefreshButton.setVisible(result);
+               applicationReplicaSetsCaptionPanel.setVisible(result);
+               machineImagesCaptionPanel.setVisible(result);
+               mongoEndpointsCaptionPanel.setVisible(result);
+               proxiesTableCaptionPanel.setVisible(result);
+               if (result) {
+                   refreshApplicationReplicaSetsTable();
+               }
+           }
 
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError(stringMessages.passphraseCheckError());
-                };
-            };
-        sshKeyManagementPanel.addSshKeySelectionChangedHandler(event->{
-            validatePassphrase(stringMessages, validatePassphraseCallback);
-        });
-        sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
-            validatePassphrase(stringMessages, validatePassphraseCallback);
-        });
-        validatePassphrase(stringMessages, validatePassphraseCallback);
-        // TODO try to identify archive servers
-        // TODO support archive server upgrade
-        // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
-    }
-    
+           public void onFailure(Throwable caught) {
+               errorReporter.reportError(stringMessages.passphraseCheckError());
+           }
+       };
+       sshKeyManagementPanel.addSshKeySelectionChangedHandler(event -> {
+           validatePassphrase(stringMessages, validatePassphraseCallback);
+       });
+       sshKeyManagementPanel.addOnPassphraseChangedListener(event -> {
+           validatePassphrase(stringMessages, validatePassphraseCallback);
+       });
+       validatePassphrase(stringMessages, validatePassphraseCallback);
+       // TODO try to identify archive servers
+       // TODO support archive server upgrade
+       // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
+   }
+
     private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
         new ShardManagementDialog(landscapeManagementService, replicaset, region, errorReporter, stringMessages, new DialogCallback<Boolean>() {
             @Override
@@ -1374,10 +1468,162 @@ public class LandscapeManagementPanel extends SimplePanel {
         refreshMongoEndpointsTable();
         refreshApplicationReplicaSetsTable();
         refreshMachineImagesTable();
+        refreshProxiesTable();
         sshKeyManagementPanel.showKeysInRegion(mfaLoginWidget.hasValidSessionCredentials() ?
                 regionsTable.getSelectionModel().getSelectedObject() : null);
     }
+    
+    private void removeReverseProxies(StringMessages stringMessages, String regionId,
+            Iterable<ReverseProxyDTO> reverseProxiesToRemove) {
+        Iterator<ReverseProxyDTO> iterator = reverseProxiesToRemove.iterator();
+        while (iterator.hasNext()) {
+            removeReverseProxy(iterator.next(), regionId, stringMessages);
+        }
+    }
+    /**
+     * Removes a reverse proxy from the cluster and terminates it.
+     * @param instance The reverse proxy to remove from the cluster.
+     * @param regionId The region the proxy is in.
+     */
+    private void removeReverseProxy(ReverseProxyDTO instance, String regionId, StringMessages stringMessages) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            proxiesTableBusy.setBusy(true);
+            landscapeManagementService.removeReverseProxy(instance, regionId,
+                    sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
+                            : null,
+                    new AsyncCallback<Void>() {
 
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                            proxiesTableBusy.setBusy(false);
+
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            proxiesTableBusy.setBusy(false);
+                            refreshProxiesTable();
+                        }
+
+                    });
+        }
+    }
+
+    /**
+     * Creates a reverse proxy based on the user's input.
+     * @param region The region to spawn the reverse proxy in.
+     */
+    private void addReverseProxyToCluster(StringMessages stringMessages, String region) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null || regionsTable.getSelectionModel().getSelectedObject() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            landscapeManagementService.describeAvailabilityZones(regionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<ArrayList<AvailabilityZoneDTO>>() {
+                        @Override
+                        public void onSuccess(ArrayList<AvailabilityZoneDTO> result) {
+                            showReverseProxyDialog(stringMessages, region, result);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
+        }
+    }
+    
+    private void showReverseProxyDialog(StringMessages stringMessages, String region, ArrayList<AvailabilityZoneDTO> availabilityZones) {
+        new CreateReverseProxyInClusterDialog(stringMessages, errorReporter, landscapeManagementService, region,
+                proxiesTable.getTable().getVisibleItems(), availabilityZones,
+                new DialogCallback<CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions>() {
+                    @Override
+                    public void ok(CreateReverseProxyInClusterDialog.CreateReverseProxyInstructions editedObject) {
+                        editedObject.setKey(sshKeyManagementPanel.getSelectedKeyPair() == null ? null
+                                : sshKeyManagementPanel.getSelectedKeyPair().getName());
+                        proxiesTableBusy.setBusy(true);
+                        landscapeManagementService.addReverseProxy(editedObject.getName(),
+                                editedObject.getInstanceType(), editedObject.getRegion(), editedObject.getKey(), editedObject.getAvailabilityZoneDTO(),
+                                new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        Notification.notify(stringMessages.success(), NotificationType.SUCCESS);
+                                        proxiesTableBusy.setBusy(false);
+                                        refreshProxiesTable();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        proxiesTableBusy.setBusy(false);
+                                        errorReporter.reportError(caught.getMessage());
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
+    }
+    
+    /**
+     * Updates the proxies table with all the reverse proxies in the region.
+     */
+    private void refreshProxiesTable() {
+        proxiesTable.getFilterPanel().removeAll();
+        if (mfaLoginWidget.hasValidSessionCredentials()
+                && regionsTable.getSelectionModel().getSelectedObject() != null) {
+            proxiesTableBusy.setBusy(true);
+            landscapeManagementService.getReverseProxies(regionsTable.getSelectionModel().getSelectedObject(),
+                    new AsyncCallback<ArrayList<ReverseProxyDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                            proxiesTableBusy.setBusy(false);
+                        }
+                        
+                        @Override
+                        public void onSuccess(ArrayList<ReverseProxyDTO> reverseProxyDTOs) {
+                            proxiesTable.refresh(reverseProxyDTOs);
+                            proxiesTableBusy.setBusy(false);
+                        }
+                    });
+        }
+    }
+    
+    /**
+     * Rotates the httpd logs on an instance.
+     * @param reverseProxy The instance to rotate the logs on.
+     */
+    private void rotateHttpdLogs(ReverseProxyDTO reverseProxy, StringMessages stringMessages) {
+        if (sshKeyManagementPanel.getSelectedKeyPair() == null) {
+            Notification.notify(stringMessages.pleaseSelectSshKeyPair(), NotificationType.INFO);
+        } else {
+            landscapeManagementService.rotateHttpdLogs(reverseProxy, reverseProxy.getRegion(),
+                    sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                    sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                            ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
+                            : null,
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            Notification.notify(
+                                    stringMessages.successfullyRotatedHttpdLogsOnInstance(reverseProxy.getInstanceId()),
+                                    NotificationType.SUCCESS);
+                        }
+                    });
+        }
+    }
+    
     private void storeRegionSelection(UserService userService, String selectedRegion) {
         if (selectedRegion != null) {
             userService.setPreference(AWS_DEFAULT_REGION_USER_PREFERENCE, selectedRegion, new AsyncCallback<Void>() {

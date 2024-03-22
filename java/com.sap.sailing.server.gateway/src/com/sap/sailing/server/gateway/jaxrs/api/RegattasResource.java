@@ -1429,7 +1429,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
+                final DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
                 if (trackedRace != null) {
                     TargetTimeInfo targetTime;
                     try {
@@ -2548,8 +2548,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE)
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2569,8 +2568,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2585,8 +2583,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2606,8 +2603,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2622,8 +2618,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2643,8 +2638,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
-        Response response;
-
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2659,7 +2653,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
-        Response response;
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2679,7 +2673,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
-        Response response;
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
@@ -2694,7 +2688,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
-        Response response;
+        final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);

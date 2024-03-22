@@ -38,10 +38,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
@@ -62,8 +58,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.Timed;
-import com.sap.sse.common.impl.DegreeBearingImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogFixTrackerManagerTest {
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
@@ -82,11 +76,6 @@ public class RaceLogFixTrackerManagerTest {
 
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     private DynamicTrackedRace trackedRace;
-
-    protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
-        return new GPSFixMovingImpl(new DegreePosition(lat, lng), new MillisecondsTimePoint(millis),
-                new KnotSpeedWithBearingImpl(knots, new DegreeBearingImpl(degrees)));
-    }
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {

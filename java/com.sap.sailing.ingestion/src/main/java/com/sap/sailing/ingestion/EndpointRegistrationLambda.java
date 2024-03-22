@@ -82,7 +82,7 @@ public class EndpointRegistrationLambda implements RequestStreamHandler {
             outputAsStream.write(successResponse.getBytes());
         } catch (ParseException | JsonDeserializationException e) {
             context.getLogger().log("Exception trying to deserialize JSON input: " + e.getMessage());
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             context.getLogger().log(ex.getMessage());
         } finally {
             try {

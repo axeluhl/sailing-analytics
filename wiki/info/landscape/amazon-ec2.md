@@ -19,9 +19,9 @@ Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in
 
 In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can manage records for any sub-domains. The "apex" record for sapsailing.com points to a Network Load Balancer (NLB), currently ``NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com``, which does the following things:
 
-* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com``, currently with the internal IP target ``172.31.28.212``
-* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
-* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com`` target group
+* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com-2``, currently with the internal IP target ``172.31.28.212``
+* accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com-2`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
+* accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com-2`` target group
 * optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
 
 Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing at a default application load balancer (ALB) (currently ``DefDynsapsailing-com-1492504005.eu-west-1.elb.amazonaws.com``) in our default region (eu-west-1). Thie default ALB is also called our "dynamic ALB" because it doesn't depend on DNS rules other than the default one for ``*.sapsailing.com``, so other than changes to the DNS which can take minutes to hours to propagate through the world-wide DNS, changes to the default ALB's rule set take effect immediately. Like all ALBs, this one also has a default rule that refers all traffic not matched by other rules to a target group that forwards traffic to an (in the future probably multiple) Apache httpd webserver. All these ALBs handle SSL termination by means of an ACM-managed certificate that AWS automatically renews before it expires. The traffic routed to the target groups is always HTTP only.
@@ -30,9 +30,20 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 
 ### Apache httpd Webserver and Reverse Proxy
 
-The web server currently exists only as one instance but could now be replicated to other availability zones (AZ)s, entering those other IPs into the ``HTTP-to-sapsailing-dot-com`` target group (and, as will be described further below, to the ``CentralWebServerHTTP*`` (for the "dynamic" ALB in eu-west-1) or ``{ALB-name}-HTTP`` (for all DNS-mapped ALBs) target group of each application load balancer (ALB) in the region). For all of sapsailing.com it does not (no longer) care about SSL and does not need to have an SSL certificate (anymore). In particular, it offers the following services:
+The web server currently exists only as one "central" reverse proxy but work is being undertaken to duplicate the essential services,
+to improve availability. Only the current central reverse proxy will be non-disposable, hosting the wiki, releases, Git jobs, static and Bugzilla.
+Other services, such as p2 remain to be decided. Any traffic to the Hudson build server subdomain gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
 
-* hudson.sapsailing.com - a Hudson installation on dev.internal.sapsailing.com
+The IPs for all reverse proxies will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
+and to the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
+Currently, the new approach tags instances with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+
+For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The diposables just have the latter.
+
+There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
+co-deployment.
+Most of sapsailing.com no longer cares about SSL and does not need to have an SSL certificate. Sail-insight still does though. The central reverse proxy offers the following services:
+
 * bugzilla.sapsailing.com - a Bugzilla installation under /usr/lib/bugzilla
 * wiki.sapsailing.com - a Gollum-based Wiki served off our git, see /home/wiki
 * static.sapsailing.com - static content hosted under /home/trac/static
@@ -55,9 +66,10 @@ If you see ``Syntax OK`` then reload the configuration using
 The webserver is registered as target in various locations:
 
 * As DNS record with its internal IP address (e.g., 172.31.19.129) for the two DNS entries ``logfiles.internal.sapsailing.com`` used by various NFS mounts, and ``smtp.internal.sapsailing.com`` for e-mail traffic sent within the landscape and not requiring the AWS SES
-* as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
-* as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com`` target group, accepting the SSH traffic for ``sapsailing.com``
-* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively.
+* as IP target with its internal IP address for the ``HTTP-to-sapsailing-dot-com-2`` target group, accepting the HTTP traffic sent straight to ``sapsailing.com`` (not ``www.sapsailing.com``)
+* as IP target with its internal IP address for the ``SSH-to-sapsailing-dot-com-2`` target group, accepting the SSH traffic for ``sapsailing.com``
+* as regular instance target in all load balancers' default rule's target group, such as ``DefDynsapsailing-com``, ``DNSMapped-0``, ``DNSMapped-1``, and so on; the names of the target groups are ``CentralWebServerHTTP-Dyn``, ``DDNSMapped-0-HTTP``, ``DDNSMapped-1-HTTP``, and so on, respectively
+* as regular instance target in ``DNSMapped-0``'s target group ``DNSMapped0-Central-HTTP`` to which requests for services available only on the *central* reverse proxy are forwarded to, such as ``releases.sapsailing.com``, ``bugzilla.sapsailing.com``, and so on
 * as target of the elastic IP address ``54.229.94.254``
 
 Changing the DNS entry especially for ``logfiles.internal.sapsailing.com`` requires re-mounting those NFS shares wherever they were used. Go to at least all instances tagged with ``sailing-analytics-server`` and, as user ``root``, execute the following commands:
@@ -1054,6 +1066,19 @@ Follow these steps to upgrade the AMI:
 * Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.
 
 ## Terminating AWS Sailing Instances
+
+### Automated approach
+
+A lot of the below has been automated and you can archive from the admin console's landscape panel. It automates much of the procedure,
+including the creation of a httpd  `.conf file` in the `conf.d` folder on the reverse proxies, via JSCH/SSH. The file produced is named
+after the domain for the event and it contains 
+```
+Use Event-ARCHIVE 49erEuros2022.sapsailing.com bee070d1-605c-4fff-9d71-7688452abe63  # last part is event uuid.
+```
+which utilises an in-house macro called Event-ARCHIVE, which creates a proxy pass pointing to the archive. Upon adding to the central
+reverse proxy, changes are pushed to the main branch of a specialised repo (must be main for script to work). Upon push completion, a git `post-receive` hook is triggered (found in `httpdHookScript.sh`) which connects to all reverse proxy instances and runs 
+`configuration/sync-repo-and-execute-cmd.sh`. This script fetches changes and merges them, whilst trying to best preserve any changes.
+This is done because live changes can occur to some files such as the 000-macros.conf by the `configuration/switchoverArchive.sh` script, which is installed on each reverse proxy (see the cloud orchestrator page for more details).
 
 ### ELB Setup with replication server(s)
 - Remove all Replica's from the ELB and wait at least 2 minutes until no request reaches their Apache webservers anymore. You can check this with looking at `apachetop` on the respective instances. Let only the Master server live inside the ELB.

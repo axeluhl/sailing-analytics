@@ -129,16 +129,16 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // Both boats have climbed half of the first upwind beat; c1 is rated the faster boat (2.0), c2 has time-on-time factor 1.0.
         // Therefore, c2 is expected to lead after applying the corrections.
         Comparator<Competitor> comparator = tot.getRaceRankingComparator(middleOfFirstLeg);
@@ -160,16 +160,16 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other
         final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);
         assertSame(c1, rankingInfo.getCompetitorFarthestAhead());
@@ -195,16 +195,16 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // Both boats have climbed half of the first upwind beat; c1 is rated the faster boat (2.0), c2 has time-on-time factor 1.0.
         // Therefore, c2 is expected to lead after applying the corrections.
         Comparator<Competitor> comparator = tot.getRaceRankingComparator(middleOfFirstLeg);
@@ -226,16 +226,16 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
                         .getFirstWaypoint(), c2)));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.0, 0), startOfRace, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c1).add(
                 new GPSFixMovingImpl(new DegreePosition(1.0, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(45))));
+                        new DegreeBearingImpl(45)), /* optionalTrueHeading */ null));
         trackedRace.getTrack(c2).add(
                 new GPSFixMovingImpl(new DegreePosition(0.5, 0), middleOfFirstLeg, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(315))));
+                        new DegreeBearingImpl(315)), /* optionalTrueHeading */ null));
         // Using a white-box test, assert that the ranking-relevant numbers are sufficiently close to each other,
         // in this case .05 seconds per nautical mile for the reciproke VMG measured in seconds per nautical mile
         final RankingMetric.RankingInfo rankingInfo = tot.getRankingInfo(middleOfFirstLeg);

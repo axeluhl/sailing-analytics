@@ -4,7 +4,6 @@ import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +35,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.metering.CPUMeter;
 import com.sap.sse.util.ThreadLocalTransporter;
 
-public class TrackedRegattaImpl implements TrackedRegatta {
+public abstract class TrackedRegattaImpl implements TrackedRegatta {
     private static final long serialVersionUID = 6480508193567014285L;
 
     private static final Logger logger = Logger.getLogger(TrackedRegattaImpl.class.getName());
@@ -84,11 +84,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     
     public TrackedRegattaImpl(Regatta regatta) {
         super();
-        trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
+        this.trackedRacesLock = new NamedReentrantReadWriteLock("trackeRaces lock for tracked regatta "+regatta.getName(), /* fair */ false);
         this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
-        raceListeners = new ConcurrentHashMap<>();
-        raceListenersLock = new NamedReentrantReadWriteLock(
+        this.raceListeners = new ConcurrentHashMap<>();
+        this.raceListenersLock = new NamedReentrantReadWriteLock(
                 "raceListeners lock for tracked regatta " + regatta.getName(), /* fair */ false);
     }
     
@@ -97,6 +97,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.raceListeners = new ConcurrentHashMap<>();
     }
     
+    @Override
+    public CPUMeter getCPUMeter() {
+        return getRegatta().getCPUMeter();
+    }
+
     @Override
     public void lockTrackedRacesForRead() {
         LockUtil.lockForRead(trackedRacesLock);
@@ -126,16 +131,6 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         }
     }
     
-    /**
-     * Resolving replaces this de-serialized object (which has a <code>null</code> {@link #raceListeners} collection) by
-     * a new one into which all other collection contents are copied.
-     */
-    private Object readResolve() throws ObjectStreamException {
-        TrackedRegattaImpl result = new TrackedRegattaImpl(this.regatta);
-        result.trackedRaces.putAll(this.trackedRaces);
-        return result;
-    }
-
     @Override
     public void addTrackedRace(TrackedRace trackedRace, Optional<ThreadLocalTransporter> threadLocalTransporter) {
         final TrackedRace oldTrackedRace;
@@ -224,12 +219,16 @@ public class TrackedRegattaImpl implements TrackedRegatta {
                 public void raceAdded(TrackedRace trackedRace) {
                     synchronized (mutex) { // TODO possible improvement: only notify if trackedRace.getRace() == race; otherwise it cannot have made a difference for getExistingTrackedRace(race)...
                         mutex.notifyAll();
-                    } // TODO can't we remove the listener again here?
+                    }
                 }
             };
             addRaceListener(listener, Optional.empty(), /* synchronous */ false);
             try {
                 synchronized (mutex) {
+                    if (getRegatta().getRaceByName(race.getName()) == null) {
+                        throw new IllegalStateException("Race "+race.getName()+" not in regatta "+getRegatta().getName()+
+                                "; not blocking for it to appear. It most likely won't");
+                    }
                     result = getExistingTrackedRace(race);
                     while (!interrupted && result == null) {
                         try {

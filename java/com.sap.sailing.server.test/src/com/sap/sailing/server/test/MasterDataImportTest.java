@@ -360,7 +360,7 @@ public class MasterDataImportTest {
                 logTimePoint3);
         regatta.getRegattaLog().add(mappingEvent);
         GPSFix gpsFix = new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint2,
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
+                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)), /* optionalTrueHeading */ null);
         sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
         // test to check that batch-import of fixes works as intended
         DeviceIdentifier deviceBatch1 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "x", 4999);
@@ -524,7 +524,7 @@ public class MasterDataImportTest {
         List<GPSFix> fixesToSave = new ArrayList<>(numFixes);
         for(int i = 1; i <= numFixes; i++) {
             fixesToSave.add(new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint.plus(i),
-                    new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))));
+                    new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)), /* optionalTrueHeading */ null));
         }
         sourceService.getSensorFixStore().storeFixes(deviceIdentifier, fixesToSave, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         return deviceIdentifier;

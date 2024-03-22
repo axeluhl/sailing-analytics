@@ -9,9 +9,9 @@ import com.sap.sailing.domain.coursetemplate.CommonMarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.Positioning;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.common.RepeatablePart;
 
 public interface ReplicatingSharedSailingData extends SharedSailingData {
     

@@ -5,8 +5,39 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">March 2024</h5>
+         <ul class="bulletList">
+            <li>Bug fix: when collapsing the leaderboard while a few competitor info flags are already
+                showing on the map, speeds were not updated properly anymore. This is now fixed.</li>
+            <li>Bug fix: when the last score update date/time was displayed with the user being in a non-UTC
+                time zone, date and time were formatted using different time zones (time: UTC; date: local time zone).
+                This may have led to inconsistent displays.</li>
+            <li>Bug fix: the new drop-down race choose in the Race Board failed to work if the race from which it
+                was used does not have a valid start time yet.</li>
+            <li>In case of an unbreakable tie, instead of always using the competitor name to arrive at some stable
+                sorting, now we use the sail number in case boats cannot change during the regatta (as they could in,
+                say, a league format). This makes sorting more consistent with regatta management systems such
+                as Manage2Sail.</li>
+         </ul>
+         <h5 class="articleSubheadline">February 2024</h5>
+         <ul class="bulletList">
+            <li>Fixed an issue for users with event update rights that resulted in them being
+                unable to see the media tab of single regatta events for events without
+                pre-existing media objects.</li>
+            <li>When connectors support providing a heading (magnetic as in HDG, or true as
+                in HDT), the heading will be used for the boat orientation on the map. The
+                TracTrac connector, starting with its version 3.15.2, does support this if
+                the trackers in use provide a true heading value.</li>
+            <li>The "classic" <tt>/gwt/Spectator.html</tt> entry point now renders races also as
+                clickable if they do not have any valid wind readings.</li>
+            <li>Fixed non responsive sizing of the carousel header in home.html.</li>
+         </ul>
          <h5 class="articleSubheadline">January 2024</h5>
          <ul class="bulletList">
+            <li>The header bar on the home / landing page now consumes the full window width.
+                This way, the drop-down menu for additional menu options needs to be displayed
+                less often, as on wide-enough screens all options easily fit into the header
+                bar.</li>
             <li>Bug fix for colored tails: maximum value for color key was sometimes not
                 adjusted properly, leading to a "red shift" on the tails.</li>
             <li>The race name display in the header bar of the race viewer ("RaceBoard") is
@@ -17,6 +48,8 @@
             <li>Event base URLs with trailing slashes no longer produce incorrect race viewer
                 URLs in the REST API. Furthermore, race and regatta names will now be properly
                 URL-encoded when constructing a race viewer URL.</li>
+            <li>Avoid full-circle rotation of start/finish boat display when rotation oscillates
+                around 0deg.</li>
          </ul>
          <h5 class="articleSubheadline">December 2023</h5>
          <ul class="bulletList">

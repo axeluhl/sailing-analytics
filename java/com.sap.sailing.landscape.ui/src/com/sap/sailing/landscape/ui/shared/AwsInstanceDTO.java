@@ -5,31 +5,37 @@ import com.sap.sse.common.TimePoint;
 
 public class AwsInstanceDTO implements IsSerializable {
     private String instanceId;
-    private String availabilityZoneId;
+    private AvailabilityZoneDTO availabilityZoneDTO;
     private String privateIpAddress;
     private String publicIpAddress;
     private String region;
     private TimePoint launchTimePoint;
     private boolean shared;
-    
     @Deprecated
     AwsInstanceDTO() {} // for GWT RPC serialization only
     
-    public AwsInstanceDTO(String instanceId, String availabilityZoneId, String privateIpAddress, String publicIpAddress, String region, TimePoint launchTimePoint, boolean shared) {
+    public AwsInstanceDTO(String instanceId, String privateIpAddress, String publicIpAddress, String region, TimePoint launchTimePoint, boolean shared, AvailabilityZoneDTO azDTO) {
         super();
         this.instanceId = instanceId;
-        this.availabilityZoneId = availabilityZoneId;
+        this.availabilityZoneDTO = azDTO;
         this.privateIpAddress = privateIpAddress;
         this.publicIpAddress = publicIpAddress;
         this.region = region;
         this.launchTimePoint = launchTimePoint;
         this.shared = shared;
     }
+    public String getAvailabilityZoneId() {
+        return availabilityZoneDTO.getAzId();
+    }
     public String getInstanceId() {
         return instanceId;
     }
-    public String getAvailabilityZoneId() {
-        return availabilityZoneId;
+    
+    public AvailabilityZoneDTO getAvailabilityZoneDTO() {
+        return availabilityZoneDTO;
+    }
+    public String getAvailabilityZoneName() {
+        return availabilityZoneDTO.getAzName();
     }
     public String getRegion() {
         return region;

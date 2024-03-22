@@ -479,13 +479,13 @@ public class LandscapeServiceImpl implements LandscapeService {
                     for (final Iterable<UUID> eids : Util.map(mdiResult.getLeaderboardGroupsImported(), lgWithEventIds->lgWithEventIds.getEventIds())) {
                         Util.addAll(eids, eventIDs);
                     }
-                    final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> centralReverseProxy =
+                    final ReverseProxy<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>, RotatingFileBasedLog> reverseProxyCluster =
                             getLandscape().getCentralReverseProxy(region);
                     // TODO bug5311: when refactoring this for general scope migration, moving to a dedicated replica set will not require this
                     // TODO bug5311: when refactoring this for general scope migration, moving into a cold storage server other than ARCHIVE will require ALBToReverseProxyRedirectMapper instead
                     logger.info("Adding reverse proxy rules for migrated content pointing to ARCHIVE");
                     defaultRedirect.accept(new ALBToReverseProxyArchiveRedirectMapper<>(
-                            centralReverseProxy, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
+                            reverseProxyCluster, hostnameFromWhichToArchive, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption));
                     if (removeApplicationReplicaSet) {
                         logger.info("Removing remote sailing server references to "+from+" from archive server "+archive);
                         try {
@@ -1416,7 +1416,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         name.ifPresent(nameTag->startMultiServerProcedureBuilder.setInstanceName(nameTag));
         final StartMultiServer<String> startMultiServerProcedure = startMultiServerProcedureBuilder.build();
         startMultiServerProcedure.run();
-        return startMultiServerProcedure.getHost();
+        return Wait.wait(() -> startMultiServerProcedure.getHost(), multiServer -> {
+            try {
+                return multiServer.isReady(optionalKeyName, privateKeyEncryptionPassphrase);
+            } catch (Exception e) {
+                return false;
+            }
+        }, true, Landscape.WAIT_FOR_HOST_TIMEOUT, /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Waiting until host "+startMultiServerProcedure.getHost().getId()+" is ready");
     }
 
     @Override
@@ -1877,8 +1883,6 @@ public class LandscapeServiceImpl implements LandscapeService {
                 Optional.of(host.getAvailabilityZone()),
                 Optional.of(SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_DEFAULT_NAME),
                 Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-        Wait.wait(()->targetHost.isReady(Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase), Landscape.WAIT_FOR_HOST_TIMEOUT,
-                /* sleepBetweenAttempts */ Duration.ONE_SECOND.times(10), Level.INFO, "Waiting until host "+host.getId()+" is ready");
         final Map<String, SailingAnalyticsProcess<String>> masterProcessesMoved = new HashMap<>();
         final Map<String, SailingAnalyticsProcess<String>> replicaProcessesMoved = new HashMap<>();
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : getLandscape()

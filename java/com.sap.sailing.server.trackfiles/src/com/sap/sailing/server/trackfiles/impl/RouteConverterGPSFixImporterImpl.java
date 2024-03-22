@@ -209,7 +209,7 @@ public class RouteConverterGPSFixImporterImpl extends BaseRouteConverterGPSFixIm
         if (speedInKilometersPerHour != null && heading != null) {
             SpeedWithBearing speedWithBearing = new KilometersPerHourSpeedWithBearingImpl(
                     speedInKilometersPerHour, new DegreeBearingImpl(heading));
-            result = new GPSFixMovingImpl(pos, timePoint, speedWithBearing);
+            result = new GPSFixMovingImpl(pos, timePoint, speedWithBearing, /* optionalTrueHeading */ null); // we assume the Wgs84Position.getHeading() method returns COG, not HDG/HDT
         } else {
             result = new GPSFixImpl(pos, timePoint);
         }

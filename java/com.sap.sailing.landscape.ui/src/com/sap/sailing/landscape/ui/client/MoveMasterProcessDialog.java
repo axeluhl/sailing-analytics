@@ -79,7 +79,7 @@ public class MoveMasterProcessDialog extends DataEntryDialog<MoveMasterProcessDi
         super(stringMessages.moveMasterToOtherInstance(), /* message */ null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         this.stringMessages = stringMessages;
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_DEDICATED_INSTANCE_TYPE_NAME, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         instanceTypeLabel = new Label();
         masterReplicationBearerTokenBox = createTextBox("", 40);
         replicaReplicationBearerTokenBox = createTextBox("", 40);

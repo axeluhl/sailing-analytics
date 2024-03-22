@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.test.mock;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,6 +86,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * Simple mock for {@link TrackedRace} for leaderboard testing; the leaderboard only requests {@link #hasStarted(TimePoint)} and
@@ -106,7 +110,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
      *            mocked tracked race
      */
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
-        this(startTime, competitorsFromBestToWorst, null);
+        this(startTime, competitorsFromBestToWorst, mock(Regatta.class));
+        when(regatta.getName()).thenReturn("Test Regatta");
+        final CPUMeter cpuMeter = CPUMeter.create();
+        when(regatta.getCPUMeter()).thenReturn(cpuMeter);
     }
 
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst, Regatta regatta) {

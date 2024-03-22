@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -12,15 +13,22 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     private static final long serialVersionUID = 6508021498142383100L;
     private final SpeedWithBearing speed;
+    private final Bearing optionalTrueHeading;
     
-    public GPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {
+    public GPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed, Bearing optionalTrueHeading) {
         super(position, timePoint);
         this.speed = speed;
+        this.optionalTrueHeading = optionalTrueHeading;
     }
 
     @Override
     public SpeedWithBearing getSpeed() {
         return speed;
+    }
+
+    @Override
+    public Bearing getOptionalTrueHeading() {
+        return optionalTrueHeading;
     }
 
     @Override
@@ -39,9 +47,10 @@ public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
     }
     
     public static GPSFixMovingImpl create(double lonDeg, double latDeg, long timeMillis,
-            double speedInKnots, double bearingDeg) {
+            double speedInKnots, double bearingDeg, Double optionalTrueHeadingDeg) {
         return new GPSFixMovingImpl(new DegreePosition(latDeg, lonDeg),
                 new MillisecondsTimePoint(timeMillis), new KnotSpeedWithBearingImpl(
-                        speedInKnots, new DegreeBearingImpl(bearingDeg)));
+                        speedInKnots, new DegreeBearingImpl(bearingDeg)),
+                optionalTrueHeadingDeg==null?null:new DegreeBearingImpl(optionalTrueHeadingDeg));
     }
 }

@@ -2,13 +2,13 @@ package com.sap.sailing.landscape.ui.client;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.landscape.ui.shared.AmazonMachineImageDTO;
+import com.sap.sailing.landscape.ui.shared.AvailabilityZoneDTO;
 import com.sap.sailing.landscape.ui.shared.AwsInstanceDTO;
 import com.sap.sailing.landscape.ui.shared.AwsShardDTO;
 import com.sap.sailing.landscape.ui.shared.CompareServersResultDTO;
@@ -17,6 +17,7 @@ import com.sap.sailing.landscape.ui.shared.MongoEndpointDTO;
 import com.sap.sailing.landscape.ui.shared.MongoScalingInstructionsDTO;
 import com.sap.sailing.landscape.ui.shared.ProcessDTO;
 import com.sap.sailing.landscape.ui.shared.ReleaseDTO;
+import com.sap.sailing.landscape.ui.shared.ReverseProxyDTO;
 import com.sap.sailing.landscape.ui.shared.SSHKeyPairDTO;
 import com.sap.sailing.landscape.ui.shared.SailingApplicationReplicaSetDTO;
 import com.sap.sailing.landscape.ui.shared.SerializationDummyDTO;
@@ -27,13 +28,45 @@ import com.sap.sse.landscape.aws.common.shared.RedirectDTO;
 public interface LandscapeManagementWriteServiceAsync {
     void getRegions(AsyncCallback<ArrayList<String>> callback);
     
-    void getInstanceTypeNames(AsyncCallback<ArrayList<String>> callback);
+    /**
+     * @param canBeDeployedInNlbInstanceBasedTargetGroup
+     *            A boolean indicating, if true, that the list of available instance types should not contain those,
+     *            which cannot be added to an instance-based Network Load Balancer.
+     */
+    void getInstanceTypeNames(boolean canBeDeployedInNlbInstanceBasedTargetGroup, AsyncCallback<ArrayList<String>> callback);
 
     void getMongoEndpoints(String regionId, AsyncCallback<ArrayList<MongoEndpointDTO>> callback);
 
     void getMongoEndpoint(String region, String replicaSetName,
             AsyncCallback<MongoEndpointDTO> callback);
-
+    
+    void getReverseProxies(String regionId, AsyncCallback<ArrayList<ReverseProxyDTO>> callback);
+    
+    /**
+     * Removes a reverse proxy from the given cluster and terminates it.
+     * @return Returns true if a success.
+     */
+    void removeReverseProxy(ReverseProxyDTO instance, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, AsyncCallback<Void> callback);
+    
+    /**
+     * Rotates the httpd logs on a proxy instance.
+     * @param optionalKeyName Name of key used to connect to the instance to restart
+     * @param passphraseForPrivateKeyDecryption the passphrase for the given key
+     */
+    void rotateHttpdLogs(ReverseProxyDTO proxy, String region, String optionalKeyName,
+            byte[] passphraseForPrivateKeyDecryption, AsyncCallback<Void> callback);
+    
+    /**
+     * Adds a reverse proxy to the cluster and the right load balancer's target group.
+     */
+    void addReverseProxy(String instanceName, String instanceType, String region, String launchKey, AvailabilityZoneDTO availabilityZoneDTO, AsyncCallback<Void> callback);
+    
+    
+    /**
+     * Gets all availability zones in a region.
+     */
+    void describeAvailabilityZones(String region,AsyncCallback<ArrayList<AvailabilityZoneDTO>> asyncCallback);
+    
     /**
      * The calling subject will see only those keys for which it has the {@code READ} permission.
      */

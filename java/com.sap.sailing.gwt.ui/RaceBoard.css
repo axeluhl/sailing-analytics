@@ -675,6 +675,7 @@ img.openColumn {
 	display: inline-block;
 	vertical-align: middle;
 	margin-left: 10px;
+	margin-right: -10px; /* allow elements to the right to slighly "under-cut" the SAP anvil */
 }
 
 .RegattaRaceInformation-Header {

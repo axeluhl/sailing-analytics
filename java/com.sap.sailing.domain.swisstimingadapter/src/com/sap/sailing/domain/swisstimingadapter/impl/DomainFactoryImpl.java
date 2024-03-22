@@ -379,7 +379,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public GPSFixMoving createGPSFix(TimePoint timePointOfTransmission, Fix fix) {
         GPSFixMoving result = new GPSFixMovingImpl(fix.getPosition(), new MillisecondsTimePoint(
-                timePointOfTransmission.asMillis() + fix.getAgeOfDataInMilliseconds()), fix.getSpeed());
+                timePointOfTransmission.asMillis() + fix.getAgeOfDataInMilliseconds()), fix.getSpeed(), /* optionalTrueHeading */ null);
         return result;
     }
     

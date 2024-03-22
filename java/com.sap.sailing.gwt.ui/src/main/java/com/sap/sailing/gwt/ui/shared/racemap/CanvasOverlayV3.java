@@ -17,6 +17,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.MapHandlerRegistration;
 import com.google.gwt.maps.client.events.click.ClickEventFormatter;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
@@ -87,6 +88,15 @@ public abstract class CanvasOverlayV3 {
      * with the time set on the canvas element style's <code>transition</code> CSS property.
      */
     private long transitionTimeInMilliseconds;
+    
+    /**
+     * Remembers the old drawing angle as passed to {@link #setCanvasRotation()} to minimize rotation angle upon
+     * the next update. The rotation property will always be animated according to the magnitude of the values. A
+     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
+     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
+     * goes through 0.<p>
+     */
+    private Double drawingAngle;
 
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
@@ -148,7 +158,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addClickHandler(ClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ClickEvent.getType(), 
                 handler, new ClickEventFormatter(), true);
     }
 
@@ -158,7 +168,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addDblClickHandler(DblClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
                 handler, new DblClickEventFormatter(), true);
     }
 
@@ -168,7 +178,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseDownHandler(MouseDownMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
                 handler, new MouseDownEventFormatter(), true);
     }
 
@@ -178,7 +188,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseMoveHandler(MouseMoveMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
                 handler, new MouseMoveEventFormatter(), true);
     }
 
@@ -188,7 +198,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
                 handler, new MouseOutEventFormatter(), true);
     }
 
@@ -198,7 +208,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
                 handler, new MouseOverEventFormatter(), true);
     }
 
@@ -208,7 +218,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseUpHandler(MouseUpMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
                 handler, new MouseUpEventFormatter(), true);
     }
 
@@ -218,7 +228,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addRightClickHandler(RightClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
                 handler, new RightClickEventFormatter(), true);
     }
     
@@ -349,9 +359,31 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
 
-    protected void setCanvasRotation(double rotationInDegrees) {
+    /**
+     * Updates {@link #drawingAngle} so that the CSS transition from the old {@link #drawingAngle} to
+     * <code>newBoatDrawingAngle</code> is minimal.
+     */
+    protected void updateDrawingAngleAndSetCanvasRotation(double newBoatDrawingAngle) {
+        if (drawingAngle == null) {
+            drawingAngle = newBoatDrawingAngle;
+        } else {
+            drawingAngle = getNewRotationWithMinimalDiff(newBoatDrawingAngle);
+        }
+        setCanvasRotation();
+    }
+    
+    private void setCanvasRotation() {
         setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
-        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + rotationInDegrees + "deg)");
+        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + drawingAngle + "deg)");
+    }
+
+    protected double getNewRotationWithMinimalDiff(double desiredAngle) {
+        double desiredMinusCurrent;
+        double result = desiredAngle;
+        while (Math.abs(desiredMinusCurrent = result - drawingAngle) > 180) {
+            result -= Math.signum(desiredMinusCurrent)*360;
+        }
+        return drawingAngle+desiredMinusCurrent;
     }
 
     protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, Distance length) {

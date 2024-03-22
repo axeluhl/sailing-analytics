@@ -1,5 +1,7 @@
 package com.sap.sailing.expeditionconnector.impl;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -8,7 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -23,6 +28,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ExpeditionMessageImpl implements ExpeditionMessage {
+    private static final Logger logger = Logger.getLogger(ExpeditionMessageImpl.class.getName());
+
     private final String originalMessage;
     private final int boatID;
     private final Map<Integer, Double> values;
@@ -148,8 +155,21 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         if (hasValue(ID_GPS_LAT) && hasValue(ID_GPS_LNG)) {
             final SpeedWithBearing cogSog = getSpeedOverGround();
             if (cogSog != null) {
-                result = new GPSFixMovingImpl(new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG)), getTimePoint(),
-                        getSpeedOverGround());
+                final DegreePosition position = new DegreePosition(getValue(ID_GPS_LAT), getValue(ID_GPS_LNG));
+                Bearing optionalTrueHeading;
+                if (hasValue(ID_HEADING)) {
+                    try {
+                        optionalTrueHeading = new DegreeBearingImpl(getValue(ID_HEADING)).add(
+                                DeclinationService.INSTANCE.getDeclination(getTimePoint(), position, /* timeoutForOnlineFetchInMilliseconds */ 1000).getBearingCorrectedTo(getTimePoint()));
+                    } catch (IOException | ParseException e) {
+                        logger.log(Level.WARNING, "Problem obtaining the magnetic declination for Expedition fix", e);
+                        optionalTrueHeading = null;
+                    }
+                } else {
+                    optionalTrueHeading = null;
+                }
+                result = new GPSFixMovingImpl(position, getTimePoint(),
+                        getSpeedOverGround(), optionalTrueHeading);
             } else {
                 result = null;
             }
