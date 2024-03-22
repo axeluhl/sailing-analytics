@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.10"
 services:
   sailing-analytics:
     image: "docker.sapsailing.com/sapsailing:latest"
@@ -15,5 +15,5 @@ services:
   mongo:
     image: "mongo:4.4-rc"
   rabbitmq:
-    image: "rabbitmq:3.9"
+    image: "rabbitmq:3.13"
 
