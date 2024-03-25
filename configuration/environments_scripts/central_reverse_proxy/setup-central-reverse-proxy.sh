@@ -15,19 +15,39 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ ruby
-yum install -y perl perl-CGI perl-Template-Toolkit perl-HTML-Template perl-CPAN perl-DBD-MySQL
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server perl-GD
+yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl
 amazon-linux-extras install epel -y && yum install -y apachetop
-cpan install Date::Parse Email::Address Email::Send DBI Geo::IP::PurePerl Math::Random::ISAAC IO::Socket::SSL
 # main conf mandates php7.1
 amazon-linux-extras enable php7.1
 yum install -y php # install mod_phpservice
 # make root readable for 
 chmod 755 /root
+scp root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
+tar -xzvf bugzilla-5.0.4.tar.gz -C /usr/share/bugzilla
+mv /usr/share/bugzilla-5.0.4 /usr/share/bugzilla
+cd /usr/share/bugzilla/
+scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
 # missing perl modules
+# essentials bugzilla
+/usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
 /usr/bin/perl install-module.pl Email::Sender
-/usr/bin/perl install-module.pl GD
+/usr/bin/perl install-module.pl Email::MIME
+/usr/bin/perl install-module.pl List::MoreUtils
+/usr/bin/perl install-module.pl Math::Random::ISAAC
+/usr/bin/perl install-module.pl JSON::XS
+
+# important bugzilla
+/usr/bin/perl install-module.pl Email::Address
+/usr/bin/perl install-module.pl autodie
+/usr/bin/perl install-module.pl Class::XSAccessor
+# nice to have for buzilla
+/usr/bin/perl install-module.pl Date::Parse
+/usr/bin/perl install-module.pl Email::Send
+/usr/bin/perl install-module.pl DBI
+/usr/bin/perl install-module.pl Geo::IP::PurePerl
+/usr/bin/perl install-module.pl IO::Socket::SSL
 /usr/bin/perl install-module.pl Chart::Lines
 /usr/bin/perl install-module.pl Template::Plugin::GD::Image
 /usr/bin/perl install-module.pl GD::Text
