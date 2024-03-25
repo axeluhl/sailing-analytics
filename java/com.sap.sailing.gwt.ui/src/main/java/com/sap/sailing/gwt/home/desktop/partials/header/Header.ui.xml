@@ -7,7 +7,7 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.header.HeaderResources" />
   <g:HTMLPanel tag="header" addStyleNames="{local_res.css.siteheader}">
     <!-- Website header-->
-      <div class="{res.mediaCss.grid}" style="display:flex;">
+      <div class="{res.mediaCss.grid}" style="display:flex; max-width: 100%;">
         <div class="{local_res.css.siteheader_logo}">
           <a ui:field="logoAnchor" title="{i18n.sapAnalytics}">
             <img ui:field="logoImage" src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>

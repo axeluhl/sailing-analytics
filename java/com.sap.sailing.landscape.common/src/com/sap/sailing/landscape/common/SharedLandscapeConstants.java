@@ -20,6 +20,15 @@ public interface SharedLandscapeConstants {
      */
     String DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME = "security-service";
     
+    String RABBIT_IN_DEFAULT_REGION_HOSTNAME = "rabbit.internal.sapsailing.com";
+
+    String DEFAULT_REGION = "eu-west-1";
+    
+    /**
+     * We maintain a DNS entry for "rabbit.internal.sapsailing.com" (see {@link #RABBIT_IN_DEFAULT_REGION_HOSTNAME}) in this region
+     */
+    String REGION_WITH_RABBITMQ_DNS_HOSTNAME = DEFAULT_REGION;
+    
     /**
      * This is the region of the load balancer handling the default traffic for {@code *.sapsailing.com}. It is also
      * called the "dynamic" load balancer because adding, removing or changing any hostname-based rule in its HTTPS
@@ -38,8 +47,14 @@ public interface SharedLandscapeConstants {
      * for archived events. If such a state is reached, "dynamic" load balancing may potentially be used regardless
      * the region.
      */
-    String REGION_WITH_DEFAULT_LOAD_BALANCER = "eu-west-1";
-
+    String REGION_WITH_DEFAULT_LOAD_BALANCER = DEFAULT_REGION;
+    
+    /**
+     * Tag name used to identify instances on which a RabbitMQ installation is running. The tag value is currently interpreted to
+     * be the port number (usually 5672) on which the RabbitMQ endpoint can be reached.
+     */
+    String RABBITMQ_TAG_NAME = "RabbitMQEndpoint";
+    
     /**
      * The tag value used to identify host images that can be launched in order to run one or more Sailing Analytics
      * server processes on it.
@@ -75,4 +90,11 @@ public interface SharedLandscapeConstants {
      * of a typical process instance.
      */
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
+
+    /**
+     * The most appropriate instance type for a disposable reverse proxy.
+     */
+    String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "T3_MEDIUM";
+
+    String DEFAULT_DISPOSABLE_REVERSE_PROXY_INSTANCE_NAME = "DisposableReverseProxy";
 }

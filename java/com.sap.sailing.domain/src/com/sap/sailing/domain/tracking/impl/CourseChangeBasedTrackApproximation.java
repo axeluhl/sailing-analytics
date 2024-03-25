@@ -431,7 +431,7 @@ public class CourseChangeBasedTrackApproximation implements Serializable, GPSTra
     }
 
     private GPSFixMovingImpl createDummyFix(TimePoint timePoint) {
-        return new GPSFixMovingImpl(/* position */ null, timePoint, /* speed */ null);
+        return new GPSFixMovingImpl(/* position */ null, timePoint, /* speed */ null, /* optionalTrueHeading */ null);
     }
 
     @Override

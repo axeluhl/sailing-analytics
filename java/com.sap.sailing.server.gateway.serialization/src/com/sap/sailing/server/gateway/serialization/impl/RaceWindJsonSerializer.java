@@ -41,9 +41,8 @@ public class RaceWindJsonSerializer extends AbstractTrackedRaceDataJsonSerialize
         final TimePoint finalTo = Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getEndOfRace());
         final Set<WindSource> windSourcesToExclude = trackedRace.getWindSourcesToExclude();
         List<WindSource> highQualityWindSources = trackedRace.getWindSources().stream()
-                .filter(windSource -> (windSource.getType() == WindSourceType.EXPEDITION
-                        || windSource.getType() == WindSourceType.RACECOMMITTEE)
-                        && windSourcesToExclude.contains(windSource))
+                .filter(windSource -> windSource.getType() == WindSourceType.EXPEDITION
+                        && !windSourcesToExclude.contains(windSource))
                 .collect(Collectors.toList());
         JSONArray windSourcesJson = new JSONArray();
         TimePoint earliestTimePoint = null;

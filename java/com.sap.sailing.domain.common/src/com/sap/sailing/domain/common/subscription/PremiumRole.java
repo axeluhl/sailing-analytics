@@ -28,6 +28,8 @@ public class PremiumRole extends RolePrototype {
                         .withActions(SecuredSecurityTypes.UserActions.BE_PREMIUM).build(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
                         .withActions(SecuredDomainType.TrackedRaceActions.VIEWANALYSISCHARTS).build(),
+                WildcardPermission.builder().withTypes(SecuredDomainType.TRACKED_RACE)
+                        .withActions(SecuredDomainType.TrackedRaceActions.COLORED_TAILS).build(),
                 WildcardPermission.builder().withTypes(SecuredDomainType.LEADERBOARD)
                         .withActions(SecuredDomainType.LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION).build());
     }

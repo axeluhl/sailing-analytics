@@ -29,7 +29,7 @@ public abstract class SecurityDTOUtil {
     /**
      * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
      * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
-     * secured object DTO}.
+     * secured object DTO}. Prunes the ACLs to those parts relevant for the currently authenticated user.
      * 
      * @param securityService
      *            the {@link SecurityService} to determine access control list and ownership
@@ -37,22 +37,39 @@ public abstract class SecurityDTOUtil {
      *            the {@link NamedSecuredObjectDTO} to add security information to
      */
     public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject) {
+        addSecurityInformation(securityService, securedObject, /* disablePruningForCurrentUser */ false);
+    }
+    
+    /**
+     * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
+     * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
+     * secured object DTO}.
+     * 
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
+     * @param securedObject
+     *            the {@link NamedSecuredObjectDTO} to add security information to
+     * @param disablePruningForCurrentUser
+     *            if {@code true}, the whole ACL is added. If {@code false}, only that part of the ACL is added that is
+     *            relevant for the currently authenticated user. For security checks, only that part is necessary, but
+     *            when editing an ACL, all contents are required to be fetched to the UI.
+     */
+    public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject, final boolean disablePruningForCurrentUser) {
         addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, new HashMap<>(),
-                new HashMap<>());
+                new HashMap<>(), disablePruningForCurrentUser);
     }
 
     /**
      * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
      * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
-     * secured object DTO}.
+     * secured object DTO}. Prunes the ACLs to those parts relevant for the currently authenticated user. 
+     * 
      * @param securityDTOFactory
      *            the {@link SecurityDTOFactory} to use for DTO creation
      * @param securityService
      *            the {@link SecurityService} to determine access control list and ownership
      * @param securedObject
      *            the {@link NamedSecuredObjectDTO} to add security information to
-     * @param fromOriginalToStrippedDownUserGroup2
-     * @param fromOriginalToStrippedDownUser2
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
             final SecurityService securityService, final SecuredDTO securedObject,
@@ -93,22 +110,21 @@ public abstract class SecurityDTOUtil {
             final Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup,
             final boolean disablePruningForCurrentUser) {
         final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(securedObject.getIdentifier());
-        AccessControlListDTO accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
+        final AccessControlListDTO accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup);
         if (disablePruningForCurrentUser) {
             securedObject.setAccessControlList(accessControlListDTO);
         } else {
-            User user = securityService.getCurrentUser();
-            if (user != null) {
-                final Iterable<StrippedUserGroupDTO> userGroups = getUserGroupsForUser(securityService,
-                        securityDTOFactory, user);
-                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getUserGroupsForUser(securityService,
-                        securityDTOFactory, securityService.getAllUser());
-                securedObject.setAccessControlList(
-                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userGroups,
-                                allUserGroups2));
-            }
+            final User user = securityService.getCurrentUser();
+            final Iterable<StrippedUserGroupDTO> userGroups = user == null
+                    ? Collections.emptySet()
+                    : getUserGroupsForUser(securityService, securityDTOFactory, user);
+            final Iterable<StrippedUserGroupDTO> allUserGroups2 = getUserGroupsForUser(securityService,
+                    securityDTOFactory, securityService.getAllUser());
+            securedObject.setAccessControlList(
+                    securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userGroups,
+                            allUserGroups2));
         }
         final OwnershipAnnotation ownership = securityService.getOwnership(securedObject.getIdentifier());
         securedObject.setOwnership(

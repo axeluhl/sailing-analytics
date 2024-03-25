@@ -26,16 +26,12 @@ public class TagFooterPanel extends FlowPanel {
      */
     protected TagFooterPanel(TaggingComponent taggingComponent, SailingServiceAsync sailingService, StringMessages stringMessages, UserService userService) {
         this.taggingComponent = taggingComponent;
-
         tagModificationPanel = new TagModificationPanel(taggingComponent, this, sailingService, stringMessages, userService);
         tagButtonPanel = new TagButtonPanel(taggingComponent, this, stringMessages, userService);
-
         // Tag-buttons are only shown if amount of tag-buttons is greater then 0!
         setTagButtonsVisibility(true);
-
         // input fields are hidden by default
         setInputFieldsVisibility(false);
-
         tagButtonPanel.loadAllTagButtons();
     }
 

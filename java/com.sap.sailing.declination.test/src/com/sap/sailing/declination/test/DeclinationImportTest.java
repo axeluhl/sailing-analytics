@@ -38,7 +38,7 @@ public abstract class DeclinationImportTest<I extends DeclinationImporter> exten
     public void readOnlineOrFromFile() throws IOException, ClassNotFoundException, ParseException {
         Declination declination = importer.getDeclination(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("2019-12-12").getTime()), 
-                /* timeoutForOnlineFetchInMilliseconds */ 10000);
+                /* timeoutForOnlineFetchInMilliseconds */ 100000);
         assertNotNull(declination);
     }
 }

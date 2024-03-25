@@ -253,6 +253,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sailing.server.gateway.interfaces.MasterDataImportConstants;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -3053,7 +3054,7 @@ Replicator {
                      * already have been removed by the stopAllTrackersForWhichRaceIsLastReachable(...) above; maybe a
                      * Java memory model idiosyncrasy with the queue thread not "seeing" the change to dataTrackers?).
                      * We must make sure to not block its execution, e.g., by synchronization, because otherwise
-                     * the the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
+                     * the removedTrackedRegatta(regatta) call below may not return, either, as it waits for
                      * tasks it may enqueue after the task enqueued here. See bug 5879.
                      */
                     trackedRegatta.removeTrackedRace(trackedRace, Optional.of(
@@ -3103,6 +3104,9 @@ Replicator {
                 }
             }
         }
+        // FIXME bug5982: when the TrackedRace is removed already, queries for the RaceDefinition would still be satisfied up to this point, with a RaceDefinition that is about to disappear;
+        // FIXME bug5982: no TrackedRace will ever appear again for that RaceDefinition; we should consider introducing a locking pattern around the transaction of removing TrackedRace+RaceDefinition
+        // FIXME bug5982: and synchronize accordingly with TrackedRegattaImpl.getTrackedRace(RaceDefinition).
         // remove the race from the (default) regatta if the regatta is not persistently stored
         regatta.removeRace(race);
         if (!regatta.isPersistent() && Util.isEmpty(regatta.getAllRaces())) {
@@ -3169,7 +3173,7 @@ Replicator {
 
     @Override
     public DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) {
-        return getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
+        return getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
     }
 
     private DynamicTrackedRace getExistingTrackedRace(Regatta regatta, RaceDefinition race) {
@@ -3233,9 +3237,9 @@ Replicator {
         if (regatta != null) {
             DynamicTrackedRegatta trackedRegatta = regattaTrackingCache.get(regatta);
             if (trackedRegatta != null) {
-                RaceDefinition race = getRace(raceIdentifier);
+                RaceDefinition race = regatta.getRaceByName(raceIdentifier.getRaceName());
                 if (race != null) {
-                    result = trackedRegatta.getTrackedRace(race);
+                    result = trackedRegatta.getExistingTrackedRace(race);
                 }
             }
         }
@@ -4161,12 +4165,12 @@ Replicator {
 
     @Override
     public void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName) {
-        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
-                RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
+                final Fleet fleetImpl = raceColumn.getFleetByName(fleetName);
+                final RaceLog racelog = raceColumn.getRaceLog(fleetImpl);
                 if (racelog != null) {
                     raceColumn.reloadRaceLog(fleetImpl);
                     logger.info("Reloaded race log for fleet " + fleetImpl + " for race column " + raceColumn.getName()
@@ -5214,8 +5218,7 @@ Replicator {
                 0.5);
         final String query;
         try {
-            query = createLeaderboardQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations,
-                    exportTrackedRacesAndStartTracking);
+            query = createLeaderboardGroupQuery(leaderboardGroupIds, compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking);
         } catch (UnsupportedEncodingException e1) {
             throw new RuntimeException(e1);
         }
@@ -5245,11 +5248,10 @@ Replicator {
             String message = e.getMessage();
             if (connection instanceof HttpURLConnection) {
                 // try to obtain an error message from the connection's error stream:
-                try {
-                    message = new BufferedReader(
+                try (final BufferedReader bufferedReader = new BufferedReader(
                             new InputStreamReader(((HttpURLConnection) connection).getErrorStream(),
-                                    HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8")))
-                                            .readLine();
+                                    HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8")))) {
+                    message = bufferedReader.readLine();
                 } catch (Exception exceptionTryingToReadErrorStream) {
                     // in this case we just stay with the exception's message
                 }
@@ -5278,16 +5280,22 @@ Replicator {
         }
     }
 
-    private String createLeaderboardQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
+    private String createLeaderboardGroupQuery(UUID[] leaderboardGroupIds, boolean compress, boolean exportWind,
             boolean exportDeviceConfigurations, boolean exportTrackedRacesAndStartTracking)
             throws UnsupportedEncodingException {
-        StringBuffer queryStringBuffer = new StringBuffer("");
+        StringBuilder queryStringBuilder = new StringBuilder();
         for (UUID uuid : leaderboardGroupIds) {
-            queryStringBuffer.append("uuids[]=" + uuid + "&");
+            queryStringBuilder.append(MasterDataImportConstants.QUERY_PARAM_UUIDS);
+            queryStringBuilder.append('=');
+            queryStringBuilder.append(uuid);
+            queryStringBuilder.append('&');
         }
-        queryStringBuffer.append(String.format("compress=%s&exportWind=%s&exportDeviceConfigs=%s&exportTrackedRacesAndStartTracking=%s", compress,
-                exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
-        return queryStringBuffer.toString();
+        queryStringBuilder.append(String.format(MasterDataImportConstants.QUERY_PARAM_COMPRESS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_WIND+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_DEVICE_CONFIGS+"=%s&"
+                                               +MasterDataImportConstants.QUERY_PARAM_EXPORT_TRACKED_RACES_AND_START_TRACKING+"=%s",
+                                               compress, exportWind, exportDeviceConfigurations, exportTrackedRacesAndStartTracking));
+        return queryStringBuilder.toString();
     }
 
     private class TimeoutExtendingInputStream extends FilterInputStream {

@@ -51,7 +51,7 @@ public class MarkPositionTimeFilterTest {
     @Test
     public void testAddFixForMark() {
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());
@@ -68,7 +68,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());
@@ -85,7 +85,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertTrue(track.getRawFixes().isEmpty());
@@ -102,7 +102,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertTrue(track.getRawFixes().isEmpty());
@@ -111,7 +111,7 @@ public class MarkPositionTimeFilterTest {
         }
         when(trackedRace.getEndOfTracking()).thenReturn(fix.plus(10000));
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)), /* optionalTrueHeading */ null), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());

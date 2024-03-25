@@ -1,0 +1,14 @@
+[Unit]
+Description=Creates httpd internal-status file.
+Requires=-.mount network-online.target
+After=-.mount network-online.target get-latest-httpd-conf.service
+Before=httpd.service
+# Staring before means no "systemctl start httpd" is needed.
+[Install]
+RequiredBy=multi-user.target
+WantedBy=httpd.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/root/setupHttpdGitLocal.sh

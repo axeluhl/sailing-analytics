@@ -55,19 +55,19 @@ public class GetSixtyInchStatisticAction implements SailingAction<GetSixtyInchSt
         final RaceDefinition race = context.getRacingEventService().getRace(identifier);
         int competitors = com.sap.sse.common.Util.size(race.getCompetitors());
         legs = race.getCourse().getLegs().size();
-        final DynamicTrackedRace trace = context.getRacingEventService().getTrackedRace(identifier);
+        final DynamicTrackedRace trackedRace = context.getRacingEventService().getTrackedRace(identifier);
         Duration duration = null;
         Distance distance = null;
         TimePoint timePoint;
-        if (trace.getEndOfRace() == null) {
+        if (trackedRace.getEndOfRace() == null) {
             timePoint = MillisecondsTimePoint.now();
-            duration = estimateDuration(trace, duration, timePoint);
-            distance = estimateDistance(trace, distance, timePoint);
+            duration = estimateDuration(trackedRace, duration, timePoint);
+            distance = estimateDistance(trackedRace, distance, timePoint);
         } else {
-            final Iterator<Competitor> competitorIterator = trace.getCompetitorsFromBestToWorst(trace.getEndOfRace()).iterator();
+            final Iterator<Competitor> competitorIterator = trackedRace.getCompetitorsFromBestToWorst(trackedRace.getEndOfRace()).iterator();
             if (competitorIterator.hasNext()) {
-                distance = trace.getDistanceTraveled(competitorIterator.next(), trace.getEndOfRace());
-                duration = trace.getStartOfRace().until(trace.getEndOfRace());
+                distance = trackedRace.getDistanceTraveled(competitorIterator.next(), trackedRace.getEndOfRace());
+                duration = trackedRace.getStartOfRace().until(trackedRace.getEndOfRace());
             }
         }
         return new GetSixtyInchStatisticDTO(competitors, legs, duration, distance);

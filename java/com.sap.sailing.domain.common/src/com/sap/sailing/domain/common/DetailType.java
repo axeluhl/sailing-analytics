@@ -24,6 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  *
  */
 public enum DetailType implements Serializable {
+    LEG_TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
     LEG_DISTANCE_TRAVELED(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "DISTANCE_TRAVELED"),
     LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START(0, ASCENDING, null, "DISTANCE_TRAVELED_INCLUDING_GATE_START"),
     LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS(2, DESCENDING, PREMIUM_LEADERBOARD_INFORMATION, "AVERAGE_SPEED_OVER_GROUND_IN_KNOTS"),
@@ -220,6 +221,13 @@ public enum DetailType implements Serializable {
 
     private final String[] oldNames;
 
+    /**
+     * @param precision
+     *            the number of decimal digits in which they are usually provided and should be formatted
+     * @param premiumAction
+     *            If not {@code null} then the user must have permission to execute this action on the leaderboard to
+     *            which it is applied.
+     */
     DetailType(int precision, SortingOrder defaultSortingOrder, Action premiumAction, String... oldNames) {
         this.oldNames = oldNames;
         this.precision = precision;
@@ -227,6 +235,9 @@ public enum DetailType implements Serializable {
         this.defaultSortingOrder = defaultSortingOrder;
     }
 
+    /**
+     * @return the number of decimal digits in which they are usually provided and should be formatted
+     */
     public int getPrecision() {
         return precision;
     }
@@ -274,6 +285,7 @@ public enum DetailType implements Serializable {
      */
     public static Collection<DetailType> getAutoplayDetailTypesForChart() {
         final Collection<DetailType> availableDetailsTypes = new LinkedHashSet<>();
+        availableDetailsTypes.add(DetailType.LEG_TACKTYPE_LONGTACK_SHORTTACK);
         availableDetailsTypes.add(DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.LEG_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         availableDetailsTypes.add(DetailType.LEG_DISTANCE_TRAVELED);

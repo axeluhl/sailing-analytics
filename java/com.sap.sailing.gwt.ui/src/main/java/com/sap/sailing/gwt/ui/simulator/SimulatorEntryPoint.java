@@ -32,7 +32,6 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class SimulatorEntryPoint extends AbstractSailingReadEntryPoint {
-
     private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
     private int yRes = 20;

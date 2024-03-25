@@ -1,0 +1,7 @@
+This is the crontab repo and it contains one line crontabs for all the different environments.
+These files are concatenated by the build-crontab-and-cp-files script. Any time the crontab should contain
+a user's home directory, instead write PATH_OF_HOME_DIR_TO_REPLACE; if the crontab should
+contain the path to the git directory, instead write PATH_OF_GIT_HOME_DIR_TO_REPLACE.
+These are replaced by the build-crontab-and-cp-filesscript.
+
+Note: theses files are symbolically linked to, so beware of the ramifications of changes.

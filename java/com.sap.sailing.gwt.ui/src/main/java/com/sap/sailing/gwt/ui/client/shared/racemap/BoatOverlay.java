@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
-import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Color;
@@ -61,15 +60,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
     public static enum DisplayMode { DEFAULT, SELECTED, NOT_SELECTED };
     private DisplayMode displayMode;
 
-    /**
-     * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
-     * the next update. The rotation property will always be animated according to the magnitude of the values. A
-     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
-     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
-     * goes through 0.<p>
-     */
-    private Double boatDrawingAngle;
-
     public BoatOverlay(final MapWidget map, int zIndex, final BoatDTO boatDTO, Color color, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
         this.boatClass = boatDTO.getBoatClass();
@@ -108,12 +98,10 @@ public class BoatOverlay extends CanvasOverlayV3 {
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
             // now rotate the canvas accordingly
-            SpeedWithBearingDTO speedWithBearing = boatFix.speedWithBearing;
-            if (speedWithBearing == null) {
-                speedWithBearing = new SpeedWithBearingDTO(0, 0);
-            }
-            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
-            setCanvasRotation(boatDrawingAngle);
+            final double trueHeadingInDegrees = boatFix.optionalTrueHeading != null
+                    ? boatFix.optionalTrueHeading.getDegrees()
+                    : (boatFix.speedWithBearing == null ? 0 : boatFix.speedWithBearing.bearingInDegrees);
+            updateDrawingAngleAndSetCanvasRotation(coordinateSystem.mapDegreeBearing(trueHeadingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
         }
     }
     
@@ -128,22 +116,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 || lastHeight == null || lastHeight != height || lastScale == null || !lastScale.equals(scaleFactor)
                 || lastColor == null || !lastColor.equals(color) || lastDisplayMode == null
                 || !lastDisplayMode.equals(displayMode);
-    }
-
-    /**
-     * Updates {@link #boatDrawingAngle} so that the CSS transition from the old {@link #boatDrawingAngle} to
-     * <code>newBoatDrawingAngle</code> is minimal.
-     */
-    private void updateBoatDrawingAngle(double newBoatDrawingAngle) {
-        if (boatDrawingAngle == null) {
-            boatDrawingAngle = newBoatDrawingAngle;
-        } else {
-            double newMinusOld;
-            while (Math.abs(newMinusOld = newBoatDrawingAngle - boatDrawingAngle) > 180) {
-                newBoatDrawingAngle -= Math.signum(newMinusOld)*360;
-            }
-            boatDrawingAngle = boatDrawingAngle+newMinusOld;
-        }
     }
 
     public void setBoatFix(GPSFixDTOWithSpeedWindTackAndLegType boatFix, long timeForPositionTransitionMillis) {

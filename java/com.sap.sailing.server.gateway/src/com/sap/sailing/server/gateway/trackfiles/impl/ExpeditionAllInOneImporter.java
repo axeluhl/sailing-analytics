@@ -365,31 +365,34 @@ public class ExpeditionAllInOneImporter {
                 securityService.checkCurrentUserExplicitPermissions(service.getRegatta(new RegattaName(regattaNameAndleaderboardName)), DefaultActions.UPDATE);
                 securityService.checkCurrentUserExplicitPermissions(service.getLeaderboardByName(regattaNameAndleaderboardName), DefaultActions.UPDATE);
                 if (importMode == ImportMode.NEW_COMPETITOR) {
-                    securityService.checkCurrentUserExplicitPermissions(service.getTrackedRace(new RegattaNameAndRaceName(regattaNameAndleaderboardName, trackedRaceName)), DefaultActions.UPDATE);
-                    final TimePointsOfFirstAndLastFix firstAndLastFixAt = importFixes(filenameWithSuffix, fileItem, jsonHolderForGpsFixImport, jsonHolderForSensorFixImport, errors);
-                    ensureEventLongEnough(firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), eventId);
-                    final Iterable<RaceColumn> raceColumns = regattaLeaderboard.getRaceColumns();
-                    if (Util.isEmpty(raceColumns)) {
-                        return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidRace"));
-                    }
-                    try {
-                        for (RaceColumn raceColumn : raceColumns) {
-                            final Iterable<? extends Fleet> fleets = raceColumn.getFleets();
-                            if (Util.size(fleets) != 1) {
-                                return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorSplitFleetNotSupported"));
-                            }
-                            final Fleet fleet = fleets.iterator().next();
-                            DynamicTrackedRace trackedRaceForColumn = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
-                            if (trackedRaceForColumn == null) {
-                                trackedRaceForColumn = trackRace(regattaLeaderboard, raceColumn, fleet);
-                            }
-                            trackedRaces.add(trackedRaceForColumn);
-                            raceNameRaceColumnNameFleetnameList
-                                    .add(new Triple<>(trackedRaceForColumn.getRaceIdentifier().getRaceName(),
-                                            raceColumn.getName(), fleet.getName()));
+                    final DynamicTrackedRace trackedRace = service.getTrackedRace(new RegattaNameAndRaceName(regattaNameAndleaderboardName, trackedRaceName));
+                    if (trackedRace != null) {
+                        securityService.checkCurrentUserExplicitPermissions(trackedRace, DefaultActions.UPDATE);
+                        final TimePointsOfFirstAndLastFix firstAndLastFixAt = importFixes(filenameWithSuffix, fileItem, jsonHolderForGpsFixImport, jsonHolderForSensorFixImport, errors);
+                        ensureEventLongEnough(firstAndLastFixAt.getFirstFixAt(), firstAndLastFixAt.getLastFixAt(), eventId);
+                        final Iterable<RaceColumn> raceColumns = regattaLeaderboard.getRaceColumns();
+                        if (Util.isEmpty(raceColumns)) {
+                            return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorInvalidRace"));
                         }
-                    } catch (Exception e) {
-                        throw new AllInOneImportException(e, errors);
+                        try {
+                            for (RaceColumn raceColumn : raceColumns) {
+                                final Iterable<? extends Fleet> fleets = raceColumn.getFleets();
+                                if (Util.size(fleets) != 1) {
+                                    return new ImporterResult(serverStringMessages.get(uiLocale, "allInOneErrorSplitFleetNotSupported"));
+                                }
+                                final Fleet fleet = fleets.iterator().next();
+                                DynamicTrackedRace trackedRaceForColumn = (DynamicTrackedRace) raceColumn.getTrackedRace(fleet);
+                                if (trackedRaceForColumn == null) {
+                                    trackedRaceForColumn = trackRace(regattaLeaderboard, raceColumn, fleet);
+                                }
+                                trackedRaces.add(trackedRaceForColumn);
+                                raceNameRaceColumnNameFleetnameList
+                                        .add(new Triple<>(trackedRaceForColumn.getRaceIdentifier().getRaceName(),
+                                                raceColumn.getName(), fleet.getName()));
+                            }
+                        } catch (Exception e) {
+                            throw new AllInOneImportException(e, errors);
+                        }
                     }
                 } else if (importMode == ImportMode.NEW_RACE) {
                     // When uploading files with identical name, the second RaceColumn will be named with the upload time in its name

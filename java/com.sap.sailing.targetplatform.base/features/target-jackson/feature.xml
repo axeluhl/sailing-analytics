@@ -40,4 +40,137 @@
          version="1.9.13"
          unpack="false"/>
 
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-core"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.core.jackson-databind"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
+
+   <plugin
+         id="com.fasterxml.jackson.dataformat.jackson-dataformat-yaml"
+         download-size="0"
+         install-size="0"
+         version="2.16.1"
+         unpack="false"/>
+         
+   <plugin
+         id="org.yaml.snakeyaml"
+         download-size="0"
+         install-size="0"
+         version="2.2.0"
+         unpack="false"/>
+         
+    <plugin
+         id="io.netty.transport"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+         
+    <plugin
+         id="io.netty.buffer"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.common"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.resolver"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.transport-classes-epoll"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.transport-native-unix-common"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.transport-classes-kqueue"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.codec"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.handler"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.resolver-dns"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.codec-dns"
+         download-size="0"
+         install-size="0"
+         version="4.1.107.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="io.netty.incubator.netty-incubator-transport-classes-io_uring"
+         download-size="0"
+         install-size="0"
+         version="0.0.25.Final"
+         unpack="false"/>
+               
+    <plugin
+         id="javax.cache.api"
+         download-size="0"
+         install-size="0"
+         version="1.1.1"
+         unpack="false"/>
+               
+    <plugin
+         id="io.reactivex.rxjava3.rxjava"
+         download-size="0"
+         install-size="0"
+         version="3.1.8"
+         unpack="false"/>
+               
+    <plugin
+         id="reactive-streams"
+         download-size="0"
+         install-size="0"
+         version="1.0.4"
+         unpack="false"/>
+               
 </feature>

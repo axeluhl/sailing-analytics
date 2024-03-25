@@ -11,8 +11,8 @@ import com.sap.sailing.domain.coursetemplate.CourseTemplate;
 import com.sap.sailing.domain.coursetemplate.CourseTemplateCompatibilityChecker;
 import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
+import com.sap.sse.common.RepeatablePart;
 
 public class CourseConfigurationImpl<P> implements CourseConfiguration<P> {
     private static final long serialVersionUID = -9189989170055144298L;

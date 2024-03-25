@@ -11,7 +11,6 @@ import org.bson.Document;
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.connection.ClusterConnectionMode;
@@ -20,6 +19,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.mongodb.Database;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
+import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class MongoEndpointImpl implements MongoEndpoint {
     private static final Logger logger = Logger.getLogger(MongoEndpointImpl.class.getName());
@@ -59,7 +59,7 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
                 if (i>=BATCH_SIZE) {
                     targetCollection.insertMany(documentsToInsert);
                     i = 0;
-                    documentsToInsert = new ArrayList<>(BATCH_SIZE);
+                    documentsToInsert.clear();
                 }
             }
             if (i>0) {
@@ -86,12 +86,12 @@ public abstract class MongoEndpointImpl implements MongoEndpoint {
     
     @Override
     public MongoClient getClient() throws URISyntaxException {
-        return MongoClients.create(getConnectionString(Optional.empty()));
+        return MongoDBService.INSTANCE.getMongo(getConnectionString(Optional.empty()));
     }
     
     @Override
     public MongoClient getClient(Optional<Duration> timeoutEmptyMeaningForever) throws URISyntaxException {
-        return MongoClients.create(getConnectionString(Optional.empty(), timeoutEmptyMeaningForever));
+        return MongoDBService.INSTANCE.getMongo(getConnectionString(Optional.empty(), timeoutEmptyMeaningForever));
     }
     
     @Override

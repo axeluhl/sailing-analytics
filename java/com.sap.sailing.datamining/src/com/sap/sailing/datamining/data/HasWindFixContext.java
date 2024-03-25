@@ -19,6 +19,12 @@ public interface HasWindFixContext extends HasWind {
     
     @Statistic(messageKey="windSpeedKnots", resultDecimals=1, ordinal=2)
     double getWindSpeedInKnots();
+    
+    @Dimension(messageKey="InTrackingInterval")
+    boolean isInTrackingInterval();
+    
+    @Dimension(messageKey="InRace")
+    boolean isInRace();
 
     @Override
     default TimePoint getTimePoint() {

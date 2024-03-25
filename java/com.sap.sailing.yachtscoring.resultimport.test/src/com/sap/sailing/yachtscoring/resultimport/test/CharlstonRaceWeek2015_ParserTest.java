@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,16 +36,14 @@ public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2
 
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mock(MongoObjectFactory.class),
                 mock(DomainObjectFactory.class));
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
-        
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(CHARLSTONRACEWEEK2015_EVENT_NAME);
         assertNotNull(resultsForKeyWestRaceWeek);
-
         assertEquals(2, resultsForKeyWestRaceWeek.size());
     }
     

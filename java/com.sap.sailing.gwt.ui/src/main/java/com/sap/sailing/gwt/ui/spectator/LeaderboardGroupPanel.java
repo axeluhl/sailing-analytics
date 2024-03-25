@@ -410,7 +410,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             String link = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
             if (isLive) {
                 b.append(getAnchor(link, raceColumnName, STYLE_LIVE_RACE));
-            } else if (race.trackedRace.hasGPSData && race.trackedRace.hasWindData) {
+            } else if (race.trackedRace.hasGPSData) {
                 b.append(getAnchor(link, raceColumnName, STYLE_ACTIVE_RACE));
             } else {
                 b.append(TEXTTEMPLATE.textWithClass(raceColumnName,

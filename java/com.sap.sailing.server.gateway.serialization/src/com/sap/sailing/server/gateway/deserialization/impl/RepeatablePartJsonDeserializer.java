@@ -2,9 +2,9 @@ package com.sap.sailing.server.gateway.deserialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
-import com.sap.sailing.domain.coursetemplate.impl.RepeatablePartImpl;
 import com.sap.sailing.server.gateway.serialization.impl.RepeatablePartJsonSerializer;
+import com.sap.sse.common.RepeatablePart;
+import com.sap.sse.common.impl.RepeatablePartImpl;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
 

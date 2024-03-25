@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Purpose: Script is used to switch to the failover archive if the primary is unhealthy, by altering the macros
+# file and then reloading Httpd.
+# Crontab for every minute: * * * * * /path/to/switchoverArchive.sh
+help() {
+    echo "$0 PATH_TO_HTTPD_MACROS_FILE TIMEOUT_FIRST_CURL_SECONDS TIMEOUT_SECOND_CURL_SECONDS"
+    echo ""
+    echo "Script used to automatically update the archive location (to the failover) in httpd if the primary is down."
+    echo "Pass in the path to the macros file containing the archive definitions;"
+    echo "the timeout of the first curl check in seconds; and the timeout of the second curl check, also in seconds."
+    echo "Make sure the combined time taken is not longer than the crontab."
+    exit 2
+}
+# $# is the number of arguments
+if [ $# -eq 0 ]; then
+    help
+fi
+#The names of the variables in the macros file.
+ARCHIVE_IP_NAME="ARCHIVE_IP"
+ARCHIVE_FAILOVER_IP_NAME="ARCHIVE_FAILOVER_IP"
+PRODUCTION_ARCHIVE_NAME="PRODUCTION_ARCHIVE"
+ARCHIVE_PORT=8888
+MACROS_PATH=$1
+# The amount of time (in seconds) that must have elapsed, since the last httpd macros email, before notifying operators again.
+TIME_CHECK_SECONDS=$((15*60))
+# Connection timeouts for curl requests (the time waited for a connection to be established). The second should be longer
+# as we want to be confident the main archive is in fact "down" before switching.
+TIMEOUT1_IN_SECONDS=$2
+TIMEOUT2_IN_SECONDS=$3
+CACHE_LOCATION="/var/cache/lastIncorrectMacroUnixTime"
+# The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
+# so the plus symbol must be escaped to refer to "one or more" of the previous character.
+for i in "^Define ${PRODUCTION_ARCHIVE_NAME}\>" \
+         "^Define ${ARCHIVE_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$" \
+         "^Define ${ARCHIVE_FAILOVER_IP_NAME} [0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
+do
+    if ! grep -q "${i}" "${MACROS_PATH}"; then
+        currentUnixTime=$(date +"%s")
+        if [[ ! -f ${CACHE_LOCATION} || $((currentUnixTime - $(cat "${CACHE_LOCATION}") )) -gt "$TIME_CHECK_SECONDS" ]]; then
+            date +"%s" > "${CACHE_LOCATION}"
+            echo "Macros file does not contain proper definitions for the archive and failover IPs. Expression ${i} not matched." | notify-operators "Incorrect httpd macros"
+        fi
+        logger -t archive "Necessary variable assignment pattern ${i} not found in macros"
+        exit 1
+    fi
+done
+# These next lines get the current ip values for the archive and failover, plus they store the value of production,
+# which is a variable pointing to either the primary or failover value.
+archiveIp="$(sed -n -e "s/^Define ${ARCHIVE_IP_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
+failoverIp="$(sed -n -e "s/^Define ${ARCHIVE_FAILOVER_IP_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
+productionIp="$(sed -n -e "s/^Define ${PRODUCTION_ARCHIVE_NAME} \(.*\)/\1/p" ${MACROS_PATH} | tr -d '[:space:]')"
+# Checks if the macro.conf is set as healthy or unhealthy currently.
+if [[ "${productionIp}" == "\${${ARCHIVE_IP_NAME}}" ]]
+then
+    alreadyHealthy=1
+    logger -t archive "currently healthy"
+else
+    alreadyHealthy=0
+    logger -t archive "currently unhealthy"
+fi
+
+setProduction() {
+    # parameter $1: the name of the variable holding the IP of the archive instance to switch to
+    sed -i -e "s/^Define ${PRODUCTION_ARCHIVE_NAME}\>.*$/Define ${PRODUCTION_ARCHIVE_NAME} \${${1}}/" ${MACROS_PATH}
+}
+
+# Sets the production value to point to the variable defining the main archive IP, provided it isn't already set.
+setProductionMainIfNotSet() {
+    if [[ $alreadyHealthy -eq 0 ]]
+    then
+        # currently unhealthy
+        # set production to archive
+        logger -t archive "Healthy: setting production to main archive"
+        setProduction ${ARCHIVE_IP_NAME}
+        service httpd reload
+        echo "The main archive server is healthy again. Switching to it." | notify-operators "Healthy: main archive online"
+    else
+        # If already healthy then no reload or notification occurs.
+        logger -t archive "Healthy: already set, no change needed"
+    fi
+}
+
+setFailoverIfNotSet() {
+    if [[ $alreadyHealthy -eq 1 ]]
+    then
+        # Set production to failover if not already. Separate if statement in case the curl statement
+        # fails but the production is already set to point to the backup
+        setProduction ${ARCHIVE_FAILOVER_IP_NAME}
+        logger -t archive "Unhealthy: second check failed, switching to failover"
+        service httpd reload
+        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at the archive: ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
+    else
+        logger -t archive "Unhealthy: second check still fails, failover already in use"
+    fi
+}
+
+logger -t archive "begin check"
+# --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero.
+# -L follows redirects
+curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+if [[ $? -ne 0 ]]
+then
+    logger -t archive "first check failed"
+    curl -s -L --fail --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+    if [[ $? -ne 0 ]]
+    then
+        setFailoverIfNotSet
+    else
+        setProductionMainIfNotSet
+    fi
+else
+    setProductionMainIfNotSet
+fi

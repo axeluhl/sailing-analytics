@@ -143,7 +143,6 @@
 <setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
-<setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
@@ -188,6 +187,10 @@
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
 <setEntry value="com.sap.db.jdbc@default:default"/>
 <setEntry value="com.sap.db.jdbc.source@default:default"/>
+<setEntry value="org.osgi.service.component@default:default"/>
+<setEntry value="org.osgi.service.cm@default:default"/>
+<setEntry value="org.osgi.util.tracker@default:default"/>
+<setEntry value="org.osgi.service.event@default:default"/>
 <setEntry value="org.osgi.service.packageadmin@default:default"/>
 <setEntry value="org.osgi.service.url@default:default"/>
 <setEntry value="com.github.haifengl.smile-core@default:default"/>

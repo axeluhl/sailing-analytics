@@ -23,6 +23,7 @@ import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
 import com.sap.sse.landscape.aws.AwsAvailabilityZone;
 import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
+import com.sap.sse.landscape.aws.orchestration.StartAwsHost;
 import com.sap.sse.landscape.ssh.JCraftLogAdapter;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.landscape.ssh.SshCommandChannel;
@@ -33,6 +34,7 @@ import com.sap.sse.shared.util.Wait;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.Tag;
 
 public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private final static Logger logger = Logger.getLogger(AwsInstanceImpl.class.getName());
@@ -43,6 +45,8 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     private InetAddress publicAddress;
     private final TimePoint launchTimePoint;
     private final AwsLandscape<ShardingKey> landscape;
+    private String name;
+    private String imageId;
     
     public AwsInstanceImpl(String instanceId, AwsAvailabilityZone availabilityZone, InetAddress privateAddress, TimePoint launchTimePoint, AwsLandscape<ShardingKey> landscape) {
         this.instanceId = instanceId;
@@ -99,6 +103,42 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
         return publicAddress;
     }
     
+    /**
+     * Checks if there is a name tag and returns the value, if it exists. This implementation caches and so may cause
+     * caching issues, because the name of the instance can change over time. 
+     * 
+     * @return name tag value
+     */
+    public String getNameTag() {
+        String result = "No name tag found";
+        if (name == null) {
+            final Instance instance = getInstance();
+            for (Tag tag : instance.tags()) {
+                if (tag.key().equals(StartAwsHost.NAME_TAG_NAME)) {
+                    name = tag.value();
+                    result = name;
+                    break;
+                }
+            }
+        } else {
+            result = name;
+        }
+        return result;
+    }
+    
+    public String getImageId() {
+        final String result;
+        if (imageId == null) {
+            final Instance instance = getInstance();
+            imageId = instance.imageId();
+            result = imageId;
+        } else {
+            result = imageId;
+        }
+        return result;
+    }
+    
+
     @Override
     public InetAddress getPrivateAddress() {
         return privateAddress;

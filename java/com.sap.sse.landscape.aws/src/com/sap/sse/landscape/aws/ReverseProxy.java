@@ -2,8 +2,6 @@ package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -97,11 +95,6 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      * are sent to the {@code applicationReplicaSet}.
      */
     void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) throws Exception;
-    
-    /**
-     * Creates a mapping for the {@code /internal-server-status} path using the host's generic external ec2 host name 
-     */
-    void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping

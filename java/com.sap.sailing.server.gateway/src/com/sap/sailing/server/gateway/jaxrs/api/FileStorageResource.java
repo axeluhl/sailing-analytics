@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -37,15 +36,13 @@ import com.sap.sse.filestorage.OperationFailedException;
 @Path("/v1/file")
 public class FileStorageResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(FileStorageResource.class.getName());
-    
+
     @GET
     public Response getFile(@QueryParam("uri") String uri) {
         Response response;
         try {
-
             getService().getFileStorageManagementService().getActiveFileStorageService()
                     .doPermissionCheckForGetFile(new URI(uri));
-
             InputStream inputStream = new URL(uri).openStream();
             ResponseBuilder responseBuilder = Response.ok().entity(inputStream);
             if (uri.toLowerCase().endsWith(".jpg")) {
@@ -61,9 +58,15 @@ public class FileStorageResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
-    // Example test use:
-    //     curl -d "uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg" http://127.0.0.1:8888/sailingserver/api/v1/file
+
+    /**
+     * Example test use: 
+     *   curl -d "uri=file:///c:/tmp/c7b821e1-ebab-4a96-a71d-28ac192b3e69.jpg" http://127.0.0.1:8888/sailingserver/api/v1/file
+     *
+     * @param uri
+     *            URI to the file which should be removed.
+     * @return response from DELETE request.
+     */
     @DELETE
     @Produces("application/json;charset=UTF-8")
     public Response deleteFile(@QueryParam("uri") String uri) {
@@ -82,14 +85,8 @@ public class FileStorageResource extends AbstractSailingServerResource {
             response = Response.status(Status.BAD_REQUEST).entity(streamingOutput(result)).build();
         }
         catch (UnauthorizedException e) {
-            response = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();            
+            response = Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
         }
         return response;
-    }
-
-    @POST
-    @Produces("application/json;charset=UTF-8")
-    public Response postDeleteFile(@QueryParam("uri") String uri) {
-        return deleteFile(uri);
     }
 }

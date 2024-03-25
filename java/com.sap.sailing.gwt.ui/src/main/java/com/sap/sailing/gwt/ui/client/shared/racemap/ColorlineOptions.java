@@ -46,12 +46,13 @@ public class ColorlineOptions {
     }
     
     
-    public Polyline newPolylineInstance(int index) {
+    public Polyline newPolylineInstance(int fixIndexInTail) {
         if (colorProvider == null) {
             throw new IllegalStateException("A ColorProvider must be set prior to creating new Polylines.");
         }
-        return newPolylineInstance(colorProvider.getColor(index));
+        return newPolylineInstance(colorProvider.getColor(fixIndexInTail));
     }
+    
     public Polyline newPolylineInstance(String strokeColor) {
         Polyline line = Polyline.newInstance(newPolylineOptionsInstance(strokeColor));
         line.setEditable(editable);

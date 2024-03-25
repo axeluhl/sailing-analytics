@@ -20,10 +20,10 @@ import com.sap.sailing.domain.coursetemplate.MarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation;
 import com.sap.sailing.domain.coursetemplate.MarkConfigurationRequestAnnotation.MarkRoleCreationRequest;
 import com.sap.sailing.domain.coursetemplate.Positioning;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.impl.MarkConfigurationRequestAnnotationImpl.MarkRoleCreationRequestImpl;
 import com.sap.sailing.server.gateway.serialization.impl.CourseConfigurationJsonSerializer;
 import com.sap.sailing.shared.server.SharedSailingData;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.shared.json.JsonDeserializationException;
 import com.sap.sse.shared.json.JsonDeserializer;
 

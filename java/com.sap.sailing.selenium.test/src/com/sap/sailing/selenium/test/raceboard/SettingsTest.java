@@ -692,7 +692,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanel = leaderboardSettingsDialog.getLeaderboardSettingsPanelPO();
         Assert.assertArrayEquals(newDetails, leaderboardSettingsPanel.getSelectedDetails());
         Assert.assertEquals(newRefreshInterval, leaderboardSettingsPanel.getRefreshInterval());
-    } 
+    }
 
     /**
      * Verifies settings storage support for regatta overview. Checks the precedences of context specific and global

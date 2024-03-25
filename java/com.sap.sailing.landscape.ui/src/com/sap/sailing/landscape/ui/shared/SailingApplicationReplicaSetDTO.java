@@ -3,6 +3,7 @@ package com.sap.sailing.landscape.ui.shared;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ServerInfoDTO;
@@ -83,11 +84,20 @@ public class SailingApplicationReplicaSetDTO<ShardingKey> implements Named, IsSe
     }
     
     /**
-     * @return {@code true} if this replica set is the one that this method is being run on. See
-     * {@link ServerInfoDTO} and {@link UserService#getServerInfo()}.
+     * @return {@code true} if this replica set is the one that this method is being run on. See {@link ServerInfoDTO}
+     *         and {@link UserService#getServerInfo()}.
      */
     public boolean isLocalReplicaSet(UserService userService) {
         return getName().equals(userService.getServerInfo().getName());
+    }
+
+    /**
+     * Based on this replica set's {@link #getName() name} decides whether this is the ARCHIVE.
+     *
+     * @see SharedLandscapeConstants#ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME
+     */
+    public boolean isArchive() {
+        return getName().equals(SharedLandscapeConstants.ARCHIVE_SERVER_APPLICATION_REPLICA_SET_NAME);
     }
 
     @Override

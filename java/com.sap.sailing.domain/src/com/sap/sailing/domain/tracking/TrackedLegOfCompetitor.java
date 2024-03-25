@@ -8,7 +8,9 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -340,6 +342,25 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * whichever is earlier.
      */
     TimePoint getTimePointNotAfterFinishingOfLeg(TimePoint timePoint);
+    
+    /**
+     * For upwind: If the difference between COG and next waypoint direction is smaller than the one between COG and wind direction
+     * {@link TackType#LONGTACK long tack} is returned; if it is greater or equal {@link TackType#SHORTTACK short tack}.
+     * For downwind: Similar to upwind but instead of "wind direction", one use the opposite direction. So where the wind is blowing to.
+     * For reaching: Similar to upwind but instead of comparing to "COG and wind direction", one use 10°. To see more differences.
+     * 
+     * @return {@code null} if {@link TimePoint} does not fit with current leg, or waypoint is {@code null}, or wind is
+     *         {@code null}, or competitor position is {@code null}.
+     */
+    TackType getTackType(TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+
+    /**
+     * Same as {@link #getTackType(TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache)}, only that an no-op cache will be used
+     * for this single call. Good, e.g., for test cases.
+     */
+    default TackType getTackType(TimePoint timePoint) throws NoWindException {
+        return getTackType(timePoint, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
 
     Double getExpeditionAWA(TimePoint at);
     Double getExpeditionAWS(TimePoint at);

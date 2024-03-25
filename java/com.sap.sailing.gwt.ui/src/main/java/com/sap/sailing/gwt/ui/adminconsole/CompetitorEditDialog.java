@@ -119,6 +119,10 @@ public abstract class CompetitorEditDialog<CompetitorType extends CompetitorDTO>
         this.flagImageURL.setUri(competitorToEdit.getFlagImageURL());
         this.imageUrlAndUploadComposite = new URLFieldWithFileUpload(stringMessages, "image/*");
         this.imageUrlAndUploadComposite.setUri(competitorToEdit.getImageURL());
+        getCancelButton().addClickHandler(clickEvent-> {
+            flagImageURL.deleteCurrentFile();
+            imageUrlAndUploadComposite.deleteCurrentFile();
+        });
         this.yardstickLabel = new Label(stringMessages.yardstickNumber(yardstickScale));
         this.yardstickNumber = createDoubleBox(competitorToEdit.getTimeOnTimeFactor() == null ? null
                 : convertYardstickTimeOnTime(competitorToEdit.getTimeOnTimeFactor(), yardstickScale), 10);

@@ -1,0 +1,19 @@
+[Unit]
+Description=Force logrotate upon shutdown and clean files in var/cache
+Requires=-.mount network-online.target
+After=-.mount network-online.target
+Before=shutdown.target
+RequiresMountsFor=/
+SurviveFinalKillSignal=yes
+
+[Install]
+RequiredBy=graphical.target
+WantedBy=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+KillMode=none
+ExecStart=/bin/true
+ExecStopPost=/bin/bash -c "logrotate --force -v /etc/logrotate.conf; /var/www/cgi-bin/reverseProxyHealthcheck.sh cleanup"
+TimeoutStopSec=50

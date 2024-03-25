@@ -26,7 +26,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.shared.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.shared.places.ShareablePlaceContext;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
-import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
@@ -34,6 +33,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.databylogo.DataByLogo;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.LinkUtil;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownHandler;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownItem;
+import com.sap.sse.gwt.client.controls.dropdown.DropdownResources;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -63,6 +65,8 @@ public class EventHeader extends Composite {
     @UiField FlowPanel dropdownContent;
     @UiField EventHeaderSharingButtons sharing;
     @UiField DataByLogo dataByLogo;
+    @UiField EventHeaderResources local_res;
+    @UiField DropdownResources dropdownitem_res;
 
     private EventViewDTO event;
     private Presenter presenter;
@@ -70,8 +74,9 @@ public class EventHeader extends Composite {
     public EventHeader(EventView.Presenter presenter) {
         this.event = presenter.getEventDTO();
         this.presenter = presenter;
-        EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
+        dropdownitem_res.css().ensureInjected();
         initFields();
         initSharing();
     }
@@ -99,7 +104,7 @@ public class EventHeader extends Composite {
         }
         String eventDisplayName = event.getDisplayName();
         String nameToShow;
-        if(presenter.showRegattaMetadata()) {
+        if (presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
             String regattaDisplayName = regattaMetadata.getDisplayName();
             if (regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
@@ -107,7 +112,6 @@ public class EventHeader extends Composite {
             } else {
                 nameToShow = eventDisplayName + " - " + regattaDisplayName;
             }
-            
             if (regattaMetadata.getCompetitorsCount() > 0) {
                 competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
             } else {
@@ -131,16 +135,14 @@ public class EventHeader extends Composite {
             Date startDate = regattaMetadata.getStartDate() != null ? regattaMetadata.getStartDate() : event.getStartDate();
             Date endDate = regattaMetadata.getEndDate() != null ? regattaMetadata.getEndDate() : event.getEndDate();
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(startDate, endDate));
-            
             hide(eventVenueContainer, eventLink);
         } else {
             nameToShow = eventDisplayName;
             eventDate.setInnerHTML(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
             eventVenue.setInnerText(event.getLocationAndVenueAndCountry());
-            
-            if(event.getOfficialWebsiteURL() != null) {
+            if (event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
-                if(title.length() > 35) {
+                if (title.length() > 35) {
                     title = StringMessages.INSTANCE.officalEventWebsite();
                 }
                 eventLink.setInnerText(title);
@@ -175,14 +177,13 @@ public class EventHeader extends Composite {
         new DropdownHandler(dropdownTrigger, dropdownContent.getElement()) {
             @Override
             protected void dropdownStateChanged(boolean dropdownShown) {
-                if(dropdownShown) {
-                    dropdownTitle.addClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
+                if (dropdownShown) {
+                    dropdownTitle.addClassName(dropdownitem_res.css().jsdropdownactive());
                 } else {
-                    dropdownTitle.removeClassName(EventHeaderResources.INSTANCE.css().jsdropdownactive());
+                    dropdownTitle.removeClassName(dropdownitem_res.css().jsdropdownactive());
                 }
             }
         };
-        
         presenter.forPlaceSelection(new PlaceCallback() {
             @Override
             public void forPlace(final AbstractEventPlace place, String title, boolean active) {
@@ -190,7 +191,7 @@ public class EventHeader extends Composite {
                 dropdownItem.addDomHandler(new ClickHandler() {
                     @Override
                     public void onClick(ClickEvent event) {
-                        if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
+                        if (LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
                             event.preventDefault();
                             presenter.navigateTo(place);
                         }
@@ -203,7 +204,7 @@ public class EventHeader extends Composite {
 
     private String withoutPrefix(String title, String... prefixes) {
         for (String prefix : prefixes) {
-            if(title.startsWith(prefix)) {
+            if (title.startsWith(prefix)) {
                 return title.substring(prefix.length(), title.length());
             }
         }
@@ -212,7 +213,6 @@ public class EventHeader extends Composite {
 
     private void hide(Element... elementsToHide) {
         for (Element element : elementsToHide) {
-//            element.getStyle().setDisplay(Display.NONE);
             element.removeFromParent();
         }
     }

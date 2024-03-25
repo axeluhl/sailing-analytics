@@ -89,15 +89,17 @@ public class AbstractPosition implements Position {
 
     @Override
     public Bearing getBearingGreatCircle(Position p) {
-        Bearing bearing = null;
+        final Bearing bearing;
         if (p != null) {
             double result = Math.atan2(Math.sin(p.getLngRad() - getLngRad()) * Math.cos(p.getLatRad()),
-                    Math.cos(getLatRad()) * Math.sin(p.getLatRad()) - Math.sin(getLatRad()) * Math.cos(p.getLatRad())
-                            * Math.cos(p.getLngRad() - getLngRad()));
+                    Math.cos(getLatRad()) * Math.sin(p.getLatRad())
+                            - Math.sin(getLatRad()) * Math.cos(p.getLatRad()) * Math.cos(p.getLngRad() - getLngRad()));
             if (result < 0) {
                 result = result + 2 * Math.PI;
             }
             bearing = new RadianBearingImpl(result);
+        } else {
+            bearing = null;
         }
         return bearing;
     }

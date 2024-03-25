@@ -17,9 +17,10 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.async.TimeRangeAsyncAction;
 
-public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<CompetitorsRaceDataDTO, CompetitorDTO> {
+public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<CompetitorsRaceDataDTO, Pair<CompetitorDTO, DetailType>> {
     private final SailingServiceAsync sailingService;
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final List<CompetitorDTO> competitors;
@@ -47,28 +48,36 @@ public class GetCompetitorsRaceDataAction implements TimeRangeAsyncAction<Compet
     }
 
     @Override
-    public void execute(Map<CompetitorDTO, TimeRange> timeRanges, AsyncCallback<CompetitorsRaceDataDTO> callback) {
+    public void execute(Map<Pair<CompetitorDTO, DetailType>, TimeRange> timeRanges, AsyncCallback<CompetitorsRaceDataDTO> callback) {
         if (timeRanges != null && !timeRanges.isEmpty()) {
+            DetailType detailType = null;
+            final List<CompetitorDTO> competitors = new ArrayList<>();
             TimeRange timeRange = null;
-            for (final Entry<CompetitorDTO, TimeRange> e : timeRanges.entrySet()) {
+            for (final Entry<Pair<CompetitorDTO, DetailType>, TimeRange> e : timeRanges.entrySet()) {
+                competitors.add(e.getKey().getA());
+                if (detailType == null) {
+                    detailType = e.getKey().getB();
+                } else if (detailType != e.getKey().getB()) {
+                    throw new IllegalArgumentException("The detail types must be the same; got "+detailType+" and "+e.getKey().getB());
+                }
                 timeRange = timeRange == null ? e.getValue() : timeRange.extend(e.getValue());
             }
             GWT.log("Calling getCompetitorsRaceData("+raceIdentifier+", "+new ArrayList<>(timeRanges.keySet())+
                     ", "+timeRange.from()+", "+timeRange.to()+", "+stepSizeInMs+", "+detailType+", "+leaderboardGroupName+", "+
                     leaderboardGroupId+", "+leaderboardName);
-            sailingService.getCompetitorsRaceData(raceIdentifier, new ArrayList<>(timeRanges.keySet()), timeRange.from().asDate(),
+            sailingService.getCompetitorsRaceData(raceIdentifier, competitors, timeRange.from().asDate(),
                     timeRange.to().asDate(), stepSizeInMs, detailType, leaderboardGroupName, leaderboardGroupId,
                     leaderboardName, callback);
         }
     }
 
     @Override
-    public Map<CompetitorDTO, TimeRange> getTimeRanges() {
+    public Map<Pair<CompetitorDTO, DetailType>, TimeRange> getTimeRanges() {
         // we'll use the same time range for all competitors
         final TimeRange timeRange = TimeRange.create(TimePoint.of(fromDate), TimePoint.of(toDate));
-        final Map<CompetitorDTO, TimeRange> result = new HashMap<>();
+        final Map<Pair<CompetitorDTO, DetailType>, TimeRange> result = new HashMap<>();
         for (final CompetitorDTO competitor : competitors) {
-            result.put(competitor, timeRange);
+            result.put(new Pair<>(competitor, detailType), timeRange);
         }
         return result;
     }
