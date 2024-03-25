@@ -23,6 +23,18 @@ amazon-linux-extras enable php7.1
 yum install -y php # install mod_phpservice
 # make root readable for 
 chmod 755 /root
+# setup cloud_cfg and keys
+cd /home
+scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+setup_keys "${IMAGE_TYPE}"
+setup_cloud_cfg_and_root_login
+# setup symbolic links and crontab
+## build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # THIS MUST BE RUN AFTER MOUNTING
+# setup mail
+setup_mail_sending
+# setup sshd config
+setup_sshd_resilience
+# copy bugzilla
 scp root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
 tar -xzvf bugzilla-5.0.4.tar.gz -C /usr/share/bugzilla
 mv /usr/share/bugzilla-5.0.4 /usr/share/bugzilla
