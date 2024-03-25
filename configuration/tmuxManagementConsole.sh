@@ -15,14 +15,6 @@ else
 	tmux new-session -s "$sn" -n "BUILD" -d
 
 	counter=1
-	for dir in dev test prod1 prod2; do
-	  cd $SERVERS_DIR/$dir
-	  tmux new-window -t "$sn:$counter" -n `basename $dir` "bash -c './start'; bash"
-	  counter=$[counter + 1]
-	done
-
-	cd /home/trac/servers/prod1
-	tmux new-window -t "$sn:$counter" -n "UDP" "bash -c './udpmirror -v 2012 localhost 2010 localhost 2011 localhost 2013 localhost 2014'; bash"
 
 	cd /opt/mongodb/bin
 	tmux new-window -t "$sn:$[counter+1]" -n "GOAccess" "bash -c 'goaccess -f /var/log/httpd/access_log'; bash"
