@@ -165,7 +165,6 @@ else
     LAST_TARGET_GROUP_IPS="${CACHE_LOCATION}/last_target_ips_${TARGET_GROUP_NAME}"
     # Target group healthcheck timeout
     TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS=300
-    current_time=$( date +%s )
     if [[ ! -e "${LAST_TARGET_GROUP_IPS}" || "$(($current_time - $(stat --format '%Y' ${LAST_TARGET_GROUP_IPS}) ))" -gt "$(randomise $TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS)" ]]; then
 	# This branch runs if the cached timestamp, of the last target group healthcheck, doesn't exist, or if it exceeds TARGET_GROUP_HEALTHCHECK_TIMEOUT_SECONDS.
 	INSTANCE_IDS=$( aws elbv2 describe-target-health --target-group-arn ${TARGET_GROUP_ARN} | jq -r '.TargetHealthDescriptions[].Target.Id' )
