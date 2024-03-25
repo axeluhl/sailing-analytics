@@ -1,0 +1,1 @@
+environments_scripts/repo/usr/local/bin/update_landscape_managers_mailing_list.sh

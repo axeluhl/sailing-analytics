@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -87,7 +88,7 @@ public class ParserTest {
 
     @Test
     public void testScoreCorrectionProviderFeedingAndHasResults() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
@@ -103,7 +104,7 @@ public class ParserTest {
     
     @Test
     public void testScoreCorrectionProvider() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
@@ -140,7 +141,7 @@ public class ParserTest {
 
     @Test
     public void testScoreCorrectionProviderForSplitFleet() throws IOException, SAXException,
-            ParserConfigurationException, JAXBException {
+            ParserConfigurationException, JAXBException, URISyntaxException {
         ScoreCorrectionProviderImpl scoreCorrectionProvider = new ScoreCorrectionProviderImpl(getTestDocumentProvider(),
                 ParserFactory.INSTANCE);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();

@@ -152,6 +152,10 @@ public abstract class VideoDialog extends DataEntryDialog<List<VideoDTO>>
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
         // the observer has to be registered after creating the URLFieldWithFileUpload
         storageServiceAvailable.registerObserver(this);
+        getCancelButton().addClickHandler(clickEvent-> {
+            videoURLAndUploadComposite.deleteCurrentFile();
+            thumbnailURLAndUploadComposite.deleteCurrentFile();
+        });
     }
 
     private void renderMultiFileTable(boolean updateMediaInfo) {

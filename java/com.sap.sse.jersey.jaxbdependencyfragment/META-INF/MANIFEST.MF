@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sse.jersey.jaxbdependencyfragment
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Fragment-Host: com.sun.jersey
+Import-Package: javax.xml.bind
 Automatic-Module-Name: com.sap.sse.jersey.jaxbdependencyfragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1",
- jaxb-api;bundle-version="2.3.1"
+Require-Bundle: com.sun.xml.bind.jaxb-impl;bundle-version="2.3.1"

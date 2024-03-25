@@ -10,7 +10,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
@@ -133,16 +132,6 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
             }
         }
         return timePoint;
-    }
-
-    protected TrackedRace getTrackedRace(HttpServletRequest req) {
-        Regatta regatta = getRegatta(req);
-        RaceDefinition race = getRaceDefinition(req);
-        TrackedRace trackedRace = null;
-        if (regatta != null && race != null) {
-            trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-        }
-        return trackedRace;
     }
 
     protected TypeBasedServiceFinderFactory getServiceFinderFactory() {

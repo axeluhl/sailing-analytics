@@ -29,6 +29,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -38,14 +39,15 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.courseCreation.CourseTemplateDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkRoleDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.MarkTemplateDTO;
+import com.sap.sailing.gwt.ui.shared.courseCreation.RepeatablePartDTO;
 import com.sap.sailing.gwt.ui.shared.courseCreation.WaypointTemplateDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO> {
@@ -54,7 +56,9 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private final TextBox nameTextBox;
     private final TextBox shortNameTextBox;
     private final TextBox urlTextBox;
-    private final TextBox numberOfLapsTextBox;
+    private final IntegerBox numberOfLapsTextBox;
+    private final IntegerBox zeroBasedIndexOfFirstWaypointOfRepeatablePart;
+    private final IntegerBox zeroBasedIndexOfLastWaypointOfRepeatablePart;
     private final StringMessages stringMessages;
     private final List<MarkRoleDTO> allMarkRoles;
     private final List<String> allMarkRolesSelectionListPlusEmptyString;
@@ -87,10 +91,10 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     private static final RegExp urlRegExp = RegExp
             .compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
 
-    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final UserService userService,
-            final StringMessages stringMessages, CourseTemplateDTO courseTemplateToEdit,
-            List<MarkRoleDTO> allMarkRoles, List<MarkTemplateDTO> allMarkTemplates,
-            DialogCallback<CourseTemplateDTO> callback, final boolean isNew) {
+    public CourseTemplateEditDialog(final SailingServiceAsync sailingService, final StringMessages stringMessages,
+            CourseTemplateDTO courseTemplateToEdit, List<MarkRoleDTO> allMarkRoles,
+            List<MarkTemplateDTO> allMarkTemplates, DialogCallback<CourseTemplateDTO> callback,
+            final boolean isNew) {
         super(stringMessages.edit() + " " + stringMessages.courseTemplates(), null, stringMessages.ok(),
                 stringMessages.cancel(), new Validator<CourseTemplateDTO>() {
                     @Override
@@ -131,6 +135,19 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                                 sb.append(stringMessages.invalidImageURL()).append(". ");
                             }
                         }
+                        if (valueToValidate.getDefaultNumberOfLaps() != null && valueToValidate.getDefaultNumberOfLaps() < 0) {
+                            sb.append(stringMessages.defaultNumberOfLapsMustNotBeNegative());
+                        }
+                        if (valueToValidate.getRepeatablePart() != null) {
+                            if ((valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() == -1) !=
+                                 (valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart() == -1)) {
+                                sb.append(stringMessages.eitherNoneOrBothStartAndEndOfRepeatablePartMustBeSpecified());
+                            } else if (valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() < valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart()) {
+                                sb.append(stringMessages.endOfRepeatablePartMustBeAtOfAfterStart());
+                            } else if (valueToValidate.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd() > valueToValidate.getWaypointTemplates().size()) {
+                                sb.append(stringMessages.endOfRepeatablePartIsGreaterThanNumberOfWaypoints());
+                            }
+                        }
                         return sb.toString();
                     }
                 }, /* animationEnabled */true, callback);
@@ -140,9 +157,14 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.nameTextBox = createTextBox(courseTemplateToEdit.getName());
         this.shortNameTextBox = createTextBox(courseTemplateToEdit.getShortName());
         this.urlTextBox = createTextBox(courseTemplateToEdit.getOptionalImageUrl().orElse(""));
-        this.numberOfLapsTextBox = createTextBox(courseTemplateToEdit.getDefaultNumberOfLaps() != null
-                ? courseTemplateToEdit.getDefaultNumberOfLaps().toString()
-                : null);
+        this.numberOfLapsTextBox = createIntegerBox(courseTemplateToEdit.getDefaultNumberOfLaps() != null
+                ? courseTemplateToEdit.getDefaultNumberOfLaps() : null, 2);
+        this.zeroBasedIndexOfFirstWaypointOfRepeatablePart = createIntegerBox(courseTemplateToEdit.getRepeatablePart() == null ? null :
+            courseTemplateToEdit.getRepeatablePart().getZeroBasedIndexOfRepeatablePartStart(), 2);
+        this.zeroBasedIndexOfFirstWaypointOfRepeatablePart.setEnabled(isNew);
+        this.zeroBasedIndexOfLastWaypointOfRepeatablePart = createIntegerBox(courseTemplateToEdit.getRepeatablePart() == null ? null :
+            courseTemplateToEdit.getRepeatablePart().getZeroBasedIndexOfRepeatablePartEnd()-1, 2);
+        this.zeroBasedIndexOfLastWaypointOfRepeatablePart.setEnabled(isNew);
         this.allMarkTemplates = allMarkTemplates;
         this.allMarkTemplatesSelectionListPlusEmptyString = new LinkedList<>(allMarkTemplates.stream().map(MarkTemplateDTO::getName).collect(Collectors.toList()));
         allMarkTemplatesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
@@ -150,7 +172,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         this.allMarkRolesSelectionListPlusEmptyString = new LinkedList<>(allMarkRoles.stream().map(MarkRoleDTO::getName).collect(Collectors.toList()));
         allMarkRolesSelectionListPlusEmptyString.add(0, ""); // prepend the empty selection
         this.markTemplatesForMarkRoles = new ArrayList<>();
-        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, markTemplatesForMarkRoles, userService);
+        markTemplatesForMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, markTemplatesForMarkRoles);
         buttonAddMarkRoleToMarkTemplateMapping = new Button(stringMessages.add());
         buttonAddMarkRoleToMarkTemplateMapping.addClickHandler(c -> {
             markTemplatesForMarkRoles.add(new MarkTemplateDTOAndMarkRoleDTO(allMarkTemplates.stream().findFirst().orElse(null),
@@ -159,7 +181,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             validateAndUpdate();
         });
         this.spareMarkTemplatesAndTheirDefaultMarkRoles = new ArrayList<>();
-        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, spareMarkTemplatesAndTheirDefaultMarkRoles, userService);
+        spareMarkTemplatesAndTheirDefaultMarkRolesTable = createMarkTemplateAndMarkRoleTable(/* readOnly */ !isNew, spareMarkTemplatesAndTheirDefaultMarkRoles);
         buttonAddMarkRoleToMarkTemplateMapping.setEnabled(isNew);
         buttonAddSpareMarkTemplate = new Button(stringMessages.add());
         buttonAddSpareMarkTemplate.addClickHandler(c -> {
@@ -203,11 +225,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
     }
 
     private CellTable<MarkTemplateDTOAndMarkRoleDTO> createMarkTemplateAndMarkRoleTable(final boolean readOnly,
-            final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesAndMarkRoles, final UserService userService) {
+            final List<MarkTemplateDTOAndMarkRoleDTO> markTemplatesAndMarkRoles) {
         final CellTable<MarkTemplateDTOAndMarkRoleDTO> table = new BaseCelltable<>(1000, tableResources);
         table.setWidth("100%");
         final SelectionCell markTemplateSelectionCell = new SelectionCell(allMarkTemplatesSelectionListPlusEmptyString);
-        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableMarkTemplateSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+        final HideableAndEditableCell<MarkTemplateDTOAndMarkRoleDTO, String, SelectionCell> hideableMarkTemplateSelectionCell = new HideableAndEditableCell<MarkTemplateDTOAndMarkRoleDTO, String, SelectionCell>(
                 markTemplateSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<MarkTemplateDTOAndMarkRoleDTO, String> markTemplateColumn = new Column<MarkTemplateDTOAndMarkRoleDTO, String>(
                 hideableMarkTemplateSelectionCell) {
@@ -227,7 +249,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
             }
         });
         final SelectionCell associatedRoleSelectionCell = new SelectionCell(allMarkRolesSelectionListPlusEmptyString);
-        final HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell> hideableAssociatedRoleSelectionCell = new HideableAndEditableCell<WaypointTemplateDTO, String, SelectionCell>(
+        final HideableAndEditableCell<MarkTemplateDTOAndMarkRoleDTO, String, SelectionCell> hideableAssociatedRoleSelectionCell = new HideableAndEditableCell<MarkTemplateDTOAndMarkRoleDTO, String, SelectionCell>(
                 associatedRoleSelectionCell, /* hidden */ null, /* editable */ wt -> !readOnly);
         Column<MarkTemplateDTOAndMarkRoleDTO, String> markRoleColumn = new Column<MarkTemplateDTOAndMarkRoleDTO, String>(
                 hideableAssociatedRoleSelectionCell) {
@@ -437,15 +459,11 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
                 defaultMarkRolesForSpareMarkTemplates.put(mt.getMarkTemplate(), mt.getMarkRole());
             }
         });
-        // TODO: repeatable part
-        Integer defaultNumberOfLaps = null;
-        try {
-            defaultNumberOfLaps = numberOfLapsTextBox.getValue() != null && numberOfLapsTextBox.getValue().length() > 0
-                    ? Integer.parseInt(numberOfLapsTextBox.getValue())
-                    : null;
-        } catch (NumberFormatException nfe) {
-            defaultNumberOfLaps = null;
-        }
+        final RepeatablePartDTO repeatablePart = zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue() == null && zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue() == null ? null :
+            new RepeatablePartDTO(
+                zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue() == null ? -1 : zeroBasedIndexOfFirstWaypointOfRepeatablePart.getValue(),
+                        zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue() == null ? -1 : zeroBasedIndexOfLastWaypointOfRepeatablePart.getValue()+1);
+        final Integer defaultNumberOfLaps = numberOfLapsTextBox.getValue();
         waypointTemplates.forEach(wt -> {
             if (!hasTwoMarks(wt) && wt.getMarkRolesForControlPoint() != null
                     && wt.getMarkRolesForControlPoint().size() == 2) {
@@ -454,7 +472,7 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         });
         return new CourseTemplateDTO(id, nameTextBox.getValue(), shortNameTextBox.getValue(), markTemplates,
                 waypointTemplates, defaultMarkRolesForSpareMarkTemplates, defaultMarkTemplatesForMarkRoles, optionalUrl,
-                tagsEditor.getValue(), null, defaultNumberOfLaps);
+                tagsEditor.getValue(), repeatablePart, defaultNumberOfLaps);
     }
 
     @Override
@@ -478,7 +496,13 @@ public class CourseTemplateEditDialog extends DataEntryDialog<CourseTemplateDTO>
         result.setWidget(row, 0, new Label(stringMessages.tags()));
         result.setWidget(row++, 1, tagsEditor);
         result.setWidget(row, 0, new Label(stringMessages.defaultNumberOfLaps()));
-        result.setWidget(row++, 1, numberOfLapsTextBox);
+        final HorizontalPanel panelForLapCountAndRepeatablePartDefinition = new HorizontalPanel();
+        panelForLapCountAndRepeatablePartDefinition.add(numberOfLapsTextBox);
+        panelForLapCountAndRepeatablePartDefinition.add(new Label(stringMessages.zeroBasedNumberOfWaypointForRepeatablePartStart()));
+        panelForLapCountAndRepeatablePartDefinition.add(zeroBasedIndexOfFirstWaypointOfRepeatablePart);
+        panelForLapCountAndRepeatablePartDefinition.add(new Label(stringMessages.zeroBasedNumberOfWaypointForRepeatablePartEnd()));
+        panelForLapCountAndRepeatablePartDefinition.add(zeroBasedIndexOfLastWaypointOfRepeatablePart);
+        result.setWidget(row++, 1, panelForLapCountAndRepeatablePartDefinition);
         return result;
     }
 

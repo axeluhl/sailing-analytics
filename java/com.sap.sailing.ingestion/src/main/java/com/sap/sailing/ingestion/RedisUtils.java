@@ -1,5 +1,6 @@
 package com.sap.sailing.ingestion;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.redisson.Redisson;
@@ -14,7 +15,7 @@ public class RedisUtils {
     
     static {
         final Config redisConfiguration = new Config();
-        redisConfiguration.useReplicatedServers().addNodeAddress(Configuration.REDIS_ENDPOINTS);
+        redisConfiguration.useClusterServers().setNodeAddresses(Arrays.asList(Configuration.REDIS_ENDPOINTS));
         redisClient = Redisson.create(redisConfiguration);
     }
 

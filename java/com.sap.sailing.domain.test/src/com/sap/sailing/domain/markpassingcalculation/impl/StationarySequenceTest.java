@@ -69,7 +69,7 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
                 if (previousTimePoint != null) {
                     position = verySmallSpeed.travelTo(position, durationBetweenFixes);
                 }
-                track.add(new GPSFixMovingImpl(position, timePoint, verySmallSpeed));
+                track.add(new GPSFixMovingImpl(position, timePoint, verySmallSpeed, /* optionalTrueHeading */ null));
                 timePoint = timePoint.plus(durationBetweenFixes);
             }
             previousTimePoint = candidate.getTimePoint();
@@ -108,7 +108,7 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
         final Position originalPosition = track.getEstimatedPosition(timePointForNewFix, /* extrapolate */ false);
         final Position westPosition = originalPosition.translateGreatCircle(new DegreeBearingImpl(270), StationarySequence.CANDIDATE_FILTER_DISTANCE.scale(0.5));
         final Position eastPosition = originalPosition.translateGreatCircle(new DegreeBearingImpl(90), StationarySequence.CANDIDATE_FILTER_DISTANCE.scale(0.5));
-        final GPSFixMovingImpl westFix = new GPSFixMovingImpl(westPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(westPosition, c2.getTimePoint().until(timePointForNewFix)));
+        final GPSFixMovingImpl westFix = new GPSFixMovingImpl(westPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(westPosition, c2.getTimePoint().until(timePointForNewFix)), /* optionalTrueHeading */ null);
         track.add(westFix);
         final Set<Candidate> candidatesEffectivelyAdded = new HashSet<>();
         final Set<Candidate> candidatesEffectivelyRemoved = new HashSet<>();
@@ -118,7 +118,7 @@ public class StationarySequenceTest extends AbstractCandidateFilterTestSupport {
         assertEquals(3, Util.size(stationarySequence.getAllCandidates())); // and all candidates should still be part of the sequence
         assertTrue(candidatesEffectivelyAdded.isEmpty());
         assertTrue(candidatesEffectivelyRemoved.isEmpty());
-        final GPSFixMovingImpl eastFix = new GPSFixMovingImpl(eastPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(eastPosition, c2.getTimePoint().until(timePointForNewFix)));
+        final GPSFixMovingImpl eastFix = new GPSFixMovingImpl(eastPosition, timePointForNewFix, originalPosition.getSpeedWithBearingToReachOnGreatCircle(eastPosition, c2.getTimePoint().until(timePointForNewFix)), /* optionalTrueHeading */ null);
         track.add(eastFix, /* replace */ true);
         final StationarySequence resultForEastFix = stationarySequence.tryToAddFix(eastFix, candidatesEffectivelyAdded, candidatesEffectivelyRemoved, stationarySequenceSetToUpdate, /* isReplacement */ true);
         assertNull(resultForEastFix); // again no split should have been necessary

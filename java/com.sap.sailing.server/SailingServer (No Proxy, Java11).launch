@@ -13,6 +13,7 @@
     <intAttribute key="default_start_level" value="4"/>
     <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="includeOptional" value="true"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_id" value="org.eclipse.pde.ui.launcher.PDESourceLookupDirector"/>
     <stringAttribute key="org.eclipse.debug.core.source_locator_memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;sourceLookupDirector&gt;&#13;&#10;&lt;sourceContainers duplicates=&quot;false&quot;&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;classpathContainer path=&amp;quot;com.google.gwt.eclipse.core.GWT_CONTAINER&amp;quot;/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.jdt.launching.sourceContainer.classpathContainer&quot;/&gt;&#13;&#10;&lt;container memento=&quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; standalone=&amp;quot;no&amp;quot;?&amp;gt;&amp;#13;&amp;#10;&amp;lt;default/&amp;gt;&amp;#13;&amp;#10;&quot; typeId=&quot;org.eclipse.debug.core.containerType.default&quot;/&gt;&#13;&#10;&lt;/sourceContainers&gt;&#13;&#10;&lt;/sourceLookupDirector&gt;&#13;&#10;"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_ATTR_USE_ARGFILE" value="false"/>
@@ -21,7 +22,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea --illegal-access=permit -Dosgi.java.profile=file:///${project_loc:java}/target/configuration/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -Dpolardata.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dmongo.uri=mongodb://localhost/winddb -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea --illegal-access=permit -Dosgi.java.profile=file:///${project_loc:java}/target/configuration/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -Dpolardata.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dmongo.uri=mongodb://localhost/winddb -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN} -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS}"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <stringAttribute key="profilingTraceType-ALLOCATION_TRACE" value="KEY_APPLICATION_FILTER%CTX_KEY%*%CTX_ENTRY%INCREASE_COUNT%CTX_KEY%8192%CTX_ENTRY%KEY_MIN_SIZE%CTX_KEY%32%CTX_ENTRY%KEY_MAX_SIZE%CTX_KEY%65536%CTX_ENTRY%KEY_INC_LINE_NRS%CTX_KEY%true%CTX_ENTRY%KEY_SESSION_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ENABLEMENT%CTX_KEY%false%CTX_ENTRY%CLASS_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_USER_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_REQUEST_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_TENANT_FILTER%CTX_KEY%*%CTX_ENTRY%KEY_ADAPTIVE%CTX_KEY%false%CTX_ENTRY%"/>
@@ -145,7 +146,6 @@
 <setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
-<setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
@@ -190,6 +190,10 @@
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
 <setEntry value="com.sap.db.jdbc@default:default"/>
 <setEntry value="com.sap.db.jdbc.source@default:default"/>
+<setEntry value="org.osgi.service.component@default:default"/>
+<setEntry value="org.osgi.service.cm@default:default"/>
+<setEntry value="org.osgi.util.tracker@default:default"/>
+<setEntry value="org.osgi.service.event@default:default"/>
 <setEntry value="org.osgi.service.packageadmin@default:default"/>
 <setEntry value="org.osgi.service.url@default:default"/>
 <setEntry value="com.github.haifengl.smile-core@default:default"/>

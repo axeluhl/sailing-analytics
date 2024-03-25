@@ -6,12 +6,14 @@ import java.util.Map;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.WithOptionalRepeatablePart;
 
 /**
  * A course that does not necessarily consist of {@link Mark}s existing in a regatta but instead is defined by
  * {@link MarkConfiguration}s. This means changes to the model are easily possible without requiring to pollute the
  * {@link RegattaLog}. The effective Marks will then be created upon Course creation based on the
- * {@link MarkConfiguration}s.
+ * {@link MarkConfiguration}s. See, e.g.,
+ * {@link CourseAndMarkConfigurationFactory#createCourseFromConfigurationAndDefineMarksAsNeeded}.
  * <p>
  * 
  * This is the model represented in a course editor which deals with editing the waypoint sequence as well as changing
@@ -25,8 +27,9 @@ import com.sap.sse.common.Named;
  * that the number of laps requested is reflected in the waypoint sequence consistently.
  * <p>
  * 
- * When used in a request to create a course template, the {@link #getRepeatablePart()} will be used as the
- * new course template's {@link CourseTemplate#getRepeatablePart() repeatable part}.<p>
+ * When used in a request to create a course template, the {@link #getRepeatablePart()} will be used as the new course
+ * template's {@link CourseTemplate#getRepeatablePart() repeatable part}.
+ * <p>
  * 
  * In particular, the base {@link #getWaypoints() waypoints sequence}, when returned by a request, has at least one
  * occurrence of a repeatable part, should the configuration specify a course template, be consistent with it, and

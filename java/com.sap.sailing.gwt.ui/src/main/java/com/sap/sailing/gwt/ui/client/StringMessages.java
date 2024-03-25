@@ -2441,4 +2441,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
     String incrementalScoreCorrectionInPoints();
     String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
+    String tackTypeUnit();
+    String tackTypeTooltip();
+    String tackType();
+    String tackTypeSegments();
+    String errorMinimumDurationBetweenAdjacentTackTypeSegmentsMustNotBeNegative();
+    String errorMinimumTackTypeSegmentDurationMustNotBeNegative();
+    String minimumDurationBetweenAdjacentTackTypeSegmentsInSeconds();
+    String minimumTackTypeSegmentsDurationInSeconds();
+    String errorNoAuthenticationParamsForGoogleMapsFound(String message);
+    String zeroBasedNumberOfWaypointForRepeatablePartStart();
+    String zeroBasedNumberOfWaypointForRepeatablePartEnd();
+    String defaultNumberOfLapsMustNotBeNegative();
+    String eitherNoneOrBothStartAndEndOfRepeatablePartMustBeSpecified();
+    String endOfRepeatablePartMustBeAtOfAfterStart();
+    String endOfRepeatablePartIsGreaterThanNumberOfWaypoints();
+    String configureCourse();
 }

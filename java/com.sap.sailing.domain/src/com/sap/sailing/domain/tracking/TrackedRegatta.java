@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.metering.HasCPUMeter;
 import com.sap.sse.util.ThreadLocalTransporter;
 
 /**
@@ -29,7 +30,7 @@ import com.sap.sse.util.ThreadLocalTransporter;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface TrackedRegatta extends Serializable {
+public interface TrackedRegatta extends Serializable, HasCPUMeter {
     Regatta getRegatta();
 
     /**

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Purpose: Deployed in a file named "post-receive", in the hooks dir of a bare git repo. Upon push completion, this script runs and
+# triggers an update to instances in the region with a specified tag. A command is ran in the repo
+# after the merge completes. The user, in which the bare repo and hook are installed, must have aws credentials, that
+# don't need mfa. (These may need to be installed manually -- within the correct user -- if starting from a clean instance.)
+
+DISPOSABLE_TAG="DisposableProxy"
+CENTRAL_TAG="CentralReverseProxy"
+DIR="/etc/httpd"
+COMMAND="sudo service httpd reload"
+MAIN_BRANCH_NAME="main"
+DISPOSABLE_BRANCH_NAME="disposable"
+CENTRAL_BRANCH_NAME="central"
+CHECKED_OUT_WORKSPACE_NAME="checked-out" # Assumes it is in the root user.
+sync_repo() {
+            #$1 tag key to use
+            #$2 branch to check out
+            # Gets all public ips for the instances with the chosen tag and iterates over the IPs.
+            for IP in $(aws ec2 describe-instances --filters Name=tag-key,Values="${1}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
+                # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
+                echo $IP
+                ssh -o "StrictHostKeyChecking=no" -o "ConnectTimeout=10" root@${IP} "cd ~ && sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' '${2}'";
+            done;
+}
+check_conflict() {
+    # $1: Return code of a command
+    # $2: Error msg to use
+    if [[ "$1" -ne 0 ]]; then
+        echo "$2"
+        echo "$2" | notify-operators "Merge issue for httpd config repo in checked-out workspace"
+        exit 1
+    fi
+}
+merge_main_into_branch() {
+        #$1 Branch name. Assumes you are in the git repo.
+        git checkout "${1}"
+        check_conflict  "$?" "Conflict checking out ${1}"
+        git pull
+        check_conflict  "$?" "Conflict pulling ${1}"
+        echo "Merging ${MAIN_BRANCH_NAME} into ${1}"
+        git merge ${MAIN_BRANCH_NAME}
+        check_conflict  "$?" "Conflict merging ${MAIN_BRANCH_NAME} into ${1}"
+        git push
+}
+while read oldrev newrev refname; do   # These vars are passed on stdin to this hook.
+    # Check if the update is on a branch
+    if [[ $refname == "refs/heads/"* ]]; then
+        branch_name=$(echo $refname | sed "s|refs/heads/\(.*\)$|\1|")
+        echo "Update on branch: $branch_name"
+        if [[ "$branch_name" == "$DISPOSABLE_BRANCH_NAME" ]]; then
+            echo "All the disposables pull the disposable branch"
+            sync_repo "${DISPOSABLE_TAG}" "${DISPOSABLE_BRANCH_NAME}"
+        elif [[ "$branch_name" == "$CENTRAL_BRANCH_NAME" ]]; then
+            echo "The central pulls the central branch"
+            sync_repo "${CENTRAL_TAG}" "${CENTRAL_BRANCH_NAME}"
+        elif [[ "$branch_name" == "$MAIN_BRANCH_NAME" ]]; then
+                cd ~
+                unset GIT_DIR
+                cd ${CHECKED_OUT_WORKSPACE_NAME}
+                # Get the latest main
+                git checkout ${MAIN_BRANCH_NAME}
+                check_conflict "$?" "Uncommitted files in the working directory"
+                git pull
+                check_conflict "$?" "Merge conflict in main branch"
+                if [[ "$(git rev-parse ${MAIN_BRANCH_NAME})" != "$(git rev-parse origin/${MAIN_BRANCH_NAME})" ]]; then
+                    echo "Merge induced by pull. Pushing latest changes in ${MAIN_BRANCH_NAME} to origin"  # In case of a merge from diverging branches. This seems cyclic as we are pushing to the same branch, but should resolve, when "Everything up-to-date".
+                    git push
+                else
+                    # Get the latest diposable branch and merge in changes
+                    merge_main_into_branch "$DISPOSABLE_BRANCH_NAME"
+                    # Get the latest central branch and merge in changes
+                    merge_main_into_branch "$CENTRAL_BRANCH_NAME"
+                    git checkout ${MAIN_BRANCH_NAME}
+                fi
+        fi
+    fi
+done

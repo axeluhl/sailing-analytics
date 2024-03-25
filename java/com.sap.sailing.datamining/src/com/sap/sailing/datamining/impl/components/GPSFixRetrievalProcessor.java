@@ -26,17 +26,17 @@ public class GPSFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTrac
 
     @Override
     protected Iterable<HasGPSFixContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
-        Collection<HasGPSFixContext> gpsFixesWithContext = new ArrayList<>();
+        final Collection<HasGPSFixContext> gpsFixesWithContext = new ArrayList<>();
         final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getTrack(element.getCompetitor());
         competitorTrack.lockForRead();
         try {
-            TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
+            final TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
             if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
                 for (GPSFixMoving gpsFix : competitorTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
                     if (isAborted()) {
                         break;
                     }
-                    HasGPSFixContext gpsFixWithContext = new GPSFixWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
+                    final HasGPSFixContext gpsFixWithContext = new GPSFixWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
                             element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), gpsFix.getTimePoint()), gpsFix);
                     gpsFixesWithContext.add(gpsFixWithContext);
                 }

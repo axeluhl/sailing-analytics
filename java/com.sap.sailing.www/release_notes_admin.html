@@ -23,6 +23,35 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">March 2024</h2>
+          <ul class="bulletList">
+            <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>
+            <li>Bug fix: in landscape automation, when moving all process instances away from a node to other nodes,
+                in-place replica re-starts were erroneously performed using the "root" user instead of the
+                "sailing" user. Not only were the processes running with the wrong user; this would also
+                create folders with incorrect ownerships which then were no longer writeable for the "sailing"
+                user which later led to problems with re-starting those processes, such as after a version
+                upgrade.</li>
+          </ul>
+          <h2 class="articleSubheadline">February 2024</h2>
+          <ul class="bulletList">
+            <li>The TracTrac API now offers <tt>STP</tt> and <tt>SCP</tt> as new race competitor status values
+                that we now map to our corresponding "IRM" / penalty codes.</li>
+            <li>A bug in the way mark passing calculation results were stored persistently lead to some races
+                "losing" their mark passings when the server was re-started. This bug is fixed now.</li>
+            <li>Upgraded embedded Jetty web server from 9.4.44 to 9.4.54. See
+                <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-22201">CVE-2024-22201</a> and
+                <a href="https://github.com/jetty/jetty.project/issues/11256">Jetty issue #11256</a>.</li>
+          </ul>
+          <h2 class="articleSubheadline">January 2024</h2>
+          <ul class="bulletList">
+            <li>When launching a new application replica set in a region, the choice of the default RabbitMQ
+                server now depends on the region: in our "default" region "eu-west-1", RabbitMQ is identified
+                by the DNS-mapped host name "rabbit.internal.sapsailing.com". Elsewhere, the RabbitMQ server
+                in the region is explored using the RabbitMQEndpoint tag. If not found, again
+                "rabbit.internal.sapsailing.com" will be used, assuming there may be a VPC peering across
+                regions.</li>
+          </ul>
           <h2 class="articleSubheadline">October 2023</h2>
           <ul class="bulletList">
             <li>TracTrac and YellowBrick passwords are no longer sent back to the client; there were ways to discover

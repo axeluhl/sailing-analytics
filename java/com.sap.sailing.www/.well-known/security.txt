@@ -1,5 +1,2 @@
 Contact: https://www.sap.com/report-a-vulnerability
-Encryption: https://www.sap.com/pgp-keyblock
-Policy: https://wiki.scn.sap.com/wiki/x/1s-iGg
-Acknowledgments: https://wiki.scn.sap.com/wiki/x/rc-iGg
-Expires: Mon, 31 Jan 2022 12:00 +0100
+Expires: 2025-01-30T18:29:00.000Z

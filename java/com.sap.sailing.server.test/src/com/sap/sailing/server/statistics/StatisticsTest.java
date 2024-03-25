@@ -112,47 +112,47 @@ public class StatisticsTest {
     public void testTrackedRaceStatisticsCacheWithFixes() throws Exception {
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295970, 8.638958), new MillisecondsTimePoint(START_OF_RACE),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295911, 8.638971),
                         new MillisecondsTimePoint(START_OF_RACE + 10),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295866, 8.638986),
                         new MillisecondsTimePoint(START_OF_RACE + 20),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295822, 8.639010),
                         new MillisecondsTimePoint(START_OF_RACE + 30),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295785, 8.639057),
                         new MillisecondsTimePoint(START_OF_RACE + 40),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295768, 8.639108),
                         new MillisecondsTimePoint(START_OF_RACE + 50),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295761, 8.639180),
                         new MillisecondsTimePoint(START_OF_RACE + 60),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295765, 8.639278),
                         new MillisecondsTimePoint(START_OF_RACE + 70),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295785, 8.639353),
                         new MillisecondsTimePoint(START_OF_RACE + 80),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295817, 8.639406),
                         new MillisecondsTimePoint(START_OF_RACE + 90),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
         trackedRace.recordFix(comp,
                 new GPSFixMovingImpl(new DegreePosition(49.295861, 8.639449),
                         new MillisecondsTimePoint(START_OF_RACE + 100),
-                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100))));
+                        new KilometersPerHourSpeedWithBearingImpl(1, new DegreeBearingImpl(100)), /* optionalTrueHeading */ null));
 
         List<MarkPassing> markPassings = new ArrayList<>();
         markPassings.add(new MarkPassingImpl(new MillisecondsTimePoint(START_OF_RACE), waypoint1, comp));

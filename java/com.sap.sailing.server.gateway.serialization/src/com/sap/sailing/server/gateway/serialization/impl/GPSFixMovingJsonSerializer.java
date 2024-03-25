@@ -21,7 +21,9 @@ public class GPSFixMovingJsonSerializer implements JsonSerializer<GPSFixMoving> 
         result.put(TypeBasedJsonDeserializer.FIELD_TYPE, GPSFixMovingJsonDeserializer.TYPE);
         result.put(GPSFixMovingJsonDeserializer.FIELD_BEARING_DEG, speedWithCourse.getBearing().getDegrees());
         result.put(GPSFixMovingJsonDeserializer.FIELD_SPEED_KNOTS, speedWithCourse.getKnots());
-
+        if (object.getOptionalTrueHeading() != null) {
+            result.put(GPSFixMovingJsonDeserializer.FIELD_TRUE_HEADING_DEG, object.getOptionalTrueHeading().getDegrees());
+        }
         return result;
     }
 }

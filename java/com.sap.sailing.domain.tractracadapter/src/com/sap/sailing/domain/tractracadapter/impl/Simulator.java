@@ -344,7 +344,7 @@ public class Simulator {
 
     private <T> void scheduleFixRecording(final T object, GPSFixMoving fix, final RecordGPSFix<T> recorder) {
         final TimePoint transformedTimepoint = advance(fix.getTimePoint());
-        final GPSFixMoving transformedFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed());
+        final GPSFixMoving transformedFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed(), fix.getOptionalTrueHeading());
         long waitTime = getWaitTimeInMillisUntil(transformedFix.getTimePoint());
         if (waitTime <= 0) {
             recorder.recordFix(object, transformedFix);

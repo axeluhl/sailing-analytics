@@ -97,7 +97,7 @@ public class Activator implements BundleActivator {
      * shared across different sub-domains; otherwise, the base URL where {@code /gwt-base/StorageMessaging.html} can be
      * loaded from shall be provided, and this base URL will then form the "origin" for the local browser storage used
      * for session storage and other local data stored in the browser which will then be available to all servers using
-     * the same setting fo rthis field. Example value: {@code "https://www.sapsailing.com"}.
+     * the same setting for this field. Example value: {@code "https://security-service.sapsailing.com"}.
      * <p>
      * 
      * The value can be specified by a system property whose name is provided by

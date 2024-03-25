@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
+import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
+
 import org.bson.Document;
 
 import com.sap.sailing.domain.common.Position;
@@ -11,7 +13,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
-import static com.sap.sailing.shared.persistence.impl.DomainObjectFactoryImpl.loadPosition;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMoving> {
@@ -27,17 +29,19 @@ public class GPSFixMovingMongoHandlerImpl implements FixMongoHandler<GPSFixMovin
     public Document transformForth(GPSFixMoving fix) throws IllegalArgumentException {
         Document result = new Document();
         mof.storeTimed(fix, result);
-        mof.storePositioned(fix, result);    
-        mof.storeSpeedWithBearing(fix.getSpeed(), result);  
+        mof.storePositioned(fix, result);
+        mof.storeSpeedWithBearing(fix.getSpeed(), result);
+        mof.storeOptionalTrueHeading(fix.getOptionalTrueHeading(), result);
         return result;
     }
 
     @Override
     public GPSFixMoving transformBack(Document dbObject) {
-        TimePoint timePoint = dof.loadTimePoint(dbObject);
-        Position position = loadPosition(dbObject);
-        SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
-        return new GPSFixMovingImpl(position, timePoint, speed);
+        final TimePoint timePoint = dof.loadTimePoint(dbObject);
+        final Position position = loadPosition(dbObject);
+        final SpeedWithBearing speed = dof.loadSpeedWithBearing(dbObject);
+        final Bearing optionalTrueHeading = dof.loadOptionalTrueHeading(dbObject);
+        return new GPSFixMovingImpl(position, timePoint, speed, optionalTrueHeading);
     }
 
 }

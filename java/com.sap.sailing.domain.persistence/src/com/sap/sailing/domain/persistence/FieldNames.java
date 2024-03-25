@@ -3,7 +3,7 @@ package com.sap.sailing.domain.persistence;
 
 public enum FieldNames {
     // general:
-    TIME_AS_MILLIS, KNOT_SPEED, DEGREE_BEARING, LAT_DEG, LNG_DEG,
+    TIME_AS_MILLIS, KNOT_SPEED, DEGREE_BEARING, LAT_DEG, LNG_DEG, TRUE_HEADING_DEG,
     
     FLEET, RACE_IDENTIFIERS,
     

@@ -15,19 +15,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
     ImageResource location();
 
     public interface LocalCss extends CssResource {
-        String jsdropdown();
-        String jsdropdown_head();
-        String jsdropdown_content();
-        String dropdown();
-        String dropdown_head();
-        String dropdown_head_title();
-        String dropdown_head_title_button();
-        String dropdown_content();
-        String jsdropdownactive();
-        String dropdown_content_link();
-        String dropdown_content_link_title();
-        String dropdown_content_link_subtitle();
-        String dropdown_content_linkactive();
         String leaderboardquickaccess();
         String eventheader();
         String eventheader_breadcrumb();
@@ -44,12 +31,6 @@ public interface EventHeaderResources extends SharedDesktopResources {
         String locationicon();
         String eventnavigation();
         String eventnavigationnormal();
-        String eventnavigation_dropdown();
-        String eventnavigation_dropdown_toggle();
-        String eventnavigation_dropdown_toggle_icon();
-        String eventnavigation_dropdown_container();
-        String eventnavigation_dropdown_containerhidden();
         String navbar_button();
-        String navbar_buttonhidden();
     }
 }

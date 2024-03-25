@@ -57,8 +57,8 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
                     ? ScoringSchemeTypeFormatter.getDescription(leaderboard.scoringScheme, stringmessages) : "");
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
-                        + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatterUTC.render(lastCorrectionDate) + ", "
+                        + DateAndTimeFormatterUtil.longTimeFormatterUTC.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 lastScoringUpdateTextDiv.setInnerText(stringmessages.eventRegattaLeaderboardLastScoreUpdate());
             } else {

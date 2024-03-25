@@ -36,7 +36,8 @@ public class SecurityServiceAndHasPermissionsProviderTest {
                 PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), TEST_DEFAULT_TENANT);
         userStore.ensureDefaultRolesExist();
         userStore.loadAndMigrateUsers();
-        accessControlStore = new AccessControlStoreImpl(userStore);
+        accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), userStore);
     }
 
     @After

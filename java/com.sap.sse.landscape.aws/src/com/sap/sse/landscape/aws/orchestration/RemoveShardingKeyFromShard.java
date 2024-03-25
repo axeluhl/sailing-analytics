@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-
 import com.sap.sse.common.Util;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.application.ApplicationProcessMetrics;

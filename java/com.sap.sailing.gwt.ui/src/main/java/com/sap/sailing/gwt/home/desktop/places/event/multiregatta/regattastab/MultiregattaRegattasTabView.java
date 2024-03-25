@@ -52,6 +52,11 @@ public class MultiregattaRegattasTabView extends Composite implements Multiregat
     }
     
     @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public void start(final MultiregattaRegattasPlace myPlace, final AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, true);
         MultiregattaRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaRegattasTabViewRegattaFilterList();

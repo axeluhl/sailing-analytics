@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="219">
+<target name="Race Analysis Target" sequenceNumber="222">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -20,10 +20,6 @@
 <unit id="org.objectweb.asm.util.source" version="9.4.0.v20221107-1714"/>
 <unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
 <unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
-<unit id="net.bytebuddy.byte-buddy" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy.source" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent" version="1.12.18.v20221114-2102"/>
-<unit id="net.bytebuddy.byte-buddy-agent.source" version="1.12.18.v20221114-2102"/>
 <unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
 <unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>
@@ -60,7 +56,6 @@
 <unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
 <unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
 <unit id="javax.xml" version="1.3.4.v201005080400"/>
-<unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
@@ -89,9 +84,9 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.44.v20210927"/>
-<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.44.v20210927"/>
-<repository location="https://p2.sapsailing.com/p2/jetty-9.4.44.v20210927/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.54.v20240208"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.54.v20240208"/>
+<repository location="https://p2.sapsailing.com/p2/jetty-9.4.54.v20240208/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="1.1.0.v20201023-1558"/>
@@ -147,7 +142,7 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.20.59"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.25.11"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -175,6 +170,7 @@
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
+<plugin id="com.fasterxml.jackson.core.jackson-core"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.validation"/>
@@ -182,7 +178,6 @@
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
 <plugin id="javax.xml"/>
-<plugin id="jaxb-api"/>
 <plugin id="javax.xml.stream"/>
 <plugin id="javax.xml.ws"/>
 <plugin id="javax.xml.soap"/>
@@ -371,15 +366,19 @@
 <plugin id="org.apache.xalan"/>
 <plugin id="org.apache.xml.serializer"/>
 <plugin id="org.eclipse.jetty.osgi.boot.jsp.source"/>
-<plugin id="org.eclipse.jetty.osgi-servlet-api" version="3.1.0.M3"/>
-<plugin id="org.eclipse.jetty.osgi-servlet-api.source" version="3.1.0.M3"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api"/>
+<plugin id="org.eclipse.jetty.osgi-servlet-api.source"/>
 <plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>
 <plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.eclipse.jetty.io.source"/>
+<plugin id="org.osgi.service.cm"/>
+<plugin id="org.osgi.service.component"/>
 <plugin id="org.osgi.service.packageadmin"/>
 <plugin id="org.osgi.service.url"/>
+<plugin id="org.osgi.service.event"/>
+<plugin id="org.osgi.util.tracker"/>
 <plugin id="org.osgi.util.promise"/>
 <plugin id="org.osgi.util.promise.source"/>
 <plugin id="org.osgi.util.function"/>
@@ -391,10 +390,36 @@
 <plugin id="org.osgi.util.xml"/>
 <plugin id="org.osgi.util.xml.source"/>
 <plugin id="redisson"/>
+<plugin id="com.esotericsoftware.kryo"/>
+<plugin id="com.esotericsoftware.minlog"/>
+<plugin id="com.esotericsoftware.reflectasm"/>
+<plugin id="com.fasterxml.jackson.core.jackson-annotations"/>
+<plugin id="com.fasterxml.jackson.core.jackson-databind"/>
+<plugin id="com.fasterxml.jackson.dataformat.jackson-dataformat-yaml"/>
+<plugin id="org.yaml.snakeyaml"/>
+<plugin id="io.netty.transport"/>
+<plugin id="io.netty.buffer"/>
+<plugin id="io.netty.common"/>
+<plugin id="io.netty.resolver"/>
+<plugin id="io.netty.transport-classes-epoll"/>
+<plugin id="io.netty.transport-native-unix-common"/>
+<plugin id="io.netty.transport-classes-kqueue"/>
+<plugin id="io.netty.codec"/>
+<plugin id="io.netty.handler"/>
+<plugin id="io.netty.resolver-dns"/>
+<plugin id="io.netty.codec-dns"/>
+<plugin id="io.netty.incubator.netty-incubator-transport-classes-io_uring"/>
+<plugin id="io.reactivex.rxjava3.rxjava"/>
+<plugin id="reactive-streams"/>
+<plugin id="jodd-bean"/>
+<plugin id="org.jboss.marshalling.jboss-marshalling-osgi"/>
+<plugin id="io.projectreactor.reactor-core"/>
+<plugin id="com.diffplug.osgi.extension.sun.misc"/>
 <plugin id="com.google.gson"/>
 <plugin id="com.google.gson.source"/>
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
 <plugin id="com.amazonaws.aws-lambda-java-core.source"/>
+<plugin id="javax.cache.api"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

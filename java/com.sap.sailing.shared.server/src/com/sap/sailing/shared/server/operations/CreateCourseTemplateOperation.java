@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.shared.server.impl.ReplicatingSharedSailingData;
+import com.sap.sse.common.RepeatablePart;
 
 public class CreateCourseTemplateOperation implements SharedSailingDataOperation<Void> {
     private static final long serialVersionUID = 5028364832943967084L;

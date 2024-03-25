@@ -47,6 +47,9 @@
     width: 100%;
 }
 .user_menu_premium {
+  margin-bottom: 8px;
+}
+.user_menu_premium DIV {
   position: absolute;
   bottom: -2px;
   left: 50%;

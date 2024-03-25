@@ -29,7 +29,7 @@ public class DeckmanGPSFixImporter implements GPSFixImporter {
         try {
             for (Iterator<Record> i = deckmanAdapter.parseLogFile(new InputStreamReader(inputStream)); i.hasNext();) {
                 Record record = i.next();
-                callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed()),
+                callback.addFix(new GPSFixMovingImpl(record.getPosition(), record.getTimePoint(), record.getGpsFix().getSpeed(), record.getGpsFix().getOptionalTrueHeading()),
                         device);
                 importedFixes.set(true);
             }

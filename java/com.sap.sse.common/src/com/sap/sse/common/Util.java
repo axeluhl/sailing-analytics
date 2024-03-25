@@ -869,7 +869,7 @@ public class Util {
      *          Input Iterable
      * @return
      *          returns List<T> if {@code iterable} is an instance of List<?> and if it is an instance Serializable. If not,
-     *          an ArrayList<T> gets constructed and filled with all items of {@code iterable}   
+     *          an ArrayList<T> gets constructed and filled with all items of {@code iterable}
      */
     public static <T> List<T> asList(Iterable<T> iterable) {
         final List<T> list;

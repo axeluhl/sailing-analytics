@@ -416,6 +416,9 @@ public interface TrackedRace
      * Obtains estimated interpolated wind information for a given position and time point. The information is taken
      * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, using the
      * confidences of the wind values provided by the various sources during averaging.
+     * 
+     * @return the wind vector for the time and place given; or {@code null} if no wind speed/direction can be
+     *         determined, e.g., because there is no non-excluded wind source available
      */
     Wind getWind(Position p, TimePoint at, Set<WindSource> windSourcesToExclude);
 
@@ -750,6 +753,9 @@ public interface TrackedRace
      * and time point <code>at</code>, using the particular wind source's averaging interval. The confidences delivered
      * by each wind source are used during computing the averaged result across the wind sources. The result has the
      * averaged confidence attached.
+     * 
+     * @return the wind vector for the time and place given, with a confidence attached; or {@code null} if no wind
+     *         speed/direction can be determined, e.g., because there is no non-excluded wind source available
      */
     WindWithConfidence<Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Set<WindSource> windSourcesToExclude);

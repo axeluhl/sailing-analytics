@@ -96,7 +96,7 @@ public class FixPositionChooser {
             fix = new GPSFixDTO(oldFix.timepoint, oldFix.position);
             this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         } else {
-            fix = new GPSFixDTOWithSpeedWindTackAndLegType(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
+            fix = new GPSFixDTOWithSpeedWindTackAndLegType(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, /* optionalTrueHeading */ null, new WindDTO(), null, null, false);
             this.moveOverlay = new FixOverlay(map, EditMarkPositionPanel.FIX_OVERLAY_Z_ORDER+1, fix, FixType.BUOY, "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         }
         redTimeLine.setValue(fix.timepoint.getTime());

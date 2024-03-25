@@ -12,6 +12,7 @@
     <intAttribute key="default_start_level" value="4"/>
     <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="includeOptional" value="true"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
         <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
         <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
@@ -20,7 +21,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djetty.port=8890 -Dreplication.exchangeName=sapsailinganalytics-replica2 -Declipse.ignoreApp=true -Dosgi.noShutdown=true&#13;&#10;-Dexpedition.udp.port=2011 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dmongo.dbName=replica2 -Dwindestimation.source.url=http://127.0.0.1:8888 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djetty.port=8890 -Dreplication.exchangeName=sapsailinganalytics-replica2 -Declipse.ignoreApp=true -Dosgi.noShutdown=true&#13;&#10;-Dexpedition.udp.port=2011 -Xmx6000m -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dmongo.dbName=replica2 -Dwindestimation.source.url=http://127.0.0.1:8888 -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN} -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS}"/>
     <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc}"/>
     <stringAttribute key="pde.version" value="3.3"/>
     <setAttribute key="selected_target_bundles">
@@ -138,7 +139,6 @@
 <setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
-<setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
 <setEntry value="javax.xml.stream@default:default"/>
 <setEntry value="javax.xml.ws@default:default"/>
@@ -183,6 +183,10 @@
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
 <setEntry value="com.sap.db.jdbc@default:default"/>
 <setEntry value="com.sap.db.jdbc.source@default:default"/>
+<setEntry value="org.osgi.service.component@default:default"/>
+<setEntry value="org.osgi.service.cm@default:default"/>
+<setEntry value="org.osgi.util.tracker@default:default"/>
+<setEntry value="org.osgi.service.event@default:default"/>
 <setEntry value="org.osgi.service.packageadmin@default:default"/>
 <setEntry value="org.osgi.service.url@default:default"/>
 <setEntry value="com.github.haifengl.smile-core@default:default"/>

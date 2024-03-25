@@ -187,7 +187,8 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public GPSFixMoving createGPSFixMoving(IPosition position) {
         GPSFixMoving result = new GPSFixMovingImpl(createPosition(position), new MillisecondsTimePoint(position.getTimestamp()),
-                new KilometersPerHourSpeedWithBearingImpl(position.getSpeed(), new DegreeBearingImpl(position.getDirection())));
+                new KilometersPerHourSpeedWithBearingImpl(position.getSpeed(), new DegreeBearingImpl(position.getDirection())),
+                position.getTrueHeading() == null ? null : new DegreeBearingImpl(position.getTrueHeading()));
         return result;
     }
     
