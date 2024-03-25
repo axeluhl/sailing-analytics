@@ -39,6 +39,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("ARMENIA", "AM", "ARM", "am", "AM", "ARM", "051", "7"));
         add(new CountryCodeImpl("ARUBA", "AW", "ABW", "aw", null, "ARU", "533", "297"));
         add(new CountryCodeImpl("ASCENSION ISLAND", null, null, "ac", null, null, null, "247"));
+        add(new CountryCodeImpl("ATHLÈTE INDIVIDUEL NEUTRE", "AA", "AIN", null, null, "AIN", null, null));
         add(new CountryCodeImpl("AUSTRALIA", "AU", "AUS", "au", "AUS", "AUS", "036", "61"));
         add(new CountryCodeImpl("AUSTRIA", "AT", "AUT", "at", "A", "AUT", "040", "43"));
         add(new CountryCodeImpl("AZERBAIJAN", "AZ", "AZE", "az", "AZ", "AZE", "031", "994"));
