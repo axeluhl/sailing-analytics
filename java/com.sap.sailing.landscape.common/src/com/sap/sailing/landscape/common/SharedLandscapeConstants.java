@@ -95,4 +95,6 @@ public interface SharedLandscapeConstants {
      * The most appropriate instance type for a disposable reverse proxy.
      */
     String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "T3_MEDIUM";
+
+    String DEFAULT_DISPOSABLE_REVERSE_PROXY_INSTANCE_NAME = "DisposableReverseProxy";
 }
