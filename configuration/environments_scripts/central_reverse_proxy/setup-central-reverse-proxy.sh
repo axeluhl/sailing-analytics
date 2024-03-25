@@ -6,7 +6,6 @@ IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
-AWS_CREDENTIALS_IP="34.251.204.62" # points to a server which has no-mfa credentials within the root user, possibly the central reverse proxy.
 # The aws credentials will have to be manually installed in the aws user.
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
@@ -14,8 +13,6 @@ sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
-sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
-sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
 # update instance
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ ruby
@@ -42,17 +39,13 @@ chmod 755 /root
 /usr/bin/perl install-module.pl Daemon::Generic
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
-# setup cloud_cfg and keys
-cd /home
-scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
-setup_keys "${IMAGE_TYPE}"
-# setup symbolic links and crontab
-# build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # THIS MUST BE RUN AFTER MOUNTING
-# setup mail
-setup_mail_sending
-# setup sshd config
-setup_sshd_resilience
-systemctl reload sshd.service
+# use the localconfig file to setup the bugzilla
+./checksetup.pl
+# append hostname to sysconfig
+echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
+sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
+hostname sapsailing.com
+hostnamectl set-hostname sapsailing.com
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
@@ -96,11 +89,16 @@ systemctl enable httpd
 systemctl start httpd
 sudo systemctl start crond.service
 sudo systemctl enable crond.service
+chkconfig sendmail off
 sudo systemctl enable postfix
 sudo systemctl restart postfix
 
 # tmux setup?
 # mongo
+# git passwds?
 # anything in etc
 SECONDEOF
 
+
+
+#not available: perl-HTML-Template  /usr/bin/perl install-module.pl GD
