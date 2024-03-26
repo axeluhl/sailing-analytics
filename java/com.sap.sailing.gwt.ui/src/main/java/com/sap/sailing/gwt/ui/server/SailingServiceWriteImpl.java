@@ -594,8 +594,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
                         config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
                         correctWindByDeclination, useOfficialEventsToUpdateRaceLog,
-                        liveURIFromConfiguration==null?null:new URI(liveURIFromConfiguration),
-                        storedURIFromConfiguration==null?null:new URI(storedURIFromConfiguration));
+                        liveURIFromConfiguration==null || liveURIFromConfiguration.trim().length() == 0 ? null : new URI(liveURIFromConfiguration),
+                        storedURIFromConfiguration==null || storedURIFromConfiguration.trim().length() == 0 ? null : new URI(storedURIFromConfiguration));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
