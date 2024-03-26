@@ -94,6 +94,8 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(TRAC_TRAC_USERNAME, ttParams.getTracTracUsername().toString());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, ttParams.isUseInternalMarkPassingAlgorithm());
         result.put(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG, ttParams.isUseOfficialEventsToUpdateRaceLog());
+        result.put(LIVE_URI_FROM_CONFIGURATION, ttParams.getLiveURIFromConfiguration()==null?null:ttParams.getLiveURIFromConfiguration().toString());
+        result.put(STORED_URI_FROM_CONFIGURATION, ttParams.getStoredURIFromConfiguration()==null?null:ttParams.getStoredURIFromConfiguration().toString());
         addWindTrackingParameters(ttParams, result);
         return result;
     }
