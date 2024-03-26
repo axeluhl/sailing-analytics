@@ -160,6 +160,7 @@ finalize() {
 setup_cloud_cfg_and_root_login() {
     sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
     sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
+    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
 }
 
 setup_fail2ban() {
@@ -222,4 +223,5 @@ setup_sshd_resilience() {
     echo "ClientAliveInterval 3
 ClientAliveCountMax 3
 GatewayPorts yes" >> /etc/ssh/sshd_config
+    systemctl reload sshd.service
 }
