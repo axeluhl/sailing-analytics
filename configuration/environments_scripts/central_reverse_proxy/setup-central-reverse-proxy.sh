@@ -34,6 +34,9 @@ setup_cloud_cfg_and_root_login
 setup_mail_sending
 # setup sshd config
 setup_sshd_resilience
+# setup goaccess and apachetop
+setup_apachetop
+setup_goaccess
 # copy bugzilla
 scp root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
 tar -xzvf bugzilla-5.0.4.tar.gz

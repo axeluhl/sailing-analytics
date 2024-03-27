@@ -225,3 +225,35 @@ ClientAliveCountMax 3
 GatewayPorts yes" >> /etc/ssh/sshd_config
     systemctl reload sshd.service
 }
+
+setup_goaccess() {
+    # Compatible with Amazon Linux 2023
+    pushd .
+    cd ~
+    wget https://tar.goaccess.io/goaccess-1.9.1.tar.gz
+    tar -xzvf goaccess-1.9.1.tar.gz
+    cd goaccess-1.9.1/
+    yum install -y gcc-c++
+    yum install -y libmaxminddb-devel ncurses-devel geoip-devel
+    ./configure --enable-utf8 --enable-geoip=mmdb
+    make
+    make install
+    scp root@sapsailing.com:/etc/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    # once we switch from amazon linux 1:
+    # scp root@sapsailing.com:/usr/local/etc/goaccess/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    popd
+}
+setup_apachetop() {
+    # Compatible with Amazon Linux 2023
+    pushd .
+    yum install -y gcc-c++
+    yum install -y ncurses-devel readline-devel
+    cd ~
+    wget https://github.com/tessus/apachetop/releases/download/0.23.2/apachetop-0.23.2.tar.gz
+    tar -xvzf apachetop-0.23.2.tar.gz
+    cd apachetop-0.23.2
+    ./configure
+    make
+    make install
+    popd
+}
