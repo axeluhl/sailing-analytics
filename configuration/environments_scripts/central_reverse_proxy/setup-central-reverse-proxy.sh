@@ -82,6 +82,12 @@ sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
 hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
+# awstats
+wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
+tar -zvxf awstats-7.0.tar.gz
+mv awstats-7.0/ /usr/share/awstats
+mkdir /var/lib/awstats
+scp root@sapsailing.com:/etc/awstats /etc/awstats
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
