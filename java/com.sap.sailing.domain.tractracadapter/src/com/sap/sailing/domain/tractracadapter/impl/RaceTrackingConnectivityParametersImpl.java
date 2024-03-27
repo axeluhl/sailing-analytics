@@ -35,7 +35,9 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
     
     private final URL paramURL;
     private final URI liveURI;
+    private final URI liveURIFromConfiguration;
     private final URI storedURI;
+    private final URI storedURIFromConfiguration;
     private final URI updateURI;
     private final TimePoint startOfTracking;
     private final TimePoint endOfTracking;
@@ -73,7 +75,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
             boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable,
-            int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
+            int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog,
+            URI liveURIFromConfiguration, URI storedURIFromConfiguration) throws Exception {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.useOfficialEventsToUpdateRaceLog = useOfficialEventsToUpdateRaceLog;
         this.paramURL = paramURL;
@@ -104,6 +107,8 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
         this.raceVisibility = raceVisibility;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
         this.preferReplayIfAvailable = preferReplayIfAvailable;
+        this.liveURIFromConfiguration = liveURIFromConfiguration;
+        this.storedURIFromConfiguration = storedURIFromConfiguration;
     }
 
     public boolean isReplayRace(IRace tractracRace) {
@@ -166,6 +171,14 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     public URI getStoredURI() {
         return storedURI;
+    }
+
+    public URI getLiveURIFromConfiguration() {
+        return liveURIFromConfiguration;
+    }
+
+    public URI getStoredURIFromConfiguration() {
+        return storedURIFromConfiguration;
     }
 
     public URI getUpdateURI() {
