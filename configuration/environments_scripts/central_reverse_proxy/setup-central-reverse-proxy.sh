@@ -36,8 +36,8 @@ setup_mail_sending
 setup_sshd_resilience
 # copy bugzilla
 scp root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
-tar -xzvf bugzilla-5.0.4.tar.gz -C /usr/share/bugzilla
-mv /usr/share/bugzilla-5.0.4 /usr/share/bugzilla
+tar -xzvf bugzilla-5.0.4.tar.gz
+mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
 # missing perl modules
