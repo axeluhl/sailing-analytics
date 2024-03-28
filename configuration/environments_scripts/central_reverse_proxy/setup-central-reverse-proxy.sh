@@ -17,7 +17,11 @@ ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server 
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
-
+# ruby and gollum
+yum group install "Development Tools"
+yum install ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
+gem install gollum
+gem update --system 3.5.7
 # make root readable for 
 # setup cloud_cfg and keys
 cd /home
