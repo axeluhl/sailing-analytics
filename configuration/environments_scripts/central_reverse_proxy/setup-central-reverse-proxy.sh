@@ -15,14 +15,12 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server perl-GD
-yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl
-amazon-linux-extras install epel -y && yum install -y apachetop
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server 
+yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
 # main conf mandates php7.1
 amazon-linux-extras enable php7.1
 yum install -y php # install mod_phpservice
 # make root readable for 
-chmod 755 /root
 # setup cloud_cfg and keys
 cd /home
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
@@ -82,12 +80,14 @@ sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
 hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
-# awstats
+# awstats - depends on some of the previous perl modules.
 wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
-scp root@sapsailing.com:/etc/awstats /etc/awstats
+scp -r root@sapsailing.com:/etc/awstats /etc/awstats
+chmod 755 /root ## TODO: DO we need this.
+## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
