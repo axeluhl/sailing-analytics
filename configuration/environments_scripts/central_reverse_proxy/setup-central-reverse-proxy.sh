@@ -17,9 +17,7 @@ ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server 
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
-# main conf mandates php7.1
-amazon-linux-extras enable php7.1
-yum install -y php # install mod_phpservice
+
 # make root readable for 
 # setup cloud_cfg and keys
 cd /home
