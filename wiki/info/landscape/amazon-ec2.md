@@ -273,6 +273,43 @@ In all of the following sub-sections the text will assume that you have provided
 
 In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
 
+There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at /root/key_vault on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
+
+The structure of the vault is important for the efficacy of the script and should appear as below. There is an explanation afterwards.
+```
+key_vault
+├── aws_credentials
+│   └── disposable-reverse-proxy-automation
+├── central_reverse_proxy
+│   ├── httpdConf
+│   │   ├── aws
+│   │   │   └── credentials -> ../../../aws_credentials/disposable-reverse-proxy-automation
+│   │   └── ssh
+│   │       ├── authorized_keys
+│   │       │   ├── id_ed25519.pub@root@central_reverse_proxy -> ../../../root/ssh/id_ed25519.pub
+│   │       │   └── id_ed25519.pub@root@reverse_proxy -> ../../../../reverse_proxy/root/ssh/id_ed25519.pub
+│   │       ├── id_ed25519
+│   │       └── id_ed25519.pub
+│   ├── root
+│   │   └── ssh
+│   │       ├── authorized_keys
+│   │       │   └── id_ed25519.pub@httpdConf@central_reverse_proxy -> ../../../httpdConf/ssh/id_ed25519.pub
+│   │       ├── id_ed25519
+│   │       └── id_ed25519.pub
+```
+1. So we have the aws_credentials directory, storing the credentials for specific AWS users.
+2. We also have directories named after the environment types (matching the directory names in GIT_HOME/configuration/environments_scripts).
+3. Nested within these, we have directories for each user that will require some keys, for the given environment type.
+4. For each user, we have optional directories "ssh" & "aws" (the naming is important).
+5. The aws folder should contain only credentials files which are sym links to the aws_credentials folder.
+6. If the setup_keys script is run, the contents of the aws folder will be copied, across to the respective .aws folder on the instance the script runs on, within the correct user's home directory. The config file will be created with the correct region. Although, it will *only* be the default profile.
+7. The ssh folder will contain the ssh keys of the user; they are named based on the type of the key.
+8. Furthermore, the folder will contain an authorized_keys directory, which holds references to the keys (elsewhere in the vault), which should be authorized to access the user. In the above example, the symbolic link named `id_ed25519.pub@httpdConf@central_reverse_proxy` means that the key referenced will be in the authorized keys
+for root, so the id_ed25519 key of the httpdConf user on the central reverse proxy will be able to access the root user.
+9. The name of these links doesn't matter, but by convention we will use the format used in the image above (`key_type@user@env_type`), using @ as a separator.
+10. The script will copy across the keys in the ssh folder (ignoring sym links or directories).
+11. The script will append every public key that is linked in the authorized_keys folder, to the authorized_keys file of the respective user. 
+
 ### Creating a New Application Replica Set
 
 In the Application Replica Sets table click the "Add" button and provide the replica set name. You may already now press the OK button and will receive a new application replica set with a master process running on a new dedicated host, and a single replica process running on a new instance launched by the application replica set's auto-scaling group.
@@ -357,6 +394,11 @@ You can also manually trigger the upgrade of the AMI used by an auto-scaling gro
 ### Removing an AMI and its Snapshots
 
 In the "Amazon Machine Images (AMIs)" table each row offers an action icon for removing the image. Use this with great care. After confirming the pop-up dialog shown, the AMI as well as its volume snapshots will be removed unrecoverably.
+
+### Create mailing list for landscape managers
+
+We now have a script to automatically create a mailing list of all the landscape managers, that is stored in /var/cache. It is updated via a cronjob. We have to be careful to write atomically, so the mailing list isn't missing any email addresses, if the notify-operators script is called midway through a write. 
+
 
 ## Automated SSH Key Management
 

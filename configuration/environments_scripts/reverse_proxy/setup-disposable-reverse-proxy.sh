@@ -30,7 +30,7 @@ scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/confi
 . imageupgrade_functions.sh
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
-# setup symbolic links and crontab
+# setup files and crontab for the required users, both dependent on the environment type.
 build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 # setup mail
 setup_mail_sending
