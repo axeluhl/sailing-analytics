@@ -395,6 +395,11 @@ You can also manually trigger the upgrade of the AMI used by an auto-scaling gro
 
 In the "Amazon Machine Images (AMIs)" table each row offers an action icon for removing the image. Use this with great care. After confirming the pop-up dialog shown, the AMI as well as its volume snapshots will be removed unrecoverably.
 
+### Create mailing list for landscape managers
+
+We now have a script to automatically create a mailing list of all the landscape managers, that is stored in /var/cache. It is updated via a cronjob. We have to be careful to write atomically, so the mailing list isn't missing any email addresses, if the notify-operators script is called midway through a write. 
+
+
 ## Automated SSH Key Management
 
 AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
