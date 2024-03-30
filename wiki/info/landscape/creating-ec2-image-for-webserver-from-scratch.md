@@ -1,5 +1,5 @@
-# Setting up an image for the www.sapsailing.com web server
-
+# Setting up an image for the www.sapsailing.com web server (For the disposables, scroll to the bottom.)
+ 
 This is an add-on to the regular EC2 image set-up described [here](https://wiki.sapsailing.com/wiki/info/landscape/creating-ec2-image-from-scratch), but leave out the following packages during installation because they are not needed on the webserver:
 
 * libstdc++48.i686 (for Android builds)
@@ -194,38 +194,6 @@ If you want to quickly run this script, consider installing it in /usr/local/bin
 
 ## Basic setup for disposable reverse proxy instance
 
-From a fresh amazon linux 2023 instance (HVM) install perl, httpd, mod_proxy_html, tmux, nfs-utils, git, whois and jq. Then type `amazon-linux-extras install epel`, which adds the epel repo so you can then run install apachetop.
-Then you need to remove the automatic ec2 code which disabled root access; reconfigure the sshd_config; setup the keys update script; and initialise the crontab. Store a bearer token in the home dir.
+From a fresh Amazon Linux 2023 instance (HVM), run the `configuration\environments_scripts\reverse_proxy\setup-disposable-reverse-proxy.sh` script, passing the IP address of the instance and the ssh-key-reader.token (needed for accessing the landscape without mfa).
 
-Rename the welcome.conf. Add a basic web page, as the Apache default page can sometimes return no 2xx codes, which can lead to failing health checks.
-
-Setup fail2ban like above.
-
-Ensure httpd is enabled, so that the server auto starts upon a restart.
-Other modules may need to be installed, depending on the httpd config.
-
-Configure a startup service (either in /etc/systemd/system or etc/rcX directories) to try to mount an attached nvme as swap space (this step needs to be checked after setup).
-Swap space still needs to be fully automated.
-
-Postmail is useful. The script for this procedure is in configuration and is titled setupDisposableProxy.sh
-
-Setup the logrotate target.
-
-Update amazon cli (because pricing list requires it)
-
-
-
-## httpd config repo
-
-We serve the httpd config from a separate git repo hosted within another user.
-Make sure the disposable reverse proxy key from root/keys is in the authorized_keys of the httpdConf user; use the branch name "main"; ensure the user has its own key in id_25519(.pub) and the user has the correct aws credentials and region. Add a gitignore containing:
-
-* logs
-* modules
-* run
-* state
-* conf.modules.d
-* conf.d/internal-server-status.conf
-
-Compare the git to that in the main git repo.
-Finally make sure the hook is installed, as a git clone --bare doesn't copy hooks.
+The script sets up nfs/nvme mounts, installs/updates httpd + software for scripts, sets up the httpd, sets up crontabs and copies files (via the`configuration\environments_scripts\build-crontab-and-cp-files`), enables service units, makes the ssh connections more resilient, sets up logrotation, configures fail2ban and alters postfix to enable mail sending.
