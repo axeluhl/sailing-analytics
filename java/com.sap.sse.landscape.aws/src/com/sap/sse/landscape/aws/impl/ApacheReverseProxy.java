@@ -128,8 +128,9 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     private void setRedirect(String configFileNameForHostname, String macroName, String hostname,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, boolean doCommit, boolean doPush, String... macroArguments)
             throws Exception {
-        String command = "su - " + CONFIG_USER + " -c 'cd " + CONFIG_REPO_PATH + " && git checkout " + CONFIG_REPO_MAIN_BRANCH_NAME + " && echo \"Use " + macroName + " " + hostname + " " + String.join(" ", macroArguments) + "\" > "
-                + getAbsoluteConfigFilePath(configFileNameForHostname);
+        String command = "su - " + CONFIG_USER + " -c 'cd " + CONFIG_REPO_PATH + " && git checkout "
+                + CONFIG_REPO_MAIN_BRANCH_NAME + " && echo \"Use " + macroName + " " + hostname + " "
+                + String.join(" ", macroArguments) + "\" > " + getAbsoluteConfigFilePath(configFileNameForHostname);
         if (doCommit) {
            command = command + "  && cd "
             + CONFIG_REPO_PATH + " && " + createCommitAndPushString(configFileNameForHostname,
@@ -145,7 +146,8 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
     }
 
     /**
-     * Overloads {@link #setRedirect(String, String, String, Optional, byte[], boolean, boolean, String...)} and defaults to true and true for committing and pushing.
+     * Overloads {@link #setRedirect(String, String, String, Optional, byte[], boolean, boolean, String...)} and
+     * defaults to {@code true} and {@code true} for committing and pushing.
      * 
      * @see #setRedirect(String, String, String, Optional, byte[], boolean, boolean, String...)
      */
@@ -153,10 +155,11 @@ implements com.sap.sse.landscape.Process<RotatingFileBasedLog, MetricsT> {
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase, String... macroArguments)
             throws Exception {
         setRedirect(configFileNameForHostname, macroName, hostname, optionalKeyName, privateKeyEncryptionPassphrase,
-                true, true, macroArguments);
+                /* doCommit */ true, /* doPush */ true, macroArguments);
     }
     
-    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    private String runCommandAndReturnStdoutAndStderr(String command, String stderrLogPrefix, Level stderrLogLevel,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final SshCommandChannel sshChannel = getHost().createRootSshChannel(TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
         final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr(command, stderrLogPrefix, stderrLogLevel);
         return stdout;

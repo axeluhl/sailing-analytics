@@ -117,7 +117,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     protected SubscriptionServiceFactory subscriptionServiceFactory;
     
     private final Displayer<StrippedLeaderboardDTO> leaderboardsDisplayer = new Displayer<StrippedLeaderboardDTO>() {
-        
         @Override
         public void fill(Iterable<StrippedLeaderboardDTO> result) {
             fillLeaderboards(result);
@@ -129,7 +128,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel
     }
     
     private final Displayer<RegattaDTO> regattasDisplayer = new Displayer<RegattaDTO>() {
-        
         @Override
         public void fill(Iterable<RegattaDTO> result) {
             fillRegattas(result);
