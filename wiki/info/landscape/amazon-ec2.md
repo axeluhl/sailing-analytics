@@ -399,6 +399,56 @@ In the "Amazon Machine Images (AMIs)" table each row offers an action icon for r
 
 We now have a script to automatically create a mailing list of all the landscape managers, that is stored in /var/cache. It is updated via a cronjob. We have to be careful to write atomically, so the mailing list isn't missing any email addresses, if the notify-operators script is called midway through a write. 
 
+### Crontab setup and script organisation
+
+We previously relied on lots of symbolic links to the various architecture scripts, which were scattered throughout the configuration directory of our Git repo. This made it easy to propagate changes, but also led to moments of chaos, as we had to find every single dependency, for every change pushed to the git repo repo (stored by the trac user), in case it was the target of a symbolic link.
+
+We now have a well defined structure (detailed below) for the different environment types, such as the central reverse proxy, the disposables, the build server, sailing server, etc.. and a method for updating instances in a controlled manner.
+```
+configuration
+├── crontabs
+│   ├── crontab-update-trac-trac-urls
+│   └── crontab-syncgit
+└── environments_scripts
+    ├── build-crontab-and-cp-files
+    ├── build_server
+    │   ├── files
+    │   │   ├── etc
+    │   │   │   ├── sysconfig
+    │   │   │   │   └── hudson
+    │   │   │   └── systemd
+    │   │   │       └── system
+    │   │   .           ├── hudson.service
+    │   │   .           └── mountnvmeswap.service -> ../../../../../repo/etc/systemd/system/mountnvmeswap.service
+    │   └── users
+    │       └── root
+    │           └── crontab-update-authorized-keys -> ../../../../crontabs/crontab-update-authorized-keys
+    └── repo
+        ├── etc
+        └── var
+```
+In the environments_scripts folder, we have the script `build-crontab-and-cp-files` for the aforementioned "controlled building", which is explained further below. Then we have directories for each environment type as well as a general purpose repo for storing files common to multiple instances. Within each environment type directory, should be a setup script, for creating an instance, of the environment type, from scratch. There is also an optional users and files folder.
+
+The users folder is for organising crontabs: there is a folder for each user that should have a crontab and, within these username folders, are symbolic links
+to the crontabs folder, which contains files named `crontab-"function"`, each one containing a one-line crontab.
+
+The files folder is for organising files that should reside on the environment type. Within the directory, is a mimicked UNIX filesystem. Files in, say /etc/awstats of reverse_proxy's files dir, should 
+be found on the reverse proxy instances at /etc/awstats. 
+
+Any scripts common to multiple environment scripts, may be found in the "repo", which is at the same level as the environment types directory, and contains only a mimicked file system (no users folder). These common scripts are added to an environment type, by creating symbolic links from the intended destination on the environment type to the script in the repo. In the example above, the mountnvmeswap.service link indicates the intended location and the contents of the file is the target of the symbolic link.
+
+The build-crontab-and-cp-files uses this structure to help setup an environment 
+type. It builds the crontab file, by combining all the referenced crontab 
+one-liners, storing a copy in the user's home directory and installing it to the specified user. It also copies across the contents of "files" to the corresponding location, de-refencing any symbolic links.
+The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the build-crontab-and-cp-files script.
+
+This script has a couple of arguments and options. The most important are the arguments.
+1. Environment type.
+2. User with a checked out Git copy.
+3. The relative path within $2 to the Git copy.
+Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
+Have a look at the script itself for more details on the options and arguments.
+
 
 ## Automated SSH Key Management
 
