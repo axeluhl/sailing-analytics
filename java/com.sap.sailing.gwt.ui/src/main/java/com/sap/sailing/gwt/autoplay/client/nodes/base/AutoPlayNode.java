@@ -15,6 +15,6 @@ public interface AutoPlayNode {
      * Will be called before onStart, before calling this the default duration is submitted. Override for custom duration.
      * A time can be supplied multiple times, the timer will restart from the time of submission
      */
-    default void customDurationHook(Consumer<Integer> consumer) {
+    default void customDurationHook(Consumer<Integer> consumerOfDurationInSeconds) {
     };
 }
