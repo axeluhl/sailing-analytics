@@ -28,17 +28,18 @@ Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing a
 
 Further ALBs may exist in addition to the default ALB and the NLB for ``sapsailing.com``. Those will then have to have one or more DNS record(s) pointing to them for which matching rules based on the hostname exist in the ALB listener's rule set. This set-up is specifically appropriate for "longer-lived" content where during archiving or dismantling a DNS lag is not a significant problem.
 
-### Apache httpd Webserver and Reverse Proxy
+### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
-The web server currently exists only as one "central" reverse proxy but work is being undertaken to duplicate the essential services,
-to improve availability. Only the current central reverse proxy will be non-disposable, hosting the wiki, releases, Git jobs, static and Bugzilla.
-Other services, such as p2 remain to be decided. Any traffic to the Hudson build server subdomain gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
+A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
 
-The IPs for all reverse proxies will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
-and to the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
-Currently, the new approach tags instances with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
-For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The diposables just have the latter.
+The IPs for all reverse proxies will automatically be added to ALB target groups with the tag key `allReverseProxies`, including the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
+and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
+Disposables instances are tagged with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+
+For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The disposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -98,6 +99,10 @@ The second obviously requires maintenance as the internal IP changes, e.g., when
 After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
 
 The webserver must be tagged with key ``CentralReverseProxy`` where the value is ignored, but ``true`` is a good default.
+
+The following diagram explains the disposable reverse proxies role a little better. 
+
+<img src="wiki\images\orchestration\disposable-reverse-proxy-architecture-from-bug1873.png" width="100%" height="100%"/>
 
 ### DNS and Application Load Balancers (ALBs)
 
@@ -213,7 +218,7 @@ We try to maintain setup scripts that help us with setting up those instance typ
 
 The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. Instructions for setting up such an image from scratch can be found [here](/wiki/info/landscape/creating-ec2-image-from-scratch).
 
-The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date by running `crontab /root/crontab`, under the assumption it points to the appropriately named crontab in `$OUR_GIT_HOME/configuration/crontabs` (as we have different crontabs for different instances/users). If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
+The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date by running `. imageupgrade_functions.sh` and then `build_crontab_and_setup_files`, with the appropriate parameters. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
 
 The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
 ```
@@ -449,6 +454,9 @@ This script has a couple of arguments and options. The most important are the ar
 Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
+<!-- ### Spinning up disposables -->
+
+<!-- TODO: Explain-->
 
 ## Automated SSH Key Management
 
