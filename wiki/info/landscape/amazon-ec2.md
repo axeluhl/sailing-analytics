@@ -432,7 +432,7 @@ configuration
         ├── etc
         └── var
 ```
-In the environments_scripts folder, we have the script `build-crontab-and-cp-files` for the aforementioned "controlled building", which is explained further below. Then we have directories for each environment type as well as a general purpose repo for storing files common to multiple instances. Within each environment type directory, should be a setup script, for creating an instance, of the environment type, from scratch. There is also an optional users and files folder.
+In the environments_scripts folder, we have the script `build-crontab-and-cp-files` for the aforementioned "controlled building", which is explained further below. Then we have directories for each environment type as well as a general purpose repo for storing files common to multiple instances. Within each environment type directory, should be a setup script, for creating an instance, of the environment type, from scratch (used if there is no image yet or the image upgrade didn't clean up unwanted scripts or content). There is also an optional users and files folder.
 
 The users folder is for organising crontabs: there is a folder for each user that should have a crontab and, within these username folders, are symbolic links
 to the crontabs folder, which contains files named `crontab-"function"`, each one containing a one-line crontab.
@@ -454,9 +454,49 @@ This script has a couple of arguments and options. The most important are the ar
 Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
-<!-- ### Spinning up disposables -->
+## Disposable reverse proxy automation
 
-<!-- TODO: Explain-->
+### Spinning around (spinning up and spinning down)
+
+Within the admin console -> Advanced -> landscape, one can launch a new disposable, with the option to customise the region, name and availability zone. The default AZ is the availability zone with the fewest reverse proxies (at the last time of refresh). Users can also rotate the httpd logs here. The automated launch process uses the AMI with the tag key
+`image-type` and corresponding value `disposable-reverse-proxy`. The security group of the disposables is selected by tags too: the key is `reverse-proxy-sg`. This sg allows http (on port 80) on the private network as well as ssh (on port 22) from anywhere.
+
+After an instance is in the RUNNING state, the automation procedure adds the instance to all target groups with the `allReverseProxy` tag, including the NLB. Any time the instance starts up or shuts down, the instance will automatically be removed from the instance
+based target groups and a service unit will attempt to remove it from the NLB target group.
+
+Upon starting up, the disposables also get the latest httpd 
+configuration from the httpdConf user on the central reverse 
+proxy. And virtual hosts are created for the private IP and 
+localhost, so the internal server status and main healthcheck 
+can function (see below).
+
+
+### Automating archive failover 
+
+We have a production archive and a failover that the disposables and the central route traffic to. Both the central and disposables, have a cronjob that checks whether the main archive is healthy and automatically switches to the failover if unhealthy (and back again if the main returns to a healthy state).
+
+We have a script in our git repo called `switchoverArchive.sh`, which takes a path to the macros file and two timeout values (in seconds). It checks the macros file and checks if the following lines are present:
+
+```
+Define ARCHIVE_IP 172.31.7.12 
+Define ARCHIVE_FAILOVER_IP 172.31.43.140  
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} 
+```
+Then it curls the primary/main archive's `/gwt/status` (with the first timeout value) and, if healthy, sets the production value to the definition of the archive; however, if unhealthy,  a
+second curl occurs (with the second timeout value) and if this again returns unhealthy then the production value above is this time set to be the value of the failover definition. 
+After these changes, key admins are notified and the apache config is reloaded. This only happens though if the new value differs from the currently known value:
+ie. if already healthy, and the health checks pass, then no reload or email occurs.
+To install, enter `crontab -e`; set the frequency to say `* * * * *`; add the path to the script; parameterise it with the path to the macros file, the first timeout value and the second timeout value (both seconds); and then 
+write and quit, to install the cronjob.
+
+```
+# Example crontab
+* * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
+```
+
+If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
+
+<!--TODO: Update the above section with build_crontab.-->
 
 ## Automated SSH Key Management
 
