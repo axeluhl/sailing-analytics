@@ -96,8 +96,6 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
-    SEPARATOR="@."
-    ACTUAL_SYMBOL="@@"
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
@@ -160,6 +158,7 @@ finalize() {
 setup_cloud_cfg_and_root_login() {
     sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
     sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
+    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
 }
 
 setup_fail2ban() {
@@ -222,4 +221,5 @@ setup_sshd_resilience() {
     echo "ClientAliveInterval 3
 ClientAliveCountMax 3
 GatewayPorts yes" >> /etc/ssh/sshd_config
+    systemctl reload sshd.service
 }

@@ -84,7 +84,8 @@ public interface TracTracAdapter {
             long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,
             boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog)
+            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog,
+            URI liveURIFromConfiguration, URI storedURIFromConfiguration)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

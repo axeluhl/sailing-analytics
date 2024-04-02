@@ -548,13 +548,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
+    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs,
+            String liveURIFromConfiguration, String storedURIFromConfiguration,
             String updateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
             boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
-        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
-                + " and storedURI " + storedURI);
+        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURIFromConfiguration
+                + " and storedURI " + storedURIFromConfiguration);
         final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
@@ -565,19 +566,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 // note that the live URI may be null for races that were put into replay mode
                 final URI effectiveLiveURI;
                 if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
-                    if (liveURI == null || liveURI.trim().length() == 0) {
+                    if (liveURIFromConfiguration == null || liveURIFromConfiguration.trim().length() == 0) {
                         effectiveLiveURI = record.getLiveURI();
                     } else {
-                        effectiveLiveURI = new URI(liveURI);
+                        effectiveLiveURI = new URI(liveURIFromConfiguration);
                     }
                 } else {
                     effectiveLiveURI = null;
                 }
                 final URI effectiveStoredURI;
-                if (storedURI == null || storedURI.trim().length() == 0) {
+                if (storedURIFromConfiguration == null || storedURIFromConfiguration.trim().length() == 0) {
                     effectiveStoredURI = record.getStoredURI();
                 } else {
-                    effectiveStoredURI = new URI(storedURI);
+                    effectiveStoredURI = new URI(storedURIFromConfiguration);
                 }
                 final URI effectiveUpdateURI;
                 if (updateURI == null || updateURI.trim().length() == 0) {
@@ -592,7 +593,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
                         config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
+                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog,
+                        liveURIFromConfiguration==null || liveURIFromConfiguration.trim().length() == 0 ? null : new URI(liveURIFromConfiguration),
+                        storedURIFromConfiguration==null || storedURIFromConfiguration.trim().length() == 0 ? null : new URI(storedURIFromConfiguration));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }

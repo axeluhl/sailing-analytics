@@ -103,7 +103,7 @@ public class MultipleClassesInRegattaTest {
                 false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, domainFactory,
                 tracTracUsername, tracTracPassword, TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
                 /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true, /* preferReplayIfAvailable */ false, /* timeoutInMillis */ -1,
-                /* useOfficialEventsToUpdateRaceLog */ false);
+                /* useOfficialEventsToUpdateRaceLog */ false, /* liveURIFromConfiguration */ null, /* storedURIFromConfiguration */ null);
     }
     
     @After
