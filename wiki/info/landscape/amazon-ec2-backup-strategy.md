@@ -126,6 +126,15 @@ You can also display any text files by replacing `ls` by `cat-file`.
 this is dummy content to test the backup
 </pre>
 
+# AWS Backup
+
+We also backup certain volumes using AWS backup, which creates snapshots in accordance with a "plan". We have two backup plans: MongoDB-Live-Replica-Set and 
+WeeklySailingInfrastructure. Each plan has rules defining frequency, tags, retention time and the transition plan to cold storage. In addition, there is the "resource assignment", which dictates the tags that are required on the volume, in order for it to be backed up, and which IAM role is used to create the snapshots.
+
+For the Mongo-Live-Replica-Set, we have a daily rule which backs up volumes with the key of DailySailingBackup and a matching value of Yes. Currently, this is the "Hidden MongoDB Live Replica encrypted" volume and the central reverse proxy's (Webserver) /home volume.
+
+For the WeeklySailingInfrastructure, if there is the tag key WeeklySailingInfrastructureBackup and the corresponding value of Yes, then we do a backup (believe it or not) on a weekly basis.
+
 # Restore
 
 Depending on what has crashed or where data got lost you need to look at different places to restore content and functionality.
