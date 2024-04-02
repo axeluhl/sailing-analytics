@@ -150,7 +150,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             throws IOException, InterruptedException, JSchException, Exception {
         logger.info("Restarting application process "+this);
         getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-            .runCommandAndReturnStdoutAndLogStderr("su -c "+getDefaultApplicationUsername()+" -c \"cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start\"", "Shutting down "+this, Level.INFO);
+            .runCommandAndReturnStdoutAndLogStderr("su -l "+getDefaultApplicationUsername()+" -c \"cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start\"", "Shutting down "+this, Level.INFO);
     }
     
     @Override
