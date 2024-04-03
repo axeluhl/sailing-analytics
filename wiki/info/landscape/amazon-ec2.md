@@ -102,7 +102,7 @@ The webserver must be tagged with key ``CentralReverseProxy`` where the value is
 
 The following diagram explains the disposable reverse proxies role a little better. 
 
-<img src="wiki\images\orchestration\disposable-reverse-proxy-architecture-from-bug1873.png" width="100%" height="100%"/>
+<img src="wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
 
 ### DNS and Application Load Balancers (ALBs)
 
@@ -454,9 +454,9 @@ This script has a couple of arguments and options. The most important are the ar
 Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
-## Disposable reverse proxy automation
+## Reverse proxy automation
 
-### Spinning around (spinning up and spinning down)
+### Spinning around (spinning up and spinning down Disposable Reverse Proxies)
 
 Within the admin console -> Advanced -> landscape, one can launch a new disposable, with the option to customise the region, name and availability zone. The default AZ is the availability zone with the fewest reverse proxies (at the last time of refresh). Users can also rotate the httpd logs here. The automated launch process uses the AMI with the tag key
 `image-type` and corresponding value `disposable-reverse-proxy`. The security group of the disposables is selected by tags too: the key is `reverse-proxy-sg`. This sg allows http (on port 80) on the private network as well as ssh (on port 22) from anywhere.
@@ -470,6 +470,46 @@ proxy. And virtual hosts are created for the private IP and
 localhost, so the internal server status and main healthcheck 
 can function (see below).
 
+### Healthcheck 
+
+On the topic of healthchecks, we have the important reverseProxyHealthcheck.sh, which can be found on the *central and 
+disposables*. It is used to reduce costly cross-AZ traffic between our instances, whilst also ensuring reliability and availability.
+
+The general idea of this ALB target group healthcheck, is to make instances healthy only if in the same AZ as the archive (the correct AZ). However, availability takes priority over cost saving, so if there is no healthy instance in the "correct" AZ, the healthcheck returns healthy.
+
+All the target groups, tagged with allReverseProxies, have this healthcheck:
+
+```
+/cgi-bin/reverseProxyHealthcheck.sh?arn=TARGET_GROUP_ARN
+```
+
+The healthcheck works by first checking internal-server-status. If genuinely unhealthy, then unhealthy is returned to the ELB (elastic load balancer) health checker. Otherwise, the instance uses cached CIDR masks (which correspond to AZ definitions) and nmap to check if in the same AZ as the archive.
+If in the same AZ, then "healthy" is returned to the ELB health checker. If not, then the target group ARN, passed as a parameter 
+to the healthcheck, is used to get the private IPs of the other instances in the target group, via a describe-target-health call to the AWS API. This is the most costly part of the check, so these values are cached.
+
+We then use the same nmap/CIDR method, to check which of the discovered instances is in the same AZ as the archive. Finally, we use the internal-server-status, of those instances in the same AZ as the archive, to check if they are healthy. If there are no healthy instances in the "correct" AZ, then we return healthy, otherwise unhealthy.
+
+### Httpd configuration Git automation
+
+Because we have changing httpd configurations and different setups for the central and disposables, we decided to use version control and some post-receive hooks to ensure synchronisation and ease of use. We also decided not to store the httpd configuration in the main Git because the post-receive hook automation would allow
+those with Git access, to influence the production landscape. We have a larger set of contributors than landscape managers 
+and want to maintain this distinction.
+
+The setup involves a repo on the central reverse proxy, in the httpdConf user. The httpdConf user also has a checked out copy for branch manipulation, by the post-receive hook. The repo has 3 branches: a shared configuration branch, a central configuration
+branch and a disposable configuration branch. The shared configuration stores content that both the central and disposables have. Changes to different branches cause different parts of the post-receive hook to be triggered:
+
+1. Any pushes to the central or disposable branch trigger the sync-repo-and-execute-cmd script on instances tagged with CentralReverseProxy and DisposableProxy respectively, to get the changes made on the other instances.
+
+2. Any pushes to the "shared" configuration  branch are merged into both of the other branches (using the checked out workspace), and everything is pushed. This push then propagates to the centrals and disposables via method 1 above.
+
+If you wish to make persistent changes to the httpd configuration, you must ALWAYS pull the latest changes before committing your changes as follows. If you commit and push changes in the disposable branch, then only the disposables will pull the changes; if you commit and push changes to the central branch, then only the central proxy will pull the changes.
+If you want to make alterations to the "shared" configuration of the disposables and central, you have two options:
+
+1. Fetch the latest changes for all the branches. Test the changes locally, without committing. Run httpd -t (to check the config syntax). Reload and confirm that all is well. Checkout the main branch. Commit the changes and push. Make sure to check out the correct branch afterwards and that they have the latest changes.
+
+2. Fetch the latest changes to the branches in the httpdConf user's checked out copy. Make the edits in the httpdConf user's checked out workspace, in the correct branch. Commit and push. HttpdConf is currently a user on the central proxy.
+
+After pushing you should automatically end up in the correct branch too.
 
 ### Automating archive failover 
 
@@ -496,8 +536,7 @@ write and quit, to install the cronjob.
 
 If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
 
-<!--TODO: Update the above section with build_crontab.-->
-
+You can use the build_crontab_and_setup_files (see below) to get these changes.
 ## Automated SSH Key Management
 
 AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.

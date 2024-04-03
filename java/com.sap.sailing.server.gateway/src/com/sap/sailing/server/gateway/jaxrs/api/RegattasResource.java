@@ -1131,6 +1131,9 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (tack != null) {
             jsonFix.put("tack", tack.name());
         }
+        if (fix.getOptionalTrueHeading() != null) {
+            jsonFix.put("trueheading-deg", fix.getOptionalTrueHeading().getDegrees());
+        }
         jsonFixes.add(jsonFix);
         return jsonFix;
     }
