@@ -470,6 +470,25 @@ proxy. And virtual hosts are created for the private IP and
 localhost, so the internal server status and main healthcheck 
 can function (see below).
 
+### Healthcheck 
+
+On the topic of healthchecks, we have the important reverseProxyHealthcheck.sh, which can be found on the *central and 
+disposables*. It is used to reduce costly cross-AZ traffic between our instances, whilst also ensuring reliability and availability.
+
+The general idea of this ALB target group healthcheck, is to make instances healthy only if in the same AZ as the archive (the correct AZ). However, availability takes priority over cost saving, so if there is no healthy instance in the "correct" AZ, the healthcheck returns healthy.
+
+All the target groups, tagged with allReverseProxies, have this healthcheck:
+
+```
+/cgi-bin/reverseProxyHealthcheck.sh?arn=TARGET_GROUP_ARN
+```
+
+The healthcheck works by first checking internal-server-status. If genuinely unhealthy, then unhealthy is returned to the ELB (elastic load balancer) health checker. Otherwise, the instance uses cached CIDR masks (which correspond to AZ definitions) and nmap to check if in the same AZ as the archive.
+If in the same AZ, then "healthy" is returned to the ELB health checker. If not, then the target group ARN, passed as a parameter 
+to the healthcheck, is used to get the private IPs of the other instances in the target group, via a describe-target-health call to the AWS API. This is the most costly part of the check, so these values are cached.
+
+We then use the same nmap/CIDR method, to check which of the discovered instances is in the same AZ as the archive. Finally, we use the internal-server-status, of those instances in the same AZ as the archive, to check if they are healthy. If there are no healthy instances in the "correct" AZ, then we return healthy, otherwise unhealthy.
+
 
 ### Automating archive failover 
 
