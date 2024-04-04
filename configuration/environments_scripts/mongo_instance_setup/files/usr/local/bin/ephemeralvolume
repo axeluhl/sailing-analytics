@@ -14,15 +14,15 @@ else
   PARTITION_NAME=$(identify_suitable_partition)
   if [[ -n "${PARTITION_NAME}" ]]; then
     PARTITION=/dev/${PARTITION_NAME}
-    if cat /proc/mounts | awk '{print $1;}' | grep "${PARTITION}"; then
+    if awk '{print $1;}' /proc/mounts | grep "${PARTITION}"; then
         echo "Partition ${PARTITION} already mounted; not formatting/mounting ephemeral volume"
     else
         FSTYPE=$(blkid -p $PARTITION -s TYPE -o value)
         if [[ "$FSTYPE" != "xfs" ]]; then
-        echo FSTYPE was "$FSTYPE" but should have been xfs. Formatting $PARTITION...
-        mkfs.xfs -f $PARTITION
+            echo FSTYPE was "$FSTYPE" but should have been xfs. Formatting $PARTITION...
+            mkfs.xfs -f $PARTITION
         else
-        echo FSTYPE was "$FSTYPE" which is just right :-\)
+            echo FSTYPE was "$FSTYPE" which is just right :-\)
         fi
         # mount the thing to /var/lib/mongo
         mount $PARTITION /var/lib/mongo
