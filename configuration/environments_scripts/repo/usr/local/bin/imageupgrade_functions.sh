@@ -223,3 +223,20 @@ ClientAliveCountMax 3
 GatewayPorts yes" >> /etc/ssh/sshd_config
     systemctl reload sshd.service
 }
+
+identify_suitable_partition() {
+    EPHEMERAL_VOLUME_NAME=$(
+    # List all block devices and find those named nvme...
+    for i in $(lsblk | grep -o "nvme[0-9][0-9]\?n[0-9]" | sort -u); do
+        # If they don't have any partitions, then...
+        if ! lsblk | grep -o "${i}p[0-9]\+" 2>&1 >/dev/null; then
+            # ...check whether they are EBS devices
+            /sbin/ebsnvme-id -u "/dev/$i" >/dev/null
+            # If not, list their name because then they must be ephemeral instance storage
+            if [[ $? -ne 0 ]]; then
+                echo "${i}"
+            fi
+        fi
+    done 2>/dev/null | head -n 1 )
+    echo $EPHEMERAL_VOLUME_NAME
+}
