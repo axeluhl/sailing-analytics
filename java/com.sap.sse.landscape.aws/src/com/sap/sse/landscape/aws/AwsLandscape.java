@@ -874,4 +874,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * Removes hosts from an IP-based target group.
      */
     void removeIpTargetFromTargetGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AwsInstance<ShardingKey>> hosts);
+
+    /**
+     * Sets the health check path for a given target group.
+     */
+    void setTargetGroupHealthcheckPath(TargetGroup<ShardingKey> targetGroup, String path);
 }

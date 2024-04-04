@@ -155,6 +155,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyRuleResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -1225,7 +1226,12 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             }
         });
     }
-
+    
+    @Override
+    public void setTargetGroupHealthcheckPath(TargetGroup<ShardingKey> targetGroup, String path) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).modifyTargetGroup(ModifyTargetGroupRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).healthCheckPath(path).build());
+    }
+    
     @Override
     public void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,

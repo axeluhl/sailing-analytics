@@ -120,4 +120,9 @@ extends NamedImpl implements TargetGroup<ShardingKey> {
     public String getTargetGroupArn() {
         return arn;
     }
+
+    @Override
+    public void setHealthCheckPath(String healthCheckPath) {
+        landscape.setTargetGroupHealthcheckPath(this, healthCheckPath);
+    }
 }

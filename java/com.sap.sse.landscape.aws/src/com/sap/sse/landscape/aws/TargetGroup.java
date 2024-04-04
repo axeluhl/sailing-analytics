@@ -73,4 +73,6 @@ public interface TargetGroup<ShardingKey> extends Named, TargetGroupConstants {
     ApplicationLoadBalancer<ShardingKey> getLoadBalancer();
 
     String getLoadBalancerArn();
+    
+    void setHealthCheckPath(String healthCheckPath);
 }
