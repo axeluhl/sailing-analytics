@@ -405,8 +405,9 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final HashMap<String, String> tagKeyandValue = new HashMap<>();
         tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
+                httpPort, reverseProxy.getTargetGroupHealthcheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
+        defaultTargetGroup.setHealthCheckPath(defaultTargetGroup.getHealthCheckPath() + "?arn=" + defaultTargetGroup.getTargetGroupArn());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
                         .createListener(l -> {
