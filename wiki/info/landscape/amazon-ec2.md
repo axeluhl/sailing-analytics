@@ -28,17 +28,18 @@ Additionally, we have created a CNAME record for ``*.sapsailing.com`` pointing a
 
 Further ALBs may exist in addition to the default ALB and the NLB for ``sapsailing.com``. Those will then have to have one or more DNS record(s) pointing to them for which matching rules based on the hostname exist in the ALB listener's rule set. This set-up is specifically appropriate for "longer-lived" content where during archiving or dismantling a DNS lag is not a significant problem.
 
-### Apache httpd Webserver and Reverse Proxy
+### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
-The web server currently exists only as one "central" reverse proxy but work is being undertaken to duplicate the essential services,
-to improve availability. Only the current central reverse proxy will be non-disposable, hosting the wiki, releases, Git jobs, static and Bugzilla.
-Other services, such as p2 remain to be decided. Any traffic to the Hudson build server subdomain gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
+A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
 
-The IPs for all reverse proxies will automatically be added to the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
-and to the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
-Currently, the new approach tags instances with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
-For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The diposables just have the latter.
+The IPs for all reverse proxies will automatically be added to ALB target groups with the tag key `allReverseProxies`, including the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
+and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
+Disposables instances are tagged with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+
+For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The disposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -98,6 +99,10 @@ The second obviously requires maintenance as the internal IP changes, e.g., when
 After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
 
 The webserver must be tagged with key ``CentralReverseProxy`` where the value is ignored, but ``true`` is a good default.
+
+The following diagram explains the disposable reverse proxies role a little better. 
+
+<img src="wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
 
 ### DNS and Application Load Balancers (ALBs)
 
@@ -213,7 +218,7 @@ We try to maintain setup scripts that help us with setting up those instance typ
 
 The SAP Sailing Analytics image is used to launch new instances, shared or dedicated, that host one or more Sailing Analytics application processes. The image contains an installation of the SAP JVM 8 under /opt/sapjvm_8, an Apache httpd service that is not currently used by default for reverse proxying / rewriting / logging activities, an initially empty directory ``/home/sailing/servers`` used to host default application process configurations, and an initialization script under ``/etc/init.d/sailing`` that handles the instance's initialization with a default application process from the EC2 instance's user data. Instructions for setting up such an image from scratch can be found [here](/wiki/info/landscape/creating-ec2-image-from-scratch).
 
-The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date by running `crontab /root/crontab`, under the assumption it points to the appropriately named crontab in `$OUR_GIT_HOME/configuration/crontabs` (as we have different crontabs for different instances/users). If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
+The user data line ``image-upgrade`` will cause the image to ignore all application configuration data and only bring the new instance to an updated state. For this, the Git content under ``/home/sailing/code`` is brought to the latest master branch commit, a ``yum update`` is carried out to install all operating system package updates available, log directories and the ``/home/sailing/servers`` directory are cleared, and the ``root`` user's crontab is brought up to date by running `. imageupgrade_functions.sh` and then `build_crontab_and_setup_files`, with the appropriate parameters. If the ``no-shutdown`` line is provided in the instance's user data, the instance will be left running. Otherwise, it will shut down which would be a good default for creating a new image. See also  procedures that automate much of this upgrade process.
 
 The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing MongoDB replica sets. It also reads the EC2 instance's user data during start-up and can be parameterized by the following variables: ``REPLICA_SET_NAME``, ``REPLICA_SET_PRIMARY``, ``REPLICA_SET_PRIORITY``, and ``REPLICA_SET_VOTES``. An example configuration could look like this:
 ```
@@ -224,7 +229,7 @@ The MongoDB Live Replica Set NVMe image is used to scale out or upgrade existing
 ```
 Like the SAP Sailing Analytics image, the MongoDB image understands the ``image-upgrade`` and the ``no-shutdown`` directives in the user data.
 
-The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Like the two other images discussed so far, the image understands the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data which will pull the Git repository's latest master to ``/home/sailing/code`` which is also from where the boot scripts are taken; furthermore, the SAP JVM 8 is brought to the latest release.
+The latest Hudson Ubuntu Slave image is what the Hudson process reachable at [https://hudson.sapsailing.com](https://hudson.sapsailing.com) will launch to run a build. See also ``configuration/launchhudsonslave`` and ``configuration/aws-automation/getLatestImageOfType.sh`` in Git. Like the two other images discussed so far, the image understands the ``image-upgrade`` and ``no-shutdown`` directives in the instance's EC2 user data which will pull the Git repository's latest master to ``/home/sailing/code`` which is also from where the boot scripts are taken; furthermore, the SAP JVM 8 is brought to the latest release. See also [here](/wiki/info/landscape/creating-ec2-image-for-hudon-from-scratch) for hints about setting such an image up.
 
 The Webserver image can be used to launch a new web server / reverse proxy in a region. It is mainly a small Linux installation with the following elements
 - an Apache httpd and the default macros defined under ``/etc/httpd/conf`` and ``/etc/httpd/conf.d``
@@ -272,6 +277,43 @@ In addition to AWS credentials it is essential to create or upload an SSH key pa
 In all of the following sub-sections the text will assume that you have provided valid AWS credentials, that you have selected a region in which you want to operate, and that you have an SSH key selected, with the passphrase to unlock the private key provided in the passphrase field below the SSH keys table.
 
 In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
+
+There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at /root/key_vault on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
+
+The structure of the vault is important for the efficacy of the script and should appear as below. There is an explanation afterwards.
+```
+key_vault
+├── aws_credentials
+│   └── disposable-reverse-proxy-automation
+├── central_reverse_proxy
+│   ├── httpdConf
+│   │   ├── aws
+│   │   │   └── credentials -> ../../../aws_credentials/disposable-reverse-proxy-automation
+│   │   └── ssh
+│   │       ├── authorized_keys
+│   │       │   ├── id_ed25519.pub@root@central_reverse_proxy -> ../../../root/ssh/id_ed25519.pub
+│   │       │   └── id_ed25519.pub@root@reverse_proxy -> ../../../../reverse_proxy/root/ssh/id_ed25519.pub
+│   │       ├── id_ed25519
+│   │       └── id_ed25519.pub
+│   ├── root
+│   │   └── ssh
+│   │       ├── authorized_keys
+│   │       │   └── id_ed25519.pub@httpdConf@central_reverse_proxy -> ../../../httpdConf/ssh/id_ed25519.pub
+│   │       ├── id_ed25519
+│   │       └── id_ed25519.pub
+```
+1. So we have the aws_credentials directory, storing the credentials for specific AWS users.
+2. We also have directories named after the environment types (matching the directory names in GIT_HOME/configuration/environments_scripts).
+3. Nested within these, we have directories for each user that will require some keys, for the given environment type.
+4. For each user, we have optional directories "ssh" & "aws" (the naming is important).
+5. The aws folder should contain only credentials files which are sym links to the aws_credentials folder.
+6. If the setup_keys script is run, the contents of the aws folder will be copied, across to the respective .aws folder on the instance the script runs on, within the correct user's home directory. The config file will be created with the correct region. Although, it will *only* be the default profile.
+7. The ssh folder will contain the ssh keys of the user; they are named based on the type of the key.
+8. Furthermore, the folder will contain an authorized_keys directory, which holds references to the keys (elsewhere in the vault), which should be authorized to access the user. In the above example, the symbolic link named `id_ed25519.pub@httpdConf@central_reverse_proxy` means that the key referenced will be in the authorized keys
+for root, so the id_ed25519 key of the httpdConf user on the central reverse proxy will be able to access the root user.
+9. The name of these links doesn't matter, but by convention we will use the format used in the image above (`key_type@user@env_type`), using @ as a separator.
+10. The script will copy across the keys in the ssh folder (ignoring sym links or directories).
+11. The script will append every public key that is linked in the authorized_keys folder, to the authorized_keys file of the respective user. 
 
 ### Creating a New Application Replica Set
 
@@ -358,6 +400,143 @@ You can also manually trigger the upgrade of the AMI used by an auto-scaling gro
 
 In the "Amazon Machine Images (AMIs)" table each row offers an action icon for removing the image. Use this with great care. After confirming the pop-up dialog shown, the AMI as well as its volume snapshots will be removed unrecoverably.
 
+### Create mailing list for landscape managers
+
+We now have a script to automatically create a mailing list of all the landscape managers, that is stored in /var/cache. It is updated via a cronjob. We have to be careful to write atomically, so the mailing list isn't missing any email addresses, if the notify-operators script is called midway through a write. 
+
+### Crontab setup and script organisation
+
+We previously relied on lots of symbolic links to the various architecture scripts, which were scattered throughout the configuration directory of our Git repo. This made it easy to propagate changes, but also led to moments of chaos, as we had to find every single dependency, for every change pushed to the git repo repo (stored by the trac user), in case it was the target of a symbolic link.
+
+We now have a well defined structure (detailed below) for the different environment types, such as the central reverse proxy, the disposables, the build server, sailing server, etc.. and a method for updating instances in a controlled manner.
+```
+configuration
+├── crontabs
+│   ├── crontab-update-trac-trac-urls
+│   └── crontab-syncgit
+└── environments_scripts
+    ├── build-crontab-and-cp-files
+    ├── build_server
+    │   ├── files
+    │   │   ├── etc
+    │   │   │   ├── sysconfig
+    │   │   │   │   └── hudson
+    │   │   │   └── systemd
+    │   │   │       └── system
+    │   │   .           ├── hudson.service
+    │   │   .           └── mountnvmeswap.service -> ../../../../../repo/etc/systemd/system/mountnvmeswap.service
+    │   └── users
+    │       └── root
+    │           └── crontab-update-authorized-keys -> ../../../../crontabs/crontab-update-authorized-keys
+    └── repo
+        ├── etc
+        └── var
+```
+In the environments_scripts folder, we have the script `build-crontab-and-cp-files` for the aforementioned "controlled building", which is explained further below. Then we have directories for each environment type as well as a general purpose repo for storing files common to multiple instances. Within each environment type directory, should be a setup script, for creating an instance, of the environment type, from scratch (used if there is no image yet or the image upgrade didn't clean up unwanted scripts or content). There is also an optional users and files folder.
+
+The users folder is for organising crontabs: there is a folder for each user that should have a crontab and, within these username folders, are symbolic links
+to the crontabs folder, which contains files named `crontab-"function"`, each one containing a one-line crontab.
+
+The files folder is for organising files that should reside on the environment type. Within the directory, is a mimicked UNIX filesystem. Files in, say /etc/awstats of reverse_proxy's files dir, should 
+be found on the reverse proxy instances at /etc/awstats. 
+
+Any scripts common to multiple environment scripts, may be found in the "repo", which is at the same level as the environment types directory, and contains only a mimicked file system (no users folder). These common scripts are added to an environment type, by creating symbolic links from the intended destination on the environment type to the script in the repo. In the example above, the mountnvmeswap.service link indicates the intended location and the contents of the file is the target of the symbolic link.
+
+The build-crontab-and-cp-files uses this structure to help setup an environment 
+type. It builds the crontab file, by combining all the referenced crontab 
+one-liners, storing a copy in the user's home directory and installing it to the specified user. It also copies across the contents of "files" to the corresponding location, de-refencing any symbolic links.
+The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the build-crontab-and-cp-files script.
+
+This script has a couple of arguments and options. The most important are the arguments.
+1. Environment type.
+2. User with a checked out Git copy.
+3. The relative path within $2 to the Git copy.
+Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
+Have a look at the script itself for more details on the options and arguments.
+
+## Reverse proxy automation
+
+### Spinning around (spinning up and spinning down Disposable Reverse Proxies)
+
+Within the admin console -> Advanced -> landscape, one can launch a new disposable, with the option to customise the region, name and availability zone. The default AZ is the availability zone with the fewest reverse proxies (at the last time of refresh). Users can also rotate the httpd logs here. The automated launch process uses the AMI with the tag key
+`image-type` and corresponding value `disposable-reverse-proxy`. The security group of the disposables is selected by tags too: the key is `reverse-proxy-sg`. This sg allows http (on port 80) on the private network as well as ssh (on port 22) from anywhere.
+
+After an instance is in the RUNNING state, the automation procedure adds the instance to all target groups with the `allReverseProxy` tag, including the NLB. Any time the instance starts up or shuts down, the instance will automatically be removed from the instance
+based target groups and a service unit will attempt to remove it from the NLB target group.
+
+Upon starting up, the disposables also get the latest httpd 
+configuration from the httpdConf user on the central reverse 
+proxy. And virtual hosts are created for the private IP and 
+localhost, so the internal server status and main healthcheck 
+can function (see below).
+
+### Healthcheck 
+
+On the topic of healthchecks, we have the important reverseProxyHealthcheck.sh, which can be found on the *central and 
+disposables*. It is used to reduce costly cross-AZ traffic between our instances, whilst also ensuring reliability and availability.
+
+The general idea of this ALB target group healthcheck, is to make instances healthy only if in the same AZ as the archive (the correct AZ). However, availability takes priority over cost saving, so if there is no healthy instance in the "correct" AZ, the healthcheck returns healthy.
+
+All the target groups, tagged with allReverseProxies, have this healthcheck:
+
+```
+/cgi-bin/reverseProxyHealthcheck.sh?arn=TARGET_GROUP_ARN
+```
+
+The healthcheck works by first checking internal-server-status. If genuinely unhealthy, then unhealthy is returned to the ELB (elastic load balancer) health checker. Otherwise, the instance uses cached CIDR masks (which correspond to AZ definitions) and nmap to check if in the same AZ as the archive.
+If in the same AZ, then "healthy" is returned to the ELB health checker. If not, then the target group ARN, passed as a parameter 
+to the healthcheck, is used to get the private IPs of the other instances in the target group, via a describe-target-health call to the AWS API. This is the most costly part of the check, so these values are cached.
+
+We then use the same nmap/CIDR method, to check which of the discovered instances is in the same AZ as the archive. Finally, we use the internal-server-status, of those instances in the same AZ as the archive, to check if they are healthy. If there are no healthy instances in the "correct" AZ, then we return healthy, otherwise unhealthy.
+
+### Httpd configuration Git automation
+
+Because we have changing httpd configurations and different setups for the central and disposables, we decided to use version control and some post-receive hooks to ensure synchronisation and ease of use. We also decided not to store the httpd configuration in the main Git because the post-receive hook automation would allow
+those with Git access, to influence the production landscape. We have a larger set of contributors than landscape managers 
+and want to maintain this distinction.
+
+The setup involves a repo on the central reverse proxy, in the httpdConf user. The httpdConf user also has a checked out copy for branch manipulation, by the post-receive hook. The repo has 3 branches: a shared configuration branch, a central configuration
+branch and a disposable configuration branch. The shared configuration stores content that both the central and disposables have. Changes to different branches cause different parts of the post-receive hook to be triggered:
+
+1. Any pushes to the central or disposable branch trigger the sync-repo-and-execute-cmd script on instances tagged with CentralReverseProxy and DisposableProxy respectively, to get the changes made on the other instances.
+
+2. Any pushes to the "shared" configuration  branch are merged into both of the other branches (using the checked out workspace), and everything is pushed. This push then propagates to the centrals and disposables via method 1 above.
+
+If you wish to make persistent changes to the httpd configuration, you must ALWAYS pull the latest changes before committing your changes as follows. If you commit and push changes in the disposable branch, then only the disposables will pull the changes; if you commit and push changes to the central branch, then only the central proxy will pull the changes.
+If you want to make alterations to the "shared" configuration of the disposables and central, you have two options:
+
+1. Fetch the latest changes for all the branches. Test the changes locally, without committing. Run httpd -t (to check the config syntax). Reload and confirm that all is well. Checkout the main branch. Commit the changes and push. Make sure to check out the correct branch afterwards and that they have the latest changes.
+
+2. Fetch the latest changes to the branches in the httpdConf user's checked out copy. Make the edits in the httpdConf user's checked out workspace, in the correct branch. Commit and push. HttpdConf is currently a user on the central proxy.
+
+After pushing you should automatically end up in the correct branch too.
+
+### Automating archive failover 
+
+We have a production archive and a failover that the disposables and the central route traffic to. Both the central and disposables, have a cronjob that checks whether the main archive is healthy and automatically switches to the failover if unhealthy (and back again if the main returns to a healthy state).
+
+We have a script in our git repo called `switchoverArchive.sh`, which takes a path to the macros file and two timeout values (in seconds). It checks the macros file and checks if the following lines are present:
+
+```
+Define ARCHIVE_IP 172.31.7.12 
+Define ARCHIVE_FAILOVER_IP 172.31.43.140  
+Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} 
+```
+Then it curls the primary/main archive's `/gwt/status` (with the first timeout value) and, if healthy, sets the production value to the definition of the archive; however, if unhealthy,  a
+second curl occurs (with the second timeout value) and if this again returns unhealthy then the production value above is this time set to be the value of the failover definition. 
+After these changes, key admins are notified and the apache config is reloaded. This only happens though if the new value differs from the currently known value:
+ie. if already healthy, and the health checks pass, then no reload or email occurs.
+To install, enter `crontab -e`; set the frequency to say `* * * * *`; add the path to the script; parameterise it with the path to the macros file, the first timeout value and the second timeout value (both seconds); and then 
+write and quit, to install the cronjob.
+
+```
+# Example crontab
+* * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
+```
+
+If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
+
+You can use the build_crontab_and_setup_files (see below) to get these changes.
 ## Automated SSH Key Management
 
 AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.

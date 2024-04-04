@@ -76,7 +76,6 @@ echo " * Patching configurations on sap-p1-1 and sap-p1-2 to new release ${RELEA
 patch_conf_and_install sap-p1-1 master
 patch_conf_and_install sap-p1-1 security_service
 patch_conf_and_install sap-p1-2 secondary_master
-patch_conf_and_install sap-p1-2 replica
 patch_conf_and_install sap-p1-2 master
 patch_conf_and_install sap-p1-2 security_service
 echo " * Updating launch configurations and auto-scaling groups"
@@ -137,7 +136,7 @@ fi
 wait
 read -p "Press ENTER to terminate all ${INSTANCE_NAME_TO_TERMINATE} instances"
 echo " * Terminating all instances named ${INSTANCE_NAME_TO_TERMINATE} to force auto-scaling group to launch and register upgraded ones"
-for REGION in $( cat `dirname $0`/regions.txt ); do
+for REGION in $( cat `dirname $0`/regions.txt | grep -v "^#" ); do
   export AWS_DEFAULT_REGION=${REGION}
   echo "Terminating instances named region ${REGION}"
   echo "-------------------------------------------------------"

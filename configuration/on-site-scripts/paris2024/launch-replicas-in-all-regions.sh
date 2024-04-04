@@ -32,7 +32,7 @@ do
             exit 4;;
     esac
 done
-for REGION in $( cat `dirname $0`/regions.txt ); do
+for REGION in $( cat `dirname $0`/regions.txt | grep -v "^#" ); do
   export AWS_DEFAULT_REGION=${REGION}
   echo "Starting replica upgrade process for region ${REGION}"
   echo "-------------------------------------------------------"

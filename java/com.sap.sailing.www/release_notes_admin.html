@@ -23,6 +23,18 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">March 2024</h2>
+          <ul class="bulletList">
+            <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>
+            <li>Bug fix: in landscape automation, when moving all process instances away from a node to other nodes,
+                in-place replica re-starts were erroneously performed using the "root" user instead of the
+                "sailing" user. Not only were the processes running with the wrong user; this would also
+                create folders with incorrect ownerships which then were no longer writeable for the "sailing"
+                user which later led to problems with re-starting those processes, such as after a version
+                upgrade.</li>
+            <li>For new stand-alone instances, the new default type suggested is c5.2xlarge which is less expensive with
+                similar characteristics as the previous default c4.2xlarge.</li>
+          </ul>
           <h2 class="articleSubheadline">February 2024</h2>
           <ul class="bulletList">
             <li>The TracTrac API now offers <tt>STP</tt> and <tt>SCP</tt> as new race competitor status values

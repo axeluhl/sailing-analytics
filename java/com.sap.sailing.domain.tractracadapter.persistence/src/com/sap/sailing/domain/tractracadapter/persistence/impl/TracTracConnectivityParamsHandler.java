@@ -48,12 +48,14 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
     private static final String TRAC_TRAC_PASSWORD = "tracTracPassword";
     private static final String STORED_URI = "storedURI";
+    private static final String STORED_URI_FROM_CONFIGURATION = "storedURIFromConfiguration";
     private static final String START_OF_TRACKING_MILLIS = "startOfTrackingMillis";
     private static final String RACE_VISIBILITY = "raceVisibility";
     private static final String RACE_STATUS = "raceStatus";
     private static final String PARAM_URL = "paramURL";
     private static final String OFFSET_TO_START_TIME_OF_SIMULATED_RACE_MILLIS = "offsetToStartTimeOfSimulatedRaceMillis";
     private static final String LIVE_URI = "liveURI";
+    private static final String LIVE_URI_FROM_CONFIGURATION = "liveURIFromConfiguration";
     private static final String END_OF_TRACKING_MILLIS = "endOfTrackingMillis";
     private static final String DELAY_TO_LIVE_IN_MILLIS = "delayToLiveInMillis";
     private static final String COURSE_DESIGN_UPDATE_URI = "courseDesignUpdateURI";
@@ -92,6 +94,8 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
         result.put(TRAC_TRAC_USERNAME, ttParams.getTracTracUsername().toString());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, ttParams.isUseInternalMarkPassingAlgorithm());
         result.put(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG, ttParams.isUseOfficialEventsToUpdateRaceLog());
+        result.put(LIVE_URI_FROM_CONFIGURATION, ttParams.getLiveURIFromConfiguration()==null?null:ttParams.getLiveURIFromConfiguration().toString());
+        result.put(STORED_URI_FROM_CONFIGURATION, ttParams.getStoredURIFromConfiguration()==null?null:ttParams.getStoredURIFromConfiguration().toString());
         addWindTrackingParameters(ttParams, result);
         return result;
     }
@@ -115,7 +119,9 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
                 isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true,
                 /* default timeout for obtaining IRace object from params URL */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
-                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : (Boolean) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG));
+                map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG) == null ? false : (Boolean) map.get(USE_OFFICIAL_EVENTS_TO_UPDATE_RACE_LOG),
+                map.get(LIVE_URI_FROM_CONFIGURATION) == null ? null : new URI(map.get(LIVE_URI_FROM_CONFIGURATION).toString()),
+                map.get(STORED_URI_FROM_CONFIGURATION) == null ? null : new URI(map.get(STORED_URI_FROM_CONFIGURATION).toString()));
     }
 
     @Override
@@ -140,7 +146,8 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 ttParams.getTracTracUsername(), ttParams.getTracTracPassword(), ttParams.getRaceStatus(),
                 ttParams.getRaceVisibility(), ttParams.isTrackWind(),
                 ttParams.isCorrectWindDirectionByMagneticDeclination(), ttParams.isPreferReplayIfAvailable(),
-                ttParams.getTimeoutInMillis(), ttParams.isUseOfficialEventsToUpdateRaceLog());
+                ttParams.getTimeoutInMillis(), ttParams.isUseOfficialEventsToUpdateRaceLog(),
+                ttParams.getLiveURIFromConfiguration(), ttParams.getStoredURIFromConfiguration());
         updatePersistentTracTracConfiguration(result);
         return result;
     }
@@ -155,9 +162,9 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
             final String creatorName = SessionUtils.getPrincipal().toString();
             final TracTracConfigurationImpl tracTracConfiguration = new TracTracConfigurationImpl(creatorName, tractracRace.getEvent().getName(), jsonURL,
                     // FIXME bug5983: stored/live URIs should be captured in the configuration only if they were specified explicitly when the parameters were created
-                    (params.getLiveURI() == null ? null : params.getLiveURI().toString()),
+                    (params.getLiveURIFromConfiguration() == null ? null : params.getLiveURIFromConfiguration().toString()),
                     /* stored URI */ params.isReplayRace(tractracRace) ? null // we mainly want to enable the user to list the event's races again in case they are removed;
-                        : (params.getStoredURI() == null ? null : params.getStoredURI().toString()), // live/stored stuff comes from the tracking params
+                        : (params.getStoredURIFromConfiguration() == null ? null : params.getStoredURIFromConfiguration().toString()), // live/stored stuff comes from the tracking params
                     params.getUpdateURI()==null?null:params.getUpdateURI().toString(), params.getTracTracUsername(), params.getTracTracPassword());
             tractracMongoObjectFactory.updateTracTracConfiguration(tracTracConfiguration);
             securityService.setDefaultOwnershipIfNotSet(tracTracConfiguration.getIdentifier());

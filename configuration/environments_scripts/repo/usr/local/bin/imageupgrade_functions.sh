@@ -85,19 +85,21 @@ build_crontab_and_setup_files() {
     local GIT_COPY_USER="$2"
     #3 relative path to git within the git user
     local RELATIVE_PATH_TO_GIT="$3"
-    TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-    scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
-    cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
-    cd ..
-    rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    if [[ "$#" -lt 3 || "$#" -gt 5 ]]; then
+        echo "Number of arguments is invalid"
+    else
+        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+        cd ..
+        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    fi
 }
 
 setup_keys() {
     #1: Environment type.
-    SEPARATOR="@."
-    ACTUAL_SYMBOL="@@"
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
@@ -160,6 +162,7 @@ finalize() {
 setup_cloud_cfg_and_root_login() {
     sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
     sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
+    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
 }
 
 setup_fail2ban() {
@@ -222,4 +225,5 @@ setup_sshd_resilience() {
     echo "ClientAliveInterval 3
 ClientAliveCountMax 3
 GatewayPorts yes" >> /etc/ssh/sshd_config
+    systemctl reload sshd.service
 }

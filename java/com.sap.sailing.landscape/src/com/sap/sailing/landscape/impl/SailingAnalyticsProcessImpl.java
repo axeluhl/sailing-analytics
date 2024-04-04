@@ -73,6 +73,11 @@ implements SailingAnalyticsProcess<ShardingKey> {
         return HEALTH_CHECK_PATH;
     }
     
+    @Override
+    protected String getDefaultApplicationUsername() {
+        return StartSailingAnalyticsHost.SAILING_USER_NAME;
+    }
+
     private JSONObject getStatus(Optional<Duration> optionalTimeout) throws TimeoutException, Exception {
         final HttpGet getStatusRequest = new HttpGet(getHealthCheckUrl(optionalTimeout).toString());
         final JSONObject status = Wait.wait(()->{
