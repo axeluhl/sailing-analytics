@@ -12,7 +12,8 @@ implements ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     /**
      * The path the target group will ping to check the health of the reverse proxy.
      */
-    protected static final String INTERNAL_SERVER_STATUS = "cgi-bin/reverseProxyHealthcheck.sh";
+    protected static final String INTERNAL_SERVER_STATUS = "internal-server-status";
+    protected static final String TARGET_GROUP_STATUS = "cgi-bin/reverseProxyHealthcheck.sh";
     private final AwsLandscape<ShardingKey> landscape;
     
     public AbstractApacheReverseProxy(AwsLandscape<ShardingKey> landscape) {
@@ -26,5 +27,10 @@ implements ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     @Override
     public String getHealthCheckPath() {
         return "/"+INTERNAL_SERVER_STATUS;
+    }
+    
+    @Override
+    public String getTargetGroupHealthcheckPath() {
+        return TARGET_GROUP_STATUS;
     }
 }

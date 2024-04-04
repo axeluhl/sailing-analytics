@@ -110,5 +110,13 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      */
     void terminate();
 
+    /**
+     * Gets the basic path that will indicate the health of a reverse proxy.
+     */
     String getHealthCheckPath();
+    
+    /**
+     * Gets the healthcheck path that should be used by a target group, containing only reverse proxies.
+     */
+    String getTargetGroupHealthcheckPath();
 }
