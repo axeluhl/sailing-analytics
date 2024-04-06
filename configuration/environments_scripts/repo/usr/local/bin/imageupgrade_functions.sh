@@ -224,7 +224,7 @@ GatewayPorts yes" >> /etc/ssh/sshd_config
     systemctl reload sshd.service
 }
 
-identify_suitable_partition() {
+identify_suitable_partition_for_ephemeral_volume() {
     EPHEMERAL_VOLUME_NAME=$(
     # List all block devices and find those named nvme...
     for i in $(lsblk | grep -o "nvme[0-9][0-9]\?n[0-9]" | sort -u); do

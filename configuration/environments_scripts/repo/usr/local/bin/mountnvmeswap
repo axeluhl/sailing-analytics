@@ -4,10 +4,10 @@
 # Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
 # An existing xfs partition will be left alone. 
 . imageupgrade_functions.sh
-EPHEMERAL_VOLUME_NAME=$(identify_suitable_partition)
+EPHEMERAL_VOLUME_NAME=$(identify_suitable_partition_for_ephemeral_volume)
 if [[ -n "${EPHEMERAL_VOLUME_NAME}" ]]; then
   EPHEMERAL_VOLUME=/dev/${EPHEMERAL_VOLUME_NAME}
-  if awk '{print $1;}' /proc/mounts | grep "${PARTITION}"; then
+  if awk '{print $1;}' /proc/mounts | grep "${EPHEMERAL_VOLUME}"; then
     echo "Partition ${PARTITION} already mounted; not formatting/mounting volume"
   else
     FSTYPE=$(blkid -p $EPHEMERAL_VOLUME -s TYPE -o value)

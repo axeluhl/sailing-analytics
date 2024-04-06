@@ -11,7 +11,7 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
 else
   echo "No image upgrade; looking for ephemeral volume and trying to format with xfs..."
   . imageupgrade_functions.sh
-  PARTITION_NAME=$(identify_suitable_partition)
+  PARTITION_NAME=$(identify_suitable_partition_for_ephemeral_volume)
   if [[ -n "${PARTITION_NAME}" ]]; then
     PARTITION=/dev/${PARTITION_NAME}
     if awk '{print $1;}' /proc/mounts | grep "${PARTITION}"; then
