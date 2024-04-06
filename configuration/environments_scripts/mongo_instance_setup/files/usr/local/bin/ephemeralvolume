@@ -26,6 +26,7 @@ else
         fi
         # mount the thing to /var/lib/mongo
         mount $PARTITION /var/lib/mongo
+        chown mongod:mongod /var/lib/mongo # Added for robustness
     fi
   fi
 fi
