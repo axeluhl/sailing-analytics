@@ -85,13 +85,17 @@ build_crontab_and_setup_files() {
     local GIT_COPY_USER="$2"
     #3 relative path to git within the git user
     local RELATIVE_PATH_TO_GIT="$3"
-    TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-    scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
-    cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
-    cd ..
-    rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    if [[ "$#" -lt 3 || "$#" -gt 5 ]]; then
+        echo "Number of arguments is invalid"
+    else
+        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+        cd ..
+        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    fi
 }
 
 setup_keys() {
