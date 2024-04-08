@@ -591,7 +591,6 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackin
         for (Receiver receiver : listenersForStoredData) {
             receiver.subscribe();
         }
-        eventSubscriber.start();
         raceSubscriber.start();
     }
     
