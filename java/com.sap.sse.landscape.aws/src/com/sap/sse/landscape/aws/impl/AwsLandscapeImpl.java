@@ -405,8 +405,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final HashMap<String, String> tagKeyandValue = new HashMap<>();
         tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
-                httpPort, reverseProxy.getTargetGroupHealthcheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
-        defaultTargetGroup.setHealthCheckPath(defaultTargetGroup.getHealthCheckPath() + "?arn=" + defaultTargetGroup.getTargetGroupArn());
+                httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
+        setTargetGroupHealthCheckPath(defaultTargetGroup, reverseProxy.getTargetGroupHealthCheckPath(defaultTargetGroup.getTargetGroupArn()));
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1228,9 +1228,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         });
     }
     
-    @Override
-    public void setTargetGroupHealthcheckPath(TargetGroup<ShardingKey> targetGroup, String path) {
-        getLoadBalancingClient(getRegion(targetGroup.getRegion())).modifyTargetGroup(ModifyTargetGroupRequest.builder().targetGroupArn(targetGroup.getTargetGroupArn()).healthCheckPath(path).build());
+    /**
+     * Adjusts the health check path of an existing target group. Note that this will make the {@link TargetGroup} object passed as
+     * the {@code targetGroup} parameter inconsistent in its {@link TargetGroup#getHealthCheckPath()} field which does not reflect the
+     * new value set here.
+     */
+    private void setTargetGroupHealthCheckPath(TargetGroup<ShardingKey> targetGroup, String path) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).modifyTargetGroup(ModifyTargetGroupRequest.builder()
+                .targetGroupArn(targetGroup.getTargetGroupArn()).healthCheckPath(path).build());
     }
     
     @Override

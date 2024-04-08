@@ -116,7 +116,12 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     String getHealthCheckPath();
     
     /**
-     * Gets the healthcheck path that should be used by a target group, containing only reverse proxies.
+     * Gets the health check path that should be used by a target group, containing only reverse proxies.
+     * 
+     * @param targetGroupArn
+     *            identifies the target group expected to run the health check; this can be used to construct a URL path
+     *            and health check that is aware of this target group and may, e.g., take into account the set of its
+     *            member instances and their availability zones.
      */
-    String getTargetGroupHealthcheckPath();
+    String getTargetGroupHealthCheckPath(String targetGroupArn);
 }
