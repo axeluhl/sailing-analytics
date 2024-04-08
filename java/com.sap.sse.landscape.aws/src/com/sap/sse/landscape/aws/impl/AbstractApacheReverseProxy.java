@@ -31,6 +31,6 @@ implements ReverseProxy<ShardingKey, MetricsT, ProcessT, RotatingFileBasedLog> {
     
     @Override
     public String getTargetGroupHealthcheckPath() {
-        return TARGET_GROUP_STATUS;
+        return "/" + TARGET_GROUP_STATUS;
     }
 }
