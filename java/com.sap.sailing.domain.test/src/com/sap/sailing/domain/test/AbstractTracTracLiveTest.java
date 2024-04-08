@@ -21,6 +21,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
@@ -108,9 +109,10 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
             ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
             if (storedUri == null) {
                 eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
+                eventSubscriber.start();
                 raceSubscriber = subscriberFactory.createRaceSubscriber(race);
             } else {
-                eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
+                eventSubscriber = DomainFactory.INSTANCE.getOrCreateEventSubscriber(race.getEvent(), liveUri, storedUri);
                 raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
             }
             assertNotNull(race);
@@ -139,7 +141,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         for (Receiver receiver : receivers) {
             receiver.subscribe();
         }
-        getEventSubscriber().start();
         getRaceSubscriber().start();
     }
     

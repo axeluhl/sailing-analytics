@@ -339,4 +339,10 @@ public interface DomainFactory {
      */
     ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
 
+    /**
+     * Event subscribers created by this call are cached in this domain factory, using the three parameters as a compound
+     * caching key. Event subscribers found in the cache are returned by this method. The event subscriber returned will
+     * already have been {@link IEventSubscriber#start() started}.
+     */
+    IEventSubscriber getOrCreateEventSubscriber(IEvent tractracEvent, URI liveURI, URI storedURI);
 }

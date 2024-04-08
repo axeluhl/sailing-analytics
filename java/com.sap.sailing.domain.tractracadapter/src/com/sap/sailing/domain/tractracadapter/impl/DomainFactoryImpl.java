@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -100,6 +101,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -117,6 +119,7 @@ import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.util.lib.api.exceptions.TimeOutException;
 
 import difflib.PatchFailedException;
@@ -161,11 +164,17 @@ public class DomainFactoryImpl implements DomainFactory {
      * monitor.
      */
     private final Set<Competitor> competitorsCurrentlyBeingMigrated;
+    
+    /**
+     * The key consists of the {@link IEvent}, the live and the stored URI. 
+     */
+    private final ConcurrentMap<Triple<IEvent, URI, URI>, IEventSubscriber> eventSubscriberCache;
 
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
         this.metadataParser = new MetadataParserImpl();
         competitorsCurrentlyBeingMigrated = Collections.synchronizedSet(new HashSet<>());
+        eventSubscriberCache = new ConcurrentHashMap<>();
     }
     
     @Override
@@ -1082,4 +1091,17 @@ public class DomainFactoryImpl implements DomainFactory {
         return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 
+    @Override
+    public IEventSubscriber getOrCreateEventSubscriber(IEvent tractracEvent, URI liveURI, URI storedURI) {
+        return eventSubscriberCache.computeIfAbsent(new Triple<>(tractracEvent, liveURI, storedURI), key->
+            {
+                try {
+                    final IEventSubscriber eventSubscriber = SubscriptionLocator.getSusbcriberFactory().createEventSubscriber(key.getA(), key.getB(), key.getC());
+                    eventSubscriber.start();
+                    return eventSubscriber;
+                } catch (SubscriberInitializationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
 }
