@@ -9,5 +9,5 @@ RequiredBy=multi-user.target
 [Service]
 Type=exec
 RemainAfterExit=true
-ExecStart=rackup -p 4567 /home/wiki/config.ru
+ExecStart=/bin/bash -c "cd /home/wiki; rackup -p 4567 /home/wiki/config.ru"
 ExecStop=/bin/kill -SIGTERM "$MAINPID"
