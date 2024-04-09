@@ -17,12 +17,11 @@ ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server 
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
-# ruby and gollum
-yum group install "Development Tools"
-yum install ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
+# ruby and gollum for wiki
+yum group install -y "Development Tools"
+yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
 gem install gollum
 gem update --system 3.5.7
-# make root readable for 
 # setup cloud_cfg and keys
 cd /home
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
@@ -88,7 +87,8 @@ tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
 scp -r root@sapsailing.com:/etc/awstats /etc/awstats
-chmod 755 /root ## TODO: DO we need this.
+scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
+chmod 755 /root
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
