@@ -342,7 +342,10 @@ public interface DomainFactory {
     /**
      * Event subscribers created by this call are cached in this domain factory, using the three parameters as a compound
      * caching key. Event subscribers found in the cache are returned by this method. The event subscriber returned will
-     * already have been {@link IEventSubscriber#start() started}.
+     * be a wrapper around the actual {@link IEventSubscriber}, managing the {@link IEventSubscriber#start()} and {@link IEventSubscriber#stop()}
+     * calls such that only the first {@link IEventSubscriber#start()} call is actually forwarded to the wrapper subscriber, and only
+     * the last {@link IEventSubscriber#stop()} call is forwarded. This is managed by an atomic counter that keeps track of the
+     * start/stop invocations.
      */
     IEventSubscriber getOrCreateEventSubscriber(IEvent tractracEvent, URI liveURI, URI storedURI);
 }

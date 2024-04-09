@@ -109,7 +109,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
             ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
             if (storedUri == null) {
                 eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
-                eventSubscriber.start();
                 raceSubscriber = subscriberFactory.createRaceSubscriber(race);
             } else {
                 eventSubscriber = DomainFactory.INSTANCE.getOrCreateEventSubscriber(race.getEvent(), liveUri, storedUri);
@@ -141,6 +140,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         for (Receiver receiver : receivers) {
             receiver.subscribe();
         }
+        getEventSubscriber().start();
         getRaceSubscriber().start();
     }
     
