@@ -97,20 +97,7 @@ EOF
 
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
-yum install -y fail2ban
-cat <<EOF > /etc/fail2ban/jail.d/customisation.local
-[ssh-iptables]
-
-enabled  = true
-filter   = sshd[mode=aggressive]
-action   = iptables[name=SSH, port=ssh, protocol=tcp]
-           sendmail-whois[name=SSH, dest=thomasstokes@yahoo.co.uk, sender=fail2ban@sapsailing.com]
-logpath  = /var/log/fail2ban.log
-maxretry = 5
-EOF
-chkconfig --level 23 fail2ban on
-service fail2ban start
-yum remove -y firewalld
+setup_fail2ban
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
