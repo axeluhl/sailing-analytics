@@ -29,13 +29,13 @@ public class EventSubscriberWrapper implements IEventSubscriber {
     private final IEvent tractracEvent;
     private final URI liveURI;
     private final URI storedURI;
-    private final AtomicInteger startCounter;
+    private int startCounter;
     
     public EventSubscriberWrapper(IEvent tractracEvent, URI liveURI, URI storedURI) throws SubscriberInitializationException {
         this.tractracEvent = tractracEvent;
         this.liveURI = liveURI;
         this.storedURI = storedURI;
-        this.startCounter = new AtomicInteger(0);
+        this.startCounter = 0;
         this.delegate = createEventSubscriber();
     }
 
@@ -54,15 +54,15 @@ public class EventSubscriberWrapper implements IEventSubscriber {
     }
 
     @Override
-    public void start() {
-        if (startCounter.getAndIncrement() == 0) {
+    public synchronized void start() {
+        if (startCounter++ == 0) {
             delegate.start();
         }
     }
 
     @Override
-    public void stop() {
-        if (startCounter.decrementAndGet() == 0) {
+    public synchronized void stop() {
+        if (--startCounter == 0) {
             delegate.stop();
             try {
                 delegate = createEventSubscriber();
