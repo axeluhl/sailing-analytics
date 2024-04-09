@@ -1,0 +1,10 @@
+{
+    "ANDROID":[
+        {
+            "version": "1.4.118",
+            "groupid": "com.sap.sailing",
+            "file": "com.sap.sailing.racecommittee.app-unsigned.apk",
+            "artifactid": "com.sap.sailing.racecommittee.app"
+        }
+    ]
+}
