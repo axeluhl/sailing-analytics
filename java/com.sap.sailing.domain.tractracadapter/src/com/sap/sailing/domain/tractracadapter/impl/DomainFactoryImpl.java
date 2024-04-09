@@ -1096,7 +1096,7 @@ public class DomainFactoryImpl implements DomainFactory {
         return eventSubscriberCache.computeIfAbsent(new Triple<>(tractracEvent, liveURI, storedURI), key->
             {
                 try {
-                    return new EventSubscriberWrapper(SubscriptionLocator.getSusbcriberFactory().createEventSubscriber(key.getA(), key.getB(), key.getC()));
+                    return new EventSubscriberWrapper(key.getA(), key.getB(), key.getC());
                 } catch (SubscriberInitializationException e) {
                     throw new RuntimeException(e);
                 }

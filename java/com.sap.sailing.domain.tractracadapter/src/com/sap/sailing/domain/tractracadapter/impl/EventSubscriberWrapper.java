@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
+import com.tractrac.subscription.lib.api.SubscriberInitializationException;
+import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.competitor.ICompetitorsListener;
 import com.tractrac.subscription.lib.api.control.IControlsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
@@ -21,12 +25,22 @@ import com.tractrac.subscription.lib.api.race.IStartStopTimesChangeListener;
  *
  */
 public class EventSubscriberWrapper implements IEventSubscriber {
-    private final IEventSubscriber delegate;
+    private IEventSubscriber delegate;
+    private final IEvent tractracEvent;
+    private final URI liveURI;
+    private final URI storedURI;
     private final AtomicInteger startCounter;
     
-    public EventSubscriberWrapper(IEventSubscriber delegate) {
-        this.delegate = delegate;
-        startCounter = new AtomicInteger(0);
+    public EventSubscriberWrapper(IEvent tractracEvent, URI liveURI, URI storedURI) throws SubscriberInitializationException {
+        this.tractracEvent = tractracEvent;
+        this.liveURI = liveURI;
+        this.storedURI = storedURI;
+        this.startCounter = new AtomicInteger(0);
+        this.delegate = createEventSubscriber();
+    }
+
+    private IEventSubscriber createEventSubscriber() throws SubscriberInitializationException {
+        return SubscriptionLocator.getSusbcriberFactory().createEventSubscriber(tractracEvent, liveURI, storedURI);
     }
 
     @Override
@@ -50,6 +64,11 @@ public class EventSubscriberWrapper implements IEventSubscriber {
     public void stop() {
         if (startCounter.decrementAndGet() == 0) {
             delegate.stop();
+            try {
+                delegate = createEventSubscriber();
+            } catch (SubscriberInitializationException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
