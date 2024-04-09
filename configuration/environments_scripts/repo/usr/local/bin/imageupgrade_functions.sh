@@ -234,8 +234,8 @@ setup_goaccess() {
     tar -xzvf goaccess-1.9.1.tar.gz
     cd goaccess-1.9.1/
     yum install -y gcc-c++
-    yum install -y libmaxminddb-devel ncurses-devel geoip-devel
-    ./configure --enable-utf8 --enable-geoip=mmdb
+    yum install -y libmaxminddb-devel ncurses-devel
+    ./configure --enable-utf8
     make
     make install
     scp root@sapsailing.com:/etc/goaccess.conf /usr/local/etc/goaccess/goaccess.conf

@@ -48,6 +48,9 @@ systemctl enable httpd
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
 setup_fail2ban
+# goaccess and apachetop
+setup_goaccess
+setup_apachetop
 # mount nvme if available
 mountnvmeswap
 # setup logrotate.d/httpd 
