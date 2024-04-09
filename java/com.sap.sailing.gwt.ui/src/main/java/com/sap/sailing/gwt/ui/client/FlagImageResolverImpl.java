@@ -18,6 +18,7 @@ public class FlagImageResolverImpl implements FlagImageResolver {
 
     {
         flagImagesMap = new HashMap<String, ImageResource>();
+        flagImagesMap.put("aa", flagImageResources.flagAIN());
         flagImagesMap.put("ad", flagImageResources.flagAD());
         flagImagesMap.put("ae", flagImageResources.flagAE());
         flagImagesMap.put("af", flagImageResources.flagAF());
