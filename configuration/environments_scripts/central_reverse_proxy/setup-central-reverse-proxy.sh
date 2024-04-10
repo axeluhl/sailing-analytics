@@ -91,6 +91,9 @@ scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 chmod 755 /root
 # cp awstats crons as well as all other weekly, daily cronjobs.
 scp -r root@sapsailing.com:/etc/cron.* /etc/cron
+scp -r root@sapsailing.com:/etc/sudoers.d /etc/
+scp -r root@sapsailing.com:/root /
+scp -r root@sapsailing.com:/etc/letsencrypt /etc
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
