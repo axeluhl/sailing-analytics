@@ -23,6 +23,13 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">April 2024</h2>
+          <ul class="bulletList">
+            <li>The TracTrac connector now pools and re-uses event subscriber threads for live connections
+                for the same event with equal stored and live URIs. This helps reduce the number of threads
+                running in the system and is "friendlier" on the TracTrac infrastructure regarding the
+                number of concurrent connections the system needs to manage.</li>
+          </ul>
           <h2 class="articleSubheadline">March 2024</h2>
           <ul class="bulletList">
             <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>
