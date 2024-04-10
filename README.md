@@ -1,15 +1,46 @@
 # SAP Sailing Analytics
 
-The SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
+## Description
+
+This is the software running the SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
 
 Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
 
-Help sailors analyze performance and optimize strategy
-Bring fans closer to the action
-Provide the media with information and insights to deliver a greater informed commentary
+- Help sailors analyze performance and optimize strategy
+- Bring fans closer to the action
+- Provide the media with information and insights to deliver a greater informed commentary
+
 SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas.
 
-Start contributing: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding)
+## Requirements
+
+The software can be run on any Linux or Windows machine with ``bash`` installed; it has also been compiled successfully for the ARM platform and was deployed to a Raspberry Pi computer. As a database, MongoDB is required, tested with releases 4.4, 5.0, and 6.0. For use in a replicated scenario (scale-out, high availability), RabbitMQ is required. Docker Compose can be used to tie these three components together, as Docker images are produced on a regular basis.
+
+Compute node and database sizing depends on several aspects of your workloads, such as whether live or replay data is to be served, how many different classes with separate leaderboard are racing concurrently, how many competitors are racing in each class, or how many concurrent viewers produce how many requests and which type (e.g., analytical, data mining, or watching a live race).
+
+To quantify this at least approximately, here are a few examples for typical node sizes that can handle such types of events reasonably well:
+
+- National sailing league event; six boats, 18 competitors, a single live leaderboard: 8GB of RAM and 4-8 CPUs
+- Large multi-class event with 15 classes with their separate leaderboards, concurrently racing on six course areas: 16GB of RAM, 16 CPUs
+- Archive of 30,000 races with a few thousand visitors per day with varying analytical and replay workloads: 64GB RAM, 2TB NVMe swap, 8 CPUs
+
+A single node typically handles up to 500 concurrent viewers for live events. You will want to scale out accordingly, using the replication pattern offered by the solution which uses RabbitMQ for transaction log shipping.
+
+## Contributing
+
+To start contributing, read the onboarding document at the following URL: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding). The project welcomes contributions in the form of pull requests, for example, enhancements of the Data Mining functionality, including any sailing-specific metric or dimension you may think of and that you find is still missing so far; or additional features for the race viewer; or a map visualization that does not require a Google Map but uses Open Street Map / Open Layers; landscape automation; improved start sequence analytics; major UI improvements for the administrative layer ("AdminConsole"), etc.
+
+The issue tracker at [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com) is currently used for any sort of issue and enhancement request tracking. Help to migrate this smoothly to Github Issues would be much appreciated, ideally keeping issue numbers stable due to many references to those Bugzilla bug numbers, be it in the source code, the Wiki, or the build infrastructure.
+
+## Code of Conduct
+
+We follow [this](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) code of conduct. Long story short: be nice :-).
+
+## Licensing
+
+This project is published under the [Apache 2.0 open source license](https://www.apache.org/licenses/LICENSE-2.0). See also the ``LICENSE`` file in the root folder of this repository.
+
+See [here](https://www.sapsailing.com/gwt/Home.html#/imprint/:) for a list of components used by the project, as well as their licenses, also to be found in the file ``java/com.sap.sailing.gwt.ui/imprint.json``.
 
 ## Building and Running
 
