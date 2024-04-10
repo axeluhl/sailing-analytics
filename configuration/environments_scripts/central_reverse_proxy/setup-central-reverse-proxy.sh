@@ -89,6 +89,8 @@ mkdir /var/lib/awstats
 scp -r root@sapsailing.com:/etc/awstats /etc/awstats
 scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 chmod 755 /root
+# cp awstats crons as well as all other weekly, daily cronjobs.
+scp -r root@sapsailing.com:/etc/cron.* /etc/cron
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
@@ -108,12 +110,8 @@ sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logr
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup httpd git
 /root/setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy"
-# certs setup
-cd /etc
-mkdir letsencrypt
-mkdir letsencrypt/live
-mkdir letsencrypt/live/sail-insight.com
-scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt/live/sail-insight.com/* /etc/letsencrypt/live/sail-insight.com
+scp -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
+chown root:root /etc/httpd/conf/pass*
 # enable units which build-crontab doesn't 
 systemctl enable httpd
 systemctl start httpd
