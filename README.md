@@ -64,7 +64,16 @@ At [https://releases.sapsailing.com](https://releases.sapsailing.com) you find o
     cd sailinganalytics
     echo "MONGODB_URI=mongodb://localhost/winddb" | ${GIT_ROOT}/java/target/refreshInstance.sh auto-install-from-stdin
 ```
+
 This will download and install the latest release and configure it such that it will connect to a MongoDB server running locally (``localhost``) and listening on the default port ``27017``, using the database called ``winddb``.
+
+In addition to the necessary ``MONGODB_URI`` variable you may need to inject a few secrets into your runtime environment:
+
+- ``MANAGE2SAIL_ACCESS_TOKEN`` access token for result and regatta structure import from the Manage2Sail regatta management system
+- ``IGTIMI_CLIENT_ID`` / ``IGTIMI_CLIENT_SECRET`` credentials for ``igtimi.com`` in case you have one or more WindBot devices that you would like to integrate with
+- ``GOOGLE_MAPS_AUTHENTICATION_PARAMS`` as in ``"key=..."`` or ``"client=..."``, required to display the Google Map in the race viewer. Obtain a Google Maps key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
+
+In the ``configuration/mail.properties`` file make the necessary adjustments in case you would like to enable the application to send out e-mails, e.g., for user notifications or invitations.
 
 Launch the server from the directory to which you just installed it:
 ```
@@ -82,6 +91,9 @@ To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to
 ```
     docker run -d -e "MEMORY=4g" -e "MONGODB_URI=mongodb://my.mongohost.org?replicaSet=rs0&retryWrites=true" -P <yourimage>
 ```
+
+As explained above for the non-Docker scenario, add any variable assignments for secrets you need to pass to the runtime by adding more ``-e`` arguments.
+
 Do a "docker ps" to figure out the port exposing the web application:
 
 CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a docker.sapsailing.com/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
