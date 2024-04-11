@@ -62,7 +62,7 @@ sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABS
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup git
-/root/setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" disposable "Disposable Reverse Proxy"
+setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" disposable "Disposable Reverse Proxy"
 # Final enabling and starting of services.
 systemctl start httpd
 sudo systemctl start crond.service
