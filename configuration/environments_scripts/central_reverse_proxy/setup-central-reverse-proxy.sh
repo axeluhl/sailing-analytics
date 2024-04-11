@@ -27,8 +27,8 @@ cd /home
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
-# setup symbolic links and crontab
-## build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # THIS MUST BE RUN AFTER MOUNTING
+# setup files
+build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
 # setup mail
 setup_mail_sending
 # setup sshd config

@@ -79,20 +79,15 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
-    #1: Environment type.
-    local ENVIRONMENT_TYPE="$1"
-    #2 git copy user
-    local GIT_COPY_USER="$2"
-    #3 relative path to git within the git user
-    local RELATIVE_PATH_TO_GIT="$3"
-    if [[ "$#" -lt 3 || "$#" -gt 5 ]]; then
-        echo "Number of arguments is invalid"
+    # There must be at least 1 and all args are passed to build-crontab-and-cp-files. See the documentation of this file for more info.
+    if [[ "$#" -lt 1 ]]; then
+        echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
     else
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
         scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+        ./build-crontab-and-cp-files $@
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
