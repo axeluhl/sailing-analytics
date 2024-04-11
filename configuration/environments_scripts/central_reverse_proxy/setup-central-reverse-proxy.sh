@@ -90,7 +90,6 @@ scp -r root@sapsailing.com:/etc/awstats /etc/awstats
 scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 chmod 755 /root
 # cp awstats crons as well as all other weekly, daily cronjobs.
-scp -r root@sapsailing.com:/etc/cron.* /etc/cron
 rsync -a --exclude perl5 root@sapsailing.com:/root /
 scp -r root@sapsailing.com:/etc/letsencrypt /etc
 scp -r root@sapsailing.com:/etc/ssh /etc
