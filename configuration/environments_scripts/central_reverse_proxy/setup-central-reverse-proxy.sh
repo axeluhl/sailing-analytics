@@ -104,10 +104,9 @@ echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
 setup_fail2ban
 # setup logrotate.d/httpd 
-mkdir /var/log/logrotate-target
-echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
-mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
-sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
+# echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
+# mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
+# sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
