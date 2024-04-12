@@ -10,7 +10,6 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<AutoplayPerspectiveOwnSettings> {
     private final AutoplayPerspectiveOwnSettings initialSettings;
@@ -56,9 +55,8 @@ public class AutoplaySettingsDialogComponent implements SettingsDialogComponent<
 
     @Override
     public AutoplayPerspectiveOwnSettings getResult() {
-        // TODO bug5774 fill SecurityChildSettingsContext correctly
         return new AutoplayPerspectiveOwnSettings(fullScreen.getValue(), switchToLiveRaceAutomatically.getValue(),
-                timeBeforeRaceStartInput.getValue(), waitTimeAfterRaceEndInput.getValue(), new SecurityChildSettingsContext(null, null));
+                timeBeforeRaceStartInput.getValue(), waitTimeAfterRaceEndInput.getValue());
     }
 
     @Override

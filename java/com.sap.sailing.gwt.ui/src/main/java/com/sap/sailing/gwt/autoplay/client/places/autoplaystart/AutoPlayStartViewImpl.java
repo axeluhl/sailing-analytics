@@ -199,7 +199,7 @@ public class AutoPlayStartViewImpl extends Composite implements AutoPlayStartVie
             settingsButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
             apcd = new AutoPlayContextDefinitionImpl(selectedAutoPlayType, selectedEvent.id, selectedLeaderboardName);
-            apcd.getType().getConfig().loadSettingsDefault(selectedEvent, apcd, selectedLeaderboard, currentPresenter.getUserService(),
+            apcd.getType().getConfig().loadSettingsDefault(apcd, selectedLeaderboard, currentPresenter.getUserService(),
                     currentPresenter.getSubscriptionServiceFactory(),
                     new OnSettingsCallback() {
                         @Override

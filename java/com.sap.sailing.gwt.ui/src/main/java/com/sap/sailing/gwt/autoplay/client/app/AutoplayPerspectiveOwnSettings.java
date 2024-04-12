@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.app;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -9013901094746556797L;
@@ -13,13 +12,13 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     private IntegerSetting timeToSwitchBeforeRaceStartInSeconds;
     private IntegerSetting waitTimeAfterRaceEndInSeconds;
 
-    public AutoplayPerspectiveOwnSettings(SecurityChildSettingsContext context) {
+    public AutoplayPerspectiveOwnSettings() {
         super();
     }
 
     public AutoplayPerspectiveOwnSettings(boolean fullscreen, boolean switchToLive,
-            int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds, SecurityChildSettingsContext context) {
-        this(context);
+            int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds) {
+        this();
         this.fullscreen.setValue(fullscreen);
         this.switchToLive.setValue(switchToLive);
         this.timeToSwitchBeforeRaceStartInSeconds.setValue(timeToSwitchBeforeRaceStartInSeconds);

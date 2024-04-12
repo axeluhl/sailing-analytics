@@ -86,7 +86,7 @@ public class AutoPlayClassicConfiguration extends AutoPlayConfiguration {
     }
 
     @Override
-    public void loadSettingsDefault(EventDTO selectedEvent, AutoPlayContextDefinition apcd,
+    public void loadSettingsDefault(AutoPlayContextDefinition apcd,
             StrippedLeaderboardDTO leaderboard, UserService userService, SubscriptionServiceFactory subscriptionServiceFactory, OnSettingsCallback settingsCallback) {
         AutoplayPerspectiveLifecycle autoplayLifecycle = new AutoplayPerspectiveLifecycle(leaderboard, userService, subscriptionServiceFactory,
                 Arrays.asList(DetailType.values()));

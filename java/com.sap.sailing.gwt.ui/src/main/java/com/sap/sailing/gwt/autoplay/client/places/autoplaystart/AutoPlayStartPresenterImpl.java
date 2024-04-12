@@ -45,7 +45,6 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         // check if config can be restored!
         SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
-        // TODO bug5774 fill correctly if possible or check min. what impact an not initialized context will have
         AutoPlayContextDefinitionImpl apcd = new AutoPlayContextDefinitionImpl();
         serializer.deserializeFromCurrentLocation(apcd);
         if (apcd.getEventId() != null) {
@@ -55,7 +54,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
                 public void onSuccess(final EventDTO event) {
                     StrippedLeaderboardDTO leaderBoard = AutoplayHelper.getSelectedLeaderboard(event,
                             apcd.getLeaderboardName());
-                    apcd.getType().getConfig().loadSettingsDefault(event, apcd, leaderBoard,
+                    apcd.getType().getConfig().loadSettingsDefault(apcd, leaderBoard,
                             clientFactory.getUserService(), clientFactory.getSubscriptionServiceFactory(),
                             new OnSettingsCallback() {
                                 @Override
