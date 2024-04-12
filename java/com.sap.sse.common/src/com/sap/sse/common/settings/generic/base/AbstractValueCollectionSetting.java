@@ -3,7 +3,6 @@ package com.sap.sse.common.settings.generic.base;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.google.gwt.core.client.GWT;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
@@ -54,14 +53,12 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
             synchronized (defaultVal) {
                 final D result = createDefaultValuesCollection();
                 result.addAll(defaultVal);
-                GWT.log("getValues() default, result: " + result);
                 return result;
             }
         }
         if (value == null) {
             return Collections.emptyList();
         }
-        GWT.log("getValues() last, result: " + value.getValues(getValueConverter()));
         return value.getValues(getValueConverter());
     }
     

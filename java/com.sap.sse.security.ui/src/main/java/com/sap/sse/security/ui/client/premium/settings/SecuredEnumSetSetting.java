@@ -37,6 +37,7 @@ public class SecuredEnumSetSetting<T extends Enum<T> & SecuredEnum> extends Abst
             GWT.log("getValue securedDTO context not available!");
         }
         ValueCollectionValue<Set<Value>> value = getValue();
+        // TODO bug5774 clean up later
         GWT.log("getValues() last, result: " + value.getValues(getValueConverter()));
         Iterable<T> result = value.getValues(getValueConverter());
         Collection<T> permittedCollection = new ArrayList<T>();
