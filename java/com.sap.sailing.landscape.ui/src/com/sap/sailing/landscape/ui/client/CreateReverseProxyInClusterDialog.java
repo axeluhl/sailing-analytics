@@ -127,8 +127,9 @@ public class CreateReverseProxyInClusterDialog
         availabilityZoneNameListBox = setupAZChoiceListBox(landscapeManagementService, errorReporter,
                 existingReverseProxies);
         proxyName = createTextBox("", 20);
+        proxyName.setValue(SharedLandscapeConstants.DEFAULT_DISPOSABLE_REVERSE_PROXY_INSTANCE_NAME);
         dedicatedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBox(this, landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_REVERSE_PROXY_INSTANCE_TYPE, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ true);
         // setup labels
         nameLabel = new Label(stringMessages.instanceName());
         instanceTypeLabel = new Label(stringMessages.instanceType());

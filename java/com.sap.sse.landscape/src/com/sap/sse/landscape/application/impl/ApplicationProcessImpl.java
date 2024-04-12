@@ -87,6 +87,12 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             && getPort() == other.getPort();
     }
     
+    /**
+     * When this application is {@link #restart(Optional, Optional, byte[]) restarted}, drop into this user first,
+     * using {@code su - <username>}, before invoking the {@code ./start} script.
+     */
+    protected abstract String getDefaultApplicationUsername();
+    
     @Override
     public Release getRelease(ReleaseRepository releaseRepository, Optional<Duration> optionalTimeout,
             Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
@@ -144,7 +150,7 @@ implements ApplicationProcess<ShardingKey, MetricsT, ProcessT> {
             throws IOException, InterruptedException, JSchException, Exception {
         logger.info("Restarting application process "+this);
         getHost().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)
-            .runCommandAndReturnStdoutAndLogStderr("cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start", "Shutting down "+this, Level.INFO);
+            .runCommandAndReturnStdoutAndLogStderr("su -l "+getDefaultApplicationUsername()+" -c \"cd "+getServerDirectory(optionalTimeout)+"; ./stop; ./start\"", "Shutting down "+this, Level.INFO);
     }
     
     @Override

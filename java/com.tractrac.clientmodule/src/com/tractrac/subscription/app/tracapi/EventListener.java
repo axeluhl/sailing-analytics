@@ -56,7 +56,7 @@ public class EventListener extends AbstractListener {
 		for (int i=0 ; i<controlRoute.getControls().size() ; i++) {
 			message.append("\n\t" + i + ": " + controlRoute.getControls().get(i).getName());
 		}
-		message.append("\n\t" + controlRoute.getMetadata().getText());
+		message.append("\n\tMETADATA: " + controlRoute.getMetadata().getText());
 		show(message);
 	}
 
@@ -103,7 +103,7 @@ public class EventListener extends AbstractListener {
 		message.append(position.toString());
 		int posNumber = increasePos(compPos, raceCompetitor.getCompetitor().getId());
 		message.append(", TOTAL POS: ").append(posNumber);
-		//show(message.toString());
+		show(message.toString());
 	}
 
 	@Override

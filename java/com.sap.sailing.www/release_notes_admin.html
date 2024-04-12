@@ -23,6 +23,29 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">April 2024</h2>
+          <ul class="bulletList">
+            <li>The TracTrac connector now pools and re-uses event subscriber threads for live connections
+                for the same event with equal stored and live URIs. This helps reduce the number of threads
+                running in the system and is "friendlier" on the TracTrac infrastructure regarding the
+                number of concurrent connections the system needs to manage.</li>
+            <li>During live TracTrac connections, mark positions are now filtered by the race's course area if
+                both, mark and race, specify one. This way, redundant and excessive mark fixes can be avoided,
+                don't consume extra memory and don't waste replication bandwidth. See also
+                <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5919">bug 5919</a>.</li>
+          </ul>
+          <h2 class="articleSubheadline">March 2024</h2>
+          <ul class="bulletList">
+            <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>
+            <li>Bug fix: in landscape automation, when moving all process instances away from a node to other nodes,
+                in-place replica re-starts were erroneously performed using the "root" user instead of the
+                "sailing" user. Not only were the processes running with the wrong user; this would also
+                create folders with incorrect ownerships which then were no longer writeable for the "sailing"
+                user which later led to problems with re-starting those processes, such as after a version
+                upgrade.</li>
+            <li>For new stand-alone instances, the new default type suggested is c5.2xlarge which is less expensive with
+                similar characteristics as the previous default c4.2xlarge.</li>
+          </ul>
           <h2 class="articleSubheadline">February 2024</h2>
           <ul class="bulletList">
             <li>The TracTrac API now offers <tt>STP</tt> and <tt>SCP</tt> as new race competitor status values

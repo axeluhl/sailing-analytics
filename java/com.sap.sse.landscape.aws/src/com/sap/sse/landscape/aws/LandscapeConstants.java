@@ -1,5 +1,7 @@
 package com.sap.sse.landscape.aws;
 
+import software.amazon.awssdk.services.ec2.model.InstanceType;
+
 public interface LandscapeConstants {
     /**
      * The key <strong>tag</strong>, indicating that an instance only acts as a reverse proxy
@@ -58,4 +60,16 @@ public interface LandscapeConstants {
      * The tag for the central reverse proxy, which also hosts non-essential services.
      */
     String CENTRAL_REVERSE_PROXY_TAG_NAME = "CentralReverseProxy";
+    
+    /**
+     * A tag key indicating that a subnet is not to be used for deploying instances, by autoscaling groups or by load balancers.
+     */
+    String NO_INSTANCE_DEPLOYMENT = "noInstanceDeployment";
+
+    InstanceType[] INSTANCE_TYPES_BANNED_FROM_INSTANCE_BASED_NLB_TARGET_GROUPS = new InstanceType[] { InstanceType.CC1_4_XLARGE, InstanceType.C1_MEDIUM, InstanceType.C1_XLARGE,
+            InstanceType.CC2_8_XLARGE, InstanceType.CG1_4_XLARGE, InstanceType.CR1_8_XLARGE, InstanceType.G2_2_XLARGE,
+            InstanceType.G2_8_XLARGE, InstanceType.HI1_4_XLARGE, InstanceType.HS1_8_XLARGE, InstanceType.M1_LARGE,
+            InstanceType.M1_MEDIUM, InstanceType.M1_SMALL, InstanceType.M1_XLARGE, InstanceType.M2_2_XLARGE,
+            InstanceType.M2_4_XLARGE, InstanceType.M2_XLARGE, InstanceType.M3_2_XLARGE, InstanceType.M3_LARGE,
+            InstanceType.M3_MEDIUM, InstanceType.M3_XLARGE, InstanceType.T1_MICRO};
 }

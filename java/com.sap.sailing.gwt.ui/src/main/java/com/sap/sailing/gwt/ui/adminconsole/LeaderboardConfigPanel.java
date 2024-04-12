@@ -167,7 +167,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 stringMessages.createRegattaLeaderboardWithOtherTieBreakingLeaderboard() + " ...",
                 leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithOtherTieBreakingLeaderboard);
         createRegattaLeaderboardWithOtherTieBreakingLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardWithOtherTieBreakingLeaderboardButton");
-
         leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), leaderboardSelectionModel, true,
                 () -> removeLeaderboards(leaderboardSelectionModel.getSelectedSet()));
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
@@ -397,7 +396,7 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
 
     private void editLeaderboard(StrippedLeaderboardDTO leaderboardDTO) {
         final String oldLeaderboardName = leaderboardDTO.getName();
-        List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
+        final List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<>();
         otherExistingLeaderboard.addAll(availableLeaderboardList);
         otherExistingLeaderboard.remove(leaderboardDTO);
         if (leaderboardDTO.type.isMetaLeaderboard()) {
@@ -1114,6 +1113,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 break;
             }
         }
+        getLeaderboardsRefresher().addIfNotContainedElseReplace(updatedLeaderboard,
+                new NameBasedStrippedLeaderboardDTOEntityIdentityComparator());
         availableLeaderboardList.set(indexOfLeaderboard, updatedLeaderboard);
         filterLeaderboardPanel.updateAll(availableLeaderboardList);
     }

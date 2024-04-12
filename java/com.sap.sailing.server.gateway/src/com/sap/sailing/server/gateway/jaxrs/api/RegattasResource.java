@@ -1131,6 +1131,9 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (tack != null) {
             jsonFix.put("tack", tack.name());
         }
+        if (fix.getOptionalTrueHeading() != null) {
+            jsonFix.put("trueheading-deg", fix.getOptionalTrueHeading().getDegrees());
+        }
         jsonFixes.add(jsonFix);
         return jsonFix;
     }
@@ -1429,7 +1432,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
+                final DynamicTrackedRace trackedRace = getService().getTrackedRace(regatta, race);
                 if (trackedRace != null) {
                     TargetTimeInfo targetTime;
                     try {

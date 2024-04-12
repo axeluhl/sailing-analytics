@@ -32,3 +32,4 @@ Require-Bundle: com.sap.sse.common,
  org.mongodb.driver-core;bundle-version="4.3.1",
  org.mongodb.driver-sync;bundle-version="4.3.1"
 Bundle-ActivationPolicy: lazy
+Import-Package: com.sap.sse.mongodb

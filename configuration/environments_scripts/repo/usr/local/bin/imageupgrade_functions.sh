@@ -85,19 +85,21 @@ build_crontab_and_setup_files() {
     local GIT_COPY_USER="$2"
     #3 relative path to git within the git user
     local RELATIVE_PATH_TO_GIT="$3"
-    TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-    scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
-    cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-    ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
-    cd ..
-    rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    if [[ "$#" -lt 3 || "$#" -gt 5 ]]; then
+        echo "Number of arguments is invalid"
+    else
+        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+        cd ..
+        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+    fi
 }
 
 setup_keys() {
     #1: Environment type.
-    SEPARATOR="@."
-    ACTUAL_SYMBOL="@@"
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
@@ -160,6 +162,7 @@ finalize() {
 setup_cloud_cfg_and_root_login() {
     sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
     sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
+    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
 }
 
 setup_fail2ban() {
@@ -216,4 +219,28 @@ myorigin =\$myhostname.sapsailing.com
     postmap hash:${password_file_location}
     systemctl restart postfix
     rm -f "${temp_mail_properties_location}"
+}
+
+setup_sshd_resilience() {
+    echo "ClientAliveInterval 3
+ClientAliveCountMax 3
+GatewayPorts yes" >> /etc/ssh/sshd_config
+    systemctl reload sshd.service
+}
+
+identify_suitable_partition_for_ephemeral_volume() {
+    EPHEMERAL_VOLUME_NAME=$(
+    # List all block devices and find those named nvme...
+    for i in $(lsblk | grep -o "nvme[0-9][0-9]\?n[0-9]" | sort -u); do
+        # If they don't have any partitions, then...
+        if ! lsblk | grep -o "${i}p[0-9]\+" 2>&1 >/dev/null; then
+            # ...check whether they are EBS devices
+            /sbin/ebsnvme-id -u "/dev/$i" >/dev/null
+            # If not, list their name because then they must be ephemeral instance storage
+            if [[ $? -ne 0 ]]; then
+                echo "${i}"
+            fi
+        fi
+    done 2>/dev/null | head -n 1 )
+    echo $EPHEMERAL_VOLUME_NAME
 }

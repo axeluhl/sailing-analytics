@@ -1,20 +1,27 @@
 #!/bin/bash
 
-# Purpose: This script goes to a given git dir (eg. httpd); fetches any new commits to
-# the repo; and - if new commits are found - merges them into the branch and runs a command.
+# Purpose: This script goes to a given git dir (eg. httpd); checks out a given branch; fetches any new commits to
+# that given branch; and - if new commits are found - merges them into the branch and runs a command.
 
 if [ $# -eq 0 ]; then
-    echo "$0 PATH_TO_GIT_REPO COMMAND_TO_RUN_ON_COMPLETION_IN_REPO"
+    echo "$0 PATH_TO_GIT_REPO COMMAND_TO_RUN_ON_COMPLETION_IN_REPO BRANCH_TO_CHECK_OUT"
     echo ""
     echo "EXAMPLE: sync-repo-and-execute-cmd.sh \"/etc/httpd\"  \"sudo service httpd reload\""
-    echo "This script is used to automatically fetch from a git repo and, if there are new commits, merge the changes."
-    echo "And then run a command, passed as an argument."
+    echo "This script is used to automatically fetch the latest changes to a given branch of a git repo and,"
+    echo "if there are new commits, merge the changes into that branch."
+    echo "And then run a command, passed as an argument. This leaves the repo checked out to the branch in the argument."
     exit 2
 fi
 
 GIT_PATH=$1
 COMMAND_ON_COMPLETION=$2
+GIT_BRANCH=$3
 cd ${GIT_PATH}
+git checkout ${GIT_BRANCH} >/dev/null 2>&1
+if [[ "$?" -ne 0 ]]; then
+    echo "Error encountered: issue checking out branch"
+    exit 1
+fi
 # Rev-parse gets the commit hash of given reference.
 CURRENT_HEAD=$(git rev-parse HEAD)
 GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git fetch
@@ -22,17 +29,17 @@ if [[ "$?" -ne 0 ]]; then
     echo "Error encountered: issue with fetching or there is no repo."
     exit 1
 fi
-if [[ $CURRENT_HEAD != $(git rev-parse origin/main) ]]  # Checks if there are new commits 
+if [[ $CURRENT_HEAD != "$(git rev-parse origin/${GIT_BRANCH})" ]]  # Checks if there are new commits
 then
     logger -t httpd "Changes found; merging now"
-    cd ${GIT_PATH} && git merge origin/main
+    cd ${GIT_PATH} && git merge origin/${GIT_BRANCH}
     if [[ $? -eq 0 ]]; then
         logger -t httpdMerge "Merge succeeded: different files edited."
     else
         logger -t httpdMerge "First merge unsuccessful: same file modified."
         git merge --abort   # Returns to pre-merge state.
         git stash
-        git merge origin/main # This should be a fast-forward merge.
+        git merge origin/${GIT_BRANCH} # This should be a fast-forward merge.
         git stash apply  # Keeps stash on top of stack, in case the apply fails.
         if [[ $? -eq 0 ]]; then
             logger -t httpdMerge "Second merge success: merge of httpd remote to local successful, and previous working directory changes restored."
@@ -47,6 +54,9 @@ then
         fi
     fi
     sleep 2
-    $($COMMAND_ON_COMPLETION)
+    if httpd -t ; then
+        ${COMMAND_ON_COMPLETION}
+    else 
+        logger -t httpdMerge "Config error"
+    fi
 fi
-

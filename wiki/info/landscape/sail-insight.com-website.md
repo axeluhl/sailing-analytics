@@ -5,8 +5,10 @@ The sail-insight micro site is hosted statically in `/home/trac/sail-insight-web
 The SSL certificate is provided by LetsEncrypt. Since `certbot` is not available on Amazon AMI Linux a docker container with symlinks to the three relevant folders is spun up to obtain the SSL certificates:
 
 ```
-docker run -it --rm --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/var/log/letsencrypt:/var/log/letsencrypt" -v "/home/trac/sail-insight-website/:/home/trac/sail-insight-website" certbot/certbot certonly
+docker run -it --rm --name certbot -p 80:80 -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/var/log/letsencrypt:/var/log/letsencrypt" -v "/home/trac/sail-insight-website/:/home/trac/sail-insight-website" certbot/certbot certonly
 ```
+
+The port forward is only needed if you use the standalone version which spins up a webserver in the docker image. If you use webroot, then you have to have the server running already.
 
 The same docker container is spun up once a week to check whether the certificate needs renewing:
 

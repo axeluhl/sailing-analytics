@@ -38,7 +38,7 @@ public class MoveAllAwayFromHostDialog extends DataEntryDialog<String> {
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         instanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBoxWithAdditionalDefaultEntry(this,
                 stringMessages.sameAsExistingHost(), SAME_AS_MASTER, landscapeManagementService, stringMessages, /* default */ stringMessages.sameAsExistingHost(),
-                errorReporter);
+                errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         instanceTypeLabel = new Label();
     }
     

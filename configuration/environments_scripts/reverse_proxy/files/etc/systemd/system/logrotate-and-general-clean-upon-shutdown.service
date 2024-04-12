@@ -15,5 +15,5 @@ Type=oneshot
 RemainAfterExit=yes
 KillMode=none
 ExecStart=/bin/true
-ExecStopPost=/bin/bash -c "logrotate --force -v /etc/logrotate.conf; rm -f /var/cache/subnetMaskSize"
+ExecStopPost=/bin/bash -c "logrotate --force -v /etc/logrotate.conf; /var/www/cgi-bin/reverseProxyHealthcheck.sh cleanup"
 TimeoutStopSec=50
