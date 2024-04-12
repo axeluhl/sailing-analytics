@@ -45,6 +45,7 @@ public class AutoPlayStartPresenterImpl extends AbstractActivity implements Auto
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         // check if config can be restored!
         SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
+        // TODO bug5774 fill correctly if possible or check min. what impact an not initialized context will have
         AutoPlayContextDefinitionImpl apcd = new AutoPlayContextDefinitionImpl();
         serializer.deserializeFromCurrentLocation(apcd);
         if (apcd.getEventId() != null) {

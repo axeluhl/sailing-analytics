@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 
-public class AwsSessionCredentialsFromUserPreference extends AbstractGenericSerializableSettings<Object> {
+public class AwsSessionCredentialsFromUserPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -3250243915670349222L;
 
     private StringSetting accessKeyId;
@@ -15,7 +15,7 @@ public class AwsSessionCredentialsFromUserPreference extends AbstractGenericSeri
     private LongSetting expiry;
     
     @Override
-    protected void addChildSettings(Object context) {
+    protected void addChildSettings() {
         accessKeyId = new StringSetting("accessKeyId", this);
         secretAccessKey = new StringSetting("secretAccessKey", this);
         sessionToken = new StringSetting("sessionToken", this);
@@ -26,7 +26,7 @@ public class AwsSessionCredentialsFromUserPreference extends AbstractGenericSeri
      * The default settings
      */
     public AwsSessionCredentialsFromUserPreference() {
-        super(null);
+        super();
     }
 
     public AwsSessionCredentialsFromUserPreference(AwsSessionCredentialsWithExpiry awsSessionCredentialsWithExpiry) {

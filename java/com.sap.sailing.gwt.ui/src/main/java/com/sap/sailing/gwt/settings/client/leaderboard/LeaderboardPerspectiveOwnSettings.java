@@ -3,9 +3,8 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 8978956250485028963L;
     
     private transient BooleanSetting showRaceDetails;
@@ -19,7 +18,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     private transient BooleanSetting livePlay;
     
     LeaderboardPerspectiveOwnSettings() {
-        super(null);
+        super();
     }
     
     public LeaderboardPerspectiveOwnSettings(boolean showRaceDetails) {
@@ -46,7 +45,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         showRaceDetails = new BooleanSetting("showRaceDetails", this, false);
         hideToolbar = new BooleanSetting("hideToolbar", this, false);
         autoExpandLastRaceColumn = new BooleanSetting(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, this, false);

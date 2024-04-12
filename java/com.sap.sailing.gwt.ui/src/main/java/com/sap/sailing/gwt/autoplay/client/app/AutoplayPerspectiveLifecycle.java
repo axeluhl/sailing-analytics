@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
@@ -25,10 +26,12 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     public static final String ID = "ap";
     private LeaderboardWithZoomingPerspectiveLifecycle leaderboardLifecycle;
     private RaceBoardPerspectiveLifecycle raceboardLifecycle;
+    private final SecurityChildSettingsContext context;
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
             SubscriptionServiceFactory subscriptionServiceFactory, Iterable<DetailType> availableDetailTypes) {
         PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
+        context = new SecurityChildSettingsContext(leaderboard, paywallResolver);
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
                 availableDetailTypes, paywallResolver);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
@@ -40,6 +43,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
 
     public AutoplayPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, UserService userService,
             PaywallResolver paywallResolver, Iterable<DetailType> availableDetailTypes) {
+        context = new SecurityChildSettingsContext(leaderboard, paywallResolver);
         leaderboardLifecycle = new LeaderboardWithZoomingPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
                 availableDetailTypes, paywallResolver);
         raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE,
@@ -63,7 +67,7 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
     
     @Override
     public AutoplayPerspectiveOwnSettings createPerspectiveOwnDefaultSettings() {
-        return new AutoplayPerspectiveOwnSettings();
+        return new AutoplayPerspectiveOwnSettings(context);
     }
 
     @Override

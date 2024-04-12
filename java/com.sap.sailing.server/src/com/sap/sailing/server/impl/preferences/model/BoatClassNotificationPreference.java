@@ -5,7 +5,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 
-public class BoatClassNotificationPreference extends AbstractGenericSerializableSettings<Object> {
+public class BoatClassNotificationPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -6510535362114348707L;
 
     private transient BoatClassSetting boatClass;
@@ -13,7 +13,7 @@ public class BoatClassNotificationPreference extends AbstractGenericSerializable
     private transient BooleanSetting notifyAboutResults;
 
     public BoatClassNotificationPreference(DomainFactory domainFactory) {
-        super(null);
+        super();
         boatClass = new BoatClassSetting("boatClass", this, domainFactory);
         notifyAboutUpcomingRaces = new BooleanSetting("notifyAboutUpcomingRaces", this, false);
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
@@ -28,7 +28,7 @@ public class BoatClassNotificationPreference extends AbstractGenericSerializable
     }
 
     @Override
-    protected void addChildSettings(Object context) {
+    protected void addChildSettings() {
         // We do not create the Setting instances here, because access to the RacingEventService would not be given.
         // Doing this, Java/GWT Serialization isn't working anymore. Because the preferences are only serialized as JSON
         // in the backend an transferred as DTO to the frontend, this isn't a problem. Due to usage of BoatClass and

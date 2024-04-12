@@ -25,6 +25,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
@@ -175,8 +176,9 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.TIME_BETWEEN_RACE_START_AND_COMPETITOR_START);
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(getLeaderboard(), leaderboardPanel.getPaywallResolver());
         final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
-                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow, context);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
 
             @Override

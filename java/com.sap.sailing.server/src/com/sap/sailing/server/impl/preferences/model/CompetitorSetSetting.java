@@ -11,7 +11,7 @@ import com.sap.sse.common.settings.generic.base.AbstractValueSetSetting;
  */
 public class CompetitorSetSetting extends AbstractValueSetSetting<Competitor> {
 
-    protected CompetitorSetSetting(String name, AbstractGenericSerializableSettings<?> settings,
+    protected CompetitorSetSetting(String name, AbstractGenericSerializableSettings settings,
             CompetitorAndBoatStore competitorStore) {
         super(name, settings, new CompetitorConverter(competitorStore));
     }

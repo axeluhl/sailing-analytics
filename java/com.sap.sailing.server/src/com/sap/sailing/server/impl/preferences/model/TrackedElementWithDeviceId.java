@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-public class TrackedElementWithDeviceId extends AbstractGenericSerializableSettings<Object> {
+public class TrackedElementWithDeviceId extends AbstractGenericSerializableSettings {
 
     private static final long serialVersionUID = 234711768869820003L;
 
@@ -16,7 +16,7 @@ public class TrackedElementWithDeviceId extends AbstractGenericSerializableSetti
     private transient UUIDSetting trackedMarkId;
 
     public TrackedElementWithDeviceId() {
-        super(null);
+        super();
     }
 
     /** copy constructor */
@@ -38,7 +38,7 @@ public class TrackedElementWithDeviceId extends AbstractGenericSerializableSetti
     }
 
     @Override
-    protected void addChildSettings(Object context) {
+    protected void addChildSettings() {
         deviceId = new StringSetting("deviceId", this);
         trackedCompetitorId = new UUIDSetting("trackedCompetitorId", this);
         trackedBoatId = new UUIDSetting("trackedBoatId", this);

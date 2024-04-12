@@ -4,14 +4,13 @@ import java.util.UUID;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.UUIDSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public final class RegattaOverviewContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public final class RegattaOverviewContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -8541790130000694098L;
     private transient UUIDSetting event;
 
     public RegattaOverviewContextDefinition() {
-        super(null);
+        super();
     }
     
     public RegattaOverviewContextDefinition(String event) {
@@ -24,7 +23,7 @@ public final class RegattaOverviewContextDefinition extends AbstractGenericSeria
     }
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         event = new UUIDSetting("event", this);
     }
     

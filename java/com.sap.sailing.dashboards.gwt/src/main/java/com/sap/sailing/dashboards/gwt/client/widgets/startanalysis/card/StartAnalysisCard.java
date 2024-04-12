@@ -185,7 +185,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, errorReporter,
                 Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        // TODO: bug5774 set RaceDTO to RaceMapLifecycle to enable premium functions
+        // TODO bug5774 set RaceDTO to RaceMapLifecycle to enable premium functions
         raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver, null), raceMapSettings,
                 sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,

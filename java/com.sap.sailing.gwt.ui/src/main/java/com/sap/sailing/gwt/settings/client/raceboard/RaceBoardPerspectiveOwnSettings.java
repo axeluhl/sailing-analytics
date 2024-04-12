@@ -14,14 +14,13 @@ import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * The settings of the raceboard perspective
  * @author Frank
  *
  */
-public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 5471954179434008459L;
     
@@ -60,7 +59,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
 
 
     public RaceBoardPerspectiveOwnSettings() {
-        super(null);
+        super();
     }
 
     public RaceBoardPerspectiveOwnSettings(Duration initialDurationAfterRaceStartInReplay) {
@@ -76,13 +75,13 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         this.showLeaderboard = new BooleanSetting("showLeaderboard", this, true);
         this.showWindChart = new BooleanSetting("showWindChart", this, false);
         this.showCompetitorsChart = new BooleanSetting("showCompetitorsChart", this, false);
         this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
-        this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
+        this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this);
         this.selectedCompetitor = new StringSetting(PARAM_SELECTED_COMPETITOR, this, null);
         this.selectedCompetitors = new StringSetSetting(PARAM_SELECTED_COMPETITORS, this, null);
         this.showTags = new BooleanSetting(PARAM_VIEW_SHOW_TAGS, this, false);
@@ -97,7 +96,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, Iterable<String> selectedCompetitors, 
             Boolean showTags, Boolean showManeuverTable, String jumpToTag, Long zoomStart, Long zoomEnd, Boolean autoExpandPreSelectedRace) {
-        super(null);
+        super();
         this.showTags.setValue(showTags);
         this.showManeuverTable.setValue(showManeuverTable);
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);

@@ -30,6 +30,8 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<AbstractRaceEndWithImagesTop3Place>
         implements RaceEndWithBoatsView.NextRaceWithBoatsPresenter {
@@ -60,12 +62,17 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
 
+        // TODO bug5774 Set securedDto correctly
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(null, 
+                new PaywallResolverImpl(getClientFactory().getUserService(), 
+                        getClientFactory().getSubscriptionServiceFactory()));
+        
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
                 /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
-                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true);
+                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true, context);
 
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
 
@@ -89,7 +96,7 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
             
             @Override
             public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-                determinePlacement(liveRace);                
+                determinePlacement(liveRace);
             }
             
             @Override

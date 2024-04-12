@@ -9,7 +9,7 @@ public abstract class AbstractHasValueSetting<T> extends AbstractSetting impleme
     
     private ValueConverter<T> valueConverter;
     
-    public AbstractHasValueSetting(String name, AbstractGenericSerializableSettings<?> settings, ValueConverter<T> valueConverter) {
+    public AbstractHasValueSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter) {
         super(name, settings);
         this.valueConverter = valueConverter;
     }

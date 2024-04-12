@@ -2,9 +2,8 @@ package com.sap.sailing.gwt.settings.client.spectator;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class SpectatorContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class SpectatorContextDefinition extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = -3422076606157458337L;
     
@@ -13,7 +12,7 @@ public class SpectatorContextDefinition extends AbstractGenericSerializableSetti
     private transient StringSetting leaderboardGroupId;
     
     public SpectatorContextDefinition() {
-        super(null);
+        super();
     }
     
     public SpectatorContextDefinition(String leaderboardGroupId) {
@@ -22,7 +21,7 @@ public class SpectatorContextDefinition extends AbstractGenericSerializableSetti
     }
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         leaderboardGroupId = new StringSetting("leaderboardGroupId", this);
     }

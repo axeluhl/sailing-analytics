@@ -15,6 +15,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
@@ -46,8 +47,9 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(getLeaderboard(), leaderboardPanel.getPaywallResolver());
         final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
-                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow, context);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {

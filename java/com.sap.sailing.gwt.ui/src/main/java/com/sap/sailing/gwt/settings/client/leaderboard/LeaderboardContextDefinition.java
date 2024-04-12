@@ -5,9 +5,8 @@ import java.util.UUID;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class LeaderboardContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class LeaderboardContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 6699950643747065960L;
     
     private transient UUIDSetting eventId;
@@ -15,7 +14,7 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     private transient StringSetting displayName;
 
     public LeaderboardContextDefinition() {
-        super(null);
+        super();
     }
     
     public LeaderboardContextDefinition(String leaderboardName, String displayName) {
@@ -25,7 +24,7 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         eventId = new UUIDSetting("eventId", this);
         leaderboardName = new StringSetting("name", this);
         displayName = new StringSetting("displayName", this);

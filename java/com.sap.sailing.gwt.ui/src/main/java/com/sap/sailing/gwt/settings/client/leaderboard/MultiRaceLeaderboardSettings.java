@@ -29,8 +29,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     protected EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
 
     
-    public MultiRaceLeaderboardSettings() {
-        super(false);
+    public MultiRaceLeaderboardSettings(SecurityChildSettingsContext context) {
+        super(false, context);
     }
 
     public MultiRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
@@ -40,17 +40,18 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
             Long delayBetweenAutoAdvancesInMilliseconds,
             RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn,
-            boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible) {
+            boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible,
+            SecurityChildSettingsContext context) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow, delayBetweenAutoAdvancesInMilliseconds,
                 showAddedScores, showCompetitorShortNameColumn,
-                showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible);
+                showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible, context);
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
     }
 
-    public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
-        super(false);
+    public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow, SecurityChildSettingsContext context) {
+        super(false, context);
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
 
@@ -88,8 +89,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      * instance except the defaults for namesOfRaceColumnsToShow which are set to the given values.
      */
     public MultiRaceLeaderboardSettings withNamesOfRaceColumnsToShowDefaults(
-            final Iterable<String> namesOfRaceColumnsToShow) {
-        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+            final Iterable<String> namesOfRaceColumnsToShow, SecurityChildSettingsContext context) {
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(context);
         SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumnsToShow);
         return newSettings;
@@ -101,8 +102,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      * set to the given values.
      */
     public MultiRaceLeaderboardSettings withNamesOfRaceColumnsToShowDefaultsAndValues(
-            final Iterable<String> namesOfRaceColumnsToShow) {
-        final MultiRaceLeaderboardSettings newSettings = withNamesOfRaceColumnsToShowDefaults(namesOfRaceColumnsToShow);
+            final Iterable<String> namesOfRaceColumnsToShow, SecurityChildSettingsContext context) {
+        final MultiRaceLeaderboardSettings newSettings = withNamesOfRaceColumnsToShowDefaults(namesOfRaceColumnsToShow, context);
         newSettings.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         return newSettings;
     }
@@ -114,7 +115,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      */
     public MultiRaceLeaderboardSettings withRaceColumnSelectionValuesFrom(
             MultiRaceLeaderboardSettings settingsWithRaceColumnSelection) {
-        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+        // take over context from origin settings, because they are valid also for new settings
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(settingsWithRaceColumnSelection.getContext());
         SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
         newSettings.activeRaceColumnSelectionStrategy
                 .setValue(settingsWithRaceColumnSelection.getActiveRaceColumnSelectionStrategy());
@@ -129,8 +131,8 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
      * numberOfLastRacesToShow.
      */
     public static MultiRaceLeaderboardSettings createDefaultSettingsWithLastNRaceColumnSelection(
-            int numberOfLastRacesToShow) {
-        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+            int numberOfLastRacesToShow, SecurityChildSettingsContext context) {
+        final MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings(context);
         newSettings.namesOfRaceColumnsToShow.setValues(null);
         newSettings.activeRaceColumnSelectionStrategy.setValue(RaceColumnSelectionStrategies.LAST_N);
         newSettings.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);

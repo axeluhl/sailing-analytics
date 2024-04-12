@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.Hel
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettingsWithContext;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.DoubleSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
@@ -25,7 +25,7 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.settings.SecuredBooleanSetting;
 
-public class RaceMapSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class RaceMapSettings extends AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> {
 
     private static final long serialVersionUID = 6283369783437892096L;
     

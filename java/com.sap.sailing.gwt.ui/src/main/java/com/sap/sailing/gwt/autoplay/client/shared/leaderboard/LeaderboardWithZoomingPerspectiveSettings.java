@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.DoubleSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * Represents the parameters for configuring a standalone leaderboard with a header view
@@ -11,7 +10,7 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
  * @author Frank
  *
  */
-public class LeaderboardWithZoomingPerspectiveSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class LeaderboardWithZoomingPerspectiveSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 69425582611507634L;
     
@@ -22,13 +21,13 @@ public class LeaderboardWithZoomingPerspectiveSettings extends AbstractGenericSe
     public final static String PARAM_LEADEROARD_ZOOM_FACTOR = "leaderboardZoomFactor";
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         leaderboardAutoZoom = new BooleanSetting("leaderboardAutoZoom", this, true);
         leaderboardZoomFactor = new DoubleSetting("leaderboardZoomFactor", this, 1.0);
     }
 
     public LeaderboardWithZoomingPerspectiveSettings() {
-        super(null);
+        super();
     }
 
     public LeaderboardWithZoomingPerspectiveSettings(boolean leaderboardAutoZoom, Double leaderboardZoomFactor) {

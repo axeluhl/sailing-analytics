@@ -27,6 +27,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class PreLiveRaceLeaderboardWithImagePresenterImpl
         extends AutoPlayPresenterConfigured<AbstractPreRaceLeaderboardWithImagePlace>
@@ -95,13 +97,16 @@ public class PreLiveRaceLeaderboardWithImagePresenterImpl
         view.nextRace(getSlideCtx().getPreLiveRace());
 
         RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
-
+        // TODO bug5774 Set securedDto correctly
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(null, 
+                new PaywallResolverImpl(getClientFactory().getUserService(), 
+                        getClientFactory().getSubscriptionServiceFactory()));
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
                 /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
-                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ false);
+                /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ false, context);
 
         GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);

@@ -27,6 +27,8 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
     private static final Logger logger = Logger.getLogger(IdleSixtyInchLeaderboardNode.class.getName());
@@ -53,13 +55,15 @@ public class IdleSixtyInchLeaderboardNode extends FiresPlaceNode {
 
         List<DetailType> raceDetails = new ArrayList<>();
         // raceDetails.add(DetailType.RACE_RANK);
+        // TODO bug5774 Init secured DTO correctly
         final MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, raceDetails, overallDetails,
                 /* namesOfRaceColumnsToShow */ null, /* numberOfLastRacesToShow */5,
                 /* delayBetweenAutoAdvancesInMilliseconds */ null, RaceColumnSelectionStrategies.LAST_N,
                 /* showAddedScores */ true, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* showCompetitorBoatInfoColumn */ false,
-                /* isCompetitorNationalityColumnVisible */ true);
+                /* isCompetitorNationalityColumnVisible */ true,
+                new SecurityChildSettingsContext(null, new PaywallResolverImpl(cf.getUserService(), cf.getSubscriptionServiceFactory())));
 
         timer = new Timer(
                 // perform the first request as "live" but don't by default auto-play

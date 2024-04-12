@@ -68,21 +68,18 @@ import com.sap.sse.common.settings.value.Value;
  * based on the child {@link Setting}s which should be sufficient for most cases.
  *
  */
-public abstract class AbstractGenericSerializableSettings<T> extends AbstractSetting implements GenericSerializableSettings {
+public abstract class AbstractGenericSerializableSettings extends AbstractSetting implements GenericSerializableSettings {
     private static final long serialVersionUID = -415371632804540785L;
-    private SettingsValue value;
-    private transient Map<String, Setting> childSettings;
-    
-    public interface ChildSettingContext {
-        
-    }
+    protected SettingsValue value;
+    protected transient Map<String, Setting> childSettings;
 
     /**
      * Default constructor for direct instantiation of root settings objects.
      */
-    public AbstractGenericSerializableSettings(T context) {
+    public AbstractGenericSerializableSettings() {
+        super();
         value = new SettingsValue();
-        addChildSettingsInternal(context);
+        addChildSettingsInternal();
     }
 
     /**
@@ -91,14 +88,14 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
      * @param name the name of the child setting
      * @param settings the parent settings to attach this settings object to
      */
-    public AbstractGenericSerializableSettings(String name, AbstractGenericSerializableSettings<T> settings, T context) {
+    public AbstractGenericSerializableSettings(String name, AbstractGenericSerializableSettings settings) {
         super(name, settings);
         value = (SettingsValue) settings.getValue(name);
         if (value == null) {
             value = new SettingsValue();
             settings.setValue(name, value);
         }
-        addChildSettingsInternal(context);
+        addChildSettingsInternal();
     }
     
     /**
@@ -112,7 +109,7 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
                 if (childSetting instanceof AbstractGenericSerializableSettings) {
                     Value childValue = value.getValue(entry.getKey());
                     if (childValue != null) {
-                        ((AbstractGenericSerializableSettings<?>) childSetting).adoptValue((SettingsValue) childValue);
+                        ((AbstractGenericSerializableSettings) childSetting).adoptValue((SettingsValue) childValue);
                     }
                 }
                 if (childSetting instanceof SettingsList<?>) {
@@ -129,10 +126,10 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
         return value;
     }
     
-    protected final void addChildSettingsInternal(T context) {
+    protected final void addChildSettingsInternal() {
         if (childSettings == null) {
             childSettings = new HashMap<>();
-            addChildSettings(context);
+            addChildSettings();
         }
     }
     
@@ -143,7 +140,7 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
      * TODO make abstract when all Settings are ported to the new system
      * 
      */
-    protected abstract void addChildSettings(T context);
+    protected abstract void addChildSettings();
 
     public Value getValue(String settingName) {
         return value.getValue(settingName);
@@ -190,9 +187,9 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
     }
     
     @GwtIncompatible
-    private void readObject(ObjectInputStream ois, T context) throws ClassNotFoundException, IOException {
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        addChildSettingsInternal(context);
+        addChildSettingsInternal();
     }
     
     @GwtIncompatible
@@ -230,7 +227,7 @@ public abstract class AbstractGenericSerializableSettings<T> extends AbstractSet
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AbstractGenericSerializableSettings<?> other = (AbstractGenericSerializableSettings<?>) obj;
+        AbstractGenericSerializableSettings other = (AbstractGenericSerializableSettings) obj;
         if (childSettings == null) {
             if (other.childSettings != null)
                 return false;

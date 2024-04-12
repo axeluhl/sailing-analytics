@@ -118,6 +118,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
 
     @Override
     public Boolean getValue() {
+        // TODO bug5774 Default value???
         return hasPermission() && checkBox.getValue();
     }
 

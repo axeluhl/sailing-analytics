@@ -5,9 +5,8 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class SpectatorSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class SpectatorSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = -883043012807297001L;
     
@@ -18,7 +17,7 @@ public class SpectatorSettings extends AbstractGenericSerializableSettings<Secur
     private transient BooleanSetting embedded;
     
     public SpectatorSettings() {
-        super(null);
+        super();
     }
     
     public SpectatorSettings(boolean showRaceDetails) {
@@ -27,7 +26,7 @@ public class SpectatorSettings extends AbstractGenericSerializableSettings<Secur
     }
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         viewMode = new StringSetting("viewMode", this);
         canReplayDuringLiveRaces = new BooleanSetting(RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, this, false);
         showMapControls = new BooleanSetting(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, this, true);

@@ -11,8 +11,8 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
 
     private BooleanSetting showRaceRankColumn;
     
-    public SingleRaceLeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
-        super(showCompetitorBoatInfoColumnDefault);
+    public SingleRaceLeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault, SecurityChildSettingsContext context) {
+        super(showCompetitorBoatInfoColumnDefault, context);
     }
 
     public SingleRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
@@ -20,10 +20,10 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
             Collection<DetailType> overallDetailsToShow, Long delayBetweenAutoAdvancesInMilliseconds,
             boolean showAddedScores, boolean showCompetitorShortNameColumn, boolean showCompetitorFullNameColumn,
             boolean showCompetitorBoatInfoColumn, boolean isCompetitorNationalityColumnVisible,
-            boolean showRaceRankColumn) {
+            boolean showRaceRankColumn, SecurityChildSettingsContext context) {
         super(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, overallDetailsToShow,
                 delayBetweenAutoAdvancesInMilliseconds, showAddedScores, showCompetitorShortNameColumn,
-                showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible);
+                showCompetitorFullNameColumn, showCompetitorBoatInfoColumn, isCompetitorNationalityColumnVisible, context);
         this.showRaceRankColumn.setValue(showRaceRankColumn);
     }
     
@@ -42,8 +42,8 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
      * raceDetailsToShow which are set to the given values.
      */
     public static SingleRaceLeaderboardSettings createDefaultSettingsWithRaceDetailValues(
-            final Iterable<DetailType> raceDetailsToShow) {
-        final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(false);
+            final Iterable<DetailType> raceDetailsToShow, SecurityChildSettingsContext context) {
+        final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(false, context);
         newSettings.raceDetailsToShow.setValues(raceDetailsToShow);
         return newSettings;
     }

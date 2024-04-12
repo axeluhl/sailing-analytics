@@ -7,7 +7,7 @@ import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
 /** Preference object which contains a stored data mining query with a name and a unique id. */
-public class StoredDataMiningQueryPreference extends AbstractGenericSerializableSettings<Object> {
+public class StoredDataMiningQueryPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -7100595551754668437L;
 
     private transient StringSetting name;
@@ -15,7 +15,7 @@ public class StoredDataMiningQueryPreference extends AbstractGenericSerializable
     private transient StringSetting serializedQuery;
 
     public StoredDataMiningQueryPreference() {
-        super(null);
+        super();
     }
 
     public StoredDataMiningQueryPreference(String name, UUID uuid, String serializedQuery) {
@@ -26,7 +26,7 @@ public class StoredDataMiningQueryPreference extends AbstractGenericSerializable
     }
 
     @Override
-    protected void addChildSettings(Object context) {
+    protected void addChildSettings() {
         name = new StringSetting("name", this);
         id = new UUIDSetting("id", this);
         serializedQuery = new StringSetting("serializedQuery", this);

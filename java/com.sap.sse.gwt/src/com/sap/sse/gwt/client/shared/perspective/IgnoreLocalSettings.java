@@ -4,13 +4,13 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
-public class IgnoreLocalSettings extends AbstractGenericSerializableSettings<Object> {
+public class IgnoreLocalSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -282780795782313106L;
     
     private transient BooleanSetting ignoreLocalSettings;
     
     public IgnoreLocalSettings() {
-        super(null);
+        super();
     }
     
     public IgnoreLocalSettings(boolean ignoreLocalSettings) {
@@ -19,7 +19,7 @@ public class IgnoreLocalSettings extends AbstractGenericSerializableSettings<Obj
     }
     
     @Override
-    protected void addChildSettings(Object context) {
+    protected void addChildSettings() {
         ignoreLocalSettings = new BooleanSetting("ignoreLocalSettings", this, false);
     }
     

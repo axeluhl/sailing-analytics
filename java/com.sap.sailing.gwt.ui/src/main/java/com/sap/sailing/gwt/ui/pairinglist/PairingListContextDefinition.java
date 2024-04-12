@@ -2,16 +2,15 @@ package com.sap.sailing.gwt.ui.pairinglist;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class PairingListContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class PairingListContextDefinition extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 6206953942932913058L;
     
     private transient StringSetting leaderboardName;
 
     public PairingListContextDefinition() {
-        super(null);
+        super();
     }
     
     public PairingListContextDefinition(String leaderboardName) {
@@ -20,7 +19,7 @@ public class PairingListContextDefinition extends AbstractGenericSerializableSet
     }
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         this.leaderboardName = new StringSetting("leaderboardName", this);
     }
     

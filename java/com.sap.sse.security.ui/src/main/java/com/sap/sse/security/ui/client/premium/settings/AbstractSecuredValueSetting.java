@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.client.premium.settings;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettingsWithContext;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.base.AbstractValueSetting;
 import com.sap.sse.security.shared.HasPermissions.Action;
@@ -15,7 +15,7 @@ public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSettin
     private final Action action;
     private final SecuredDTO securedDTO;
 
-    protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettings<SecurityChildSettingsContext> settings, T defaultValue,
+    protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, T defaultValue,
             ValueConverter<T> valueConverter, PaywallResolver paywallResolver, Action action, SecuredDTO securedDTO) {
         super(name, settings, defaultValue, valueConverter);
         this.paywallResolver = paywallResolver;

@@ -9,9 +9,8 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumLinkedHashSetSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class WindChartSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class WindChartSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -3250243915670349222L;
 
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
@@ -25,7 +24,7 @@ public class WindChartSettings extends AbstractGenericSerializableSettings<Secur
     private BooleanSetting showWindDirectionsSeries;
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         Set<WindSourceType> defaultWindDirectionSourcesToDisplay = new LinkedHashSet<WindSourceType>();
         defaultWindDirectionSourcesToDisplay.add(WindSourceType.COMBINED);
         windDirectionSourcesToDisplay = new EnumLinkedHashSetSetting<>("windDirectionSourcesToDisplay", this, defaultWindDirectionSourcesToDisplay, WindSourceType::valueOf);
@@ -43,7 +42,7 @@ public class WindChartSettings extends AbstractGenericSerializableSettings<Secur
      *  The default settings
      */
     public WindChartSettings() {
-        super(null);
+        super();
     }
     
     public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay, 

@@ -7,12 +7,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * @author Lennart Hensler (D054527)
  */
-public class RaceMapZoomSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 7283052942434130497L;
 
@@ -39,7 +38,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings<Sec
     private BooleanSetting zoomToSelectedCompetitors;
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         typesToConsiderOnZoom = new EnumSetSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), ZoomTypes::valueOf);
         zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
     }
@@ -49,15 +48,15 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings<Sec
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
     public RaceMapZoomSettings() {
-        super(null);
+        super();
     }
 
     /**
      * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
-    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings<SecurityChildSettingsContext> parentSettings) {
-        super(propertyName, parentSettings, null);
+    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
+        super(propertyName, parentSettings);
     }
     
     public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {

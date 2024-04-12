@@ -11,9 +11,8 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.StringSetSetting;
 import com.sap.sse.common.settings.generic.UUIDSetSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public final class RegattaRaceStatesSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public final class RegattaRaceStatesSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 7059340304556830062L;
     private transient UUIDSetSetting visibleCourseAreas;
     private transient StringSetSetting visibleRegattas;
@@ -21,7 +20,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
     private transient BooleanSetting showOnlyCurrentlyRunningRaces;
 
     public RegattaRaceStatesSettings() {
-        super(null);
+        super();
     }
     
     public RegattaRaceStatesSettings(Iterable<CourseAreaDTO> defaultCourseAreas, Iterable<RaceGroupDTO> defaultRaceGroups) {
@@ -41,7 +40,7 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
     }
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this, true);
         visibleRegattas = new StringSetSetting("visibleRegattas", this, true);
         showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);

@@ -8,11 +8,12 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettingsWithContext;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
+import com.sap.sse.security.ui.client.premium.settings.SecuredEnumSetSetting;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -22,10 +23,10 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class LeaderboardSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public abstract class LeaderboardSettings extends AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> {
     private static final long serialVersionUID = 2625004077963291333L;
     
-    protected EnumSetSetting<DetailType> maneuverDetailsToShow;
+    protected SecuredEnumSetSetting<DetailType> maneuverDetailsToShow;
     protected EnumSetSetting<DetailType> legDetailsToShow;
     protected EnumSetSetting<DetailType> raceDetailsToShow;
     protected EnumSetSetting<DetailType> overallDetailsToShow;
@@ -48,7 +49,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-        maneuverDetailsToShow = new EnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOfString);
+        maneuverDetailsToShow = new SecuredEnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOfString, 
+                context.getPaywallResolver(), context.getSecuredDTO());
         List<DetailType> legDetails = new ArrayList<>();
         legDetails.add(DetailType.LEG_DISTANCE_TRAVELED);
         legDetails.add(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
@@ -68,8 +70,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         showCompetitorBoatInfoColumn = new BooleanSetting("showCompetitorBoatInfoColumn", this, false);
     }
     
-    public LeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
-        super(null);
+    public LeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault, SecurityChildSettingsContext context) {
+        super(context);
         showCompetitorBoatInfoColumn.setDefaultValue(showCompetitorBoatInfoColumnDefault);
     }
     
@@ -81,8 +83,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
             Long delayBetweenAutoAdvancesInMilliseconds, 
             boolean showAddedScores, boolean showCompetitorShortNameColumn, 
             boolean showCompetitorFullNameColumn, boolean showCompetitorBoatInfoColumn,
-            boolean isCompetitorNationalityColumnVisible) {
-        this(showCompetitorBoatInfoColumn);
+            boolean isCompetitorNationalityColumnVisible, SecurityChildSettingsContext context) {
+        this(showCompetitorBoatInfoColumn, context);
         this.legDetailsToShow.setValues(legDetailsToShow);
         this.raceDetailsToShow.setValues(raceDetailsToShow);
         this.overallDetailsToShow.setValues(overallDetailsToShow);

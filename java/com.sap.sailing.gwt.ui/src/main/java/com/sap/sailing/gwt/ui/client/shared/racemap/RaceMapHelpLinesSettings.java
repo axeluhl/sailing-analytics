@@ -6,9 +6,8 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.EnumSetSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = -3155593082712145485L;
 
@@ -22,7 +21,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
     private EnumSetSetting<HelpLineTypes> visibleHelpLines;
     
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         Set<HelpLineTypes> defaultVisibleHelpLines = new HashSet<HelpLineTypes>();
         defaultVisibleHelpLines.add(HelpLineTypes.STARTLINE);
         defaultVisibleHelpLines.add(HelpLineTypes.FINISHLINE);
@@ -37,15 +36,15 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
     public RaceMapHelpLinesSettings() {
-        super(null);
+        super();
     }
     
     /**
      * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
-    public RaceMapHelpLinesSettings(String propertyName, AbstractGenericSerializableSettings<SecurityChildSettingsContext> parentSettings) {
-        super(propertyName, parentSettings, null);
+    public RaceMapHelpLinesSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
+        super(propertyName, parentSettings);
     }
     
     /**

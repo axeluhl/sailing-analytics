@@ -16,7 +16,7 @@ public class Activator implements BundleActivator {
         final Hashtable<String, String> properties = new Hashtable<>();
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, LandscapeService.USER_PREFERENCE_FOR_SESSION_TOKEN);
         context.registerService(PreferenceConverter.class,
-                new GenericJSONPreferenceConverter<>(() -> new AwsSessionCredentialsFromUserPreference()),
+                new GenericJSONPreferenceConverter<>(() -> new AwsSessionCredentialsFromUserPreference(null)),
                 properties);
     }
 

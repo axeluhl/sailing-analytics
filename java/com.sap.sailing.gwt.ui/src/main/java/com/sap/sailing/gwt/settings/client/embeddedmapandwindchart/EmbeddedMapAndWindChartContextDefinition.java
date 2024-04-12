@@ -2,9 +2,8 @@ package com.sap.sailing.gwt.settings.client.embeddedmapandwindchart;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class EmbeddedMapAndWindChartContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class EmbeddedMapAndWindChartContextDefinition extends AbstractGenericSerializableSettings {
 
     private static final long serialVersionUID = 8018301079159485102L;
 
@@ -13,7 +12,7 @@ public class EmbeddedMapAndWindChartContextDefinition extends AbstractGenericSer
     private transient StringSetting fleetName;
 
     public EmbeddedMapAndWindChartContextDefinition() {
-        super(null);
+        super();
     }
 
     public EmbeddedMapAndWindChartContextDefinition(final String regattaLikeName, final String raceColumnName,
@@ -25,7 +24,7 @@ public class EmbeddedMapAndWindChartContextDefinition extends AbstractGenericSer
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         regattaLikeName = new StringSetting("regattaLikeName", this);
         raceColumnName = new StringSetting("raceColumnName", this);
         fleetName = new StringSetting("fleetName", this);

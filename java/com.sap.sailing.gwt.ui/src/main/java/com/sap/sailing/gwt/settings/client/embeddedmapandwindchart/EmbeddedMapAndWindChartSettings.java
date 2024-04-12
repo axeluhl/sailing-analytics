@@ -3,9 +3,8 @@ package com.sap.sailing.gwt.settings.client.embeddedmapandwindchart;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class EmbeddedMapAndWindChartSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class EmbeddedMapAndWindChartSettings extends AbstractGenericSerializableSettings {
 
     private static final long serialVersionUID = 272440351202821549L;
 
@@ -27,7 +26,7 @@ public class EmbeddedMapAndWindChartSettings extends AbstractGenericSerializable
     private transient BooleanSetting windUp;
 
     public EmbeddedMapAndWindChartSettings() {
-        super(null);
+        super();
     }
 
     public EmbeddedMapAndWindChartSettings(final boolean play) {
@@ -36,7 +35,7 @@ public class EmbeddedMapAndWindChartSettings extends AbstractGenericSerializable
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         play = new BooleanSetting(PARAM_PLAY, this, false);
         showCompetitors = new BooleanSetting(PARAM_SHOW_COMPETITORS, this, false);
         showAllCompetitorsOfEvent = new BooleanSetting(PARAM_SHOW_ALL_COMPETITORS_OF_EVENT, this, false);

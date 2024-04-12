@@ -13,22 +13,22 @@ import com.sap.sse.common.settings.value.ValueListValue;
 public abstract class AbstractValueListSetting<T> extends AbstractValueCollectionSetting<T, List<Value>, List<T>>
         implements ValueListSetting<T> {
 
-    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings<?> settings,
+    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings settings,
             ValueConverter<T> valueConverter) {
         this(name, settings, false, valueConverter);
     }
 
-    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings<?> settings, boolean emptyIsDefault,
+    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings settings, boolean emptyIsDefault,
             ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter, emptyIsDefault);
     }
 
-    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings<?> settings,
+    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings settings,
             Iterable<T> defaultValues, ValueConverter<T> valueConverter) {
         this(name, settings, defaultValues, false, valueConverter);
     }
 
-    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings<?> settings,
+    public AbstractValueListSetting(String name, AbstractGenericSerializableSettings settings,
             Iterable<T> defaultValues, boolean emptyIsDefault, ValueConverter<T> valueConverter) {
         this(name, settings, emptyIsDefault, valueConverter);
         setDefaultValues(defaultValues);

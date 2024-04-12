@@ -5,9 +5,8 @@ import java.util.UUID;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class RaceboardContextDefinition extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class RaceboardContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 2632481216072003426L;
     
     private StringSetting regattaName;
@@ -19,7 +18,7 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
     private StringSetting mode;
 
     public RaceboardContextDefinition() {
-        super(null);
+        super();
     }
 
     /**
@@ -46,7 +45,7 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         regattaName = new StringSetting("regattaName", this);
         raceName = new StringSetting("raceName", this);
         leaderboardName = new StringSetting("leaderboardName", this);

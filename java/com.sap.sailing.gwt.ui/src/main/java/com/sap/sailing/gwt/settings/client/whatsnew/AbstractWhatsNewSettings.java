@@ -2,20 +2,19 @@ package com.sap.sailing.gwt.settings.client.whatsnew;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.LongSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
 /**
  * Abstract setting implementation to store the number of characters in a change log when the last login occurred. This
  * is needed to determine whether to show a 'What's New' dialog to the user after login or not.
  */
-public abstract class AbstractWhatsNewSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public abstract class AbstractWhatsNewSettings extends AbstractGenericSerializableSettings {
 
     private static final long serialVersionUID = -8669347808456747826L;
 
     private transient LongSetting numberOfCharsOnLastLogin;
 
     protected AbstractWhatsNewSettings() {
-        super(null);
+        super();
     }
 
     protected AbstractWhatsNewSettings(final Long numberOfCharsOnLastLogin) {
@@ -24,7 +23,7 @@ public abstract class AbstractWhatsNewSettings extends AbstractGenericSerializab
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         numberOfCharsOnLastLogin = new LongSetting("numberOfCharsOnLastLogin", this, 0l);
     }
 

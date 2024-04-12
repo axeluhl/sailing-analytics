@@ -7,9 +7,8 @@ import com.sap.sse.common.settings.generic.EnumSetting;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.StringToEnumConverter;
 import com.sap.sse.common.settings.generic.UUIDSetting;
-import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> implements AutoPlayContextDefinition {
+public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSettings implements AutoPlayContextDefinition {
     private static final long serialVersionUID = 2880854263616658272L;
 
     private transient EnumSetting<AutoPlayType> type;
@@ -24,11 +23,11 @@ public class AutoPlayContextDefinitionImpl extends AbstractGenericSerializableSe
     }
 
     public AutoPlayContextDefinitionImpl() {
-        super(null);
+        super();
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         type = new EnumSetting<AutoPlayType>("autoplayType", this, AutoPlayType.CLASSIC,
                 new StringToEnumConverter<AutoPlayType>() {
                     @Override

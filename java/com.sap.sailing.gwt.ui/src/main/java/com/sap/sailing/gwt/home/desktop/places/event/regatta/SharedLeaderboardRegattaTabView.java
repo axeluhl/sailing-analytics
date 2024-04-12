@@ -17,6 +17,7 @@ import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMu
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
@@ -72,8 +73,11 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                                 initialLeaderboardSizeCalculated = true;
                                 if (newWidth > 0 && newHeight > 0 && newWidth > 1500) {
                                     final int numberOfLastRacesToShow = (1500 - 600) / 50;
+                                    SecurityChildSettingsContext context = 
+                                            new SecurityChildSettingsContext(leaderboardPanel.getLeaderboard(), 
+                                            leaderboardPanel.getPaywallResolver());
                                     MultiRaceLeaderboardSettings newSettings = MultiRaceLeaderboardSettings
-                                            .createDefaultSettingsWithLastNRaceColumnSelection(numberOfLastRacesToShow);
+                                            .createDefaultSettingsWithLastNRaceColumnSelection(numberOfLastRacesToShow, context);
                                     componentContext.addAdditionalSettingsLayerForComponent(leaderboardPanel,
                                             PipelineLevel.SYSTEM_DEFAULTS, newSettings,
                                             leaderboardPanel::updateSettings);

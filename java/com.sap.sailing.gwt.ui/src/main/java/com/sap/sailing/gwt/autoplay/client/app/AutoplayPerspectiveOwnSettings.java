@@ -5,7 +5,7 @@ import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.IntegerSetting;
 import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 
-public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings<SecurityChildSettingsContext> {
+public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -9013901094746556797L;
 
     private BooleanSetting fullscreen;
@@ -13,13 +13,13 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     private IntegerSetting timeToSwitchBeforeRaceStartInSeconds;
     private IntegerSetting waitTimeAfterRaceEndInSeconds;
 
-    public AutoplayPerspectiveOwnSettings() {
-        super(null);
+    public AutoplayPerspectiveOwnSettings(SecurityChildSettingsContext context) {
+        super();
     }
 
     public AutoplayPerspectiveOwnSettings(boolean fullscreen, boolean switchToLive,
-            int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds) {
-        this();
+            int timeToSwitchBeforeRaceStartInSeconds, int waitTimeAfterRaceEndInSeconds, SecurityChildSettingsContext context) {
+        this(context);
         this.fullscreen.setValue(fullscreen);
         this.switchToLive.setValue(switchToLive);
         this.timeToSwitchBeforeRaceStartInSeconds.setValue(timeToSwitchBeforeRaceStartInSeconds);
@@ -27,7 +27,7 @@ public class AutoplayPerspectiveOwnSettings extends AbstractGenericSerializableS
     }
 
     @Override
-    protected void addChildSettings(SecurityChildSettingsContext context) {
+    protected void addChildSettings() {
         fullscreen = new BooleanSetting("fullscreen", this, true);
         switchToLive = new BooleanSetting("switchToLive", this, true);
         timeToSwitchBeforeRaceStartInSeconds = new IntegerSetting("timeToSwitchBeforeRaceStart", this, 180);

@@ -9,7 +9,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     
     private T defaultValue;
 
-    protected AbstractValueSetting(String name, AbstractGenericSerializableSettings<?> settings, T defaultValue, ValueConverter<T> valueConverter) {
+    protected AbstractValueSetting(String name, AbstractGenericSerializableSettings settings, T defaultValue, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter);
         this.defaultValue = defaultValue;
         if (settings.getValue(settingName) == null) {
