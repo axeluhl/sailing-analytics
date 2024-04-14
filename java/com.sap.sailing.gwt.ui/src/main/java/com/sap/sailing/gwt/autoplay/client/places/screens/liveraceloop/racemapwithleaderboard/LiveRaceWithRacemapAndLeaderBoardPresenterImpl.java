@@ -166,7 +166,7 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             
             @Override
             public void onSuccess(StrippedLeaderboardDTO strippedLeaderboardDto) {
-                // TODO bug5774 Set securedDto correctly
+                // TODO bug5774 Test if this code works
                 GWT.log("++++++ loaded stripped leaderboard DTO successfully +++++");
                 SecurityChildSettingsContext context = new SecurityChildSettingsContext(strippedLeaderboardDto, 
                         new PaywallResolverImpl(getClientFactory().getUserService(), 

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.autoplay.client.places.screens.preliveraceloop.leade
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Timer;
@@ -95,11 +94,9 @@ public class PreLiveRaceLeaderboardWithImagePresenterImpl
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
         view.nextRace(getSlideCtx().getPreLiveRace());
-
         RegattaAndRaceIdentifier liveRace = getSlideCtx().getPreLiveRace();
-        // TODO bug5774 Set securedDto correctly
-        SecurityChildSettingsContext context = new SecurityChildSettingsContext(null, 
-                new PaywallResolverImpl(getClientFactory().getUserService(), 
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(leaderboardPanel.getLeaderboard(),
+                new PaywallResolverImpl(getClientFactory().getUserService(),
                         getClientFactory().getSubscriptionServiceFactory()));
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
@@ -107,23 +104,18 @@ public class PreLiveRaceLeaderboardWithImagePresenterImpl
                 /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
                 /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ false, context);
-
-        GWT.log("event " + getSlideCtx().getEvent());
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
-
         timer = new com.sap.sse.gwt.client.player.Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Playing,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardPanel = new SingleRaceLeaderboardPanel(null,null,sailingService, new AsyncActionsExecutor(),
+        leaderboardPanel = new SingleRaceLeaderboardPanel(null, null, sailingService, new AsyncActionsExecutor(),
                 leaderboardSettings, false, liveRace, competitorSelectionProvider, timer, null,
-                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
+                getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(false),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
-
         view.setLeaderBoard(leaderboardPanel);
         selectionTimer.schedule(AnimationPanel.DELAY + AnimationPanel.ANIMATION_DURATION);
-
     }
 
     @Override

@@ -49,11 +49,9 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
 
     @Override
     public void startConfigured(AcceptsOneWidget panel) {
-
         SailingServiceAsync sailingService = getClientFactory().getSailingService();
         ErrorReporter errorReporter = getClientFactory().getErrorReporter();
         view.startingWith(this, panel);
-
         RegattaAndRaceIdentifier liveRace = getPlace().getLastRace();
         if (liveRace == null) {
             panel.setWidget(new Label("No raceIdentifier specified"));
@@ -61,21 +59,16 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
         }
         getEventBus().fireEvent(new AutoPlayHeaderEvent(getSlideCtx().getContextDefinition().getLeaderboardName(),
                 getPlace().getLastRace().getRaceName()));
-
-        // TODO bug5774 Set securedDto correctly
-        SecurityChildSettingsContext context = new SecurityChildSettingsContext(null, 
+        SecurityChildSettingsContext context = new SecurityChildSettingsContext(leaderboardPanel.getLeaderboard(), 
                 new PaywallResolverImpl(getClientFactory().getUserService(), 
                         getClientFactory().getSubscriptionServiceFactory()));
-        
         final SingleRaceLeaderboardSettings leaderboardSettings = new SingleRaceLeaderboardSettings(
                 /* maneuverDetailsToShow */ null, /* legDetailsToShow */ null, /* raceDetailsToShow */ null,
                 /* overallDetailsToShow */ null, /* delayBetweenAutoAdvancesInMilliseconds */ null,
                 /* showAddedScores */ false, /* showCompetitorShortNameColumn */ true,
                 /* showCompetitorFullNameColumn */ false, /* isCompetitorNationalityColumnVisible */ false,
                 /* showCompetitorBoatInfoColumn */ false, /* showRaceRankColumn */ true, context);
-
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ false);
-
         timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live,
                 PlayStates.Paused,
                 /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
@@ -84,7 +77,6 @@ public class RaceEndWithBoatsPresenterImpl extends AutoPlayPresenterConfigured<A
                 getSlideCtx().getContextDefinition().getLeaderboardName(), errorReporter, StringMessages.INSTANCE, 
                 false, null, false, null, false, true, false, false, false, new SixtyInchLeaderboardStyle(true),
                 FlagImageResolverImpl.get(), Arrays.asList(DetailType.values()), getClientFactory());
-
         int competitorCount = getPlace().getStatistic().getCompetitors();
         Distance distance  = getPlace().getStatistic().getDistance();
         Duration duration = getPlace().getStatistic().getDuration();
