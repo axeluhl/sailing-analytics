@@ -25,7 +25,7 @@ gem update --system 3.5.7
 # setup cloud_cfg and keys
 cd /home
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
-setup_keys "${IMAGE_TYPE}"
+. imageupgrade_functions.sh
 setup_cloud_cfg_and_root_login
 # setup files
 build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
@@ -37,12 +37,11 @@ setup_sshd_resilience
 setup_apachetop
 setup_goaccess
 # copy bugzilla
-scp root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
+scp -o StrictHostKeyChecking=no  root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /root
 tar -xzvf bugzilla-5.0.4.tar.gz
 mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
-# missing perl modules
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
@@ -75,11 +74,7 @@ scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
 /usr/bin/perl install-module.pl File::Copy::Recursive
 # use the localconfig file to setup the bugzilla
 ./checksetup.pl
-# append hostname to sysconfig
-echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
-sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
-hostname sapsailing.com
-hostnamectl set-hostname sapsailing.com
+
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
 wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
@@ -89,10 +84,9 @@ mkdir /var/lib/awstats
 scp -r root@sapsailing.com:/etc/awstats /etc/awstats
 scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 chmod 755 /root
-# cp awstats crons as well as all other weekly, daily cronjobs.
+# copy awstats crons as well as all other weekly, daily cronjobs.
 rsync -a --exclude perl5 root@sapsailing.com:/root /
 scp -r root@sapsailing.com:/etc/letsencrypt /etc
-scp -r root@sapsailing.com:/etc/ssh /etc
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
@@ -116,15 +110,11 @@ chown root:root /etc/httpd/conf/pass*
 # enable units which build-crontab doesn't 
 systemctl enable httpd
 systemctl start httpd
-sudo systemctl start crond.service
 sudo systemctl enable crond.service
-chkconfig sendmail off
 sudo systemctl enable postfix
 sudo systemctl restart postfix
 
-# tmux setup?
 # mongo
-# git passwds?
 # anything in etc
 SECONDEOF
 
