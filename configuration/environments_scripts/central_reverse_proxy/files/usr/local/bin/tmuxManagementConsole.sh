@@ -14,7 +14,7 @@ else
 	cd /home/trac/git
 	tmux new-session -s "$sn" -n "BUILD" -d
 
-	counter=1
+	counter=0
 
 	tmux new-window -t "$sn:$[counter+1]" -n "GOAccess" "bash -c 'goaccess -f /var/log/httpd/access_log'; bash"
 
