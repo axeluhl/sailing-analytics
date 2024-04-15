@@ -253,14 +253,26 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
 
     private CheckBox createAndRegisterCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
-        CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
-                DetailTypeFormatter.getTooltip(detailType));
+        CheckBox checkbox = createCheckbox(dialog, detailType, selected);
         registry.put(detailType, checkbox);
         return checkbox;
     }
 
     private PremiumCheckBox createAndRegisterPremiumCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected,
             Map<DetailType, CheckBox> registry) {
+        PremiumCheckBox premiumCheckbox = createPremiumCheckbox(dialog, detailType, selected);
+        registry.put(detailType, premiumCheckbox.getCheckBox());
+        return premiumCheckbox;
+    }
+
+    private CheckBox createCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
+        CheckBox checkbox = createCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
+                DetailTypeFormatter.getTooltip(detailType));
+        checkbox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
+        return checkbox;
+    }
+
+    private PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, DetailType detailType, boolean selected) {
         String tooltip = DetailTypeFormatter.getTooltip(detailType);
         String premiumTooltip = stringMessages.premiumFeature();
         if (tooltip != null && !tooltip.isEmpty()) {
@@ -268,7 +280,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         } 
         PremiumCheckBox premiumCheckBox = createPremiumCheckbox(dialog, DetailTypeFormatter.format(detailType), selected,
                 premiumTooltip , detailType.getPremiumAction());
-        registry.put(detailType, premiumCheckBox.getCheckBox());
+        premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(detailType) + CHECK_BOX_DEBUGID_CONSTANT);
         return premiumCheckBox;
     }
     
