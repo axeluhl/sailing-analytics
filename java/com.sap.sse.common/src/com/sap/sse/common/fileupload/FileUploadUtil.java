@@ -1,7 +1,5 @@
 package com.sap.sse.common.fileupload;
 
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.sap.sse.common.Base64Utils;
 
 public class FileUploadUtil {
