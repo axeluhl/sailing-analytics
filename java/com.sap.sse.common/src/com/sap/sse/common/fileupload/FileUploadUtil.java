@@ -1,9 +1,14 @@
-package com.sap.sse.gwt.client.fileupload;
+package com.sap.sse.common.fileupload;
 
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
+import com.sap.sse.common.Base64Utils;
 
 public class FileUploadUtil {
+    private final static String EMBEDDING_TAG = "div";
+    private final static String PAYLOAD_ATTRIBUTE_NAME = "jsonPayloadAsBase64";
+    private final static String JSON_IN_HTML_EMBEDDING_TEMPLATE = "<body><"+EMBEDDING_TAG+" "+PAYLOAD_ATTRIBUTE_NAME+"=\"%s\"></"+EMBEDDING_TAG+"></body>";
+    
     /**
      * For file uploads through {@link FormPanel} elements, if the response is a JSON message (content type
      * {@code application/json}) then the way the {@link FormPanel} intercepts this response (namely through
@@ -17,8 +22,12 @@ public class FileUploadUtil {
      * browsers---especially on mobile devices---to do ugly things to the content returned, such as replacing digit
      * sequences by a corresponding {@code <a>} element that allows the user to dial that number with the phone app...
      */
-    public static String getApplicationJsonContent(SubmitCompleteEvent submitResultWithApplicationJsonContent) {
-        final String strippedResult = submitResultWithApplicationJsonContent.getResults().replaceFirst("<pre[^>]*>(.*)</pre>.*$", "$1");
-        return strippedResult;
+    public static String getApplicationJsonContentFromHtml(final String resultHtml) {
+        final String base64EncodedJsonPayload = resultHtml.replaceFirst("^.*<"+EMBEDDING_TAG+"  *"+PAYLOAD_ATTRIBUTE_NAME+"=\"([^\"]*)></"+EMBEDDING_TAG+">.*$", "$1");
+        return new String(Base64Utils.fromBase64(base64EncodedJsonPayload));
+    }
+    
+    public static String getHtmlWithEmbeddedJsonContent(final String json) {
+        return String.format(JSON_IN_HTML_EMBEDDING_TEMPLATE, Base64Utils.toBase64(json.getBytes()));
     }
 }

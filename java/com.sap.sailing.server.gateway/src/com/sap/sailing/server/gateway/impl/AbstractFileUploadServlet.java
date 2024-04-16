@@ -56,7 +56,7 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
             // Conversely, trying to use text/html as content encoding leads some browsers---especially on mobile devices---
             // to do ugly things to the content returned, such as replacing digit sequences by a corresponding <a> element
             // that allows the user to dial that number with the phone app...
-            setJsonResponseHeader(resp);
+            setJsonEncodedInHtmlResponseHeader(resp);
             process(items, req, resp);
         } catch (FileUploadException e) {
             throw new IOException("Could not parse request");
