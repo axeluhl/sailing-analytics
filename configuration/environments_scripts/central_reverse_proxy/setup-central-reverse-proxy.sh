@@ -15,8 +15,8 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ icu libicu-devel docker mariadb105-server
-yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu docker mariadb105-server
+yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD gcc-c++
 # ruby and gollum for wiki
 yum group install -y "Development Tools"
 yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
@@ -73,10 +73,13 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
 # use the localconfig file to setup the bugzilla
-./checksetup.pl
-
+# ./checksetup.pl
+SECONDEOF
+ssh -A "root@${IP}" "cpan install Geo::IP"
+ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
+scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
@@ -115,7 +118,7 @@ sudo systemctl restart postfix
 
 # mongo
 # anything in etc
-SECONDEOF
+THIRDEOF
 
 
 
