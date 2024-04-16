@@ -42,7 +42,7 @@ cd /usr/local/src
 tar -xzvf bugzilla-5.0.4.tar.gz
 mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
-scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
+scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localconfig .
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
@@ -60,7 +60,6 @@ scp root@sapsailing.com:/usr/share/bugzilla/localconfig .
 /usr/bin/perl install-module.pl Date::Parse
 /usr/bin/perl install-module.pl Email::Send
 /usr/bin/perl install-module.pl DBI
-/usr/bin/perl install-module.pl Geo::IP::PurePerl
 /usr/bin/perl install-module.pl IO::Socket::SSL
 /usr/bin/perl install-module.pl Chart::Lines
 /usr/bin/perl install-module.pl Template::Plugin::GD::Image
@@ -82,12 +81,11 @@ wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
-scp -r root@sapsailing.com:/etc/awstats /etc/awstats
-scp -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
+scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/etc/awstats /etc/awstats
 chmod 755 /root
 # copy awstats crons as well as all other weekly, daily cronjobs.
 rsync -a --exclude perl5 root@sapsailing.com:/root /
-scp -r root@sapsailing.com:/etc/letsencrypt /etc
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
@@ -106,7 +104,7 @@ sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logr
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup httpd git
 setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy"
-scp -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
 chown root:root /etc/httpd/conf/pass*
 # enable units which build-crontab doesn't 
 systemctl enable httpd
