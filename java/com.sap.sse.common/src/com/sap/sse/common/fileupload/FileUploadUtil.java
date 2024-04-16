@@ -7,7 +7,6 @@ import com.sap.sse.common.Base64Utils;
 public class FileUploadUtil {
     private final static String EMBEDDING_TAG = "div";
     private final static String PAYLOAD_ATTRIBUTE_NAME = "jsonPayloadAsBase64";
-    private final static String JSON_IN_HTML_EMBEDDING_TEMPLATE = "<body><"+EMBEDDING_TAG+" "+PAYLOAD_ATTRIBUTE_NAME+"=\"%s\"></"+EMBEDDING_TAG+"></body>";
     
     /**
      * For file uploads through {@link FormPanel} elements, if the response is a JSON message (content type
@@ -28,6 +27,6 @@ public class FileUploadUtil {
     }
     
     public static String getHtmlWithEmbeddedJsonContent(final String json) {
-        return String.format(JSON_IN_HTML_EMBEDDING_TEMPLATE, Base64Utils.toBase64(json.getBytes()));
+        return "<body><"+EMBEDDING_TAG+" "+PAYLOAD_ATTRIBUTE_NAME+"=\""+Base64Utils.toBase64(json.getBytes())+"\"></"+EMBEDDING_TAG+"></body>";
     }
 }
