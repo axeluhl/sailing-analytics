@@ -1,6 +1,7 @@
 #!/bin/bash
 
-#PART 2
+# PART 2
+# Assumes already tagged.
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
@@ -19,4 +20,17 @@ hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 setup_keys "${IMAGE_TYPE}"
 scp -r root@sapsailing.com:/etc/ssh /etc
+# setup nfs
+systemctl enable nfs-server
+echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
+/home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
+systemctl start nfs
+internal_ip=\$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
+cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
+cd /root && sed -i "s/SMTP_INTERNAL_IP/\$internal_ip/" batch.json
+# aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch.json
+cd /root && ./add-to-necessary-target-groups.sh
+cd /root && ./remount-nfs-shares.sh
+# the setting of an elastic ip will terminate the connection
+cd /root && ./set-elastic-ip.sh
 EOF
