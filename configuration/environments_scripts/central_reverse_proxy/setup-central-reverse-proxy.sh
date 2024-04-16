@@ -15,7 +15,7 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ geoip-devel icu libicu-devel docker mariadb-server 
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap gcc-c++ icu libicu-devel docker mariadb105-server
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD
 # ruby and gollum for wiki
 yum group install -y "Development Tools"
@@ -38,6 +38,7 @@ setup_apachetop
 setup_goaccess
 # copy bugzilla
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /usr/local/src
+cd /usr/local/src
 tar -xzvf bugzilla-5.0.4.tar.gz
 mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
