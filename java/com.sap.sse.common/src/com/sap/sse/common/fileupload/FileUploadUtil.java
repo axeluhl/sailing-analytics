@@ -6,7 +6,9 @@ import com.sap.sse.common.Base64Utils;
 
 public class FileUploadUtil {
     private final static String EMBEDDING_TAG = "div";
-    private final static String PAYLOAD_ATTRIBUTE_NAME = "jsonPayloadAsBase64";
+    
+    // use an all lower-case attribute name because along the channel, HMTL content may be normalized
+    private final static String PAYLOAD_ATTRIBUTE_NAME = "jsonpayloadasbase64";
     
     /**
      * For file uploads through {@link FormPanel} elements, if the response is a JSON message (content type
@@ -22,7 +24,7 @@ public class FileUploadUtil {
      * sequences by a corresponding {@code <a>} element that allows the user to dial that number with the phone app...
      */
     public static String getApplicationJsonContentFromHtml(final String resultHtml) {
-        final String base64EncodedJsonPayload = resultHtml.replaceFirst("^.*<"+EMBEDDING_TAG+"  *"+PAYLOAD_ATTRIBUTE_NAME+"=\"([^\"]*)></"+EMBEDDING_TAG+">.*$", "$1");
+        final String base64EncodedJsonPayload = resultHtml.replaceFirst("^.*<"+EMBEDDING_TAG+"  *"+PAYLOAD_ATTRIBUTE_NAME+"=\"([^\"]*)\"></"+EMBEDDING_TAG+">.*$", "$1");
         return new String(Base64Utils.fromBase64(base64EncodedJsonPayload));
     }
     
