@@ -243,7 +243,7 @@ identify_suitable_partition_for_ephemeral_volume() {
 setup_goaccess() {
     # Compatible with Amazon Linux 2023
     pushd .
-    cd ~
+    cd /usr/local/src
     wget https://tar.goaccess.io/goaccess-1.9.1.tar.gz
     tar -xzvf goaccess-1.9.1.tar.gz
     cd goaccess-1.9.1/
@@ -262,7 +262,7 @@ setup_apachetop() {
     pushd .
     yum install -y gcc-c++
     yum install -y ncurses-devel readline-devel
-    cd ~
+    cd /usr/local/src
     wget https://github.com/tessus/apachetop/releases/download/0.23.2/apachetop-0.23.2.tar.gz
     tar -xvzf apachetop-0.23.2.tar.gz
     cd apachetop-0.23.2
