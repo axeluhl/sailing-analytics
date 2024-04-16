@@ -23,6 +23,20 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">April 2024</h2>
+          <ul class="bulletList">
+            <li>The TracTrac connector now pools and re-uses event subscriber threads for live connections
+                for the same event with equal stored and live URIs. This helps reduce the number of threads
+                running in the system and is "friendlier" on the TracTrac infrastructure regarding the
+                number of concurrent connections the system needs to manage.</li>
+            <li>During live TracTrac connections, mark positions are now filtered by the race's course area if
+                both, mark and race, specify one. This way, redundant and excessive mark fixes can be avoided,
+                don't consume extra memory and don't waste replication bandwidth. See also
+                <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5919">bug 5919</a>.</li>
+            <li>Fixed file upload for Chrome browsers after Chrome made an incompatible change, appending
+                a combination of <tt>&lt;div&gt;</tt> tags after the already <tt>&lt;pre&gt;</tt>-enclosed
+                form submission completion payload.</li>
+          </ul>
           <h2 class="articleSubheadline">March 2024</h2>
           <ul class="bulletList">
             <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>
