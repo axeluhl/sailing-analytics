@@ -119,7 +119,11 @@ sudo systemctl restart postfix
 # mongo
 # anything in etc
 THIRDEOF
-
-
+echo "Your turn! The instance is prepared, hopefully you have given it the correct tags already as they are needed for part 2"
+echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
+echo "And then unmount the volumes and remount them on the new instance."
+echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
+echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
+read -n 1  -p "Press a key to continue" key_pressed
 
 #not available: perl-HTML-Template  /usr/bin/perl install-module.pl GD
