@@ -12,6 +12,7 @@ ssh -A "root@${IP}" "bash -s" << EOF
 
 . imageupgrade_functions.sh
 adduser --uid 1003 wiki 
+adduser --uid 1004 trac
 build_crontab_and_setup_files -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
 sudo systemctl start crond.service
 setup_keys "${IMAGE_TYPE}"
