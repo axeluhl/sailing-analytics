@@ -257,7 +257,7 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
         try {
             final JSONObject json = (JSONObject) JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContentFromHtml(e.getResults()));
             if (json.get(ORCCertificateUploadConstants.CERTIFICATES) != null) {
-                sailingServiceWrite.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
+                sailingServiceWrite.getORCCertificates(json.toString(), new AsyncCallback<Collection<ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         busyIndicator.setBusy(false);
