@@ -15,7 +15,11 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu docker mariadb105-server
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server #icu is a c/c++ library that provides unicode and globalisation support for software development.
+# docker setup 
+yum install -y docker
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD gcc-c++
 # ruby and gollum for wiki
 yum group install -y "Development Tools"
