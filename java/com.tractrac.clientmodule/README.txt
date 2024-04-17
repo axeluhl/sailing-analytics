@@ -16,6 +16,18 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.6
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - There are some threads that are not killed when the connection is closed. These threads were added to collect
+ statistics but this feature make not sense in TracAPI. (Reported by Axel Uhl, 17/04/2024)
+
+********************************************
         TracAPI 3.15.5
 ********************************************
 This is a final version. It keeps the backward compatibility.

@@ -75,7 +75,7 @@ public class Main {
         System.out.println("Cancelling data stream");
 
         // Stop data streams
-        //eventSubscriber.stop();
+        eventSubscriber.stop();
         raceSubscriber.stop();
     }
 
