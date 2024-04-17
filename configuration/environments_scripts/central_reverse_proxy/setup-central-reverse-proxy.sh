@@ -81,15 +81,18 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 SECONDEOF
 ssh -A "root@${IP}" "cpan install Geo::IP"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
+. imageupgrade_functions.sh
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
 scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
+cd /usr/local/src
 wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
 scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/etc/awstats /etc/awstats
 chmod 755 /root
+cd ~
 # copy awstats crons as well as all other weekly, daily cronjobs.
 rsync -a --exclude perl5 root@sapsailing.com:/root /
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
@@ -119,9 +122,6 @@ systemctl start httpd
 sudo systemctl enable crond.service
 sudo systemctl enable postfix
 sudo systemctl restart postfix
-
-# mongo
-# anything in etc
 THIRDEOF
 echo "Your turn! The instance is prepared, hopefully you have given it the correct tags already as they are needed for part 2"
 echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
@@ -129,5 +129,7 @@ echo "And then unmount the volumes and remount them on the new instance."
 echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
 echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
 read -n 1  -p "Press a key to continue" key_pressed
+# "$(dirname $0)"/setup-central-reverse-proxy-part-2.sh
 
+# anything in etc
 #not available: perl-HTML-Template  /usr/bin/perl install-module.pl GD
