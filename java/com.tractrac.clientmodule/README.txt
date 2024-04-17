@@ -16,6 +16,50 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.5
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - Deadlock when a connection was closed by the server and the client called the IRaceSubscriber.stop method. (Reported by
+  Axel Uhl, 16/04/2024)
+
+********************************************
+        TracAPI 3.15.4
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 16/04/2024
+
+ 1) Features
+
+ - Formatting the code using blank spaces (instead of tabs). The workspace was already configured like this,
+ but the old files kept some tabs. All the code has been formatted again. (Requested by Axel Uhl, 19/02/2024)
+
+ 2) Bugs
+
+ - When the IRaceSubscriber.stop method is called, the library doesn't close the connection. (Reported by Axel Uhl, 03/04/2024)
+ - Improving the detection of a dead connection. (Reported by Axel Uhl, 03/04/2024)
+
+********************************************
+        TracAPI 3.15.3
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 11/03/2024
+
+ 1) Feature
+
+ - Adding the method IPosition.getRTKStatus used to get the RTK status (Requested by Chris Terkelsen, 07/03/2024)
+
+ 2) Bugs
+
+ - Some socket connections were not closed correctly (Reported by Jorge Piera, 08/03/2024)
+
+********************************************
         TracAPI 3.15.2
 ********************************************
 This is a final version. It keeps the backward compatibility.
