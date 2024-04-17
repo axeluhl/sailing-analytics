@@ -161,8 +161,10 @@ setup_cloud_cfg_and_root_login() {
 }
 
 setup_fail2ban() {
+    pushd .
     if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
         yum install 2to3 -y
+        cd /usr/local/src
         wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
         tar -xvf 1.0.2.tar.gz
         cd fail2ban-1.0.2/
@@ -184,8 +186,10 @@ setup_fail2ban() {
     logpath  = /var/log/fail2ban.log
     maxretry = 5
 EOF
+    touch /var/log/fail2ban.log
     service fail2ban start
     yum remove -y firewalld
+    popd
 }
 
 setup_mail_sending() {
