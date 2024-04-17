@@ -46,7 +46,7 @@ if [[ -d "users" && "$CREATE_CRONTABS" == "true" ]]; then
     GIT_PATH="$(eval echo $(printf "~%q" "$GIT_USER"))/${RELATIVE_GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
     for dir in $(ls -d */ ); do
         USERNAME=$(echo "$dir" | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
-        adduser "$USERNAME"
+        # adduser "$USERNAME"
         HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
         # Clear the crontab file before assembling it from the snippets:
         > $HOME_DIR/crontab
