@@ -1,19 +1,21 @@
 #!/bin/bash
 
 # PART 2
-# Assumes already tagged, most files are already copied and that root contains a /home folder which will be copied over.
+# Assumes already tagged, most files are already copied and that root contains $TEMPORARY_HOME_COPY_LOCATION folder which will be copied over to home.
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
+TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within this.
 ssh -A "root@${IP}" "bash -s" << EOF
 sudo systemctl start crond.service
 . imageupgrade_functions.sh
+cp -ir "$TEMPORARY_HOME_COPY_LOCATION"/home /
+rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
 adduser --uid 1003 wiki
 adduser --uid 1004 trac
-usermod --append --groups trac wiki  # adds wiki to trac group.
 adduser --uid 1014 --gid 1016 certbot
 adduser --uid 1012 --gid 1013 scores
 adduser --uid 1015 --gid 1017 httpdConf

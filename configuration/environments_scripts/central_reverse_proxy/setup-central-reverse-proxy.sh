@@ -126,6 +126,8 @@ systemctl start httpd
 sudo systemctl enable crond.service
 sudo systemctl enable postfix
 sudo systemctl restart postfix
+mkdir --parents /root/temporary_home_copy/home
+mv /home/* /root/temporary_home_copy/home
 THIRDEOF
 echo "Your turn! The instance is prepared, hopefully you have given it the correct tags already as they are needed for part 2"
 echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
