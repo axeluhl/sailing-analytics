@@ -117,6 +117,9 @@ sed -i "s/^#compress/compress/" /etc/logrotate.conf
 setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy"
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
 chown root:root /etc/httpd/conf/pass*
+# create mountpoints (see part 2 for ownership changes)
+mkdir /var/log/old
+mkdir /var/www/static
 # enable units which build-crontab doesn't 
 systemctl enable httpd
 systemctl start httpd

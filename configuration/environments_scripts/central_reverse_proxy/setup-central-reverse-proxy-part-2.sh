@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PART 2
-# Assumes already tagged.
+# Assumes already tagged, most files are already copied and that root contains a /home folder which will be copied over.
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
@@ -9,7 +9,7 @@ HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="trac"
 RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
 ssh -A "root@${IP}" "bash -s" << EOF
-
+sudo systemctl start crond.service
 . imageupgrade_functions.sh
 adduser --uid 1003 wiki
 adduser --uid 1004 trac
@@ -18,7 +18,12 @@ adduser --uid 1014 --gid 1016 certbot
 adduser --uid 1012 --gid 1013 scores
 adduser --uid 1015 --gid 1017 httpdConf
 build_crontab_and_setup_files -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
-sudo systemctl start crond.service
+usermod --append --groups trac wiki  # adds wiki to trac group.
+# configure static ownership
+groupadd --gid 1006 static
+gpasswd -a trac static
+gpasswd -a wiki static
+chown trac:static /var/www/static
 setup_keys "${IMAGE_TYPE}"
 # setup nfs
 systemctl enable nfs-server
