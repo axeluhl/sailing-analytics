@@ -74,8 +74,9 @@ if [[ -d "users" && "$CREATE_CRONTABS" == "true" ]]; then
         HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
         # Clear the crontab file before assembling it from the snippets:
         > $HOME_DIR/crontab
-        for crontab in $(ls ${USERNAME}/crontab*); do
-	    cat "${crontab}">> $HOME_DIR/crontab
+        for crontab in ${USERNAME}/crontab*; do
+	        [[ -e $crontab ]] || continue
+            cat "${crontab}">> $HOME_DIR/crontab
         done
         sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
         sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
