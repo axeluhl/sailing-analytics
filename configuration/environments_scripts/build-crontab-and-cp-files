@@ -46,7 +46,31 @@ if [[ -d "users" && "$CREATE_CRONTABS" == "true" ]]; then
     GIT_PATH="$(eval echo $(printf "~%q" "$GIT_USER"))/${RELATIVE_GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
     for dir in $(ls -d */ ); do
         USERNAME=$(echo "$dir" | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
-        # adduser "$USERNAME"
+        user_UID=""
+        user_GID=""
+        echo "STARTING WORK ON USER $USERNAME"
+        if [[ -f "$USERNAME"/uid ]]; then
+            user_UID=$(cat "$USERNAME"/uid)
+            echo "UID => $user_UID"
+        fi
+        if [[ -f "$USERNAME"/gid ]]; then
+            user_GID=$(cat "$USERNAME"/gid)
+            groupadd --gid "$user_GID" "$USERNAME"
+            echo "GID => $user_GID"
+
+        fi
+        if [[ -n "$user_UID" && -n "$user_GID" ]]; then
+            adduser --uid "$user_UID" --gid "$user_GID" "$USERNAME"
+        elif [[ -n "$user_UID" ]]; then
+            adduser --uid "$user_UID" "$USERNAME"
+        elif [[ -n "$user_GID" ]]; then
+            adduser --gid "$user_GID" "$USERNAME"
+        else
+            adduser "$USERNAME"
+        fi
+        for group in $(cat "$USERNAME"/groups); do
+            gpasswd --add "$USERNAME" "$group"  
+        done
         HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
         # Clear the crontab file before assembling it from the snippets:
         > $HOME_DIR/crontab
@@ -59,6 +83,7 @@ if [[ -d "users" && "$CREATE_CRONTABS" == "true" ]]; then
         if [[ "$INSTALL_CRONTAB" == "true" ]]; then    
             crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
         fi
+        echo "*** FINISHED USER $USERNAME ***"
     done
     cd .. # exits users folder, which is essential for the next commands
 fi
