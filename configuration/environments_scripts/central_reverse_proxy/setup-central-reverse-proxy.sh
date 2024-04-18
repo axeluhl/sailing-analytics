@@ -15,7 +15,7 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server #icu is a c/c++ library that provides unicode and globalisation support for software development.
+yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
 # docker setup 
 yum install -y docker
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -28,7 +28,8 @@ gem install gollum
 gem update --system 3.5.7
 # setup cloud_cfg and keys
 cd /home
-scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+# scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 . imageupgrade_functions.sh
 setup_cloud_cfg_and_root_login
 # setup files
