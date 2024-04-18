@@ -11,8 +11,12 @@ RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_co
 ssh -A "root@${IP}" "bash -s" << EOF
 
 . imageupgrade_functions.sh
-adduser --uid 1003 wiki 
+adduser --uid 1003 wiki
 adduser --uid 1004 trac
+usermod --append --groups trac wiki  # adds wiki to trac group.
+adduser --uid 1014 --gid 1016 certbot
+adduser --uid 1012 -gid 1013 scores
+adduser --uid 1015 --gid 1017 httpdConf
 build_crontab_and_setup_files -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
 sudo systemctl start crond.service
 setup_keys "${IMAGE_TYPE}"
