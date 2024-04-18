@@ -48,6 +48,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
@@ -58,7 +59,6 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
-import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -255,9 +255,9 @@ public abstract class AbstractBoatCertificatesPanel extends SimplePanel {
 
     private void formSubmitComplete(SubmitCompleteEvent e) {
         try {
-            final JSONObject json = (JSONObject) JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContent(e));
+            final JSONObject json = (JSONObject) JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContentFromHtml(e.getResults()));
             if (json.get(ORCCertificateUploadConstants.CERTIFICATES) != null) {
-                sailingServiceWrite.getORCCertificates(e.getResults(), new AsyncCallback<Collection<ORCCertificate>>() {
+                sailingServiceWrite.getORCCertificates(json.toString(), new AsyncCallback<Collection<ORCCertificate>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         busyIndicator.setBusy(false);

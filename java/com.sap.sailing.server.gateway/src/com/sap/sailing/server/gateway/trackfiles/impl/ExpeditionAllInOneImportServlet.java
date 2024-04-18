@@ -130,7 +130,7 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
             importerResult = new ImporterResult(t, Collections.emptyList());
             logger.log(Level.SEVERE, t.getMessage());
         } finally {
-            this.toJSON(importerResult).writeJSONString(resp.getWriter());
+            writeJsonIntoHtmlResponse(resp, toJSON(importerResult));
         }
     }
 

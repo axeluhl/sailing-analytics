@@ -25,7 +25,7 @@ import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 
 public class MongoUriParserTest {
-    private static final String WWW_EXAMPLE_COM = "www.example.com";
+    private static final String WWW_EXAMPLE_COM = "127.0.0.2";
     private MongoUriParser<String> parser;
     
     @SuppressWarnings("unchecked")
@@ -36,7 +36,7 @@ public class MongoUriParserTest {
         final AwsInstance<String> host1 = mock(AwsInstance.class);
         when(host1.getPublicAddress()).thenReturn(wwwExampleCom);
         when(host1.getPrivateAddress()).thenReturn(wwwExampleCom);
-        when(landscape.getHostByPublicIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(wwwExampleCom.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host1);
+        when(landscape.getHostByPrivateIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(wwwExampleCom.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host1);
         final InetAddress loopback = InetAddress.getLoopbackAddress();
         final AwsInstance<String> host2 = mock(AwsInstance.class);
         when(host2.getPrivateAddress()).thenReturn(loopback);
@@ -46,25 +46,25 @@ public class MongoUriParserTest {
     
     @Test
     public void testSimpleSingleNodeUri() throws URISyntaxException, UnknownHostException {
-        final String hostname = WWW_EXAMPLE_COM;
+        final String hostname = "127.0.0.1";
         final String dbName = "myDb";
         final Database database = parser.parseMongoUri("mongodb://"+hostname+"/"+dbName);
         assertFalse(database.getEndpoint().isReplicaSet());
         final MongoProcess mongoProcess = database.getEndpoint().asMongoProcess();
-        assertEquals(InetAddress.getByName(WWW_EXAMPLE_COM).getHostAddress(), mongoProcess.getHostname());
+        assertEquals(hostname, mongoProcess.getHostname());
         assertEquals(27017, mongoProcess.getPort());
         assertEquals(dbName, database.getName());
     }
 
     @Test
     public void testSimpleSingleNodeUriWithExplicitPort() throws URISyntaxException, UnknownHostException {
-        final String hostname = WWW_EXAMPLE_COM;
+        final String hostname = "127.0.0.1";
         final int port = 10202;
         final String dbName = "myDb";
         final Database database = parser.parseMongoUri("mongodb://"+hostname+":"+port+"/"+dbName);
         assertFalse(database.getEndpoint().isReplicaSet());
         final MongoProcess mongoProcess = database.getEndpoint().asMongoProcess();
-        assertEquals(InetAddress.getByName(WWW_EXAMPLE_COM).getHostAddress(), mongoProcess.getHostname());
+        assertEquals(InetAddress.getByName(hostname).getHostAddress(), mongoProcess.getHostname());
         assertEquals(port, mongoProcess.getPort());
         assertEquals(dbName, database.getName());
     }
