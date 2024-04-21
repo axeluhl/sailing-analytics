@@ -14,17 +14,7 @@ sudo systemctl start crond.service
 . imageupgrade_functions.sh
 cp -ir "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
-adduser --uid 1003 wiki
-adduser --uid 1004 trac
-adduser --uid 1014 --gid 1016 certbot
-adduser --uid 1012 --gid 1013 scores
-adduser --uid 1015 --gid 1017 httpdConf
 build_crontab_and_setup_files -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
-usermod --append --groups trac wiki  # adds wiki to trac group.
-# configure static ownership
-groupadd --gid 1006 static
-gpasswd -a trac static
-gpasswd -a wiki static
 chown trac:static /var/www/static
 setup_keys "${IMAGE_TYPE}"
 # setup nfs
