@@ -18,7 +18,7 @@ yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
 # docker setup 
 yum install -y docker
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD gcc-c++
 # ruby and gollum for wiki
@@ -78,8 +78,8 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
 # use the localconfig file to setup the bugzilla
-# ./checksetup.pl
 SECONDEOF
+ssh root@${IP} -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
 . imageupgrade_functions.sh
