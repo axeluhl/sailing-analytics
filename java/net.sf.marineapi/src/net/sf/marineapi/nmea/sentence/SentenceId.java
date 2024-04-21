@@ -28,7 +28,8 @@ package net.sf.marineapi.nmea.sentence;
  * @see net.sf.marineapi.nmea.sentence.TalkerId
  */
 public enum SentenceId {
-
+        /** Raymarine SeaTalk ($STALK). */
+        ALK,
 	/** Autopilot sentence "B"; xte, bearings and heading toward destination */
 	APB,
 	/** Bearing Origin to Destination */
@@ -51,6 +52,8 @@ public enum SentenceId {
 	GSA,
 	/** Detailed satellite data */
 	GSV,
+	/** Pseudorange Noise Statistics */
+	GST,
 	/** Vessel heading in degrees with magnetic variation and deviation. */
 	HDG,
 	/** Vessel heading in degrees with respect to true north. */
@@ -105,10 +108,10 @@ public enum SentenceId {
 	XDR,
 	/** Cross-track error, measured */
 	XTE,
-    /** Meteorological Composite  */
-    MDA,
-	/** Wind speed and direction */
-    MWD,
+	/** Meteorological Composite  */
+        MDA,
+        /** Wind speed and direction */
+        MWD,
 	/** UTC time and date with local time zone offset */
 	ZDA;
 

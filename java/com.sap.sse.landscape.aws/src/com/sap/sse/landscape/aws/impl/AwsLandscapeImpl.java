@@ -155,6 +155,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerState;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyRuleResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RedirectActionStatusCodeEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
@@ -405,6 +406,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         tagKeyandValue.put(LandscapeConstants.ALL_REVERSE_PROXIES, "");
         final TargetGroup<ShardingKey> defaultTargetGroup = createTargetGroup(alb.getRegion(), DEFAULT_TARGET_GROUP_PREFIX + alb.getName() + "-" + ProtocolEnum.HTTP.name(),
                 httpPort, reverseProxy.getHealthCheckPath(), /* healthCheckPort */ httpPort, alb.getArn(), alb.getVpcId(), tagKeyandValue);
+        setTargetGroupHealthCheckPath(defaultTargetGroup, reverseProxy.getTargetGroupHealthCheckPath(defaultTargetGroup.getTargetGroupArn()));
         defaultTargetGroup.addTargets(reverseProxy.getHosts());
         final String defaultCertificateArn = defaultCertificateArnFuture.get();
         return getLoadBalancingClient(getRegion(alb.getRegion()))
@@ -1225,7 +1227,17 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             }
         });
     }
-
+    
+    /**
+     * Adjusts the health check path of an existing target group. Note that this will make the {@link TargetGroup} object passed as
+     * the {@code targetGroup} parameter inconsistent in its {@link TargetGroup#getHealthCheckPath()} field which does not reflect the
+     * new value set here.
+     */
+    private void setTargetGroupHealthCheckPath(TargetGroup<ShardingKey> targetGroup, String path) {
+        getLoadBalancingClient(getRegion(targetGroup.getRegion())).modifyTargetGroup(ModifyTargetGroupRequest.builder()
+                .targetGroupArn(targetGroup.getTargetGroupArn()).healthCheckPath(path).build());
+    }
+    
     @Override
     public void addTargetsToTargetGroup(
             TargetGroup<ShardingKey> targetGroup,
