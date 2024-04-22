@@ -1,6 +1,6 @@
 # SAP Sailing Analytics
 
-## About this project
+## About this Project
 
 The Sailing Analytics, formerly known as the "SAP Sailing Analytics," are a solution for portraying and analyzing sailing regattas, support training scenarios, and power the vast archive at https://sapsailing.com.
 
