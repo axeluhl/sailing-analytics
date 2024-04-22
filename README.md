@@ -36,13 +36,14 @@ To start contributing, read the onboarding document at the following URL: [https
 
 The issue tracker at [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com) is currently used for any sort of issue and enhancement request tracking. Help to migrate this smoothly to Github Issues would be much appreciated, ideally keeping issue numbers stable due to many references to those Bugzilla bug numbers, be it in the source code, the Wiki, or the build infrastructure.
 
+
 ## Code of Conduct
 
-We follow [this](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) code of conduct. Long story short: be nice :-).
+We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone. By participating in this project, you agree to abide by its [Code of Conduct](https://github.com/SAP/.github/blob/main/CODE_OF_CONDUCT.md) at all times.
 
 ## Licensing
 
-This project is published under the [Apache 2.0 open source license](https://www.apache.org/licenses/LICENSE-2.0). See also the ``LICENSE`` file in the root folder of this repository.
+Copyright 2024 SAP SE or an SAP affiliate company and sailing-analytics contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/SAP/sailing-analytics).
 
 See [here](https://www.sapsailing.com/gwt/Home.html#/imprint/:) for a list of components used by the project, as well as their licenses, also to be found in the file ``java/com.sap.sailing.gwt.ui/imprint.json``.
 
