@@ -10,36 +10,39 @@ jobs:
         uses: actions/checkout@v2
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          echo "humba" >humba
-          echo "trala" >trala
-          echo "RELEASE_DATE=$( date +%Y%m%d%H%M )" >>${GITHUB_ENV}
+          RELEASE_DATE=$( date +%Y%m%d%H%M )
+          echo "RELEASE_DATE=${RELEASE_DATE}" >>${GITHUB_ENV}
+          mkdir -p dist/build-${RELEASE_DATE}
+          echo "humba" >dist/build-${RELEASE_DATE}/build-${RELEASE_DATE}.tar.gz
+          echo "trala" >dist/build-${RELEASE_DATE}/trala/release-notes.txt
+          echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: build-${{ env.RELEASE_DATE }}
-          release_name: build-${{ env.RELEASE_DATE }}
+          tag_name: ${{ env.SIMPLE_VERSION_INFO }}
+          release_name: ${{ env.SIMPLE_VERSION_INFO }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset humba
-        id: upload-release-asset-humba
+      - name: Upload Release Asset tar.gz
+        id: upload-release-asset-tar-gz
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./humba
-          asset_name: humba
-          asset_content_type: application/zip
-      - name: Upload Release Asset trala
-        id: upload-release-asset-trala
+          asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/${{ env.SIMPLE_VERSION_INFO }}.tar.gz
+          asset_name: ${{ env.SIMPLE_VERSION_INFO }}.tar.gz
+          asset_content_type: application/x-tar
+      - name: Upload Release Asset release_notes.txt
+        id: upload-release-asset-release-notes-txt
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./trala
-          asset_name: trala
-          asset_content_type: application/zip
+          asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/release-notes.txt
+          asset_name: release-notes.txt
+          asset_content_type: text/plain
