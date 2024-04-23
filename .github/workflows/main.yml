@@ -16,6 +16,11 @@ jobs:
         uses: supercharge/mongodb-github-action@1.10.0
         with:
           mongodb-version: 4.4
+      - name: Start RabbitMQ
+        uses: namoshek/rabbitmq-github-action@v1
+        with:
+          version: '3.8.9'
+          ports: '5672:5672'
       - shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
