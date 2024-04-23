@@ -14,6 +14,7 @@ jobs:
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
+          mvn-toolchain-id: 'JavaSE-1.8'
       #- name: Make the script files executable
       #  run: chmod +x my-script.sh my-other-script.sh
       - shell: bash
