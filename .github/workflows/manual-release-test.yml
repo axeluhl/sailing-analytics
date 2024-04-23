@@ -14,7 +14,7 @@ jobs:
           echo "RELEASE_DATE=${RELEASE_DATE}" >>${GITHUB_ENV}
           mkdir -p dist/build-${RELEASE_DATE}
           echo "humba" >dist/build-${RELEASE_DATE}/build-${RELEASE_DATE}.tar.gz
-          echo "trala" >dist/build-${RELEASE_DATE}/trala/release-notes.txt
+          echo "trala" >dist/build-${RELEASE_DATE}/release-notes.txt
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
       - name: Create Release
         id: create_release
