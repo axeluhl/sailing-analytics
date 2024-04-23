@@ -19,8 +19,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: build-${RELEASE_DATE}
-          release_name: build-${RELEASE_DATE}
+          tag_name: some-token-who-knows
+          release_name: build-${{RELEASE_DATE}}
           draft: false
           prerelease: false
       - name: Upload Release Asset humba
