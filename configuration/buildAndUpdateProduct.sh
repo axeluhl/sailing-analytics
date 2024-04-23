@@ -140,6 +140,7 @@ if [ $# -eq 0 ]; then
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "                  This parameter can also hold the name of the release if you are using the release command."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
+    echo "-L in conjunction with the release sub-command, build the release only locally to dist/ and do not upload"
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
