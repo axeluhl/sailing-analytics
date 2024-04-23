@@ -1,0 +1,45 @@
+on: workflow_dispatch
+name: Test release creation
+
+jobs:
+  build:
+    name: Test uploading release asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build project # This would actually build your project, using zip for an example artifact
+        run: |
+          touch humba
+          touch trala
+          echo "RELEASE_DATE=$( date +%Y%m%d%H%M )" >>${GITHUB_ENV}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: build-${RELEASE_DATE}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset humba
+        id: upload-release-asset-humba
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./humba
+          asset_name: humba
+          asset_content_type: application/zip
+      - name: Upload Release Asset trala
+        id: upload-release-asset-trala
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./trala
+          asset_name: trala
+          asset_content_type: application/zip
