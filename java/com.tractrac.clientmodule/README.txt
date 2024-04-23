@@ -16,6 +16,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.7
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 23/04/2024
+
+ 1) Bugs
+
+ - When a new static mark is created, the library only sends a updateControlPointPosition callback using the event start time,
+ that is outside the race bounds. Now, it is calling updateControlPointPosition twice and in the second call uses the
+ tracking start time as the position time (Reported by Axel Uhl, 23/04/2024)
+
+********************************************
         TracAPI 3.15.6
 ********************************************
 This is a final version. It keeps the backward compatibility.

@@ -66,7 +66,7 @@ public class Main {
         raceSubscriber.subscribeRaceCompetitor(listener);
 
         raceSubscriber.start();
-        //eventSubscriber.start();
+        eventSubscriber.start();
 
 
         // Go ahead with GUI or other stuff in main thread
