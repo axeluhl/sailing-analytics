@@ -1,34 +1,20 @@
-name: build
-on: push
+on: workflow_dispatch
+name: Test release creation
+
 jobs:
   build:
+    name: Test uploading release asset
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository to the runner
-        uses: actions/checkout@v4
-      - name: Install JDK 8
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '8'
-          mvn-toolchain-id: 'JavaSE-1.8'
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: 4.4
-      - name: Start RabbitMQ
-        uses: namoshek/rabbitmq-github-action@v1
-        with:
-          version: '3.8.9'
-          ports: '5672:5672'
-      - shell: bash
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
-          ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
-      - shell: bash
-        run: |
-          ./configuration/buildAndUpdateProduct.sh -u -L release
-      - name: Determine release name
-        run: |
+          RELEASE_DATE=$( date +%Y%m%d%H%M )
+          echo "RELEASE_DATE=${RELEASE_DATE}" >>${GITHUB_ENV}
+          mkdir -p dist/build-${RELEASE_DATE}
+          echo "humba" >dist/build-${RELEASE_DATE}/build-${RELEASE_DATE}.tar.gz
+          echo "trala" >dist/build-${RELEASE_DATE}/release-notes.txt
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
       - name: Create Release
         id: create_release
@@ -60,8 +46,3 @@ jobs:
           asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/release-notes.txt
           asset_name: release-notes.txt
           asset_content_type: text/plain
-      - uses: actions/upload-artifact@v4
-        with:
-            name: release
-            path: dist/**/*
-            retention-days: 30
