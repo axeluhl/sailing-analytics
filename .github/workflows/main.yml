@@ -3,9 +3,6 @@ on: push
 jobs:
   build:
     runs-on: ubuntu-latest
-    #defaults:
-    #  run:
-    #    working-directory: ./scripts
     steps:
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
@@ -15,12 +12,14 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
-      #- name: Make the script files executable
-      #  run: chmod +x my-script.sh my-other-script.sh
       - shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
-      #- name: Run the scripts
-      #  run: |
-      #    ./my-script.sh
-      #    ./my-other-script.sh
+      - shell: bash
+        run: |
+          ./configuration/buildAndUpdateProduct.sh -u -L release
+      - uses: actions/upload-artifact@v4
+        with:
+            name: release
+            path: dist/**/*
+            retention-days: 30
