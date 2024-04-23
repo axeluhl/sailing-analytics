@@ -356,16 +356,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackin
             reconciler = null;
         }
         racesListener = new IRacesListener() {
-            @Override public void abandonRace(long timestamp, UUID raceId) {
-                if (raceId.equals(tractracRace.getId())) {
-                    try {
-                        onStop(/* stopReceiversPreemtively */ false, /* willBeRemoved */ false);
-                    } catch (InterruptedException e) {
-                        logger.log(Level.WARNING, "Problem when receiving abandonRace("+raceId+") for race "+tractracRace+
-                                " in event "+tractracEvent+" while trying to stop the listeners", e);
-                    }
-                }
-            }
+            @Override public void abandonRace(long timestamp, UUID raceId) {}
             @Override public void addRace(long timestamp, IRace race) {}
             @Override public void deleteRace(long timestamp, UUID raceId) {}
             @Override public void reloadRace(long timestamp, UUID raceId) {
