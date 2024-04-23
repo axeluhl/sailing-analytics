@@ -359,7 +359,7 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
 
     echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
 
-    if [ "${LOCAL_RELEASE_ONLY} != "1" ]; then
+    if [ "${LOCAL_RELEASE_ONLY}" != "1" ]; then
         echo "Checking the remote connection..."
         REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
         echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
