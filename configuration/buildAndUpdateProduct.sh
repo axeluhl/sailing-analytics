@@ -199,6 +199,7 @@ do
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
+        L) LOCAL_RELEASE_ONLY=1;;
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
@@ -358,12 +359,16 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
 
     echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
 
-    echo "Checking the remote connection..."
-    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
-    echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
+    if [ "${LOCAL_RELEASE_ONLY} != "1" ]; then
+        echo "Checking the remote connection..."
+        REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
+        echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
 
-    `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
-    echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+        `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
+        echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+    else
+        echo "Release available at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/, tarball at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz"
+    fi
 fi
 
 if [[ "$@" == "local-deploy" ]]; then
