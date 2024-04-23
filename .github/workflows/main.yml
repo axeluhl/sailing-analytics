@@ -17,7 +17,7 @@ jobs:
           ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
       - shell: bash
         run: |
-          ./configuration/buildAndUpdateProduct.sh -u release
+          ./configuration/buildAndUpdateProduct.sh -u -L release
       - uses: actions/upload-artifact@v4
         with:
             name: release
