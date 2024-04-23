@@ -18,7 +18,7 @@ jobs:
       #  run: chmod +x my-script.sh my-other-script.sh
       - shell: bash
         run: |
-          ./configuration/buildAndUpdateProduct.sh -a build > build.log
+          ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
       #- name: Run the scripts
       #  run: |
       #    ./my-script.sh
