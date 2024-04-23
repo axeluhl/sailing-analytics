@@ -12,6 +12,10 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: 4.4
       - shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
