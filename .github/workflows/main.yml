@@ -22,6 +22,8 @@ jobs:
           version: '3.8.9'
           ports: '5672:5672'
       - shell: bash
+        env: # Or as an environment variable
+          APP_PARAMETERS: "-Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACESSKEY }}"
         run: |
           ./configuration/buildAndUpdateProduct.sh -a build 2>&1 | tee build.log
       - shell: bash
