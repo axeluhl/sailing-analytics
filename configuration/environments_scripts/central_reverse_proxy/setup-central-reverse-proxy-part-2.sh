@@ -21,7 +21,7 @@ setup_keys "${IMAGE_TYPE}"
 systemctl enable nfs-server
 echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
-systemctl start nfs
+systemctl start nfs-server
 cd /var/log/old/cache/docker/registry && docker-compose-up
 internal_ip=\$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
 cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
