@@ -40,6 +40,11 @@
                 assumed the race will be re-sailed, and so the connector will keep tracking the race.</li>
             <li>Fixed handling of <tt>null</tt> values in "compareservers" end point.</li>
             <li>Upgraded to TracAPI 3.15.7, fixing an issue with static mark positions not transmitted during live races.</li>
+            <li>The LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL scoring scheme,
+                as used typically for iQFOil formats with quarter/semi/grand finals, now does no longer require explicit
+                column factors of 1.0 for those medal-series race columns. The medal series-based doubling is deactivated
+                now for this scoring scheme. Should you have relied on this scheme doubling your medal series scores,
+                you now have to adjust the column factors for those race columns to 2.0 explicitly.</li>
           </ul>
           <h2 class="articleSubheadline">March 2024</h2>
           <ul class="bulletList">
