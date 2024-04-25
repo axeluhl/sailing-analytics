@@ -35,7 +35,8 @@ jobs:
         if: always()
         with:
           name: Maven Tests
-          path: '**/TEST-*.xml'
+          path: '**/TEST-*.xml' 
+          max-annotations: '0'
           reporter: java-junit
           fail-on-error: true
       - shell: bash
