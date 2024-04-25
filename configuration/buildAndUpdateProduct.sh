@@ -183,7 +183,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocpaArvm:n:l:s:w:x:j:u'
+options=':bgtocpaArvmL:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
