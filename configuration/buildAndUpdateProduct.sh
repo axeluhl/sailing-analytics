@@ -127,6 +127,7 @@ if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
+    echo "-G Build forked GWT and gwt-maven-plugin locally instead of downloading Github release."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
@@ -183,11 +184,12 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocpaArvm:n:l:s:w:x:j:u'
+options=':bgtocpaArvmLG:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
+        G) BUILD_GWT_FORK=1;;
         t) testing=0;;
         b) onegwtpermutationonly=1;;
         o) offline=1;;
@@ -754,8 +756,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
         if [ $gwtcompile -eq 1 ]; then
-	  echo "Building and installing forked GWT version..."
-	  JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+          if [ "${BUILD_GWT_FORK}" = "1" ]; then
+            echo "Building and installing forked GWT version..."
+	    JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+          else
+            echo "Downloading and installing forked GWT version..."
+            `dirname $0`/install-gwt-from-fork-releases https://github.com/axeluhl/gwt https://github.com/axeluhl/gwt-maven-plugin 2.11.0 .
+          fi
         fi
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
