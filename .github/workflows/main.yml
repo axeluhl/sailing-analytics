@@ -30,7 +30,7 @@ jobs:
           APP_PARAMETERS: "-Daws.region=eu-west-1 -Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}"
         run: |
           ./configuration/buildAndUpdateProduct.sh -a -x 60 build 2>&1 | tee build.log
-      - name: Report
+      - name: Collect Test Reports
         uses: dorny/test-reporter@v1
         if: always()
         with:
