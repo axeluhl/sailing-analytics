@@ -6,6 +6,8 @@ IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
+GIT_COPY_USER="wiki"
+RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
 # The aws credentials will have to be manually installed in the aws user.
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
@@ -134,7 +136,7 @@ echo "And then unmount the volumes and remount them on the new instance."
 echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
 echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
 read -n 1  -p "Press a key to continue" key_pressed
-# "$(dirname $0)"/setup-central-reverse-proxy-part-2.sh "$IP" "$BEARER_TOKEN" "$IMAGE_TYPE"
+# "$(dirname $0)"/setup-central-reverse-proxy-part-2.sh "$IP"  "$IMAGE_TYPE"
 
 # anything in etc
 #not available: perl-HTML-Template  /usr/bin/perl install-module.pl GD

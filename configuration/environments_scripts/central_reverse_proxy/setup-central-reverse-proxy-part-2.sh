@@ -3,11 +3,10 @@
 # PART 2
 # Assumes already tagged, most files are already copied and that root contains $TEMPORARY_HOME_COPY_LOCATION folder which will be copied over to home.
 IP=$1
-BEARER_TOKEN=$2
-IMAGE_TYPE="central_reverse_proxy"
+IMAGE_TYPE="$2"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
-GIT_COPY_USER="trac"
-RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
+GIT_COPY_USER="wiki"
+RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
 TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within this.
 ssh -A "root@${IP}" "bash -s" << EOF
 sudo systemctl start crond.service
