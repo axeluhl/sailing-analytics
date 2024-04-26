@@ -35,6 +35,12 @@ scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configu
 setup_cloud_cfg_and_root_login
 # setup files
 build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
+cd /home
+for dir in *; do 
+    [[ -d "$dir" ]] || continue
+    grep "$dir" /etc/passwd || continue
+    chown -R "$dir":"$dir" "$dir"
+done
 # setup mail
 setup_mail_sending
 # setup sshd config
