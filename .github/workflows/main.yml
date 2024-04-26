@@ -20,7 +20,7 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           log-accepted-android-sdk-licenses: 'false'
-          cmdline-tools-version: 8512546  # This corresponds to human-friendly version number 7.0
+          cmdline-tools-version: 9123335  # This corresponds to human-friendly version number 8.0
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
