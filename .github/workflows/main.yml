@@ -15,7 +15,7 @@ jobs:
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
-          mvn-toolchain-id: 'JavaSE-8'
+          mvn-toolchain-id: 'JavaSE-1.8'
       - name: Install JDK 17
         uses: actions/setup-java@v4
         with:
