@@ -11,7 +11,7 @@ TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within th
 ssh -A "root@${IP}" "bash -s" << EOF
 sudo systemctl start crond.service
 . imageupgrade_functions.sh
-cp -ir "$TEMPORARY_HOME_COPY_LOCATION"/home /
+cp -ir --preserve "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
 build_crontab_and_setup_files -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
 chown trac:static /var/www/static
