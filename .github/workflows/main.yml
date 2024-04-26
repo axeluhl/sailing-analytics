@@ -16,6 +16,8 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
@@ -29,7 +31,7 @@ jobs:
         env: # Or as an environment variable
           APP_PARAMETERS: "-Daws.region=eu-west-1 -Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}"
         run: |
-          ./configuration/buildAndUpdateProduct.sh -a -x 60 build 2>&1 | tee build.log
+          ./configuration/buildAndUpdateProduct.sh -x 60 build 2>&1 | tee build.log
       - name: Collect Test Reports
         uses: dorny/test-reporter@v1
         if: always()
