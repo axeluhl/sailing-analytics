@@ -1,6 +1,7 @@
 package com.sap.sailing.server.impl;
 
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -32,7 +33,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAction {
-    
+    private static final Logger logger = Logger.getLogger(RaceLogScoringReplicator.class.getName());
+
     private static final long serialVersionUID = -5958519195756937338L;
     
     private final RacingEventService service;
@@ -54,10 +56,10 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
     }
 
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent event) {
-        Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getRegattaLikeParent().getName());
+        final Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getRegattaLikeParent().getName());
         if (leaderboard != null) {
-            Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
-            RaceLog raceLog = raceColumn.getRaceLog(fleet);
+            final Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
+            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
             checkNeedForScoreCorrectionByResultsOfRaceCommittee(leaderboard, raceColumn, fleet, raceLog, event.getCreatedAt(), event);
         }
     }
@@ -126,12 +128,20 @@ public class RaceLogScoringReplicator implements RaceColumnListenerWithDefaultAc
             for (CompetitorResult positionedCompetitor : positioningList) {
                 final Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
                 int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
-                Double preChangeTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+                final Double preChangeTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+                final MaxPointsReason preChangeMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
                 correctScoreInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor,
                         rankByRaceCommittee, positionedCompetitor.getScore(), positionedCompetitor.getMaxPointsReason());
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
-                Double postChangeTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
-                if (postChangeTotalPoints != preChangeTotalPoints) {
+                final Double postChangeTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
+                final MaxPointsReason postChangeMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+                if (!metadataUpdateRequired &&
+                        (!Util.equalsWithNull(postChangeTotalPoints, preChangeTotalPoints)
+                                ||
+                         !Util.equalsWithNull(preChangeMaxPointsReason, postChangeMaxPointsReason))) {
+                    logger.info("Found at least one score correction change in leaderboard "+leaderboard.getName()+
+                            " for competitor "+competitor.getName()+" in race column "+raceColumn.getName()+
+                            ". Updating comment and time of last correction.");
                     metadataUpdateRequired = true;
                 }
             }
