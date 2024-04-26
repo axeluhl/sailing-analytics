@@ -24,6 +24,8 @@ jobs:
           mvn-toolchain-id: 'JavaSE-1.8'
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: 'false'
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
