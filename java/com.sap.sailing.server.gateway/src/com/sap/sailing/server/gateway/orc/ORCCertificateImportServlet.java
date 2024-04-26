@@ -101,7 +101,6 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
     private void writeResponse(Iterable<ORCCertificate> certificates, HttpServletResponse resp) throws IOException {
         // Use text/html to prevent browsers from wrapping the response body,
         // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
-        resp.setContentType("text/html;charset=UTF-8");
         final JSONObject jsonResponse = new JSONObject();
         final ORCCertificateJsonSerializer certificateSerializer = new ORCCertificateJsonSerializer();
         final JSONArray certificatesAsJson = new JSONArray();
@@ -110,7 +109,7 @@ public class ORCCertificateImportServlet extends AbstractFileUploadServlet {
         }
         jsonResponse.put(ORCCertificateUploadConstants.CERTIFICATES, certificatesAsJson);
         jsonResponse.put(ORCCertificateUploadConstants.STATUS, "OK");
-        jsonResponse.writeJSONString(resp.getWriter());
+        writeJsonIntoHtmlResponse(resp, jsonResponse);
     }
 
 }

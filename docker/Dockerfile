@@ -1,4 +1,4 @@
-FROM docker.sapsailing.com/sapjvm8:8.1.097
+FROM docker.sapsailing.com/sapjvm8:8.1.098
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release

@@ -105,7 +105,6 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             }
             resultList.add(result);
         }
-
-        resultList.writeJSONString(resp.getWriter());
+        writeJsonIntoHtmlResponse(resp, resultList);
     }
 }

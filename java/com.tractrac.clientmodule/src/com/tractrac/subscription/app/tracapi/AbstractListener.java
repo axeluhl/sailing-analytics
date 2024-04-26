@@ -26,7 +26,7 @@ import java.util.UUID;
 /**
  * @author <a href="mailto:jorge@tractrac.dk">Jorge Piera Llodr&aacute;</a>
  */
-public abstract class AbstractListener  implements IEventMessageListener,
+public abstract class AbstractListener implements IEventMessageListener,
         IRaceMessageListener, IPositionListener, IPositionOffsetListener,
         IPositionSnappedListener, IConnectionStatusListener, IControlPointPositionListener,
         IControlPassingsListener, IRaceStartStopTimesChangeListener,

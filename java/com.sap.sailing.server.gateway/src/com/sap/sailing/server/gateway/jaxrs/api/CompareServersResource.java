@@ -456,7 +456,9 @@ public class CompareServersResource extends AbstractSailingServerResource {
                         json1.remove(i);
                         json2.remove(item2);
                     } else {
-                        removeDuplicateEntries(item1, item2);
+                        if (item1 != null && item2 != null) {
+                            removeDuplicateEntries(item1, item2);
+                        }
                         i++;
                     }
                 }
