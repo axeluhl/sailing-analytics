@@ -99,7 +99,7 @@ setup_keys() {
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
@@ -108,10 +108,30 @@ setup_keys() {
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 755 "${user_home_dir}/.aws"
-                \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
-                echo "[default]" >> "${user_home_dir}/.aws/config"
-                echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                chmod 755 "${user_home_dir}"/.aws
+                # Setup credentials
+                if [[ -d "${user}/aws/credentials" && ! -e "${user_home_dir}/.aws/credentials" ]]; then
+                    > "${user_home_dir}"/.aws/credentials
+                    for credentials in "${user}"/aws/credentials/*; do
+                        [[ -f "$credentials" ]] || continue
+                        cat "$credentials" >> "${user_home_dir}"/.aws/credentials
+                        echo "" >> "${user_home_dir}"/.aws/credentials
+                    done
+                fi
+                # Setup config
+                if [[ ! -e "${user_home_dir}/.aws/config" ]]; then
+                    echo "[default]" >> "${user_home_dir}/.aws/config"
+                    echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                    echo "" >> "${user_home_dir}"/.aws/config
+                    if [[ -d "${user}/aws/config" ]]; then
+                        for config in "${user}"/aws/config/*; do
+                            [[ -f "$config" ]] || continue
+                            cat "$config" >> "${user_home_dir}"/.aws/config
+                            echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                            echo "" >> "${user_home_dir}"/.aws/config
+                        done
+                    fi
+                fi
                 chown -R  ${user}:${user} "${user_home_dir}/.aws"
                 chmod 600 "${user_home_dir}"/.aws/*
             fi
