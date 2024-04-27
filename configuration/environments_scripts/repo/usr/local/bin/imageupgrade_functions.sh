@@ -84,7 +84,7 @@ build_crontab_and_setup_files() {
         echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
     else
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-        scp -o StrictHostKeyChecking=no -pr "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:/home/sailing/code/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         ./build-crontab-and-cp-files $@
