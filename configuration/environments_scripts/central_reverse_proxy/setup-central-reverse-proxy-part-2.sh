@@ -27,6 +27,10 @@ cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
 cd /root && sed -i "s/SMTP_INTERNAL_IP/\$internal_ip/" batch.json
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
 # append hostname to sysconfig
+echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
+sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
+hostname sapsailing.com
+hostnamectl set-hostname sapsailing.com
 echo "Please logon and go to root where you will find 3 scripts. First authenticate with awsmfa (you may need to alter the bash alias for your credentials)."
 echo "Then run add-to-necessary-target-groups-and-setup-route53.sh"
 echo "Then remount-nfs-shares.sh because the previous script alters the logfiles and smtp entries"
