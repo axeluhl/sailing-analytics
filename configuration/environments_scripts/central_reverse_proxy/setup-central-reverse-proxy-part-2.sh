@@ -25,15 +25,11 @@ cd /var/log/old/cache/docker/registry && docker-compose-up
 internal_ip=\$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
 cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
 cd /root && sed -i "s/SMTP_INTERNAL_IP/\$internal_ip/" batch.json
-###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch.json
-cd /root && ./add-to-necessary-target-groups.sh
-cd /root && ./remount-nfs-shares.sh
-# scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
 # append hostname to sysconfig
-echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
-sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
-hostname sapsailing.com
-hostnamectl set-hostname sapsailing.com
-# the setting of an elastic ip will terminate the connection
-#### DO NOT ENABLE WHILST TESTING: cd /root && ./set-elastic-ip.sh
+echo "Please logon and go to root where you will find 3 scripts. First authenticate with awsmfa (you may need to alter the bash alias for your credentials)."
+echo "Then run add-to-necessary-target-groups-and-setup-route53.sh"
+echo "Then remount-nfs-shares.sh because the previous script alters the logfiles and smtp entries"
+echo "Finally run set-elastic-ip.sh"
+echo "Have a great day!"
 EOF
