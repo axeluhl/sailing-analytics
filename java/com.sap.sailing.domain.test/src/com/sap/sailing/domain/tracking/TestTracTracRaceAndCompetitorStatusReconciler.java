@@ -135,7 +135,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
         when(trackedRegatta.getCPUMeter()).thenReturn(CPUMeter.create());
         when(trackedRace.getTrackedRegatta()).thenReturn(trackedRegatta);
         leaderboard = new FlexibleLeaderboardImpl(TEST_LEADERBOARD_NAME, new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("area A", new UUID(1200, 1200) , new DegreePosition(100, 100), new MeterDistance(100)));
-        leaderboard.addRace(trackedRace, R1, /* medelRace */ false);
+        leaderboard.addRace(trackedRace, R1, /* medalRace */ false);
         raceLog = leaderboard.getRacelog(R1, LeaderboardNameConstants.DEFAULT_FLEET_NAME);
         when(trackedRace.getAttachedRaceLogs()).thenReturn(Collections.singleton(raceLog));
         reconciler = new RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher(DomainFactory.INSTANCE, new RaceLogResolver() {
