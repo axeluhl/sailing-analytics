@@ -95,6 +95,7 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
+    pushd .
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
@@ -130,7 +131,7 @@ setup_keys() {
             fi
         fi
     done
-    cd /
+    popd
     rm -rf "${TEMP_KEY_DIR}"
 }
 
