@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -23,26 +24,39 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceAndCompetitorStatusWithRaceLogReconciler;
+import com.sap.sailing.server.impl.RaceLogScoringReplicator;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.metering.CPUMeter;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
@@ -56,6 +70,8 @@ import com.tractrac.model.lib.api.event.RaceStatusType;
  *
  */
 public class TestTracTracRaceAndCompetitorStatusReconciler {
+    private static final String TEST_LEADERBOARD_NAME = "test";
+    private static final String R1 = "R1";
     private AbstractLogEventAuthor author;
     private TrackedRace trackedRace;
     private IRace tractracRace;
@@ -65,7 +81,7 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
     private IRaceCompetitor tractracRaceCompetitor;
     private ICompetitor tractracCompetitor;
     private Competitor competitor;
-    
+    private FlexibleLeaderboard leaderboard;
     private static class RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher extends RaceAndCompetitorStatusWithRaceLogReconciler {
         public RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher(DomainFactory domainFactory,
                 RaceLogResolver raceLogResolver, IRace tractracRace) {
@@ -112,7 +128,15 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
                         /* dateOfBirth */null, "This is Rigo, the coach")), 
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, b, /* store */ false);
         when(tractracCompetitor.getId()).thenReturn((UUID) competitor.getId());
-        raceLog = new RaceLogImpl("RaceLogID");
+        final RaceDefinition raceDefinition = mock(RaceDefinitionImpl.class);
+        when(raceDefinition.getCompetitors()).thenReturn(Collections.singleton(competitor));
+        when(trackedRace.getRace()).thenReturn(raceDefinition);
+        final TrackedRegatta trackedRegatta = mock(TrackedRegatta.class);
+        when(trackedRegatta.getCPUMeter()).thenReturn(CPUMeter.create());
+        when(trackedRace.getTrackedRegatta()).thenReturn(trackedRegatta);
+        leaderboard = new FlexibleLeaderboardImpl(TEST_LEADERBOARD_NAME, new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(), new CourseAreaImpl("area A", new UUID(1200, 1200) , new DegreePosition(100, 100), new MeterDistance(100)));
+        leaderboard.addRace(trackedRace, R1, /* medalRace */ false);
+        raceLog = leaderboard.getRacelog(R1, LeaderboardNameConstants.DEFAULT_FLEET_NAME);
         when(trackedRace.getAttachedRaceLogs()).thenReturn(Collections.singleton(raceLog));
         reconciler = new RaceAndCompetitorStatusWithRaceLogReconcilerWithPublicResultFetcher(DomainFactory.INSTANCE, new RaceLogResolver() {
             @Override
@@ -120,6 +144,16 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
                 return raceLog;
             }
         }, tractracRace);
+        final RacingEventService racingEventService = mock(RacingEventService.class);
+        when(racingEventService.getLeaderboardByName(TEST_LEADERBOARD_NAME)).thenReturn(leaderboard);
+        when(racingEventService.getBaseDomainFactory()).thenReturn(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+        when(racingEventService.apply(ArgumentMatchers.any(RacingEventServiceOperation.class))).thenAnswer(
+                invocation -> {
+                    final RacingEventServiceOperation<?> operation = invocation.getArgument(0);
+                    return operation.applyTo(racingEventService);
+                });
+        final RaceLogScoringReplicator raceLogScoringReplicator = new RaceLogScoringReplicator(racingEventService);
+        leaderboard.getRaceColumnByName(R1).addRaceColumnListener(raceLogScoringReplicator);
         raceLog.add(new RaceLogPassChangeEventImpl(startOfPass, author, /* pPassId */ 1));
     }
     
@@ -344,7 +378,36 @@ public class TestTracTracRaceAndCompetitorStatusReconciler {
             assertEquals(yetNewerResultTimePoint, raceLogBasedResult.getB());
             assertEquals(MaxPointsReason.NONE, raceLogBasedResult.getA().getMaxPointsReason());
             assertEquals(0, raceLogBasedResult.getA().getOneBasedRank());
+        }      
+    }
+    
+    @Test
+    public void testOfficialNullFinishTimeAndZeroRank() {
+        final TimePoint resultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(1));
+        when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.NO_DATA);
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(resultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(0);
+        when(trackedRace.getFinishingTime()).thenReturn(null);
+        reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
+        {
+            // assert scorecorrection msg afterwards is unchanged.
+            assertNull(leaderboard.getScoreCorrection().getComment());
+            assertNull(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
         }
     }
 
+    @Test
+    public void testOfficialFinishTimeAndValidRankUpdateScoreCorrectionMetadata() {
+        final TimePoint resultTimePoint = startOfPass.plus(Duration.ONE_SECOND.times(1));
+        when(tractracRaceCompetitor.getStatus()).thenReturn(RaceCompetitorStatusType.FINISH_CONFIRMED);
+        when(tractracRaceCompetitor.getStatusLastChangedTime()).thenReturn(resultTimePoint.asMillis());
+        when(tractracRaceCompetitor.getOfficialRank()).thenReturn(4);
+        when(trackedRace.getFinishingTime()).thenReturn(null);
+        reconciler.reconcileCompetitorStatus(tractracRaceCompetitor, trackedRace);
+        {
+            // assert scorecorrection msg afterwards is unchanged.
+            assertEquals("Results of race "+R1+" have been updated.", leaderboard.getScoreCorrection().getComment());
+            assertNotNull(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
+        }
+    }
 }
