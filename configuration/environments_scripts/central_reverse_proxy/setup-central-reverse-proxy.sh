@@ -36,10 +36,10 @@ setup_cloud_cfg_and_root_login
 # setup files
 build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
 cd /home
-for dir in *; do 
-    [[ -d "$dir" ]] || continue
-    grep "$dir" /etc/passwd || continue
-    chown -R "$dir":"$dir" "$dir"
+for folder in * ; do
+    [[ -d "\$folder" ]] || continue
+    grep "\$folder" /etc/passwd || continue
+    chown -R "\$folder":"\$folder" "\$folder"
 done
 # setup mail
 setup_mail_sending
@@ -86,7 +86,9 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 /usr/bin/perl install-module.pl File::Copy::Recursive
 # use the localconfig file to setup the bugzilla
 SECONDEOF
-ssh root@${IP} -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
+read -n 1  -p "Check bugzilla localconfig file and then press a key to continue" key_pressed
+# t forces tty allocation.
+ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
 . imageupgrade_functions.sh
@@ -109,7 +111,6 @@ scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
 EOF
-
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
 setup_fail2ban
@@ -136,6 +137,7 @@ sudo systemctl restart postfix
 mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
 THIRDEOF
+
 echo "Your turn! The instance is prepared, hopefully you have given it the correct tags already as they are needed for part 2"
 echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
 echo "And then unmount the volumes and remount them on the new instance."
