@@ -48,7 +48,7 @@ if [[ -d "groups" ]]; then
     cd "groups"
     for group in * ; do
         [[ -e "$group" ]] || continue
-        echo "CREATING group $group"
+        echo "CREATING GROUP $group"
         if [[ -e "$group"/gid ]]; then
             groupadd --gid $(cat "$group"/gid) "$group"
         else
@@ -94,6 +94,7 @@ if [[ -d "users" ]]; then
                 cat "${crontab}">> $HOME_DIR/crontab
                 echo "">> $HOME_DIR/crontab
             done
+            chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
             sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
             sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
             echo "">>$HOME_DIR/crontab  # Adds a newline

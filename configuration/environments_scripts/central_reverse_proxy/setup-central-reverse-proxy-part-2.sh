@@ -4,7 +4,6 @@
 # Assumes already tagged, most files are already copied and that root contains $TEMPORARY_HOME_COPY_LOCATION folder which will be copied over to home.
 IP=$1
 IMAGE_TYPE="$2"
-HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="wiki"
 RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
 TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within this.
