@@ -1,7 +1,11 @@
-name: build
+name: release
 on:
-  - push
-  - workflow_dispatch
+  push:
+    paths-ignore:
+      - 'wiki/**'
+      - '.github/workflows/*'
+      - '**/*.md'
+  workflow_dispatch: {}
 jobs:
   build:
     runs-on: ubuntu-latest-64cpu
@@ -42,7 +46,9 @@ jobs:
         with:
           name: Maven Tests
           path: '**/TEST-*.xml' 
-          max-annotations: '0'
+          max-annotations: '1'
+          list-suites: failed
+          list-tests: failed
           reporter: java-junit
           fail-on-error: true
       - shell: bash
@@ -51,8 +57,15 @@ jobs:
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: ${{ env.SIMPLE_VERSION_INFO }}.zip
+            path: dist/**/*
+            retention-days: 90
       - name: Create Release
         id: create_release
+        if: ${{ github.ref == 'main' || github.ref == 'docker-17' || startsWith(github.ref, 'releases/') }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -63,6 +76,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset tar.gz
         id: upload-release-asset-tar-gz
+        if: ${{ github.ref == 'main' || github.ref == 'docker-17' || startsWith(github.ref, 'releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,6 +87,7 @@ jobs:
           asset_content_type: application/x-tar
       - name: Upload Release Asset release_notes.txt
         id: upload-release-asset-release-notes-txt
+        if: ${{ github.ref == 'main' || github.ref == 'docker-17' || startsWith(github.ref, 'releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,8 +96,3 @@ jobs:
           asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/release-notes.txt
           asset_name: release-notes.txt
           asset_content_type: text/plain
-      - uses: actions/upload-artifact@v4
-        with:
-            name: release
-            path: dist/**/*
-            retention-days: 30

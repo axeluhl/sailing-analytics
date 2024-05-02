@@ -43,6 +43,8 @@ public class WindEstimationDataResource extends AbstractWindEstimationDataResour
         logger.info("Wind Estimation Model Data requested by "+
                 (subject.getPrincipal() == null ? "anonymous user" :
                     subject.getPrincipal().toString()));
+        subject.checkPermission(SecuredDomainType.WIND_ESTIMATION_MODELS.getStringPermissionForTypeRelativeIdentifier(
+                DefaultActions.READ, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {

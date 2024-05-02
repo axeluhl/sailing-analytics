@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.jaxrs.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,11 +30,13 @@ public class WindEstimationDataClient {
 
     private final ReplicableWindEstimationFactoryService windEstimationFactoryService;
     private final String windEstimationDataSourceURL;
+    private final Optional<String> windEstimationModelBearerToken;
 
     public WindEstimationDataClient(String windEstimationDataSourceURL,
-            ReplicableWindEstimationFactoryService windEstimationFactoryService) {
+            ReplicableWindEstimationFactoryService windEstimationFactoryService, Optional<String> windEstimationModelBearerToken) {
         this.windEstimationFactoryService = windEstimationFactoryService;
         this.windEstimationDataSourceURL = windEstimationDataSourceURL;
+        this.windEstimationModelBearerToken = windEstimationModelBearerToken;
     }
 
     /**
@@ -62,9 +65,14 @@ public class WindEstimationDataClient {
     }
 
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
-        HttpGet getProcessor = new HttpGet(getAPIString());
-        HttpResponse processorResponse = client.execute(getProcessor);
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        final HttpGet getProcessor = new HttpGet(getAPIString());
+        windEstimationModelBearerToken.ifPresent(bearerToken -> getProcessor.setHeader("Authorization", "Bearer " + bearerToken));
+        final HttpResponse processorResponse = client.execute(getProcessor);
+        if (processorResponse.getStatusLine().getStatusCode() >= 300) {
+            throw new IOException("Error trying to load wind estimation data from "+getAPIString()+": "
+                    +processorResponse.getStatusLine().getReasonPhrase()+" ("+processorResponse.getStatusLine().getStatusCode()+")");
+        }
         return processorResponse.getEntity().getContent();
     }
 
