@@ -42,7 +42,9 @@ jobs:
         with:
           name: Maven Tests
           path: '**/TEST-*.xml' 
-          max-annotations: '0'
+          max-annotations: '1'
+          list-suites: failed
+          list-tests: failed
           reporter: java-junit
           fail-on-error: true
       - shell: bash
