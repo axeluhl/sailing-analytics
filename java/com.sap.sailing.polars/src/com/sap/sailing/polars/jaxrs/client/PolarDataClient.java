@@ -2,6 +2,7 @@ package com.sap.sailing.polars.jaxrs.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,9 +12,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
 /**
@@ -32,17 +35,25 @@ public class PolarDataClient {
 
     private final ReplicablePolarService polarDataService;
     private final String polarDataSourceURL;
+    private final Optional<String> polarDataBearerToken;
     
     /**
      * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
+     * 
      * @param polarDataSourceURL
      *            archive server URL string
      * @param polarDataService
      *            {@link PolarDataServiceImpl} service to work with
+     * @param polarDataBearerToken
+     *            if present, this will be used in a <tt>Authorization: Bearer ...</tt> HTTP header to authenticate the
+     *            request that fetches the polar data. The token must authenticate a subject with permission
+     *            {@link SecuredDomainType#POLAR_DATA}.{@link DefaultActions#READ READ} on the "SERVER" object from
+     *            where polar data is request as per the {@code polarDataSourceURL}.
      */
-    public PolarDataClient(String polarDataSourceURL, ReplicablePolarService polarDataService) {
+    public PolarDataClient(String polarDataSourceURL, ReplicablePolarService polarDataService, Optional<String> polarDataBearerToken) {
         this.polarDataService = polarDataService;
         this.polarDataSourceURL = polarDataSourceURL;
+        this.polarDataBearerToken = polarDataBearerToken;
     }
 
     /**
@@ -70,9 +81,14 @@ public class PolarDataClient {
     }
 
     protected InputStream getContentFromResponse() throws IOException, ParseException {
-        HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
-        HttpGet getProcessor = new HttpGet(getAPIString());
-        HttpResponse processorResponse = client.execute(getProcessor);
+        final HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        final HttpGet getProcessor = new HttpGet(getAPIString());
+        polarDataBearerToken.ifPresent(bearerToken -> getProcessor.setHeader("Authorization", "Bearer " + bearerToken));
+        final HttpResponse processorResponse = client.execute(getProcessor);
+        if (processorResponse.getStatusLine().getStatusCode() >= 300) {
+            throw new IOException("Error trying to load polar data from "+getAPIString()+": "
+                    +processorResponse.getStatusLine().getReasonPhrase()+" ("+processorResponse.getStatusLine().getStatusCode()+")");
+        }
         return processorResponse.getEntity().getContent();
     }
 
