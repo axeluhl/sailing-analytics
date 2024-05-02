@@ -150,7 +150,7 @@ echo "For further details, checkout this wiki page https://wiki.sapsailing.com/w
 echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
 echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
 read -n 1  -p "Press a key to continue" key_pressed
-# "$(dirname $0)"/setup-central-reverse-proxy-part-2.sh "$IP"  "$IMAGE_TYPE"
+"$(dirname $0)"/setup-central-reverse-proxy-part-2.sh "$IP"  "$IMAGE_TYPE"
 
 # anything in etc
 #not available: perl-HTML-Template  /usr/bin/perl install-module.pl GD
