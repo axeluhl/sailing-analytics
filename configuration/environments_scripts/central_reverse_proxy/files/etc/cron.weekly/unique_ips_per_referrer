@@ -1,4 +1,4 @@
 #!/bin/bash
 cd /var/log/old
-./unique_ips_per_referrer_fast `find . -name 'access_log*'` bundesliga2015_elb_access_log.gz tw2015_elb_access_log.gz >/dev/null 2>/dev/null
+unique_ips_per_referrer_fast `find . -name 'access_log*'` bundesliga2015_elb_access_log.gz tw2015_elb_access_log.gz >/dev/null 2>/dev/null
 exit 0
