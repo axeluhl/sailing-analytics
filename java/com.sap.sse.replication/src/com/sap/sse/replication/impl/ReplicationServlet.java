@@ -147,7 +147,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                         try {
                             replicable.serializeForInitialReplication(compressingOutputStream);
                             logger.info("Done serializing initial load for replicable "+replicableIdAsString+" for remote host "+req.getRemoteHost());
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                             logger.log(Level.SEVERE, "doGet", e);
                             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

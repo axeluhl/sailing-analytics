@@ -17,11 +17,15 @@ Then carry out these steps:
               gcc-c++ ncurses-devel geoip-devel perl-autodie docker
 ```
 
-* activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
+* activate NFS by calling `systemctl enable nfs-server`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
 ```
 /var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)
 ```
+rw = read/write allowed
+nohide = means sub-mounted volumes are included in the parent nfs share
+no_root_squash = Allows remote root users to act as root on the nfs share
+
 * launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
