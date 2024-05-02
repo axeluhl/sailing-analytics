@@ -11,4 +11,4 @@ WantedBy=httpd.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-ExecStart=/root/setupHttpdGitLocal.sh
+ExecStart=setupHttpdGitLocal.sh
