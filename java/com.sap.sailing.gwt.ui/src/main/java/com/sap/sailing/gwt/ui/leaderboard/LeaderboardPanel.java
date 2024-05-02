@@ -128,7 +128,6 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
@@ -240,7 +239,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     protected LeaderboardDTO leaderboard;
-    final Map<Action, Boolean> premiumLeaderboardPermissions = new HashMap<>();
 
     private final TotalRankColumn totalRankColumn;
     
@@ -2593,15 +2591,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
-            // check premium leaderboard permissions only on total set of actions defined on DetailType (should be less)
-            // instead of call hasPermission on each single DetailType and collect result in premiumLeaderboardPermissions map.
-            Set<Action> premiumLeaderboardActions = DetailType
-                    .getAllPremiumActionsFromSubset(overallDetailColumnMap.keySet());
-            premiumLeaderboardPermissions.clear();
-            premiumLeaderboardPermissions.putAll(paywallResolver
-                    .getHasPermissionMap(premiumLeaderboardActions, leaderboard));
-        }
-        if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -2895,8 +2884,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
                     && overallDetailColumnMap.containsKey(overallDetailType)
-                    && (overallDetailType.getPremiumAction() == null
-                            || premiumLeaderboardPermissions.get(overallDetailType.getPremiumAction()))) {
+                    ) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }

@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettingsWithContext;
 import com.sap.sse.common.settings.generic.BooleanSetting;
-import com.sap.sse.common.settings.generic.EnumSetSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.premium.settings.SecuredEnumSetSetting;
@@ -27,9 +26,9 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
     private static final long serialVersionUID = 2625004077963291333L;
     
     protected SecuredEnumSetSetting<DetailType> maneuverDetailsToShow;
-    protected EnumSetSetting<DetailType> legDetailsToShow;
-    protected EnumSetSetting<DetailType> raceDetailsToShow;
-    protected EnumSetSetting<DetailType> overallDetailsToShow;
+    protected SecuredEnumSetSetting<DetailType> legDetailsToShow;
+    protected SecuredEnumSetSetting<DetailType> raceDetailsToShow;
+    protected SecuredEnumSetSetting<DetailType> overallDetailsToShow;
     protected LongSetting delayBetweenAutoAdvancesInMilliseconds;
     protected BooleanSetting isShowCompetitorNationality;
     
@@ -55,14 +54,17 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         legDetails.add(DetailType.LEG_DISTANCE_TRAVELED);
         legDetails.add(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.LEG_RANK_GAIN);
-        legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString);
+        legDetailsToShow = new SecuredEnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString, 
+                context.getPaywallResolver(), context.getSecuredDTO());
         List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         raceDetails.add(DetailType.RACE_DISPLAY_BOATS);
-        raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOfString);
+        raceDetailsToShow = new SecuredEnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOfString, 
+                context.getPaywallResolver(), context.getSecuredDTO());
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
-        overallDetailsToShow = new EnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOfString);
+        overallDetailsToShow = new SecuredEnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOfString, 
+                context.getPaywallResolver(), context.getSecuredDTO());
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorShortNameColumn = new BooleanSetting("showCompetitorShortNameColumn", this, true);
