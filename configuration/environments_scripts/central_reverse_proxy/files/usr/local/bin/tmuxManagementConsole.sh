@@ -27,7 +27,3 @@ else
 
 	tmux select-window -t "$sn:0"
 fi
-
-if [[ "$1" != "unattended" ]]; then
-	tmux -2 attach-session -t "$sn"
-fi

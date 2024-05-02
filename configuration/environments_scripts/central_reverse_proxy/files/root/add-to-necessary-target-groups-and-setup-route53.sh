@@ -9,7 +9,7 @@ echo "Registering with nlb"
 aws elbv2 register-targets --target-group-arn "$nlbArn"  --targets Id="${LOCAL_IPV4}",Port=80
 echo "Fetching tags"
 describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | .TargetGroupArn'))
-for tag in "${tags[@]}"; do
+for tag in "${TAGS[@]}"; do
     echo "Adding to target groups with $tag"
     for tgArn in $(echo "$describe_tags" | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="'"$tag"'") ) | .ResourceArn'); do
         if [[ "$tgArn" != "$nlbArn" ]]; then
