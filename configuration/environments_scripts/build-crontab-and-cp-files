@@ -73,7 +73,7 @@ if [[ -d "users" ]]; then
             user_GID=$(cat "$USERNAME"/gid)
             echo "GID => $user_GID"
             groupadd --gid "$user_GID" "$USERNAME"
-            [[ "$?" -eq 0 ]] || echo "Group id or name already exists."
+            [[ "$?" -eq 0 ]] || echo "Group id or name already exists." >&2
         fi
         if [[ -n "$user_UID" && -n "$user_GID" ]]; then
             adduser --uid "$user_UID" --gid "$user_GID" "$USERNAME"
