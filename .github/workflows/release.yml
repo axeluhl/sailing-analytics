@@ -1,7 +1,10 @@
-name: build
+name: release
 on:
-  - push
-  - workflow_dispatch
+  push:
+    paths-ignore:
+      - 'wiki/**'
+      - '.github/workflows/*'
+  workflow_dispatch: {}
 jobs:
   build:
     runs-on: ubuntu-latest-64cpu
@@ -85,6 +88,6 @@ jobs:
           asset_content_type: text/plain
       - uses: actions/upload-artifact@v4
         with:
-            name: release
-            path: dist/**/*
-            retention-days: 30
+            name: ${{ env.SIMPLE_VERSION_INFO }}.tar.gz
+            path: dist/${{ env.SIMPLE_VERSION_INFO }}/${{ env.SIMPLE_VERSION_INFO }}.tar.gz
+            retention-days: 90
