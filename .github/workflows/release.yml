@@ -65,7 +65,7 @@ jobs:
             retention-days: 90
       - name: Create Release
         id: create_release
-        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
+        if: ${{ github.ref == 'main' || startsWith(github.ref, 'releases/') }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +76,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset tar.gz
         id: upload-release-asset-tar-gz
-        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
+        if: ${{ github.ref == 'main' || startsWith(github.ref, 'releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -87,7 +87,7 @@ jobs:
           asset_content_type: application/x-tar
       - name: Upload Release Asset release_notes.txt
         id: upload-release-asset-release-notes-txt
-        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
+        if: ${{ github.ref == 'main' || startsWith(github.ref, 'releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
