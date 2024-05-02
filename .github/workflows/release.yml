@@ -4,6 +4,7 @@ on:
     paths-ignore:
       - 'wiki/**'
       - '.github/workflows/*'
+      - '**/*.md'
   workflow_dispatch: {}
 jobs:
   build:
@@ -56,8 +57,15 @@ jobs:
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: ${{ env.SIMPLE_VERSION_INFO }}.zip
+            path: dist/**/*
+            retention-days: 90
       - name: Create Release
         id: create_release
+        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,6 +76,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset tar.gz
         id: upload-release-asset-tar-gz
+        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +87,7 @@ jobs:
           asset_content_type: application/x-tar
       - name: Upload Release Asset release_notes.txt
         id: upload-release-asset-release-notes-txt
+        if: ${{ github.ref == 'main' || contains(github.ref, 'releases/**') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -86,8 +96,3 @@ jobs:
           asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/release-notes.txt
           asset_name: release-notes.txt
           asset_content_type: text/plain
-      - uses: actions/upload-artifact@v4
-        with:
-            name: ${{ env.SIMPLE_VERSION_INFO }}.tar.gz
-            path: dist/${{ env.SIMPLE_VERSION_INFO }}/${{ env.SIMPLE_VERSION_INFO }}.tar.gz
-            retention-days: 90
