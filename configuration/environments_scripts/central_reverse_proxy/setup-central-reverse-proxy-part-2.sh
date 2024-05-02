@@ -31,8 +31,8 @@ sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
 hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 echo "Please logon and go to root where you will find 3 scripts. First authenticate with awsmfa (you may need to alter the bash alias for your credentials)."
-echo "Then run add-to-necessary-target-groups-and-setup-route53.sh"
-echo "Then remount-nfs-shares.sh because the previous script alters the logfiles and smtp entries"
-echo "Finally run set-elastic-ip.sh"
+echo "Then run /root/add-to-necessary-target-groups-and-setup-route53.sh"
+echo "Then /root/remount-nfs-shares.sh because the previous script alters the logfiles and smtp entries"
+echo "Finally run /root/set-elastic-ip.sh"
 echo "Have a great day!"
 EOF
