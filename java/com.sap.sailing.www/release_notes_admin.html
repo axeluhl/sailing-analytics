@@ -23,6 +23,25 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">May 2024</h2>
+          <ul class="bulletList">
+            <li>Reading the wind estimation data from a server during start-up, using the
+                <tt>windestimation.source.url</tt> system property, now requires authentication.
+                The <tt>java/target/start</tt> script now reads the <tt>WINDESTIMATION_BEARER_TOKEN</tt>
+                variable and passes it as the <tt>windestimation.source.bearertoken</tt> system property
+                to the application. The user authenticated by that token must have the
+                <tt>WIND_ESTIMATION_MODELS:READ</tt> permission for the server identified by the
+                URL provided in the <tt>windestimation.source.url</tt> property, for example
+                <tt>WIND_ESTIMATION_MODELS:READ:ARCHIVE</tt> if the URL is <tt>https://sapsailing.com</tt></li>
+            <li>Reading the polar data from a server during start-up, using the
+                <tt>polardata.source.url</tt> system property, now requires authentication.
+                The <tt>java/target/start</tt> script now reads the <tt>POLAR_DATA_BEARER_TOKEN</tt>
+                variable and passes it as the <tt>polardata.source.bearertoken</tt> system property
+                to the application. The user authenticated by that token must have the
+                <tt>POLAR_DATA:READ</tt> permission for the server identified by the
+                URL provided in the <tt>polardata.source.url</tt> property, for example
+                <tt>POLAR_DATA:READ:ARCHIVE</tt> if the URL is <tt>https://sapsailing.com</tt></li>
+          </ul>
           <h2 class="articleSubheadline">April 2024</h2>
           <ul class="bulletList">
             <li>The TracTrac connector now pools and re-uses event subscriber threads for live connections
