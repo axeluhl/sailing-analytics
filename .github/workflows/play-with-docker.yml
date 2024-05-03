@@ -1,0 +1,16 @@
+name: play-with-docker
+on:
+  workflow_dispatch: {}
+jobs:
+  play-with-docker-job:
+    #runs-on: ubuntu-latest-64cpu
+    #runs-on: ubuntu-latest-4cpu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: docker.sapsailing.com
+          username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
+          password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+
