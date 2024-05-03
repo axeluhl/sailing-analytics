@@ -4,7 +4,6 @@ on:
     inputs:
       release:
         description: Release
-        required: true
         default: ''
 jobs:
   play-with-docker-job:
