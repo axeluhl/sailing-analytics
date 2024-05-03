@@ -37,8 +37,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: test:${{ env.RELEASE }}
-          dockerfile: docker/Dockerfile
+          tags: docker.sapsailing.com/test:${{ env.RELEASE }}
+          file: docker/Dockerfile
           context: docker/
           push: true
       - name: Clean up copied files
