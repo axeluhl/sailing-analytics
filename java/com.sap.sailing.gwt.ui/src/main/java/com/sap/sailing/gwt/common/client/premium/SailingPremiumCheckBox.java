@@ -13,8 +13,8 @@ import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetti
 
 public class SailingPremiumCheckBox extends PremiumCheckBox {
 
-    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver, SecuredDTO contextDTO) {
-        super(label, action, paywallResolver, contextDTO);
+    public SailingPremiumCheckBox(final String label, final Action action, final PaywallResolver paywallResolver, final SecuredDTO contextDTO, final boolean defaultValue) {
+        super(label, action, paywallResolver, contextDTO, defaultValue);
     }
     
     public SailingPremiumCheckBox(final String label, final AbstractSecuredValueSetting<Boolean> setting) {
