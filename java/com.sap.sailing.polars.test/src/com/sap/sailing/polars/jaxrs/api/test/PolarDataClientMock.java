@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import org.json.simple.parser.ParseException;
 
@@ -16,7 +17,7 @@ public class PolarDataClientMock extends PolarDataClient {
     private final File file;
 
     public PolarDataClientMock(File file, ReplicablePolarService polarService, DomainFactory domainFactory) {
-        super(null, polarService);
+        super(null, polarService, Optional.empty());
         polarService.registerDomainFactory(domainFactory);
         this.file = file;
     }

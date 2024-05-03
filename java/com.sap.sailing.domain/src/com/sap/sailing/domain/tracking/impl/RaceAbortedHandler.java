@@ -40,7 +40,7 @@ public class RaceAbortedHandler extends UpdateHandler implements RaceAbortedList
         Map<String, String> additionalArgs = new HashMap<>();
         additionalArgs.put("race_status", raceStatus);
         URL raceAbortedURL = buildUpdateURL(additionalArgs);
-        logger.info("Using " + raceAbortedURL.toString() + " for the race aborted notification!");
+        logger.info("Using " + eraseSecurityRelatedValuesFromURL(raceAbortedURL.toString()) + " for the race aborted notification!");
         HttpURLConnection connection = (HttpURLConnection) raceAbortedURL.openConnection();
         try {
             connection = setConnectionProperties(connection);
@@ -53,7 +53,8 @@ public class RaceAbortedHandler extends UpdateHandler implements RaceAbortedList
             if (connection != null) {
                 connection.disconnect();
             } else {
-                logger.severe("Connection to TracTrac race aborted URL " + raceAbortedURL.toString() + " could not be established");
+                logger.severe("Connection to TracTrac race aborted URL " +
+                        eraseSecurityRelatedValuesFromURL(raceAbortedURL.toString()) + " could not be established");
             }
         }
     }

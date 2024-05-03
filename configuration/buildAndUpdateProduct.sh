@@ -127,6 +127,7 @@ if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
+    echo "-G Build forked GWT and gwt-maven-plugin locally instead of downloading Github release."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
@@ -140,6 +141,7 @@ if [ $# -eq 0 ]; then
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "                  This parameter can also hold the name of the release if you are using the release command."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
+    echo "-L in conjunction with the release sub-command, build the release only locally to dist/ and do not upload"
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
@@ -182,11 +184,12 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocpaArvm:n:l:s:w:x:j:u'
+options=':bgtocpaArvmLG:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
+        G) BUILD_GWT_FORK=1;;
         t) testing=0;;
         b) onegwtpermutationonly=1;;
         o) offline=1;;
@@ -199,6 +202,7 @@ do
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
+        L) LOCAL_RELEASE_ONLY=1;;
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
@@ -358,12 +362,16 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
 
     echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
 
-    echo "Checking the remote connection..."
-    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
-    echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
+    if [ "${LOCAL_RELEASE_ONLY}" != "1" ]; then
+        echo "Checking the remote connection..."
+        REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
+        echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
 
-    `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
-    echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+        `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
+        echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+    else
+        echo "Release available at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/, tarball at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz"
+    fi
 fi
 
 if [[ "$@" == "local-deploy" ]]; then
@@ -748,8 +756,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         extra="$extra -P with-not-android-relevant,!with-mobile"
         if [ $gwtcompile -eq 1 ]; then
-	  echo "Building and installing forked GWT version..."
-	  JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+          if [ "${BUILD_GWT_FORK}" = "1" ]; then
+            echo "Building and installing forked GWT version..."
+	    JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+          else
+            echo "Downloading and installing forked GWT version..."
+            `dirname $0`/install-gwt-from-fork-releases https://github.com/SAP/gwt-forward-serialization-rpc https://github.com/SAP/gwt-maven-plugin-forward-serialization-rpc 2.11.0 .
+          fi
         fi
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
