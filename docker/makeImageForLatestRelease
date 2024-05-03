@@ -2,7 +2,7 @@
 release=$1
 if [ "${release}" = "" ]; then
   SET_LATEST=1
-  release=$(wget -O - http://releases.sapsailing.com/ 2>/dev/null | grep 'build-[0-9]\{10\}' | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
+  release=$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep 'build-[0-9]\{10\}' | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
   echo Latest release is ${release}
 fi
 GITROOT="`dirname $0`/.."
