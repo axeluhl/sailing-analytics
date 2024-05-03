@@ -15,6 +15,12 @@ jobs:
           registry: docker.sapsailing.com
           username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
           password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+      - name: Copy a few files
+        shell: bash
+        run: |
+          cp "java/target/env.sh" docker/
+          cp "java/target/start" docker/
+          cp "java/target/configuration/JavaSE-11.profile" docker/
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -22,3 +28,7 @@ jobs:
           dockerfile: docker/Dockerfile
           context: docker/
           push: true
+      - name: Clean up copied files
+        shell: bash
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile
+          
