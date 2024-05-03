@@ -1,0 +1,34 @@
+name: play-with-docker
+on:
+  workflow_dispatch: {}
+jobs:
+  play-with-docker-job:
+    #runs-on: ubuntu-latest-64cpu
+    #runs-on: ubuntu-latest-4cpu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to docker.sapsailing.com
+        uses: docker/login-action@v3
+        with:
+          registry: docker.sapsailing.com
+          username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
+          password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+      - name: Copy a few files
+        shell: bash
+        run: |
+          cp "java/target/env.sh" docker/
+          cp "java/target/start" docker/
+          cp "java/target/configuration/JavaSE-11.profile" docker/
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          tags: test:0.0.1
+          dockerfile: docker/Dockerfile
+          context: docker/
+          push: true
+      - name: Clean up copied files
+        shell: bash
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile
+          
