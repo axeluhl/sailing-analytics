@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -166,8 +165,6 @@ public class LiveRaceWithRacemapAndLeaderBoardPresenterImpl
             
             @Override
             public void onSuccess(StrippedLeaderboardDTO strippedLeaderboardDto) {
-                // TODO bug5774 Test if this code works
-                GWT.log("++++++ loaded stripped leaderboard DTO successfully +++++");
                 SecurityChildSettingsContext context = new SecurityChildSettingsContext(strippedLeaderboardDto, 
                         new PaywallResolverImpl(getClientFactory().getUserService(), 
                                 getClientFactory().getSubscriptionServiceFactory()));

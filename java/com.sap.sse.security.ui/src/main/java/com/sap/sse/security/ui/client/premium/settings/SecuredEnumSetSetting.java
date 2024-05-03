@@ -64,7 +64,6 @@ public class SecuredEnumSetSetting<T extends Enum<T> & SecuredEnum> extends Abst
             } else {
                 // handle default values
                 if (StreamSupport.stream(getDefaultValues().spliterator(), false).anyMatch(t -> t == singleValue)) {
-                    GWT.log("Change not permitted but is set already by default value: " + singleValue.name());
                     permittedCollection.add(singleValue);
                 }
             }

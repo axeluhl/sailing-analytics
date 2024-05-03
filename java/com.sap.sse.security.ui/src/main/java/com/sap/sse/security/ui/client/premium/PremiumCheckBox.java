@@ -113,10 +113,7 @@ public abstract class PremiumCheckBox extends PremiumUiElement implements HasVal
 
     @Override
     public Boolean getValue() {
-        // TODO bug5774 Default value???
-        // hasPermission() && 
         final Boolean result;
-        GWT.log("get secured value from " + checkBox.getTitle() + ": " + checkBox.getValue() + "(" + checkBox.isEnabled() + "), default value: " + defaultValue);
         if (hasPermission()) {
             result = checkBox.getValue();
         } else {

@@ -1507,9 +1507,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren(boolean filterByPermissions) {
+        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
             List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new ArrayList<>();
-            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren(filterByPermissions)) {
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
             if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {

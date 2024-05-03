@@ -51,8 +51,6 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         maneuverDetailsToShow = new SecuredEnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOfString, 
                 context.getPaywallResolver(), context.getSecuredDTO());
         List<DetailType> legDetails = new ArrayList<>();
-        legDetails.add(DetailType.LEG_DISTANCE_TRAVELED);
-        legDetails.add(DetailType.LEG_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.LEG_RANK_GAIN);
         legDetailsToShow = new SecuredEnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString, 
                 context.getPaywallResolver(), context.getSecuredDTO());
