@@ -69,7 +69,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            name: test-results-and-build-log.zip
+            name: test-results-and-build-log
             path: |
                 **/surefire-reports/**
                 build.log
