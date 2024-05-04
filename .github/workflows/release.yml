@@ -21,12 +21,6 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
-      - name: Install JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '17'
-          mvn-toolchain-id: 'JavaSE-17'
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -69,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            name: test-results-and-build-log.zip
+            name: test-results-and-build-log
             path: |
                 **/surefire-reports/**
                 build.log
