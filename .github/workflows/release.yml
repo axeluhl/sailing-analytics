@@ -41,6 +41,13 @@ jobs:
           JAVA8_HOME: ${{env.JAVA_HOME_8_X64}}
         run: |
           ./configuration/buildAndUpdateProduct.sh -x 60 build 2>&1 | tee build.log
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+            name: build.log
+            path: build.log
+            retention-days: 90
       - name: Collect Test Reports
         uses: dorny/test-reporter@v1
         if: always()
@@ -59,20 +66,18 @@ jobs:
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
-      - name: Upload test results and build log
+      - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-            name: test-results-and-build-log
-            path: |
-                **/surefire-reports/**
-                build.log
+            name: test-results
+            path: **/surefire-reports/**
             retention-days: 90
       - name: Upload distribution artifact
         uses: actions/upload-artifact@v4
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         with:
-            name: ${{ env.SIMPLE_VERSION_INFO }}.zip
+            name: ${{ env.SIMPLE_VERSION_INFO }}
             path: dist/**/*
             retention-days: 90
       - name: Create Release
