@@ -59,13 +59,24 @@ jobs:
           reporter: java-junit
           fail-on-error: true
       - shell: bash
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         run: |
           ./configuration/buildAndUpdateProduct.sh -u -L release
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
+      - name: Upload test results and build log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+            name: test-results-and-build-log.zip
+            path: |
+                **/surefire-reports/**
+                build.log
+            retention-days: 90
       - name: Upload distribution artifact
         uses: actions/upload-artifact@v4
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         with:
             name: ${{ env.SIMPLE_VERSION_INFO }}.zip
             path: dist/**/*
