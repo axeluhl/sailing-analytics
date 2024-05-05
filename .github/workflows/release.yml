@@ -71,7 +71,8 @@ jobs:
         if: always()
         with:
             name: test-results
-            path: **/surefire-reports/**
+            path: |
+                **/surefire-reports/**
             retention-days: 90
       - name: Upload distribution artifact
         uses: actions/upload-artifact@v4
