@@ -1,10 +1,15 @@
-name: build
+name: release
 on:
-  - push
-  - workflow_dispatch
+  push:
+    paths-ignore:
+      - 'wiki/**'
+      - '.github/workflows/*'
+      - '**/*.md'
+  workflow_dispatch: {}
 jobs:
   build:
     runs-on: ubuntu-latest-64cpu
+    #runs-on: ubuntu-latest-4cpu
     steps:
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
@@ -33,25 +38,51 @@ jobs:
       - shell: bash
         env: # Or as an environment variable
           APP_PARAMETERS: "-Daws.region=eu-west-1 -Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}"
+          JAVA8_HOME: ${{env.JAVA_HOME_8_X64}}
         run: |
           ./configuration/buildAndUpdateProduct.sh -x 60 build 2>&1 | tee build.log
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+            name: build.log
+            path: build.log
+            retention-days: 90
       - name: Collect Test Reports
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: Maven Tests
           path: '**/TEST-*.xml' 
-          max-annotations: '0'
+          max-annotations: '1'
+          list-suites: failed
+          list-tests: failed
           reporter: java-junit
           fail-on-error: true
       - shell: bash
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         run: |
           ./configuration/buildAndUpdateProduct.sh -u -L release
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+            name: test-results
+            path: **/surefire-reports/**
+            retention-days: 90
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        with:
+            name: ${{ env.SIMPLE_VERSION_INFO }}
+            path: dist/**/*
+            retention-days: 90
       - name: Create Release
         id: create_release
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,6 +93,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset tar.gz
         id: upload-release-asset-tar-gz
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,6 +104,7 @@ jobs:
           asset_content_type: application/x-tar
       - name: Upload Release Asset release_notes.txt
         id: upload-release-asset-release-notes-txt
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -80,8 +113,3 @@ jobs:
           asset_path: ./dist/${{ env.SIMPLE_VERSION_INFO }}/release-notes.txt
           asset_name: release-notes.txt
           asset_content_type: text/plain
-      - uses: actions/upload-artifact@v4
-        with:
-            name: release
-            path: dist/**/*
-            retention-days: 30
