@@ -32,7 +32,7 @@ download_and_install_latest_sap_jvm_8() {
       TMP=/tmp
     fi
     echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip" >>/var/log/sailing.err
-    curl --cookie eula_3_1_agreed=tools.hana.ondemand.com/developer-license-3_1.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
+    curl --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
     cd /opt
     rm -rf sapjvm_8
     if [ -f SIGNATURE.SMF ]; then
