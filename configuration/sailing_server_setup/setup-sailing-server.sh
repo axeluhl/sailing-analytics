@@ -65,6 +65,8 @@ EOF
     # Install mountnvmeswap stuff
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap /usr/local/bin
     sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
+    sudo ln -s /home/sailing/code/configuration/imageupgrade.sh /usr/local/bin
+    sudo ln -s /home/sailing/code/configuration/imageupgrade_functions.sh /usr/local/bin
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
