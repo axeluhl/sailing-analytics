@@ -36,8 +36,11 @@ echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
 sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
 hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
-echo "Please now run the script target-group-tag-route53-nfs-elasticIP-setup.sh which configures the tags, adds to the "
-echo "necessary target groups, modifies a few records in route53, remounts those dependent on this, and sets the elastic IP."
+echo "Please now run the script target-group-tag-route53-nfs-elasticIP-setup.sh which configures the EC2 instance tags, adds to the "
+echo "necessary target groups, modifies a few records in route53 (logs.internal.sapsailing.com"
+echo "and smtp.internal.sapsailing.com), remounts those dependent on this, and sets the elastic IP."
 echo "You will need to have the aws cli installed and have the necessary permissions to make these alterations manually."
+echo "In particular, make sure you have an active session token in your shell's environment, e.g., obtained"
+echo "through the awsmfalogon.sh script."
 echo "Have a great day!"
 EOF
