@@ -138,7 +138,7 @@ mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
 THIRDEOF
 
-echo "Your turn! The instance is prepared, hopefully you have given it the correct tags already as they are needed for part 2."
+echo "Your turn! READ CAREFULLY! The instance is now prepared, hopefully you have given it the correct tags already as they are needed for part 2."
 echo "Which tags you may ask... The central reverse proxy requires the following key pairs (one space added for clarity):"
 echo "key:CentralReverseProxy value:true"
 echo "key:ReverseProxy value:<optional>"
@@ -146,6 +146,8 @@ echo "key:Name value:Webserver"
 echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
 echo "And that there is at least 1 healthy disposable in the same availability zone as the archive, so there is no risk of all the targets being briefly unhealthy."
 echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy and remount them on the new instance."
+echo "This can be done in the admin console by going to the webserver and clicking on the volumes in question (found within the storage tab)."
+echo "Then click Detach from within the Actions column."
 echo "For further details, checkout this wiki page https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies"
 echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
 echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
