@@ -1,7 +1,16 @@
 #!/bin/bash
 
 # PART 2
-# Assumes already tagged, most files are already copied and that root contains $TEMPORARY_HOME_COPY_LOCATION folder which will be copied over to home.
+# Assumes to be run after or be invoked by setup-central-reverse-proxy.sh which
+# is assumed to have prepared content for user home folders in /root/temporary_home_copy,
+# has set up the software packages, and that the user has mounted the volumes with their
+# original content to /home, /var/log, et cetera.
+#
+# Call as follows:
+#    setup-central-reverse-proxy-part-2.sh {external-ip-of-new-instance} {image-type}
+# where {image-type} identifies the "environment" from configuration/environments_scripts
+# which usually would be "central_reverse_proxy" here, passed in from the previous stage's
+# script.
 IP=$1
 IMAGE_TYPE="$2"
 GIT_COPY_USER="wiki"
@@ -21,10 +30,7 @@ echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
 systemctl start nfs-server
 cd /var/log/old/cache/docker/registry && docker-compose-up
-internal_ip=\$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
-cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
-cd /root && sed -i "s/SMTP_INTERNAL_IP/\$internal_ip/" batch.json
-scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
+scp -p -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
 # append hostname to sysconfig
 echo "Please now run the script target-group-tag-route53-nfs-elasticIP-setup.sh which configures the tags, adds to the "
 echo "necessary target groups, modifies a few records in route53, remounts those dependent on this, and sets the elastic IP."
