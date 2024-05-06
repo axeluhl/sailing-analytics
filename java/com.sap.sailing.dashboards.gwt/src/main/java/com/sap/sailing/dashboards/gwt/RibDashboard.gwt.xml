@@ -55,8 +55,6 @@
 	<set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED" />
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
 
-	<set-property name="user.agent" value="safari" />
-
 	<set-configuration-property name="mgwt.css" value="pretty" />
 	<set-configuration-property name="CssResource.enableGss" value="true" />
 	<set-configuration-property name="CssResource.conversionMode" value="strict" />

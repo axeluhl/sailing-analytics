@@ -17,6 +17,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -27,7 +28,6 @@ import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomType
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
 import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
@@ -169,43 +170,60 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.BUOYS);
         }
-        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService, subscriptionServiceFactory);
-        // TODO bug5774 set RaceDTO to RaceMapLifecycle to enable premium functions
-        RaceDTO raceDTO = null;
-        final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
-        final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
-                /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
-                /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
-                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false, 
-                /* defaultForTailLengthInMilliseconds */ null, paywallResolver, raceDTO);
-        final RaceMapSettings raceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(defaultRaceMapSettings, raceDTO, paywallResolver)
-                .withTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds)
-                .withHelpLinesSettings(getHelpLineSettings())
-                .withZoomSettings(raceMapZoomSettings)
-                .build();
-        final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
-                asyncActionsExecutor, errorReporter,
-                Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver, raceDTO), raceMapSettings,
-                sailingServiceAsync, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
-                new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
-                startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true,
-                new DefaultQuickFlagDataProvider(), paywallResolver, /* isSimulationEnabled */false);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
-        raceMap.setSize("100%", "100%");
-        card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
-        card_map_container.add(raceMap);
-        /**
-         * Executes onResize() after the reflow of the DOM. Otherwise it has no effect.
-         * Needs to resize the map because google maps are not shown loaded fully when they are hidden.
-         * */
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                raceMap.onResize();
-            }
-        });
+        userService.createEssentialSecuredDTOByIdAndType(
+                /* permission Type */startAnalysisDTO.regattaAndRaceIdentifier.getPermissionType(),
+                /* name */ startAnalysisDTO.regattaAndRaceIdentifier.getName(),
+                /* TypeRelativeObjectIdentifier */ startAnalysisDTO.regattaAndRaceIdentifier
+                        .getTypeRelativeObjectIdentifier(),
+                new AsyncCallback<SecuredDTO>() {
+                    @Override
+                    public void onSuccess(SecuredDTO raceDTO) {
+                        final PaywallResolver paywallResolver = new PaywallResolverImpl(userService,
+                                subscriptionServiceFactory);
+                        // TODO bug5774 set RaceDTO to RaceMapLifecycle to enable premium functions
+                        final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
+                        final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+                        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
+                                /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
+                                /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
+                                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false,
+                                /* defaultForTailLengthInMilliseconds */ null, paywallResolver, raceDTO);
+                        final RaceMapSettings raceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(
+                                defaultRaceMapSettings, raceDTO, paywallResolver)
+                                        .withTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds)
+                                        .withHelpLinesSettings(getHelpLineSettings())
+                                        .withZoomSettings(raceMapZoomSettings).build();
+                        final RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(
+                                sailingServiceAsync, asyncActionsExecutor, errorReporter,
+                                Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier),
+                                5000l /* requestInterval */);
+                        raceMap = new RaceMap(null, null,
+                                new RaceMapLifecycle(StringMessages.INSTANCE, paywallResolver, raceDTO),
+                                raceMapSettings, sailingServiceAsync, asyncActionsExecutor, errorReporter, timer,
+                                competitorSelectionModel, new RaceCompetitorSet(competitorSelectionModel),
+                                StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources,
+                                /* showHeaderPanel */ true, new DefaultQuickFlagDataProvider(), paywallResolver,
+                                /* isSimulationEnabled */false);
+                        raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
+                        raceMap.setSize("100%", "100%");
+                        card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
+                        card_map_container.add(raceMap);
+                        /**
+                         * Executes onResize() after the reflow of the DOM. Otherwise it has no effect. Needs to resize
+                         * the map because google maps are not shown loaded fully when they are hidden.
+                         */
+                        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                raceMap.onResize();
+                            }
+                        });
+                    };
+
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Cannot create essential raceDTO", caught);
+                    };
+                });
     }
     
     private double getHeightForRaceMapInPixels(){

@@ -24,7 +24,9 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.commons.math;bundle-version="2.1.0",
  com.sap.sse.security.ui,
  com.sap.sse,
- com.sap.sse.replication.interfaces
+ com.sap.sse.replication.interfaces,
+ com.sap.sse.security.common,
+ com.sap.sse.landscape.common
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sse.security.shared.dto,
  javax.servlet;version="3.1.0",

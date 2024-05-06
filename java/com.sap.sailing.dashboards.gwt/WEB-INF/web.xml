@@ -34,6 +34,15 @@
         <url-pattern>/service/sailing</url-pattern>
         <url-pattern>/service/sailing/*</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <display-name>User Management Write</display-name>
+        <servlet-name>UserManagementService</servlet-name>
+        <servlet-class>com.sap.sse.security.ui.server.UserManagementWriteServiceImpl</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserManagementService</servlet-name>
+        <url-pattern>/service/usermanagement</url-pattern>
+    </servlet-mapping>
 
 	<filter>
 		<filter-name>LocaleInjectionFilter</filter-name>
