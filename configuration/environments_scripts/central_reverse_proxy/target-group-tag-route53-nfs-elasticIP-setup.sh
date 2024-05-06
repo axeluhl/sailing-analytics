@@ -1,6 +1,11 @@
 #!/bin/bash
+# This script is to be run after part 1 and part 2. It should be run locally and 
+# requires the user to have the AWS CLI installed, as well as credentials. They must also have ran the awsmfalogon.sh to authenticate.
+# It will add the necessary tags, alter route 53 records, remount the nfs mounts that depend on these changes, add to the
+# necessary target groups and switch the elastic IP. 
 if [[ "$#" -ne 1 ]]; then
     echo "Please pass the remote IP address as the only parameter."
+    echo "Please check comment description for usage."
     exit 2
 fi
 target_groups=$(aws elbv2 describe-target-groups)

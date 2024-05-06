@@ -23,7 +23,9 @@
 # This will do all necessary set-up up to the point where the large volumes
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
-
+if [[ "$#" -ne 2 ]]; then
+    echo "IP and bearer token required. Please check comment description for further details."
+fi
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
@@ -170,9 +172,10 @@ echo "Your turn! READ CAREFULLY! The instance is now prepared."
 echo "Please remove the existing central reverse proxy from all target groups tagged with \"CentralReverseProxy\""
 echo "or \"allReverseProxies\" (draining can take 5 mins):"
 echo "And that there is at least 1 healthy disposable in the SAME availability zone as the archive, so there is no risk of all the targets being briefly unhealthy."
-echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy and remount them on the new instance."
-echo "This can be done in the admin console by going to the webserver and clicking on the volumes in question (found within the storage tab)."
-echo "Then click Detach from within the Actions column."
+echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy,"
+echo "detach, reattach and remount."
+echo "The detaching and attaching can be done in the admin console by going to the webserver and clicking on the volumes in question (found within the storage tab)."
+echo "Then click Detach from within the Actions column. The mounting can be done using umount -l -f <location> on the existing instance; the remounting can be done with mount -a on the new instance."
 echo "For further details, checkout this wiki page https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies"
 echo "Once you are confident that this is working, please press a key to trigger part 2, which"
 echo "sets up the hostname, copies /etc/ssh and configures the users and crontabs."
