@@ -1,7 +1,8 @@
 #!/bin/bash
 target_groups=$(aws elbv2 describe-target-groups)
-LOCAL_IPV4=$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
-INSTANCE_ID=$(ec2-metadata --instance-id | sed "s/instance-id: *//")
+LOCAL_IPV4=$(ssh root@sapsailing.com "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
+INSTANCE_ID=$(ssh root@sapsailing.com "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
+ELASTIC_IP="54.229.94.254"
 TAGS=("allReverseProxies" "CentralReverseProxy")
 extract_public_ip() {
     jq -r ' .Instances | .[] | .PublicIpAddress' | grep -v null
@@ -10,6 +11,11 @@ select_instances_by_tag() {
     # $1: tag
     jq -r '.Reservations | .[] | select(.Instances | .[] | .Tags| any (.Key=="'"$1"'"))'
 }
+cd $(dirname "$0")
+# give the instance the necessary tags.
+for tag in "${TAGS[@]}"; do
+    aws ec2 create-tags --resources "$INSTANCE_ID" --tags Key="$tag",Value=""
+done
 # The nlb is the exception case as we use the load balancer arn to further identify it.
 nlbArn=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.LoadBalancerArns | .[] | contains("loadbalancer/net")  ) | .TargetGroupArn') | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="allReverseProxies") ) | .ResourceArn')
 echo "Registering with nlb"
@@ -27,6 +33,8 @@ for tag in "${TAGS[@]}"; do
     done
 done
 # alter records using batch file.
+sed -i "s/LOGFILES_INTERNAL_IP/$internal_ip/" batch-for-route53-dns-record-update.json
+sed -i "s/SMTP_INTERNAL_IP/$internal_ip/" batch-for-route53-dns-record-update.json
 ###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
 echo "Describing instances"
@@ -41,7 +49,4 @@ for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "Disp
 done
 # Alter the elastic IP.
 # WARNING: Will terminate connections via the existing public ip. 
-LOCAL_IPV4=$(ec2-metadata --local-ipv4 | sed "s/local-ipv4: *//")
-INSTANCE_ID=$(ec2-metadata --instance-id | sed "s/instance-id: *//")
-ELASTIC_IP="54.229.94.254"
 aws ec2 associate-address --instance-id "${INSTANCE_ID}"  --public-ip "${ELASTIC_IP}"

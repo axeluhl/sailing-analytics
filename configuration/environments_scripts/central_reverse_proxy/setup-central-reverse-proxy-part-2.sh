@@ -26,13 +26,8 @@ cd /root && sed -i "s/LOGFILES_INTERNAL_IP/\$internal_ip/" batch.json
 cd /root && sed -i "s/SMTP_INTERNAL_IP/\$internal_ip/" batch.json
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
 # append hostname to sysconfig
-echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
-sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
-hostname sapsailing.com
-hostnamectl set-hostname sapsailing.com
-echo "Please logon and go to root where you will find 3 scripts. First authenticate with awsmfa (you may need to alter the bash alias for your credentials)."
-echo "Then run /root/add-to-necessary-target-groups-and-setup-route53.sh"
-echo "Then /root/remount-nfs-shares.sh because the previous script alters the logfiles and smtp entries"
-echo "Finally run /root/set-elastic-ip.sh"
+echo "Please now run the script target-group-tag-route53-nfs-elasticIP-setup.sh which configures the tags, adds to the "
+echo "necessary target groups, modifies a few records in route53, remounts those dependent on this, and sets the elastic IP."
+echo "You will need to have the aws cli installed and have the necessary permissions to make these alterations manually."
 echo "Have a great day!"
 EOF
