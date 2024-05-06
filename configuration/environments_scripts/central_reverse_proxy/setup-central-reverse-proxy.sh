@@ -1,7 +1,29 @@
 #!/bin/bash
 
-# Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP. 
-# Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
+# Setup script for a "Central Reverse HTTP Proxy" that runs Apache httpd,
+# provides the Git repository, runs Bugzilla and Gollum for wiki access,
+# furthermore AWStats, goaccess and apachetop support within a tmux session,
+# releases.sapsailing.com, jobs.sapsailing.com content, and a Docker
+# infrastructure for a self-hosted Docker image registry.
+#
+# Start by launching a new instance, e.g., of type m3.xlarge, in the same AZ
+# as the current Webserver / Central Reverse Proxy. This will become important
+# as you will need to detach volumes from the latter to attach them to the
+# new instance.
+#
+# Then, call this script with the new instance's external IP address as the first,
+# and with a "bearer token" authenticating a user at security-service.sapsailing.com
+# which needs to have the following permissions:
+#    USER:READ:*
+#    SSH_KEY_READ:*
+# which will be used to determine the landscape management users, for example.
+#
+# Example usage:
+#   setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs=
+# This will do all necessary set-up up to the point where the large volumes
+# currently attached to and mounted on the current Central Reverse Proxy will
+# need to be unmounted, detached, attached to the new instance, and mounted there.
+
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="central_reverse_proxy"
@@ -137,6 +159,11 @@ sudo systemctl enable postfix
 sudo systemctl restart postfix
 mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
+echo "UUID=f03cc464-c3c0-452a-87da-e0eadc4c497f	/var/log	ext4	defaults,noatime,commit=30	0	0
+UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
+UUID=0b15f5cb-fd3e-48e6-8195-be248cd7726d	/var/www/static	ext3	defaults,noatime,commit=30	0	0
+UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,commit=30	0	0
+UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noatime,commit=30	0	0" >>/etc/fstab
 THIRDEOF
 
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
