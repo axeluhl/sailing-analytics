@@ -1,4 +1,4 @@
-FROM docker.sapsailing.com/sapjvm8:8.1.097
+FROM docker.sapsailing.com/sapjvm8:8.1.098
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
@@ -9,7 +9,7 @@ COPY vimrc /root/.vimrc
 RUN wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
  && /opt/sapjvm_8/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/sapjvm_8/jre/lib/security/cacerts -noprompt -storepass changeit \
  && rm /tmp/rds.pem
-RUN wget -O /tmp/${RELEASE}.tar.gz http://releases.sapsailing.com/${RELEASE}/${RELEASE}.tar.gz \
+RUN wget -O /tmp/${RELEASE}.tar.gz https://releases.sapsailing.com/${RELEASE}/${RELEASE}.tar.gz \
  && tar xzvpf /tmp/${RELEASE}.tar.gz \
  && rm /tmp/${RELEASE}.tar.gz
 COPY env.sh .

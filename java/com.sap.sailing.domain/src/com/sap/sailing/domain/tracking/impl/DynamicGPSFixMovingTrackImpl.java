@@ -265,7 +265,12 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
             numberOfOutliersDueToCOGDiff++;
             logger.finer(()->""+DynamicGPSFixMovingTrackImpl.this+": computed COG "+speedToNeighbor.getBearing()+" differs significantly (by "+
                     speedToNeighbor.getBearing().getDifferenceTo(takeCogAndSogFrom.getSpeed().getBearing()).abs()+
-                    ") from reported COG "+takeCogAndSogFrom.getSpeed().getBearing());
+                    ") from reported COG "+takeCogAndSogFrom.getSpeed().getBearing()+
+                    "; time points: "+from.getTimePoint()+" / "+to.getTimePoint());
+        } else if (!foundValidPreviousFixInRange) {
+            logger.finer(()->""+DynamicGPSFixMovingTrackImpl.this+": invalid fix "+to+" due to smoothened speed ratio "+
+                    getSmoothenedSpeedRatio(speedToNeighbor, takeCogAndSogFrom.getSpeed())+
+                    " greater or equal threshold "+MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
         }
         numberOfFixesCheckedForOutlier++;
         return foundValidPreviousFixInRange;

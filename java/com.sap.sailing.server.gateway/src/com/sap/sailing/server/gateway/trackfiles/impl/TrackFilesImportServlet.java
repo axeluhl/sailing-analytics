@@ -62,7 +62,7 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
         } catch (Exception e) {
             importResult.add(e);
         } finally {
-            ImportResultSerializer.serializeImportResult(importResult).writeJSONString(resp.getWriter());
+            writeJsonIntoHtmlResponse(resp, ImportResultSerializer.serializeImportResult(importResult));
         }
     }
 }

@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -100,6 +101,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -161,11 +163,17 @@ public class DomainFactoryImpl implements DomainFactory {
      * monitor.
      */
     private final Set<Competitor> competitorsCurrentlyBeingMigrated;
+    
+    /**
+     * The key consists of the {@link IEvent}, the live and the stored URI. 
+     */
+    private final ConcurrentMap<Triple<IEvent, URI, URI>, IEventSubscriber> eventSubscriberCache;
 
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
         this.metadataParser = new MetadataParserImpl();
         competitorsCurrentlyBeingMigrated = Collections.synchronizedSet(new HashSet<>());
+        eventSubscriberCache = new ConcurrentHashMap<>();
     }
     
     @Override
@@ -1068,11 +1076,12 @@ public class DomainFactoryImpl implements DomainFactory {
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable, int timeoutInMillis,
+            boolean useOfficialEventsToUpdateRaceLog, URI liveURIFromConfiguration, URI storedURIFromConfiguration) throws Exception {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
-                preferReplayIfAvailable, timeoutInMillis, useOfficialEventsToUpdateRaceLog);
+                preferReplayIfAvailable, timeoutInMillis, useOfficialEventsToUpdateRaceLog, liveURIFromConfiguration, storedURIFromConfiguration);
     }
 
     @Override
@@ -1081,4 +1090,15 @@ public class DomainFactoryImpl implements DomainFactory {
         return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 
+    @Override
+    public IEventSubscriber getOrCreateEventSubscriber(IEvent tractracEvent, URI liveURI, URI storedURI) {
+        return eventSubscriberCache.computeIfAbsent(new Triple<>(tractracEvent, liveURI, storedURI), key->
+            {
+                try {
+                    return new EventSubscriberWrapper(key.getA(), key.getB(), key.getC());
+                } catch (SubscriberInitializationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
 }

@@ -59,7 +59,8 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* offsetToStartTimeOfSimulatedRace */null, /* ignoreTracTracMarkPassings */ false,
                         raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
-                        /* preferReplayIfAvailable */ false, timeoutInMillis, useOfficialEventsToUpdateRaceLog),
+                        /* preferReplayIfAvailable */ false, timeoutInMillis, useOfficialEventsToUpdateRaceLog,
+                        /* liveURIFromConfiguration */ null, /* storedURIFromConfiguration */ null),
                 timeoutInMilliseconds, raceTrackingHandler);
     }
 
@@ -69,14 +70,14 @@ public class TracTracAdapterImpl implements TracTracAdapter {
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog) throws Exception {
+            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog, URI liveURIFromConfiguration, URI storedURIFromConfiguration) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
                         raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false,
-                        (int) timeoutInMilliseconds, useOfficialEventsToUpdateRaceLog), timeoutInMilliseconds);
+                        (int) timeoutInMilliseconds, useOfficialEventsToUpdateRaceLog, liveURIFromConfiguration, storedURIFromConfiguration), timeoutInMilliseconds);
     }
 
     @Override

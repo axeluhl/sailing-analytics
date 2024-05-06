@@ -63,7 +63,7 @@ public class FinishTimeUpdateHandler extends UpdateHandler {
                         final CloseableHttpClient client = HttpClientBuilder.create()
                                 .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
                                 .build();
-                        logger.info("Using " + stopTrackingURI.toString() + " to stop tracking");
+                        logger.info("Using " + eraseSecurityRelatedValuesFromURL(stopTrackingURI.toString()) + " to stop tracking");
                         final HttpResponse response = client.execute(request);
                         try {
                             parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent(),

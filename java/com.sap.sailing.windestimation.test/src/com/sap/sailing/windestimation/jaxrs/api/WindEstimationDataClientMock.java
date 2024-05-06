@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.Map;
+import java.util.Optional;
 
 import org.json.simple.parser.ParseException;
 
@@ -26,7 +27,7 @@ public class WindEstimationDataClientMock extends WindEstimationDataClient {
 
     public WindEstimationDataClientMock(ModelStore modelStore,
             ReplicableWindEstimationFactoryService windEstimationFactoryService) {
-        super(null, windEstimationFactoryService);
+        super(null, windEstimationFactoryService, /* windEstimationModelBearerToken */ Optional.empty());
         this.modelStore = modelStore;
     }
 

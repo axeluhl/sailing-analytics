@@ -174,7 +174,7 @@ public class MarkPassingCalculator {
                     }
                 }
             }
-        }, "MarkPassingCalculator for race " + race.getRace().getName() + " initialization");
+        }, "MarkPassingCalculator for race " + race.getRaceIdentifier() + " initialization");
         if (waitForInitialMarkPassingCalculation) {
             t.run();
         } else {
