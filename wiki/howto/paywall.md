@@ -21,11 +21,11 @@ On UserService side:
 	- Registers user status event handlers, reacting when a users attributes change (e.g. when a user logs in, he might have another permission set)
 
 ## SecuredSettings
-A subset of Settings, which have been extended by a corresponding action. These actions are tied to permissions, which must be owned by a user if they wnat to execute the action. 
-
+A subset of Settings, which have been extended by a corresponding action. These actions are tied to permissions, which must be owned by a user if they want to execute the action. 
 
 The current implementation implies, that if a user wants to change a setting from its default value, he/she need the required permissions to do so. Otherwise the application will always fall back to the default setting when reading or setting a value.
 As an example see the code below. To infer wether the user possesses the required permissions, three components are required:
+
 1. PaywallResolver. As stated before it is used as an interface / utility class for all things subscritpion related. In this case it forwards the hasPermission call to the userService.
 2. Action. The Action is set inside of the Setting itself on creation (in the Constructor of all AbstractSecuredValueSettings / AbstractSecuredValueCollectionSettings)
 3. DTOContext. It represents a SecuredDTO object, that gives information on which object the action is to be performed on. Hence providing information about ownership.
@@ -34,13 +34,30 @@ A permission check is not possible if not all three components are present and t
 ```
 @Override
     public final T getValue() {
-        if(dtoContext != null && dtoContext.isPresent() && paywallResolver.hasPermission(action, dtoContext.getSecuredDTO())) {
+        ...
+        if (securedDTO == null 
+                || paywallResolver != null 
+                && paywallResolver.hasPermission(action, securedDTO)) {
             return super.getValue();
-        }else {
+        } else {
             return super.getDefaultValue();
         }
     }
 ```
+
+Following behaviour need to be known:
+
+* if no secureDTO is available -> value will be return without permission check
+* if all three requirements are available, but permission check will fail -> default value will be returned
+
+### SecuredEnumSetSetting
+The secured ENUM set setting is somehow special, because it's based on a list of enums instead of single values like the normal SecuredSettings. It is mainly used for Leaderboard settings. 
+
+It's also supporting default values. Therefore, if a premium setting is added to the set of default values, this settings will be enabled by default.
+This leads to a special situation. If the user do not have premium rights to change the setting, it's always be activated and cannot be deactivated. 
+
+Because this won't make sence in the most cases, it is highly recommended to **don't add premium features to default settings**. A good example for an exception could be advertising, where it is wanted that the user cannot *disable* it, if he is not a premium user.
+
 
 ## Premium UI Elements
 Anything extending com.sap.sse.security.ui.client.premium.uielements.PremiumUiElement<T> can be used to establish additional paywall features. 
