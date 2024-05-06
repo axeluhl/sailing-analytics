@@ -133,7 +133,7 @@ chmod 755 /root
 cd ~
 # Copies across the key vault and other relevant secrets from the existing
 # Central Reverse Proxy's /root folder:
-rsync -a dev-secrets github_tools_sap.pat hudson-aws-credentials key_vault mail.properties new_version_key_vault secrets ssh-key-reader.token root@sapsailing.com:/root /
+rsync -a  root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,new_version_key_vault,secrets,ssh-key-reader.token} /root
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
