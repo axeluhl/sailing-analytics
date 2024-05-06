@@ -1,7 +1,11 @@
 #!/bin/bash
+if [[ "$#" -ne 1 ]]; then
+    echo "Please pass the remote IP address as the only parameter."
+    exit 2
+fi
 target_groups=$(aws elbv2 describe-target-groups)
-LOCAL_IPV4=$(ssh root@sapsailing.com "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
-INSTANCE_ID=$(ssh root@sapsailing.com "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
+LOCAL_IPV4=$(ssh root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
+INSTANCE_ID=$(ssh root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
 ELASTIC_IP="54.229.94.254"
 TAGS=("allReverseProxies" "CentralReverseProxy")
 extract_public_ip() {
@@ -37,7 +41,7 @@ sed -i "s/LOGFILES_INTERNAL_IP/$internal_ip/" batch-for-route53-dns-record-updat
 sed -i "s/SMTP_INTERNAL_IP/$internal_ip/" batch-for-route53-dns-record-update.json
 ###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
-echo "Describing instances"
+echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
     echo "Remounting on $instanceIp"
