@@ -167,7 +167,8 @@ UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noati
 THIRDEOF
 
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
-echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
+echo "Please remove the existing central reverse proxy from all target groups tagged with \"CentralReverseProxy\""
+echo "or \"allReverseProxies\" (draining can take 5 mins):"
 echo "And that there is at least 1 healthy disposable in the SAME availability zone as the archive, so there is no risk of all the targets being briefly unhealthy."
 echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy and remount them on the new instance."
 echo "This can be done in the admin console by going to the webserver and clicking on the volumes in question (found within the storage tab)."
