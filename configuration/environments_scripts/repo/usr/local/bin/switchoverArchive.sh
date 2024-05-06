@@ -28,6 +28,7 @@ TIME_CHECK_SECONDS=$((15*60))
 # as we want to be confident the main archive is in fact "down" before switching.
 TIMEOUT1_IN_SECONDS=$2
 TIMEOUT2_IN_SECONDS=$3
+MAXIMUM_TIMEOUT=6
 CACHE_LOCATION="/var/cache/lastIncorrectMacroUnixTime"
 # The following line checks if all the strings in "search" are present at the beginning of their own line. Note: grep uses BRE by default,
 # so the plus symbol must be escaped to refer to "one or more" of the previous character.
@@ -98,11 +99,11 @@ setFailoverIfNotSet() {
 logger -t archive "begin check"
 # --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero.
 # -L follows redirects
-curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} --max-time 6 "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} --max-time "$MAXIMUM_TIMEOUT" "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
     logger -t archive "first check failed"
-    curl -s -L --fail --connect-timeout ${TIMEOUT2_IN_SECONDS} --max-time 6 "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+    curl -s -L --fail --connect-timeout ${TIMEOUT2_IN_SECONDS} --max-time "$MAXIMUM_TIMEOUT" "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
     if [[ $? -ne 0 ]]
     then
         setFailoverIfNotSet
