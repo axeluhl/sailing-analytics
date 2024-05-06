@@ -53,8 +53,10 @@ yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake ope
 gem install gollum
 gem update --system 3.5.7
 cd /home
-# scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
-scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+# The following line is for production use:
+scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+# The following line is for test use, copying from a test instance with a check-out Git workspace:
+# scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 . imageupgrade_functions.sh
 setup_cloud_cfg_and_root_login
 # setup files
@@ -127,11 +129,10 @@ mkdir /var/lib/awstats
 scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/etc/awstats /etc/awstats
 chmod 755 /root
 cd ~
-# copy awstats crons as well as all other weekly, daily cronjobs.
-rsync -a --exclude perl5 root@sapsailing.com:/root /
-rm -rf /root/.goaccessrc
+# Copies across the key vault and other relevant secrets from the existing
+# Central Reverse Proxy's /root folder:
+rsync -a dev-secrets github_tools_sap.pat hudson-aws-credentials key_vault mail.properties new_version_key_vault secrets ssh-key-reader.token root@sapsailing.com:/root /
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
-## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>Health check</title><meta charset="UTF-8"></head><body><h1>Test page</h1></body></html>
