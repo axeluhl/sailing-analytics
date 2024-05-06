@@ -23,7 +23,7 @@
 # This will do all necessary set-up up to the point where the large volumes
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
-if [[ "$#" -ne 2 ]]; then
+if [[ "$#" -ne 4 ]]; then
     echo "IP and bearer token required. Please check comment description for further details."
 fi
 IP=$1
