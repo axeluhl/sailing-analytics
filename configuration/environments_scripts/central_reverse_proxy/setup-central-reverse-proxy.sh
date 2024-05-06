@@ -105,6 +105,7 @@ chmod 755 /root
 cd ~
 # copy awstats crons as well as all other weekly, daily cronjobs.
 rsync -a --exclude perl5 root@sapsailing.com:/root /
+rm -rf /root/.goaccessrc
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 ## TODO: Do we need to use awstats_configure.pl. No but we do need to do some copying of the GeoIP database. And get the conf file in order.
 # add basic test page which won't cause redirect error code if used as a health check.
@@ -122,7 +123,7 @@ setup_fail2ban
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup httpd git
-setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy"
+(/usr/local/bin/setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy")
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
 chown root:root /etc/httpd/conf/pass*
 # create mountpoints (see part 2 for ownership changes)
@@ -138,19 +139,15 @@ mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
 THIRDEOF
 
-echo "Your turn! READ CAREFULLY! The instance is now prepared, hopefully you have given it the correct tags already as they are needed for part 2."
-echo "Which tags you may ask... The central reverse proxy requires the following key pairs (one space added for clarity):"
-echo "key:CentralReverseProxy value:true"
-echo "key:ReverseProxy value:<optional>"
-echo "key:Name value:Webserver"
+echo "Your turn! READ CAREFULLY! The instance is now prepared."
 echo "Please ensure the existing central reverse proxy has been removed from the necessary target groups (draining can take 5 mins)"
-echo "And that there is at least 1 healthy disposable in the same availability zone as the archive, so there is no risk of all the targets being briefly unhealthy."
+echo "And that there is at least 1 healthy disposable in the SAME availability zone as the archive, so there is no risk of all the targets being briefly unhealthy."
 echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy and remount them on the new instance."
 echo "This can be done in the admin console by going to the webserver and clicking on the volumes in question (found within the storage tab)."
 echo "Then click Detach from within the Actions column."
 echo "For further details, checkout this wiki page https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies"
-echo "Once you are confident that this is working, please press enter to trigger part 2, which updates route53, sets up the elastic IP,"
-echo "refreshes the mounts referencing logfiles.internal.sapsailing.com, sets up the hostname and configures the users and crontabs."
+echo "Once you are confident that this is working, please press a key to trigger part 2, which"
+echo "sets up the hostname, copies /etc/ssh and configures the users and crontabs."
 read -n 1  -p "Press a key to continue" key_pressed
 "$(dirname $0)"/setup-central-reverse-proxy-part-2.sh "$IP" "$IMAGE_TYPE"
 
