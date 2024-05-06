@@ -28,6 +28,8 @@ if [[ "$#" -ne 2 ]]; then
 fi
 IP=$1
 BEARER_TOKEN=$2
+IMAGEUPGRADE_FUNCTIONS_IP="$3"   # can be a domain name, such as sapsailing.com
+IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT="$4"
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="wiki"
@@ -54,7 +56,7 @@ gem install gollum
 gem update --system 3.5.7
 cd /home
 # The following line is for production use:
-scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT"/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /usr/local/bin
 # The following line is for test use, copying from a test instance with a check-out Git workspace:
 # scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 . imageupgrade_functions.sh
