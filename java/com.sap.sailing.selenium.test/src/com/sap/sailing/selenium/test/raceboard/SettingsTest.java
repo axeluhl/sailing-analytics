@@ -96,8 +96,8 @@ public class SettingsTest extends AbstractSeleniumTest {
                 // Race details
                 DetailCheckboxInfo.RACE_GAP_TO_LEADER, DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
                 DetailCheckboxInfo.DISPLAY_LEGS,
-                // Leg Details
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Leg Details (DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND and DetailCheckboxInfo.DISTANCE are Premium settings now and therefore not selected by default!)
+                DetailCheckboxInfo.RANK_GAIN,
                 // Maneuvers
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
         };
