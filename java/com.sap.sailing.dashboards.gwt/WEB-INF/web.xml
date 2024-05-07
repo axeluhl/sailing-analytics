@@ -76,6 +76,7 @@
 		<dispatcher>INCLUDE</dispatcher>
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
+    <filter>
             <filter-name>GWTCacheControlServletFilter</filter-name>
             <filter-class>com.sap.sse.gwt.server.GWTCacheControlServletFilter</filter-class>
     </filter>
