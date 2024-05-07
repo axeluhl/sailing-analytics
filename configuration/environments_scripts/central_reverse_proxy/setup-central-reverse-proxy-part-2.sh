@@ -28,7 +28,6 @@ systemctl enable nfs-server
 echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
 systemctl start nfs-server
-cd /var/log/old/cache/docker/registry && docker-compose-up
 scp -p -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
 # append hostname to sysconfig
 echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
@@ -36,6 +35,7 @@ sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
 hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 EOF
+ssh -A -f root@"$IP" "cd /var/log/old/cache/docker/registry && nohup docker-compose up &>/dev/null &" &> /dev/null
 echo "Please now run the script target-group-tag-route53-nfs-elasticIP-setup.sh which configures the EC2 instance tags, adds to the "
 echo "necessary target groups, modifies a few records in route53 (logs.internal.sapsailing.com"
 echo "and smtp.internal.sapsailing.com), remounts those dependent on this, and sets the elastic IP."
