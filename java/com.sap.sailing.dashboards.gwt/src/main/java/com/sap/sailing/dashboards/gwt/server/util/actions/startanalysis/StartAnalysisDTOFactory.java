@@ -143,7 +143,7 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
         startLineAdvantageDTO.startLineAdvatageType = getStartlineAdvantageType(trackedRace, new MillisecondsTimePoint(
                 new Date()));
-        startLineAdvantageDTO.startLineAdvantage = startline.getAdvantage().getMeters();
+        startLineAdvantageDTO.startLineAdvantage = startline == null ? null : startline.getAdvantage().getMeters();
         startAnalysisWindLineInfoDTO.startLineAdvantage = startLineAdvantageDTO;
 	if (trackedRace.getStartTimeReceived() != null) {
 	    Position portMarkPosition = trackedRace.getOrCreateTrack(
