@@ -142,6 +142,7 @@ EOF
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
 setup_fail2ban
+setup_keys "${IMAGE_TYPE}"
 # setup logrotate.d/httpd 
 # echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 # mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
