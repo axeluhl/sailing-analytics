@@ -29,7 +29,8 @@ Require-Bundle: com.sap.sailing.domain,
  org.apache.shiro.ehcache;bundle-version="1.2.3",
  org.apache.shiro.core;bundle-version="1.2.2",
  com.sap.sse.security.common,
- com.sap.sse.landscape.common
+ com.sap.sse.landscape.common,
+ com.sap.sse.landscape.aws.common
 Bundle-ActivationPolicy: lazy
 Import-Package: com.sap.sailing.shared.server.security,
  com.sap.sse.security,
