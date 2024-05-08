@@ -1,0 +1,9 @@
+name: test-hudson-trigger
+on:
+  workflow_dispatch: {}
+jobs:
+  trigger:
+    - name: Trigger hudson job
+      shell: bash
+      run: |
+        curl https://${{ secrets.HUDSON_JOB_USERNAME }}:${{ secrets.HUDSON_JOB_PASSWORD}}@hudson.sapsailing.com/job/TestStatsFromGithubArtifacts/build?token=${{ secrets.HUDSON_JOB_TOKEN }}
