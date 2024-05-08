@@ -164,5 +164,15 @@ public class TestMongoEndpointEquality {
         public TimePoint getLaunchTimePoint() {
             return null;
         }
+
+        @Override
+        public String getNameTag() {
+            return null;
+        }
+
+        @Override
+        public String getImageId() {
+            return null;
+        }
     }
 }

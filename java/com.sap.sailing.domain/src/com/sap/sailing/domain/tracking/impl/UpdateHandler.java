@@ -91,6 +91,10 @@ public class UpdateHandler {
         return new URI(baseURI.getScheme(), baseURI.getHost(), baseURI.getPath()+(baseURI.getPath().endsWith("/")?"":"/")+action, baseURI.getFragment());
     }
     
+    protected String eraseSecurityRelatedValuesFromURL(String url) {
+        return url.replaceAll("password=([^&]*)&", "password=****&");
+    }
+    
     /**
      * @return a new list that the caller may extend to add more parameters; the list returned contains the basic
      *         parameters {@code eventid}, {@code raceid}, {@code username} and {@code password}.

@@ -545,13 +545,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
+    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs,
+            String liveURIFromConfiguration, String storedURIFromConfiguration,
             String updateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
             boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
-        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
-                + " and storedURI " + storedURI);
+        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURIFromConfiguration
+                + " and storedURI " + storedURIFromConfiguration);
         final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
@@ -562,19 +563,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 // note that the live URI may be null for races that were put into replay mode
                 final URI effectiveLiveURI;
                 if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
-                    if (liveURI == null || liveURI.trim().length() == 0) {
+                    if (liveURIFromConfiguration == null || liveURIFromConfiguration.trim().length() == 0) {
                         effectiveLiveURI = record.getLiveURI();
                     } else {
-                        effectiveLiveURI = new URI(liveURI);
+                        effectiveLiveURI = new URI(liveURIFromConfiguration);
                     }
                 } else {
                     effectiveLiveURI = null;
                 }
                 final URI effectiveStoredURI;
-                if (storedURI == null || storedURI.trim().length() == 0) {
+                if (storedURIFromConfiguration == null || storedURIFromConfiguration.trim().length() == 0) {
                     effectiveStoredURI = record.getStoredURI();
                 } else {
-                    effectiveStoredURI = new URI(storedURI);
+                    effectiveStoredURI = new URI(storedURIFromConfiguration);
                 }
                 final URI effectiveUpdateURI;
                 if (updateURI == null || updateURI.trim().length() == 0) {
@@ -589,7 +590,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
                         config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
+                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog,
+                        liveURIFromConfiguration==null || liveURIFromConfiguration.trim().length() == 0 ? null : new URI(liveURIFromConfiguration),
+                        storedURIFromConfiguration==null || storedURIFromConfiguration.trim().length() == 0 ? null : new URI(storedURIFromConfiguration));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
@@ -2102,11 +2105,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
-                DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
-                // In case the user selected a distinct set of races, we want the call to completely fail if
-                // tracking wind isn't allowed for at least one race
-                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-                trackedRaces.add(trackedRace);
+                final DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
+                if (trackedRace != null) {
+                    // In case the user selected a distinct set of races, we want the call to completely fail if
+                    // tracking wind isn't allowed for at least one race
+                    getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+                    trackedRaces.add(trackedRace);
+                }
             }
         } else {
             for (DynamicTrackedRace race : getAllTrackedRaces()) {
@@ -2598,11 +2603,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
         RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName());
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-        trackedRace.setStartTimeReceived(
-                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
-        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            trackedRace.setStartTimeReceived(
+                    newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        }
+        return trackedRace == null ? null : baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
 
     @Override
@@ -2955,6 +2962,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throw new ServiceException(serverStringMessages.get(locale, "slicingRaceColumnAlreadyUsedThe"));
         }
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
+        // If tracked race isn't found, a NullPointerException will be thrown next, and that's okay because
+        // it's a bit unusual to not find a race that is just about to be sliced. We couldn't continue anyway.
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
         if (sliceFrom == null || sliceTo == null || startOfTrackingOfRaceToSlice.after(sliceFrom)
@@ -2994,7 +3003,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             hasFinishingTime = false;
             hasFinishedTime = false;
         }
-
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);

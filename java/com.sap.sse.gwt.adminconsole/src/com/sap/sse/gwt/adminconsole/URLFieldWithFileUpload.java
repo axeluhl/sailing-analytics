@@ -38,9 +38,9 @@ import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.common.fileupload.FileUploadConstants;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 
 /**
  * A {@link TextBox} together with an upload button that can use the file storage service to
@@ -175,7 +175,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<Map<St
                 }
                 selectUploadButton.removeStyleName(RESOURCES.urlFieldWithFileUploadStyle().loadingClass());
                 endUploadEvent.endUpload();
-                JSONArray resultJson = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContent(event)).isArray();
+                JSONArray resultJson = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContentFromHtml(event.getResults())).isArray();
                 if (resultJson != null) {
                     Map<String, String> uris = new HashMap<>(resultJson.size());
                     List<String> titleStrings = new ArrayList<>(resultJson.size());

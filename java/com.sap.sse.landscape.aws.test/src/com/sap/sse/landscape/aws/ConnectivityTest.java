@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jcraft.jsch.ChannelSftp;
@@ -87,6 +88,7 @@ import software.amazon.awssdk.services.sts.model.Credentials;
  * @author Axel Uhl (D043530)
  *
  */
+@Ignore("Needs AWS key ID, key secret and session token in system properties")
 public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, SailingAnalyticsMetrics, ProcessT>> {
     private static final Logger logger = Logger.getLogger(ConnectivityTest.class.getName());
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(10));

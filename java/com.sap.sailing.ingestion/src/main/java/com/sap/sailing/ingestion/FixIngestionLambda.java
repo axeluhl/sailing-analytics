@@ -70,20 +70,19 @@ public class FixIngestionLambda implements RequestStreamHandler {
             });
             final List<EndpointDTO> listOfEndpointsToTrigger = cacheMap.get(deviceIdentifier.getStringRepresentation());
             if (listOfEndpointsToTrigger != null) {
-                final List<EndpointDTO> endpointsToTrigger = listOfEndpointsToTrigger;
-                for (final EndpointDTO endpoint : endpointsToTrigger) {
+                for (final EndpointDTO endpoint : listOfEndpointsToTrigger) {
                     dispatchToSubscribersTask.submit(() -> {
                         dispatchToSubscribers(endpoint, bodyAsBytes);
                     });
                 }
-                // wait for tasks to complete for <number of end-points>*<timeout for connection>+<ramp-up time>
-                dispatchToSubscribersTask.awaitQuiescence(
-                        (endpointsToTrigger.size() * Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT) + 2,
-                        TimeUnit.SECONDS);
             } else {
-                logger.info("No endpoint has been configured for Identifier " + deviceIdentifier.getStringRepresentation());
+                logger.info("No endpoint has been configured for identifier " + deviceIdentifier.getStringRepresentation());
             }
-            String successResponse = awsInOut.createJsonResponse(deviceIdentifier.getStringRepresentation()).toJSONString();
+            // wait for tasks to complete for <number of end-points>*<timeout for connection>+<ramp-up time>
+            dispatchToSubscribersTask.awaitQuiescence(
+                    (listOfEndpointsToTrigger==null?0:listOfEndpointsToTrigger.size() * Configuration.TIMEOUT_IN_SECONDS_WHEN_DISPATCHING_TO_ENDPOINT) + 2,
+                    TimeUnit.SECONDS);
+            final String successResponse = awsInOut.createJsonResponse(deviceIdentifier.getStringRepresentation()).toJSONString();
             logger.info(successResponse);
             outputAsStream.write(successResponse.getBytes());
         } catch (ParseException | JsonDeserializationException e) {
@@ -106,9 +105,8 @@ public class FixIngestionLambda implements RequestStreamHandler {
 
     private void dispatchToSubscribers(final EndpointDTO endpoint, final byte[] jsonAsBytes) {
         logger.info("Connecting to endpoint " + endpoint.getEndpointCallbackUrl() + " with ID " + endpoint.getEndpointUuid());
-        URL endpointUrl;
         try {
-            endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
+            final URL endpointUrl = new URL(endpoint.getEndpointCallbackUrl());
             try {
                 final HttpURLConnection connectionToEndpoint = (HttpURLConnection) endpointUrl.openConnection();
                 connectionToEndpoint.setRequestMethod("POST");
@@ -134,16 +132,21 @@ public class FixIngestionLambda implements RequestStreamHandler {
 
     private void storeFixFileToS3(final DeviceIdentifier deviceIdentifier, final List<GPSFixMoving> newFixes)
             throws IOException {
-        final String dataAsString = newFixes.toString();
-        logger.info("Data to write: " + dataAsString);
-        for (GPSFixMoving fix : newFixes) {
-            final String destinationKey = s3FixStorageStructure.generateKeyForSingleFix(deviceIdentifier, fix.getTimePoint());
-            logger.info("Location: " + destinationKey);
-            final PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(Configuration.S3_BUCKET_NAME)
-                    .key(destinationKey).contentType("application/json").build();
-            final JSONObject serializedFix = gpsFixSerializer.serialize(fix);
-            s3Client.putObject(putObjectRequest, RequestBody.fromString(serializedFix.toJSONString()));
+        try {
+            final String dataAsString = newFixes.toString();
+            logger.info("Data to write: " + dataAsString);
+            for (GPSFixMoving fix : newFixes) {
+                final String destinationKey = s3FixStorageStructure.generateKeyForSingleFix(deviceIdentifier, fix.getTimePoint());
+                logger.info("Location: " + destinationKey);
+                final PutObjectRequest putObjectRequest = PutObjectRequest.builder().bucket(Configuration.S3_BUCKET_NAME)
+                        .key(destinationKey).contentType("application/json").build();
+                final JSONObject serializedFix = gpsFixSerializer.serialize(fix);
+                s3Client.putObject(putObjectRequest, RequestBody.fromString(serializedFix.toJSONString()));
+            }
+            logger.info("Finished putting object into S3");
+        } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Error writing GPS fix to S3: "+e.getMessage(), e);
+            throw e;
         }
-        logger.info("Finished putting object into S3");
     }
 }

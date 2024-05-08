@@ -3,6 +3,7 @@ package com.sap.sailing.polars.impl;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import com.sap.sse.util.ClearStateTestSupport;
 public class Activator implements BundleActivator {
 
     private static final String POLAR_DATA_SOURCE_URL_PROPERTY_NAME = "polardata.source.url";
+    private static final String POLAR_DATA_SOURCE_BEARER_TOKEN_PROPERTY_NAME = "polardata.source.bearertoken";
 
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
@@ -42,8 +44,10 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(Replicable.class, service, replicableServiceProperties));
         registrations.add(context.registerService(ClearStateTestSupport.class.getName(), service, null));
         final String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
+        final String polarDataBearerToken = System.getProperty(POLAR_DATA_SOURCE_BEARER_TOKEN_PROPERTY_NAME);
         if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
-            waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service, context, polarDataServiceRegistration);
+            waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL,
+                    Optional.ofNullable(polarDataBearerToken), service, context, polarDataServiceRegistration);
         }
     }
     
@@ -52,7 +56,6 @@ public class Activator implements BundleActivator {
      * unregisters the service from the OSGi registry because it will temporarily become unusable, runs the polar data
      * import from the given URL and registers the service again, adding the service registration object to the set of
      * {@link #registrations}. The domain factory is required to resolve boat classes during de-serialization.
-     * 
      * @param polarDataServiceRegistration
      *            used to remove the service registration temporarily while updating the service by a remote import
      * @param registerPolarServiceCallback
@@ -60,15 +63,15 @@ public class Activator implements BundleActivator {
      *            {@link Replicable} and as the {@link PolarDataService} with the OSGi registry
      */
     private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL,
-            final ReplicablePolarService polarService, final BundleContext context,
-            ServiceRegistration<PolarDataService> polarDataServiceRegistration) {
+            Optional<String> polarDataBearerToken, final ReplicablePolarService polarService,
+            final BundleContext context, ServiceRegistration<PolarDataService> polarDataServiceRegistration) {
         final Thread t = new Thread(() -> {
                 try {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for domain factory to be registered with PolarService...");
                     // Note: although the domainFactory parameter isn't used, using runWithDomainFactory ensures that the domain factory is there
                     polarService.runWithDomainFactory(domainFactory -> { 
-                        PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService);
+                        PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService, polarDataBearerToken);
                         try {
                             polarDataServiceRegistration.unregister();
                             polarDataClient.updatePolarDataRegressions();

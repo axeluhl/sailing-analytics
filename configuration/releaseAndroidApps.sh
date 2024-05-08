@@ -1,11 +1,11 @@
 #!/bin/sh
-ANDROID_RELEASE_BRANCH=android-xmake-release
-RELEASE_BRANCH=fa/rel-1.4
+ANDROID_RELEASE_BRANCH=hyperspace
+RELEASE_BRANCHES="release-race-manager-app release-buoy-pinger-app"
 APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
 APP_GRADLE_PROPERTIES="gradle.properties"
-FILES2SIGN=cfg/files2sign.json
+FILES2SIGN=files2sign.json
 VERSION_FILE=cfg/VERSION
-GIT_REMOTE=sap
+GIT_REMOTE=githubsapsailing
 
 OPTION_UPDATE_ANDROID_VERSIONS=1
 OPTION_PERFORM_GIT_OPERATIONS=1
@@ -16,7 +16,7 @@ usage() {
   echo "See more usage details in the sapsailing.com wiki at:"
   echo "  https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances"
   echo "-m Disable upgrading the versionCode and versionName"
-  echo "-g Disable the final git push operation to $RELEASE_BRANCH"
+  echo "-g Disable the final git push operation to ${RELEASE_BRANCHES}"
   echo "-r The git remote; defaults to origin"
   exit 2
 }
@@ -42,9 +42,11 @@ increment_version_code_and_set_version_name() {
 # replace, e.g. "version": "1.4.xy" with new one
 update_files2sign() {
   echo "Update files2sign.json with new versionName $NEW_VERSION_NAME"
-  OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' $FILES2SIGN | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
-  for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
-    sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "$FILES2SIGN"
+  for f in $( find . -name "${FILES2SIGN}" ); do
+    OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' "${f}" | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
+    for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
+      sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "${f}"
+    done
   done
 }
 
@@ -84,8 +86,6 @@ cd "$GIT_DIR"
 git fetch $GIT_REMOTE
 git checkout $ANDROID_RELEASE_BRANCH
 git merge -m "Merging $GIT_REMOTE/$ANDROID_RELEASE_BRANCH" $GIT_REMOTE/$ANDROID_RELEASE_BRANCH
-git fetch $GIT_REMOTE $RELEASE_BRANCH:$RELEASE_BRANCH
-git merge -m "Merging $RELEASE_BRANCH into $ANDROID_RELEASE_BRANCH, probably incorporating version setting to -SNAPSHOT" $GIT_REMOTE/$RELEASE_BRANCH
 if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
   git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
 fi
@@ -97,18 +97,21 @@ if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
   for m in $APP_DIRS; do
     increment_version_code_and_set_version_name $m
   done
-
   update_files2sign
-
   update_version_file
 fi
 
 # Now commit the version changes and amend the commit using the change request ID tag:
 git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
 git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`"
-if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
-  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$RELEASE_BRANCH
-fi
+for RELEASE_BRANCH in ${RELEASE_BRANCHES}; do
+  git checkout ${RELEASE_BRANCH}
+  echo "Merging version number changes into release branch ${RELEASE_BRANCH}"
+  git merge -m "Merging version update from ${ANDROID_RELEASE_BRANCH} into ${RELEASE_BRANCH}" ${ANDROID_RELEASE_BRANCH}
+  if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
+    git push $GIT_REMOTE ${RELEASE_BRANCH}:${RELEASE_BRANCH}
+  fi
+done
 
 echo "Launch a stage build here: https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/"
 echo "using $RELEASE_BRANCH as the Treeish to build."

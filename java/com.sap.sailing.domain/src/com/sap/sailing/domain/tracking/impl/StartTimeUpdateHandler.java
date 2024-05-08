@@ -68,7 +68,7 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                 additionalParameters.put(FIELD_RACE_START_TIME, String.valueOf(newStartTime.asMillis()));
                 URL startTimeUpdateURL = buildUpdateURL(additionalParameters);
                 
-                logger.info("Using " + startTimeUpdateURL.toString() + " for the start time update!");
+                logger.info("Using " + eraseSecurityRelatedValuesFromURL(startTimeUpdateURL.toString()) + " for the start time update!");
                 HttpURLConnection connection = (HttpURLConnection) startTimeUpdateURL.openConnection();
                 try {
                     connection = setConnectionProperties(connection);
@@ -81,7 +81,8 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                     if (connection != null) {
                         connection.disconnect();
                     } else {
-                        logger.severe("Connection to TracTrac Course Update URL " + startTimeUpdateURL.toString() + " could not be established");
+                        logger.severe("Connection to TracTrac Course Update URL " +
+                                eraseSecurityRelatedValuesFromURL(startTimeUpdateURL.toString()) + " could not be established");
                     }
                 }
                 if (regatta.isControlTrackingFromStartAndFinishTimes()) {
@@ -96,7 +97,7 @@ public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeCh
                     final HttpClient client = HttpClientBuilder.create()
                             .setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes())
                             .build();
-                    logger.info("Using " + startTrackingURI.toString() + " to start tracking");
+                    logger.info("Using " + eraseSecurityRelatedValuesFromURL(startTrackingURI.toString()) + " to start tracking");
                     final HttpResponse response = client.execute(request);
                     try {
                         parseAndLogResponse(new BufferedReader(new InputStreamReader(response.getEntity().getContent(),

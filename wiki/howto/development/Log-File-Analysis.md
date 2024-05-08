@@ -62,6 +62,8 @@ Still, in order to provide the true client IP in the log files, we use the `X-Fo
 
 This uses the SetEnvIf module, tries to match an IP address at the start of the `X-Forwarded-For` header field, and if found, assigns it to the `original_client_ip` variable. This variable, in turn, decides which of the two `CustomLog` directives is applied to the request. If the variable is set, instead of using the regular `%h` field for the client IP, the variable value is logged by `%{original_client_ip}`.
 
+The disposable reverse proxies have Apache logs too, which go to /var/log/old/REVERSE_PROXIES/"public ip" after log rotation.
+
 ### Amazon EC2 Elastic / Application Load Balancer (ELB / ALB) Logs
 
 An Amazon ELB or ALB can be configured to write log files to the S3 storage. The general format is [explained here](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/access-log-collection.html#access-log-entry-format). It contains in particular the client IP where the request originated and can tell timing parameters for request forwarding and processing that otherwise would not be available.
