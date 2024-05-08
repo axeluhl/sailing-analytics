@@ -10,7 +10,7 @@ jobs:
       run: |
         if [ "${{ github.ref }}" = "refs/heads/main" ]; then
           JOB=SAPSailingAnalytics-master
-        elif [ "${{ github.ref }}" =~ refs/heads/releases/.* ]; then
+        elif [[ "${{ github.ref }}" =~ refs/heads/releases/.* ]]; then
           JOB=$( echo "${{ github.ref }}" | sed -e 's/^refs\/heads\/releases\///' )
         else
           JOB=$( echo "${{ github.ref }}" | sed -e 's/^refs\/heads\///' )
