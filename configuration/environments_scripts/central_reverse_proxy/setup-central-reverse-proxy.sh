@@ -52,7 +52,7 @@ yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod
 # ruby and gollum for wiki
 yum group install -y "Development Tools"
 yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
-gem install gollum
+gem install gollum -v 5.3.2
 gem update --system 3.5.7
 cd /home
 # The following line is for production use:
@@ -157,6 +157,7 @@ chown root:root /etc/httpd/conf/pass*
 # create mountpoints (see part 2 for ownership changes)
 mkdir /var/log/old
 mkdir /var/www/static
+download_and_install_latest_sap_jvm_8
 # enable units which build-crontab doesn't 
 systemctl enable httpd
 systemctl start httpd
