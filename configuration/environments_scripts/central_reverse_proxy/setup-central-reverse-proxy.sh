@@ -16,10 +16,12 @@
 # which needs to have the following permissions:
 #    USER:READ:*
 #    SSH_KEY_READ:*
-# which will be used to determine the landscape management users, for example.
+# which will be used to determine the landscape management users, for example. In addition, 
+# add the IP/hostname of the instance with the imageupgrade_functions.sh, and the path to
+# the repo on that instance. 
 #
 # Example usage:
-#   setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs=
+#   setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code
 # This will do all necessary set-up up to the point where the large volumes
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
