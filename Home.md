@@ -117,7 +117,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Java De(Serialization) and Circular Dependencies|wiki/howto/development/java-de-serialization-and-circular-dependencies]]
 * [[JMX Support|wiki/howto/development/jmx]]
 * [[Working with GWT Locally|wiki/howto/development/local-gwt]]
-* [[Log File Analysis|wiki/howto/development/log-file-analysis]]
+* [[Log File Analysis|wiki/howto/development/Log-File-Analysis]]
 * [[Old Log Compression|wiki/howto/development/Log-File-Compression]]
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]

@@ -79,20 +79,16 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
-    #1: Environment type.
-    local ENVIRONMENT_TYPE="$1"
-    #2 git copy user
-    local GIT_COPY_USER="$2"
-    #3 relative path to git within the git user
-    local RELATIVE_PATH_TO_GIT="$3"
-    if [[ "$#" -lt 3 || "$#" -gt 5 ]]; then
-        echo "Number of arguments is invalid"
+    # There must be at least 1 and all args are passed to build-crontab-and-cp-files. See the documentation of this file for more info.
+    if [[ "$#" -lt 1 ]]; then
+        echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
     else
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
         scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        ./build-crontab-and-cp-files "${ENVIRONMENT_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+        ./build-crontab-and-cp-files $@
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
@@ -100,21 +96,43 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
+    pushd .
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
-    for user in $(ls); do 
-        if id -u "$user"; then
+    for user in *; do
+        [[ -e "$user" ]] || continue
+        if id -u "$user" > /dev/null; then
             user_home_dir=$(getent passwd $(id -u "$user") | cut -d: -f6) # getent searches for passwd based on user id, which the "id" command supplies.
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 755 "${user_home_dir}/.aws"
-                \cp -r --preserve --dereference "${user}"/aws/* "${user_home_dir}/.aws"
-                echo "[default]" >> "${user_home_dir}/.aws/config"
-                echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                chmod 755 "${user_home_dir}"/.aws
+                # Setup credentials
+                if [[ -d "${user}/aws/credentials" && ! -e "${user_home_dir}/.aws/credentials" ]]; then
+                    > "${user_home_dir}"/.aws/credentials
+                    for credentials in "${user}"/aws/credentials/*; do
+                        [[ -f "$credentials" ]] || continue
+                        cat "$credentials" >> "${user_home_dir}"/.aws/credentials
+                        echo "" >> "${user_home_dir}"/.aws/credentials
+                    done
+                fi
+                # Setup config
+                if [[ ! -e "${user_home_dir}/.aws/config" ]]; then
+                    echo "[default]" >> "${user_home_dir}/.aws/config"
+                    echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                    echo "" >> "${user_home_dir}"/.aws/config
+                    if [[ -d "${user}/aws/config" ]]; then
+                        for config in "${user}"/aws/config/*; do
+                            [[ -f "$config" ]] || continue
+                            cat "$config" >> "${user_home_dir}"/.aws/config
+                            echo "region = ${REGION}" >> "${user_home_dir}"/.aws/config
+                            echo "" >> "${user_home_dir}"/.aws/config
+                        done
+                    fi
+                fi
                 chown -R  ${user}:${user} "${user_home_dir}/.aws"
                 chmod 600 "${user_home_dir}"/.aws/*
             fi
@@ -122,8 +140,12 @@ setup_keys() {
             if [[ -d "${user}/ssh" ]]; then
                 mkdir --parents "${user_home_dir}/.ssh"
                 chmod 700 "${user_home_dir}/.ssh"
-                \cp --preserve --dereference $(find ${user}/ssh -maxdepth 1 -type f)  "${user_home_dir}/.ssh"
-                for key in $(find ${user}/ssh/authorized_keys -type f); do
+                for key in "${user}"/ssh/*; do
+                    [[ -f "$key" ]] || continue
+                    \cp --preserve --dereference "$key" "$user_home_dir"/.ssh
+                done
+                for key in "${user}"/ssh/authorized_keys/*; do
+                    [[ -f "$key" ]] || continue
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
                 chown -R  ${user}:${user} "${user_home_dir}/.ssh"
@@ -131,7 +153,7 @@ setup_keys() {
             fi
         fi
     done
-    cd /
+    popd
     rm -rf "${TEMP_KEY_DIR}"
 }
 
@@ -166,8 +188,10 @@ setup_cloud_cfg_and_root_login() {
 }
 
 setup_fail2ban() {
+    pushd .
     if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
         yum install 2to3 -y
+        cd /usr/local/src
         wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
         tar -xvf 1.0.2.tar.gz
         cd fail2ban-1.0.2/
@@ -189,8 +213,10 @@ setup_fail2ban() {
     logpath  = /var/log/fail2ban.log
     maxretry = 5
 EOF
+    touch /var/log/fail2ban.log
     service fail2ban start
     yum remove -y firewalld
+    popd
 }
 
 setup_mail_sending() {
@@ -243,4 +269,36 @@ identify_suitable_partition_for_ephemeral_volume() {
         fi
     done 2>/dev/null | head -n 1 )
     echo $EPHEMERAL_VOLUME_NAME
+}
+
+setup_goaccess() {
+    # Compatible with Amazon Linux 2023
+    pushd .
+    cd /usr/local/src
+    wget https://tar.goaccess.io/goaccess-1.9.1.tar.gz
+    tar -xzvf goaccess-1.9.1.tar.gz
+    cd goaccess-1.9.1/
+    yum install -y gcc-c++
+    yum install -y libmaxminddb-devel ncurses-devel
+    ./configure --enable-utf8
+    make
+    make install
+    scp root@sapsailing.com:/etc/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    # once we switch from amazon linux 1:
+    # scp root@sapsailing.com:/usr/local/etc/goaccess/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    popd
+}
+setup_apachetop() {
+    # Compatible with Amazon Linux 2023
+    pushd .
+    yum install -y gcc-c++
+    yum install -y ncurses-devel readline-devel
+    cd /usr/local/src
+    wget https://github.com/tessus/apachetop/releases/download/0.23.2/apachetop-0.23.2.tar.gz
+    tar -xvzf apachetop-0.23.2.tar.gz
+    cd apachetop-0.23.2
+    ./configure
+    make
+    make install
+    popd
 }
