@@ -85,24 +85,29 @@ if [[ -d "users" ]]; then
             adduser "$USERNAME"
         fi
         id "$USERNAME"
-        if [[ "$?" -eq 0 &&  "$CREATE_CRONTABS" == "true" ]]; then  # 9 is the exit code indicating the username already exists.
+        if [[ "$?" -eq 0 ]]; then
             HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
-            # Clear the crontab file before assembling it from the snippets:
-            > $HOME_DIR/crontab
-            for crontab in ${USERNAME}/crontab*; do
-                [[ -e $crontab ]] || continue
-                cat "${crontab}">> $HOME_DIR/crontab
-                echo "">> $HOME_DIR/crontab
-            done
-            chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
-            sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
-            sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
-            sed -i '/^$/d' $HOME_DIR/crontab # purges random empty lines.
-            echo "">>$HOME_DIR/crontab  # Adds a newline
-            if [[ "$INSTALL_CRONTAB" == "true" ]]; then
-                crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+            # Sets permissions of home dir.
+            [[ -e "$USERNAME"/permissions ]] && chmod "$(cat "$USERNAME"/permissions)" "$HOME_DIR"
+            if [[ "$CREATE_CRONTABS" == "true" ]]; then  # 9 is the exit code indicating the username already exists.
+                # Clear the crontab file before assembling it from the snippets:
+                > $HOME_DIR/crontab
+                for crontab in ${USERNAME}/crontab*; do
+                    [[ -e $crontab ]] || continue
+                    cat "${crontab}">> $HOME_DIR/crontab
+                    echo "">> $HOME_DIR/crontab
+                done
+                chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
+                sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
+                sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
+                sed -i '/^$/d' $HOME_DIR/crontab # purges random empty lines.
+                echo "">>$HOME_DIR/crontab  # Adds a newline
+                if [[ "$INSTALL_CRONTAB" == "true" ]]; then
+                    crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+                fi
             fi
         fi
+        
         echo "****** finished user ******"
     done
     # Add to groups after all the groups exist.

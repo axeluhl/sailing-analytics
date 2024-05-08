@@ -144,7 +144,8 @@ setup_keys() {
                     [[ -f "$key" ]] || continue
                     \cp --preserve --dereference "$key" "$user_home_dir"/.ssh
                 done
-                for key in $(find ${user}/ssh/authorized_keys -type f); do
+                for key in "${user}"/ssh/authorized_keys/*; do
+                    [[ -f "$key" ]] || continue
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
                 chown -R  ${user}:${user} "${user_home_dir}/.ssh"

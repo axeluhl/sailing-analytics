@@ -23,11 +23,13 @@
 # This will do all necessary set-up up to the point where the large volumes
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
-if [[ "$#" -ne 2 ]]; then
+if [[ "$#" -ne 4 ]]; then
     echo "IP and bearer token required. Please check comment description for further details."
 fi
 IP=$1
 BEARER_TOKEN=$2
+IMAGEUPGRADE_FUNCTIONS_IP="$3"   # can be a domain name, such as sapsailing.com
+IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT="$4"
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="wiki"
@@ -50,11 +52,11 @@ yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod
 # ruby and gollum for wiki
 yum group install -y "Development Tools"
 yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake openssl-devel libyaml-devel
-gem install gollum
+gem install gollum -v 5.3.2
 gem update --system 3.5.7
 cd /home
 # The following line is for production use:
-scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT"/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /usr/local/bin
 # The following line is for test use, copying from a test instance with a check-out Git workspace:
 # scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 . imageupgrade_functions.sh
@@ -131,7 +133,7 @@ chmod 755 /root
 cd ~
 # Copies across the key vault and other relevant secrets from the existing
 # Central Reverse Proxy's /root folder:
-rsync -a dev-secrets github_tools_sap.pat hudson-aws-credentials key_vault mail.properties new_version_key_vault secrets ssh-key-reader.token root@sapsailing.com:/root /
+rsync -a  root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,new_version_key_vault,secrets,ssh-key-reader.token} /root
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 # add basic test page which won't cause redirect error code if used as a health check.
 cat <<EOF > /var/www/html/index.html
@@ -140,6 +142,7 @@ EOF
 echo "net.ipv4.ip_conntrac_max = 131072" >> /etc/sysctl.conf
 # setup fail2ban
 setup_fail2ban
+setup_keys "${IMAGE_TYPE}"
 # setup logrotate.d/httpd 
 # echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 # mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
@@ -154,6 +157,7 @@ chown root:root /etc/httpd/conf/pass*
 # create mountpoints (see part 2 for ownership changes)
 mkdir /var/log/old
 mkdir /var/www/static
+download_and_install_latest_sap_jvm_8
 # enable units which build-crontab doesn't 
 systemctl enable httpd
 systemctl start httpd
