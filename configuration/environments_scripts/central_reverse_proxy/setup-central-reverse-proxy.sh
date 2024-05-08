@@ -12,13 +12,13 @@
 # new instance.
 #
 # Then, call this script with the new instance's external IP address as the first,
-# and with a "bearer token" authenticating a user at security-service.sapsailing.com
-# which needs to have the following permissions:
+# and with a "bearer token" as a second argument, authenticating a user at
+# security-service.sapsailing.com which needs to have the following permissions:
 #    USER:READ:*
 #    SSH_KEY_READ:*
 # which will be used to determine the landscape management users, for example. In addition, 
-# add the IP/hostname of the instance with the imageupgrade_functions.sh, and the path to
-# the repo on that instance. 
+# add the IP/hostname of an instance with the Git repository checked out, containing
+# the file configuration/imageupgrade_functions.sh, and the path to the repo on that instance. 
 #
 # Example usage:
 #   setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code
