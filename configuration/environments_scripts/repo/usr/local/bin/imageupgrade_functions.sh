@@ -85,7 +85,7 @@ build_crontab_and_setup_files() {
     else
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
         scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         ./build-crontab-and-cp-files $@
