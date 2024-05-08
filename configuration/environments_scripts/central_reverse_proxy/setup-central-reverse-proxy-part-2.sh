@@ -28,7 +28,7 @@ systemctl enable nfs-server
 echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
 systemctl start nfs-server
-scp -p -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
+# scp -p -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc   # causes some issue with MACs
 # append hostname to sysconfig
 echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
 sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
