@@ -19,7 +19,7 @@ sync_repo() {
             # Gets all public ips for the instances with the chosen tag and iterates over the IPs.
             for IP in $(aws ec2 describe-instances --filters Name=tag-key,Values="${1}" | jq -r '.Reservations[].Instances[].PublicIpAddress'); do
                 # strictHostKey... means no authenticity check. The sync-repo... script must be installed in the root user's home.
-                echo $IP
+                echo "Getting the latest changes on branch $2 for $IP ($1)"
                 ssh -o "StrictHostKeyChecking=no" -o "ConnectTimeout=10" root@${IP} "cd ~ && sync-repo-and-execute-cmd.sh '${DIR}' '${COMMAND}' '${2}'";
             done;
 }
@@ -35,12 +35,12 @@ check_conflict() {
 merge_main_into_branch() {
         #$1 Branch name. Assumes you are in the git repo.
         git checkout "${1}"
-        check_conflict  "$?" "Conflict checking out ${1}"
+        check_conflict  "$?" "Conflict checking out ${1}, in the checked-out workspace."
         git pull
-        check_conflict  "$?" "Conflict pulling ${1}"
-        echo "Merging ${MAIN_BRANCH_NAME} into ${1}"
+        check_conflict  "$?" "Conflict pulling ${1}, in the checked-out workspace."
+        echo "Merging ${MAIN_BRANCH_NAME} into ${1}, in the checked-out workspace."
         git merge ${MAIN_BRANCH_NAME}
-        check_conflict  "$?" "Conflict merging ${MAIN_BRANCH_NAME} into ${1}"
+        check_conflict  "$?" "Conflict merging ${MAIN_BRANCH_NAME} into ${1}, in the checked-out workspace."
         git push
 }
 while read oldrev newrev refname; do   # These vars are passed on stdin to this hook.
@@ -55,14 +55,15 @@ while read oldrev newrev refname; do   # These vars are passed on stdin to this 
             echo "The central pulls the central branch"
             sync_repo "${CENTRAL_TAG}" "${CENTRAL_BRANCH_NAME}"
         elif [[ "$branch_name" == "$MAIN_BRANCH_NAME" ]]; then
+                echo "Performing manipulation in the checked-out workspace on the central, used for merges and manipulation."
                 cd ~
                 unset GIT_DIR
                 cd ${CHECKED_OUT_WORKSPACE_NAME}
                 # Get the latest main
                 git checkout ${MAIN_BRANCH_NAME}
-                check_conflict "$?" "Uncommitted files in the working directory"
+                check_conflict "$?" "Uncommitted files in the working directory, in the checked-out workspace."
                 git pull
-                check_conflict "$?" "Merge conflict in main branch"
+                check_conflict "$?" "Merge conflict in main branch from the checked-out workspace."
                 if [[ "$(git rev-parse ${MAIN_BRANCH_NAME})" != "$(git rev-parse origin/${MAIN_BRANCH_NAME})" ]]; then
                     echo "Merge induced by pull. Pushing latest changes in ${MAIN_BRANCH_NAME} to origin"  # In case of a merge from diverging branches. This seems cyclic as we are pushing to the same branch, but should resolve, when "Everything up-to-date".
                     git push
