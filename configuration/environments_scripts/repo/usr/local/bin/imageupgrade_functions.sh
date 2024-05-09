@@ -283,9 +283,10 @@ setup_goaccess() {
     ./configure --enable-utf8
     make
     make install
-    scp root@sapsailing.com:/etc/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    # old location:
+    # scp root@sapsailing.com:/etc/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
     # once we switch from amazon linux 1:
-    # scp root@sapsailing.com:/usr/local/etc/goaccess/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
+    scp root@sapsailing.com:/usr/local/etc/goaccess/goaccess.conf /usr/local/etc/goaccess/goaccess.conf
     popd
 }
 setup_apachetop() {
