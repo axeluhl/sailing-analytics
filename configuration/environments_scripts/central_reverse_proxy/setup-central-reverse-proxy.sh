@@ -174,11 +174,11 @@ sudo systemctl enable postfix
 sudo systemctl restart postfix
 mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
-echo "UUID=f03cc464-c3c0-452a-87da-e0eadc4c497f	/var/log	ext4	defaults,noatime,commit=30	0	0
-UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
+echo "UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
 UUID=0b15f5cb-fd3e-48e6-8195-be248cd7726d	/var/www/static	ext3	defaults,noatime,commit=30	0	0
 UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,commit=30	0	0
 UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noatime,commit=30	0	0" >>/etc/fstab
+systemctl enable --now docker
 THIRDEOF
 
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
