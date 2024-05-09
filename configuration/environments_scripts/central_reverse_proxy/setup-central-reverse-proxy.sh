@@ -42,7 +42,7 @@ ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
-ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
+ssh -A "root@${IP}" "bash -s" << SECONDEOF
 # update instance
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
@@ -78,6 +78,7 @@ setup_sshd_resilience
 # setup goaccess and apachetop
 setup_apachetop
 setup_goaccess
+. imageupgrade_functions.sh
 # copy bugzilla
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /usr/local/src
 cd /usr/local/src
@@ -85,6 +86,10 @@ tar -xzvf bugzilla-5.0.4.tar.gz
 mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localconfig .
+echo "Bugzilla has been copied. Now setting up bugzilla modules."
+echo "This can take 5 minutes or so."
+SECONDEOF
+ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
@@ -114,13 +119,14 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 /usr/bin/perl install-module.pl Daemon::Generic
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
+scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
+BUGZILLAEOF
+read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
 # use the localconfig file to setup the bugzilla
-SECONDEOF
-read -n 1  -p "Check bugzilla localconfig file and then press a key to continue" key_pressed
 # t forces tty allocation.
 ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
-ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
+ssh -A "root@${IP}" "bash -s" << THIRDEOF
 . imageupgrade_functions.sh
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
