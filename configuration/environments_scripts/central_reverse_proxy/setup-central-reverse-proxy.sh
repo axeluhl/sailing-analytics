@@ -118,6 +118,8 @@ ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 /usr/bin/perl install-module.pl Daemon::Generic
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
+/usr/bin/perl install-module.pl MIME::Base64
+/usr/bin/perl install-module.pl Authen::SASL
 scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
 BUGZILLAEOF
 read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
