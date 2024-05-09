@@ -68,7 +68,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data consumption of mobile apps|wiki/info/mobile/data-consumption]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
-* [[NMEA|wiki/info/mobile/nmea]]
+* [[NMEA|wiki/info/mobile/NMEA]]
 
 ### API
 
@@ -133,7 +133,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Operating Igtimi WindBots|wiki/howto/eventmanagers/windbot-operations]]
 * [[Linking Race Videos|wiki/howto/eventmanagers/linking-race-videos]]
 * [[Import official results|wiki/howto/eventmanagers/results-import]]
-* [[Pairing lists|wiki/howto/eventmanagers/pairing-lists]]
+* [[Pairing lists|wiki/howto/eventmanagers/Pairing-Lists]]
 * [[Manage media content|wiki/howto/eventmanagers/Manage-media-content]]
 * [[Import Event into Archive|wiki/howto/eventmanagers/import-into-archive]]
 
@@ -168,7 +168,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[505 worlds Kiel 2014 event page|wiki/events/505-worlds-kiel-2014]]
 * [[Kieler Woche event page|wiki/events/kieler-woche-2015]]
 * [[Charleston Race Week 2016|wiki/events/Charleston-Race-Week-2016]]
-* [[Sailing Leagues 2016|wiki/events/sailing-Leagues-2016]]
+* [[Sailing Leagues 2016|wiki/events/Sailing-Leagues-2016]]
 * [[Media Content|wiki/events/Sailing-events-media-content]]
 
 ## Planning
