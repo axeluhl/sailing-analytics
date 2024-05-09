@@ -78,7 +78,6 @@ setup_sshd_resilience
 # setup goaccess and apachetop
 setup_apachetop
 setup_goaccess
-. imageupgrade_functions.sh
 # copy bugzilla
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /usr/local/src
 cd /usr/local/src
@@ -87,7 +86,7 @@ mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localconfig .
 echo "Bugzilla has been copied. Now setting up bugzilla modules."
-echo "This can take 5 minutes or so."
+echo "This can take 5 minutes or so. The output is muted to prevent excessive warnings and clutter."
 SECONDEOF
 ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 # essentials bugzilla
