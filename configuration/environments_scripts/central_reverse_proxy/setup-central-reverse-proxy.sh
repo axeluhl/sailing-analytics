@@ -65,6 +65,7 @@ scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGR
 setup_cloud_cfg_and_root_login
 # setup files
 build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
+setup_swap 5000
 cd /home
 for folder in * ; do
     [[ -d "\$folder" ]] || continue
