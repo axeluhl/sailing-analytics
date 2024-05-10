@@ -12,7 +12,8 @@ target_groups=$(aws elbv2 describe-target-groups)
 LOCAL_IPV4=$(ssh root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
 INSTANCE_ID=$(ssh root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
 ELASTIC_IP="54.229.94.254"
-TAGS=("allReverseProxies" "CentralReverseProxy")
+TAGS=("CentralReverseProxy" "ReverseProxy")
+TARGET_GROUP_TAGS=("allReverseProxies" "CentralReverseProxy")
 extract_public_ip() {
     jq -r ' .Instances | .[] | .PublicIpAddress' | grep -v null
 }
@@ -31,7 +32,7 @@ echo "Registering with nlb"
 aws elbv2 register-targets --target-group-arn "$nlbArn"  --targets Id="${LOCAL_IPV4}",Port=80
 echo "Fetching tags"
 describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | .TargetGroupArn'))
-for tag in "${TAGS[@]}"; do
+for tag in "${TARGET_GROUP_TAGS[@]}"; do
     echo "Adding to target groups with $tag"
     for tgArn in $(echo "$describe_tags" | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="'"$tag"'") ) | .ResourceArn'); do
         if [[ "$tgArn" != "$nlbArn" ]]; then
@@ -50,7 +51,7 @@ echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
     echo "Remounting on $instanceIp"
-    ssh root@"${instanceIp}"  "umount -l -f /var/log/old; umount -l -f /home/scores;  mount -a"
+    ssh root@"${instanceIp}"  " umount -l -f /home/scores;  mount -a"
 done
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "DisposableProxy" | extract_public_ip); do
     echo "Remounting on $instanceIp"
