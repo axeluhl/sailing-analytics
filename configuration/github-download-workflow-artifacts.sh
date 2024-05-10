@@ -13,7 +13,7 @@
 BRANCH="${1}"
 BEARER_TOKEN="${2}"
 # Get the artifacts URL of the last workflow run triggered by a branch push for ${BRANCH}:
-LAST_WORKFLOW_FOR_BRANCH=$( curl --silent -L -H 'Authorization: Bearer '${BEARER_TOKEN} https://api.github.com/repos/SAP/sailing-analytics/actions/runs 2>/dev/null | jq -r '.workflow_runs | map(select(.name == "release" and ((.head_branch | startswith("'${BRANCH}'")) or (.head_branch | startswith("releases/'${BRANCH}'"))))) | sort_by(.created_at) | reverse | .[0]' )
+LAST_WORKFLOW_FOR_BRANCH=$( curl --silent -L -H 'Authorization: Bearer '${BEARER_TOKEN} https://api.github.com/repos/SAP/sailing-analytics/actions/runs 2>/dev/null | jq -r '.workflow_runs | map(select(.status == "completed" and .name == "release" and ((.head_branch | startswith("'${BRANCH}'")) or (.head_branch | startswith("releases/'${BRANCH}'"))))) | sort_by(.created_at) | reverse | .[0]' )
 ARTIFACTS_URL=$( echo "${LAST_WORKFLOW_FOR_BRANCH}" | jq -r '.artifacts_url' )
 CONCLUSION=$( echo "${LAST_WORKFLOW_FOR_BRANCH}" | jq -r '.conclusion' )
 ARTIFACTS_JSON=$( curl --silent -H 'Authorization: Bearer '${BEARER_TOKEN} "${ARTIFACTS_URL}" )
