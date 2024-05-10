@@ -303,3 +303,16 @@ setup_apachetop() {
     make install
     popd
 }
+
+setup_swap() {
+    # $1: size of swapspace in megabytes.
+    local swapfile_location=/var/cache/swapfile
+    pushd .
+    sudo dd if=/dev/zero of="$swapfile_location" bs=1M count="$1"
+    sudo chmod 600 "$swapfile_location"
+    sudo chown root:root "$swapfile_location"
+    sudo mkswap "$swapfile_location"
+    sudo su - -c "echo \"$swapfile_location       none    swap    pri=0      0       0\" >> /etc/fstab"
+    sudo swapon -a
+    popd
+}
