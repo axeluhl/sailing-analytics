@@ -160,7 +160,6 @@ import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
-import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MailInvitationType;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -207,7 +206,6 @@ import com.sap.sailing.domain.common.orc.impl.ORCPerformanceCurveLegImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -223,7 +221,6 @@ import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -359,10 +356,10 @@ import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -514,7 +511,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
-            Position fixedPosition) {
+            Position fixedPosition) throws NoCorrespondingServiceRegisteredException, TransformationException {
         MarkProperties markProperties = getSharedSailingData().getMarkPropertiesById(markPropertiesId);
         if (deviceIdentifier != null) {
             getSharedSailingData().setTrackingDeviceIdentifierForMarkProperties(markProperties, convertDtoToDeviceIdentifier(deviceIdentifier));
@@ -551,13 +548,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI, String storedURI,
+    public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs,
+            String liveURIFromConfiguration, String storedURIFromConfiguration,
             String updateURI, boolean trackWind, final boolean correctWindByDeclination,
             final Duration offsetToStartTimeOfSimulatedRace, final boolean useInternalMarkPassingAlgorithm,
             boolean useOfficialEventsToUpdateRaceLog, String jsonUrlAsKey)
             throws Exception {
-        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURI
-                + " and storedURI " + storedURI);
+        logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURIFromConfiguration
+                + " and storedURI " + storedURIFromConfiguration);
         final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
@@ -568,19 +566,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 // note that the live URI may be null for races that were put into replay mode
                 final URI effectiveLiveURI;
                 if (!record.getRaceStatus().equals(TracTracConnectionConstants.REPLAY_STATUS)) {
-                    if (liveURI == null || liveURI.trim().length() == 0) {
+                    if (liveURIFromConfiguration == null || liveURIFromConfiguration.trim().length() == 0) {
                         effectiveLiveURI = record.getLiveURI();
                     } else {
-                        effectiveLiveURI = new URI(liveURI);
+                        effectiveLiveURI = new URI(liveURIFromConfiguration);
                     }
                 } else {
                     effectiveLiveURI = null;
                 }
                 final URI effectiveStoredURI;
-                if (storedURI == null || storedURI.trim().length() == 0) {
+                if (storedURIFromConfiguration == null || storedURIFromConfiguration.trim().length() == 0) {
                     effectiveStoredURI = record.getStoredURI();
                 } else {
-                    effectiveStoredURI = new URI(storedURI);
+                    effectiveStoredURI = new URI(storedURIFromConfiguration);
                 }
                 final URI effectiveUpdateURI;
                 if (updateURI == null || updateURI.trim().length() == 0) {
@@ -595,7 +593,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, config == null ? null : config.getTracTracUsername(),
                         config == null ? null : config.getTracTracPassword(), record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog);
+                        correctWindByDeclination, useOfficialEventsToUpdateRaceLog,
+                        liveURIFromConfiguration==null || liveURIFromConfiguration.trim().length() == 0 ? null : new URI(liveURIFromConfiguration),
+                        storedURIFromConfiguration==null || storedURIFromConfiguration.trim().length() == 0 ? null : new URI(storedURIFromConfiguration));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
@@ -2108,11 +2108,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
-                DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
-                // In case the user selected a distinct set of races, we want the call to completely fail if
-                // tracking wind isn't allowed for at least one race
-                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-                trackedRaces.add(trackedRace);
+                final DynamicTrackedRace trackedRace = getTrackedRace(raceDTO.getRaceIdentifier());
+                if (trackedRace != null) {
+                    // In case the user selected a distinct set of races, we want the call to completely fail if
+                    // tracking wind isn't allowed for at least one race
+                    getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+                    trackedRaces.add(trackedRace);
+                }
             }
         } else {
             for (DynamicTrackedRace race : getAllTrackedRaces()) {
@@ -2604,11 +2606,13 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public RaceDTO setStartTimeReceivedForRace(RaceIdentifier raceIdentifier, Date newStartTimeReceived) {
         RegattaNameAndRaceName regattaAndRaceIdentifier = new RegattaNameAndRaceName(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName());
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
-        getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
-        trackedRace.setStartTimeReceived(
-                newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
-        return baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(regattaAndRaceIdentifier);
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
+            trackedRace.setStartTimeReceived(
+                    newStartTimeReceived == null ? null : new MillisecondsTimePoint(newStartTimeReceived));
+        }
+        return trackedRace == null ? null : baseDomainFactory.createRaceDTO(getService(), false, regattaAndRaceIdentifier, trackedRace);
     }
 
     @Override
@@ -2961,6 +2965,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throw new ServiceException(serverStringMessages.get(locale, "slicingRaceColumnAlreadyUsedThe"));
         }
         final DynamicTrackedRace trackedRaceToSlice = getService().getTrackedRace(raceIdentifier);
+        // If tracked race isn't found, a NullPointerException will be thrown next, and that's okay because
+        // it's a bit unusual to not find a race that is just about to be sliced. We couldn't continue anyway.
         final TimePoint startOfTrackingOfRaceToSlice = trackedRaceToSlice.getStartOfTracking();
         final TimePoint endOfTrackingOfRaceToSlice = trackedRaceToSlice.getEndOfTracking();
         if (sliceFrom == null || sliceTo == null || startOfTrackingOfRaceToSlice.after(sliceFrom)
@@ -3000,7 +3006,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             hasFinishingTime = false;
             hasFinishedTime = false;
         }
-
         // Only wind fixes in the new tracking interval as well as the best fallback fixes are added to the new RaceLog
         final LogEventTimeRangeWithFallbackFilter<RaceLogWindFixEvent> windFixEvents = new LogEventTimeRangeWithFallbackFilter<>(
                 timeRange);
@@ -3880,49 +3885,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             return new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
         }
         return null;
-    }
-
-    private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
-        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getFixLastReceived(Collections.singleton(mapping.getDevice()));
-        final Timed lastFix;
-        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
-            lastFix = lastFixes.get(mapping.getDevice());
-        } else {
-            lastFix = null;
-        }
-        String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ?
-                null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
-                null : mapping.getTimeRange().to().asDate();
-        MappableToDevice item = null;
-        final WithID mappedTo = mapping.getMappedTo();
-        if (mappedTo == null) {
-            throw new RuntimeException("Device mapping not mapped to any object");
-        } else if (mappedTo instanceof Competitor) {
-            item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
-        } else if (mappedTo instanceof Mark) {
-            item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
-        } else if (mappedTo instanceof Boat) {
-            item = baseDomainFactory.convertToBoatDTO((Boat) mappedTo);
-        } else {
-            throw new RuntimeException("Can only handle Competitor, Boat or Mark as mapped item type, but not "
-                    + mappedTo.getClass().getName());
-        }
-        //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
-        //has a large performance implact for GWT.
-        //As any Serializable subclass is converted to String by the BaseRaceLogEventSerializer, and only UUIDs are
-        //recovered by the BaseRaceLogEventDeserializer, only UUIDs are safe to use anyway.
-        List<UUID> originalRaceLogEventUUIDs = new ArrayList<UUID>();
-        for (Serializable id : mapping.getOriginalRaceLogEventIds()) {
-            if (! (id instanceof UUID)) {
-                logger.log(Level.WARNING, "Got RaceLogEvent with id that was not UUID, but " + id.getClass().getName());
-                throw new TransformationException("Could not send device mapping to browser: can only deal with UUIDs");
-            }
-            originalRaceLogEventUUIDs.add((UUID) id);
-        }
-        return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
     }
 
     private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog) throws TransformationException {

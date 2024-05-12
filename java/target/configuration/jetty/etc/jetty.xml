@@ -128,20 +128,25 @@
     </Call>
 
     <!-- Enable JMX -->
-    <Call id="MBeanServer" class="java.lang.management.ManagementFactory" name="getPlatformMBeanServer"/>
-
-    <New id="MBeanContainer" class="org.eclipse.jetty.jmx.MBeanContainer">
-        <Arg>
-            <Ref id="MBeanServer"/>
-        </Arg>
-    </New>
+    <!-- =========================================================== -->
+    <!-- Get the platform mbean server                               -->
+    <!-- =========================================================== -->
+    <Call id="MBeanServer" class="java.lang.management.ManagementFactory"
+      name="getPlatformMBeanServer" />
+  
+    <!-- =========================================================== -->
+    <!-- Initialize the Jetty MBean container -->
+    <!-- =========================================================== -->
     <Call name="addBean">
-        <Arg>
-            <Ref id="MBeanContainer"/>
-        </Arg>
+      <Arg>
+        <New id="MBeanContainer" class="org.eclipse.jetty.jmx.MBeanContainer">
+          <Arg>
+            <Ref refid="MBeanServer" />
+          </Arg>
+        </New>
+      </Arg>
     </Call>
-
-
+  
     <!-- =========================================================== -->
     <!-- extra server options                                        -->
     <!-- =========================================================== -->

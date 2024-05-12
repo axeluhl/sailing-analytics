@@ -404,7 +404,7 @@ public class SimulationServiceImpl implements SimulationService {
                 });
             }
             if (!legListeners.containsKey(legIdentifier.getRaceIdentifier())) {
-                TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
+                final TrackedRace trackedRace = racingEventService.getTrackedRace(legIdentifier);
                 if (trackedRace != null) {
                     LegChangeListener listener = new LegChangeListener(trackedRace);
                     legListeners.put(legIdentifier.getRaceIdentifier(), listener);

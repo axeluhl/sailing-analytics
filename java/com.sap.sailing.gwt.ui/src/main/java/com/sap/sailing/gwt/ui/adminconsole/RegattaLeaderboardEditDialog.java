@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -21,5 +22,10 @@ public class RegattaLeaderboardEditDialog<LD extends LeaderboardDescriptor> exte
             discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboardDescriptor.getDiscardThresholds(), stringMessages);
         } // else, the regatta leaderboard obtains its result discarding rule implicitly from the underlying regatta
         adjustVisibilityOfResultDiscardingRuleComponent();
+    }
+
+    @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return displayNameTextBox;
     }
 }

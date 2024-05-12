@@ -289,12 +289,14 @@ public interface DomainFactory {
      *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
      *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
      *            races if since the last connection the race was migrated to a replay file format.
+     * @param liveURIFromConfiguration TODO
+     * @param storedURIFromConfiguration TODO
      */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
-            boolean preferReplayIfAvailable, int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog) throws Exception;
+            boolean preferReplayIfAvailable, int timeoutInMillis, boolean useOfficialEventsToUpdateRaceLog, URI liveURIFromConfiguration, URI storedURIFromConfiguration) throws Exception;
     
     /**
      * Removes all knowledge about <code>tractracRace</code> from the race cache.
@@ -337,4 +339,13 @@ public interface DomainFactory {
      */
     ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
 
+    /**
+     * Event subscribers created by this call are cached in this domain factory, using the three parameters as a compound
+     * caching key. Event subscribers found in the cache are returned by this method. The event subscriber returned will
+     * be a wrapper around the actual {@link IEventSubscriber}, managing the {@link IEventSubscriber#start()} and {@link IEventSubscriber#stop()}
+     * calls such that only the first {@link IEventSubscriber#start()} call is actually forwarded to the wrapper subscriber, and only
+     * the last {@link IEventSubscriber#stop()} call is forwarded. This is managed by an atomic counter that keeps track of the
+     * start/stop invocations.
+     */
+    IEventSubscriber getOrCreateEventSubscriber(IEvent tractracEvent, URI liveURI, URI storedURI);
 }

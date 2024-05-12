@@ -41,12 +41,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.home.shared.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.fileupload.FileUploadConstants;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.panels.HorizontalFlowPanel;
@@ -288,7 +288,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
             // we can get the result text here (see the FormPanel documentation for
             // further explanation).
             progressOverlay.setVisible(false);
-            JSONValue resultJsonValue = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContent(event));
+            JSONValue resultJsonValue = JSONParser.parseStrict(FileUploadUtil.getApplicationJsonContentFromHtml(event.getResults()));
             JSONArray resultJson = resultJsonValue.isArray();
             boolean uploadSuccessful = false;
             boolean fileSkipped = false;

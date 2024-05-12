@@ -4,6 +4,11 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -25,7 +30,7 @@ import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
  * by the <tt>{value}</tt> of the {@code "replicaSet"} parameter; otherwise the result is a {@link MongoProcess}.
  */
 public class MongoUriParser<ShardingKey> {
-    private final String SCHEME = "mongodb";
+    private final static String SCHEME = "mongodb";
     private final AwsLandscape<ShardingKey> landscape;
     private final Region region;
     
@@ -70,10 +75,42 @@ public class MongoUriParser<ShardingKey> {
         }
         return endpoint == null ? null : endpoint.getDatabase(dbName);
     }
+    
+    public Database parseMongoDBConfigurationFromStatus(JSONObject mongoDBConfigurationJSON) throws UnknownHostException {
+        final String databaseName = mongoDBConfigurationJSON.get("database").toString();
+        final String replicaSetName = mongoDBConfigurationJSON.get("replicaSet").toString();
+        final MongoEndpoint endpoint;
+        final List<Pair<AwsInstance<ShardingKey>, Integer>> hostnamesAndPorts = new ArrayList<>();
+        final JSONArray serversJSON = (JSONArray) mongoDBConfigurationJSON.get("servers");
+        for (final Object serverObject : serversJSON) {
+            final JSONObject serverJSON = (JSONObject) serverObject;
+            final String hostname = serverJSON.get("host").toString();
+            final int port = ((Number) serverJSON.get("port")).intValue();
+            hostnamesAndPorts.add(getHostAndPort(hostname, port));
+        }
+        if (replicaSetName != null) {
+            MongoReplicaSet replicaSet = new MongoReplicaSetImpl(replicaSetName);
+            for (final Pair<AwsInstance<ShardingKey>, Integer> hostnameAndPort : hostnamesAndPorts) {
+                final MongoProcessInReplicaSet mongoProcessInReplicaSet = getMongoProcessInReplicaSet(replicaSet, hostnameAndPort);
+                if (mongoProcessInReplicaSet != null) {
+                    replicaSet.addReplica(mongoProcessInReplicaSet);
+                }
+            }
+            endpoint = replicaSet;
+        } else {
+            endpoint = getMongoProcess(hostnamesAndPorts.get(0));
+        }
+        return endpoint == null ? null : endpoint.getDatabase(databaseName);
+
+    }
 
     private MongoEndpoint getMongoProcess(final String hostnameAndOptionalPort) throws UnknownHostException {
-        final MongoEndpoint endpoint;
         Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort = getHostAndPort(hostnameAndOptionalPort);
+        return getMongoProcess(hostAndOptionalPort);
+    }
+    
+    private MongoEndpoint getMongoProcess(Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort) {
+        final MongoEndpoint endpoint;
         if (hostAndOptionalPort.getA() != null) {
             if (hostAndOptionalPort.getB() != null) {
                 endpoint = new MongoProcessImpl(hostAndOptionalPort.getA(), hostAndOptionalPort.getB());
@@ -87,8 +124,12 @@ public class MongoUriParser<ShardingKey> {
     }
     
     private MongoProcessInReplicaSet getMongoProcessInReplicaSet(final MongoReplicaSet replicaSet, final String hostnameAndOptionalPort) throws UnknownHostException {
-        final MongoProcessInReplicaSet endpoint;
         Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort = getHostAndPort(hostnameAndOptionalPort);
+        return getMongoProcessInReplicaSet(replicaSet, hostAndOptionalPort);
+    }
+    
+    private MongoProcessInReplicaSet getMongoProcessInReplicaSet(final MongoReplicaSet replicaSet, Pair<AwsInstance<ShardingKey>, Integer> hostAndOptionalPort) {
+        final MongoProcessInReplicaSet endpoint;
         if (hostAndOptionalPort.getA() != null) {
             if (hostAndOptionalPort.getB() != null) {
                 endpoint = new MongoProcessInReplicaSetImpl(replicaSet, hostAndOptionalPort.getB(), hostAndOptionalPort.getA());
@@ -106,8 +147,17 @@ public class MongoUriParser<ShardingKey> {
      */
     private Pair<AwsInstance<ShardingKey>, Integer> getHostAndPort(String hostnameAndOptionalPort) throws UnknownHostException {
         final String[] hostnameAndOptionalPortSplit = hostnameAndOptionalPort.split(":");
-        final InetAddress address = InetAddress.getByName(hostnameAndOptionalPortSplit[0]);
+        final String hostname = hostnameAndOptionalPortSplit[0];
+        final Integer port = hostnameAndOptionalPortSplit.length<2?null:Integer.valueOf(hostnameAndOptionalPortSplit[1]);
+        return getHostAndPort(hostname, port);
+    }
+
+    /**
+     * If the host isn't found in the landscape, the {@link Pair#getA()} component of the pair returned will be {@code null}.
+     */
+    private Pair<AwsInstance<ShardingKey>, Integer> getHostAndPort(String hostname, Integer optionalPort) throws UnknownHostException {
+        final InetAddress address = InetAddress.getByName(hostname);
         final AwsInstance<ShardingKey> hostByPrivateIp = landscape.getHostByPrivateIpAddress(region, address.getHostAddress(), AwsInstanceImpl::new);
-        return new Pair<>(hostByPrivateIp, hostnameAndOptionalPortSplit.length<2?null:Integer.valueOf(hostnameAndOptionalPortSplit[1]));
+        return new Pair<>(hostByPrivateIp, optionalPort);
     }
 }

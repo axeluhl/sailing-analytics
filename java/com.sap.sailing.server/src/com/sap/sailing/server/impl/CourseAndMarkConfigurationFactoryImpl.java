@@ -69,7 +69,6 @@ import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.Positioning;
 import com.sap.sailing.domain.coursetemplate.PositioningVisitor;
 import com.sap.sailing.domain.coursetemplate.RegattaMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.TrackingDeviceBasedPositioning;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
@@ -92,6 +91,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CourseConfigurationBu
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
 import com.sap.sailing.shared.server.SharedSailingData;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
@@ -995,7 +995,7 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
         return result;
     }
     
-    private class CourseTemplateCompatibilityCheckerForCourseBase
+    class CourseTemplateCompatibilityCheckerForCourseBase
             extends CourseTemplateCompatibilityChecker<CourseBase, Mark, Waypoint> {
         public CourseTemplateCompatibilityCheckerForCourseBase(CourseBase course, CourseTemplate courseTemplate) {
             super(course, courseTemplate);
@@ -1173,7 +1173,8 @@ public class CourseAndMarkConfigurationFactoryImpl implements CourseAndMarkConfi
      * 
      * Eventually, a list of {@code W} waypoint-like objects is created, one for each
      * {@link WaypointWithMarkConfiguration} in the original list provided to the constructor, based on the {@code M}
-     * objects to which the mark configurations were mapped.
+     * objects to which the mark configurations were mapped. The list can be found in {@link #effectiveWaypoints} after
+     * the constructor has completed.<p>
      *
      * @param <CP>
      *            a control point-like type; something that is one or has two object(s) of type {@code M}.
