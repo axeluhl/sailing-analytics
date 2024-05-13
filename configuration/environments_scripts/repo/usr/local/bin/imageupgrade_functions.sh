@@ -79,16 +79,54 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
-    # There must be at least 1 and all args are passed to build-crontab-and-cp-files. See the documentation of this file for more info.
-    if [[ "$#" -lt 1 ]]; then
-        echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
+    if [[ "$#" -eq 0 ]]; then
+        echo "Number of arguments is invalid. Please use the options and arguments as follows."
+        echo "Options for this function:"
+        echo "  -h is the hostname to fetch the configuration/environments_scripts from."
+        echo "The remaining (optional) args and options, if correct, are passed to the build_crontab_and_setup_files script."
+        echo "  -c means no crontab file is created"
+        echo "  -n means that if a crontab has been created, it isn't actually installed. This is useful for testing."
+        echo "  -f means no files are copied over, which is useful if you have already copied files accross or don't want to override existing files"
+        echo "Then there are the arguments, where the order matters:"
+        echo "  ENVIRONMENT_TYPE - the directory name in environments_scripts which will be used."
+        echo "  USER_WITH_COPY_OF_REPO - a user which will exist on the environment type, which has a checked out copy of the git workspace."
+        echo "  RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER - the relative path within the USER_WITH_COPY_OF_REPO to get to the git workspace."
     else
+        TEMP=$(getopt -o fnch: -n 'options checker' -- "$@")
+        [[ "$?" -eq 0 ]] || exit 2
+        eval set -- "$TEMP"
+        PASS_OPTIONS=()
+        HOSTNAME="sapsailing.com"
+        while :; do
+            case "$1" in
+                -c|-f|-n)
+                    PASS_OPTIONS+=("$1")
+                    ;;
+                -h)
+                    if [[ "$2" ]]; then
+                        HOSTNAME="$2"
+                        shift
+                    else
+                        echo "hostname option requires argument"
+                    fi
+                    ;;
+                --)
+                    shift
+                    break
+                    ;;
+                *)
+                    echo "no more options"
+                    break
+            esac
+            shift
+        done
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
+        echo "Attempting access to the wiki, typically used by image upgrade. Otherwise, try root. NOTE: If the first command fails, there will be a warning message."
+        scp -o StrictHostKeyChecking=no -pr "wiki@$HOSTNAME:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@$HOSTNAME:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        ./build-crontab-and-cp-files $@
+        ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}" "$@" 
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi

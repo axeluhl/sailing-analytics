@@ -39,7 +39,7 @@ do
             exit 4;;
     esac
 done
-shift $((OPTIND-1)) # shift the arguments along so -s is no longer $1
+shift $((OPTIND-1)) # shift the arguments along. OPTIND is the position of the next argument to process.
 ENV_TYPE="$1"
 GIT_USER="$2"
 RELATIVE_GIT_DIR_NAME="$3"
