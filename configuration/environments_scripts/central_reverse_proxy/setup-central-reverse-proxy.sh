@@ -25,6 +25,10 @@
 # This will do all necessary set-up up to the point where the large volumes
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
+terminationCheck() {
+    # $1 status returned by the last command. 
+    [[ "$1" -eq 0 ]] || { echo "Non-zero exit code. Exiting to avoid damage" &&  exit 1; }
+}
 if [[ "$#" -ne 4 ]]; then
     echo "4 arguments required. Please check comment description for further details."
     echo "Example usage: setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code"
@@ -91,6 +95,7 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 echo "Bugzilla has been copied. Now setting up bugzilla modules."
 echo "This can take 5 minutes or so. The output is muted (but sent to log.txt) to prevent excessive warnings and clutter in the terminal."
 SECONDEOF
+terminationCheck "$?"
 ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>log.txt
 cd /usr/share/bugzilla/
 # essentials bugzilla
@@ -125,7 +130,7 @@ cd /usr/share/bugzilla/
 /usr/bin/perl install-module.pl MIME::Base64
 /usr/bin/perl install-module.pl Authen::SASL
 BUGZILLAEOF
-[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
+terminationCheck "$?"
 read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
 # use the localconfig file to setup the bugzilla
 # t forces tty allocation.
@@ -189,7 +194,7 @@ UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,com
 UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noatime,commit=30	0	0" >>/etc/fstab
 systemctl enable --now docker
 THIRDEOF
-[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
+terminationCheck "$?"
 echo ""
 echo ""
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
