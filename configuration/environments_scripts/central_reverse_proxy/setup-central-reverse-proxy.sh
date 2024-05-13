@@ -28,6 +28,7 @@
 if [[ "$#" -ne 4 ]]; then
     echo "4 arguments required. Please check comment description for further details."
     echo "Example usage: setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code"
+    exit 2
 fi
 IP=$1
 BEARER_TOKEN=$2
@@ -90,6 +91,7 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 echo "Bugzilla has been copied. Now setting up bugzilla modules."
 echo "This can take 5 minutes or so. The output is muted to prevent excessive warnings and clutter."
 SECONDEOF
+[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
 ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
@@ -124,6 +126,7 @@ ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 /usr/bin/perl install-module.pl Authen::SASL
 scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
 BUGZILLAEOF
+[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
 read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
 # use the localconfig file to setup the bugzilla
 # t forces tty allocation.
@@ -183,7 +186,7 @@ UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,com
 UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noatime,commit=30	0	0" >>/etc/fstab
 systemctl enable --now docker
 THIRDEOF
-
+[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
 echo ""
 echo ""
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
