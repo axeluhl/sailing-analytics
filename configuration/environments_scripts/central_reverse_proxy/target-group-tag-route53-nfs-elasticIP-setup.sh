@@ -48,8 +48,10 @@ sed -i "s/SMTP_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.jso
 read -n 1  -p "Check the instance has the correct tags and is in the correct target group. Furthermore, check the batch file has been modified correctly. Press a key to continue.." key_pressed
 ###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
-echo "Waiting 60 seconds for records to change"
+echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
+echo "Please check the route53 DNS records have been correctly updated."
 sleep 60
+read -n 1  -p " Press a key to continue.." key_pressed
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
