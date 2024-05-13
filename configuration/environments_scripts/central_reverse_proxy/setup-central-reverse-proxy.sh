@@ -180,6 +180,9 @@ sudo systemctl enable postfix
 sudo systemctl restart postfix
 mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/www/icons /var/www
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/www/errorpages /var/www
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/www/error /var/www
 echo "UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
 UUID=0b15f5cb-fd3e-48e6-8195-be248cd7726d	/var/www/static	ext3	defaults,noatime,commit=30	0	0
 UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,commit=30	0	0
