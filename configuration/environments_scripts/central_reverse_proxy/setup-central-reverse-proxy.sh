@@ -42,7 +42,7 @@ ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
-ssh -A "root@${IP}" "bash -s" << SECONDEOF  >log.txt    
+ssh -A "root@${IP}" "bash -s" << SECONDEOF
 # update instance
 yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
@@ -85,6 +85,10 @@ tar -xzvf bugzilla-5.0.4.tar.gz
 mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localconfig .
+echo "Bugzilla has been copied. Now setting up bugzilla modules."
+echo "This can take 5 minutes or so. The output is muted to prevent excessive warnings and clutter."
+SECONDEOF
+ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
@@ -114,13 +118,14 @@ scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localco
 /usr/bin/perl install-module.pl Daemon::Generic
 /usr/bin/perl install-module.pl File::MimeInfo::Magic
 /usr/bin/perl install-module.pl File::Copy::Recursive
+scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
+BUGZILLAEOF
+read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
 # use the localconfig file to setup the bugzilla
-SECONDEOF
-read -n 1  -p "Check bugzilla localconfig file and then press a key to continue" key_pressed
 # t forces tty allocation.
 ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
-ssh -A "root@${IP}" "bash -s" << THIRDEOF  >>log.txt    
+ssh -A "root@${IP}" "bash -s" << THIRDEOF
 . imageupgrade_functions.sh
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
@@ -168,27 +173,31 @@ sudo systemctl enable postfix
 sudo systemctl restart postfix
 mkdir --parents /root/temporary_home_copy/home
 mv /home/* /root/temporary_home_copy/home
-echo "UUID=f03cc464-c3c0-452a-87da-e0eadc4c497f	/var/log	ext4	defaults,noatime,commit=30	0	0
-UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
+echo "UUID=23d42c52-85ee-4f6d-bdfe-c62f69bb689f	/home	ext4	defaults,noatime,commit=30	0	0
 UUID=0b15f5cb-fd3e-48e6-8195-be248cd7726d	/var/www/static	ext3	defaults,noatime,commit=30	0	0
 UUID=ff598428-d380-4429-a690-3809157506b7	/var/log/old	ext3	defaults,noatime,commit=30	0	0
 UUID=d371e530-c189-4012-ae57-45d67a690554	/var/log/old/cache	ext4	defaults,noatime,commit=30	0	0" >>/etc/fstab
+systemctl enable --now docker
 THIRDEOF
 
+echo ""
+echo ""
 echo "Your turn! READ CAREFULLY! The instance is now prepared."
 echo "Please remove the existing central reverse proxy from all target groups tagged with \"CentralReverseProxy\""
 echo "or \"allReverseProxies\" (draining can take 5 mins)."
 echo "Also ensure there is at least 1 healthy disposable in the SAME availability zone as the archive,"
 echo "so there is no risk of all the targets being briefly unhealthy."
-echo "Then unmount the volumes /var/log, /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy,"
+echo "Then unmount the volumes /home, /var/www/static, /var/log/old and /var/log/old/cache from the existing reverse proxy,"
 echo "detach, reattach to the new instance and remount as follows:"
-echo "The detaching and attaching can be done in the AWS EC2 console by going to the webserver"
+echo "First unmount, on the old instance, via"
+echo "     umount -l -f <location>"
+echo "Then begin detaching and attaching. This can be done in the AWS EC2 console by going to the old webserver"
 echo "and clicking on the volumes in question (found within the storage tab)."
-echo "Then click Detach from within the Actions column. The mounting can be done using"
-echo "    umount -l -f <location>"
-echo "on the existing instance; the remounting can be done with"
+echo "Then click Detach from within the Actions dropdrown. Reattach to the new instance by clicking Attach from the Actions dropdown,"
+echo "then choose the new instance and the device name."
+echo "On the new instance itself, the remounting can be done with"
 echo "    mount -a"
-echo "on the new instance."
+echo "as /etc/fstab contains all the mount details."
 echo "For further details, checkout this wiki page https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies"
 echo "Check that all these volumes were mounted successfully, e.g. by invoking"
 echo "    mount"
