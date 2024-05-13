@@ -126,7 +126,9 @@ build_crontab_and_setup_files() {
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@$HOSTNAME:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}" "$@" 
+        if ! ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}" "$@"; then
+            exit 1
+        fi
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
