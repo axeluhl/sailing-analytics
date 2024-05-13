@@ -26,7 +26,8 @@
 # currently attached to and mounted on the current Central Reverse Proxy will
 # need to be unmounted, detached, attached to the new instance, and mounted there.
 if [[ "$#" -ne 4 ]]; then
-    echo "IP and bearer token required. Please check comment description for further details."
+    echo "4 arguments required. Please check comment description for further details."
+    echo "Example usage: setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code"
 fi
 IP=$1
 BEARER_TOKEN=$2
@@ -48,7 +49,7 @@ yum update -y
 yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
 # docker setup 
 yum install -y docker
-sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
+sudo curl --silent -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 yum install -y perl perl-CGI perl-Template-Toolkit  perl-CPAN perl-DBD-MySQL mod_perl perl-GD gcc-c++
 # ruby and gollum for wiki

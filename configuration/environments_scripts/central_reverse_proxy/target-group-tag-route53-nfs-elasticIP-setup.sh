@@ -9,8 +9,8 @@ if [[ "$#" -ne 1 ]]; then
     exit 2
 fi
 target_groups=$(aws elbv2 describe-target-groups)
-LOCAL_IPV4=$(ssh root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
-INSTANCE_ID=$(ssh root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
+LOCAL_IPV4=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
+INSTANCE_ID=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
 ELASTIC_IP="54.229.94.254"
 TAGS=("CentralReverseProxy" "ReverseProxy")
 TARGET_GROUP_TAGS=("allReverseProxies" "CentralReverseProxy")
@@ -52,11 +52,11 @@ echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
     echo "Remounting on $instanceIp"
-    ssh root@"${instanceIp}"  " umount -l -f /home/scores;  mount -a"
+    ssh -o StrictHostKeyChecking=false root@"${instanceIp}"  " umount -l -f /home/scores;  mount -a"
 done
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "DisposableProxy" | extract_public_ip); do
     echo "Remounting on $instanceIp"
-    ssh root@"${instanceIp}"  "umount -l -f /var/log/old; mount -a"
+    ssh -o StrictHostKeyChecking=false root@"${instanceIp}"  "umount -l -f /var/log/old; mount -a"
 done
 # Alter the elastic IP.
 # WARNING: Will terminate connections via the existing public ip. 
