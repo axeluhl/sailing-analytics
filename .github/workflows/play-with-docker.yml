@@ -13,15 +13,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Login to ghcr.io
-        uses: docker/login-action@v3
-        with:
-          #registry: docker.sapsailing.com
-          #username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
-          #password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
-          registry: ghcr.io
-          #username: ${{ secrets.DOCKER_GHCR_IO_USERNAME }}
-          #password: ${{ secrets.DOCKER_GHCR_IO_PASSWORD }}
+#      - name: Login to ghcr.io
+#        uses: docker/login-action@v3
+#        with:
+#          #registry: docker.sapsailing.com
+#          #username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
+#          #password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+#          registry: ghcr.io
+#          #username: ${{ secrets.DOCKER_GHCR_IO_USERNAME }}
+#          #password: ${{ secrets.DOCKER_GHCR_IO_PASSWORD }}
       - name: Copy a few files
         shell: bash
         run: |
