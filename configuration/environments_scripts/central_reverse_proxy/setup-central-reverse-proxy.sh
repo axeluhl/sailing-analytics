@@ -89,10 +89,10 @@ mv bugzilla-5.0.4 /usr/share/bugzilla
 cd /usr/share/bugzilla/
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/usr/share/bugzilla/localconfig .
 echo "Bugzilla has been copied. Now setting up bugzilla modules."
-echo "This can take 5 minutes or so. The output is muted to prevent excessive warnings and clutter."
+echo "This can take 5 minutes or so. The output is muted (but sent to log.txt) to prevent excessive warnings and clutter in the terminal."
 SECONDEOF
-[[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
-ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
+ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>log.txt
+cd /usr/share/bugzilla/
 # essentials bugzilla
 /usr/bin/perl install-module.pl DateTime
 /usr/bin/perl install-module.pl DateTime::TimeZone
@@ -124,7 +124,6 @@ ssh -A "root@${IP}" "bash -s" << BUGZILLAEOF &>/dev/null
 /usr/bin/perl install-module.pl File::Copy::Recursive
 /usr/bin/perl install-module.pl MIME::Base64
 /usr/bin/perl install-module.pl Authen::SASL
-scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
 BUGZILLAEOF
 [[ "$?" -eq 0 ]] || exit 1 # ensure program doesn't continue if a major error occurs.
 read -n 1  -p "Bugzilla installation complete, when ready press a key to continue." key_pressed
@@ -134,6 +133,7 @@ ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF
 . imageupgrade_functions.sh
+scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
 scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
