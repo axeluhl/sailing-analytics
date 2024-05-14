@@ -1,8 +1,0 @@
-#!/bin/bash
-MONGO_VERSION=2.6.2
-cd plugins
-jar xvf com.mongodb.driver_${MONGO_VERSION}.jar lib/
-cd ..
-classpath=`find plugins -name 'com.sap.sailing.domain.common_*.jar' | sort | tail -1`:`find plugins -name 'org.eclipse.osgi_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.mongodb_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.udpconnector_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain.swisstimingadapter_*.jar' | sort | tail -1`:`find plugins -name 'com.sap.sailing.domain.swisstimingadapter.persistence_*.jar' | sort | tail -1`:plugins/lib/mongo-${MONGO_VERSION}.jar
-echo Using classpath $classpath
-java -cp "$classpath" -Dmongo.port=10200 -Djava.util.logging.config.file=swisstiminglistenerLog.properties com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward $*
