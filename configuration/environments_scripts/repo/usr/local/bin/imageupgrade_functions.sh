@@ -182,6 +182,7 @@ setup_keys() {
                 chmod 700 "${user_home_dir}/.ssh"
                 for key in "${user}"/ssh/*; do
                     [[ -f "$key" ]] || continue
+                    [[ ! -f "$user_home_dir"/.ssh/"$(basename "$key")" ]] || continue
                     \cp --preserve --dereference "$key" "$user_home_dir"/.ssh
                 done
                 for key in "${user}"/ssh/authorized_keys/*; do
