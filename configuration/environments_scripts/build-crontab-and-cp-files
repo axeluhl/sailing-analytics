@@ -35,7 +35,7 @@ do
         c) CREATE_CRONTABS="false";;
         f) COPY_FILES="false";;
         n) INSTALL_CRONTAB="false";;
-        \?) echo "Invalid option"
+        \?) echo "Invalid option"  # getops replaces unknown options with a question mark, so we have to escape the question mark.
             exit 4;;
     esac
 done

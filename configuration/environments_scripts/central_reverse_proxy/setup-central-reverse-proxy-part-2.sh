@@ -21,7 +21,9 @@ sudo systemctl start crond.service
 . imageupgrade_functions.sh
 cp -r "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
-build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"  # files have already been copied so -f is used.
+if ! build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # files have already been copied so -f is used.
+    exit 1
+fi
 chown trac:static /var/www/static
 # setup nfs
 systemctl enable nfs-server

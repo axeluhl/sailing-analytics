@@ -127,7 +127,7 @@ build_crontab_and_setup_files() {
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         if ! ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}" "$@"; then
-            exit 1
+            return 1
         fi
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"

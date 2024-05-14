@@ -27,6 +27,8 @@
 # need to be unmounted, detached, attached to the new instance, and mounted there.
 terminationCheck() {
     # $1 status returned by the last command. 
+    # Exits the program if the passed argument is non zero. 
+    # Used to ensure the program doesn't continue if a major error occurs.
     [[ "$1" -eq 0 ]] || { echo "Non-zero exit code. Exiting to avoid damage" &&  exit 1; }
 }
 if [[ "$#" -ne 4 ]]; then
@@ -70,7 +72,9 @@ scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGR
 . imageupgrade_functions.sh
 setup_cloud_cfg_and_root_login
 # setup files
-build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"   # -c & -n mean only files are copied over.
+if ! build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # -c & -n mean only files are copied over.
+    exit 1
+fi
 setup_swap 5000
 cd /home
 for folder in * ; do

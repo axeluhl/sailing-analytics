@@ -51,7 +51,7 @@ read -n 1  -p "Check the instance has the correct tags and is in the correct tar
 echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
 echo "Please check the route53 DNS records have been correctly updated."
 sleep 60
-read -n 1  -p " Press a key to continue.." key_pressed
+read -n 1  -p "Press a key to continue.." key_pressed
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
