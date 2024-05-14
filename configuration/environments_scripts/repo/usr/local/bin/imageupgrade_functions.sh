@@ -136,6 +136,31 @@ build_crontab_and_setup_files() {
 
 setup_keys() {
     #1: Environment type.
+    # Optional parameter is -p which indicates that no permissions will be set or overwritten.
+    TEMP=$(getopt -o p -n 'options' -- "$@")
+    [[ "$?" -eq 0 ]] || return 2
+    SET_PERMISSIONS="true"
+    eval set -- "$TEMP"
+    while true; do
+        case "$1" in
+            -p)
+                SET_PERMISSIONS="false"
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "Option not recognised"
+                return 2
+                ;;
+        esac
+        shift
+    done
+    if [[ "$#" -ne 1 ]]; then
+        echo "Please specify the environment type and use the optional -p flag to indicate that no permissions will be set or overwritten."
+        return 2
+    fi
     pushd .
     TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
@@ -149,7 +174,6 @@ setup_keys() {
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 755 "${user_home_dir}"/.aws
                 # Setup credentials
                 if [[ -d "${user}/aws/credentials" && ! -e "${user_home_dir}/.aws/credentials" ]]; then
                     > "${user_home_dir}"/.aws/credentials
@@ -173,13 +197,15 @@ setup_keys() {
                         done
                     fi
                 fi
-                chown -R  ${user}:${user} "${user_home_dir}/.aws"
-                chmod 600 "${user_home_dir}"/.aws/*
+                if [[ "$SET_PERMISSIONS" == "true" ]]; then
+                    chmod 755 "${user_home_dir}"/.aws
+                    chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                    chmod 600 "${user_home_dir}"/.aws/*
+                fi
             fi
             # ssh setup
             if [[ -d "${user}/ssh" ]]; then
                 mkdir --parents "${user_home_dir}/.ssh"
-                chmod 700 "${user_home_dir}/.ssh"
                 for key in "${user}"/ssh/*; do
                     [[ -f "$key" ]] || continue
                     [[ ! -f "$user_home_dir"/.ssh/"$(basename "$key")" ]] || continue
@@ -189,8 +215,11 @@ setup_keys() {
                     [[ -f "$key" ]] || continue
                     cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
                 done
-                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
-                chmod 600 "${user_home_dir}"/.ssh/*
+                if [[ "$SET_PERMISSIONS" == "true" ]]; then
+                    chmod 700 "${user_home_dir}/.ssh"
+                    chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                    chmod 600 "${user_home_dir}"/.ssh/*
+                fi
             fi
         fi
     done
