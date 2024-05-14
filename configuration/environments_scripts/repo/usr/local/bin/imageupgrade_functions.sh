@@ -93,7 +93,7 @@ build_crontab_and_setup_files() {
         echo "  RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER - the relative path within the USER_WITH_COPY_OF_REPO to get to the git workspace."
     else
         TEMP=$(getopt -o fnch: -n 'options checker' -- "$@")
-        [[ "$?" -eq 0 ]] || exit 2
+        [[ "$?" -eq 0 ]] || return 2
         eval set -- "$TEMP"
         PASS_OPTIONS=()
         HOSTNAME="sapsailing.com"
