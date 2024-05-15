@@ -19,4 +19,6 @@ public class FlatSmartphoneUuidAndGPSFixMovingJsonSerializer {
     public static final String TIME_ISO = "timestamp-iso";
     public static final String SPEED_M_PER_S = "speed";
     public static final String BEARING_DEG = "course";
+    public static final String TRUE_HEADING_DEG = "hdt";
+    public static final String MAGNETIC_HEADING_DEG = "hdg";
 }

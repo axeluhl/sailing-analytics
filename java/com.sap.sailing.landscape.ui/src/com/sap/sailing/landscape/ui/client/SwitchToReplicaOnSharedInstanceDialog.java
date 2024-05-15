@@ -57,7 +57,7 @@ public class SwitchToReplicaOnSharedInstanceDialog extends DataEntryDialog<Switc
         sharedInstanceTypeListBox = LandscapeDialogUtil.createInstanceTypeListBoxWithAdditionalDefaultEntry(this,
                 stringMessages.sameAsMaster(), DEFAULT_INSTANCE_TYPE,
                 landscapeManagementService,
-                stringMessages, SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME, errorReporter);
+                stringMessages, SharedLandscapeConstants.DEFAULT_SHARED_INSTANCE_TYPE_NAME, errorReporter, /* canBeDeployedInNlbInstanceBasedTargetGroup */ false);
         replicaReplicationBearerTokenBox = createTextBox("", 40);
         memoryInMegabytesBox = createIntegerBox(null, 7);
         memoryTotalSizeFactorBox = createIntegerBox(SharedLandscapeConstants.DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY, 2);

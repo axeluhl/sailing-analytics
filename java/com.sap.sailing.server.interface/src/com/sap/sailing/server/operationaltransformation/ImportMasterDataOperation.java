@@ -475,6 +475,8 @@ public class ImportMasterDataOperation extends
                         DynamicTrackedRace trackedRace = toState
                                 .getTrackedRace((RegattaAndRaceIdentifier) raceIdentifier);
                         raceColumn.setTrackedRace(fleet, trackedRace);
+                        // in case the TrackedRace wasn't found (see also bug 5982), at least record the race identifier
+                        raceColumn.setRaceIdentifier(fleet, raceIdentifier);
                     }
                 }
             }
@@ -526,7 +528,7 @@ public class ImportMasterDataOperation extends
                         if (fixToAdd instanceof VeryCompactGPSFixMovingImpl) {
                             VeryCompactGPSFixMovingImpl gpsFix = (VeryCompactGPSFixMovingImpl) fixToAdd;
                             fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                                    ((VeryCompactGPSFixMovingImpl) fixToAdd).getSpeed(), gpsFix.getOptionalTrueHeading());
                         } else if (fixToAdd instanceof VeryCompactGPSFixImpl) {
                             VeryCompactGPSFixImpl gpsFix = (VeryCompactGPSFixImpl) fixToAdd;
                             fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
@@ -708,7 +710,7 @@ public class ImportMasterDataOperation extends
                     RaceHandle raceHandle = toState.addRace(/* default */ null, paramToStartTracking, /* do not wait */ -1);
                     final RaceDefinition race = raceHandle.getRace(RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
                     if (race != null) {
-                        final DynamicTrackedRace trackedRace = raceHandle.getTrackedRegatta().getTrackedRace(race);
+                        final DynamicTrackedRace trackedRace = raceHandle.getTrackedRegatta().getTrackedRace(race); // wait/block for tracked race to show up
                         result.add(trackedRace);
                         ensureOwnership(trackedRace.getIdentifier(), securityService);
                         creationCount.addOneTrackedRace(race.getId().toString());

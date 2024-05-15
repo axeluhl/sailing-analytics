@@ -245,7 +245,7 @@ public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracT
         Position pos = firstFix.getPosition();
         TimePoint tp = firstFix.getTimePoint();
         DegreePosition degPos = new DegreePosition(pos.getLatDeg() + 0.05, pos.getLngDeg() + 0.05);
-        GPSFixMoving gpsM = new GPSFixMovingImpl(degPos, tp, speed);
+        GPSFixMoving gpsM = new GPSFixMovingImpl(degPos, tp, speed, /* optionalTrueHeading */ null);
         testRace.getTrack(firstCompetitor).add(gpsM, true);
         MarkPassingRaceFingerprint fingerprint2 = factory.createFingerprint(testRace);
         assertFalse(fingerprint1.matches(testRace));

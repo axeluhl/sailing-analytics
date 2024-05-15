@@ -104,7 +104,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         } finally {
             competitorTrack.unlockAfterRead();
         }
-        competitorTrack.addGPSFix(new GPSFixMovingImpl(position, timePoint, speed));
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(position, timePoint, speed, /* optionalTrueHeading */ null));
     }
 
     /**

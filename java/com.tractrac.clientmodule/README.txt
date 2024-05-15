@@ -8,11 +8,139 @@ This zip package contains 3 folders:
 
  - lib -> contains the Trac-API compiled library
  - src -> contains the source code of the API and some code examples
+ - javadoc -> contains the JavaDoc
 
 It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+        TracAPI 3.15.7
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 23/04/2024
+
+ 1) Bugs
+
+ - When a new static mark is created, the library only sends a updateControlPointPosition callback using the event start time,
+ that is outside the race bounds. Now, it is calling updateControlPointPosition twice and in the second call uses the
+ tracking start time as the position time (Reported by Axel Uhl, 23/04/2024)
+
+********************************************
+        TracAPI 3.15.6
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - There are some threads that are not killed when the connection is closed. These threads were added to collect
+ statistics but this feature make not sense in TracAPI. (Reported by Axel Uhl, 17/04/2024)
+
+********************************************
+        TracAPI 3.15.5
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - Deadlock when a connection was closed by the server and the client called the IRaceSubscriber.stop method. (Reported by
+  Axel Uhl, 16/04/2024)
+
+********************************************
+        TracAPI 3.15.4
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 16/04/2024
+
+ 1) Features
+
+ - Formatting the code using blank spaces (instead of tabs). The workspace was already configured like this,
+ but the old files kept some tabs. All the code has been formatted again. (Requested by Axel Uhl, 19/02/2024)
+
+ 2) Bugs
+
+ - When the IRaceSubscriber.stop method is called, the library doesn't close the connection. (Reported by Axel Uhl, 03/04/2024)
+ - Improving the detection of a dead connection. (Reported by Axel Uhl, 03/04/2024)
+
+********************************************
+        TracAPI 3.15.3
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 11/03/2024
+
+ 1) Feature
+
+ - Adding the method IPosition.getRTKStatus used to get the RTK status (Requested by Chris Terkelsen, 07/03/2024)
+
+ 2) Bugs
+
+ - Some socket connections were not closed correctly (Reported by Jorge Piera, 08/03/2024)
+
+********************************************
+        TracAPI 3.15.2
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 20/02/2024
+
+ 1) Feature
+
+ - Removing the usage of the IMetricsService (Requested by Axel Uhl, 19/02/2024)
+
+********************************************
+        TracAPI 3.15.1
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/02/2024
+
+ 1) Feature
+
+ - Adding a setter to register an implementation for the IClientSocketFactory (Requested by Axel Uhl, 19/02/2024)
+
+********************************************
+       TracAPI 3.15.0
+********************************************
+This is a final version. It adds some changes in the protocol used to exchange live data. It will be necessary to use
+ this version to receive live data from the 19/02/2024. It also changes the signatures of some interfaces, breaking
+ the backward compatibility. These interfaces are:
+
+    - Removing the method IControlPassingsListener.gotControlPassings(IRaceCompetitor,IControlPassings). This method is not called by the
+    implementation. The classes that implement this interface have to update their implementations removing this method. There is
+    another method with the same name that includes timestamp.
+    - Updating the methods of the IPositionFactory. This factory should be used only internally so the thirds party apps should
+    not be affected
+
+  Release date: 19/02/2024
+
+  1) Features
+    - The IPosition has a new method to get the true heading (getTrueHeading) (Requested by Radek Masnica, 2023)
+    - Adding two new entry statuses: STP and SCP  (Requested by Radek Masnica, 2023)
+
+  2) Bugs
+    - Updating the protocol to send/receive messages between the dataserver and the library.
+    - Fixing a bug when the route is updated and it has not metadata attached (reported by Jorge Piera, 11/11/2023)
+
+********************************************
+       TracAPI 3.14.2
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 25/07/2021
+  Build number:
+
+ 1) Bug
+
+ - Catching the exceptions when TracAPI executes the callbacks. Otherwise, an exception
+  in the consumer application could finalize a TracAPI thread. (Requested by Axel Uhl, 25/07/2021)
 
 ********************************************
        TracAPI 3.14.1

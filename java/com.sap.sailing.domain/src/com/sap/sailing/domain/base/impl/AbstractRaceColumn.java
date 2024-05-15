@@ -197,11 +197,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void reloadRaceLog(Fleet fleet) {
         // FIXME bug3286: newOrLoadedRaceLog will have MongoRaceLogStoreListener attached; raceLogAvailable, result of de-serialization, will not; merging newOrLoadedRaceLog into raceLogAvailable will leave resulting log without persistence
-        RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
-        RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
-        RaceLog raceLogAvailable = raceLogs.get(fleet);
+        final RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
+        final RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
+        final RaceLog raceLogAvailable = raceLogs.get(fleet);
         if (raceLogAvailable == null) {
-            RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+            final RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
             // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
             // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
             newOrLoadedRaceLog.addListener(listener);
@@ -496,5 +496,4 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         }
     }
-
 }

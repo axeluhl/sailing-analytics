@@ -3,6 +3,7 @@ package com.sap.sailing.domain.coursetemplate;
 import java.util.Iterator;
 
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.Util;
 
 /**

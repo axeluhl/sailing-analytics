@@ -81,6 +81,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A regatta with series with race columns and fleets, a scoring scheme and various other data, many of which are relevant
@@ -174,6 +175,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private AbstractLogEventAuthor regattaLogEventAuthorForRegatta = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
 
+    private transient CPUMeter cpuMeter;
+    
     /**
      * Constructs a regatta with an empty {@link RaceLogStore} and with
      * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} and
@@ -264,6 +267,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange,
             RankingMetricConstructor rankingMetricConstructor, String registrationLinkSecret) {
         super(name);
+        this.cpuMeter = CPUMeter.create();
         this.registrationLinkSecret = registrationLinkSecret;
         this.rankingMetricConstructor = rankingMetricConstructor;
         this.useStartTimeInference = useStartTimeInference;
@@ -343,6 +347,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         return id;
     }
 
+    @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
+    }
+
     public static String getDefaultName(String baseName, String boatClassName) {
         return baseName.replace('/', '_') + (boatClassName == null ? "" : " (" + boatClassName + ")").replace('/', '_');
     }
@@ -360,6 +369,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        this.cpuMeter = CPUMeter.create();
         regattaListeners = new HashSet<RegattaListener>();
         MasterDataImportInformation masterDataImportInformation = ongoingMasterDataImportInformation.get();
         if (masterDataImportInformation != null) {

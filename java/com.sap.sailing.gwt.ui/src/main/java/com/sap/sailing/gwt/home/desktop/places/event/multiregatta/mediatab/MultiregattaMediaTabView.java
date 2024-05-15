@@ -2,20 +2,19 @@ package com.sap.sailing.gwt.home.desktop.places.event.multiregatta.mediatab;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.desktop.partials.media.MediaPage;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sailing.gwt.home.shared.places.MediaTabView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.security.shared.HasPermissions;
 
 /**
  * Created by pgtaboada on 25.11.14.
  */
-public class MultiregattaMediaTabView extends Composite implements MultiregattaTabView<MultiregattaMediaPlace> {
+public class MultiregattaMediaTabView extends Composite implements MultiregattaTabView<MultiregattaMediaPlace>, MediaTabView<MultiregattaMediaPlace, Presenter> {
     
     private Presenter currentPresenter;
     
@@ -27,20 +26,17 @@ public class MultiregattaMediaTabView extends Composite implements MultiregattaT
     public void setPresenter(EventMultiregattaView.Presenter currentPresenter) {
         this.currentPresenter = currentPresenter;
     }
+    
+    @Override
+    public Presenter getPresenter() {
+        return currentPresenter;
+    }
 
     @Override
     public Class<MultiregattaMediaPlace> getPlaceClassForActivation() {
         return MultiregattaMediaPlace.class;
     }
     
-    @Override
-    public TabView.State getState() {
-        return currentPresenter.hasMedia() || currentPresenter.getUserService()
-                .hasPermission(currentPresenter.getEventDTO(), HasPermissions.DefaultActions.UPDATE)
-                        ? TabView.State.VISIBLE
-                        : TabView.State.INVISIBLE;
-    }
-
     @Override
     public void start(MultiregattaMediaPlace myPlace, final AcceptsOneWidget contentArea) {
         ErrorAndBusyClientFactory errorAndBusyClientFactory = currentPresenter.getErrorAndBusyClientFactory();

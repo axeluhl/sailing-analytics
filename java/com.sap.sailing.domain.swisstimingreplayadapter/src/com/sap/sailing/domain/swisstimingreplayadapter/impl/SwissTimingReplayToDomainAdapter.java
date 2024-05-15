@@ -494,7 +494,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         TimePoint raceTimePoint = raceTimePerRaceID.containsKey(currentRaceID) ? raceTimePerRaceID.get(currentRaceID) : referenceTimePoint;
         Bearing bearing = new DegreeBearingImpl(cog);
         SpeedWithBearing speed = new KnotSpeedWithBearingImpl(((double) sog_Knots_x10) / 10., bearing);
-        GPSFixMoving fix = new GPSFixMovingImpl(position, raceTimePoint, speed);
+        GPSFixMoving fix = new GPSFixMovingImpl(position, raceTimePoint, speed, /* optionalTrueHeading */ null);
         Mark mark = markByHashValue.get(hashValue);
         if (mark != null) {
             Iterator<Entry<ControlPoint, SpeedWithBearing>> i = windAtControlPoint.entrySet().iterator();

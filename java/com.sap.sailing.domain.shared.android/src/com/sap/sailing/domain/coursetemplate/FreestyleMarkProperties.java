@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.coursetemplate;
 
 /**
- * While sharing most of @{@link CommonMarkProperties}, {@link MarkProperties} do have the distinct
+ * While sharing most of {@link CommonMarkProperties}, {@link MarkProperties} do have the distinct
  * {@link FreestyleMarkConfiguration} property tags.
  * 
  */

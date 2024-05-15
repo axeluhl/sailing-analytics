@@ -1,0 +1,55 @@
+#################################################################
+####### Azure Pipeline for Android Applications #################
+#################################################################
+
+trigger:
+  branches:
+    include:
+     - hyperspace
+     - release-race-manager-app
+     - release-buoy-pinger-app
+
+pr:
+- hyperspace
+
+#################################################################
+#################################################################
+#################################################################
+
+# Define yml templates for specific steps. They are hosted on an external GitHub repsitory.
+resources:
+  repositories:
+    - repository: sap-mobile-pipeline
+      type: githubenterprise
+      name: SAPMobile/sap-mobile-pipeline
+      endpoint: 'github.tools.sap'
+      # Uncomment the line below this comment block if you want to pin a specific version
+      # By default, it will always take the latest commit on the hyperspace branch
+      # For available versions, please have a look here (use the tag, not the release name):
+      # https://github.tools.sap/SAPMobile/sap-mobile-pipeline/releases
+      # ----------
+      # ref: 'refs/tags/1.0.0'
+
+#################################################################
+######################### Pipeline Start ########################
+#################################################################
+extends:
+  template: android.yml@sap-mobile-pipeline
+  parameters:
+    # Please check the pipeline documentation for available parameters:
+    #  https://pages.github.tools.sap/SAPMobile/Documentation/Pipelines/android-library/#configuration
+    repositoryName: 'sapsailing'
+    # whatever we use here for a tag or branch, make sure that it triggers the pipeline; see section "triggers:"
+    isRelease: ${{ startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}
+    # productiveBranchName acts as part of a condition that selects the flow, such as the "release" flow
+    productiveBranchName: refs/heads/hyperspace
+    buildLaneName: 'releaseBuild'
+    testLaneName: 'test'
+    # requestAuthentication: true  # enable if fetching dependencies from Artifactory or Nexus
+    appCenterSlug: 'sapsailing/sapsailing-android-apps'
+    jdkVersion: 11
+    androidVersion: 33
+    # We are building more than one app from our repository; we will use branches
+    # to determine which app is to be built/released/signed
+    # Default: Race Manager App
+    momaAssemblyId: 189

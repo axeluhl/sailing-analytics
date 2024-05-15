@@ -227,7 +227,7 @@ public class OutlierFilter {
                         // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
                         final TimePoint inferredTimePointForFix = lastFix.getTimePoint().plus(lastFix.getTimePoint().until(currentFix.getTimePoint()).times(
                                 alongTrackDistanceFromLastFix.divide(lastFix.getPosition().getDistance(currentFix.getPosition()))));
-                        result = new GPSFixMovingImpl(fixPosition, inferredTimePointForFix, fix.getSpeed());
+                        result = new GPSFixMovingImpl(fixPosition, inferredTimePointForFix, fix.getSpeed(), fix.getOptionalTrueHeading());
                         distanceRatio = distanceFromSegment.divide(lastFix.getPosition().getDistance(currentFix.getPosition()));
                     } else { // we found a minimum after fix:
                         foundMinimum = true;

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformance
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.util.NaturalComparator;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -63,6 +64,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final TimePoint timePoint;
     private final Iterable<RaceColumn> raceColumnsToConsider;
     private final WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache;
+    private final NaturalComparator lastResortNaturalComparator;
     
     /**
      * An on-demand map of competitors with their opening series rank, 1-based.<p>
@@ -121,6 +123,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
         this.cache = cache;
+        this.lastResortNaturalComparator = new NaturalComparator(/* caseSensitive */ true);
         netPointsCache = new HashMap<>();
         totalPointsCache = new HashMap<>();
         discardedRaceColumnsPerCompetitor = new HashMap<>();
@@ -357,7 +360,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     private int compareByArbitraryButStableCriteria(Competitor o1, Competitor o2) {
-        return o1.getName().compareTo(o2.getName());
+        return lastResortNaturalComparator.compare(o1.getStableLastResortOrderingCriterion(), o2.getStableLastResortOrderingCriterion());
     }
 
     private static class FleetComparisonResult {

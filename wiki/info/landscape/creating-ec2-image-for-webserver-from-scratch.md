@@ -1,5 +1,5 @@
-# Setting up an image for the www.sapsailing.com web server
-
+# Setting up an image for the www.sapsailing.com web server (For the disposables, scroll to the bottom.)
+ 
 This is an add-on to the regular EC2 image set-up described [here](https://wiki.sapsailing.com/wiki/info/landscape/creating-ec2-image-from-scratch), but leave out the following packages during installation because they are not needed on the webserver:
 
 * libstdc++48.i686 (for Android builds)
@@ -17,11 +17,15 @@ Then carry out these steps:
               gcc-c++ ncurses-devel geoip-devel perl-autodie docker
 ```
 
-* activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
+* activate NFS by calling `systemctl enable nfs-server`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
 ```
 /var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)
 ```
+rw = read/write allowed
+nohide = means sub-mounted volumes are included in the parent nfs share
+no_root_squash = Allows remote root users to act as root on the nfs share
+
 * launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
@@ -169,49 +173,12 @@ maxretry = 5
 * Ensure that fail2ban will be started automatically when the instance starts: `chkconfig --level 23 fail2ban on` and start it right away with `service fail2ban start`. You can see which filters are active using `service fail2ban status`.
 * Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/var/www/static``, ``/var/log``, ``/var/log/old`` and ``/var/log/old/cache``, ``DailySailingBackup=Yes`` for ``/home``.
 
-## Automating archive failover 
-
-We have a script in our git repo called `switchoverArchive.sh`, which takes a path to the macros file and two timeout values (in seconds). It checks the macros file and checks if the following lines are present:
-
-```
-Define ARCHIVE_IP 172.31.7.12 
-Define ARCHIVE_FAILOVER_IP 172.31.43.140  
-Define PRODUCTION_ARCHIVE ${ARCHIVE_IP} 
-```
-Then it curls the primary/main archive's `/gwt/status` (with the first timeout value) and, if healthy, sets the production value to the definition of the archive; however, if unhealthy,  a
-second curl occurs (with the second timeout value) and if this again returns unhealthy then the production value above is this time set to be the value of the failover definition. 
-After these changes, key admins are notified and the apache config is reloaded. This only happens though if the new value differs from the currently known value:
-ie. if already healthy, and the health checks pass, then no reload or email occurs.
-To install, enter `crontab -e`; set the frequency to say `* * * * *`; add the path to the script; parameterise it with the path to the macros file, the first timeout value and the second timeout value (both seconds); and then 
-write and quit, to install the cronjob.
-
-```
-# Example crontab
-* * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
-```
-
-If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
-
 ## Basic setup for disposable reverse proxy instance
 
-From a fresh amazon linux 2023 instance (HVM) install perl, httpd, mod_proxy_html, tmux, nfs-utils, git, whois and jq. Then type `amazon-linux-extras install epel`, which adds the epel repo so you can then run install apachetop.
-Then you need to remove the automatic ec2 code which disabled root access; reconfigure the sshd_config; setup the keys update script; and initialise the crontab. Store a bearer token in the home dir.
+From a fresh Amazon Linux 2023 instance (HVM), run the `configuration\environments_scripts\reverse_proxy\setup-disposable-reverse-proxy.sh` script, passing the IP address of the instance and the ssh-key-reader.token (needed for accessing the landscape without mfa).
 
-Rename the welcome.conf. Add a basic web page, as the Apache default page can sometimes return no 2xx codes, which can lead to failing health checks.
+The script sets up nfs/nvme mounts, installs/updates httpd + software for scripts, sets up the httpd, sets up crontabs and copies files (via the`configuration\environments_scripts\build-crontab-and-cp-files`), enables service units, makes the ssh connections more resilient, sets up logrotation, configures fail2ban and alters postfix to enable mail sending.
 
-Setup fail2ban like above.
+## Read Also
 
-Ensure httpd is enabled, so that the server auto starts upon a restart.
-Other modules may need to be installed, depending on the httpd config.
-
-Configure a startup service (either in /etc/systemd/system or etc/rcX directories) to try to mount an attached nvme as swap space (this step needs to be checked after setup).
-Swap space still needs to be fully automated.
-
-Postmail is useful. The script for this procedure is in configuration and is titled setupDisposableProxy.sh
-
-Setup the logrotate target.
-
-Update amazon cli (because pricing list requires it)
-
-
-
+Check out the details in [amazon-ec2](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies) on the disposables and central: namely the target group healthcheck and shared httpd configuration Git repo. Also, look over the key_vault and the build_crontab_and_setup_files detailed there.

@@ -144,17 +144,17 @@ public abstract class AbstractWindImporter {
         if (uploadRequest.races.size() > 0) {
             for (RegattaAndRaceIdentifier raceEntry : uploadRequest.races) {
                 DynamicTrackedRace trackedRace = service.getTrackedRace(raceEntry);
-                SecurityUtils.getSubject()
-                        .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE));
                 if (trackedRace != null) {
+                    SecurityUtils.getSubject()
+                        .checkPermission(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE));
                     trackedRaces.add(trackedRace);
                 }
             }
         } else {
             for (Regatta regatta : service.getAllRegattas()) {
                 for (RaceDefinition raceDefinition : regatta.getAllRaces()) {
-                    final DynamicTrackedRace trackedRace = service.getTrackedRegatta(regatta).getTrackedRace(raceDefinition);
-                    if (SecurityUtils.getSubject()
+                    final DynamicTrackedRace trackedRace = service.getTrackedRegatta(regatta).getExistingTrackedRace(raceDefinition);
+                    if (trackedRace != null && SecurityUtils.getSubject()
                             .isPermitted(trackedRace.getIdentifier().getStringPermission(DefaultActions.UPDATE))) {
                         trackedRaces.add(trackedRace);
                     }

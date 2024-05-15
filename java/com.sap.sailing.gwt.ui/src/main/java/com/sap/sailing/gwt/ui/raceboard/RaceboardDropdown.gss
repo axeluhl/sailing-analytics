@@ -14,8 +14,6 @@
   max-width: 100%;
   display: inline-block;
   text-align: left;
-  margin-left: -0.666666666666667em;
-  margin-right: 0.666666666666667em; /* compensate for margin-left, keeping browser from cropping the drop-down button */
 }
 .dropdown_head {
   display: inline-block;

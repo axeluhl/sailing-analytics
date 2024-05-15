@@ -440,8 +440,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
 
-    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURI,
-            String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, List<TracTracRaceRecordDTO> rrs, String liveURIFromConfiguration,
+            String storedURIFromConfiguration, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, boolean useOfficialEventsToUpdateRaceLog,
             String jsonUrlAsKey) throws UnauthorizedException, Exception;
 
@@ -453,7 +453,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             String yellowBrickPassword);
 
     MarkPropertiesDTO updateMarkPropertiesPositioning(UUID markPropertiesId, DeviceIdentifierDTO deviceIdentifier,
-            Position fixedPosition);
+            Position fixedPosition) throws Exception;
 
     CourseTemplateDTO createOrUpdateCourseTemplate(CourseTemplateDTO courseTemplate);
 

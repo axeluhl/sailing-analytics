@@ -52,6 +52,7 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String priority();
     String votes();
     String instanceType();
+    String instanceName();
     String youHaveToProvideAPositiveNumberOfInstancesToLaunch();
     String youHaveToProvideANonNegativePriority();
     String youHaveToProvideANonNegativeNumberOfVotes();
@@ -166,4 +167,14 @@ com.sap.sse.gwt.adminconsole.StringMessages {
     String dnsNameAlreadyInUse();
     String errorArchivingMongoDBTo(String replicaSetNameToArchiveTo, String mongoDBArchivingErrorMessage);
     String optionalSessionToken();
+    String reverseProxies();
+    String rotateHttpdLogs();
+    String successfullyRotatedHttpdLogsOnInstance(String instance);
+    String invalidOperationForThisProxy();
+    String pleaseProvideNonEmptyNameAndAZ();
+    String success();
+    String availabilityZone();
+    String runOnExisting();
+    String publicIp();
+    String privateIp();
 }

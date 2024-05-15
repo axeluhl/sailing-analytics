@@ -15,7 +15,6 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Command;
@@ -34,10 +33,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -59,7 +58,7 @@ public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<
     private final ListDataProvider<MarkRoleDTO> markRoleListDataProvider = new ListDataProvider<>();
     private final LabeledAbstractFilterablePanel<MarkRoleDTO> filterableMarkRoles;
     private List<MarkRoleDTO> allMarkRoles;
-    private CellTable<MarkRoleDTO> markRolesTable;
+    private FlushableCellTable<MarkRoleDTO> markRolesTable;
     private RefreshableMultiSelectionModel<MarkRoleDTO> refreshableSelectionModel;
 
     public MarkRolePanel(SailingServiceWriteAsync sailingServiceWrite, ErrorReporter errorReporter, StringMessages stringMessages,
@@ -134,23 +133,10 @@ public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<
     }
 
     private void createMarkRoleTable(final UserService userService) {
-        markRolesTable = new BaseCelltable<>(1000, tableResources);
-
+        markRolesTable = new FlushableCellTable<>(1000, tableResources);
         markRolesTable.setWidth("100%");
         ListHandler<MarkRoleDTO> sortHandler = new ListHandler<>(markRoleListDataProvider.getList());
         markRolesTable.addColumnSortHandler(sortHandler);
-
-        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<MarkRoleDTO>() {
-            @Override
-            public boolean representSameEntity(MarkRoleDTO dto1, MarkRoleDTO dto2) {
-                return dto1.getUuid().equals(dto2.getUuid());
-            }
-
-            @Override
-            public int hashCode(MarkRoleDTO t) {
-                return t.getUuid().hashCode();
-            }
-        }, filterableMarkRoles.getAllListDataProvider());
         markRolesTable.setSelectionModel(refreshableSelectionModel, DefaultSelectionEventManager
                 .createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<MarkRoleDTO>() {
                     @Override
@@ -182,7 +168,6 @@ public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<
                 }));
 
         initTableColumns(sortHandler, userService);
-
         markRoleListDataProvider.addDataDisplay(markRolesTable);
         add(markRolesTable);
         allMarkRoles.clear();
@@ -190,15 +175,19 @@ public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<
     }
 
     private void initTableColumns(final ListHandler<MarkRoleDTO> sortHandler, final UserService userService) {
-        Column<MarkRoleDTO, Boolean> checkColumn = new Column<MarkRoleDTO, Boolean>(
-                new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                        tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
-            @Override
-            public Boolean getValue(MarkRoleDTO object) {
-                // Get the value from the selection model.
-                return refreshableSelectionModel.isSelected(object);
-            }
-        };
+        final SelectionCheckboxColumn<MarkRoleDTO> checkColumn = new SelectionCheckboxColumn<MarkRoleDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<MarkRoleDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkRoleDTO dto1, MarkRoleDTO dto2) {
+                        return dto1.getUuid().equals(dto2.getUuid());
+                    }
+                    @Override
+                    public int hashCode(MarkRoleDTO t) {
+                        return t.getUuid().hashCode();
+                    }
+                }, filterableMarkRoles.getAllListDataProvider(), markRolesTable);
         markRolesTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markRolesTable.setColumnWidth(checkColumn, 40, Unit.PX);
         // id
@@ -249,6 +238,8 @@ public class MarkRolePanel extends FlowPanel implements FilterablePanelProvider<
                 markRole -> configACL.openDialog(markRole));
         markRolesTable.addColumn(idColumn, stringMessages.id());
         markRolesTable.addColumn(actionsColumn, stringMessages.actions());
+        refreshableSelectionModel = checkColumn.getSelectionModel();
+        markRolesTable.setSelectionModel(refreshableSelectionModel, checkColumn.getSelectionManager());
     }
 
     private void openEditMarkRoleDialog(final MarkRoleDTO originalMarkRole) {

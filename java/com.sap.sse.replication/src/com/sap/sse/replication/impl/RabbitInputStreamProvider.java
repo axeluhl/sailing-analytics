@@ -40,7 +40,7 @@ public class RabbitInputStreamProvider extends NamedImpl {
         clientReadsFromThis = new PipedInputStream(messagesAreWrittenToThis);
         final QueueingConsumer messageConsumer = new QueueingConsumer(channel);
         channel.basicConsume(queueName, /* auto-ack */ true, messageConsumer);
-        new Thread() {
+        new Thread(getClass().getSimpleName()) {
             @Override
             public void run() {
                 while (true) {

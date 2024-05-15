@@ -305,7 +305,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
         sailingServiceWrite.getMailType(new AsyncCallback<MailInvitationType>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());

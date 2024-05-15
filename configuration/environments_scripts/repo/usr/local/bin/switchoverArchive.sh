@@ -89,7 +89,7 @@ setFailoverIfNotSet() {
         setProduction ${ARCHIVE_FAILOVER_IP_NAME}
         logger -t archive "Unhealthy: second check failed, switching to failover"
         service httpd reload
-        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
+        echo "Main archive is unhealthy. Switching to failover. Please urgently take a look at the archive: ${archiveIp}." | notify-operators "Unhealthy: main archive offline, failover in place"
     else
         logger -t archive "Unhealthy: second check still fails, failover already in use"
     fi
@@ -98,11 +98,11 @@ setFailoverIfNotSet() {
 logger -t archive "begin check"
 # --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero.
 # -L follows redirects
-curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+curl -s -L --fail --max-time ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
     logger -t archive "first check failed"
-    curl -s -L --fail --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+    curl -s -L --fail --max-time ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
     if [[ $? -ne 0 ]]
     then
         setFailoverIfNotSet

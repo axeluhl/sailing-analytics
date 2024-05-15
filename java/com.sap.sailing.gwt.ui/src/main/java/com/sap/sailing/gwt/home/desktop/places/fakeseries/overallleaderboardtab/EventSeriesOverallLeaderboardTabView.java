@@ -54,6 +54,11 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
     }
     
     @Override
+    public SeriesView.Presenter getPresenter() {
+        return currentPresenter;
+    }
+
+    @Override
     public TabView.State getState() {
         return currentPresenter.getSeriesDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }

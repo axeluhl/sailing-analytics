@@ -20,13 +20,10 @@ import java.util.stream.Collectors;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
@@ -34,9 +31,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
-import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -49,10 +43,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
-import com.sap.sse.gwt.client.controls.BetterCheckboxCell;
+import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -79,7 +73,7 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
     private List<MarkPropertiesDTO> allMarkProperties;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private CellTable<MarkPropertiesDTO> markPropertiesTable;
+    private FlushableCellTable<MarkPropertiesDTO> markPropertiesTable;
     private ListDataProvider<MarkPropertiesDTO> markPropertiesListDataProvider = new ListDataProvider<>();
     private RefreshableMultiSelectionModel<MarkPropertiesDTO> refreshableSelectionModel;
 
@@ -160,58 +154,11 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
     }
 
     private void createMarkPropertiesTable(final UserService userService) {
-        // Create a CellTable.
-        // Set a key provider that provides a unique key for each contact. If key is
-        // used to identify contacts when fields (such as the name and address)
-        // change.
-        markPropertiesTable = new BaseCelltable<>(1000, tableResources);
+        markPropertiesTable = new FlushableCellTable<>(1000, tableResources);
         markPropertiesTable.setWidth("100%");
         // Attach a column sort handler to the ListDataProvider to sort the list.
         ListHandler<MarkPropertiesDTO> sortHandler = new ListHandler<>(markPropertiesListDataProvider.getList());
         markPropertiesTable.addColumnSortHandler(sortHandler);
-        // Add a selection model so we can select cells.
-        refreshableSelectionModel = new RefreshableMultiSelectionModel<>(
-                new EntityIdentityComparator<MarkPropertiesDTO>() {
-                    @Override
-                    public boolean representSameEntity(MarkPropertiesDTO dto1, MarkPropertiesDTO dto2) {
-                        return dto1.getUuid().equals(dto2.getUuid());
-                    }
-
-                    @Override
-                    public int hashCode(MarkPropertiesDTO t) {
-                        return t.getUuid().hashCode();
-                    }
-                }, filterableMarkProperties.getAllListDataProvider());
-        markPropertiesTable.setSelectionModel(refreshableSelectionModel, DefaultSelectionEventManager
-                .createCustomManager(new DefaultSelectionEventManager.CheckboxEventTranslator<MarkPropertiesDTO>() {
-                    @Override
-                    public boolean clearCurrentSelection(CellPreviewEvent<MarkPropertiesDTO> event) {
-                        return !isCheckboxColumn(event.getColumn());
-                    }
-
-                    @Override
-                    public SelectAction translateSelectionEvent(CellPreviewEvent<MarkPropertiesDTO> event) {
-                        NativeEvent nativeEvent = event.getNativeEvent();
-                        if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
-                            if (nativeEvent.getCtrlKey()) {
-                                MarkPropertiesDTO value = event.getValue();
-                                refreshableSelectionModel.setSelected(value,
-                                        !refreshableSelectionModel.isSelected(value));
-                                return SelectAction.IGNORE;
-                            }
-                            if (!refreshableSelectionModel.getSelectedSet().isEmpty()
-                                    && !isCheckboxColumn(event.getColumn())) {
-                                return SelectAction.DEFAULT;
-                            }
-                        }
-                        return SelectAction.TOGGLE;
-                    }
-
-                    private boolean isCheckboxColumn(int columnIndex) {
-                        return columnIndex == 0;
-                    }
-                }));
-
         // Initialize the columns.
         initTableColumns(sortHandler, userService);
         markPropertiesListDataProvider.addDataDisplay(markPropertiesTable);
@@ -224,18 +171,21 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
      * Add the columns to the table.
      */
     private void initTableColumns(final ListHandler<MarkPropertiesDTO> sortHandler, final UserService userService) {
-        Column<MarkPropertiesDTO, Boolean> checkColumn = new Column<MarkPropertiesDTO, Boolean>(
-                new BetterCheckboxCell(tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                        tableResources.cellTableStyle().cellTableCheckboxDeselected())) {
-            @Override
-            public Boolean getValue(MarkPropertiesDTO object) {
-                // Get the value from the selection model.
-                return refreshableSelectionModel.isSelected(object);
-            }
-        };
+        final SelectionCheckboxColumn<MarkPropertiesDTO> checkColumn = new SelectionCheckboxColumn<MarkPropertiesDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<MarkPropertiesDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkPropertiesDTO dto1, MarkPropertiesDTO dto2) {
+                        return dto1.getUuid().equals(dto2.getUuid());
+                    }
+                    @Override
+                    public int hashCode(MarkPropertiesDTO t) {
+                        return t.getUuid().hashCode();
+                    }
+                }, filterableMarkProperties.getAllListDataProvider(), markPropertiesTable);
         markPropertiesTable.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         markPropertiesTable.setColumnWidth(checkColumn, 40, Unit.PX);
-
         // id
         Column<MarkPropertiesDTO, String> idColumn = new Column<MarkPropertiesDTO, String>(new TextCell()) {
             @Override
@@ -298,7 +248,6 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
         };
         Column<MarkPropertiesDTO, AbstractImagePrototype> positioningColumn = new Column<MarkPropertiesDTO, AbstractImagePrototype>(
                 new AbstractCell<AbstractImagePrototype>() {
-
                     @Override
                     public void render(Context context, AbstractImagePrototype image, SafeHtmlBuilder sb) {
                         if (image != null) sb.append(image.getSafeHtml());
@@ -356,17 +305,19 @@ public class MarkPropertiesPanel extends FlowPanel implements FilterablePanelPro
             }
         });
         actionsColumn.addAction(ACTION_UPDATE, UPDATE, this::openEditMarkPropertiesDialog);
-        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_DEVICE_IDENTIFIER,
+        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_DEVICE_IDENTIFIER, UPDATE,
                 this::openEditMarkPropertiesDeviceIdentifierDialog);
-        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_POSITION,
+        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_SET_POSITION, UPDATE,
                 this::openEditMarkPropertiesPositionDialog);
-        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_UNSET_POSITION,
+        actionsColumn.addAction(MarkPropertiesImagesbarCell.ACTION_UNSET_POSITION, UPDATE,
                 this::unsetPosition);
         actionsColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
         actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 markProperties -> configACL.openDialog(markProperties));
         markPropertiesTable.addColumn(idColumn, stringMessages.id());
         markPropertiesTable.addColumn(actionsColumn, stringMessages.actions());
+        refreshableSelectionModel = checkColumn.getSelectionModel();
+        markPropertiesTable.setSelectionModel(checkColumn.getSelectionModel(), checkColumn.getSelectionManager());
     }
 
     public void refreshMarkProperties() {

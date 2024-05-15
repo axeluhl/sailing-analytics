@@ -22,12 +22,12 @@ import com.sap.sailing.domain.coursetemplate.MarkConfigurationResponseAnnotation
 import com.sap.sailing.domain.coursetemplate.MarkProperties;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.MarkTemplateBasedMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.RepeatablePart;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
-import com.sap.sailing.domain.coursetemplate.WithOptionalRepeatablePart;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.RepeatablePart;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.WithOptionalRepeatablePart;
 import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
@@ -90,7 +90,9 @@ public interface CourseAndMarkConfigurationFactory {
      * {@link Regatta} is given, the {@link MarkTemplate}s are mapped to contained {@link Mark}s if possible.
      * <p>
      * 
-     * TODO how is this match-making performed? Looking at the Mark's getOriginatingMarkTemplateIdOrNull() values?
+     * Match-making happens in an inner implementation class called {@link LastUsageBasedAssociater}, basically based on
+     * the start times of the races using marks for {@link Mark#getOriginatingMarkTemplateIdOrNull() mark templates} in
+     * a {@link Course} {@link Course#getOriginatingCourseTemplateIdOrNull() derived} from a {@link CourseTemplate}.
      * <p>
      * 
      * Any {@link MarkTemplate} not mapped to a {@link Mark} (in case, no {@link Regatta} is given, these are just all
@@ -105,13 +107,13 @@ public interface CourseAndMarkConfigurationFactory {
      * The {@link CourseConfiguration#getNumberOfLaps() number of laps} matches the
      * {@link CourseTemplate#getDefaultNumberOfLaps() template's default number of laps} which is relevant only if the
      * {@link CourseTemplate} specifies a {@link CourseTemplate#getRepeatablePart() repeatable part}.
+     * 
      * @param optionalRegatta
      *            If given, {@link MarkTemplate}s of the given {@link CourseTemplate} are automatically mapped to their
      *            {@link Mark} counterpart of the {@link Regatta}.
      * @param tagsToFilterMarkProperties
      *            If given, any {@link MarkProperties} that is suggested to replace a {@link MarkTemplate} of the given
      *            {@link CourseTemplate} needs to match all given tags.
-     * @param optionalNumberOfLaps TODO
      */
     CourseConfiguration<MarkConfigurationResponseAnnotation> createCourseConfigurationFromTemplate(
             CourseTemplate courseTemplate, Regatta optionalRegatta, Iterable<String> tagsToFilterMarkProperties, Integer optionalNumberOfLaps);

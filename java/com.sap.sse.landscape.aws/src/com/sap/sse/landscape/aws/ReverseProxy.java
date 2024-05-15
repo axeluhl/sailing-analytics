@@ -2,8 +2,6 @@ package com.sap.sse.landscape.aws;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Host;
 import com.sap.sse.landscape.Log;
 import com.sap.sse.landscape.application.ApplicationProcess;
@@ -99,11 +97,6 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
     void setScopeRedirect(Scope<ShardingKey> scope, ProcessT applicationProcess) throws Exception;
     
     /**
-     * Creates a mapping for the {@code /internal-server-status} path using the host's generic external ec2 host name 
-     */
-    void createInternalStatusRedirect(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
-    
-    /**
      * Removes any existing redirect mapping for the {@code hostname} provided. If no such mapping
      * exists, the method does nothing.
      */
@@ -117,5 +110,18 @@ public interface ReverseProxy<ShardingKey, MetricsT extends ApplicationProcessMe
      */
     void terminate();
 
+    /**
+     * Gets the basic path that will indicate the health of a reverse proxy.
+     */
     String getHealthCheckPath();
+    
+    /**
+     * Gets the health check path that should be used by a target group, containing only reverse proxies.
+     * 
+     * @param targetGroupArn
+     *            identifies the target group expected to run the health check; this can be used to construct a URL path
+     *            and health check that is aware of this target group and may, e.g., take into account the set of its
+     *            member instances and their availability zones.
+     */
+    String getTargetGroupHealthCheckPath(String targetGroupArn);
 }

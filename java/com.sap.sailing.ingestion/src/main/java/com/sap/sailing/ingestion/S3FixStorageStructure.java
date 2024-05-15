@@ -10,8 +10,9 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
+
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 
 /**
  * This class defines the organization structure of fixes on the S3 storage and is the foundation for all the AWS Lambda
@@ -35,7 +36,7 @@ public class S3FixStorageStructure {
     private static final String SINGLE_FIX_PREFIX = "ingestion";
     private static final String COLLECTION_PREFIX = "collection";
     private static final String S3_DELIMITER = "/";
-    private static final Duration COLLECTION_DURATION = new MillisecondsDurationImpl(600_000);
+    private static final Duration COLLECTION_DURATION = Duration.ONE_MINUTE.times(10l);
     private static final int SINGLE_FIX_BATCH_SIZE = 10;
 
     /**
@@ -205,7 +206,7 @@ public class S3FixStorageStructure {
         final String collectionName = String.format("%02d:%02d:%02d.%03d-UTC.json", calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND), calendar.get(Calendar.MILLISECOND));
         final String year = String.format("%04d", calendar.get(Calendar.YEAR));
-        final String month = String.format("%02d", calendar.get(Calendar.MONTH));
+        final String month = String.format("%02d", calendar.get(Calendar.MONTH)+1);
         final String dayOfMonth = String.format("%02d", calendar.get(Calendar.DATE));
         final String generatedKey = combineElementsToKey(prefix, deviceIdentifier.getStringRepresentation(), year,
                 month, dayOfMonth, collectionName);
