@@ -1,1 +1,1 @@
-../../../../mongo_instance_setup/files/etc/logrotate.d/mongodb
+../../../../repo/etc/logrotate.d/mongodb
