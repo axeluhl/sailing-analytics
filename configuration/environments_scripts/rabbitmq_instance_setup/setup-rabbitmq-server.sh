@@ -27,6 +27,7 @@ else
     exit 1
   fi
   setup_sshd_resilience
+  sudo chown root:root /usr/local/bin/imageupgrade_functions.sh
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
   sudo rabbitmq-plugins enable rabbitmq_management
