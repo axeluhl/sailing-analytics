@@ -32,7 +32,7 @@ else
   BACKUP_FILE=/home/ec2-user/backupdb.sql
   backupdbNOLOCK=/home/ec2-user/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
-  scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/ec2-user
+  scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/ec2-user
   sudo mv /home/ec2-user/imageupgrade_functions.sh /usr/local/bin/imageupgrade_functions.sh
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/ec2-user
   sudo chown ec2-user /home/ec2-user/ssh-key-reader.token
