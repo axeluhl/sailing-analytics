@@ -32,7 +32,8 @@ else
   BACKUP_FILE=/home/ec2-user/backupdb.sql
   backupdbNOLOCK=/home/ec2-user/backupdbNOLOCK.sql
   # Install cron job for ssh key update for landscape managers
-  scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/ec2-user/environments_scripts
+  scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/ec2-user
+  sudo mv /home/ec2-user/imageupgrade_functions.sh /usr/local/bin/imageupgrade_functions.sh
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/ec2-user
   sudo chown ec2-user /home/ec2-user/ssh-key-reader.token
   sudo chgrp ec2-user /home/ec2-user/ssh-key-reader.token
@@ -45,7 +46,9 @@ else
   sudo systemctl start mariadb.service
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
-  sudo su -c "/home/ec2-user/environments_scripts/build-crontab 'mysql_instance_setup' ec2-user environments_scripts"
+  . imageupgrade_functions.sh
+  build_crontab_and_setup_files mysql_instance_setup ec2-user no_local_copy
+  setup_sshd_resilience
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --skip-lock-tables  --lock-tables=0" >> ${BACKUP_FILE}
   # the two lock options are supposed to ignore table locks, but the following removes a problematic exception.
@@ -58,6 +61,7 @@ else
   rm ${backupdbNOLOCK}
   sudo systemctl stop mariadb.service
   sudo systemctl start mariadb.service
+  echo "Showing bug count:"
   sudo mysql -u root -p${ROOT_PW} -e "select count(bug_id) from bugs.bugs;"
   echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
   echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
