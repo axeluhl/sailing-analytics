@@ -120,15 +120,18 @@ build_crontab_and_setup_files() {
             esac
             shift
         done
-        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /var/tmp/environments_scripts_XXX)
         echo "Attempting access to the wiki, typically used by image upgrade. Otherwise, try root. NOTE: If the first command fails, there will be a warning message."
-        scp -o StrictHostKeyChecking=no -pr "wiki@$HOSTNAME:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@$HOSTNAME:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
-        chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        if ! ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}" "$@"; then
-            return 1
-        fi
+	# Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
+	for option in "$@"; do
+	  PASS_OPTIONS+=( "$option")
+	done
+	if ! sudo  ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
+		return 1
+	fi
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
