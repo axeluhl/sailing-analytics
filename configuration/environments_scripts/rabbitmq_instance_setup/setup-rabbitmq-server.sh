@@ -20,8 +20,13 @@ else
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
   sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys
   sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys
-  scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts /home/admin
-  sudo su -c "/home/admin/environments_scripts/build-crontab 'rabbitmq_instance_setup' admin environments_scripts"
+  scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/admin
+  sudo mv imageupgrade_functions.sh /usr/local/bin
+  . imageupgrade_functions.sh
+  if ! build_crontab_and_setup_files 'rabbitmq_instance_setup' admin environments_scripts; then
+    exit 1
+  fi
+  setup_sshd_resilience
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
   sudo rabbitmq-plugins enable rabbitmq_management
@@ -31,8 +36,4 @@ loopback_users = none
 EOF
 "
   sudo systemctl restart rabbitmq-server.service
-  echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
-  echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
-  echo "make sure the instance has the \"Database and Messaging\" security group set,"
-  echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi

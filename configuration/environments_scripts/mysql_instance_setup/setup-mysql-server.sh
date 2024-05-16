@@ -47,7 +47,9 @@ else
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
   . imageupgrade_functions.sh
-  build_crontab_and_setup_files mysql_instance_setup ec2-user no_local_copy
+  if ! build_crontab_and_setup_files mysql_instance_setup ec2-user no_local_copy; then
+    exit 1
+  fi    
   setup_sshd_resilience
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --skip-lock-tables  --lock-tables=0" >> ${BACKUP_FILE}
