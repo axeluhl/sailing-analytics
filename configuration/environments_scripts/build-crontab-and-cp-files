@@ -137,7 +137,8 @@ if [[ "$COPY_FILES" == "true" && -d "files" ]]; then
     cd "files"
     \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
     systemctl daemon-reload
-    for unit in $(find etc/systemd/system -type f); do
+    for unit in etc/systemd/system/*; do
+        [[ -f "$unit" ]] || continue
         systemctl reenable /"${unit}" # to recreate all the dependency links.
     done
     cd ..
