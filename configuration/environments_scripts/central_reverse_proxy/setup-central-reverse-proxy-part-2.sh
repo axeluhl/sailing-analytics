@@ -24,6 +24,7 @@ rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
 if ! build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # files have already been copied so -f is used.
     exit 1
 fi
+setup_keys -p "${IMAGE_TYPE}"
 chown trac:static /var/www/static
 # setup nfs
 systemctl enable nfs-server
