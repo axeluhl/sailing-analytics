@@ -182,9 +182,9 @@ finalize() {
 }
 
 setup_cloud_cfg_and_root_login() {
-    sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
-    sed -i 's/^disable_root: true$/disable_root: false/' /etc/cloud/cloud.cfg
-    echo "preserve_hostname: true" >> /etc/cloud/cloud.cfg
+    sudo sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
+    sudo sed -i 's/^disable_root: *true$/disable_root: false/' /etc/cloud/cloud.cfg
+    sudo su -c "echo 'preserve_hostname: true' >> /etc/cloud/cloud.cfg"
 }
 
 setup_fail2ban() {
