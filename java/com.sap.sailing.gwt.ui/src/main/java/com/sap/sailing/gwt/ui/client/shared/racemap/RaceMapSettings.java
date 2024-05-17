@@ -118,9 +118,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettingsWithCont
         helpLinesSettings = new RaceMapHelpLinesSettings(HELP_LINES_SETTINGS, this);
         windUpSetting = new BooleanSetting(PARAM_MAP_ORIENTATION_WIND_UP, this, false);
         buoyZoneRadiusSetting = new DistanceSetting(PARAM_BUOY_ZONE_RADIUS_IN_METERS, this, DEFAULT_BUOY_ZONE_RADIUS);
-        showWindStreamletOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, TrackedRaceActions.VIEWSTREAMLETS);
-        showWindStreamletColorsSetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, TrackedRaceActions.VIEWSTREAMLETS);
-        showSimulationOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false, TrackedRaceActions.SIMULATOR);
+        showWindStreamletOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLETS, this, false, TrackedRaceActions.VIEWSTREAMLETS, context);
+        showWindStreamletColorsSetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, TrackedRaceActions.VIEWSTREAMLETS, context);
+        showSimulationOverlaySetting = new SecuredBooleanSetting(PARAM_VIEW_SHOW_SIMULATION, this, false, TrackedRaceActions.SIMULATOR, context);
         showWindLadderSetting = new BooleanSetting(PARAM_SHOW_WIND_LADDER, this, false);
         zoomSettings = new RaceMapZoomSettings(ZOOM_SETTINGS, this);
         transparentHoverlinesSetting = new BooleanSetting(TRANSPARENT_HOVERLINES, this, false);

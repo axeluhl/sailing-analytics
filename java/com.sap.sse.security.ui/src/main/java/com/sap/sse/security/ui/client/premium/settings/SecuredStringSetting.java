@@ -8,13 +8,13 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 public class SecuredStringSetting extends AbstractSecuredValueSetting<String> {
 
     public SecuredStringSetting(final String name, final AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            Action action) {
-        this(name, settings, null, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        this(name, settings, null, action, securityContext);
     }
 
     public SecuredStringSetting(final String name, final AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            final String defaultValue, Action action) {
-        super(name, settings, defaultValue, StringConverter.INSTANCE, action);
+            final String defaultValue, Action action, SecurityChildSettingsContext securityContext) {
+        super(name, settings, defaultValue, StringConverter.INSTANCE, action, securityContext);
     }
 
     public boolean isNotBlank() {

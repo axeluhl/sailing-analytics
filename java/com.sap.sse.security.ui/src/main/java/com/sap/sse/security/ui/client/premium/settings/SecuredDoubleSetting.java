@@ -8,12 +8,12 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 public class SecuredDoubleSetting extends AbstractSecuredValueSetting<Double> {
 
     public SecuredDoubleSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            Action action) {
-        this(name, settings, null, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        this(name, settings, null, action, securityContext);
     }
 
     public SecuredDoubleSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, Double defaultValue,
-            Action action) {
-        super(name, settings, defaultValue, DoubleConverter.INSTANCE, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        super(name, settings, defaultValue, DoubleConverter.INSTANCE, action, securityContext);
     }
 }

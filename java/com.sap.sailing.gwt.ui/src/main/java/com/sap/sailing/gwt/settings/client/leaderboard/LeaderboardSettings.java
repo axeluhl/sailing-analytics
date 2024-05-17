@@ -49,20 +49,20 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
         maneuverDetailsToShow = new SecuredEnumSetSetting<>("maneuverDetailsToShow", this, maneuverDetails, DetailType::valueOfString, 
-                context.getPaywallResolver(), context.getSecuredDTO());
+                context);
         List<DetailType> legDetails = new ArrayList<>();
         legDetails.add(DetailType.LEG_RANK_GAIN);
         legDetailsToShow = new SecuredEnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString, 
-                context.getPaywallResolver(), context.getSecuredDTO());
+                context);
         List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         raceDetails.add(DetailType.RACE_DISPLAY_BOATS);
         raceDetailsToShow = new SecuredEnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOfString, 
-                context.getPaywallResolver(), context.getSecuredDTO());
+                context);
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);
         overallDetailsToShow = new SecuredEnumSetSetting<>("overallDetailsToShow", this, overallDetails, DetailType::valueOfString, 
-                context.getPaywallResolver(), context.getSecuredDTO());
+                context);
         delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorShortNameColumn = new BooleanSetting("showCompetitorShortNameColumn", this, true);

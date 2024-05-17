@@ -2,7 +2,6 @@ package com.sap.sse.security.ui.client.premium.settings;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
@@ -22,22 +21,12 @@ public class SecuredEnumSetSetting<T extends Enum<T> & SecuredEnum> extends Abst
     
     private final PaywallResolver paywallResolver;
     private final SecuredDTO securedDto;
-    private final Set<SecuredBooleanSetting> securedValues = new HashSet<>();
-    private final AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> securedSettings;
 
     public SecuredEnumSetSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            Iterable<T> defaultValues, StringToEnumConverter<T> stringToEnumConverter,
-            PaywallResolver paywallResolver, SecuredDTO securedDto) {
+            Iterable<T> defaultValues, StringToEnumConverter<T> stringToEnumConverter, SecurityChildSettingsContext securityContext) {
         super(name, settings, defaultValues, new EnumConverter<>(stringToEnumConverter));
-        this.securedSettings = settings;
-        this.paywallResolver = paywallResolver;
-        this.securedDto = securedDto;
-    }
-    
-    public final void setValuesSecured(Iterable<T> values) {
-        for (T value: values) {
-            securedValues.add(new SecuredBooleanSetting(value.name(), securedSettings, value.getPremiumAction()));
-        }
+        this.paywallResolver = securityContext.getPaywallResolver();
+        this.securedDto = securityContext.getSecuredDTO();
     }
 
     /**
@@ -69,9 +58,5 @@ public class SecuredEnumSetSetting<T extends Enum<T> & SecuredEnum> extends Abst
             }
         }
         return permittedCollection;
-    }
-    
-    public Collection<SecuredBooleanSetting> getSecuredValues() {
-        return securedValues;
     }
 }

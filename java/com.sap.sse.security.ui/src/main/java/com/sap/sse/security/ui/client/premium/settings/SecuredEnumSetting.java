@@ -9,12 +9,12 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 public class SecuredEnumSetting<T extends Enum<T>> extends AbstractSecuredValueSetting<T> {
 
     public SecuredEnumSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            StringToEnumConverter<T> stringToEnumConverter, Action action) {
-        this(name, settings, null, stringToEnumConverter, action);
+            StringToEnumConverter<T> stringToEnumConverter, Action action, SecurityChildSettingsContext securityContext) {
+        this(name, settings, null, stringToEnumConverter, action, securityContext);
     }
 
     public SecuredEnumSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, T defaultValue,
-            StringToEnumConverter<T> stringToEnumConverter, Action action) {
-        super(name, settings, defaultValue, new EnumConverter<>(stringToEnumConverter), action);
+            StringToEnumConverter<T> stringToEnumConverter, Action action, SecurityChildSettingsContext securityContext) {
+        super(name, settings, defaultValue, new EnumConverter<>(stringToEnumConverter), action, securityContext);
     }
 }

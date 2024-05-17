@@ -9,13 +9,13 @@ import com.sap.sse.security.ui.client.premium.settings.AbstractSecuredValueSetti
 
 public class SecuredDistanceSetting extends AbstractSecuredValueSetting<Distance> {
     public SecuredDistanceSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            Action action) {
-        this(name, settings, null, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        this(name, settings, null, action, securityContext);
     }
 
     public SecuredDistanceSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, Distance defaultValue,
-            Action action) {
-        super(name, settings, defaultValue, DistanceConverter.INSTANCE, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        super(name, settings, defaultValue, DistanceConverter.INSTANCE, action, securityContext);
     }
 
 }

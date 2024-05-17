@@ -12,7 +12,7 @@ The paywall mainly interacts with the SubscriptionService through the PaywallRes
 The PaywallResolver is used as the main utility tool to interact with all services that are related to the paywall. It has been introduced mainly to slim down the number of parameters handed down through constructors in the application. 
 As an example, it is injected into all Settings of type AbstractSecuredValueCollectionSettings and AbstractSecuredValueSettings to forward the actual permission evaluation.
 
-it does provide the following features: 
+It does provide the following features: 
 On SubscriptionService side:
 	- Gives access to functions directly related to subscriptions.
 	- Gives a list of all SubscriptionPlans that would unlock a specified feature.
@@ -50,6 +50,30 @@ Following behaviour need to be known:
 * if no secureDTO is available -> value will be return without permission check
 * if all three requirements are available, but permission check will fail -> default value will be returned
 
+Here is an example of setting up a **secured** Setting (RaceMapSettings.java)
+
+```
+public class RaceMapSettings extends AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> {
+	[...]
+	@Override
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+    	[...]
+    	showWindStreamletOverlaySetting = new SecuredBooleanSetting(
+    		PARAM_VIEW_SHOW_STREAMLETS, this, false, TrackedRaceActions.VIEWSTREAMLETS, context);
+        showWindStreamletColorsSetting = new SecuredBooleanSetting(
+        	PARAM_VIEW_SHOW_STREAMLET_COLORS, this, false, TrackedRaceActions.VIEWSTREAMLETS, context);
+        showSimulationOverlaySetting = new SecuredBooleanSetting(
+        	PARAM_VIEW_SHOW_SIMULATION, this, false, TrackedRaceActions.SIMULATOR, context);
+        [...]
+        }
+    [...]
+}
+```
+
+The class is extending the `AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext>` instead of `AbstractGenericSerializableSettings` to have the needed PaywallResolver and SecuredDTO in place (a security context will be set before addChildSettings is permormed, so the context is always available in an AbstractGenericSerializableSettingsWithContext). 
+
+This change maybe needs some adaptions to the constructors to set the security context objects accordingly, but this will be automatically visible by checking the compiler errors.
+
 ### SecuredEnumSetSetting
 The secured ENUM set setting is somehow special, because it's based on a list of enums instead of single values like the normal SecuredSettings. It is mainly used for Leaderboard settings. 
 
@@ -58,6 +82,27 @@ This leads to a special situation. If the user do not have premium rights to cha
 
 Because this won't make sence in the most cases, it is highly recommended to **don't add premium features to default settings**. A good example for an exception could be advertising, where it is wanted that the user cannot *disable* it, if he is not a premium user.
 
+Here is an example of setting up a **secured** EnumSetSetting with default values (LeaderboardSettings.java):
+
+```
+public abstract class LeaderboardSettings extends AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> {
+	[...]
+    @Override
+    protected void addChildSettings(SecurityChildSettingsContext context) {
+		[...]
+        List<DetailType> overallDetails = new ArrayList<>();
+        overallDetails.add(DetailType.REGATTA_RANK);
+        overallDetailsToShow = new SecuredEnumSetSetting<>(
+        	"overallDetailsToShow", this, overallDetails, DetailType::valueOfString, context);
+		[...]
+	}
+	[...]
+}	
+
+```	
+
+#### Premium default values (as idea for future)
+See bug -> 
 
 ## Premium UI Elements
 Anything extending com.sap.sse.security.ui.client.premium.uielements.PremiumUiElement<T> can be used to establish additional paywall features. 

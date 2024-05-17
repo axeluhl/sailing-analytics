@@ -16,11 +16,11 @@ public abstract class AbstractSecuredValueSetting<T> extends AbstractValueSettin
     private final SecuredDTO securedDTO;
 
     protected AbstractSecuredValueSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, T defaultValue,
-            ValueConverter<T> valueConverter, Action action) {
+            ValueConverter<T> valueConverter, Action action, SecurityChildSettingsContext securityContext) {
         super(name, settings, defaultValue, valueConverter);
-        this.paywallResolver = settings.getContext().getPaywallResolver();
+        this.paywallResolver = securityContext.getPaywallResolver();
         this.action = action;
-        this.securedDTO = settings.getContext().getSecuredDTO();
+        this.securedDTO = securityContext.getSecuredDTO();
     }
     
     public boolean hasPermission() {

@@ -8,12 +8,12 @@ import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 public class SecuredIntegerSetting extends AbstractSecuredValueSetting<Integer> {
 
     public SecuredIntegerSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings,
-            Action action) {
-        this(name, settings, null, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        this(name, settings, null, action, securityContext);
     }
 
     public SecuredIntegerSetting(String name, AbstractGenericSerializableSettingsWithContext<SecurityChildSettingsContext> settings, Integer defaultValue,
-            Action action) {
-        super(name, settings, defaultValue, IntegerConverter.INSTANCE, action);
+            Action action, SecurityChildSettingsContext securityContext) {
+        super(name, settings, defaultValue, IntegerConverter.INSTANCE, action, securityContext);
     }
 }
