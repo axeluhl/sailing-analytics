@@ -216,7 +216,9 @@ setup_keys() {
                 done
                 for key in "${user}"/ssh/authorized_keys/*; do
                     [[ -f "$key" ]] || continue
-                    cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
+                    if ! grep -q "$(cat "$key")" "${user_home_dir}"/.ssh/authorized_keys; then
+                        cat "${key}" >>  "${user_home_dir}"/.ssh/authorized_keys
+                    fi
                 done
                 if [[ "$SET_PERMISSIONS" == "true" ]]; then
                     chmod 700 "${user_home_dir}/.ssh"
