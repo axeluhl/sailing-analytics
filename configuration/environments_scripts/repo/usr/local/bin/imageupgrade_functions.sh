@@ -220,9 +220,25 @@ EOF
 }
 
 setup_mail_sending() {
-    yum install -y mailx postfix
-    systemctl enable postfix
-    temp_mail_properties_location=$(mktemp /root/mail.properties_XXX)
+    # Sets up mail sending using Amazon Simple Email Service by configuring postfix.
+    #
+    # $1 is an optional argument which is prepended to the myorigin variable in the postfix conf.
+    # This variable controls the sender's email address.
+    # eg. "setup_mail_sending disposable" will result in mail from disposable.sapsailing.com. 
+    # DO NOT include spaces in the parameter, even if you use quotes.
+    # The default is the local hostname.
+    if sudo grep "^relayhost\>" /etc/postfix/main.cf &>/dev/null; then   #& here redirects stdout and stderr. \> means there must be a word boundary.
+        echo "Postfix is already installed and has some custom configuration. Please check it is configured correctly at /etc/postfix/main.cf"
+        echo "If you wish to change the sender's email address then edit the myorigin variable in /etc/postfix/main.cf"
+        return 0
+    fi
+    subdomain_of_sender_address="$( ec2-metadata --local-hostname | sed "s/local-hostname: *//")"
+    if [[ -n "$1" ]]; then
+        subdomain_of_sender_address="$1"
+    fi
+    sudo yum install -y mailx postfix
+    sudo systemctl enable postfix
+    temp_mail_properties_location=$(mktemp /var/tmp/mail.properties_XXX)
     scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
     cd $(dirname "${temp_mail_properties_location}")
     local smtp_host="$(sed -n "s/mail.smtp.host \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
@@ -230,7 +246,7 @@ setup_mail_sending() {
     local smtp_user="$(sed -n "s/mail.smtp.user \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
     local smtp_pass="$(sed -n "s/mail.smtp.password \?= \?\(.*\)/\1/p" ${temp_mail_properties_location})"
     local password_file_location="/etc/postfix/sasl_passwd"
-    echo "relayhost = [${smtp_host}]:${smtp_port}
+    sudo su -c "echo \"relayhost = [${smtp_host}]:${smtp_port}
 smtp_sasl_auth_enable = yes
 smtp_sasl_security_options = noanonymous
 smtp_sasl_password_maps = hash:${password_file_location}
@@ -238,12 +254,12 @@ smtp_use_tls = yes
 smtp_tls_security_level = encrypt
 smtp_tls_note_starttls_offer = yes
 
-myorigin =\$myhostname.sapsailing.com
-" >> /etc/postfix/main.cf
-    sed -i  "/smtp_tls_security_level = may/d" /etc/postfix/main.cf
-    echo "[${smtp_host}]:${smtp_port} ${smtp_user}:${smtp_pass}" >> ${password_file_location}
-    postmap hash:${password_file_location}
-    systemctl restart postfix
+myorigin =${subdomain_of_sender_address}.sapsailing.com
+\" >> /etc/postfix/main.cf"
+    sudo sed -i  "/smtp_tls_security_level = may/d" /etc/postfix/main.cf
+    sudo su -c "echo \"[${smtp_host}]:${smtp_port} ${smtp_user}:${smtp_pass}\" >> ${password_file_location}"
+    sudo postmap hash:${password_file_location}
+    sudo systemctl restart postfix
     rm -f "${temp_mail_properties_location}"
 }
 
