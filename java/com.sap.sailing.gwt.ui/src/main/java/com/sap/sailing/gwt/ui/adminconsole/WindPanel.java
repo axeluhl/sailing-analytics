@@ -69,13 +69,13 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -477,7 +477,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 importResultPanel.clear();
-                String windImportResultJson = FileUploadUtil.getApplicationJsonContent(event);
+                String windImportResultJson = FileUploadUtil.getApplicationJsonContentFromHtml(event.getResults());
                 try {
                     WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
                     JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();

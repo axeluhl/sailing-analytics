@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.NamedWithUUID;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.WithOptionalRepeatablePart;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;

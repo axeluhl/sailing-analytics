@@ -50,6 +50,10 @@ implements AwsApplicationProcess<ShardingKey, MetricsT, ProcessT> {
         this.landscape = landscape;
     }
     
+    protected AwsLandscape<ShardingKey> getLandscape() {
+        return landscape;
+    }
+    
     @Override
     public AwsInstance<ShardingKey> getHost() {
         @SuppressWarnings("unchecked")

@@ -80,7 +80,7 @@ public interface SharedLandscapeConstants {
      */
     String MULTI_PROCESS_INSTANCE_DEFAULT_NAME = "SL Multi-Server";
 
-    String DEFAULT_DEDICATED_INSTANCE_TYPE_NAME = "C4_2_XLARGE";
+    String DEFAULT_DEDICATED_INSTANCE_TYPE_NAME = "C5_2_XLARGE";
     
     String DEFAULT_SHARED_INSTANCE_TYPE_NAME = "I3_2_XLARGE";
 
@@ -90,4 +90,11 @@ public interface SharedLandscapeConstants {
      * of a typical process instance.
      */
     int DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY = 4;
+
+    /**
+     * The most appropriate instance type for a disposable reverse proxy.
+     */
+    String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "T3_MEDIUM";
+
+    String DEFAULT_DISPOSABLE_REVERSE_PROXY_INSTANCE_NAME = "DisposableReverseProxy";
 }

@@ -92,13 +92,12 @@ Loading the time-index fixes for a race from a single MongoDB collection quickly
 
 We should also consider alternatives to MongoDB, at least for the storage of the sensor fixes. [Cassandra](http://cassandra.apache.org/) seems an interesting approach that promises high availability and virtually unlimited scalability. 
 
-#### No automatic fail-over for archive server
+#### Automatic fail-over for archive server
 
-When the archive server fails, a few people get an SMS/text message notification. Manually switching the central reverse proxy configuration in /etc/httpd/conf.d/000-macros.conf is then necessary, followed by a ``service httpd reload`` command to switch to the failover archive server. This process needs automation. A special configuration of "availability" checks between production and failover archive server will be required. We have to figure out where best to put this failover feature: is it something the ALB / target group set-up can do for us? How would the central reverse proxy/proxies route the requests then?
+We now automate the failover of the archive server, using `configuration/switchoverArchive.sh`. This script runs on all reverse proxies. It works by switching a PRODUCTION_IP variable to point to either the ARCHIVE_IP or the ARCHIVE_FAILOVER_IP, within the macros file, depending on the status of the primary (checked via multiple curl requests). If changes are made then operators are notified and the config reloaded. Note that this only occurs if the status actually changes, so if it is still unhealthy, then notification/reload do not occur.
 
-Alternatively, we could look at other mechanisms for implementing the fail-over functionality. For example, Apache can be configured in "balancer" mode where failover rules can be specified explicitly.
-
-Alternatively, consider looking at Elastic Beanstalk.
+Another note: This approach has some coupling to the archiving process of creating new event-archive macros, because that causes an auto-pull. However, the script prioritises local state, as to maintain archive failover function.
+Another +1 note: This script doesn't commit the changes. It only makes them locally.
 
 #### No good approach for dynamic scale-up
 

@@ -96,7 +96,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
         from.setValue(null);
         to = createDateTimeBox(new Date(), Accuracy.SECONDS);
         to.setValue(null);
-
+        // device ID list box:
         deviceType = createListBox(false);
         sailingServiceWrite.getDeserializableDeviceIdentifierTypes(new AsyncCallback<List<String>>() {
             @Override

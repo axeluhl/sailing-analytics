@@ -107,7 +107,10 @@ public class WindResource extends AbstractSailingServerResource {
                 RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
                 // add wind only to those races the subject is permitted to update
                 if (getSecurityService().hasCurrentUserUpdatePermission(identifier)) {
-                    result.add(new RaceIdentifierAndTrackedRace(identifier, getService().getTrackedRace(identifier)));
+                    final DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+                    if (trackedRace != null) {
+                        result.add(new RaceIdentifierAndTrackedRace(identifier, trackedRace));
+                    }
                 }
             }
         } else {

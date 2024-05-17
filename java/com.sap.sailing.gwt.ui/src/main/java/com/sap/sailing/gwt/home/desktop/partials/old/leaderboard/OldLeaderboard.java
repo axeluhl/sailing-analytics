@@ -217,8 +217,9 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
             }
             if (leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
                 Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
-                String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
-                        + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
+                // FIXME bug5972: make sure the two formatters use the same time zone!
+                String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatterUTC.render(lastCorrectionDate) + ", "
+                        + DateAndTimeFormatterUtil.longTimeFormatterUTC.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
                 lastScoringUpdateTextDiv.setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 if (delegate != null) {
