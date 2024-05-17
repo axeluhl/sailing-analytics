@@ -323,10 +323,9 @@ myorigin =\$myhostname.sapsailing.com
 }
 
 setup_sshd_resilience() {
-    echo "ClientAliveInterval 3
+    sudo su -c "echo 'ClientAliveInterval 3
 ClientAliveCountMax 3
-GatewayPorts yes" >> /etc/ssh/sshd_config
-    systemctl reload sshd.service
+GatewayPorts yes' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
 }
 
 identify_suitable_partition_for_ephemeral_volume() {
