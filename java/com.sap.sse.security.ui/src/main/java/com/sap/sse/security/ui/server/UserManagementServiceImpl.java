@@ -26,6 +26,7 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.Credential;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -288,7 +289,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions) {
+    public SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions, SecuredAwsLandscapeType securedAwsLandscapeType) {
         return null;
     }
 

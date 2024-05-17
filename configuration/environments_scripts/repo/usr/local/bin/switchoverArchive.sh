@@ -98,11 +98,11 @@ setFailoverIfNotSet() {
 logger -t archive "begin check"
 # --fail option ensures that, if a server error is returned (ie. 5xx/4xx status code), then the status code (stored in $?) will be non zero.
 # -L follows redirects
-curl -s -L --fail --connect-timeout ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+curl -s -L --fail --max-time ${TIMEOUT1_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
 if [[ $? -ne 0 ]]
 then
     logger -t archive "first check failed"
-    curl -s -L --fail --connect-timeout ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
+    curl -s -L --fail --max-time ${TIMEOUT2_IN_SECONDS} "http://${archiveIp}:${ARCHIVE_PORT}/gwt/status" >> /dev/null
     if [[ $? -ne 0 ]]
     then
         setFailoverIfNotSet

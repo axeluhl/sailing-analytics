@@ -8,26 +8,33 @@
 # Within these crontab stubs, are certain string literals, which are replaced: PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes
 # the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of the home directory
 # in which the crontab will be installed. 
+# Furthermore, within the users folder optional uid, gid and groups files an exist. uid should store the user's uid,
+# gid the group id and groups should have secondary groups (one per line). The secondary groups are added after all users are 
+# created.
 # Useful files are also copied across from the "files" dir within each image type.
 # Finally, the script ends by performing a deamon reload and reenabling all the systemd units in the files directory,
 # so that the correct wants, requires, etc. are installed/linked. Any systemd units, within the mimicked filesystem,
 # will be automatically enabled. 
 
-if [[ $# -lt 3 || $# -gt 5 ]]; then
+if [[ $# -lt 3 || $# -gt 6 ]]; then
     echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
     echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
-    echo "Use the s(imple) flag to only do the crontab and not copy any files across. The n(o install) flag can be used to setup the crontabs but not install them."
+    echo "Use the f(iles) flag to disable file copying. Use the c(rontab) flag to disable the creation of users and the creation of crontab files for those users."
+    echo "If the c flag is not used then the n(o install) flag can be used to setup the crontabs but not install them."
     exit 2
 fi
 INSTALL_CRONTAB="true"
-options='sn'
+COPY_FILES="true"
+CREATE_CRONTABS="true";
+options='fnc'
 while getopts $options option
 do
     case $option in
+        c) CREATE_CRONTABS="false";;
+        f) COPY_FILES="false";;
         n) INSTALL_CRONTAB="false";;
-        s) ONLY_CRONTAB="true";;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -37,27 +44,96 @@ ENV_TYPE="$1"
 GIT_USER="$2"
 RELATIVE_GIT_DIR_NAME="$3"
 cd "$(dirname "$0")/${ENV_TYPE}"
+if [[ -d "groups" ]]; then
+    cd "groups"
+    for group in * ; do
+        [[ -e "$group" ]] || continue
+        echo "CREATING GROUP $group"
+        if [[ -e "$group"/gid ]]; then
+            groupadd --gid $(cat "$group"/gid) "$group"
+        else
+            groupadd "$group"
+        fi
+    done
+    cd ..
+fi
 if [[ -d "users" ]]; then
     cd "users"
     GIT_PATH="$(eval echo $(printf "~%q" "$GIT_USER"))/${RELATIVE_GIT_DIR_NAME}" # The path to the git repo that contains the files needed.
     for dir in $(ls -d */ ); do
-        USERNAME=$(echo $dir | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
-        HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
-        # Clear the crontab file before assembling it from the snippets:
-        > $HOME_DIR/crontab
-        for crontab in $(ls ${USERNAME}/crontab*); do
-	    cat "${crontab}">> $HOME_DIR/crontab
-        done
-        sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" $HOME_DIR/crontab # Sets correct path to the git repo within the crontab.
-        sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" $HOME_DIR/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
-        echo "">>$HOME_DIR/crontab  # Adds a newline
-        if [[ "$INSTALL_CRONTAB" == "true" ]]; then    
-            crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+        USERNAME=$(echo "$dir" | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
+        user_UID=""
+        user_GID=""
+        echo "STARTING WORK ON USER $USERNAME"
+        if [[ -f "$USERNAME"/uid ]]; then
+            user_UID=$(cat "$USERNAME"/uid)
+            echo "UID => $user_UID"
         fi
+        if [[ -f "$USERNAME"/gid ]]; then
+            user_GID=$(cat "$USERNAME"/gid)
+            echo "GID => $user_GID"
+            groupadd --gid "$user_GID" "$USERNAME"
+            [[ "$?" -eq 0 ]] || echo "Group id or name already exists." >&2
+        fi
+        if [[ -n "$user_UID" && -n "$user_GID" ]]; then
+            adduser --uid "$user_UID" --gid "$user_GID" "$USERNAME"
+        elif [[ -n "$user_UID" ]]; then
+            adduser --uid "$user_UID" "$USERNAME"
+        elif [[ -n "$user_GID" ]]; then
+            adduser --gid "$user_GID" "$USERNAME"
+        else
+            adduser "$USERNAME"
+        fi
+        id "$USERNAME"
+        if [[ "$?" -eq 0 ]]; then
+            HOME_DIR=$(eval echo $(printf "~%q" "$USERNAME"))   # The path to the home dir of the user whose cronjob will be installed.
+            # Sets permissions of home dir.
+            [[ -e "$USERNAME"/permissions ]] && chmod "$(cat "$USERNAME"/permissions)" "$HOME_DIR"
+            if [[ "$CREATE_CRONTABS" == "true" ]]; then  # 9 is the exit code indicating the username already exists.
+                # Clear the crontab file before assembling it from the snippets:
+                > $HOME_DIR/crontab
+                for crontab in ${USERNAME}/crontab*; do
+                    [[ -e $crontab ]] || continue
+                    cat "${crontab}">> $HOME_DIR/crontab
+                    echo "">> $HOME_DIR/crontab
+                done
+                chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
+                sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
+                sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
+                sed -i '/^$/d' $HOME_DIR/crontab # purges random empty lines.
+                echo "">>$HOME_DIR/crontab  # Adds a newline
+                if [[ "$INSTALL_CRONTAB" == "true" ]]; then
+                    crontab -u ${USERNAME} $HOME_DIR/crontab # Install the crontab in the given user's home dir.
+                fi
+            fi
+        fi
+        
+        echo "****** finished user ******"
+    done
+    # Add to groups after all the groups exist.
+    for dir in $(ls -d */ ); do
+        USERNAME=$(echo "$dir" | sed "s/\/$//") # Dirname is the username. The trailing slash is removed.
+        [[ -e "$USERNAME"/groups ]] || continue
+        echo "ADDING $USERNAME TO THE GROUPS SPECIFIED IN THEIR 'groups' FILE"
+        for group in $(cat "$USERNAME"/groups); do
+            gpasswd --add "$USERNAME" "$group"
+        done
     done
     cd .. # exits users folder, which is essential for the next commands
 fi
-if [[ "$ONLY_CRONTAB" != "true" && -d "files" ]]; then
+# Add users to groups, specified in ENVIRONMENT_TYPE/groups/GROUP/users. Used if groups exist which aren't directly related to a user.
+if [[ -d "groups" ]]; then
+    cd "groups"
+    for group in * ; do
+        [[ -e "$group"/users ]] || continue
+        echo "ADDING USERS IN 'users' FILE TO GROUP $group"
+        for user in $(cat "$group"/users); do
+            gpasswd -a "$user" "$group"
+        done
+    done
+    cd ..
+fi
+if [[ "$COPY_FILES" == "true" && -d "files" ]]; then
     cd "files"
     \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
     systemctl daemon-reload
