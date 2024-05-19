@@ -151,6 +151,7 @@ wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/lib/awstats /var/lib
 scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/etc/awstats /etc/awstats
 chmod 755 /root
 cd ~
