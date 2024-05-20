@@ -36,7 +36,7 @@ start_servers() {
     chmod 755 /usr/local/bin/cp_root_mail_properties
     if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
         echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
-        $GIT_REPOSITORY/configuration/imageupgrade.sh
+        imageupgrade.sh
     else
         echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
         echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
@@ -75,7 +75,7 @@ configure_and_start_server() {
   chgrp sailing "${SERVERS_DIR}/${conf}"
   # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
   /usr/local/bin/cp_root_mail_properties "${conf}"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
   pushd ${SERVERS_DIR}/${conf}
   ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
   popd
