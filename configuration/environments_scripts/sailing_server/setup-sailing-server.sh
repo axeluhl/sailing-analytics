@@ -24,17 +24,16 @@ else
     sudo cp /home/ec2-user/.ssh/authorized_keys /root/.ssh
     sudo chown root /root/.ssh/authorized_keys
     sudo chgrp root /root/.ssh/authorized_keys
-    sudo adduser sailing
-    sudo su - sailing -c "mkdir servers"
+    # Copy imageupgrade_function.sh
+    scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh .
+    sudo mv imageupgrade_functions.sh /usr/local/bin
+    # build-crontab
+    . imageupgrade_functions.sh
+    build_crontab_and_setup_files  sailing_server sailing code
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
-    ssh-keygen -t ed25519 -P '' -f /home/ec2-user/.ssh/id_ed25519
-    cat /home/ec2-user/.ssh/id_ed25519.pub | ssh -o StrictHostKeyChecking=false root@sapsailing.com "cat >>/home/trac/.ssh/authorized_keys"
-    sudo mkdir /home/sailing/.ssh
-    sudo mv /home/ec2-user/.ssh/id* /home/sailing/.ssh
-    sudo chown -R sailing /home/sailing/.ssh
-    sudo chgrp -R sailing /home/sailing/.ssh
-    sudo chmod 700 /home/sailing/.ssh
+    setup_keys "sailing_server"
+    sudo su - sailing -c "mkdir servers"
     # Install standard packages:
     sudo yum -y update
     sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
