@@ -1,6 +1,6 @@
 FROM eclipse-temurin:8-jdk
 # To build with an SAP JVM 8 base image built using Dockerfile_sapjvm, use something like:
-#FROM docker.sapsailing.com/sapjvm8:8.1.098
+#FROM sapjvm8:8.1.098
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
 # Download and extract the release
