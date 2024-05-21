@@ -95,15 +95,11 @@ EOF
     sudo chgrp root /root/mail.properties
     sudo chmod 600 /root/mail.properties
     # Create some swap space for the case mountnvmeswap hasn't created any
-    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1M count=6000
-    sudo chown root /var/cache/swapfile
-    sudo chgrp root /var/cache/swapfile
-    sudo chmod 600 /var/cache/swapfile
-    sudo mkswap /var/cache/swapfile
-    # And while adding to /etc/fstab, also add the NFS mount of /home/scores:
+    . imageupgrade_functions.sh
+    setup_swap 6000
+    # Add the NFS mount of /home/scores to /etc/fstab:
     sudo mkdir /home/scores
-    sudo su - -c 'echo "/var/cache/swapfile       none    swap    pri=0      0       0
-logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
+    sudo su - -c 'echo "logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
     sudo swapon -a
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
