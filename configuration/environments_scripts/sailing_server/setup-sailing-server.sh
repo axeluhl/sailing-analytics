@@ -39,19 +39,13 @@ else
     sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
-    # Clone Git to /home/sailing/code
-    sudo su - sailing -c "git clone ssh://trac@sapsailing.com/home/trac/git code"
-    # Keep Amazon Linux from patching root's authorized_keys file:
-    sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
-    # build-crontab
-    sudo su -c "/home/sailing/code/configuration/environments_scripts/build-crontab sailing_server sailing code"
+    # Keep Amazon Linux from patching root's authorized_keys file and setup root login:
+    setup_cloud_cfg_and_root_login
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
-PermitRootLogin without-password
-PermitRootLogin Yes
 MaxStartups 100
 EOF
 "
@@ -61,8 +55,6 @@ EOF
 net.ipv4.ip_conntrac_max = 131072
 EOF
 "
-    sudo ln -s /home/sailing/code/configuration/imageupgrade.sh /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/imageupgrade_functions.sh /usr/local/bin
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
