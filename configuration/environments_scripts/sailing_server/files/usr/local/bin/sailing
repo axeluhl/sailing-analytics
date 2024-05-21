@@ -7,7 +7,7 @@
 #
 
 
-# Source function library.
+# Source function library. This alters the PATH variable.
 . /etc/init.d/functions
 
 RETVAL=0
@@ -36,7 +36,7 @@ start_servers() {
     chmod 755 /usr/local/bin/cp_root_mail_properties
     if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
         echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
-        imageupgrade.sh
+        /usr/local/bin/imageupgrade.sh
     else
         echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
         echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
@@ -47,9 +47,9 @@ start_servers() {
             done
         else
             echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
-        echo "Initializing local MongoDB replica set \"replica\"..." >>/var/log/sailing.err
+            echo "Initializing local MongoDB replica set \"replica\"..." >>/var/log/sailing.err
             while ! echo "rs.initiate()" | mongo; do
-          echo "MongoDB not ready yet; waiting and trying again..." >>/var/log/sailing.err
+                echo "MongoDB not ready yet; waiting and trying again..." >>/var/log/sailing.err
                 sleep 5
             done
             FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
