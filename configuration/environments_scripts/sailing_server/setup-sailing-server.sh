@@ -97,6 +97,7 @@ EOF
     # Create some swap space for the case mountnvmeswap hasn't created any
     . imageupgrade_functions.sh
     setup_swap 6000
+    setup_sshd_resilience
     # Add the NFS mount of /home/scores to /etc/fstab:
     sudo mkdir /home/scores
     sudo su - -c 'echo "logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
