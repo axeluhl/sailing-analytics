@@ -293,7 +293,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             // or no load balancer forwards to it; in any case we can only default to the assumption that the process may be an archive
             // server:
             if (getName().equals(ARCHIVE_SERVER_NAME)) {
-                setHostname("www.sapsailing.com");
+                setHostname("www.sapsailing.com"); // TODO this should probably be archive-failover.sapsailing.com for the fail-over ARCHIVE server
             } else {
                 logger.warning("Found an application replica set " + getName() + " that is not the "
                         + ARCHIVE_SERVER_NAME + " replica set; no hostname can be inferred.");
