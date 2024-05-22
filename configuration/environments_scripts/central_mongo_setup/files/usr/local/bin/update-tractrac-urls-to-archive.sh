@@ -15,20 +15,27 @@ if [[ "$?" -ne 0 || "$urls" == "null" ]]; then
 else
     echo "${urls}" | sort -u >"${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
     cd "${GIT_ROOT}"
+    git config pull.rebase false # ensure that diverging branches merge.
     branch_head=$(git rev-parse HEAD)
+    stash_stack_size=$(git stash list | wc -l)
     git stash
+    new_stash_stack_size=$(git stash list | wc -l)
     git pull
-    if git stash apply; then
-        echo "STASH APPLIED CLEANLY"
-        git stash drop
-        git add "${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
-        git commit -m "Updated tractrac-json-urls"
-        git push
+    if [[ "$stash_stack_size" -eq "$new_stash_stack_size" ]]; then
+        echo "NO CHANGES STASHED" # This implies there were no changes to the tractrac urls or other changes in the workspace.
     else
-        # prioritise existing state and local changes.
-        echo "PRIORITISING LOCAL STATE, RESETTING HEAD AND APPLYING STASH."
-        git reset --hard "$branch_head"
-        git stash apply
-        echo "The stash is still stored in the stack."
+        if git stash apply; then
+            echo "STASH APPLIED CLEANLY"
+            git stash drop
+            git add "${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
+            git commit -m "Updated tractrac-json-urls"
+            git push
+        else
+            # prioritise existing state and local changes.
+            echo "PRIORITISING LOCAL STATE, RESETTING HEAD AND APPLYING STASH."
+            git reset --hard "$branch_head"
+            git stash apply
+            echo "The stash is still stored in the stack."
+        fi
     fi
 fi
