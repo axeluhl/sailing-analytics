@@ -156,13 +156,14 @@ load_from_release_file ()
         INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
         echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
         # Alternatively, to download a release from Github, here is how the latest Java8/main-release can be obtained:
-        #   curl -L -H 'Authorization: Bearer ***' https://api.github.com/repos/SAP/sailing-analytics/releases 2>/dev/null | jq -r 'sort_by(.created_at) | reverse | map(select(.name | startswith("main-")))[0].assets[] | select(.content_type=="application/x-tar").browser_download_url'
+        #   curl -L -H 'Authorization: Bearer ***' https://api.github.com/repos/SAP/sailing-analytics/releases 2>/dev/null | jq -r 'sort_by(.created_at) | reverse | map(select(.name | startswith("main-")))[0].assets[] | select(.content_type=="application/x-tar").id'
         # will output something like:
-        #   https://github.com/SAP/sailing-analytics/releases/download/main-202405021235/main-202405021235.tar.gz
+        #   169233159
+        # which can then be used in a request such as:
+        #   curl -L -o main-1234567890.tar.gz -H 'Accept: application/octet-stream' -H 'Authorization: Bearer ***' 'https://api.github.com/repos/SAP/sailing-analytics/releases/assets/169233159'
         # Or to obtain the latest docker-17 release, try this:
-        #   curl -L -H 'Authorization: Bearer ***' https://api.github.com/repos/SAP/sailing-analytics/releases 2>/dev/null | jq -r 'sort_by(.created_at) | reverse | map(select(.name | startswith("docker-17-")))[0].assets[] | select(.content_type=="application/x-tar").browser_download_url'
-        # will output something like:
-        #   https://github.com/SAP/sailing-analytics/releases/download/docker-17-202405030912/docker-17-202405030912.tar.gz
+        #   curl -L -H 'Authorization: Bearer ***' https://api.github.com/repos/SAP/sailing-analytics/releases 2>/dev/null | jq -r 'sort_by(.created_at) | reverse | map(select(.name | startswith("docker-17-")))[0].assets[] | select(.content_type=="application/x-tar").id'
+        # and then on like above...
     fi
     if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
       echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
