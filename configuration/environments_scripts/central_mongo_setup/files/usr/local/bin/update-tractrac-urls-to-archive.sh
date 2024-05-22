@@ -15,7 +15,20 @@ if [[ "$?" -ne 0 || "$urls" == "null" ]]; then
 else
     echo "${urls}" | sort -u >"${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
     cd "${GIT_ROOT}"
-    git add "${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
-    git commit -m "Updated tractrac-json-urls"
-    git push
+    branch_head=$(git rev-parse HEAD)
+    git stash
+    git pull
+    if git stash apply; then
+        echo "STASH APPLIED CLEANLY"
+        git stash drop
+        git add "${GIT_ROOT}/${PATH_TO_TRAC_TRAC_URLS}"
+        git commit -m "Updated tractrac-json-urls"
+        git push
+    else
+        # prioritise existing state and local changes.
+        echo "PRIORITISING LOCAL STATE, RESETTING HEAD AND APPLYING STASH."
+        git reset --hard "$branch_head"
+        git stash apply
+        echo "The stash is still stored in the stack."
+    fi
 fi
