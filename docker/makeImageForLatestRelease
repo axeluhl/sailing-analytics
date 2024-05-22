@@ -13,12 +13,11 @@ cp "$GITROOT/java/target/env.sh" "$DOCKERDIR"
 cp "$GITROOT/java/target/start" "$DOCKERDIR"
 cp "$GITROOT/java/target/configuration/JavaSE-11.profile" "$DOCKERDIR"
 cd "$DOCKERDIR"
-docker build --build-arg RELEASE=${release} -t sapsailing:${release} .
+docker build --build-arg RELEASE=${release} -t ghcr.io/sap/sailing-analytics:${release} .
 echo "Cleaning up..."
 rm start env.sh JavaSE-11.profile
-docker tag sapsailing:${release} docker.sapsailing.com/sapsailing:${release}
-docker push docker.sapsailing.com/sapsailing:${release}
+docker push ghcr.io/sap/sailing-analytics:${release}
 if [ "$SET_LATEST" = "1" ]; then
-  docker tag sapsailing:${release} docker.sapsailing.com/sapsailing:latest
-  docker push docker.sapsailing.com/sapsailing:latest
+  docker tag ghcr.io/sap/sailing-analytics:${release} ghcr.io/sap/sailing-analytics:latest
+  docker push ghcr.io/sap/sailing-analytics:latest
 fi
