@@ -166,7 +166,7 @@ load_from_release_file ()
         # and then on like above...
     fi
     if [ -n "${BUILD_COMPLETE_NOTIFY}" ]; then
-      echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r simon.marcel.pamies@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
+      echo "Build/Deployment process has been started - it can take 5 to 20 minutes until your instance is ready. " | mail -r axel.uhl@sap.com -s "Build or Deployment of $INSTANCE_ID to $SERVER_HOME for server $SERVER_NAME starting" ${BUILD_COMPLETE_NOTIFY}
     fi
     RELEASE_FILE_NAME=${INSTALL_FROM_RELEASE}.tar.gz
     cd ${SERVER_HOME}
