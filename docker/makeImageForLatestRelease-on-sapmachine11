@@ -14,14 +14,13 @@ for f in ${FILES_TO_COPY_FROM_JAVA_TARGET}; do
   cp "${GITROOT}/java/target/${f}" "$DOCKERDIR"
 done
 cd "$DOCKERDIR"
-docker build --build-arg RELEASE=${release} -t sapsailing_on_sapmachine11:${release} -f Dockerfile_sapsailing_on_sapmachine11 .
+docker build --build-arg RELEASE=${release} -t ghcr.io/sap/sailing-analytics:${release} -f Dockerfile_sapsailing_on_sapmachine11 .
 echo "Cleaning up..."
 for f in ${FILES_TO_COPY_FROM_JAVA_TARGET}; do
   rm "`basename ${f}`"
 done
-docker tag sapsailing_on_sapmachine11:${release} docker.sapsailing.com/sapsailing_on_sapmachine11:${release}
-docker push docker.sapsailing.com/sapsailing_on_sapmachine11:${release}
+docker push ghcr.io/sap/sailing-analytics:${release}
 if [ "$SET_LATEST" = "1" ]; then
-  docker tag sapsailing_on_sapmachine11:${release} docker.sapsailing.com/sapsailing_on_sapmachine11:latest
-  docker push docker.sapsailing.com/sapsailing_on_sapmachine11:latest
+  docker tag ghcr.io/sap/sailing-analytics:${release} ghcr.io/sap/sailing-analytics:latest-11
+  docker push ghcr.io/sap/sailing-analytics:latest-11
 fi
