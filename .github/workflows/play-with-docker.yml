@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}
+          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{ github.ref == 'refs/heads/main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || '' }}
           file: docker/Dockerfile
           context: docker/
           push: true
