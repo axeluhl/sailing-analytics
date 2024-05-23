@@ -7,11 +7,7 @@
 # of the instance you just launched in AWS as only argument. This will then
 # turn the instance into an application server for the SAP Sailing Analytics
 # application. When the script is done you may log in to look around and check
-# things. When done, shut down the instance (Stop, not Terminate) and create
-# an image off of it, naming it, e.g., "SAP Sailing Analytics 2.0" and
-# also tagging its root volume snapshot as, e.g., "SAP Sailing Analytics 2.0 (Root)".
-# If you want to use the resulting image in production, also tag it with
-# tag key "image-type" and tag value "sailing-analytics-server".
+# things.
 if [ $# != 0 ]; then
   SERVER=$1
   $(dirname $0)/../sailing_server/setup-sailing-server.sh ${SERVER}
@@ -73,6 +69,8 @@ EOF
     sudo systemctl start sailing.service
     sudo systemctl stop sailing.service
     sudo mount -a
+    echo "Now follow the instructions on the wiki for creating-ec2-image-for-hudson-from-scratch.md. It explains how to mount"
+    echo "the hudson volume and setup the aws + ssh keys."
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
