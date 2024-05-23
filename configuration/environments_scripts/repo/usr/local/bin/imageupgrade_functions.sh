@@ -127,10 +127,10 @@ build_crontab_and_setup_files() {
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
-        PASS_OPTIONS+=( "$option")
+          PASS_OPTIONS+=( "$option")
         done
         if ! sudo  ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
-            return 1
+          return 1
         fi
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
