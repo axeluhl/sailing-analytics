@@ -165,7 +165,7 @@ setup_keys() {
         return 2
     fi
     pushd .
-    TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
+    TEMP_KEY_DIR=$(mktemp  -d /var/tmp/keysXXXXX)
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
     scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
