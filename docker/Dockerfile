@@ -13,7 +13,7 @@ RUN apt-get update \
  && apt-get install -y vim telnet dnsutils net-tools jq
 COPY vimrc /root/.vimrc
 RUN wget -O /tmp/rds.pem https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem \
- && keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore /opt/java/openjdk/jre/lib/security/cacerts -noprompt -storepass changeit \
+ && ${JAVA_HOME}/bin/keytool -importcert -alias AWSRDS -file /tmp/rds.pem -keystore ${JAVA_HOME}/jre/lib/security/cacerts -noprompt -storepass changeit \
  && rm /tmp/rds.pem
 COPY ${RELEASE}.tar.gz /tmp
 RUN tar xzvpf /tmp/${RELEASE}.tar.gz \
