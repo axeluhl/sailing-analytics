@@ -18,6 +18,9 @@ if [ $# != 0 ]; then
 else
   if ec2-metadata | grep -q instance-id; then
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
+    # Install standard packages:
+    sudo yum -y update
+    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
     # Allow root ssh login with the same key used for the ec2-user for now;
     # later, a cron job will be installed that keeps the /root/authorized_keys file
     # up to date with all landscape managers' public SSH keys
@@ -34,9 +37,6 @@ else
     # and then move it to the sailing user's .ssh directory
     setup_keys "sailing_server"
     sudo su - sailing -c "mkdir servers"
-    # Install standard packages:
-    sudo yum -y update
-    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
     # Keep Amazon Linux from patching root's authorized_keys file and setup root login:
