@@ -26,12 +26,11 @@ else
     sudo mv /tmp/dev-secrets /root/secrets
     sudo mkdir /root/.aws
     sudo mv /tmp/hudson-aws-credentials /root/.aws/credentials
-    sudo chown root:root /root/secrets /root/.aws/credentials
-    sudo chmod 600 /root/secrets /root/.aws/credentials
+    . imageupgrade_functions.sh
+    build_crontab_and_setup_files build_server sailing code
     # Make eu-west-1 the default region for any aws CLI interaction:
     sudo su - -c "aws configure set default.region eu-west-1"
-    # Create "hudson" user and clear its directory again which is to become a mount point
-    sudo adduser hudson
+    # Clear "hudson" user's directory again which is to become a mount point
     sudo su - hudson -c "rm -rf /home/hudson/* /home/hudson/.* 2>/dev/null"
     sudo mkdir /usr/lib/hudson
     sudo chown hudson /usr/lib/hudson
@@ -39,7 +38,6 @@ else
     sudo chgrp hudson /var/log/hudson
     sudo chmod g+w /var/log/hudson
     sudo wget -O /usr/lib/hudson/hudson.war "https://static.sapsailing.com/hudson.war.patched-with-mail-1.6.2"
-    sudo su - -c "/home/sailing/code/configuration/environments_scripts/build-crontab build_server sailing code"
     # Enable NFS server
     sudo systemctl enable nfs-server.service
     sudo systemctl start nfs-server.service
