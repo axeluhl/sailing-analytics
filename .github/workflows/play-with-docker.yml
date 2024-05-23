@@ -37,7 +37,7 @@ jobs:
           else
             echo "${{ github.event.inputs.release }}"
           fi )
-BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
+          BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
       - name: Download release
         shell: bash
         run: |
