@@ -166,9 +166,19 @@ setup_keys() {
     fi
     pushd .
     TEMP_KEY_DIR=$(mktemp  -d /var/tmp/keysXXXXX)
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    sudo su - -c "source imageupgrade_functions.sh; __setup_keys_using_local_copy $TEMP_KEY_DIR $SET_PERMISSIONS"
+    popd
+    rm -rf "${TEMP_KEY_DIR}"
+}
+__setup_keys_using_local_copy() {
+    # $1 the local location of the key_vault subdirectory corresponding to the image type this is run on.
+    # $2 a "true" or "false" string, indicating whether to override existing permissions. 
+    # "true" indicates the permissions and ownership of the .ssh and .aws folders will not be set.
+    TEMP_KEY_DIR="$1"
+    SET_PERMISSIONS="$2"    
     REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
     && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
@@ -228,8 +238,6 @@ setup_keys() {
             fi
         fi
     done
-    popd
-    rm -rf "${TEMP_KEY_DIR}"
 }
 
 clean_root_ssh_dir_and_tmp() {
