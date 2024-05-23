@@ -1,4 +1,8 @@
 FROM eclipse-temurin:8-jdk
+# This Dockerfile assumes that the release to use is provided as
+# ${RELEASE}.tar.gz in the current Docker workspace. Use, e.g.,
+# the configuration/github-download-release-assets.sh script to
+# obtain the tar.gz file for a specific or the latest "main" release.
 # To build with an SAP JVM 8 base image built using Dockerfile_sapjvm, use something like:
 #FROM sapjvm8:8.1.098
 ARG RELEASE
