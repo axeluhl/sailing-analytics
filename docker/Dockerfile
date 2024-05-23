@@ -8,8 +8,8 @@ WORKDIR /home/sailing/servers/server
 RUN apt-get update \
  && apt-get install -y vim telnet dnsutils net-tools jq
 COPY vimrc /root/.vimrc
-RUN wget -O /tmp/${RELEASE}.tar.gz https://releases.sapsailing.com/${RELEASE}/${RELEASE}.tar.gz \
- && tar xzvpf /tmp/${RELEASE}.tar.gz \
+COPY ${RELEASE}.tar.gz /tmp
+RUN tar xzvpf /tmp/${RELEASE}.tar.gz \
  && rm /tmp/${RELEASE}.tar.gz
 COPY env.sh .
 RUN cat env-default-rules.sh >>env.sh

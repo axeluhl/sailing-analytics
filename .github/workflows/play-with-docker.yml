@@ -7,8 +7,6 @@ on:
         default: ''
 jobs:
   play-with-docker-job:
-    #runs-on: ubuntu-latest-64cpu
-    #runs-on: ubuntu-latest-4cpu
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,11 +32,18 @@ jobs:
       - name: Determine release
         shell: bash
         run: |
-          echo "RELEASE=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
-            wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep 'build-[0-9]\{10\}' | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/'
+          echo "RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
+            echo 'main-' # use the latest main-... release available
           else
             echo "${{ github.event.inputs.release }}"
-          fi )" >>${GITHUB_ENV}
+          fi )
+BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
+      - name: Download release
+        shell: bash
+        run: |
+          RELEASE_TAR_GZ_FILENAME=$( configuration/github-download-release-assets.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.RELEASE_PREFIX }} )
+          RELEASE=$( echo ${RELEASE_TAR_GZ_FILENAME} | sed -e 's/\.tar\.gz$//' )
+          echo "RELEASE=${RELEASE}" >>${GITHUB_ENV}
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -49,5 +54,5 @@ jobs:
           push: true
       - name: Clean up copied files
         shell: bash
-        run: rm docker/start docker/env.sh docker/JavaSE-11.profile
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile ${{ env.RELEASE }}.tar.gz release-notes.txt
           
