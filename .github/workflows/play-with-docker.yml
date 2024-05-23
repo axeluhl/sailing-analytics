@@ -57,5 +57,4 @@ jobs:
           push: true
       - name: Clean up copied files
         shell: bash
-        run: rm docker/start docker/env.sh docker/JavaSE-11.profile ${{ env.RELEASE }}.tar.gz release-notes.txt
-          
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile docker/${{ env.RELEASE }}.tar.gz release-notes.txt
