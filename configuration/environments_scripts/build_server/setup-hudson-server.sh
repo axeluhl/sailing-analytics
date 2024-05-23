@@ -22,7 +22,10 @@ else
     sudo chown root:root /root/secrets
     sudo chmod 600 /root/secrets
     . imageupgrade_functions.sh
-    build_crontab_and_setup_files build_server sailing code
+    if ! build_crontab_and_setup_files build_server sailing code; then
+        exit 1
+    fi
+    setup_sshd_resilience
     # Make eu-west-1 the default region for any aws CLI interaction:
     sudo su - -c "aws configure set default.region eu-west-1"
     # Clear "hudson" user's directory again which is to become a mount point
@@ -54,7 +57,7 @@ EOF
     # Install DEV server
     sudo su - sailing -c "mkdir /home/sailing/servers/DEV
 cd /home/sailing/servers/DEV
-cat <<EOF | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin
+cat <<EOF | /usr/local/bin/refreshInstance.sh auto-install-from-stdin
 USE_ENVIRONMENT=dev-server
 EOF
 "
