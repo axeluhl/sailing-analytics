@@ -7,18 +7,22 @@ on:
         default: ''
 jobs:
   play-with-docker-job:
-    #runs-on: ubuntu-latest-64cpu
-    #runs-on: ubuntu-latest-4cpu
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Login to docker.sapsailing.com
+#      - name: Login to docker.sapsailing.com for sapjvm8 image download
+#        uses: docker/login-action@v3
+#        with:
+#          registry: docker.sapsailing.com
+#          username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
+#          password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+      - name: Login to ghcr.io to upload sailing-analytics image
         uses: docker/login-action@v3
         with:
-          registry: docker.sapsailing.com
-          username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
-          password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Copy a few files
         shell: bash
         run: |
@@ -28,20 +32,29 @@ jobs:
       - name: Determine release
         shell: bash
         run: |
-          echo "RELEASE=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
-            wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep 'build-[0-9]\{10\}' | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/'
+          echo "RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
+            echo 'main-' # use the latest main-... release available
           else
             echo "${{ github.event.inputs.release }}"
-          fi )" >>${GITHUB_ENV}
+          fi )
+          BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
+      - name: Download release
+        shell: bash
+        run: |
+          RELEASE_TAR_GZ_FILENAME=$( configuration/github-download-release-assets.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.RELEASE_PREFIX }} )
+          RELEASE=$( echo ${RELEASE_TAR_GZ_FILENAME} | sed -e 's/\.tar\.gz$//' )
+          if [ -n ${RELEASE_TAR_GZ_FILENAME} ]; then
+            mv ${RELEASE_TAR_GZ_FILENAME} docker/
+          fi
+          echo "RELEASE=${RELEASE}" >>${GITHUB_ENV}
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: docker.sapsailing.com/test:${{ env.RELEASE }}
+          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}
           file: docker/Dockerfile
           context: docker/
           push: true
       - name: Clean up copied files
         shell: bash
-        run: rm docker/start docker/env.sh docker/JavaSE-11.profile
-          
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile docker/${{ env.RELEASE }}.tar.gz release-notes.txt
