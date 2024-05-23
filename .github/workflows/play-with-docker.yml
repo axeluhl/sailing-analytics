@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           echo "RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
-            echo 'main-' # use the latest main-... release available
+            echo 'docker-17-' # use the latest docker-17-... release available
           else
             echo "${{ github.event.inputs.release }}"
           fi )
@@ -52,7 +52,7 @@ jobs:
         with:
           build-args: RELEASE=${{ env.RELEASE }}
           tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}
-          file: docker/Dockerfile
+          file: docker/Dockerfile_sapsailing_on_sapmachine17
           context: docker/
           push: true
       - name: Clean up copied files
