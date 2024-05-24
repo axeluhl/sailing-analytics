@@ -21,5 +21,7 @@ jobs:
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
           git remote -v
           GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing
+          git config --global user.email "github@sapsailing.com"
+          git config --global user.name "Github Auto-Merger"
           git merge sapsailing/master
           git push
