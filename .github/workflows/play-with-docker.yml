@@ -33,7 +33,7 @@ jobs:
       - name: Determine release
         shell: bash
         run: |
-          echo "BRANCH=$( git branch --show-current )-
+          echo "BRANCH=$( git branch --show-current )
             RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
               echo "$( git branch --show-current )-"
             else
@@ -53,7 +53,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{ github.ref == 'refs/heads/main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || '' }}
+          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{
+              env.BRANCH == 'main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' ||
+              env.BRANCH == 'docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' ||
+              ''
+          }}
           file: docker/Dockerfile
           context: docker/
           push: true
