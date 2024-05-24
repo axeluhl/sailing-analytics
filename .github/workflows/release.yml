@@ -59,8 +59,9 @@ jobs:
           list-tests: failed
           reporter: java-junit
           fail-on-error: true
-      - shell: bash
+      - name: Build Release
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -u -L release
       - name: Determine release name
