@@ -49,12 +49,6 @@ jobs:
             mv ${RELEASE_TAR_GZ_FILENAME} docker/
           fi
           echo "RELEASE=${RELEASE}" >>${GITHUB_ENV}
-      - name: Debug Output
-        shell: bash
-        run: |
-            echo "BRANCH: ${{ env.BRANCH }}"
-            echo "github.events.inputs.release: ${{ github.even.inputs.release }}"
-            echo "Additional tag: ${{ env.BRANCH == 'main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' || '' }}"
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
