@@ -1,0 +1,62 @@
+name: create-docker-image
+on:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+    branches: [main, docker-17]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release
+        default: ''
+jobs:
+  create-docker-image-job:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.workflow_dispatch.ref || github.event.workflow_run.head_branch }}
+      - name: Login to ghcr.io to upload sailing-analytics image
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Copy a few files
+        shell: bash
+        run: |
+          cp "java/target/env.sh" docker/
+          cp "java/target/start" docker/
+          cp "java/target/configuration/JavaSE-11.profile" docker/
+      - name: Determine release
+        shell: bash
+        run: |
+          echo "BRANCH=$( git branch --show-current )
+          RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
+            echo "$( git branch --show-current )-"
+          else
+            echo "${{ github.event.inputs.release }}"
+          fi )
+          BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
+      - name: Download release
+        shell: bash
+        run: |
+          RELEASE_TAR_GZ_FILENAME=$( configuration/github-download-release-assets.sh ${{ secrets.GITHUB_TOKEN }} ${{ env.RELEASE_PREFIX }} )
+          RELEASE=$( echo ${RELEASE_TAR_GZ_FILENAME} | sed -e 's/\.tar\.gz$//' )
+          if [ -n ${RELEASE_TAR_GZ_FILENAME} ]; then
+            mv ${RELEASE_TAR_GZ_FILENAME} docker/
+          fi
+          echo "RELEASE=${RELEASE}" >>${GITHUB_ENV}
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          build-args: RELEASE=${{ env.RELEASE }}
+          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{ env.BRANCH == 'main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' || '' }}
+          file: ${{ env.BRANCH == 'docker-17' && 'docker/Dockerfile_sapsailing_on_sapmachine17' || 'docker/Dockerfile' }}
+          context: docker/
+          push: true
+      - name: Clean up copied files
+        shell: bash
+        run: rm docker/start docker/env.sh docker/JavaSE-11.profile docker/${{ env.RELEASE }}.tar.gz release-notes.txt
