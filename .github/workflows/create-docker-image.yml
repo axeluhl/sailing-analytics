@@ -1,4 +1,4 @@
-name: play-with-docker
+name: create-docker-image
 on:
   workflow_run:
     workflows: [release]
@@ -10,7 +10,7 @@ on:
         description: Release
         default: ''
 jobs:
-  play-with-docker-job:
+  create-docker-image-job:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
