@@ -12,4 +12,5 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY_FOR_TRAC_SAPSAILING_COM }}" >~/.ssh/id_ed25519
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
+          git remote -v
           git fetch sapsailing
