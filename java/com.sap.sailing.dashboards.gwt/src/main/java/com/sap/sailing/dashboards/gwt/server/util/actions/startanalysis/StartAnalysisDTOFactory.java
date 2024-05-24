@@ -141,7 +141,7 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         final TimePoint timePoint = startOfRace == null ? MillisecondsTimePoint.now() : startOfRace;
         LineDetails startline = trackedRace.getStartLine(timePoint);
         StartLineAdvantageDTO startLineAdvantageDTO = new StartLineAdvantageDTO();
-        startLineAdvantageDTO.startLineAdvatageType = getStartlineAdvantageType(trackedRace, new MillisecondsTimePoint(
+        startLineAdvantageDTO.startLineAdvantageType = getStartlineAdvantageType(trackedRace, new MillisecondsTimePoint(
                 new Date()));
         startLineAdvantageDTO.startLineAdvantage = startline == null ? null : startline.getAdvantage().getMeters();
         startAnalysisWindLineInfoDTO.startLineAdvantage = startLineAdvantageDTO;

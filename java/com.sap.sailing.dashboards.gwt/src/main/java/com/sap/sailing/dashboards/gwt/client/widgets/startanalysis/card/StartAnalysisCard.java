@@ -118,21 +118,25 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
     private void fillWindAndStartLineData(StartAnalysisDTO startAnalysisDTO) {
         if (startAnalysisDTO.startAnalysisWindLineInfoDTO != null) {
-            setLineAdvantageDivWidth(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType);
+            setLineAdvantageDivWidth(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantageType);
             final String startLineAdvantageType;
-            if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
+            if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantageType
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometryHeader();
             } else {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWindHeader();
             }
-            startanalysis_card_line_advantage
-                    .setInnerHTML(SafeHtmlUtils.fromString(startLineAdvantageType
-                            + ": "
-                            + NumberFormat
-                                    .getFormat("#0.0")
-                                    .format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)
-                            + " m").asString());
+            if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage == null) {
+                startanalysis_card_line_advantage.setInnerHTML("");
+            } else {
+                startanalysis_card_line_advantage
+                        .setInnerHTML(SafeHtmlUtils.fromString(startLineAdvantageType
+                                + ": "
+                                + NumberFormat
+                                        .getFormat("#0.0")
+                                        .format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)
+                                + " m").asString());
+            }
             String formattedTimeSinceStart;
             if (startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)) {
                 formattedTimeSinceStart = getRaceTimeStringFromMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);
@@ -151,8 +155,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     }
 
     private void setLineAdvantageDivWidth(StartlineAdvantageType startlineAdvantageType) {
-        if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
-                .equals(StartlineAdvantageType.GEOMETRIC)) {
+        if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantageType
+                == StartlineAdvantageType.GEOMETRIC) {
             startanalysis_card_line_advantage.getStyle().setWidth(GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT, Unit.PT);
         } else {
             startanalysis_card_line_advantage.getStyle().setWidth(WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT, Unit.PT);
@@ -180,7 +184,6 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                     public void onSuccess(SecuredDTO raceDTO) {
                         final PaywallResolver paywallResolver = new PaywallResolverImpl(userService,
                                 subscriptionServiceFactory);
-                        // TODO bug5774 set RaceDTO to RaceMapLifecycle to enable premium functions
                         final RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
                         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
                         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
