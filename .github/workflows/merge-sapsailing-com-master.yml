@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch the whole thing to make sure the histories merge
       - name: Create SSH key and fetch
         shell: bash
         run: |
@@ -19,6 +21,5 @@ jobs:
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
           git remote -v
           GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing
-          git fetch origin
           git merge sapsailing/master
           git push
