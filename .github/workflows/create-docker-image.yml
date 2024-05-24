@@ -1,22 +1,23 @@
-name: play-with-docker
+name: create-docker-image
 on:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+    branches: [main, docker-17]
   workflow_dispatch:
     inputs:
       release:
         description: Release
         default: ''
 jobs:
-  play-with-docker-job:
+  create-docker-image-job:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-#      - name: Login to docker.sapsailing.com for sapjvm8 image download
-#        uses: docker/login-action@v3
-#        with:
-#          registry: docker.sapsailing.com
-#          username: ${{ secrets.DOCKER_SAPSAILING_COM_USERNAME }}
-#          password: ${{ secrets.DOCKER_SAPSAILING_COM_PASSWORD }}
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.workflow_dispatch.ref || github.event.workflow_run.head_branch }}
       - name: Login to ghcr.io to upload sailing-analytics image
         uses: docker/login-action@v3
         with:
@@ -32,8 +33,9 @@ jobs:
       - name: Determine release
         shell: bash
         run: |
-          echo "RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
-            echo 'docker-17-' # use the latest docker-17-... release available
+          echo "BRANCH=$( git branch --show-current )
+          RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
+            echo "$( git branch --show-current )-"
           else
             echo "${{ github.event.inputs.release }}"
           fi )
@@ -47,11 +49,18 @@ jobs:
             mv ${RELEASE_TAR_GZ_FILENAME} docker/
           fi
           echo "RELEASE=${RELEASE}" >>${GITHUB_ENV}
+      - name: Debug Output
+        shell: bash
+        run: |
+            echo "BRANCH: ${{ env.BRANCH }}"
+            echo "github.events.inputs.release: ${{ github.even.inputs.release }}"
+            echo "Additional tag: ${{ env.BRANCH == 'main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' || '' }}"
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{ github.ref == 'refs/heads/docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' || '' }}
+          tags: ghcr.io/sap/sailing-analytics:${{ env.RELEASE }}${{ env.BRANCH == 'main' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest' || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && ',ghcr.io/sap/sailing-analytics:latest-17' || '' }}
+          file: ${{ env.BRANCH == 'docker-17' && 'docker/Dockerfile_sapsailing_on_sapmachine17' || 'docker/Dockerfile' }}
           context: docker/
           push: true
       - name: Clean up copied files
