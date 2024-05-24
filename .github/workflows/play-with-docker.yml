@@ -33,12 +33,13 @@ jobs:
       - name: Determine release
         shell: bash
         run: |
-          echo "RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
-            echo "$( git branch --show-current )-"
-          else
-            echo "${{ github.event.inputs.release }}"
-          fi )
-          BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
+          echo "BRANCH=$( git branch --show-current )-
+            RELEASE_PREFIX=$( if [ "${{ github.event.inputs.release }}" = "" ]; then
+              echo "$( git branch --show-current )-"
+            else
+              echo "${{ github.event.inputs.release }}"
+            fi )
+            BEARER_TOKEN=${{ secrets.GITHUB_TOKEN }}" >>${GITHUB_ENV}
       - name: Download release
         shell: bash
         run: |
