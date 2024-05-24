@@ -10,7 +10,10 @@ jobs:
       - name: Create SSH key and fetch
         shell: bash
         run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY_FOR_TRAC_SAPSAILING_COM }}" >~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
           git remote -v
           git fetch sapsailing
