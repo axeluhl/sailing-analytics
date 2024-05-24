@@ -7,6 +7,7 @@ FROM eclipse-temurin:8-jdk
 #FROM sapjvm8:8.1.098
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
+LABEL org.opencontainers.image.description Sailing Analytics with Java 8
 # Download and extract the release
 WORKDIR /home/sailing/servers/server
 RUN apt-get update \
