@@ -21,11 +21,10 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 ### Accounts
 
 1. Git Account
-   The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote `sapsailing.com` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
+   The primary Git repository for the project is hosted on Github (see [https://github.com/SAP/sailing-analytics](https://github.com/SAP/sailing-analytics)). To clone, use ``git@github.com:SAP/sailing-analytics.git``. To gain write access you have to become member of the [sailing-analytics-team](https://github.com/orgs/SAP/teams/sailing-analytics-team) organization. We still have a shadow repository around that, e.g., powers our Wiki at [https://wiki.sapsailing.com](https://wiki.sapsailing.com) and which lives at ``ssh://trac@sapsailing.com/home/trac/git``. 
 
-   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).  
+   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to one of the project maintainers, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).  
    Note: If you want to use the ssh-key in the context of our solution, it can be an RSA or ED25519 format. Example for creating a key: `ssh-keygen -t ed25519 -b 512 -C "test@test.com"`. Make sure to set a non-empty password for your key.
-   - Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 
 2. Bugzilla
 
@@ -35,7 +34,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 3. Wiki
 
-   - Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
+We have so far decided against migrating our existing Gollum-based Wiki to Github's Wiki pages. Therefore, for the time being, you can either push changes to the ``wiki/`` folder to the ``main`` branch of the repository from where they will make it to the Gollum-provided Wiki, or our can request a Gollum account to be created for you. This will also allow you to view non-public pages through [https://wiki.sapsailing.com](https://wiki.sapsailing.com).
+
+For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 
 4. Hudson
 
@@ -46,7 +47,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. JDK >= 11. No longer required by Eclipse because new Eclipse releases bring their own JDK bundled with the installer. Still, if you want to use Java 11 or Java 17, install any such JDK and set the `JAVA_HOME` variable to it.
 2. Eclipse IDE for Eclipse Committers, version 4.29.0 ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r) 
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
-4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)still
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
 6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/). You may need to choose the community edition. In addition, install `mongosh`.
 7. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
