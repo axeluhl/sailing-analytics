@@ -16,4 +16,4 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
           git remote -v
-          git fetch sapsailing
+          GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing
