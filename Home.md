@@ -179,3 +179,5 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
 * [Maven Repository Browser](https://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
 * [Main Sailing Website](https://www.sapsailing.com)
+
+test
