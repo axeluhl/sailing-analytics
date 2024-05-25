@@ -5,7 +5,7 @@
 name: Merge master from sapsailing.com
 on:
   schedule:
-    - cron: "*/5 * * * *"   # every five minutes
+    - cron: "53 * * * *"   # every hour, at :53 minutes
   workflow_dispatch: {}
 jobs:
   merge-master-from-sapsailing-com:
