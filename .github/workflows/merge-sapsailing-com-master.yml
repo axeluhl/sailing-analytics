@@ -1,3 +1,7 @@
+# One of the reasons to have this workflow is that the Gollum-based Wiki
+# at wiki.sapsailing.com is operating on a Git workspace at wiki@sapsailing.com:gitwiki
+# which has been cloned from ssh://trac@sapsailing.com/home/trac/git. Its changes
+# shall be synchronized to the Github repo at github.com/SAP/sailing-analytics
 name: Merge master from sapsailing.com
 on:
   schedule:
