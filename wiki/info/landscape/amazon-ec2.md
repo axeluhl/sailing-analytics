@@ -102,7 +102,7 @@ The webserver must be tagged with key ``CentralReverseProxy`` where the value is
 
 The following diagram explains the disposable reverse proxies role a little better. 
 
-<img src="wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+<img src="/wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
 
 ### DNS and Application Load Balancers (ALBs)
 
