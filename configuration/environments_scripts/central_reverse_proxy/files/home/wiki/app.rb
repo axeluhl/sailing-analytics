@@ -35,7 +35,6 @@ class App < Precious::App
         return
       end
       @_auth =  Rack::Auth::Basic::Request.new(request.env)
-      puts "here"
       if self.env['PATH_INFO'].split('/').length >=2 &&
         (self.env['PATH_INFO'].split('/')[1] != 'wiki' &&
         self.env['PATH_INFO'].split('/')[2] != 'wiki' &&
@@ -43,6 +42,7 @@ class App < Precious::App
         self.env['PATH_INFO'].split('/')[2] != 'home' &&
         self.env['PATH_INFO'].split('/')[1] != 'Home' &&
         self.env['PATH_INFO'].split('/')[2] != 'Home' &&
+        self.env['PATH_INFO'].split('/')[1] != 'Home.md' &&
         self.env['PATH_INFO'].split('/')[1] != 'search' &&
         self.env['PATH_INFO'].split('/')[2] != 'search' &&
         self.env['PATH_INFO'].split('/')[1] != 'edit' &&
