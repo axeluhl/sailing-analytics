@@ -59,8 +59,9 @@ jobs:
           list-tests: failed
           reporter: java-junit
           fail-on-error: true
-      - shell: bash
+      - name: Build Release
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -u -L release
       - name: Determine release name
@@ -84,12 +85,10 @@ jobs:
       - name: Create Release
         id: create_release
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.SIMPLE_VERSION_INFO }}
-          release_name: ${{ env.SIMPLE_VERSION_INFO }}
+          name: ${{ env.SIMPLE_VERSION_INFO }}
           draft: false
           prerelease: false
       - name: Upload Release Asset tar.gz
