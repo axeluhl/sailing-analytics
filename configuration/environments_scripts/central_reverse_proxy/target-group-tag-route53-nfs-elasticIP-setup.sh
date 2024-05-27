@@ -58,7 +58,7 @@ echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
     echo "Remounting on $instanceIp"
-    ssh -o StrictHostKeyChecking=false root@"${instanceIp}"  " umount -l -f /home/scores;  mount -a"
+    ssh -o StrictHostKeyChecking=false root@"${instanceIp}" "umount -l -f /home/scores;  mount -a"
 done
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "DisposableProxy" | extract_public_ip); do
     echo "Remounting on $instanceIp"
