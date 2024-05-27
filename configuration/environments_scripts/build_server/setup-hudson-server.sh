@@ -47,13 +47,6 @@ else
 /home/hudson/android-sdk-linux 172.31.0.0/16(rw,nohide,no_root_squash)
 EOF
 "
-    # Allow "hudson" user to launch EC2 instances:
-    sudo su - -c "cat <<EOF >>/etc/sudoers.d/hudsoncanlaunchec2instances
-hudson             ALL = (root) NOPASSWD: /usr/local/bin/launchhudsonslave
-hudson             ALL = (root) NOPASSWD: /usr/local/bin/launchhudsonslave-java11
-hudson             ALL = (root) NOPASSWD: /usr/local/bin/getLatestImageOfType.sh
-EOF
-"
     # Install DEV server
     sudo su - sailing -c "mkdir /home/sailing/servers/DEV
 cd /home/sailing/servers/DEV
