@@ -45,7 +45,9 @@ done
 # alter records using batch file.
 sed -i "s/LOGFILES_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.json
 sed -i "s/SMTP_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.json
-read -n 1  -p "Check the instance has the correct tags and is in the correct target group. Furthermore, check the batch file has been modified correctly. Press a key to continue.." key_pressed
+read -n 1  -p "Check the instance has the correct tags and is in the correct target group.
+Furthermore, check the batch file batch-for-route53-dns-record-update.json has been modified correctly.
+Press a key to continue.." key_pressed
 ###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
 echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
