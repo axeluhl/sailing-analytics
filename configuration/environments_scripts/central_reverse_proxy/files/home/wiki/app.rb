@@ -17,7 +17,6 @@ class App < Precious::App
 
   helpers do
     def authenticate!
-      puts "authentication"
       public_urls=IO.readlines 'public.txt'
       public_urls.each {|url|
         if self.env['PATH_INFO'] == url.slice(0, url.length-1)
@@ -27,7 +26,6 @@ class App < Precious::App
 
         if self.env['PATH_INFO'].start_with?('/wiki/images') ||
             self.env['PATH_INFO'].start_with?('/favicon.ico')
-          puts "Allowing " + self.env['PATH_INFO']
           return
         end
       }
@@ -48,11 +46,10 @@ class App < Precious::App
         self.env['PATH_INFO'].split('/')[1] != 'edit' &&
         self.env['PATH_INFO'].split('/')[2] != 'edit' &&
         self.env['PATH_INFO'].split('/')[1] != 'preview' &&
-        self.env['PATH_INFO'].split('/')[2] != 'preview')
+        self.env['PATH_INFO'].split('/')[2] != 'preview' &&
+        (self.env['PATH_INFO'].split('/')[1] != 'gollum'|| self.env['PATH_INFO'].split('/')[2] != 'create'))
         throw(:halt, [403, 'Forbidden - You can not access anything outside wiki/ path.'])
       end
-      puts settings
-      puts settings.authorized_users
       if @_auth.provided?
       end
       if @_auth.provided? && @_auth.basic? && @_auth.credentials && @user = detected_user(@_auth.credentials)
@@ -69,7 +66,6 @@ class App < Precious::App
     end
 
     def users
-      puts settings
       @_users ||= settings.authorized_users.map {|u| User.new(*u) }
     end
 
