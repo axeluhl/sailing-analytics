@@ -26,3 +26,5 @@
 - Releases and p2 respository references, where "releases.sapsailing.com" will be replaced over time by Github releases which the ``refreshInstance.sh`` script can then download.
 
 - MongoDB references and rabbit references, or any other private IP references in route53. Such references can in particular be found in the ``environments/`` folder on ``releases.sapsailing.com`` for the default parameterization of certain application process types, such as ``security-service-master`` or ``archive-server``.
+
+- branch.io is used for "deep linking" for the apps. We have an integration with our Route53 hosted zone "sapsailing.com" for the specific domain names, allowing smart payload transfer through from-scratch installations, e.g., from a QR code. The branch.io account would need to be transferred and would need to have the configuration changed; or a new account would be required. The apps' deep linking capabilities are expressed in their manifests, and hence the apps would need to be adjusted to work with a different domain.
