@@ -166,7 +166,7 @@ setup_keys() {
     fi
     pushd .
     TEMP_KEY_DIR=$(mktemp  -d /var/tmp/keysXXXXX)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
     sudo su - -c "source imageupgrade_functions.sh; __setup_keys_using_local_copy $TEMP_KEY_DIR $SET_PERMISSIONS"
     popd
     rm -rf "${TEMP_KEY_DIR}"
