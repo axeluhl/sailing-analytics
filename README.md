@@ -92,7 +92,7 @@ Connect to your server at ``http://localhost:8888`` and find its administration 
 
 ## Docker
 
-To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default (private) Dockerhub repository will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``docker.sapsailing.com/sapsailing:...`` result from the build. To run that docker image, try something like
+To build a docker image, try ``docker/makeImageForLatestRelease``. The upload to the default Github Package Registry (``ghcr.io``) will usually fail unless you are a collaborator for that repository, but you should see a local image tagged ``ghcr.io/sap/sailing-analytics:...`` resulting from the build. To run that docker image, try something like
 ```
     docker run -d -e "MEMORY=4g" -e "MONGODB_URI=mongodb://my.mongohost.org?replicaSet=rs0&retryWrites=true" -P <yourimage>
 ```
@@ -109,9 +109,24 @@ In this example, find your web application at http://localhost:32779 which is wh
 ```
 to connect to the server's OSGi console.
 
+The default Docker image built by ``docker/makeImageForLatestRelease`` uses the ``eclipse-temurin:8-jdk`` base image. If you'd like to use the SAP JVM 8 which gives you great profiling and reversible on-the-fly debugging capabilities, you may build a Docker image for it, using ``docker/Dockerfile_sapjvm``. Using it to build an image will accept version 3.2 of the SAP tools developer license on your behalf. Build the image, e.g., like this:
+
+```
+    cd ${GITROOT}/docker
+    docker build --build-arg SAPJVM_VERSION=8.1.099 -t sapjvm8:8.1.099 -f Dockerfile_sapjvm .
+```
+
+Then patch or copy ``docker/Dockerfile`` so that it has
+
+```
+   FROM sapjvm8:8.1.099
+```
+
+(of course with the version tag adjusted to what you used above when you built/tagged the image). This will give you an SAP JVM 8 under ``/opt/sapjvm_8`` in the container which in particular includes the useful ``jvmmon`` utility specific to the SAP JVM 8.
+
 ## Docker Compose
 
-If you have built or obtained the ``docker.sapsailing.com/sapsailing:latest`` image, try this:
+If you have built or obtained the ``ghcr.io/sap/sailing-analytics:latest`` image, try this:
 ```
     cd docker
     docker-compose up
@@ -122,6 +137,13 @@ Based on the ``docker/docker-compose.yml`` definition you should end up with thr
 - a Sailing Analytics server, listening for HTTP requests on port 8888 and for telnet connections to the OSGi console on port 14888
 
 Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
+
+To use Java 17, use the ``docker-compose-17.yml`` file instead:
+
+```
+    cd docker
+    docker-compose -f docker-compose-17.yml up
+```
 
 ## Configuration Options, Environment Variables
 
