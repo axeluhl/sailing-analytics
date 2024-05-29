@@ -404,7 +404,7 @@ setup_apachetop() {
 
 setup_swap() {
     # $1: size of swapspace in megabytes.
-    echo "Creating swapswpace of $1 MBs"
+    echo "Creating swapspace of $1 MBs"
     local swapfile_location=/var/cache/swapfile
     pushd .
     sudo dd if=/dev/zero of="$swapfile_location" bs=1M count="$1"

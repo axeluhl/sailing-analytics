@@ -11,6 +11,10 @@
 # where {image-type} identifies the "environment" from configuration/environments_scripts
 # which usually would be "central_reverse_proxy" here, passed in from the previous stage's
 # script.
+if [[ "$#" -ne 2 ]]; then
+    echo "2 arguments required. Check comment of scripts for more details."
+    exit 2
+fi
 IP=$1
 IMAGE_TYPE="$2"
 GIT_COPY_USER="wiki"
@@ -18,6 +22,7 @@ RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_co
 TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within this.
 ssh -A "root@${IP}" "bash -s" << EOF
 sudo systemctl start crond.service
+sudo systemctl start tmux-management-panel.service
 . imageupgrade_functions.sh
 cp -r "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
