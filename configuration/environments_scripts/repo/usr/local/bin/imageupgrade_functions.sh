@@ -177,8 +177,7 @@ __setup_keys_using_local_copy() {
     # "true" indicates the permissions and ownership of the .ssh and .aws folders will not be set.
     TEMP_KEY_DIR="$1"
     SET_PERMISSIONS="$2"
-    REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
-    && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
+    REGION="$(  ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
