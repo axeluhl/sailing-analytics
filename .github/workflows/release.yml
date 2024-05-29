@@ -9,7 +9,8 @@ on:
 jobs:
   build:
     #runs-on: ubuntu-latest-64cpu
-    runs-on: ubuntu-latest-4cpu
+    #runs-on: ubuntu-latest-4cpu
+    runs-on: ubuntu-latest
     steps:
       - name: Collect Workflow Telemetry
         uses: catchpoint/workflow-telemetry-action@v2
@@ -44,7 +45,7 @@ jobs:
           APP_PARAMETERS: "-Daws.region=eu-west-1 -Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}"
           JAVA8_HOME: ${{env.JAVA_HOME_8_X64}}
         run: |
-          ./configuration/buildAndUpdateProduct.sh -x 60 build 2>&1 | tee build.log
+          ./configuration/buildAndUpdateProduct.sh -x 4 build 2>&1 | tee build.log
       - name: Upload build log
         uses: actions/upload-artifact@v4
         if: always()
