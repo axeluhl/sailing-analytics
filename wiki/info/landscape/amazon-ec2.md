@@ -112,7 +112,7 @@ eval `ssh-agent`
 ssh-add
 ```
 
-You will also need the AWS CLI and can run `./awsmfalogon.sh` to authenticate and gain a session token. Next, you should notify the community that internal services, such as Bugzilla will temporarily be down (make sure to notify them afterwards too, so they can continue their work). 
+You will also need the AWS CLI and must run `./awsmfalogon.sh` before running the first script below, to authenticate and gain a session token. Next, you should notify the community that internal services, such as Bugzilla will temporarily be down (make sure to notify them afterwards too, so they can continue their work). 
 
 Using the landscape tab of the admin console, ensure there is a disposable in the same AZ as the archive (this ensures we can still route traffic to the archive).
 
