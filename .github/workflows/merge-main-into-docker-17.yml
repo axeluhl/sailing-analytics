@@ -15,10 +15,11 @@ jobs:
         with:
           ref: docker-17
           #fetch-depth: 0  # fetch the whole thing to make sure the histories merge
-      - name: Merge main into docker-17
-        uses: devmasx/merge-branch@master
-        with:
-          type: now
-          from_branch: main
-          target_branch: docker-17
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Merge main into docker-17 and push
+        shell: bash
+        run: |
+          git config --global user.email "github@sapsailing.com"
+          git config --global user.name "Github Auto-Merger"
+          git fetch origin main:main
+          git merge main
+          git push
