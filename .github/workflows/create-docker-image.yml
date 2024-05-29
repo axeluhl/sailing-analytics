@@ -1,4 +1,4 @@
-name: create-docker-image
+name: Create Docker Image
 on:
   workflow_run:
     workflows: [release]
