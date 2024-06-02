@@ -13,9 +13,11 @@
     
 - The ``target-group-tag-route53-nfs-elasticIP-setup.sh`` script used as the last stage of the setup process of a new central reverse proxy. It queries the Route 53 ID of the "sapsailing.com" hosted zone which would have to become a parameter or would need to be changed in the script.
 
-- Mail sending and Amazon SES.
+- Mail sending and Amazon SES: we have Amazon WorkMail accounts, particularly for support@sapsailing.com and also a few other @sapsailing.com addresses, such as marcus.baur@sapsailing.com and jan.hamann@sapsailing.com. There are also technical accounts such as noreply@sapsailing.com. The mail address used for mail sent by the application as well as the mail server to use for sending, including its authentication parameters, can be set in the ``mail.properties`` file. The secrets for this currently come from ``root@sapsailing.com:secrets``.
 
-- ``REPLICATE_MASTER_SERVLET_HOST`` is sometimes hardcoded.
+- ``sapsailing.com`` is hardcoded in some of the environments files currently found under ``https://releases.sapsailing.com/environments``
+
+- The ``refreshInstance.sh`` script contains around eight references to ``releases.sapsailing.com``. Some of these are about where to download releases from and shall be replaced by logic that obtains those releases from Github. The others are concerned with environments, as referenced by the ``USE_ENVIRONMENT`` variable and are currently expected to be found under ``https://releases.sapsailing.com/environments`` which is just a static share on our central reverse proxy. If that is configured for a different domain then so has the refreshInstance.sh script.
 
 - Igtimi Authentication: the Igtimi REST API and authentication scheme uses a callback URL that we have configured on the igtimi.com web site, pointing to sapsailing.com.
 
@@ -23,7 +25,7 @@
 
 - A number of bash scripts have sapsailing.com hardcoded, especially the setup scripts and imageupgrade_functions.sh. Ideally we will need to factor out into a constant that all bash scripts can access.
 
-- Releases and p2 respository references, where "releases.sapsailing.com" will be replaced over time by Github releases which the ``refreshInstance.sh`` script can then download.
+- Releases and p2 respository references, where "releases.sapsailing.com" will be replaced over time by Github releases which the ``refreshInstance.sh`` script can then download. The p2 repositories for the AWS SDK combined repository, as well as our base p2 repo that forms an important part of our target platform are currently expected to be found at ``https://p2.sapsailing.com/p2/aws-sdk`` and ``https://p2.sapsailing.com/p2/sailing``, respectively. Also, we have the latest SDBG installable hosted there under ``https://p2.sapsailing.com/p2/sdbg``. The scripts under ``java/com.sap.sailing.targetplatform/scripts`` and ``java/com.sap.sailing.feature.p2build/scripts`` as well as the target platform definitions under ``java/com.sap.sailing.targetplatform/definitions`` reference those p2 repositories. Should this set of p2 repositories be migrated to a different domain, the corresponding scripts and target platform definitions need to be adjusted, and the builds including the builds with an adjusted local target platform, need to be tested thoroughly.
 
 - MongoDB references and rabbit references, or any other private IP references in route53. Such references can in particular be found in the ``environments/`` folder on ``releases.sapsailing.com`` for the default parameterization of certain application process types, such as ``security-service-master`` or ``archive-server``.
 

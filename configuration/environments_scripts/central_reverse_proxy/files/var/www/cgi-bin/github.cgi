@@ -8,7 +8,11 @@ PUSHER=$( echo "${BODY}" | jq -r '.pusher.email' )
 logger -t github-cgi "ref is $REF, pusher was $PUSHER"
 # For testing:
 #if [ "${PUSHER}" = "axel.uhl@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
-if [ "${PUSHER}" = "tmsatsls+github.tools.sap_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
+tmsatsls+github.com_service-tip-git@sap.com
+# The filter in case this is to be used for github.tools.sap:
+#if [ "${PUSHER}" = "tmsatsls+github.tools.sap_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
+# The filter for github.com:
+if [ "${PUSHER}" = "tmsatsls+github.com_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
   echo "Identified a push to refs/heads/translation by ${PUSHER}."
   echo "Fetching translation branch from github.tools.sap and pushing it to ssh://trac@sapsailing.com/home/trac/git"
   logger -t github-cgi "fetching translation branch from github.tools.sap and pushing it to ssh://trac@sapsailing.com/home/trac/git"
