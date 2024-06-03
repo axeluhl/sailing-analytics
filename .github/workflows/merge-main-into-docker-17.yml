@@ -23,4 +23,5 @@ jobs:
           type: now
           from_branch: main
           target_branch: docker-17
+          message: Auto-merging main into docker-17 after successful release build
           github_token: ${{ secrets.REPO_TOKEN_FOR_MERGE_AND_PUSH }}
