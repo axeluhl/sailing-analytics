@@ -8,7 +8,7 @@
 # Within these crontab stubs, are certain string literals, which are replaced: PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes
 # the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of the home directory
 # in which the crontab will be installed. 
-# Furthermore, within the users folder optional uid, gid and groups files an exist. uid should store the user's uid,
+# Furthermore, within the users folder optional uid, gid and groups files can exist. uid should store the user's uid,
 # gid the group id and groups should have secondary groups (one per line). The secondary groups are added after all users are 
 # created.
 # Useful files are also copied across from the "files" dir within each image type.
@@ -17,7 +17,7 @@
 # will be automatically enabled. 
 
 if [[ $# -lt 3 || $# -gt 6 ]]; then
-    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
+    echo "$0 [ -f ] [ -n ] [ -c ] <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>"
     echo ""
     echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
     echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
