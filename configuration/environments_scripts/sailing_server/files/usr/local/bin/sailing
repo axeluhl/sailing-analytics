@@ -31,11 +31,11 @@ echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_servers() {
     /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
-    cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
+    cp ${GIT_REPOSITORY}/configuration/cp_root_mail_properties /usr/local/bin
     chown root /usr/local/bin/cp_root_mail_properties
     chgrp root /usr/local/bin/cp_root_mail_properties
     chmod 755 /usr/local/bin/cp_root_mail_properties
-    cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
+    cp ${GIT_REPOSITORY}/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
     if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
         echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
         $GIT_REPOSITORY/configuration/imageupgrade.sh
