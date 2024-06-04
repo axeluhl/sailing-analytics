@@ -44,7 +44,10 @@ done
 # alter records using batch file.
 sed -i "s/LOGFILES_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.json
 sed -i "s/SMTP_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.json
-###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id Z2JYWXYWLLRLTE --change-batch file://batch-for-route53-dns-record-update.json
+HOSTED_ZONE_ID=$( aws route53 list-hosted-zones | \
+           jq -r '.HostedZones[] | select(.Name == "sapsailing.com.").Id' | \
+           sed -e 's|/hostedzone/||' )
+###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)

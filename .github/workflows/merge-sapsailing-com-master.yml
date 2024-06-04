@@ -1,0 +1,31 @@
+# One of the reasons to have this workflow is that the Gollum-based Wiki
+# at wiki.sapsailing.com is operating on a Git workspace at wiki@sapsailing.com:gitwiki
+# which has been cloned from ssh://trac@sapsailing.com/home/trac/git. Its changes
+# shall be synchronized to the Github repo at github.com/SAP/sailing-analytics
+name: Merge master from sapsailing.com
+on:
+  schedule:
+    - cron: "53 * * * *"   # every hour, at :53 minutes
+  workflow_dispatch: {}
+jobs:
+  merge-master-from-sapsailing-com:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch the whole thing to make sure the histories merge
+      - name: Create SSH key and fetch repo from sapsailing.com
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY_FOR_TRAC_SAPSAILING_COM }}" >~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
+          git remote -v
+          GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing
+          git config --global user.email "github@sapsailing.com"
+          git config --global user.name "Github Auto-Merger"
+          git merge sapsailing/master
+          git push
