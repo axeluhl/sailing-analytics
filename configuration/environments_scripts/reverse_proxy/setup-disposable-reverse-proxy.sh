@@ -29,13 +29,13 @@ yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables 
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
 cd /root
-scp -o StrictHostKeyChecking=no -p "root@18.170.25.225:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 # Setup root user and apache user with the right keys.
 . imageupgrade_functions.sh
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
 # setup files and crontab for the required users, both dependent on the environment type.
-build_crontab_and_setup_files -h 172.31.39.35 "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 # setup mail
 setup_mail_sending
 # setup sshd config
