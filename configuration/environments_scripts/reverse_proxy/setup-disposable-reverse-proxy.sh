@@ -3,6 +3,10 @@
 # Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP.
 # Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
 # Ensure that the security for requesting the metadata uses IMDSv1
+if [[ "$#" -ne 2 ]]; then
+    echo "Incorrect number of args (2 required). See script header for further details."
+    exit 2
+fi
 IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="reverse_proxy"
@@ -25,13 +29,13 @@ yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables 
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
 cd /root
-scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
+scp -o StrictHostKeyChecking=no -p "root@18.170.25.225:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 # Setup root user and apache user with the right keys.
 . imageupgrade_functions.sh
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
 # setup files and crontab for the required users, both dependent on the environment type.
-build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+build_crontab_and_setup_files -h 172.31.39.35 "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
 # setup mail
 setup_mail_sending
 # setup sshd config
