@@ -16,15 +16,6 @@
 # so that the correct wants, requires, etc. are installed/linked. Any systemd units, within the mimicked filesystem,
 # will be automatically enabled. 
 
-if [[ $# -lt 3 || $# -gt 6 ]]; then
-    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
-    echo ""
-    echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
-    echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
-    echo "Use the f(iles) flag to disable file copying. Use the c(rontab) flag to disable the creation of users and the creation of crontab files for those users."
-    echo "If the c flag is not used then the n(o install) flag can be used to setup the crontabs but not install them."
-    exit 2
-fi
 INSTALL_CRONTAB="true"
 COPY_FILES="true"
 CREATE_CRONTABS="true";
@@ -40,6 +31,15 @@ do
     esac
 done
 shift $((OPTIND-1)) # shift the arguments along so -s is no longer $1
+if [[ "$#" -ne 3 ]]; then
+    echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "
+    echo ""
+    echo "Where USER_WITH_COPY_OF_REPO is a user that contains a checked out copy of the main git."
+    echo "And where RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER is the path to the git repo from the USER_WITH_COPY_OF_REPO's home directory."
+    echo "Use the f(iles) flag to disable file copying. Use the c(rontab) flag to disable the creation of users and the creation of crontab files for those users."
+    echo "If the c flag is not used then the n(o install) flag can be used to setup the crontabs but not install them."
+    exit 2
+fi
 ENV_TYPE="$1"
 GIT_USER="$2"
 RELATIVE_GIT_DIR_NAME="$3"
