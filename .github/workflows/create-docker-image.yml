@@ -59,8 +59,8 @@ jobs:
         with:
           labels: |
             maintainer=axel.uhl@sap.com
-            org.opencontainers.image.title=Sailing Analytics
-            org.opencontainers.image.description=The Sailing Analytics Web Application
+            manifest:org.opencontainers.image.title=Sailing Analytics
+            manifest:org.opencontainers.image.description=The Sailing Analytics Web Application
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
