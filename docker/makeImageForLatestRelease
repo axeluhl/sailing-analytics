@@ -19,7 +19,8 @@ else
   cp "$GITROOT/java/target/start" "$DOCKERDIR"
   cp "$GITROOT/java/target/configuration/JavaSE-11.profile" "$DOCKERDIR"
   cd "$DOCKERDIR"
-  docker build --build-arg RELEASE=${release} -t ghcr.io/sap/sailing-analytics:${release} .
+  docker buildx create --name=container --driver=docker-container --use --bootstrap
+  docker buildx build --builder=container --platform=linux/amd64,linux/arm64 --build-arg RELEASE=${release} -t ghcr.io/sap/sailing-analytics:${release} .
   echo "Cleaning up..."
   rm start env.sh JavaSE-11.profile ${RELEASE_TAR_GZ_FILENAME} release-notes.txt
   docker push ghcr.io/sap/sailing-analytics:${release}
