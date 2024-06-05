@@ -138,7 +138,8 @@ build_crontab_and_setup_files() {
 }
 
 setup_keys() {
-    #1: Environment type.
+    # Installs the necessary aws and ssh keys for a given environment type, by copying from the key vault.
+    # $1: Environment type.
     # Optional parameter is -p which indicates that no permissions will be set or overwritten.
     TEMP=$(getopt -o p -n 'options' -- "$@")
     [[ "$?" -eq 0 ]] || return 2
