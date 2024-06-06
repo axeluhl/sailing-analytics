@@ -12,6 +12,14 @@ jobs:
     runs-on: ubuntu-latest-4cpu
     #runs-on: ubuntu-latest
     steps:
+      - name: Allocate swap space
+        shell: bash
+        run: |
+          sudo dd if=/dev/zero of=/mnt/large-swapfile bs=1G count=10
+          sudo chmod 600 /mnt/large-swapfile
+          sudo mkswap /mnt/large-swapfile
+          sudo chown root:root /mnt/large-swapfile
+          sudo swapon /mnt/large-swapfile
       - name: Collect Workflow Telemetry
         uses: catchpoint/workflow-telemetry-action@v2
         with:
