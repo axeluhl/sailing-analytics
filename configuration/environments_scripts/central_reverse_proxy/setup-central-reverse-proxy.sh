@@ -152,7 +152,6 @@ tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/lib/awstats /var/lib
-scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/etc/awstats /etc/awstats
 chmod 755 /root
 cd ~
 # Copies across the key vault and other relevant secrets from the existing
@@ -171,6 +170,7 @@ setup_fail2ban
 # mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
 # sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
+mkdir /var/log/logrotate-target
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf
 sed -i "s/^#compress/compress/" /etc/logrotate.conf
 # setup httpd git
