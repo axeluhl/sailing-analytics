@@ -47,9 +47,11 @@ hostname sapsailing.com
 hostnamectl set-hostname sapsailing.com
 if sshd -t; then
     systemctl restart sshd
-fi 
+fi
+cat /root/.ssh/known_hosts* >/root/.ssh/know_hosts.bak
+rm /root/.ssh/known_hosts.old /root/.ssh/known_hosts
 EOF
-ssh -A -f root@"$IP" "cd /var/log/old/cache/docker/registry && nohup docker-compose up &>/dev/null &" &> /dev/null
+ssh -o StrictHostKeyChecking=no -A -f root@"$IP" "cd /var/log/old/cache/docker/registry && nohup docker-compose up &>/dev/null &" &> /dev/null
 echo "PLEASE READ ALL OF THE FOLLOWING..."
 echo "When ready, press a key to continue, which will run the script target-group-tag-route53-nfs-elasticIP-setup.sh."
 echo "This configures the EC2 instance tags, adds to the "
