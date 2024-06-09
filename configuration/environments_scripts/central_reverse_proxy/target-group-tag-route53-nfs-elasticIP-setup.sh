@@ -51,7 +51,7 @@ HOSTED_ZONE_ID=$( aws route53 list-hosted-zones | \
 read -n 1  -p "Check the instance has the correct tags and is in the correct target group.
 Furthermore, check the batch file batch-for-route53-dns-record-update.json has been modified correctly.
 Press a key to continue.." key_pressed
-###### DO NOT ENABLE WHILST TESTING: aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://batch-for-route53-dns-record-update.json
+aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
 echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
 echo "Please check the route53 DNS records have been correctly updated."
