@@ -31,7 +31,7 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 ### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
 A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
-Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server. The setup procedure can be found below.
 
 To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
@@ -39,7 +39,7 @@ The IPs for all reverse proxies will automatically be added to ALB target groups
 and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
 Disposables instances are tagged with `DisposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
 
-For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The disposables just have the latter.
+For security groups of the central reverse proxy, we want Webserver, as well as Reverse Proxy. The disposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -94,7 +94,7 @@ Use Status 172.31.19.129 internal-server-status
 Use Status 127.0.0.1 internal-server-status
 ```
 
-The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
+The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. This maintenance is managed by a service unit. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
 
 After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
 
@@ -103,6 +103,23 @@ The webserver must be tagged with key ``CentralReverseProxy`` where the value is
 The following diagram explains the disposable reverse proxies role a little better. 
 
 <img src="/wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+
+## Setting up the Central Reverse Proxy
+
+A lot of the above procedure has since been combined into a series of setup scripts found under `configuration/environments_scripts/central_reverse_proxy`. The script requires that you have added an SSH key with maximum access to your SSH authentication agent. This can be done with 
+```
+eval `ssh-agent`
+ssh-add
+```
+
+You will also need the AWS CLI and must run `./awsmfalogon.sh` before running the first script below, to authenticate and gain a session token. Next, you should notify the community that internal services, such as Bugzilla will temporarily be down (make sure to notify them afterwards too, so they can continue their work). 
+
+Using the landscape tab of the admin console, ensure there is a disposable in the same AZ as the archive (this ensures we can still route traffic to the archive).
+
+Next, remove the central reverse proxy from all target groups tagged with `allReverseProxies`. Then when at the path described above, launch `./setup-central-reverse-proxy.sh` and follow the necessary instructions. You
+will need to unmount and detach volumes from the old instance and then reattach and mount on the new webserver.
+Then `setup-central-reverse-proxy-part-2.sh` runs to finish any setup that requires these mounts. Finally, `target-group-tag-route53-nfs-elasticIP-setup.sh`
+will run to configure the target groups, tags and route 53. You will need to then remove the old reverse proxy from the target groups tagged with `CentralReverseProxy`. 
 
 ### DNS and Application Load Balancers (ALBs)
 
