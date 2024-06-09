@@ -16,6 +16,7 @@
 # so that the correct wants, requires, etc. are installed/linked. Any systemd units, within the mimicked filesystem,
 # will be automatically enabled.
 # For options, see the help below.
+# This script should NOT be installed into /usr/local/bin. See the README for more.
 
 if [[ $# -lt 3 || $# -gt 6 ]]; then
     echo "$0 <ENVIRONMENT_TYPE> <USER_WITH_COPY_OF_REPO> <RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER>  "

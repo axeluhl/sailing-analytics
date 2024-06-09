@@ -122,6 +122,12 @@ build_crontab_and_setup_files() {
         done
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /var/tmp/environments_scripts_XXX)
         echo "Attempting access to the wiki, typically used by image upgrade. Otherwise, try root. NOTE: If the first command fails, there will be a warning message."
+        # During image upgrades, no environment type should have root access to the central server, but they do need 
+        # access to the wiki copy. Therefore, the various keys for different environment types are in the authorized_keys
+        # of the wiki user. So, during image upgrade or to get the latest changes, the following command should succeed.
+        # The wiki user's authorized_keys is not updated automatically with landscape managers, so 
+        # the below command may fail during initial image setup. In this scenario, the root user is instead the target 
+        # user of the scp command (as seen in the second command below).
         scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"

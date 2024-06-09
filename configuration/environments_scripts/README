@@ -6,7 +6,7 @@ These are replaced by the build-crontab-and-cp-files script with the correct pat
 
 environment_scripts (directory)
 |
-|_environement_type (directory)
+|_environment_type (directory)
     |
     |_usefulScripts
     |_users (directory)
@@ -14,3 +14,13 @@ environment_scripts (directory)
         |_user1 (directory)
             |
             |_symbolicLinks (to configuration/crontabs)
+
+
+The build-crontab-and-cp-files script is not installed to /usr/local/bin,
+so in order to actually perform this crontab setup and file copying from 
+on an instance, you will need to use the build_crontab_and_setup-files function
+from imageupgrade_functions.sh, which copies the latest environment_scripts 
+folder onto the local instance and then executes the build-crontab-and-cp-files 
+script, within the directory. This allows for a single dependency and calling method.
+Furthermore, it means the latest version of the build-crontab-and-cp-files script 
+is always used.
