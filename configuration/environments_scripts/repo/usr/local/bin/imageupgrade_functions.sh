@@ -84,8 +84,14 @@ build_crontab_and_setup_files() {
         echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
     else
         TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
+        # During image upgrades, no environment type should have root access to the central server, but they do need 
+        # access to the wiki copy. Therefore, the various keys for different environment types are in the authorized_keys
+        # of the wiki user. So, during image upgrade or to get the latest changes, the following command should succeed.
+        # The wiki user's authorized_keys is not updated automatically with landscape managers, so 
+        # the below command may fail during initial image setup. In this scenario, the root user is instead the target 
+        # user of the scp command (as seen in the second command below).
         scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         ./build-crontab-and-cp-files $@
