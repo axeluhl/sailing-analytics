@@ -5,7 +5,7 @@ GIT_USERNAME=$3
 STATUS_DEFINITION_FILE="internal-server-status.conf"
 SELF_IP=$( ec2-metadata --local-ipv4 | grep   -o "[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+\>")
 cd /etc/httpd
-if ! git status; then
+if ! git status &>/dev/null; then
     echo "Currently not a git repo, creating and pulling latest changes"
     rm -rf .git
     rm -rf conf   # Perhaps, this script should instead mv to a backup location
