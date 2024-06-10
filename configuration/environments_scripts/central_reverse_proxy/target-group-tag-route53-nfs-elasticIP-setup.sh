@@ -12,7 +12,7 @@ target_groups=$(aws elbv2 describe-target-groups)
 LOCAL_IPV4=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
 INSTANCE_ID=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
 ELASTIC_IP="54.229.94.254"
-TAGS=("CentralReverseProxy" "ReverseProxy")
+INSTANCE_TAGS=("CentralReverseProxy" "ReverseProxy")
 TARGET_GROUP_TAGS=("allReverseProxies" "CentralReverseProxy")
 extract_public_ip() {
     jq -r ' .Instances | .[] | .PublicIpAddress' | grep -v null
@@ -23,7 +23,7 @@ select_instances_by_tag() {
 }
 cd $(dirname "$0")
 # give the instance the necessary tags.
-for tag in "${TAGS[@]}"; do
+for tag in "${INSTANCE_TAGS[@]}"; do
     aws ec2 create-tags --resources "$INSTANCE_ID" --tags Key="$tag",Value=""
 done
 # The nlb is the exception case as we use the load balancer arn to further identify it.
@@ -32,6 +32,8 @@ echo "Registering with nlb"
 aws elbv2 register-targets --target-group-arn "$nlbArn" --targets Id="${LOCAL_IPV4}",Port=80
 echo "Fetching tags"
 # We fetch the tags of the target groups to identify those which the central reverse proxy should be added to.
+# We depend on SAILING_TARGET_GROUP_NAME_PREFIX to filter out all target groups which point to sailing servers,
+# because describe tags can take a maximum of 20 resource-arns.
 describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.TargetGroupName | startswith("S-") | not ) | .TargetGroupArn'))
 for tag in "${TARGET_GROUP_TAGS[@]}"; do
     echo "Adding to target groups with $tag"
