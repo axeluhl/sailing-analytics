@@ -26,6 +26,7 @@ sudo systemctl start tmux-management-panel.service
 . imageupgrade_functions.sh
 cp -r "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
+# Localhost works here as we are logged on as root and are using ssh agent forwarding.
 if ! build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # files have already been copied so -f is used.
     exit 1
 fi
@@ -37,9 +38,6 @@ echo "/var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)" >>/etc/exports
 systemctl start nfs-server
 scp -p -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/ssh /etc
-if sshd -t; then
-    systemctl restart sshd
-fi
 # append hostname to sysconfig
 echo "HOSTNAME=sapsailing.com" >> /etc/sysconfig/network
 sed -i "s/\(127.0.0.1 *\)/\1 sapsailing.com /" /etc/hosts
@@ -48,8 +46,6 @@ hostnamectl set-hostname sapsailing.com
 if sshd -t; then
     systemctl restart sshd
 fi
-cat /root/.ssh/known_hosts* >/root/.ssh/know_hosts.bak
-rm /root/.ssh/known_hosts.old /root/.ssh/known_hosts
 EOF
 ssh -o StrictHostKeyChecking=no -A -f root@"$IP" "cd /var/log/old/cache/docker/registry && nohup docker-compose up &>/dev/null &" &> /dev/null
 echo "PLEASE READ ALL OF THE FOLLOWING..."
