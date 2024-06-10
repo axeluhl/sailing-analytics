@@ -4,6 +4,7 @@
 # provides the Git repository, runs Bugzilla and Gollum for wiki access,
 # furthermore AWStats, goaccess and apachetop support within a tmux session,
 # releases.sapsailing.com, jobs.sapsailing.com content, and a Docker
+# infrastructure for a self-hosted Docker image registry. It assumes the
 # existence of a running webserver accessible under sapsailing.com.
 #
 # Start by launching a new instance, e.g., of type m3.xlarge, in the same AZ
@@ -66,30 +67,6 @@ yum install -y ruby ruby-devel libicu libicu-devel zlib zlib-devel git cmake ope
 gem install gollum -v 5.3.2
 gem update --system 3.5.7
 cd /home
-# The following line is for production use:
-scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT"/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /usr/local/bin
-# The following line is for test use, copying from a test instance with a check-out Git workspace:
-# scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
-. imageupgrade_functions.sh
-setup_cloud_cfg_and_root_login
-# setup files
-if ! build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # -c & -n mean only files are copied over.
-    exit 1
-fi
-setup_swap 5000
-cd /home
-for folder in * ; do
-    [[ -d "\$folder" ]] || continue
-    grep "\$folder" /etc/passwd || continue
-    chown -R "\$folder":"\$folder" "\$folder"
-done
-# setup mail
-setup_mail_sending
-# setup sshd config
-setup_sshd_resilience
-# setup goaccess and apachetop
-setup_apachetop
-setup_goaccess
 # copy bugzilla
 scp -o StrictHostKeyChecking=no  root@sapsailing.com:/var/www/static/bugzilla-5.0.4.tar.gz /usr/local/src
 cd /usr/local/src
@@ -142,8 +119,30 @@ read -n 1  -p "Bugzilla installation complete, when ready press a key to continu
 ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
 ssh -A "root@${IP}" "cpan install Geo::IP"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF
+# The following line is for production use:
+scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT"/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /usr/local/bin
+# The following line is for test use, copying from a test instance with a check-out Git workspace:
+# scp -o StrictHostKeyChecking=no -p "root@13.40.100.54:/home/sailing/code/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
 . imageupgrade_functions.sh
-scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
+setup_cloud_cfg_and_root_login
+# setup files
+if ! build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # -c & -n mean only files are copied over.
+    exit 1
+fi
+setup_swap 5000
+cd /home
+for folder in * ; do
+    [[ -d "\$folder" ]] || continue
+    grep "\$folder" /etc/passwd || continue
+    chown -R "\$folder":"\$folder" "\$folder"
+done
+# setup mail
+setup_mail_sending
+# setup sshd config
+setup_sshd_resilience
+# setup goaccess and apachetop
+setup_apachetop
+setup_goaccess
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
@@ -157,6 +156,7 @@ scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/lib/awstats /var/lib
 chmod 755 /root
 cd ~
 # Copies across the key vault and other relevant secrets from the existing
+# central reverse proxy's /root folder:
 rsync -a root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,secrets,ssh-key-reader.token} /root
 rsync -a  root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,key_vault_old,secrets,ssh-key-reader.token} /root
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
