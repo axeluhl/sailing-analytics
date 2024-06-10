@@ -7,7 +7,7 @@
 # infrastructure for a self-hosted Docker image registry. It assumes the
 # existence of a running webserver accessible under sapsailing.com.
 #
-# Start by launching a new instance, e.g., of type m3.xlarge, in the same AZ
+# Start by launching a new instance, e.g., of type t3.xlarge, in the same AZ
 # as the current Webserver / Central Reverse Proxy. This will become important
 # as you will need to detach volumes from the latter to attach them to the
 # new instance.
