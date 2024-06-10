@@ -37,7 +37,7 @@ if [[ "$#" -ne 4 ]]; then
     echo "Example usage: setup-central-reverse-proxy.sh 1.2.3.4 0OcJ1938QE5it875kjlQe7HnzQ6740jsnMEVzowjZrs= 18.170.25.225 /home/sailing/code"
     exit 2
 fi
-echo "Make sure the instance is in the same AZ as the existing reverse proxy, so the volumes can be switched over.p"
+echo "Make sure the instance is in the same AZ as the existing reverse proxy, so the volumes can be switched over."
 IP=$1
 BEARER_TOKEN=$2
 IMAGEUPGRADE_FUNCTIONS_IP="$3"   # can be a domain name, such as sapsailing.com
