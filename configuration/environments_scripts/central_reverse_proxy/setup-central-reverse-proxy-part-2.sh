@@ -57,5 +57,5 @@ echo "You will need to have the AWS CLI installed and have credentials that allo
 echo "Make sure you have an active session token in your shell's environment, e.g., obtained"
 echo "through the awsmfalogon.sh script. If you haven't already authenticated then stop this script; authenticate manually;"
 echo "and then run the script named above."
-read -n 1  -p "Press a key to continue" key_pressed
+read -n 1 -p "Press a key to continue" key_pressed
 "$(dirname $0)"/target-group-tag-route53-nfs-elasticIP-setup.sh

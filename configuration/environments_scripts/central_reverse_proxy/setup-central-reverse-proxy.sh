@@ -4,7 +4,7 @@
 # provides the Git repository, runs Bugzilla and Gollum for wiki access,
 # furthermore AWStats, goaccess and apachetop support within a tmux session,
 # releases.sapsailing.com, jobs.sapsailing.com content, and a Docker
-# infrastructure for a self-hosted Docker image registry.
+# existence of a running webserver accessible under sapsailing.com.
 #
 # Start by launching a new instance, e.g., of type m3.xlarge, in the same AZ
 # as the current Webserver / Central Reverse Proxy. This will become important
@@ -45,7 +45,7 @@ IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
 GIT_COPY_USER="wiki"
 RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
-# The aws credentials will have to be manually installed in the aws user.
+# This authorized keys copying is essential as we rely on the ability to log into the root user.
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
@@ -146,17 +146,18 @@ ssh -A "root@${IP}" "bash -s" << THIRDEOF
 scp -p root@sapsailing.com:/usr/share/bugzilla/data/params.json /usr/share/bugzilla/data/params.json
 echo $BEARER_TOKEN > /root/ssh-key-reader.token
 # awstats - depends on some of the previous perl modules.
-scp -o StrictHostKeyChecking=no  -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
+scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/usr/share/GeoIP /usr/share/GeoIP
 cd /usr/local/src
 wget http://prdownloads.sourceforge.net/awstats/awstats-7.0.tar.gz
 tar -zvxf awstats-7.0.tar.gz
 mv awstats-7.0/ /usr/share/awstats
 mkdir /var/lib/awstats
+# Copies the database for awstats over.
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/var/lib/awstats /var/lib
 chmod 755 /root
 cd ~
 # Copies across the key vault and other relevant secrets from the existing
-# Central Reverse Proxy's /root folder:
+rsync -a root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,secrets,ssh-key-reader.token} /root
 rsync -a  root@sapsailing.com:/root/{dev-secrets,github_tools_sap.pat,hudson-aws-credentials,key_vault,mail.properties,key_vault_old,secrets,ssh-key-reader.token} /root
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/letsencrypt /etc
 # add basic test page which won't cause redirect error code if used as a health check.
@@ -169,7 +170,7 @@ setup_fail2ban
 # setup logrotate.d/httpd 
 # echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
 # mkdir --parents "/var/log/old/REVERSE_PROXIES/${IP}"
-# sed -i  "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
+# sed -i "s|/var/log/old|/var/log/old/REVERSE_PROXIES/${IP}|" $HTTP_LOGROTATE_ABSOLUTE 
 # logrotate.conf setup
 mkdir /var/log/logrotate-target
 sed -i 's/rotate 4/rotate 20 \n\nolddir \/var\/log\/logrotate-target/' /etc/logrotate.conf

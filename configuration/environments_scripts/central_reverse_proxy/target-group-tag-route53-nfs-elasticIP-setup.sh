@@ -29,8 +29,9 @@ done
 # The nlb is the exception case as we use the load balancer arn to further identify it.
 nlbArn=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.LoadBalancerArns | .[] | contains("loadbalancer/net")  ) | .TargetGroupArn') | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="allReverseProxies") ) | .ResourceArn')
 echo "Registering with nlb"
-aws elbv2 register-targets --target-group-arn "$nlbArn"  --targets Id="${LOCAL_IPV4}",Port=80
+aws elbv2 register-targets --target-group-arn "$nlbArn" --targets Id="${LOCAL_IPV4}",Port=80
 echo "Fetching tags"
+# We fetch the tags of the target groups to identify those which the central reverse proxy should be added to.
 describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.TargetGroupName | startswith("S-") | not ) | .TargetGroupArn'))
 for tag in "${TARGET_GROUP_TAGS[@]}"; do
     echo "Adding to target groups with $tag"
@@ -48,7 +49,7 @@ sed -i "s/SMTP_INTERNAL_IP/$LOCAL_IPV4/" batch-for-route53-dns-record-update.jso
 HOSTED_ZONE_ID=$( aws route53 list-hosted-zones | \
            jq -r '.HostedZones[] | select(.Name == "sapsailing.com.").Id' | \
            sed -e 's|/hostedzone/||' )
-read -n 1  -p "Check the instance has the correct tags and is in the correct target group.
+read -n 1 -p "Check the instance has the correct tags and is in the correct target group.
 Furthermore, check the batch file batch-for-route53-dns-record-update.json has been modified correctly.
 Press a key to continue.." key_pressed
 aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://batch-for-route53-dns-record-update.json
@@ -56,7 +57,7 @@ aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --cha
 echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
 echo "Please check the route53 DNS records have been correctly updated."
 sleep 60
-read -n 1  -p "Press a key to continue.." key_pressed
+read -n 1 -p "Press a key to continue.." key_pressed
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
