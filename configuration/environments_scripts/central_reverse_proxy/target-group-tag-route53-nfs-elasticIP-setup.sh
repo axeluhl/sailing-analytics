@@ -79,3 +79,4 @@ done
 # Alter the elastic IP.
 # WARNING: Will terminate connections via the existing public ip. 
 aws ec2 associate-address --instance-id "${INSTANCE_ID}"  --public-ip "${ELASTIC_IP}"
+git checkout main batch-for-route53-dns-record-update.json
