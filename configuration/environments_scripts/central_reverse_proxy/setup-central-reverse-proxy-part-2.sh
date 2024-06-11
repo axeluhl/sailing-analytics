@@ -49,13 +49,15 @@ fi
 EOF
 ssh -o StrictHostKeyChecking=no -A -f root@"$IP" "cd /var/log/old/cache/docker/registry && nohup docker-compose up &>/dev/null &" &> /dev/null
 echo "PLEASE READ ALL OF THE FOLLOWING..."
+echo "Remove the existing central reverse proxy from the SSH target groups."
 echo "When ready, press a key to continue, which will run the script target-group-tag-route53-nfs-elasticIP-setup.sh."
 echo "This configures the EC2 instance tags, adds to the "
 echo "necessary target groups, modifies a few records in route53 (logs.internal.sapsailing.com"
 echo "and smtp.internal.sapsailing.com), remounts those instances that are dependent on this, and sets the elastic IP."
 echo "You will need to have the AWS CLI installed and have credentials that allow you to run all the commands in the script."
 echo "Make sure you have an active session token in your shell's environment, e.g., obtained"
-echo "through the awsmfalogon.sh script. If you haven't already authenticated then stop this script; authenticate manually;"
-echo "and then run the script named above."
+echo "through the awsmfalogon.sh script. The script requires that you have jq and host installed locally."
+echo "If you haven't already authenticated, then stop this script; authenticate manually;"
+echo "and then run the script named above with the remote IP as a parameter."
 read -n 1 -p "Press a key to continue" key_pressed
 "$(dirname $0)"/target-group-tag-route53-nfs-elasticIP-setup.sh
