@@ -47,6 +47,7 @@ import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationReceiver;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.replication.ReplicationServletActions.Action;
 import com.sap.sse.replication.impl.Activator;
 import com.sap.sse.replication.impl.RabbitOutputStream;
 import com.sap.sse.replication.impl.ReplicationInstancesManager;
@@ -367,17 +368,17 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                                 pw.println("Content-Type: text/plain");
                                 pw.println();
                                 pw.flush();
-                                if (request.contains("DEREGISTER")) {
+                                if (request.contains(Action.DEREGISTER.name())) {
                                     // assuming that it is safe to unregister all replicas for tests
                                     for (ReplicaDescriptor descriptor : getReplicaInfo()) {
                                         unregisterReplica(descriptor);
                                     }
-                                } else if (request.contains("REGISTER")) {
+                                } else if (request.contains(Action.REGISTER.name())) {
                                     final String uuid = UUID.randomUUID().toString();
                                     registerReplicaUuidForMaster(uuid, masterDescriptor);
                                     masterReplicationService.registerReplica(replicaDescriptor);
                                     pw.print(uuid);
-                                } else if (request.contains("INITIAL_LOAD")) {
+                                } else if (request.contains(Action.INITIAL_LOAD.name())) {
                                     Channel channel = masterReplicationService.createMasterChannel();
                                     RabbitOutputStream ros = new RabbitOutputStream(INITIAL_LOAD_PACKAGE_SIZE, channel,
                                             /* queueName */ "initial-load-for-TestClient-"+UUID.randomUUID(), /* syncAfterTimeout */ false);
@@ -396,6 +397,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             logger.info("Request handled successfully.");
                         }
                     } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception in test replication servlet", e);
                         throw new RuntimeException(e);
                     } finally {
                         logger.info("replication servlet emulation done");

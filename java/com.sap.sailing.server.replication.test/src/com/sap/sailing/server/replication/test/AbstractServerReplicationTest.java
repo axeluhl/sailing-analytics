@@ -41,7 +41,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
             if (dropDB) {
                 mongoDBService.getDB().drop();
             }
-            mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+            mongoObjectFactory = PersistenceFactory.INSTANCE.getMajorityMongoObjectFactory(mongoDBService);
         }
 
         @Override
@@ -49,7 +49,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
             return new RacingEventServiceImpl((final RaceLogAndTrackedRaceResolver raceLogResolver)-> {
                 return new ConstructorParameters() {
                     private final DomainFactory baseDomainFactory = new DomainFactoryImpl(raceLogResolver);
-                    @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService, baseDomainFactory); }
+                    @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getMajorityDomainObjectFactory(mongoDBService, baseDomainFactory); }
                     @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
                     @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
@@ -68,7 +68,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
                         return new RacingEventServiceImpl.ConstructorParameters() {
                             private final DomainObjectFactory domainObjectFactory =
-                                    PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
+                                    PersistenceFactory.INSTANCE.getMajorityDomainObjectFactory(mongoDBService,
                                             // replica gets its own base DomainFactory:
                                             new DomainFactoryImpl(raceLogResolver));
                             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
