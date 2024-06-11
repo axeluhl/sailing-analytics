@@ -9,8 +9,8 @@ if [[ "$#" -ne 1 ]]; then
     exit 2
 fi
 target_groups=$(aws elbv2 describe-target-groups)
-LOCAL_IPV4=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --local-ipv4 | sed \"s/local-ipv4: *//\"")
-INSTANCE_ID=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --instance-id | sed \"s/instance-id: *//\"")
+LOCAL_IPV4=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --local-ipv4 2>/dev/null | sed \"s/local-ipv4: *//\"")
+INSTANCE_ID=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --instance-id 2>/dev/null | sed \"s/instance-id: *//\"")
 ELASTIC_IP="54.229.94.254"
 INSTANCE_TAGS=("CentralReverseProxy" "ReverseProxy")
 TARGET_GROUP_TAGS=("allReverseProxies" "CentralReverseProxy")
@@ -62,10 +62,12 @@ sleep 60
 read -n 1 -p "Press a key to continue.." key_pressed
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
+echo "Sailing servers: "
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "sailing-analytics-server" | extract_public_ip); do
     echo "Remounting on $instanceIp"
     ssh -o StrictHostKeyChecking=false root@"${instanceIp}" "umount -l -f /home/scores;  mount -a"
 done
+echo "Disposable reverse proxies: "
 for instanceIp in $(echo "$describe_instances"  | select_instances_by_tag  "DisposableProxy" | extract_public_ip); do
     echo "Remounting on $instanceIp"
     ssh -o StrictHostKeyChecking=false root@"${instanceIp}"  "umount -l -f /var/log/old; mount -a"
