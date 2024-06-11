@@ -62,10 +62,10 @@ Furthermore, check the batch file batch-for-route53-dns-record-update.json has b
 Press a key to continue.." key_pressed
 aws route53 change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch file://batch-for-route53-dns-record-update.json
 # reload the nfs mountpoints.
-echo "Waiting 60 seconds for records to change. The program will await a key press after this time."
-echo "Please check the route53 DNS records have been correctly updated."
-sleep 60
-read -n 1 -p "Press a key to continue.." key_pressed
+echo "Waiting for records to change."
+until $(host "logfiles.internal.sapsailing.com" | grep -q "$LOCAL_IPV4") && $(host "smtp.internal.sapsailing.com" | grep -q "$LOCAL_IPV4"); do
+    sleep 5
+done
 echo "Describing instances for remounting."
 describe_instances=$(aws ec2 describe-instances)
 echo "Sailing servers: "
