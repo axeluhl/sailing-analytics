@@ -139,7 +139,7 @@ if [[ -d "groups" ]]; then
 fi
 if [[ "$COPY_FILES" == "true" && -d "files" ]]; then
     cd "files"
-    \cp -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
+    \cp --remove-destination -rL * /   # copies all files accross, realising any symbolic links. The backslash escapes the alias cp -i.
     systemctl daemon-reload
     for unit in etc/systemd/system/*; do
         [[ -f "$unit" ]] || continue
