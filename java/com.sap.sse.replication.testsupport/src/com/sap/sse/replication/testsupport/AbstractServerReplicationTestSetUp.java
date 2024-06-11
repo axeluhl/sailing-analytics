@@ -102,7 +102,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
     }
     
-    private void setUpSecurity() {
+    protected void setUpSecurity() {
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
         SecurityUtils.setSecurityManager(securityManager);

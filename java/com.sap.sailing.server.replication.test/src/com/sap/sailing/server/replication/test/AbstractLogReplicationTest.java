@@ -43,6 +43,21 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         extends AbstractServerReplicationTest {
     protected static final String BOAT_CLASS_NAME_49er = "49er";
 
+    public AbstractLogReplicationTest() {
+        super(new ServerReplicationTestSetUp() {
+            @Override
+            public void setUp() throws Exception {
+                try {
+                    setUpSecurity();
+                    setUpWithoutStartingToReplicateYet();
+                    // don't start to replicate yet
+                } catch (Exception e) {
+                    tearDown();
+                    throw e;
+                }
+            }
+        });
+    }
     /**
      * Uses a new master that loads the existing regatta and race log to append an event to the race log. This will store it to the DB so that if the original
      * master re-loads the race log it should see the new race log event.
