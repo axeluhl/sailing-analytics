@@ -31,10 +31,14 @@ for tag in "${INSTANCE_TAGS[@]}"; do
     aws ec2 create-tags --resources "$INSTANCE_ID" --tags Key="$tag",Value=""
 done
 # The nlb is the exception case as we use the load balancer arn to further identify it.
-nlbArn=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.LoadBalancerArns | .[] | contains("loadbalancer/net")  ) | .TargetGroupArn') | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="allReverseProxies") ) | .ResourceArn')
+ip_based_target_groups_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.LoadBalancerArns | any(contains("loadbalancer/net"))  ) | .TargetGroupArn'))
+nlb_target_group_arn=$(echo "$ip_based_target_groups_tags"  | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="allReverseProxies") ) | .ResourceArn')
 echo "Registering with nlb"
-aws elbv2 register-targets --target-group-arn "$nlbArn" --targets Id="${LOCAL_IPV4}",Port=80
-echo "Fetching tags"
+aws elbv2 register-targets --target-group-arn "$nlb_target_group_arn" --targets Id="${LOCAL_IPV4}",Port=80
+ssh_target_group_arn=$(echo "$ip_based_target_groups_tags"  | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="CentralReverseProxy") ) | .ResourceArn')
+echo "Registering with ssh target group"
+aws elbv2 register-targets --target-group-arn "$ssh_target_group_arn" --targets Id="${LOCAL_IPV4}",Port=80
+echo "Fetching tags for all target groups to identify which groups to add the new central proxy to"
 # We fetch the tags of the target groups to identify those which the central reverse proxy should be added to.
 # We depend on SAILING_TARGET_GROUP_NAME_PREFIX to filter out all target groups which point to sailing servers,
 # because describe tags can take a maximum of 20 resource-arns.
