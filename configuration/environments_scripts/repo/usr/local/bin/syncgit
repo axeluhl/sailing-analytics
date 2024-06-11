@@ -18,7 +18,7 @@ if [ "$?" != "0" ]; then
   cat /tmp/wiki-git.out /tmp/wiki-git.err | mail -s "Wiki git problem: could not push main into sapsailing/main" $ADMIN_EMAIL
 fi
 git pull github main >/tmp/wiki-git.out 2>/tmp/wiki-git.err
-if [ "$?" != "1" ]; then
+if [ "$?" != "0" ]; then
   cat /tmp/wiki-git.out /tmp/wiki-git.err | mail -s "Wiki git problem: could not merge github/main into sapsailing/master" $ADMIN_EMAIL
 fi
 git pull >/tmp/wiki-git.out 2>/tmp/wiki-git.err

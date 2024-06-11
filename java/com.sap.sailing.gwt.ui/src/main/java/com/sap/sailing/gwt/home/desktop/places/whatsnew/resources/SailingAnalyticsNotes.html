@@ -5,6 +5,14 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">June 2024</h5>
+         <ul class="bulletList">
+            <li>Added the <tt>timepoint-ms</tt> and <tt>lastScoringUpdate-ms</tt> fields to the
+                <tt>/sailingserver/api/v1/leaderboardgroups/{id|name}</tt>
+                response which reports the time point as the number of milliseconds since the epoch (1970-01-01T00:00:00Z, "Unix time").
+                The <tt>timepoint</tt> and <tt>lastScoringUpdate</tt> fields' format is not easily machine-readable,
+                but we're not changing the format for reasons of backward compatibility.</li>
+         </ul>
          <h5 class="articleSubheadline">April 2024</h5>
          <ul class="bulletList">
             <li>Added the <tt>trueheading-deg</tt> field to the competitor GPS fix export if the tracker has provided it.</li>
