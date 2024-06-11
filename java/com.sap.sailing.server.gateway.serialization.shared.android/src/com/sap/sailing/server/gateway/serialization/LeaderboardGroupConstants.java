@@ -6,6 +6,7 @@ public interface LeaderboardGroupConstants {
     String DISPLAYNAME = "displayName";
     String DESCRIPTION = "description";
     String TIMEPOINT = "timepoint";
+    String TIMEPOINT_MILLIS = "timepoint-ms";
     String EVENTS = "events";
     String LEADERBOARDS = "leaderboards";
 }
