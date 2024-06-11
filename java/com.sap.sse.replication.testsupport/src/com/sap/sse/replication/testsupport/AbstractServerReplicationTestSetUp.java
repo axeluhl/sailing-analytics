@@ -102,7 +102,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
     }
     
-    private void setUpSecurity() {
+    protected void setUpSecurity() {
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
         Subject fakeSubject = Mockito.mock(Subject.class);
         SecurityUtils.setSecurityManager(securityManager);
@@ -397,6 +397,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             logger.info("Request handled successfully.");
                         }
                     } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception in test replication servlet", e);
                         throw new RuntimeException(e);
                     } finally {
                         logger.info("replication servlet emulation done");
