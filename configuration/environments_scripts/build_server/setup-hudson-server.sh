@@ -7,7 +7,8 @@
 # of the instance you just launched in AWS as only argument. This will then
 # turn the instance into an application server for the SAP Sailing Analytics
 # application. When the script is done you may log in to look around and check
-# things.
+# things, such as the landscape managers keys, aws credentials, and that 
+# the necessary scripts are in /usr/local/bin.
 if [ $# != 0 ]; then
   SERVER=$1
   $(dirname $0)/../sailing_server/setup-sailing-server.sh ${SERVER}
