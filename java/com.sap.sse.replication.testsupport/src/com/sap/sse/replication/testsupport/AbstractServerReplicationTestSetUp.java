@@ -397,6 +397,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                             logger.info("Request handled successfully.");
                         }
                     } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception in test replication servlet", e);
                         throw new RuntimeException(e);
                     } finally {
                         logger.info("replication servlet emulation done");
