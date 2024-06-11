@@ -14,6 +14,7 @@ public interface LeaderboardNameConstants {
     static final String SCORINGSCHEME = "scoringScheme";
     static final String SCORINGCOMMENT = "scoringComment";
     static final String LASTSCORINGUPDATE = "lastScoringUpdate";
+    static final String LASTSCORINGUPDATE_MILLIS = "lastScoringUpdate-ms";
     static final String REGATTANAME = "regattaName";
     static final String SERIES = "series";
     static final String ISMEDALSERIES = "isMedalSeries";
