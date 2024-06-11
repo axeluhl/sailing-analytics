@@ -117,7 +117,9 @@ read -n 1  -p "Bugzilla installation complete, when ready press a key to continu
 # use the localconfig file to setup the bugzilla
 # t forces tty allocation.
 ssh root@"${IP}" -A -t 'cd /usr/share/bugzilla/;  ./checksetup.pl'
+terminationCheck "$?"
 ssh -A -t "root@${IP}" "cpan install Geo::IP"
+terminationCheck "$?"
 ssh -A "root@${IP}" "bash -s" << THIRDEOF
 # The following line is for production use:
 scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT"/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /usr/local/bin
