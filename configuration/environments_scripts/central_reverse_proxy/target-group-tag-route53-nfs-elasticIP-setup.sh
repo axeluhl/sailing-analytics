@@ -42,15 +42,13 @@ echo "Fetching tags for all target groups to identify which groups to add the ne
 # We fetch the tags of the target groups to identify those which the central reverse proxy should be added to.
 # We depend on SAILING_TARGET_GROUP_NAME_PREFIX to filter out all target groups which point to sailing servers,
 # because describe tags can take a maximum of 20 resource-arns.
-describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.TargetGroupName | startswith("S-") | not ) | .TargetGroupArn'))
+describe_tags=$(aws elbv2 describe-tags --resource-arns $(echo "$target_groups" | jq -r '.TargetGroups | .[] | select(.TargetGroupName | startswith("S-") | not ) | select(.LoadBalancerArns | any(contains("loadbalancer/net") | not)  ) | .TargetGroupArn'))
 for tag in "${TARGET_GROUP_TAGS[@]}"; do
     echo "Adding to target groups with $tag"
     for tgArn in $(echo "$describe_tags" | jq -r '.TagDescriptions | .[] | select(.Tags | any(.Key=="'"$tag"'") ) | .ResourceArn'); do
-        if [[ "$tgArn" != "$nlbArn" ]]; then
-            echo "Registering in $tgArn as it has the correct tag"
-            aws elbv2 register-targets --target-group-arn "$tgArn" --targets Id="${INSTANCE_ID}"
-            [[ "$?" -eq 0 ]] || echo "Register target not successful"
-        fi
+        echo "Registering in $tgArn as it has the correct tag"
+        aws elbv2 register-targets --target-group-arn "$tgArn" --targets Id="${INSTANCE_ID}"
+        [[ "$?" -eq 0 ]] || echo "Registration of target was not successful"
     done
 done
 # alter records using batch file.
