@@ -11,6 +11,10 @@ fi
 target_groups=$(aws elbv2 describe-target-groups)
 LOCAL_IPV4=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --local-ipv4 2>/dev/null | sed \"s/local-ipv4: *//\"")
 INSTANCE_ID=$(ssh -o StrictHostKeyChecking=false root@"$1" "ec2-metadata --instance-id 2>/dev/null | sed \"s/instance-id: *//\"")
+if [[ -z "$LOCAL_IPV4" || -z "$INSTANCE_ID" ]]; then
+    echo "Null local IP or Instance ID"
+    exit 1
+fi 
 ELASTIC_IP="54.229.94.254"
 INSTANCE_TAGS=("CentralReverseProxy" "ReverseProxy")
 TARGET_GROUP_TAGS=("allReverseProxies" "CentralReverseProxy")
