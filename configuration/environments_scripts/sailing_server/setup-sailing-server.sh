@@ -95,7 +95,6 @@ EOF
     sudo chgrp root /root/mail.properties
     sudo chmod 600 /root/mail.properties
     # Create some swap space for the case mountnvmeswap hasn't created any
-    . imageupgrade_functions.sh
     setup_swap 6000
     setup_sshd_resilience
     # Add the NFS mount of /home/scores to /etc/fstab:
