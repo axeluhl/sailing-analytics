@@ -79,28 +79,113 @@ update_root_crontab() {
 }
 
 build_crontab_and_setup_files() {
-    # There must be at least 1 and all args are passed to build-crontab-and-cp-files. See the documentation of this file for more info.
-    if [[ "$#" -lt 1 ]]; then
-        echo "Number of arguments is invalid. There must be at least 1 and all args are passed to build-crontab-and-cp-files."
+    if [[ "$#" -eq 0 ]]; then
+        echo "Number of arguments is invalid. Please use the options and arguments as follows."
+        echo "Options for this function:"
+        echo "  -h is the hostname to fetch the configuration/environments_scripts from."
+        echo "The remaining (optional) args and options, if correct, are passed to the build_crontab_and_setup_files script."
+        echo "  -c means no crontab file is created"
+        echo "  -n means that if a crontab has been created, it isn't actually installed. This is useful for testing."
+        echo "  -f means no files are copied over, which is useful if you have already copied files accross or don't want to override existing files"
+        echo "Then there are the arguments, where the order matters:"
+        echo "  ENVIRONMENT_TYPE - the directory name in environments_scripts which will be used."
+        echo "  USER_WITH_COPY_OF_REPO - a user which will exist on the environment type, which has a checked out copy of the git workspace."
+        echo "  RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER - the relative path within the USER_WITH_COPY_OF_REPO to get to the git workspace."
     else
-        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /root/environments_scripts_XXX)
-        scp -o StrictHostKeyChecking=no -pr "wiki@sapsailing.com:~/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/*" "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
+        TEMP=$(getopt -o fnch: -n 'options checker' -- "$@")
+        [[ "$?" -eq 0 ]] || return 2
+        eval set -- "$TEMP"
+        PASS_OPTIONS=()
+        HOSTNAME="sapsailing.com"
+        while :; do
+            case "$1" in
+                -c|-f|-n)
+                    PASS_OPTIONS+=("$1")
+                    ;;
+                -h)
+                    if [[ "$2" ]]; then
+                        HOSTNAME="$2"
+                        shift
+                    else
+                        echo "hostname option requires argument"
+                    fi
+                    ;;
+                --)
+                    shift
+                    break
+                    ;;
+                *)
+                    echo "no more options"
+                    break
+            esac
+            shift
+        done
+        TEMP_ENVIRONMENTS_SCRIPTS=$(mktemp -d /var/tmp/environments_scripts_XXX)
+        echo "Attempting access to the wiki, typically used by image upgrade. Otherwise, try root. NOTE: If the first command fails, there will be a warning message."
+        # During image upgrades, no environment type should have root access to the central server, but they do need 
+        # access to the wiki copy. Therefore, the various keys for different environment types are in the authorized_keys
+        # of the wiki user. So, during image upgrade or to get the latest changes, the following command should succeed.
+        # The wiki user's authorized_keys is not updated automatically with landscape managers, so 
+        # the below command may fail during initial image setup. In this scenario, the root user is instead the target 
+        # user of the scp command (as seen in the second command below).
+        scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        ./build-crontab-and-cp-files $@
+        # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
+        for option in "$@"; do
+          PASS_OPTIONS+=( "$option")
+        done
+        if ! sudo  ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
+          return 1
+        fi
         cd ..
         rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
 }
 
 setup_keys() {
-    #1: Environment type.
+    # Installs the necessary aws and ssh keys for a given environment type, by copying from the key vault.
+    # $1: Environment type.
+    # Optional parameter is -p which indicates that no permissions will be set or overwritten.
+    TEMP=$(getopt -o p -n 'options' -- "$@")
+    [[ "$?" -eq 0 ]] || return 2
+    SET_PERMISSIONS="true"
+    eval set -- "$TEMP"
+    while true; do
+        case "$1" in
+            -p)
+                SET_PERMISSIONS="false"
+                ;;
+            --)
+                shift
+                break
+                ;;
+            *)
+                echo "Option not recognised"
+                return 2
+                ;;
+        esac
+        shift
+    done
+    if [[ "$#" -ne 1 ]]; then
+        echo "Please specify the environment type and use the optional -p flag to indicate that no permissions will be set or overwritten."
+        return 2
+    fi
     pushd .
-    TEMP_KEY_DIR=$(mktemp  -d /root/keysXXXXX)
-    REGION=$(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" --silent -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
-    && curl -H "X-aws-ec2-metadata-token: $TOKEN" --silent http://169.254.169.254/latest/meta-data/placement/region)
-    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/new_version_key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    TEMP_KEY_DIR=$(mktemp  -d /var/tmp/keysXXXXX)
+    scp -o StrictHostKeyChecking=no -pr root@sapsailing.com:/root/key_vault/"${1}"/* "${TEMP_KEY_DIR}"
+    sudo su - -c "source imageupgrade_functions.sh; __setup_keys_using_local_copy $TEMP_KEY_DIR $SET_PERMISSIONS"
+    popd
+    rm -rf "${TEMP_KEY_DIR}"
+}
+__setup_keys_using_local_copy() {
+    # $1 the local location of the key_vault subdirectory corresponding to the image type this is run on.
+    # $2 a "true" or "false" string, indicating whether to override existing permissions. 
+    # "true" indicates the permissions and ownership of the .ssh and .aws folders will not be set.
+    TEMP_KEY_DIR="$1"
+    SET_PERMISSIONS="$2"
+    REGION="$(  ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
@@ -109,7 +194,6 @@ setup_keys() {
             # aws setup
             if [[ -d "${user}/aws" ]]; then 
                 mkdir --parents "${user_home_dir}/.aws"
-                chmod 755 "${user_home_dir}"/.aws
                 # Setup credentials
                 if [[ -d "${user}/aws/credentials" && ! -e "${user_home_dir}/.aws/credentials" ]]; then
                     > "${user_home_dir}"/.aws/credentials
@@ -133,28 +217,34 @@ setup_keys() {
                         done
                     fi
                 fi
-                chown -R  ${user}:${user} "${user_home_dir}/.aws"
-                chmod 600 "${user_home_dir}"/.aws/*
+                if [[ "$SET_PERMISSIONS" == "true" ]]; then
+                    chmod 755 "${user_home_dir}"/.aws
+                    chown -R  ${user}:${user} "${user_home_dir}/.aws"
+                    chmod 600 "${user_home_dir}"/.aws/*
+                fi
             fi
             # ssh setup
             if [[ -d "${user}/ssh" ]]; then
                 mkdir --parents "${user_home_dir}/.ssh"
-                chmod 700 "${user_home_dir}/.ssh"
                 for key in "${user}"/ssh/*; do
                     [[ -f "$key" ]] || continue
+                    [[ ! -f "$user_home_dir"/.ssh/"$(basename "$key")" ]] || { echo "$key not touched, as it is already present in ssh dir of $user. You may want to override it." && continue; }
                     \cp --preserve --dereference "$key" "$user_home_dir"/.ssh
                 done
                 for key in "${user}"/ssh/authorized_keys/*; do
                     [[ -f "$key" ]] || continue
-                    cat "${key}" >>  ${user_home_dir}/.ssh/authorized_keys
+                    if ! grep -q "$(cat "$key")" "${user_home_dir}"/.ssh/authorized_keys; then
+                        cat "${key}" >>  "${user_home_dir}"/.ssh/authorized_keys
+                    fi
                 done
-                chown -R  ${user}:${user} "${user_home_dir}/.ssh"
-                chmod 600 "${user_home_dir}"/.ssh/*
+                if [[ "$SET_PERMISSIONS" == "true" ]]; then
+                    chmod 700 "${user_home_dir}/.ssh"
+                    chown -R  ${user}:${user} "${user_home_dir}/.ssh"
+                    chmod 600 "${user_home_dir}"/.ssh/*
+                fi
             fi
         fi
     done
-    popd
-    rm -rf "${TEMP_KEY_DIR}"
 }
 
 clean_root_ssh_dir_and_tmp() {
@@ -321,7 +411,7 @@ setup_apachetop() {
 
 setup_swap() {
     # $1: size of swapspace in megabytes.
-    echo "Creating swapswpace of $1 MBs"
+    echo "Creating swapspace of $1 MBs"
     local swapfile_location=/var/cache/swapfile
     pushd .
     sudo dd if=/dev/zero of="$swapfile_location" bs=1M count="$1"

@@ -2,7 +2,7 @@
 
 ## About this Project
 
-The Sailing Analytics, formerly known as the "SAP Sailing Analytics," are a solution for portraying and analyzing sailing regattas, supporting training scenarios, and powering the vast archive at https://sapsailing.com.
+The Sailing Analytics, formerly known as the "SAP Sailing Analytics," are a solution for portraying and analyzing sailing regattas, supporting training scenarios, and powering the vast archive at https://sapsailing.com. The solution consists of a cloud application with a web-based user interface, as well as three companion apps that integrate with the cloud application. This repository has the code for the cloud-based web application, and two of the three mobile apps (Buoy Pinger and Race Manager). The third companion app (Sail Insight) is found in [another repository](https://github.com/SailTracks/sailinsight).
 
 ## Description
 
@@ -16,9 +16,30 @@ Sailing provides the perfect platform for SAP to showcase solutions and help the
 
 SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas.
 
+## Quick Start with Docker Compose
+
+If you have built or obtained the ``ghcr.io/sap/sailing-analytics:latest`` multi-platform image (currently available for linux/amd64 and linux/arm64 architectures), try this:
+```
+    cd docker
+    docker-compose up
+```
+Based on the ``docker/docker-compose.yml`` definition you should end up with three running Docker containers:
+- a MongoDB server, listening on default port 27017
+- a RabbitMQ server, listening on default port
+- a Sailing Analytics server, listening for HTTP requests on port 8888 and for telnet connections to the OSGi console on port 14888
+
+Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
+
+To use Java 17, use the ``docker-compose-17.yml`` file instead:
+
+```
+    cd docker
+    docker-compose -f docker-compose-17.yml up
+```
+
 ## Requirements
 
-The software can be run on any Linux or Windows machine with ``bash`` installed; it has also been compiled successfully for the ARM platform and was deployed to a Raspberry Pi computer. As a database, MongoDB is required, tested with releases 4.4, 5.0, and 6.0. For use in a replicated scenario (scale-out, high availability), RabbitMQ is required. Docker Compose can be used to tie these three components together, as Docker images are produced on a regular basis.
+The software can be run on any Linux or Windows machine with ``bash`` installed; it has also been compiled successfully for the ARM platform and was deployed to a Raspberry Pi computer. As a database, MongoDB is required, tested with releases 4.4, 5.0, and 6.0. For use in a replicated scenario (scale-out, high availability), RabbitMQ is required. A simple Docker Compose set-up can be used to tie these three components together, e.g., for a quick local test and to familiarize yourself with the application, as Docker images are produced on a regular basis.
 
 Compute node and database sizing depends on several aspects of your workloads, such as whether live or replay data is to be served, how many different classes with separate leaderboard are racing concurrently, how many competitors are racing in each class, or how many concurrent viewers produce how many requests and which type (e.g., analytical, data mining, or watching a live race).
 
@@ -28,11 +49,13 @@ To quantify this at least approximately, here are a few examples for typical nod
 - Large multi-class event with 15 classes with their separate leaderboards, concurrently racing on six course areas: 16GB of RAM, 16 CPUs
 - Archive of 30,000 races with a few thousand visitors per day with varying analytical and replay workloads: 64GB RAM, 2TB NVMe swap, 8 CPUs
 
-A single node typically handles up to 500 concurrent viewers for live events. You will want to scale out accordingly, using the replication pattern offered by the solution which uses RabbitMQ for transaction log shipping.
+A single node typically handles up to 500-1000 concurrent viewers for live events. You will want to scale out accordingly, using the replication pattern offered by the solution which uses RabbitMQ for transaction log shipping.
 
 ## Contributing
 
-To start contributing, read the onboarding document at the following URL: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding). The project welcomes contributions in the form of pull requests, for example, enhancements of the Data Mining functionality, including any sailing-specific metric or dimension you may think of and that you find is still missing so far; or additional features for the race viewer; or a map visualization that does not require a Google Map but uses Open Street Map / Open Layers; landscape automation; improved start sequence analytics; major UI improvements for the administrative layer ("AdminConsole"), etc.
+To start contributing, read the onboarding document at the following URL: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding). Further documentation can be found in our Wiki at [https://wiki.sapsailing.com](https://wiki.sapsailing.com), serving the content from this repo's ``wiki/`` folder.
+
+The project welcomes contributions in the form of pull requests, for example, enhancements of the Data Mining functionality, including any sailing-specific metric or dimension you may think of and that you find is still missing so far; or additional features for the race viewer; or a map visualization that does not require a Google Map but uses Open Street Map / Open Layers; landscape automation; improved start sequence analytics; major UI improvements for the administrative layer ("AdminConsole"), etc.
 
 The issue tracker at [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com) is currently used for any sort of issue and enhancement request tracking. Help to migrate this smoothly to Github Issues would be much appreciated, ideally keeping issue numbers stable due to many references to those Bugzilla bug numbers, be it in the source code, the Wiki, or the build infrastructure.
 
@@ -49,15 +72,28 @@ See [here](https://www.sapsailing.com/gwt/Home.html#/imprint/:) for a list of co
 
 ## Building and Running
 
-To build, invoke
+This assumes you have completed the onboarding (see again [here](https://wiki.sapsailing.com/wiki/howto/onboarding)) successfully. To build, then invoke
+
 ```
     configuration/buildAndUpdateProduct.sh build
 ```
-If the build was successful you can install the product locally by invoking
+This will build the Android companion apps first, then the web application. If the build was successful you can install the product locally by invoking
+
 ```
     configuration/buildAndUpdateProduct.sh install [ -s <server-name> ]
 ```
+
 The default server name is taken to be your current branch name, e.g., ``master``. The install goes to ``${HOME}/servers/{server-name}``. You will find a ``start`` script there which you can use to launch the product.
+
+Or you create a release by running
+
+```
+    configuration/buildAndUpdateProduct.sh -L -u -n <release-name> release
+```
+which produces a tarball under ``dist/{release-name}-{timestamp}/{release-name}-{timestamp}.tar.gz`` which can then be used for ``scp``-based downloads with the ``refreshInstance.sh`` script under ``java/target``.
+
+Run the ``buildAndUpdateProduct.sh`` without any arguments to see the sub-commands and options available.
+
 
 ## Downloading, Installing and Running an Official Release
 
@@ -123,27 +159,6 @@ Then patch or copy ``docker/Dockerfile`` so that it has
 ```
 
 (of course with the version tag adjusted to what you used above when you built/tagged the image). This will give you an SAP JVM 8 under ``/opt/sapjvm_8`` in the container which in particular includes the useful ``jvmmon`` utility specific to the SAP JVM 8.
-
-## Docker Compose
-
-If you have built or obtained the ``ghcr.io/sap/sailing-analytics:latest`` image, try this:
-```
-    cd docker
-    docker-compose up
-```
-Based on the ``docker/docker-compose.yml`` definition you should end up with three running Docker containers:
-- a MongoDB server, listening on default port 27017
-- a RabbitMQ server, listening on default port
-- a Sailing Analytics server, listening for HTTP requests on port 8888 and for telnet connections to the OSGi console on port 14888
-
-Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
-
-To use Java 17, use the ``docker-compose-17.yml`` file instead:
-
-```
-    cd docker
-    docker-compose -f docker-compose-17.yml up
-```
 
 ## Configuration Options, Environment Variables
 

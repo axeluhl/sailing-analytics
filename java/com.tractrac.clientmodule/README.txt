@@ -16,6 +16,21 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.8
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 06/06/2024
+
+ 1) Features
+
+ - Adding new values to the RaceCompetitorStatusType: RCT(Retired after causing a tangle),
+ DCT(Disqualified after causing a tangle) and DNE(Disqualification not excludable).
+ (Requested by Radek Masnika, 30/05/2024)
+ - Adding the method IPosition.getHACC to retrieve the horizontal accuracy (Requested by Chris Terkelsen,
+ 05/05/2024)
+
+********************************************
         TracAPI 3.15.7
 ********************************************
 This is a final version. It keeps the backward compatibility.
