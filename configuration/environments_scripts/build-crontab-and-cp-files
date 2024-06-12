@@ -95,6 +95,9 @@ if [[ -d "users" ]]; then
             if [[ "$CREATE_CRONTABS" == "true" ]]; then  # 9 is the exit code indicating the username already exists.
                 # Clear the crontab file before assembling it from the snippets:
                 > $HOME_DIR/crontab
+                echo "# Note that this file should not be edited manually. Please instead make use of the build_crontab_and_setup_files command in imageupgrade_functions.sh">>"$HOME_DIR"/crontab
+                echo "# which concatenates the crontabs found at GIT_HOME/configuration/crontabs into this file. Please edit these crontab stubs in the git repo to make permanent changes.">>"$HOME_DIR"/crontab
+                echo "">>"$HOME_DIR"/crontab
                 for crontab in ${USERNAME}/crontab*; do
                     [[ -e $crontab ]] || continue
                     cat "${crontab}">> $HOME_DIR/crontab
