@@ -18,8 +18,8 @@ else
   sudo apt-get -y update
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
-  sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys
-  sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys
+  sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
+  sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
   scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/admin
   sudo mv imageupgrade_functions.sh /usr/local/bin
   . imageupgrade_functions.sh
