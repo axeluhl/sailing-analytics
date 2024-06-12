@@ -251,7 +251,7 @@ clean_root_ssh_dir_and_tmp() {
   echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
   rm -rf ${LOGON_USER_HOME}/.ssh/authorized_keys
   rm -rf ${LOGON_USER_HOME}/.ssh/known_hosts
-  rm -f /var/run/last_change_aws_landscape_managers_ssh_keys
+  rm -f /var/run/last_change_aws_landscape_managers_ssh_keys*
   rm -rf /tmp/image-upgrade-finished
 }
 
