@@ -80,7 +80,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
         shell: bash
         run: |
-          ./configuration/buildAndUpdateProduct.sh -u -L release
+          ./configuration/buildAndUpdateProduct.sh -u -L ${{ github.event.inputs.skip_tests == 'true' && '-n untested' || '' }} release
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
