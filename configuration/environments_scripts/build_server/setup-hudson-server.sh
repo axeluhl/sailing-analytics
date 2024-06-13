@@ -67,6 +67,7 @@ EOF
     sudo mount -a
     echo "Now follow the instructions on the wiki for creating-ec2-image-for-hudson-from-scratch.md. It explains how to mount"
     echo "the hudson volume and setup the aws + ssh keys."
+    echo "See https://wiki.sapsailing.com/wiki/info/landscape/creating-ec2-image-for-hudson-from-scratch.md"
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
