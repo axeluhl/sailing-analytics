@@ -135,7 +135,11 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            JOB=SAPSailingAnalytics-master
+            if [ "${{ github.event.inputs.skip_tests }}" = "true" ]; then
+              JOB=SAPSailingAnalytics-master-fasttrack-no-tests
+            else
+              JOB=SAPSailingAnalytics-master
+            fi
           elif [[ "${{ github.ref }}" =~ refs/heads/releases/.* ]]; then
             JOB=$( echo "${{ github.ref }}" | sed -e 's/^refs\/heads\/releases\///' )
           else
