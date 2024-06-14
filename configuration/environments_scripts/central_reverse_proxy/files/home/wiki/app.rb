@@ -47,7 +47,9 @@ class App < Precious::App
         self.env['PATH_INFO'].split('/')[2] != 'edit' &&
         self.env['PATH_INFO'].split('/')[1] != 'preview' &&
         self.env['PATH_INFO'].split('/')[2] != 'preview' &&
-        (self.env['PATH_INFO'].split('/')[1] != 'gollum'|| self.env['PATH_INFO'].split('/')[2] != 'create'))
+        (self.env['PATH_INFO'].split('/')[1] != 'gollum' ||
+          (self.env['PATH_INFO'].split('/')[2] != 'create' &&
+             (self.env['PATH_INFO'].split('/')[2] != 'overview' || self.env['PATH_INFO'].split('/')[3] != 'wiki'))))
         throw(:halt, [403, 'Forbidden - You can not access anything outside wiki/ path.'])
       end
       if @_auth.provided?
