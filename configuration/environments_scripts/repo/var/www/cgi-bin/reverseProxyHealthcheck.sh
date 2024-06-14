@@ -101,11 +101,28 @@ randomise() {
     echo $(($RANDOM % 5 + $1 ))
 }
 
+getListOfIpsForCidr() {
+    # $1: a CIDR, such as 172.10.0.0/32
+    # Outputs the list of IP addresses that match the CIDR.
+    # Tries to read this from a file in ${CACHE_LOCATION}
+    # whose name is inferred from the CIDR parameter. If not
+    # found, nmap is used to produce that list, and it is
+    # written to the file in the ${CACHE_LOCATION} so it can
+    # be found the next time requested
+    cidr="${1}"
+    FILE_WITH_IPS_FOR_CIDR=${CACHE_LOCATION}/$( echo "${cidr}" | tr '/' '_' )
+    if [ -f ${FILE_WITH_IPS_FOR_CIDR} ]; then
+	cat ${FILE_WITH_IPS_FOR_CIDR}
+    else
+        nmap -sL -n ${cidr} | head -n -1 | tail -n +2 | sed -e 's/^.*\<\([0-9]*\.[0-9]*\.[0-9]*\.[0-9]*\)$/\1/' | tee ${FILE_WITH_IPS_FOR_CIDR}
+    fi
+}
+
 getAzCidr() {
     # $1: path to a file containing one CIDR per line
     # $2: an IP address to obtain the subnet CIDR for
     for cidr in $( cat "${1}" ); do
-	if nmap -sL -n ${cidr} | head -n -1 | tail -n +2 | grep -q ${2}; then
+	if getListOfIpsForCidr ${cidr} | grep -q ${2}; then
 	    echo ${cidr}
 	fi
     done

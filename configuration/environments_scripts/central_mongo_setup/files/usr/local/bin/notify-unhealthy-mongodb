@@ -9,10 +9,11 @@ for db in $MONGODBS; do
       read health
       read state
       if [ "$health" != "1" ]; then
-	echo "MongoDB replica set $replicaset unhealthy, node $server is in state $state\
+        echo "MongoDB replica set $replicaset unhealthy, node $server is in state $state\
 
 Check status of $db urgently. To unsubscribe, change $MAILINGLIST on `hostname`." | mail -s "MongoDB Replica Set \"$replicaset\" Unhealthy" `cat "$MAILINGLIST"`
       fi
     done
   )
 done
+

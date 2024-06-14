@@ -1,1 +1,1 @@
-ALL ALL=NOPASSWD: /usr/local/bin/cp_root_mail_properties
+environments_scripts/sailing_server/files/etc/sudoers.d/cp_root_mail_properties_sudoers

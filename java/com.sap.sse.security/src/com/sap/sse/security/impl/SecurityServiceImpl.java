@@ -2826,10 +2826,18 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * These roles are non transitive, hence they can not be granted to other users.
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
+        final Role result;
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
         final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
-        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser,
-                /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
+        final RoleDefinition roleDefinition = getRoleDefinition(planRole.getRoleId());
+        if (roleDefinition == null) {
+            logger.severe("Role with ID "+planRole.getRoleId()+" for user "+user.getName()+" not found.");
+            result = null;
+        } else {
+            result = new Role(roleDefinition, qualifiedTenant, qualifiedUser,
+                    /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
+        }
+        return result;
     }
 
     /**
