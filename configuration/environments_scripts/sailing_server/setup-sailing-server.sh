@@ -18,41 +18,37 @@ if [ $# != 0 ]; then
 else
   if ec2-metadata | grep -q instance-id; then
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
+    # Install standard packages:
+    sudo yum -y update
+    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
     # Allow root ssh login with the same key used for the ec2-user for now;
     # later, a cron job will be installed that keeps the /root/authorized_keys file
     # up to date with all landscape managers' public SSH keys
     sudo cp /home/ec2-user/.ssh/authorized_keys /root/.ssh
     sudo chown root /root/.ssh/authorized_keys
     sudo chgrp root /root/.ssh/authorized_keys
-    sudo adduser sailing
-    sudo su - sailing -c "mkdir servers"
+    # Copy imageupgrade_function.sh
+    scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh .
+    sudo mv imageupgrade_functions.sh /usr/local/bin
+    # build-crontab
+    . imageupgrade_functions.sh
+    # The 2nd argument references a user home to navigate to and the 3rd argument is the path to navigate to within that user to find a checked
+    # out git workspace. This dependency will be removed in the future, when we no longer have any dependency on a checked out
+    # workspace on a sailing server.
+    build_crontab_and_setup_files  sailing_server sailing code
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
-    ssh-keygen -t ed25519 -P '' -f /home/ec2-user/.ssh/id_ed25519
-    cat /home/ec2-user/.ssh/id_ed25519.pub | ssh -o StrictHostKeyChecking=false root@sapsailing.com "cat >>/home/trac/.ssh/authorized_keys"
-    sudo mkdir /home/sailing/.ssh
-    sudo mv /home/ec2-user/.ssh/id* /home/sailing/.ssh
-    sudo chown -R sailing /home/sailing/.ssh
-    sudo chgrp -R sailing /home/sailing/.ssh
-    sudo chmod 700 /home/sailing/.ssh
-    # Install standard packages:
-    sudo yum -y update
-    sudo yum -y install git tmux nvme-cli chrony cronie cronie-anacron jq telnet mailx
+    setup_keys "sailing_server"
+    sudo su - sailing -c "mkdir servers"
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
-    # Clone Git to /home/sailing/code
-    sudo su - sailing -c "git clone ssh://trac@sapsailing.com/home/trac/git code"
+    # Keep Amazon Linux from patching root's authorized_keys file and setup root login:
+    setup_cloud_cfg_and_root_login
     # Install SAP JVM 8:
     sudo mkdir -p /opt
-    sudo su - -c "source /home/sailing/code/configuration/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
-    # Install sailing.sh script to /etc/profile.d
-    sudo ln -s /home/sailing/code/configuration/sailing.sh /etc/profile.d
-    # Keep Amazon Linux from patching root's authorized_keys file:
-    sudo sed -i -e 's/disable_root: *true/disable_root: false/' /etc/cloud/cloud.cfg
+    sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
     # Configure SSH daemon:
     sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
-PermitRootLogin without-password
-PermitRootLogin Yes
 MaxStartups 100
 EOF
 "
@@ -62,11 +58,6 @@ EOF
 net.ipv4.ip_conntrac_max = 131072
 EOF
 "
-    # Install mountnvmeswap stuff
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/mountnvmeswap.service /etc/systemd/system
-    sudo ln -s /home/sailing/code/configuration/imageupgrade.sh /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/imageupgrade_functions.sh /usr/local/bin
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
@@ -87,19 +78,12 @@ replication:
 EOF
 "
     sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
-    # Install cron job for ssh key update for landscape managers
-    sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/crontab-root /root/crontab
-    sudo su - -c "crontab /root/crontab"
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root /root/ssh-key-reader.token
     sudo chgrp root /root/ssh-key-reader.token
     sudo chmod 600 /root/ssh-key-reader.token
     # Install /etc/init.d/sailing start-up / shut-down service
-    sudo ln -s /home/sailing/code/configuration/sailing /etc/init.d/sailing
-    sudo ln -s /home/sailing/code/configuration/sailing_server_setup/sailing.service /etc/systemd/system
     sudo systemctl daemon-reload
     sudo systemctl enable sailing.service
     # Install secrets
@@ -114,15 +98,11 @@ EOF
     sudo chgrp root /root/mail.properties
     sudo chmod 600 /root/mail.properties
     # Create some swap space for the case mountnvmeswap hasn't created any
-    sudo dd if=/dev/zero of=/var/cache/swapfile bs=1M count=6000
-    sudo chown root /var/cache/swapfile
-    sudo chgrp root /var/cache/swapfile
-    sudo chmod 600 /var/cache/swapfile
-    sudo mkswap /var/cache/swapfile
-    # And while adding to /etc/fstab, also add the NFS mount of /home/scores:
+    setup_swap 6000
+    setup_sshd_resilience
+    # Add the NFS mount of /home/scores to /etc/fstab:
     sudo mkdir /home/scores
-    sudo su - -c 'echo "/var/cache/swapfile       none    swap    pri=0      0       0
-logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
+    sudo su - -c 'echo "logfiles.internal.sapsailing.com:/home/scores       /home/scores    nfs     tcp,intr,timeo=100,retry=0" >>/etc/fstab'
     sudo swapon -a
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
