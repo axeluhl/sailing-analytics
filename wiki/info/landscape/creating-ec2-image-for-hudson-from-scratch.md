@@ -27,7 +27,7 @@ To find out ``{the-UUID-of-the-partition-to-mount}``, use ``blkid``.
 ```
 * If you'd like to keep in sync with the latest version of a still running live Hudson environment, keep copying its ``/home/hudson`` contents with ``rsync -av root@dev.internal.sapsailing.com:/home/hudson/ /home/hudson/`` until you switch
 * Ensure you have EC2 / EBS snapshot backups for the volumes by tagging them as follows: ``WeeklySailingInfrastructureBackup=Yes`` for ``/`` and ``/home/hudson``.
-* Then run the following to correctly configure the aws keys and ssh keys. 
+* Then run the following to correctly configure the aws keys and ssh keys. Make sure to add the correct key to your ssh agent and use agent forwarding via the -A ssh option, as it will try to connect to root@sapsailing.com in order to access the key_vault.
 ```
 . imageupgrade_functions.sh
 setup_keys -p build_server # -p preserves existing ownerships and permissions.
