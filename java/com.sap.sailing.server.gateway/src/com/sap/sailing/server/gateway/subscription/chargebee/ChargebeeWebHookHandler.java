@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import com.sap.sailing.server.gateway.subscription.SubscriptionWebHookHandler;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -104,7 +105,8 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
         final SubscriptionWebHookEventType eventType = event.getEventType();
         if (eventType != null) {
             logger.info(() -> "Start process webhook event \"" + eventType.getName() + "\" for user " + user.getName());
-            lockSubscriptionsForUser(user);
+            final SecurityService securityService = context.getSecurityService();
+            securityService.lockSubscriptionsForUser(user);
             try {
                 final Subscription userSubscription = getCurrentUserSubscriptionFromEvent(user, event);
                 switch (eventType) {
@@ -148,7 +150,7 @@ public class ChargebeeWebHookHandler extends SubscriptionWebHookHandler {
                     break;
                 }
             } finally {
-                unlockSubscriptionsForUser(user);
+                securityService.unlockSubscriptionsForUser(user);
             }
             logger.info(() -> "Webhook event \"" + eventType.getName() + "\" has been processed for user "
                     + user.getName());

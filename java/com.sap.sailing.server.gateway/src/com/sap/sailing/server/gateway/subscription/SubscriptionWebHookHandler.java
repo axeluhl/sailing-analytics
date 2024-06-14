@@ -1,15 +1,11 @@
 package com.sap.sailing.server.gateway.subscription;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -22,13 +18,6 @@ public abstract class SubscriptionWebHookHandler {
 
     protected SubscriptionWebHookServlet context;
     
-    /**
-     * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
-     * based on what was read, a user-specific write lock must be obtained to ensure that no writes can cut in between.
-     * See also {@link #lockSubscriptionsForUser} and {@link #unlockSubscriptionsForUser}.
-     */
-    private final static ConcurrentMap<User, NamedReentrantReadWriteLock> subscriptionLocksForUsers = new ConcurrentHashMap<>();
-
     /**
      * Handle webhook
      */
@@ -49,14 +38,6 @@ public abstract class SubscriptionWebHookHandler {
         return context.getSecurityService().getUserByName(customerId);
     }
     
-    protected void lockSubscriptionsForUser(final User user) {
-        LockUtil.lockForWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
-    }
-
-    protected void unlockSubscriptionsForUser(final User user) {
-        LockUtil.unlockAfterWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
-    }
-
     protected void updateUserSubscription(User user, Subscription subscription) throws UserManagementException {
         logger.info(() -> "Update subscription, user " + user.getName() + ", new subscription "
                 + (subscription != null ? subscription.toString() : "null"));
