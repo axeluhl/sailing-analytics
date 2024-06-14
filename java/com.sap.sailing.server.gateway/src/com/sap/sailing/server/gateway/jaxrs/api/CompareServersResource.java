@@ -80,6 +80,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * "[]" for array expansion. Example: ".leaderboards[].series[].fleets[].races[].raceViewerUrls"
      */
     private static final String[] KEYSTOIGNORE = new String[] { "."+LeaderboardGroupConstants.TIMEPOINT,
+            "."+LeaderboardGroupConstants.TIMEPOINT_MILLIS,
             "."+LeaderboardGroupConstants.LEADERBOARDS+"[]."+LeaderboardNameConstants.SERIES+"[]."+LeaderboardNameConstants.FLEETS+"[]."+LeaderboardNameConstants.RACES+"[]."+LeaderboardNameConstants.RACEVIEWERURLS };
     private static final Set<String> KEYSETTOIGNORE = new HashSet<>(Arrays.asList(KEYSTOIGNORE));
 

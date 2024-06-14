@@ -130,6 +130,7 @@ build_crontab_and_setup_files() {
         # user of the scp command (as seen in the second command below).
         scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
+        chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
@@ -248,8 +249,9 @@ __setup_keys_using_local_copy() {
 
 clean_root_ssh_dir_and_tmp() {
   echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
-  rm -rf ${LOGON_USER_HOME}/.ssh/*
-  rm -f /var/run/last_change_aws_landscape_managers_ssh_keys
+  rm -rf ${LOGON_USER_HOME}/.ssh/authorized_keys
+  rm -rf ${LOGON_USER_HOME}/.ssh/known_hosts
+  rm -f /var/run/last_change_aws_landscape_managers_ssh_keys*
   rm -rf /tmp/image-upgrade-finished
 }
 
@@ -273,7 +275,6 @@ finalize() {
 setup_cloud_cfg_and_root_login() {
     sudo sed -i 's/#PermitRootLogin yes/PermitRootLogin without-password\nPermitRootLogin yes/' /etc/ssh/sshd_config
     sudo sed -i 's/^disable_root: *true$/disable_root: false/' /etc/cloud/cloud.cfg
-    sudo su -c "echo 'preserve_hostname: true' >> /etc/cloud/cloud.cfg"
 }
 
 setup_fail2ban() {
