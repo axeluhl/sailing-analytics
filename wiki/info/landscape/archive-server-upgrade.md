@@ -10,12 +10,25 @@
   Use Plain archive-candidate.sapsailing.com 172.31.46.203 8888
 ```
 with ``172.31.46.203`` being an example of the internal IP address your new archive candidate instance got assigned.
+ - Check the configuration by running ``httpd -t``. If you get an "OK" as the output, commit and distribute the configuration change to all reverse proxies like this:
+```
+  git checkout main
+  git commit -a
+  git push
+```
+This will disseminate the configuration to all reverse proxies through a Git hook, merge as required and check out the appropriate configuration for that environment again, then reload the configuration in ``httpd``.
 - Compare server contents, either with ``compareServers`` script or through REST API, and fix any differences
 ```
   java/target/compareServers -ael https://www.sapsailing.com https://archive-candidate.sapsailing.com
 ```
 - Do some spot checks on the new instance
-- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed by ``service httpd reload``
+- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed again by
+```
+  httpd -t   # ensure you get "OK" as the response
+  git checkout main
+  git commit -a
+  git push
+```
 - Terminate old fail-over EC2 instance; you will have to disabel its termination protection first.
 - Adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 
