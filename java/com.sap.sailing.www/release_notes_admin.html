@@ -31,6 +31,10 @@
                 six decimal places in lat/lng output to increase resolution to approximately 1cm.</li>
             <li>Fixed concurrency issue with subscription webhook callbacks which in rare cases led
                 expiring subscriptions or failing payments to not properly revoke user permissions.</li>
+            <li>When archiving a replica set, any remote reference pointing to it from the archive running
+                at <tt>www.sapsailing.com</tt> is being removed. Now, the same reference will also be removed
+                from the failover archive at <tt>archive-failover.sapsailing.com</tt> to reduce inconsistency
+                and a circular reference structure in case we need to switch to the failover.</li>
           </ul>
           <h2 class="articleSubheadline">May 2024</h2>
           <ul class="bulletList">
