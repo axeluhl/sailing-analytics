@@ -4,16 +4,18 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for [highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs as used for [Tokyo 2020](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator) and [Paris 2024](https://wiki.sapsailing.com/wiki/info/landscape/paris2024/olympic-plan-for-paris-marseille-2024).
 
 ## Important Servers, Hostnames
 
 - Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
-- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
+- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201 and replica set "winddb", all other slow/archived DBs on 10202 for replica set "slow", hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com (replica set "live"), mongo1.internal.sapsailing.com (replica set "live")
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ, hence currently mysql.internal.sapsailing.com and rabbit.internal.sapsailing.com refer to the same instance)
-- Hudson Build Server: called "Build/Test/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
-- Additional "Build Slaves" launched by the Hudson Build Server: Named ``Hudson Ubuntu Slave``, used to run individual build jobs
+- MariaDB (mainly for Bugzilla): mysql.internal.sapsailing.com
+- Hudson Build Server: called "Build/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
+- A central sailing application replica set called "security_service" reachable at ``security-service.sapsailing.com`` which is the hub for security-related information such as the user and groups database with permissions and roles, entity ownerships, as well as access control lists
+- Self-service at ``my.sapsailing.com`` which currently is the default server name used by the Sail Insight app, as two dedicated hosts running the replica set
+- Three multi-server instances shared by several sailing application replica sets, spread across all three availability zones (AZs) of eu-west-1
 
 ## Landscape Overview
 
