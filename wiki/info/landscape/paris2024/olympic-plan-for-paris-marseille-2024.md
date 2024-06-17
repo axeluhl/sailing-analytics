@@ -148,7 +148,7 @@ This will make the MongoDB cloud replica running on ``paris-ssh.sapsailing.com``
 
 Then, all cloud replicas need to stop replicating because soon the on-site master will be stopped. See script ``configuration/on-site-scripts/paris2024/stop-all-cloud-replicas.sh``.
 
-### Stop On-Site Master and Launch Cloud Master on ``paris-ssh.sapsailingcom``
+### Stop On-Site Master and Launch Cloud Master on ``paris-ssh.sapsailing.com``
 
 Next, an application master for the ``paris2024`` application replica set needs to be launched on ``paris-ssh.sapsailing.com``. It uses the MongoDB URI ``mongodb://localhost:10203/paris2024?replicaSet=paris2024&retryWrites=true&readPreference=nearest``, hence connecting to the single-instance MongoDB "replica set" running on the same host. Other than this the instance uses a standard configuration for a live master. This configuration can already be prepared before the event. All that then needs to be done is to adjust the release to the one that all cloud replicas are using.
 
