@@ -7,7 +7,7 @@
 #
 
 
-# Source function library.
+# Source function library. This alters the PATH variable.
 . /etc/init.d/functions
 
 RETVAL=0
@@ -15,7 +15,6 @@ RETVAL=0
 SERVERS_DIR=/home/sailing/servers
 cd "${SERVERS_DIR}"
 JAVA_START_INSTANCES="$(find * -type d -prune)"
-GIT_REPOSITORY=/home/sailing/code
 if [ -x /bin/ec2-metadata ]; then
   EC2_METADATA_CMD=/bin/ec2-metadata
 elif [ -x /usr/bin/ec2-metadata ]; then
@@ -31,14 +30,12 @@ echo "Executing with $1 at `date`" >>/var/log/sailing.err
 
 start_servers() {
     /usr/local/bin/update_authorized_keys_for_landscape_managers $( cat ${SSH_KEY_READER_BEARER_TOKEN} ) https://security-service.sapsailing.com /root 2>&1 >>/var/log/sailing.err
-    cp /home/sailing/code/configuration/cp_root_mail_properties /usr/local/bin
     chown root /usr/local/bin/cp_root_mail_properties
     chgrp root /usr/local/bin/cp_root_mail_properties
     chmod 755 /usr/local/bin/cp_root_mail_properties
-    cp /home/sailing/code/configuration/cp_root_mail_properties_sudoers /etc/sudoers.d
     if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
         echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
-        $GIT_REPOSITORY/configuration/imageupgrade.sh
+        /usr/local/bin/imageupgrade.sh
     else
         echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
         echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
@@ -49,9 +46,9 @@ start_servers() {
             done
         else
             echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched." >>/var/log/sailing.err
-            echo "Initializing local MongoDB replica set \"replica\"..."
+            echo "Initializing local MongoDB replica set \"replica\"..." >>/var/log/sailing.err
             while ! echo "rs.initiate()" | mongo; do
-                echo "MongoDB not ready yet; waiting and trying again..."
+                echo "MongoDB not ready yet; waiting and trying again..." >>/var/log/sailing.err
                 sleep 5
             done
             FIRST_SERVER=$( eval $( ${EC2_METADATA_CMD} -d | sed -e 's/^user-data: //' ); echo $SERVER_NAME )
@@ -77,7 +74,7 @@ configure_and_start_server() {
   chgrp sailing "${SERVERS_DIR}/${conf}"
   # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
   /usr/local/bin/cp_root_mail_properties "${conf}"
-  su - sailing -c "cd ${SERVERS_DIR}/${conf} && ${GIT_REPOSITORY}/java/target/refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
+  su - sailing -c "cd ${SERVERS_DIR}/${conf} && refreshInstance.sh auto-install; ./start" 2>>/var/log/sailing.err >>/var/log/sailing.err
   pushd ${SERVERS_DIR}/${conf}
   ./defineReverseProxyMappings.sh 2>>/var/log/sailing.err >>/var/log/sailing.err
   popd

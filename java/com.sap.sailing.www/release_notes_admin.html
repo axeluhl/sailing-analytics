@@ -23,6 +23,15 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">June 2024</h2>
+          <ul class="bulletList">
+            <li>Upgraded to TracAPI 3.15.8, supporting more TracTrac invalid result markers (IRMs),
+                in particular DCT, DNE, and RCT.</li>
+            <li>For raw data output of wind sensor and object positions, where permitted, use seven instead of
+                six decimal places in lat/lng output to increase resolution to approximately 1cm.</li>
+            <li>Fixed concurrency issue with subscription webhook callbacks which in rare cases led
+                expiring subscriptions or failing payments to not properly revoke user permissions.</li>
+          </ul>
           <h2 class="articleSubheadline">May 2024</h2>
           <ul class="bulletList">
             <li>Reading the wind estimation data from a server during start-up, using the

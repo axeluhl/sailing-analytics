@@ -5,12 +5,29 @@ on:
       - 'wiki/**'
       - '.github/workflows/*'
       - '**/*.md'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: Skip tests (set to "true" to skip all tests)
+        default: 'false'
+
 jobs:
   build:
     runs-on: ubuntu-latest-64cpu
     #runs-on: ubuntu-latest-4cpu
     steps:
+      - name: Allocate swap space
+        shell: bash
+        run: |
+          sudo dd if=/dev/zero of=/mnt/large-swapfile bs=1G count=10
+          sudo chmod 600 /mnt/large-swapfile
+          sudo mkswap /mnt/large-swapfile
+          sudo chown root:root /mnt/large-swapfile
+          sudo swapon /mnt/large-swapfile
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
         with:
@@ -40,7 +57,7 @@ jobs:
           APP_PARAMETERS: "-Daws.region=eu-west-1 -Dgoogle.maps.authenticationparams=${{ secrets.GOOGLE_MAPS_AUTHENTICATIONPARAMS }} -Daws.s3.test.s3AccessId=${{ secrets.AWS_S3_TEST_S3ACCESSID }} -Daws.s3.test.s3AccessKey=${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}"
           JAVA8_HOME: ${{env.JAVA_HOME_8_X64}}
         run: |
-          ./configuration/buildAndUpdateProduct.sh -x 60 build 2>&1 | tee build.log
+            ./configuration/buildAndUpdateProduct.sh -x 60 ${{ github.event.inputs.skip_tests == 'true' && '-t' || '' }} build 2>&1 | tee build.log
       - name: Upload build log
         uses: actions/upload-artifact@v4
         if: always()
@@ -59,10 +76,11 @@ jobs:
           list-tests: failed
           reporter: java-junit
           fail-on-error: true
-      - shell: bash
+      - name: Build Release
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        shell: bash
         run: |
-          ./configuration/buildAndUpdateProduct.sh -u -L release
+          ./configuration/buildAndUpdateProduct.sh -u -L ${{ github.event.inputs.skip_tests == 'true' && '-n untested' || '' }} release
       - name: Determine release name
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
@@ -84,12 +102,10 @@ jobs:
       - name: Create Release
         id: create_release
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.SIMPLE_VERSION_INFO }}
-          release_name: ${{ env.SIMPLE_VERSION_INFO }}
+          name: ${{ env.SIMPLE_VERSION_INFO }}
           draft: false
           prerelease: false
       - name: Upload Release Asset tar.gz
@@ -119,7 +135,11 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            JOB=SAPSailingAnalytics-master
+            if [ "${{ github.event.inputs.skip_tests }}" = "true" ]; then
+              JOB=SAPSailingAnalytics-master-fasttrack-no-tests
+            else
+              JOB=SAPSailingAnalytics-master
+            fi
           elif [[ "${{ github.ref }}" =~ refs/heads/releases/.* ]]; then
             JOB=$( echo "${{ github.ref }}" | sed -e 's/^refs\/heads\/releases\///' )
           else
