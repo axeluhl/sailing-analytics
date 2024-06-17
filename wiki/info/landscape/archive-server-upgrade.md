@@ -3,7 +3,7 @@
 ## TL;DR
 
 - Optionally, to accelerate DB reads, launch MongoDB replica for ``archive`` replica set (see [here](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:)); wait until MongoDB replica is in ``SECONDARY`` state
-- Launch "more like this" based on existing primary archive, adjusting the ``INSTALL_FROM_RELEASE`` user data entry to the release of choice and the ``Name`` tag to "SL Archive (New Candidate)"
+- Launch "more like this" based on existing primary archive, adjusting the ``INSTALL_FROM_RELEASE`` user data entry to the release of choice and the ``Name`` tag to "SL Archive (New Candidate)" and adjusting the availability zone (AZ) such that it does not equal the AZ of the current production ARCHIVE and ideally has either the central reverse proxy or a disposable reverse proxy in that AZ so that cross-AZ traffic is avoided.
 - Wait until the new instance is done with its background tasks and CPU utilization goes to 0% (approximately 36h)
 - Create an entry in the reverse proxy's ``/etc/httpd/conf.d/001-events.conf`` file like this:
 ```
