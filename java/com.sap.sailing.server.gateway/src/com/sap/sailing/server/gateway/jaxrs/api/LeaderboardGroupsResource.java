@@ -167,6 +167,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                         jsonLeaderboard.put(LeaderboardNameConstants.DISPLAYNAME, leaderboard.getDisplayName());
                         jsonLeaderboard.put(LeaderboardNameConstants.ISMETALEADERBOARD, isMetaLeaderboard);
                         jsonLeaderboard.put(LeaderboardNameConstants.ISREGATTALEADERBOARD, isRegattaLeaderboard);
+                        final JSONArray discardIndices = AbstractLeaderboardsResource.getDiscardingRuleAsJson(leaderboard);
+                        if (discardIndices != null) {
+                            jsonLeaderboard.put(LeaderboardNameConstants.DISCARDS, discardIndices);
+                        }
                         jsonLeaderboardEntries.add(jsonLeaderboard);
                         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                         if (scoreCorrection != null) {
