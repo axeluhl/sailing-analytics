@@ -4597,14 +4597,14 @@ Replicator {
     }
 
     private void setWindEstimationOnAllTrackedRaces(WindEstimationFactoryService service) {
-        Iterable<Regatta> allRegattas = getAllRegattas();
-        for (Regatta regatta : allRegattas) {
-            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+        final Iterable<Regatta> allRegattas = getAllRegattas();
+        for (final Regatta regatta : allRegattas) {
+            final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
-                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-                    for (TrackedRace trackedRace : trackedRaces) {
+                    final Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (final TrackedRace trackedRace : trackedRaces) {
                         trackedRace.setWindEstimation(
                                 service == null ? null : service.createIncrementalWindEstimationTrack(trackedRace));
                     }
