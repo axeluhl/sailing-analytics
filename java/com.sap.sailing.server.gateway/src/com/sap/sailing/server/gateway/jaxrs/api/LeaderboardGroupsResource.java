@@ -147,6 +147,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.DESCRIPTION, leaderboardGroup.getDescription());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT, timePoint.toString());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT_MILLIS, timePoint.asMillis());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.HAS_OVERALL_LEADERBOARD, leaderboardGroup.hasOverallLeaderboard());
+                if (leaderboardGroup.hasOverallLeaderboard()) {
+                    jsonLeaderboardGroup.put(LeaderboardGroupConstants.OVERALL_LEADERBOARD_NAME, leaderboardGroup.getOverallLeaderboardName());
+                }
                 final Set<Event> eventsReferencingLeaderboardGroup = new HashSet<>();
                 final JSONArray idsOfEventsReferencingLeaderboardGroup = new JSONArray();
                 for (final Event event : getService().getAllEvents()) {
