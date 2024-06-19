@@ -30,5 +30,5 @@ public interface LeaderboardNameConstants {
     static final String RACEVIEWERURLS = "raceViewerUrls";
     static final String HASGPSDATA = "hasGpsData";
     static final String HASWINDDATA = "hasWindData";
-    
+    static final String DISCARDS = "discardIndexResultsStartingWithHowManyRaces";
 }

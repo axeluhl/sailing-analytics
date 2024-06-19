@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -67,6 +68,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
             LeaderboardNameConstants.ISMETALEADERBOARD, LeaderboardNameConstants.ISREGATTALEADERBOARD,
             LeaderboardNameConstants.SCORINGCOMMENT, LeaderboardNameConstants.LASTSCORINGUPDATE,
             LeaderboardNameConstants.SCORINGSCHEME, LeaderboardNameConstants.REGATTANAME,
+            LeaderboardNameConstants.DISCARDS,
             LeaderboardNameConstants.SERIES, LeaderboardNameConstants.ISMEDALSERIES, LeaderboardNameConstants.FLEETS,
             LeaderboardNameConstants.COLOR, LeaderboardNameConstants.ORDERING, LeaderboardNameConstants.RACES,
             LeaderboardNameConstants.ISMEDALRACE, LeaderboardNameConstants.ISTRACKED,
@@ -244,13 +246,13 @@ public class CompareServersResource extends AbstractSailingServerResource {
      */
     private Pair<Object, Object> fetchLeaderboardgroupDetailsAndRemoveDuplicates(String server1, String server2,
             String leaderboardgroupId, String bearer1, String bearer2) throws Exception {
-        Object lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1), bearer1);
-        Object lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2), bearer2);
-        Pair<Object, Object> result = removeUnnecessaryAndDuplicateFields(lgdetail1, lgdetail2);
+        final JSONObject lgdetail1 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server1), bearer1);
+        final JSONObject lgdetail2 = getLeaderboardgroupDetailsById(leaderboardgroupId, RemoteServerUtil.createBaseUrl(server2), bearer2);
+        final Pair<Object, Object> result = removeUnnecessaryAndDuplicateFields(lgdetail1, lgdetail2);
         return result;
     }
 
-    Pair<Object, Object> removeUnnecessaryAndDuplicateFields(Object lgdetail1, Object lgdetail2) {
+    Pair<Object, Object> removeUnnecessaryAndDuplicateFields(JSONAware lgdetail1, JSONAware lgdetail2) {
         removeUnnecessaryFields(lgdetail1);
         removeUnnecessaryFields(lgdetail2);
         Pair<Object, Object> result = removeDuplicateEntries(lgdetail1, lgdetail2);
@@ -275,10 +277,10 @@ public class CompareServersResource extends AbstractSailingServerResource {
     /**
      * Fetches the JSON for a given leaderboardgroup UUID.
      */
-    private Object getLeaderboardgroupDetailsById(String leaderboardgroupId, URL baseUrl, String bearer) throws Exception {
-        final URLConnection lgdetailc = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
+    private JSONObject getLeaderboardgroupDetailsById(String leaderboardgroupId, URL baseUrl, String bearer) throws Exception {
+        final URLConnection lgdetails = HttpUrlConnectionHelper.redirectConnectionWithBearerToken(
                 RemoteServerUtil.createRemoteServerUrl(baseUrl, createLgDetailPath(leaderboardgroupId), null), bearer);
-        Object result = JSONValue.parse(new InputStreamReader(lgdetailc.getInputStream(), "UTF-8"));
+        JSONObject result = (JSONObject) JSONValue.parse(new InputStreamReader(lgdetails.getInputStream(), "UTF-8"));
         return result;
     }
 
@@ -296,7 +298,7 @@ public class CompareServersResource extends AbstractSailingServerResource {
      * empty path string to start with, removing fields to be ignored or not to be compared in-place, modifying
      * the {@code json} object.
      */
-    private void removeUnnecessaryFields(Object json) {
+    private void removeUnnecessaryFields(JSONAware json) {
         removeUnnecessaryFields(json, "");
     }
     
