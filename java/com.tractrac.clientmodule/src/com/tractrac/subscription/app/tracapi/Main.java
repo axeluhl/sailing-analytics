@@ -11,7 +11,6 @@ import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IEventFactory;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.subscription.lib.api.*;
-import com.tractrac.util.lib.api.autolog.LoggerLocator;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,9 +25,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException,
-            SubscriberInitializationException, CreateModelException, URISyntaxException {
-
-        LoggerLocator.getLoggerManager().init(1, "println");
+            SubscriberInitializationException, CreateModelException {
 
         Object[] myArgs = parseArguments(args);
         URI paramURI = (URI) myArgs[0];
@@ -56,11 +53,7 @@ public class Main {
         eventSubscriber.subscribeControls(listener);
         eventSubscriber.subscribeCompetitors(listener);
 
-        IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(
-                race,
-                new URI("tcp://localhost:4400"),
-                new URI("tcp://localhost:4401")
-        );
+        IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(race);
         raceSubscriber.subscribeConnectionStatus(listener);
         raceSubscriber.subscribeControlPositions(listener);
         raceSubscriber.subscribePositions(listener);

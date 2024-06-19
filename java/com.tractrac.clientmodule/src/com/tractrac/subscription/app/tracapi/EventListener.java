@@ -27,12 +27,9 @@ import java.util.UUID;
  */
 public class EventListener extends AbstractListener {
 
-    private IRace race;
-
     private static void show(Object obj) {
         System.out.println(TimeUtils.formatDateInMillis(new Date().getTime()) + ": " + obj);
     }
-
 
     private static Map<UUID, Integer> controlPos = new HashMap<>();
     private static Map<UUID, Integer> compPos = new HashMap<>();
@@ -70,14 +67,6 @@ public class EventListener extends AbstractListener {
 
     @Override
     public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
-        if (this.race != null) {
-            String markCourseArea = control.getCourseArea();
-            String raceCourseArea = this.race.getCourseArea();
-            if (markCourseArea != null && raceCourseArea != null && !markCourseArea.equals(raceCourseArea)) {
-                //show("Discarding position because control course area " + markCourseArea + "(" + control.getName() + ") is not like " + race.getCourseArea());
-                return;
-            }
-        }
         String message = "COTRLPOS " + control.getName() + " - " + markNumber +
                 "\t" + control.getShortName() + "\t" +
                 position.toString();
@@ -113,7 +102,7 @@ public class EventListener extends AbstractListener {
         message.append(position.toString());
         int posNumber = increasePos(compPos, raceCompetitor.getCompetitor().getId());
         message.append(", TOTAL POS: ").append(posNumber);
-        //show(message.toString());
+        show(message.toString());
     }
 
     @Override
@@ -261,13 +250,5 @@ public class EventListener extends AbstractListener {
         show("DATA SOURCE CHANGE " + race + ":\n" +
                 "\tLIVE URI: " + race.getLiveURI() + "\n" +
                 "\tSTORED URI: " + race.getStoredURI());
-    }
-
-    public IRace getRace() {
-        return race;
-    }
-
-    public void setRace(IRace race) {
-        this.race = race;
     }
 }
