@@ -16,6 +16,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.9
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/06/2024
+
+ 1) Features
+
+ - The dataserver is able to filter the control positions by course area. (Requested by Axel Ulh, 15/04/2024)
+ - If TracAPI tries to connect to a race and there is an MTB created, the library always returns the content
+ of the MTB file (Requested by Jorge Piera, 15/04/2024)
+
+********************************************
         TracAPI 3.15.8
 ********************************************
 This is a final version. It keeps the backward compatibility.
