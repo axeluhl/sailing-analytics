@@ -171,6 +171,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.WASZP.getDisplayName(), imageResources.WaszpIcon());
         boatClassIconsMap.put(BoatClassMasterdata.WAYFARER.getDisplayName(), imageResources.WayfarerIcon());
         boatClassIconsMap.put(BoatClassMasterdata.WETA.getDisplayName(), imageResources.WetaIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.WINGFOIL.getDisplayName(), imageResources.WingfoilIcon());
         boatClassIconsMap.put(BoatClassMasterdata.X_332.getDisplayName(), imageResources.X332Icon());
         boatClassIconsMap.put(BoatClassMasterdata.X_99.getDisplayName(), imageResources.X99Icon());
         boatClassIconsMap.put(BoatClassMasterdata.RUNNING.getDisplayName(), imageResources.RunningIcon());
