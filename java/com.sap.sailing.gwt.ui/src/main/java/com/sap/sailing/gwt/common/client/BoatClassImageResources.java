@@ -592,6 +592,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource WetaIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/WINGFOIL.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource WingfoilIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/TOM_28_MAX.png")
     @ImageOptions(preventInlining = true)
     ImageResource Tom28MaxIcon();
