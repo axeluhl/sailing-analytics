@@ -57,9 +57,7 @@ public class Main {
         eventSubscriber.subscribeCompetitors(listener);
 
         IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(
-                race,
-                new URI("tcp://localhost:4400"),
-                new URI("tcp://localhost:4401")
+                race
         );
         raceSubscriber.subscribeConnectionStatus(listener);
         raceSubscriber.subscribeControlPositions(listener);

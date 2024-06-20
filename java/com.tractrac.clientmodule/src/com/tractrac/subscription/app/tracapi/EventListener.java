@@ -41,8 +41,10 @@ public class EventListener extends AbstractListener {
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
         show(storedDataEvent);
         if (storedDataEvent.getType() == IStoredDataEvent.Type.End) {
-            System.out.println("CONTROLS: " + controlPos);
-            System.out.println("COMPETITORS: " + compPos);
+            synchronized (this) {
+                System.out.println("CONTROLS: " + controlPos);
+                System.out.println("COMPETITORS: " + compPos);
+            }
         }
     }
 
@@ -83,10 +85,10 @@ public class EventListener extends AbstractListener {
                 position.toString();
         int posNumber = increasePos(controlPos, control.getId());
         message += (", TOTAL POS: " + posNumber);
-        show(message);
+       // show(message);
     }
 
-    private int increasePos(Map<UUID, Integer> map, UUID id) {
+    private synchronized int increasePos(Map<UUID, Integer> map, UUID id) {
         map.merge(id, 1, Integer::sum);
         return map.get(id);
     }
