@@ -16,6 +16,34 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.10
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 20/06/2024
+
+ 1) Bugs
+
+ - If the parameters file has a MTB and the user overwrites the stored-uri with another value, the library ignores this
+  parameters and gives priority to the MTB file. But if the consumer application is overriding the stored-uri with a
+  valid MTB file, the library is also ignoring this parameter. This is a bug. Now, if the consumer application uses
+  an MTB file, this file will be always used and the library will only force the usage of the MTB file if the user
+  is overwriting the the stored-uri using a dataserver connection. (Reported by Axel Uhl, 20/06/2024)
+
+********************************************
+        TracAPI 3.15.9
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/06/2024
+
+ 1) Features
+
+ - The dataserver is able to filter the control positions by course area. (Requested by Axel Ulh, 15/04/2024)
+ - If TracAPI tries to connect to a race and there is an MTB created, the library always returns the content
+ of the MTB file (Requested by Jorge Piera, 15/04/2024)
+
+********************************************
         TracAPI 3.15.8
 ********************************************
 This is a final version. It keeps the backward compatibility.
