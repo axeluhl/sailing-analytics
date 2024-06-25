@@ -158,7 +158,7 @@ public enum BoatClassMasterdata {
     WASZP ("WASZP", true, 3.35, 2.25, BoatHullType.MONOHULL, false, "WASZPs"),
     WAYFARER ("Wayfarer", true, 4.82, 1.85, BoatHullType.MONOHULL, false),
     WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
-    WINGFOIL ("Wingfoil", true, 1.95, 0.8, BoatHullType.SURFERBOARD, false, "Wing Foil"),
+    WINGFOIL ("Wingfoil", true, 1.95, 0.8, BoatHullType.SURFERBOARD, false, "Wing Foil", "X-15"),
     X_332 ("X-332", true, 10.06, 3.30, BoatHullType.MONOHULL, true, "X332"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
