@@ -16,6 +16,29 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.12
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 25/06/2024
+
+ 1) Bugs
+
+- The previous version 3.15.11 had an error in the build generation. (Reported by Jorge Piera, 25/06/2024)
+
+********************************************
+        TracAPI 3.15.11
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 25/06/2024
+
+ 1) Bugs
+
+- The MTB reader is not releasing all the resources once the reading process is over (Reported by Axel Uhl,
+22/06/2024)
+
+********************************************
         TracAPI 3.15.10
 ********************************************
 This is a final version. It keeps the backward compatibility.
@@ -24,11 +47,11 @@ This is a final version. It keeps the backward compatibility.
 
  1) Bugs
 
- - If the parameters file has a MTB and the user overwrites the stored-uri with another value, the library ignores this
-  parameters and gives priority to the MTB file. But if the consumer application is overriding the stored-uri with a
-  valid MTB file, the library is also ignoring this parameter. This is a bug. Now, if the consumer application uses
-  an MTB file, this file will be always used and the library will only force the usage of the MTB file if the user
-  is overwriting the the stored-uri using a dataserver connection. (Reported by Axel Uhl, 20/06/2024)
+- If the parameters file has an MTB and the user overwrites the stored-uri with another value, the library ignores the
+ user parameter and gives priority to the MTB file. And it doesn't matter if the provided stored-uri is a dataserver
+ port or an MTB: the library is always ignoring this parameter. This is a bug. Now, if the user uses an MTB file,
+ this file will always be used and the library will only force the usage of the MTB file if the user overwrites
+ the stored-uri using a dataserver port. (Reported by Axel Uhl, 20/06/2024)
 
 ********************************************
         TracAPI 3.15.9
