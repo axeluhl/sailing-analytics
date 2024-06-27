@@ -30,6 +30,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.CONTENDER, BoatClassMasterdata.HANSA_303,
                 BoatClassMasterdata.FINN, BoatClassMasterdata.MUSTO_SKIFF, BoatClassMasterdata.OPEN_BIC,
                 BoatClassMasterdata.OPTIMIST, BoatClassMasterdata.PWA,
+                BoatClassMasterdata.OK,
                 BoatClassMasterdata.RS_AERO, BoatClassMasterdata.RS_X,
                 BoatClassMasterdata.IQFOIL_MEN, BoatClassMasterdata.IQFOIL_WOMEN, BoatClassMasterdata.IQFOIL_YOUTH, 
                 BoatClassMasterdata.SPLASH_BLUE, BoatClassMasterdata.SPLASH_RED, BoatClassMasterdata.SPLASH_GREEN,
