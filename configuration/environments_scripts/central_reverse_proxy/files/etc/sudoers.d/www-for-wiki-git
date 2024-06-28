@@ -1,3 +1,3 @@
 # Enables the apache user, on all hosts, to execute commands as the wiki user. This can be done without a password for 
-# running git, and all of its commands.
+# running git, and all of its commands. This is used for the cgi-bin script on the central.
 apache ALL = (wiki) NOPASSWD: /usr/bin/git

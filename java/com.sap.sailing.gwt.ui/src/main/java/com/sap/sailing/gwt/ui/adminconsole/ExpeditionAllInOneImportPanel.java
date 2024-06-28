@@ -33,11 +33,11 @@ import com.sap.sailing.gwt.ui.adminconsole.resulthandling.ExpeditionDataImportRe
 import com.sap.sailing.gwt.ui.client.Displayer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
-import com.sap.sse.gwt.client.fileupload.FileUploadUtil;
 
 /**
  * The UI form to upload data for expedition all in one import.
@@ -150,7 +150,7 @@ public class ExpeditionAllInOneImportPanel extends Composite {
         formPanel.addSubmitCompleteHandler(event -> {
             validation.run();
             busyIndicator.setBusy(false);
-            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(FileUploadUtil.getApplicationJsonContent(event));
+            final ExpeditionDataImportResponse response = ExpeditionDataImportResponse.parse(FileUploadUtil.getApplicationJsonContentFromHtml(event.getResults()));
             if (response == null) {
                 Notification.notify(StringMessages.INSTANCE.unexpectedErrorDuringFileImport(), NotificationType.ERROR);
             } else if (response.hasEventId()) {

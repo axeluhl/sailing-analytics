@@ -23,6 +23,69 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">June 2024</h2>
+          <ul class="bulletList">
+            <li>Upgraded to TracAPI 3.15.8, supporting more TracTrac invalid result markers (IRMs),
+                in particular DCT, DNE, and RCT.</li>
+            <li>For raw data output of wind sensor and object positions, where permitted, use seven instead of
+                six decimal places in lat/lng output to increase resolution to approximately 1cm.</li>
+            <li>Fixed concurrency issue with subscription webhook callbacks which in rare cases led
+                expiring subscriptions or failing payments to not properly revoke user permissions.</li>
+            <li>When archiving a replica set, any remote reference pointing to it from the archive running
+                at <tt>www.sapsailing.com</tt> is being removed. Now, the same reference will also be removed
+                from the failover archive at <tt>archive-failover.sapsailing.com</tt> to reduce inconsistency
+                and a circular reference structure in case we need to switch to the failover.</li>
+            <li>Upgraded to TracAPI 3.15.9, filtering mark positions by course area on the server side now and
+                offering the client archived MTB files instead of live DB access where available.</li>
+            <li>Upgraded to TracAPI 3.15.10, fixing a bug introduced by TracAPI 3.15.9 regarding locally
+                overriding the so-called "stored data URI"</li>
+            <li>Added class "Wingfoil"</li>
+            <li>TracAPI 3.15.12 fixes the MTB file reader that was not releasing all the resources once
+                the reading process was over.</li>
+            <li>Added class "RS Vareo"</li>
+          </ul>
+          <h2 class="articleSubheadline">May 2024</h2>
+          <ul class="bulletList">
+            <li>Reading the wind estimation data from a server during start-up, using the
+                <tt>windestimation.source.url</tt> system property, now requires authentication.
+                The <tt>java/target/start</tt> script now reads the <tt>WINDESTIMATION_BEARER_TOKEN</tt>
+                variable and passes it as the <tt>windestimation.source.bearertoken</tt> system property
+                to the application. The user authenticated by that token must have the
+                <tt>WIND_ESTIMATION_MODELS:READ</tt> permission for the server identified by the
+                URL provided in the <tt>windestimation.source.url</tt> property, for example
+                <tt>WIND_ESTIMATION_MODELS:READ:ARCHIVE</tt> if the URL is <tt>https://sapsailing.com</tt></li>
+            <li>Reading the polar data from a server during start-up, using the
+                <tt>polardata.source.url</tt> system property, now requires authentication.
+                The <tt>java/target/start</tt> script now reads the <tt>POLAR_DATA_BEARER_TOKEN</tt>
+                variable and passes it as the <tt>polardata.source.bearertoken</tt> system property
+                to the application. The user authenticated by that token must have the
+                <tt>POLAR_DATA:READ</tt> permission for the server identified by the
+                URL provided in the <tt>polardata.source.url</tt> property, for example
+                <tt>POLAR_DATA:READ:ARCHIVE</tt> if the URL is <tt>https://sapsailing.com</tt></li>
+          </ul>
+          <h2 class="articleSubheadline">April 2024</h2>
+          <ul class="bulletList">
+            <li>The TracTrac connector now pools and re-uses event subscriber threads for live connections
+                for the same event with equal stored and live URIs. This helps reduce the number of threads
+                running in the system and is "friendlier" on the TracTrac infrastructure regarding the
+                number of concurrent connections the system needs to manage.</li>
+            <li>During live TracTrac connections, mark positions are now filtered by the race's course area if
+                both, mark and race, specify one. This way, redundant and excessive mark fixes can be avoided,
+                don't consume extra memory and don't waste replication bandwidth. See also
+                <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5919">bug 5919</a>.</li>
+            <li>Fixed file upload for Chrome browsers after Chrome made an incompatible change, appending
+                a combination of <tt>&lt;div&gt;</tt> tags after the already <tt>&lt;pre&gt;</tt>-enclosed
+                form submission completion payload.</li>
+            <li>The TracTrac connector will no longer disconnect from a race when it is abandoned. It is now
+                assumed the race will be re-sailed, and so the connector will keep tracking the race.</li>
+            <li>Fixed handling of <tt>null</tt> values in "compareservers" end point.</li>
+            <li>Upgraded to TracAPI 3.15.7, fixing an issue with static mark positions not transmitted during live races.</li>
+            <li>The LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_ONE_TO_FINAL_AND_TWO_TO_SEMIFINAL scoring scheme,
+                as used typically for iQFOil formats with quarter/semi/grand finals, now does no longer require explicit
+                column factors of 1.0 for those medal-series race columns. The medal series-based doubling is deactivated
+                now for this scoring scheme. Should you have relied on this scheme doubling your medal series scores,
+                you now have to adjust the column factors for those race columns to 2.0 explicitly.</li>
+          </ul>
           <h2 class="articleSubheadline">March 2024</h2>
           <ul class="bulletList">
             <li>Support the "AIN" IOC code for "ATHLÈTE INDIVIDUEL NEUTRE" with its special flag.</li>

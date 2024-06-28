@@ -15,9 +15,14 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
+import com.sap.sse.common.fileupload.FileUploadUtil;
 
 /**
- * Abstract servlet handling multipart-mime file upload coming from an upload form
+ * Abstract servlet handling multipart-mime file upload coming from an upload form. The response content type is set to
+ * "text/html" by default (see {@link #setJsonEncodedInHtmlResponseHeader(HttpServletResponse)}). If your response is a
+ * JSON document, encode it as an HTML document {@code body} using
+ * {@link FileUploadUtil#getHtmlWithEmbeddedJsonContent(String)}. A client can then use the submit complete event
+ * response and decode it using {@link FileUploadUtil#getApplicationJsonContentFromHtml(String)}.
  * 
  * @author Fredrik Teschke
  * @author Axel Uhl
@@ -56,7 +61,7 @@ public abstract class AbstractFileUploadServlet extends AbstractJsonHttpServlet 
             // Conversely, trying to use text/html as content encoding leads some browsers---especially on mobile devices---
             // to do ugly things to the content returned, such as replacing digit sequences by a corresponding <a> element
             // that allows the user to dial that number with the phone app...
-            setJsonResponseHeader(resp);
+            setJsonEncodedInHtmlResponseHeader(resp);
             process(items, req, resp);
         } catch (FileUploadException e) {
             throw new IOException("Could not parse request");

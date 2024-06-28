@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,5 +47,10 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
             }
         }
         discardThresholdBoxes = new DiscardThresholdBoxes(this, leaderboard.getDiscardThresholds(), stringMessages);
+    }
+
+    @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return displayNameTextBox;
     }
 }

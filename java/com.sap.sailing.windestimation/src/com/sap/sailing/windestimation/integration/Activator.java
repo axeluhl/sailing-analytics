@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.integration;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +53,14 @@ public class Activator implements BundleActivator {
      * file system that contains serialized model files to load.
      */
     private static final String WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME = "windestimation.source.folder";
+    
+    /**
+     * If a system property with this name is provided, the property value will be used as a bearer token in an HTTP
+     * header <tt>Authorization: Bearer ...</tt> to authenticate the request fetching the wind estimation data from the
+     * URL specified in either the {@link #WIND_ESTIMATION_MODEL_DATA_SOURCE_URL_PROPERTY_NAME} or the
+     * {@link #WIND_ESTIMATION_MODEL_DATA_SOURCE_ALWAYS_URL_PROPERTY_NAME} property.
+     */
+    private static final String WIND_ESTIMATION_MODEL_BEARER_TOKEN_PROPERTY_NAME = "windestimation.source.bearertoken";
 
     private final Set<ServiceRegistration<?>> registrations = new HashSet<>();
     
@@ -72,6 +81,8 @@ public class Activator implements BundleActivator {
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_ALWAYS_URL_PROPERTY_NAME);
         final String windEstimationModelDataSourceFolder = System
                 .getProperty(WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME);
+        final String windEstimationModelBearerToken = System
+                .getProperty(WIND_ESTIMATION_MODEL_BEARER_TOKEN_PROPERTY_NAME);
         int loadFromCount = (windEstimationModelDataSourceURL != null ? 1 : 0) +
                 (windEstimationModelDataSourceAlwaysURL != null ? 1 : 0) +
                 (windEstimationModelDataSourceFolder != null ? 1 : 0);
@@ -82,9 +93,9 @@ public class Activator implements BundleActivator {
                     + WIND_ESTIMATION_MODEL_DATA_SOURCE_FOLDER_PROPERTY_NAME + "\"");
         }
         if (windEstimationModelDataSourceURL != null && !service.isReady()) {
-            importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL);
+            importWindEstimationModelsFromUrl(windEstimationModelDataSourceURL, Optional.ofNullable(windEstimationModelBearerToken));
         } else if (windEstimationModelDataSourceAlwaysURL != null) {
-            importWindEstimationModelsFromUrl(windEstimationModelDataSourceAlwaysURL);
+            importWindEstimationModelsFromUrl(windEstimationModelDataSourceAlwaysURL, Optional.ofNullable(windEstimationModelBearerToken));
         } else if (windEstimationModelDataSourceFolder != null) {
             importWindEstimationModelsFromFolder(windEstimationModelDataSourceFolder);
         }
@@ -117,10 +128,15 @@ public class Activator implements BundleActivator {
         }
     }
 
-    private void importWindEstimationModelsFromUrl(String windEstimationModelDataSourceURL) {
+    /**
+     * @param windEstimationModelBearerToken
+     *            if present, this bearer token will be used to authenticate the request for the wind estimation model
+     *            data
+     */
+    private void importWindEstimationModelsFromUrl(String windEstimationModelDataSourceURL, Optional<String> windEstimationModelBearerToken) {
         logger.info("Importing wind estimation data from URL: " + windEstimationModelDataSourceURL);
         WindEstimationDataClient windEstimationDataClient = new WindEstimationDataClient(
-                windEstimationModelDataSourceURL, service);
+                windEstimationModelDataSourceURL, service, windEstimationModelBearerToken);
         try {
             windEstimationDataClient.updateWindEstimationModels();
         } catch (Exception e) {

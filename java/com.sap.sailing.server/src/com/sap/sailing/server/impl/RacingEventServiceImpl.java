@@ -1879,12 +1879,12 @@ Replicator {
         if (useStartTimeInference && controlTrackingFromStartAndFinishTimes) {
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
-        com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
+        final com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme, courseAreaIds,
                 buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
                 autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor);
-        Regatta regatta = regattaWithCreatedFlag.getA();
+        final Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
             replicateSpecificRegattaWithoutRaceColumns(regatta);
@@ -1916,13 +1916,13 @@ Replicator {
             ScoringScheme scoringScheme, Iterable<? extends Serializable> courseAreaIds, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             boolean autoRestartTrackingUponCompetitorSetChange, RankingMetricConstructor rankingMetricConstructor) {
-        Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
+        final Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), canBoatsOfCompetitorsChangePerRace,
                 competitorRegistrationType, startDate, endDate, series, persistent, scoringScheme, id,
                 Util.map(courseAreaIds, courseAreaId->getBaseDomainFactory().getExistingCourseAreaById(courseAreaId)),
                 buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes,
                 autoRestartTrackingUponCompetitorSetChange, rankingMetricConstructor, registrationLinkSecret);
-        boolean wasCreated = addAndConnectRegatta(persistent, regatta);
+        final boolean wasCreated = addAndConnectRegatta(persistent, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
         }
@@ -4597,14 +4597,14 @@ Replicator {
     }
 
     private void setWindEstimationOnAllTrackedRaces(WindEstimationFactoryService service) {
-        Iterable<Regatta> allRegattas = getAllRegattas();
-        for (Regatta regatta : allRegattas) {
-            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+        final Iterable<Regatta> allRegattas = getAllRegattas();
+        for (final Regatta regatta : allRegattas) {
+            final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
-                    Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
-                    for (TrackedRace trackedRace : trackedRaces) {
+                    final Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
+                    for (final TrackedRace trackedRace : trackedRaces) {
                         trackedRace.setWindEstimation(
                                 service == null ? null : service.createIncrementalWindEstimationTrack(trackedRace));
                     }

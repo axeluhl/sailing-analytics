@@ -29,7 +29,7 @@ public class StartTimeResetHandler extends UpdateHandler implements StartTimeCha
             return;
         }
         URL startTimeUpdateURL = buildUpdateURL();
-        logger.info("Using " + startTimeUpdateURL.toString() + " for the start reset!");
+        logger.info("Using " + eraseSecurityRelatedValuesFromURL(startTimeUpdateURL.toString()) + " for the start reset!");
         HttpURLConnection connection =  (HttpURLConnection) startTimeUpdateURL.openConnection();
         try {
             connection = setConnectionProperties(connection);
@@ -42,7 +42,8 @@ public class StartTimeResetHandler extends UpdateHandler implements StartTimeCha
             if (connection != null) {
                 connection.disconnect();
             } else {
-                logger.severe("Connection to TracTrac start time reset URL " + startTimeUpdateURL.toString() + " could not be established");
+                logger.severe("Connection to TracTrac start time reset URL " +
+                        eraseSecurityRelatedValuesFromURL(startTimeUpdateURL.toString()) + " could not be established");
             }
         }
     }

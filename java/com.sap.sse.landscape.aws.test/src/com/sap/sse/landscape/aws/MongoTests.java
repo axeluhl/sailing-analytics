@@ -13,6 +13,7 @@ import java.util.Random;
 
 import org.bson.Document;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -26,6 +27,7 @@ import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessInReplicaSetImpl;
 import com.sap.sse.landscape.mongodb.impl.MongoReplicaSetImpl;
 
+@Ignore("Needs a specific MongoDB replica set named 'rs0' in the environment")
 public class MongoTests {
     private static final Optional<Duration> optionalTimeout = Optional.of(Duration.ONE_MINUTE.times(5));
 

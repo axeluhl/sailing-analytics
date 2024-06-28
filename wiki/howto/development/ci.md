@@ -93,7 +93,7 @@ The image has been crafted specifically to contain the tools required for the bu
    # is an alternative; unpack to /usr/local/bin.
    cd /usr/local/bin
    wget -O - "https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz" | tar xzvpf -
-   apt-get -y install cloud-guest-utils maven rabbitmq-server mongodb-org firefox fwupd linux-aws linux-headers-aws linux-image-aws docker.io
+   apt-get -y install jq cloud-guest-utils maven rabbitmq-server mongodb-org firefox fwupd linux-aws linux-headers-aws linux-image-aws docker.io
    apt-get -y autoremove
    cd /tmp
    mv /tmp/imageupgrade /usr/local/bin

@@ -1,0 +1,30 @@
+#!/bin/bash
+# Downloads releases of GWT and the gwt-maven-plugin and installs them to the local Maven repo at ~/.m2
+# as well as copies the GWT JARs to the sailing Git workspace
+# Usage: install-gwt-from-fork-releases {gwt-repo-URL} {gwt-maven-plugin-repo-URL} {gwt-version} {sailing-git-root}
+# Example: install-gwt-from-fork-releases https://github.com/axeluhl/gwt https://github.com/axeluhl/gwt-maven-plugin 2.11.0 .
+GWT_REPO_URL="${1}"
+GWT_MAVEN_PLUG_REPO_URL="${2}"
+GWT_VERSION="${3}"
+SAILING_GIT_ROOT="$( cd ${4}; pwd )"
+GWT="`mktemp -t -d gwt.XXXXX`"
+cd "${GWT}"
+echo "GWT directory: ${GWT}"
+curl -L "${GWT_REPO_URL}/releases/download/gwt-${GWT_VERSION}/gwt-${GWT_VERSION}.zip" -o "gwt-${GWT_VERSION}.zip"
+curl -L "${GWT_MAVEN_PLUG_REPO_URL=}/releases/download/gwt-${GWT_VERSION}/gwt-maven-plugin-${GWT_VERSION}.jar" -o "gwt-maven-plugin-${GWT_VERSION}.jar"
+curl -L "${GWT_MAVEN_PLUG_REPO_URL=}/releases/download/gwt-${GWT_VERSION}/gwt-maven-plugin-${GWT_VERSION}.pom" -o "gwt-maven-plugin-${GWT_VERSION}.pom"
+unzip gwt-${GWT_VERSION}.zip
+cd gwt-${GWT_VERSION}
+cp gwt-dev.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.dev/lib/gwt-dev.jar
+cp gwt-user.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.user/lib/gwt-user.jar
+cp gwt-servlet.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet.jar
+cp gwt-servlet-deps.jar ${SAILING_GIT_ROOT}/java/com.google.gwt.servlet/lib/gwt-servlet-deps.jar
+for i in dev user servlet; do
+  mvn --batch-mode install:install-file -Dfile=gwt-${i}.jar -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-$i-${GWT_VERSION}.pom"
+done
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/gwt-${GWT_VERSION}.pom"
+mvn --batch-mode install:install-file -Dpackaging=pom -Dfile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom" -DpomFile="${SAILING_GIT_ROOT}/configuration/gwt-poms/requestfactory-${GWT_VERSION}.pom"
+# gwt-maven-plugin:
+cd ..
+mvn --batch-mode install:install-file -Dfile="gwt-maven-plugin-${GWT_VERSION}.jar" -DpomFile="gwt-maven-plugin-${GWT_VERSION}.pom"
+rm -rf "${GWT}"
