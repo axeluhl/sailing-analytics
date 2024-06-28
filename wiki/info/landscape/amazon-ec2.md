@@ -4,16 +4,18 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for [highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs as used for [Tokyo 2020](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator) and [Paris 2024](https://wiki.sapsailing.com/wiki/info/landscape/paris2024/olympic-plan-for-paris-marseille-2024).
 
 ## Important Servers, Hostnames
 
 - Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
-- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
+- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201 and replica set "winddb", all other slow/archived DBs on 10202 for replica set "slow", hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com (replica set "live"), mongo1.internal.sapsailing.com (replica set "live")
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ, hence currently mysql.internal.sapsailing.com and rabbit.internal.sapsailing.com refer to the same instance)
-- Hudson Build Server: called "Build/Test/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
-- Additional "Build Slaves" launched by the Hudson Build Server: Named ``Hudson Ubuntu Slave``, used to run individual build jobs
+- MariaDB (mainly for Bugzilla): mysql.internal.sapsailing.com
+- Hudson Build Server: called "Build/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
+- A central sailing application replica set called "security_service" reachable at ``security-service.sapsailing.com`` which is the hub for security-related information such as the user and groups database with permissions and roles, entity ownerships, as well as access control lists
+- Self-service at ``my.sapsailing.com`` which currently is the default server name used by the Sail Insight app, as two dedicated hosts running the replica set
+- Three multi-server instances shared by several sailing application replica sets, spread across all three availability zones (AZs) of eu-west-1
 
 ## Landscape Overview
 
@@ -31,15 +33,15 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 ### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
 A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
-Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server. The setup procedure can be found below.
 
 To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
 The IPs for all reverse proxies will automatically be added to ALB target groups with the tag key `allReverseProxies`, including the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
 and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
-Disposables instances are tagged with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+Disposables instances are tagged with `DisposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
 
-For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The disposables just have the latter.
+For security groups of the central reverse proxy, we want Webserver, as well as Reverse Proxy. The disposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -94,7 +96,7 @@ Use Status 172.31.19.129 internal-server-status
 Use Status 127.0.0.1 internal-server-status
 ```
 
-The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
+The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. This maintenance is managed by a service unit. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
 
 After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
 
@@ -102,7 +104,24 @@ The webserver must be tagged with key ``CentralReverseProxy`` where the value is
 
 The following diagram explains the disposable reverse proxies role a little better. 
 
-<img src="wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+<img src="/wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+
+## Setting up the Central Reverse Proxy
+
+A lot of the above procedure has since been combined into a series of setup scripts found under `configuration/environments_scripts/central_reverse_proxy`. The script requires that you have added an SSH key with maximum access to your SSH authentication agent. This can be done with 
+```
+eval `ssh-agent`
+ssh-add
+```
+
+You will also need the AWS CLI and must run `./awsmfalogon.sh` before running the first script below, to authenticate and gain a session token. Next, you should notify the community that internal services, such as Bugzilla will temporarily be down (make sure to notify them afterwards too, so they can continue their work). 
+
+Using the landscape tab of the admin console, ensure there is a disposable in the same AZ as the archive (this ensures we can still route traffic to the archive).
+
+Next, remove the central reverse proxy from all target groups tagged with `allReverseProxies`. Then when at the path described above, launch `./setup-central-reverse-proxy.sh` and follow the necessary instructions. You
+will need to unmount and detach volumes from the old instance and then reattach and mount on the new webserver.
+Then `setup-central-reverse-proxy-part-2.sh` runs to finish any setup that requires these mounts. Finally, `target-group-tag-route53-nfs-elasticIP-setup.sh`
+will run to configure the target groups, tags and route 53. You will need to then remove the old reverse proxy from the target groups tagged with `CentralReverseProxy`. 
 
 ### DNS and Application Load Balancers (ALBs)
 
@@ -278,7 +297,7 @@ In all of the following sub-sections the text will assume that you have provided
 
 In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
 
-There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at `/root/new_version_key_vault` on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
+There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at `/root/key_vault` on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
 
 The structure of the vault is important for the efficacy of the script and should appear as below. There is an explanation afterwards.
 ```

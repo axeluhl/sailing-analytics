@@ -10,12 +10,6 @@ else
   # Fix the non-sensical use of "dash" as the default shell:
   sudo rm /usr/bin/sh
   sudo ln -s /usr/bin/bash /usr/bin/sh
-  # Install cron job for ssh key update for landscape managers
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers /tmp
-  sudo mv /tmp/update_authorized_keys_for_landscape_managers /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/update_authorized_keys_for_landscape_managers_if_changed /tmp
-  sudo mv /tmp/update_authorized_keys_for_landscape_managers_if_changed /usr/local/bin
-  scp -o StrictHostKeyChecking=false root@sapsailing.com:/home/wiki/gitwiki/configuration/rabbitmq_instance_setup/crontab-admin /home/admin/crontab
   scp -o StrictHostKeyChecking=false root@sapsailing.com:ssh-key-reader.token /home/admin
   sudo chown admin /home/admin/ssh-key-reader.token
   sudo chgrp admin /home/admin/ssh-key-reader.token
@@ -24,9 +18,16 @@ else
   sudo apt-get -y update
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
-  sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys
-  sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys
-  crontab /home/admin/crontab
+  sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
+  sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
+  scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/admin
+  sudo mv imageupgrade_functions.sh /usr/local/bin
+  . imageupgrade_functions.sh
+  if ! build_crontab_and_setup_files 'rabbitmq_instance_setup' admin environments_scripts; then
+    exit 1
+  fi
+  setup_sshd_resilience
+  sudo chown root:root /usr/local/bin/imageupgrade_functions.sh
   # Wait for RabbitMQ to become available; note that install under apt also means start...
   sleep 10
   sudo rabbitmq-plugins enable rabbitmq_management
@@ -36,8 +37,4 @@ loopback_users = none
 EOF
 "
   sudo systemctl restart rabbitmq-server.service
-  echo 'Test your DB, e.g., by counting bugs: sudo mysql -u root -p -e "use bugs; select count(*) from bugs;"'
-  echo "If you like what you see, switch to the new DB by updating the mysql.internal.sapsailing.com DNS record to this instance,"
-  echo "make sure the instance has the \"Database and Messaging\" security group set,"
-  echo "and tag the instance's root volume with the WeeklySailingInfrastructureBackup=Yes tag."
 fi

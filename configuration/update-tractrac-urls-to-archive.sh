@@ -1,1 +1,1 @@
-environments_scripts/central_reverse_proxy/files/usr/local/bin/update-tractrac-urls-to-archive.sh
+environments_scripts/central_mongo_setup/files/usr/local/bin/update-tractrac-urls-to-archive.sh
