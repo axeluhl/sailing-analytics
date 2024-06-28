@@ -16,6 +16,141 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.12
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 25/06/2024
+
+ 1) Bugs
+
+- The previous version 3.15.11 had an error in the build generation. (Reported by Jorge Piera, 25/06/2024)
+
+********************************************
+        TracAPI 3.15.11
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 25/06/2024
+
+ 1) Bugs
+
+- The MTB reader is not releasing all the resources once the reading process is over (Reported by Axel Uhl,
+22/06/2024)
+
+********************************************
+        TracAPI 3.15.10
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 20/06/2024
+
+ 1) Bugs
+
+- If the parameters file has an MTB and the user overwrites the stored-uri with another value, the library ignores the
+ user parameter and gives priority to the MTB file. And it doesn't matter if the provided stored-uri is a dataserver
+ port or an MTB: the library is always ignoring this parameter. This is a bug. Now, if the user uses an MTB file,
+ this file will always be used and the library will only force the usage of the MTB file if the user overwrites
+ the stored-uri using a dataserver port. (Reported by Axel Uhl, 20/06/2024)
+
+********************************************
+        TracAPI 3.15.9
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/06/2024
+
+ 1) Features
+
+ - The dataserver is able to filter the control positions by course area. (Requested by Axel Ulh, 15/04/2024)
+ - If TracAPI tries to connect to a race and there is an MTB created, the library always returns the content
+ of the MTB file (Requested by Jorge Piera, 15/04/2024)
+
+********************************************
+        TracAPI 3.15.8
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 06/06/2024
+
+ 1) Features
+
+ - Adding new values to the RaceCompetitorStatusType: RCT(Retired after causing a tangle),
+ DCT(Disqualified after causing a tangle) and DNE(Disqualification not excludable).
+ (Requested by Radek Masnika, 30/05/2024)
+ - Adding the method IPosition.getHACC to retrieve the horizontal accuracy (Requested by Chris Terkelsen,
+ 05/05/2024)
+
+********************************************
+        TracAPI 3.15.7
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 23/04/2024
+
+ 1) Bugs
+
+ - When a new static mark is created, the library only sends a updateControlPointPosition callback using the event start time,
+ that is outside the race bounds. Now, it is calling updateControlPointPosition twice and in the second call uses the
+ tracking start time as the position time (Reported by Axel Uhl, 23/04/2024)
+
+********************************************
+        TracAPI 3.15.6
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - There are some threads that are not killed when the connection is closed. These threads were added to collect
+ statistics but this feature make not sense in TracAPI. (Reported by Axel Uhl, 17/04/2024)
+
+********************************************
+        TracAPI 3.15.5
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 17/04/2024
+
+ 1) Bugs
+
+ - Deadlock when a connection was closed by the server and the client called the IRaceSubscriber.stop method. (Reported by
+  Axel Uhl, 16/04/2024)
+
+********************************************
+        TracAPI 3.15.4
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 16/04/2024
+
+ 1) Features
+
+ - Formatting the code using blank spaces (instead of tabs). The workspace was already configured like this,
+ but the old files kept some tabs. All the code has been formatted again. (Requested by Axel Uhl, 19/02/2024)
+
+ 2) Bugs
+
+ - When the IRaceSubscriber.stop method is called, the library doesn't close the connection. (Reported by Axel Uhl, 03/04/2024)
+ - Improving the detection of a dead connection. (Reported by Axel Uhl, 03/04/2024)
+
+********************************************
+        TracAPI 3.15.3
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 11/03/2024
+
+ 1) Feature
+
+ - Adding the method IPosition.getRTKStatus used to get the RTK status (Requested by Chris Terkelsen, 07/03/2024)
+
+ 2) Bugs
+
+ - Some socket connections were not closed correctly (Reported by Jorge Piera, 08/03/2024)
+
+********************************************
         TracAPI 3.15.2
 ********************************************
 This is a final version. It keeps the backward compatibility.

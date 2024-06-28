@@ -85,6 +85,8 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
@@ -234,11 +236,19 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final PermissionChangeListeners permissionChangeListeners;
     
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
-    
+
+    /**
+     * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
+     * based on what was read, a user-specific write lock must be obtained to ensure that no writes can cut in between.
+     * See also {@link #lockSubscriptionsForUser} and {@link #unlockSubscriptionsForUser}.
+     */
+    private final static ConcurrentMap<User, NamedReentrantReadWriteLock> subscriptionLocksForUsers;
+
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
         shiroEnvironment = new BasicIniEnvironment("classpath:shiro.ini");
+        subscriptionLocksForUsers = new ConcurrentHashMap<>();
     }
     
     /**
@@ -2611,40 +2621,45 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throws UserManagementException {
         final User user = getUserByName(username);
         if (user != null) {
-            final String newSubscriptionPlanId = newSubscription.getPlanId();
-            final Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
-            if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
-                logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
-                logger.info(() -> "Current user plan subscription: "
-                        + (currentSubscription != null ? currentSubscription.toString() : "null"));
-                logger.info(() -> "New plan subscription: "
-                        + (newSubscription != null ? newSubscription.toString() : "null"));
-                // In some cases there is no invoice or transaction information. E.g. if the subscription has
-                // been cancelled.
-                // To ensure information about previous payments is preserved, the subscription is patched.
-                if (currentSubscription != null && newSubscription != null
-                        && newSubscription.getSubscriptionId() != null
-                        && newSubscription.getSubscriptionId().equals(currentSubscription.getSubscriptionId())) {
-                    if (currentSubscription.getTransactionStatus() != null
-                            && newSubscription.getTransactionStatus() == null) {
-                        newSubscription.patchTransactionData(currentSubscription);
+            lockSubscriptionsForUser(user);
+            try {
+                final String newSubscriptionPlanId = newSubscription.getPlanId();
+                final Subscription currentSubscription = user.getSubscriptionByPlan(newSubscriptionPlanId);
+                if (shouldProcessNewSubscription(currentSubscription, newSubscription)) {
+                    logger.info(() -> "Update user subscription for plan " + newSubscriptionPlanId);
+                    logger.info(() -> "Current user plan subscription: "
+                            + (currentSubscription != null ? currentSubscription.toString() : "null"));
+                    logger.info(() -> "New plan subscription: "
+                            + (newSubscription != null ? newSubscription.toString() : "null"));
+                    // In some cases there is no invoice or transaction information. E.g. if the subscription has
+                    // been cancelled.
+                    // To ensure information about previous payments is preserved, the subscription is patched.
+                    if (currentSubscription != null && newSubscription != null
+                            && newSubscription.getSubscriptionId() != null
+                            && newSubscription.getSubscriptionId().equals(currentSubscription.getSubscriptionId())) {
+                        if (currentSubscription.getTransactionStatus() != null
+                                && newSubscription.getTransactionStatus() == null) {
+                            newSubscription.patchTransactionData(currentSubscription);
+                        }
+                        if (currentSubscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
+                            newSubscription.patchInvoiceData(currentSubscription);
+                        }
                     }
-                    if (currentSubscription.getInvoiceId() != null && newSubscription.getInvoiceId() == null) {
-                        newSubscription.patchInvoiceData(currentSubscription);
+                    if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
+                        updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
                     }
+                    final Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
+                    if (newSubscriptions != null) {
+                        user.setSubscriptions(newSubscriptions);
+                    }
+                    store.updateUser(user);
+                } else {
+                    logger.info(() -> "New subscription has been ignored: " + newSubscription);
                 }
-                if (shouldUpdateUserRolesForSubscription(user, currentSubscription, newSubscription)) {
-                    updateUserRolesOnSubscriptionChange(user, currentSubscription, newSubscription);
-                }
-                final Subscription[] newSubscriptions = buildNewUserSubscriptions(user, newSubscription);
-                if (newSubscriptions != null) {
-                    user.setSubscriptions(newSubscriptions);
-                }
-                store.updateUser(user);
-            } else {
-                logger.info(() -> "New subscription has been ignored: " + newSubscription);
+                return null;
+            } finally {
+                unlockSubscriptionsForUser(user);
             }
-            return null;
         } else {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
@@ -2826,10 +2841,18 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * These roles are non transitive, hence they can not be granted to other users.
      */
     private Role getSubscriptionPlanUserRole(User user, SubscriptionPlanRole planRole) {
+        final Role result;
         final User qualifiedUser = getSubscriptionPlanRoleQualifiedUser(user, planRole);
         final UserGroup qualifiedTenant = getSubscriptionPlanRoleQualifiedTenant(user, qualifiedUser, planRole);
-        return new Role(getRoleDefinition(planRole.getRoleId()), qualifiedTenant, qualifiedUser,
-                /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
+        final RoleDefinition roleDefinition = getRoleDefinition(planRole.getRoleId());
+        if (roleDefinition == null) {
+            logger.severe("Role with ID "+planRole.getRoleId()+" for user "+user.getName()+" not found.");
+            result = null;
+        } else {
+            result = new Role(roleDefinition, qualifiedTenant, qualifiedUser,
+                    /* roles acquired through subscription are non-transitive, meaning the user cannot pass them on */ false);
+        }
+        return result;
     }
 
     /**
@@ -3023,5 +3046,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new UserManagementException("You are not allowed to take this role to the user.");
         }
         return role;
+    }
+
+    @Override
+    public void lockSubscriptionsForUser(final User user) {
+        LockUtil.lockForWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
+    }
+    
+    @Override
+    public void unlockSubscriptionsForUser(final User user) {
+        LockUtil.unlockAfterWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
     }
 }

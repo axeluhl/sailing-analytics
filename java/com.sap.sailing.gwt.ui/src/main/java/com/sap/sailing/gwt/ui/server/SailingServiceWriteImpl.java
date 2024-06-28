@@ -1529,6 +1529,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<EventDTO>() {
                     @Override
                     public EventDTO call() throws Exception {
+                        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is trying to create event "+eventName);
                         final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
                         final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
                                 final URL officialWebsiteURL = officialWebsiteURLAsString != null
@@ -1711,14 +1712,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
+        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is trying to create regatta "+regattaName);
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<RegattaDTO>() {
                     @Override
                     public RegattaDTO call() throws Exception {
-                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-                        Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
+                        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                        final Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret,
                                 startTimePoint, endTimePoint, UUID.randomUUID(),
                                 seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,

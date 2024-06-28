@@ -66,8 +66,8 @@ public enum TalkerId {
 	/** Computer - Memory Data (obsolete) */
 	@Deprecated
 	CM,
-    /** Channel Pilot (Navicom Dynamics proprietary) */
-    CP,
+	/** Channel Pilot (Navicom Dynamics proprietary) */
+        CP,
 	/** Communications - Satellite */
 	CS,
 	/** Communications - Radio-Telephone (MF/HF) */
@@ -148,6 +148,8 @@ public enum TalkerId {
 	SN,
 	/** Sounder, Scanning */
 	SS,
+	/** Raymarine SeaTalk ($STALK) */
+	ST,
 	/** Turn Rate Indicator */
 	TI,
 	/** TRANSIT Navigation System */

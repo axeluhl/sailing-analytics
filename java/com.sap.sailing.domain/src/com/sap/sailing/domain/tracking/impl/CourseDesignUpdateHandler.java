@@ -48,7 +48,7 @@ public class CourseDesignUpdateHandler extends UpdateHandler implements CourseDe
         JSONObject serializedCourseDesign = courseSerializer.serialize(newCourseDesignWithExistingControlPoints);
         String payload = serializedCourseDesign.toJSONString();
         URL currentCourseDesignURL = buildUpdateURL();
-        logger.info("Using " + currentCourseDesignURL.toString() + " for the course update!");
+        logger.info("Using " + eraseSecurityRelatedValuesFromURL(currentCourseDesignURL.toString()) + " for the course update!");
         logger.info("Payload is " + payload);
         HttpURLConnection connection = (HttpURLConnection) currentCourseDesignURL.openConnection();
         try {
@@ -62,7 +62,8 @@ public class CourseDesignUpdateHandler extends UpdateHandler implements CourseDe
             if (connection != null) {
                 connection.disconnect();
             } else {
-                logger.severe("Connection to TracTrac Course Update URL " + currentCourseDesignURL.toString() + " could not be established");
+                logger.severe("Connection to TracTrac Course Update URL " +
+                        eraseSecurityRelatedValuesFromURL(currentCourseDesignURL.toString()) + " could not be established");
             }
         }
     }

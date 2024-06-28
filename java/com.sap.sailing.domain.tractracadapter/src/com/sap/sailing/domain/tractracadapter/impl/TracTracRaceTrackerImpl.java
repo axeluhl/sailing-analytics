@@ -65,7 +65,6 @@ import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.model.lib.api.route.IControl;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
-import com.tractrac.subscription.lib.api.ISubscriberFactory;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
@@ -350,24 +349,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackin
                 + (endOfTracking != null ? endOfTracking.asMillis() : "n/a"));
 
         // Initialize data controller using live and stored data sources
-        ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
-        eventSubscriber = subscriberFactory.createEventSubscriber(tractracEvent, liveURI, effectiveStoredURI);
+        eventSubscriber = domainFactory.getOrCreateEventSubscriber(tractracEvent, liveURI, effectiveStoredURI);
         if (useOfficialEventsToUpdateRaceLog) {
             reconciler = new RaceAndCompetitorStatusWithRaceLogReconciler(domainFactory, raceLogResolver, tractracRace);
         } else {
             reconciler = null;
         }
         racesListener = new IRacesListener() {
-            @Override public void abandonRace(long timestamp, UUID raceId) {
-                if (raceId.equals(tractracRace.getId())) {
-                    try {
-                        onStop(/* stopReceiversPreemtively */ false, /* willBeRemoved */ false);
-                    } catch (InterruptedException e) {
-                        logger.log(Level.WARNING, "Problem when receiving abandonRace("+raceId+") for race "+tractracRace+
-                                " in event "+tractracEvent+" while trying to stop the listeners", e);
-                    }
-                }
-            }
+            @Override public void abandonRace(long timestamp, UUID raceId) {}
             @Override public void addRace(long timestamp, IRace race) {}
             @Override public void deleteRace(long timestamp, UUID raceId) {}
             @Override public void reloadRace(long timestamp, UUID raceId) {
@@ -401,7 +390,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl<RaceTrackin
         eventSubscriber.subscribeRaces(racesListener);
         // Start live and stored data streams
         final Regatta effectiveRegatta;
-        raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, effectiveStoredURI);
+        raceSubscriber = SubscriptionLocator.getSusbcriberFactory().createRaceSubscriber(tractracRace, liveURI, effectiveStoredURI);
         raceSubscriber.subscribeConnectionStatus(this);
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
