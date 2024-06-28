@@ -50,6 +50,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.J70, BoatClassMasterdata.J80, BoatClassMasterdata.J92, BoatClassMasterdata.J92S,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.IRC, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS_VENTURE,
+                BoatClassMasterdata.RS_VAREO,
                 BoatClassMasterdata.RS100, BoatClassMasterdata.RS21, BoatClassMasterdata.TP52,
                 BoatClassMasterdata.CLUB_SWAN_50, BoatClassMasterdata.BAVARIA_CRUISER_41S, BoatClassMasterdata.BAVARIA_CRUISER_45,
                 BoatClassMasterdata.BAVARIA_CRUISER_46, BoatClassMasterdata.BENETEAU_FIRST_35, BoatClassMasterdata.BENETEAU_FIRST_45,
