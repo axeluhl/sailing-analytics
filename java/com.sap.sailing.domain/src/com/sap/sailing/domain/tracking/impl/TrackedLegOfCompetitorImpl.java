@@ -272,11 +272,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private Distance getWindwardDistanceTo(LegType legTypeOrNull, Waypoint waypoint, TimePoint at,
             WindPositionMode windPositionMode, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         final Distance result;
-        Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false);
+        Position estimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, /* extrapolate */ false);
         if (!hasStartedLeg(at) || estimatedPosition == null) {
             // covers the case with no fixes for this leg yet, also if the mark passing has already been received
             estimatedPosition = getTrackedRace().getOrCreateTrack(getLeg().getFrom().getMarks().iterator().next())
-                    .getEstimatedPosition(at, false);
+                    .getEstimatedPosition(at, /* extrapolate */ false);
         }
         if (estimatedPosition == null) { // may happen if mark positions haven't been received yet
             result = null;

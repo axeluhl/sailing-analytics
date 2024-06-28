@@ -368,6 +368,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource RSFevaIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_VAREO.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource RSVareoIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS_TERA.png")
     @ImageOptions(preventInlining = true)
     ImageResource RSTeraIcon();
