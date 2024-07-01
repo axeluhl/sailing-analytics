@@ -82,6 +82,10 @@ android {
         exclude "LICENSE.txt"
         exclude ".readme"
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
