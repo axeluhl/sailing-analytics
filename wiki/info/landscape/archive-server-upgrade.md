@@ -3,19 +3,32 @@
 ## TL;DR
 
 - Optionally, to accelerate DB reads, launch MongoDB replica for ``archive`` replica set (see [here](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:)); wait until MongoDB replica is in ``SECONDARY`` state
-- Launch "more like this" based on existing primary archive, adjusting the ``INSTALL_FROM_RELEASE`` user data entry to the release of choice and the ``Name`` tag to "SL Archive (New Candidate)"
+- Launch "more like this" based on existing primary archive, adjusting the ``INSTALL_FROM_RELEASE`` user data entry to the release of choice and the ``Name`` tag to "SL Archive (New Candidate)" and adjusting the availability zone (AZ) such that it does not equal the AZ of the current production ARCHIVE and ideally has either the central reverse proxy or a disposable reverse proxy in that AZ so that cross-AZ traffic is avoided.
 - Wait until the new instance is done with its background tasks and CPU utilization goes to 0% (approximately 36h)
 - Create an entry in the reverse proxy's ``/etc/httpd/conf.d/001-events.conf`` file like this:
 ```
   Use Plain archive-candidate.sapsailing.com 172.31.46.203 8888
 ```
 with ``172.31.46.203`` being an example of the internal IP address your new archive candidate instance got assigned.
+ - Check the configuration by running ``httpd -t``. If you get an "OK" as the output, commit and distribute the configuration change to all reverse proxies like this:
+```
+  git checkout main
+  git commit -a
+  git push
+```
+This will disseminate the configuration to all reverse proxies through a Git hook, merge as required and check out the appropriate configuration for that environment again, then reload the configuration in ``httpd``.
 - Compare server contents, either with ``compareServers`` script or through REST API, and fix any differences
 ```
   java/target/compareServers -ael https://www.sapsailing.com https://archive-candidate.sapsailing.com
 ```
 - Do some spot checks on the new instance
-- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed by ``service httpd reload``
+- Switch reverse proxy, by adjusting the archive IP definitions at the top of ``root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf``, followed again by
+```
+  httpd -t   # ensure you get "OK" as the response
+  git checkout main
+  git commit -a
+  git push
+```
 - Terminate old fail-over EC2 instance; you will have to disabel its termination protection first.
 - Adjust Name tags for what is now the fail-over and what is now the primary archive server in EC2 console
 

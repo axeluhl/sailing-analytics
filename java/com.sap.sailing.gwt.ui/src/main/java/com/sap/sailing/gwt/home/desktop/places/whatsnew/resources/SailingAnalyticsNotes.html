@@ -12,6 +12,12 @@
                 response which reports the time point as the number of milliseconds since the epoch (1970-01-01T00:00:00Z, "Unix time").
                 The <tt>timepoint</tt> and <tt>lastScoringUpdate</tt> fields' format is not easily machine-readable,
                 but we're not changing the format for reasons of backward compatibility.</li>
+            <li>The REST API for <tt>/sailingserver/api/v1/events/{event-id}</tt> and <tt>/sailingserver/api/v1/leaderboardgroups/{leaderboardgroup-name-or-id}</tt>
+                now have the new <tt>overallLeaderboardName</tt> field for the leaderboard group(s), and the latter now also has
+                the <tt>hasOverallLeaderboard</tt> Boolean field. The <tt>overallLeaderboardName</tt> field is present if and only if
+                <tt>hasOverallLeaderboard</tt> is <tt>true</tt>.</li>
+            <li>Boat visualization for OK Dinghy for downwind legs now without spinnaker.</li>
+            <li>Boat visualization for RS Tera for downwind legs now without spinnaker.</li>
          </ul>
          <h5 class="articleSubheadline">April 2024</h5>
          <ul class="bulletList">

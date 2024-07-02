@@ -123,7 +123,8 @@ public enum BoatClassMasterdata {
     RS_AERO ("RS Aero", true, 4.00, 1.40, BoatHullType.MONOHULL, false, "RSAERO", "RS_Aero"),
     RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman", "RS:X Women"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
-    RS_TERA ("RS Tera", true, 2.87, 1.23, BoatHullType.MONOHULL, true, "RSTera"),
+    RS_TERA ("RS Tera", true, 2.87, 1.23, BoatHullType.MONOHULL, false, "RSTera"),
+    RS_VAREO ("RS Vareo", true, 4.25, 1.57, BoatHullType.MONOHULL, true, "RS_VAREO", "RSVareo", "RS Vareo"),
     RS_VENTURE ("RS Venture", true, 4.9, 2.0, BoatHullType.MONOHULL, true, "RSVenture", "RS Venture Connect"),
     SALONA_46 ("Salona 46", true, 14.14, 4.2, BoatHullType.MONOHULL, true, "Salona-46"),
     SCAN_KAP_99 ("Scan-kap 99", true, 9.86, 2.61, BoatHullType.MONOHULL, true, "Scan Kap 99"),
@@ -158,6 +159,7 @@ public enum BoatClassMasterdata {
     WASZP ("WASZP", true, 3.35, 2.25, BoatHullType.MONOHULL, false, "WASZPs"),
     WAYFARER ("Wayfarer", true, 4.82, 1.85, BoatHullType.MONOHULL, false),
     WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
+    WINGFOIL ("Wingfoil", true, 1.95, 0.8, BoatHullType.SURFERBOARD, false, "Wing Foil", "X-15"),
     X_332 ("X-332", true, 10.06, 3.30, BoatHullType.MONOHULL, true, "X332"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     

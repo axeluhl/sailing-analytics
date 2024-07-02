@@ -39,6 +39,9 @@ else
     # Enable NFS server
     sudo systemctl enable nfs-server.service
     sudo systemctl start nfs-server.service
+    # Enable the mongod.service on which the sailing service depends:
+    sudo systemctl enable mongod.service
+    sudo systemctl start mongod.service
     # Enable the service:
     sudo systemctl daemon-reload
     sudo systemctl enable hudson.service
@@ -62,7 +65,6 @@ EOF
     sudo chgrp sailing /home/sailing/servers/DEV/configuration/mail.properties
     # Start the sailing.service with empty/no user data, so the next boot is recognized as a re-boot
     sudo systemctl start sailing.service
-    sudo systemctl stop sailing.service
     sudo mount -a
     echo "Now follow the instructions on the wiki for creating-ec2-image-for-hudson-from-scratch.md. It explains how to mount"
     echo "the hudson volume and setup the aws + ssh keys."
