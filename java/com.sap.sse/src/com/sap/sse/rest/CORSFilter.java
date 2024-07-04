@@ -1,4 +1,4 @@
-package com.sap.sailing.www;
+package com.sap.sse.rest;
 
 import java.io.IOException;
 
@@ -22,6 +22,9 @@ public class CORSFilter implements Filter {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
         httpResponse.setHeader("Access-Control-Allow-Origin", "*");
         httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        httpResponse.setHeader("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type");
+        httpResponse.setHeader("Access-Control-Expose-Headers", "Location, Content-Disposition");
+        httpResponse.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, DELETE, HEAD, OPTIONS");
         chain.doFilter(request, response);
     }
 
