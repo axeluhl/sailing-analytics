@@ -667,10 +667,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
-        SDK_MANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+        SDK_MANAGER="$ANDROID_HOME/cmdline-tools/8.0/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
+        echo "SDK_MANAGER=${SDK_MANAGER}"
+        echo "cmdline-tools:"
+        ls -l "$ANDROID_HOME/cmdline-tools/"
         
         BUILD_TOOLS_VERSION=`grep "buildTools = " build.gradle | cut -d "\"" -f 2`
         echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
