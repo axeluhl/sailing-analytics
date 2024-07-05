@@ -153,7 +153,7 @@ install_environment ()
 load_from_release_file ()
 {
     if [[ ${INSTALL_FROM_RELEASE} == "" ]]; then
-        INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')"
+        INSTALL_FROM_RELEASE="$(wget -O - https://releases.sapsailing.com/ 2>/dev/null | grep main- | tail -1 | sed -e 's/^.*\(main-[0-9]*\).*$/\1/')"
         echo "You didn't provide a release. Defaulting to latest master build https://releases.sapsailing.com/$INSTALL_FROM_RELEASE"
         # Alternatively, to download a release from Github, here is how the latest Java8/main-release can be obtained:
         #   curl -L -H 'Authorization: Bearer ***' https://api.github.com/repos/SAP/sailing-analytics/releases 2>/dev/null | jq -r 'sort_by(.created_at) | reverse | map(select(.name | startswith("main-")))[0].assets[] | select(.content_type=="application/x-tar").id'
