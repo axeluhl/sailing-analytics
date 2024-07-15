@@ -136,7 +136,7 @@ build_crontab_and_setup_files() {
         for option in "$@"; do
           PASS_OPTIONS+=( "$option")
         done
-        if ! sudo  ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
+        if ! sudo ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
           return 1
         fi
         cd ..
