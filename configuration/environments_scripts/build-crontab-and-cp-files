@@ -7,7 +7,7 @@
 # that user too.
 # Within these crontab stubs, are certain string literals, which are replaced: PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes
 # the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of the home directory
-# in which the crontab will be installed (ie. that user's home). 
+# in which the crontab will be installed (ie. that user's home).
 # Furthermore, within the users folder optional uid, gid and groups files an exist. uid should store the user's uid,
 # gid the group id and groups should have secondary groups (one per line). The user is added to the secondary groups
 # after all users are created.
@@ -17,10 +17,10 @@
 # will be automatically enabled.
 # For options, see the help below.
 # This script should NOT be installed into /usr/local/bin. See the README for more.
-
+. repo/usr/local/bin/imageupgrade_functions.sh
 INSTALL_CRONTAB="true"
 COPY_FILES="true"
-CREATE_CRONTABS="true";
+CREATE_CRONTABS="true"
 options='fnc'
 while getopts $options option
 do
@@ -100,7 +100,7 @@ if [[ -d "users" ]]; then
                 echo "">>"$HOME_DIR"/crontab
                 for crontab in ${USERNAME}/crontab*; do
                     [[ -e $crontab ]] || continue
-                    cat "${crontab}">> $HOME_DIR/crontab
+                    cat "${crontab}" | eval $( get_replacements_from_crontab_filename_as_sed_command "${crontab}" ) >> $HOME_DIR/crontab
                     echo "">> $HOME_DIR/crontab
                 done
                 chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
@@ -113,7 +113,6 @@ if [[ -d "users" ]]; then
                 fi
             fi
         fi
-        
         echo "****** finished user ******"
     done
     # Add to groups after all the groups exist.

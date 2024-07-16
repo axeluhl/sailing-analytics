@@ -144,6 +144,39 @@ build_crontab_and_setup_files() {
     fi
 }
 
+# Assumes a filename following the pattern "crontab*[@{param}={value} ...]"
+# It prints an "sed" command on the standard output that callers can use to
+# obtain a piping command through which to send the file's contents to achieve
+# the text pattern replacements requested by the @-parts in the file/link
+# name.
+# If a value shall contain the @ literal, it needs to be doubled, as, e.g., in
+#     crontab-some-mail-thing@EMAIL_ADDRESS=john.doe@@example.com
+# Multiple replacements may be requested by adding more @-phrases:
+#     crontab-something@A=x@B=y
+# Example usage:
+#   echo "The user USER has e-mail address EMAIL_ADDRESS and home directory HOME_DIR" | eval $( get_replacements_from_crontab_filename_as_sed_command crontab-humba@USER=uhl@EMAIL_ADDRESS=axel.uhl@@sap.com@HOME_DIR=_home_axel__uhl_ )
+# will output
+#   The user uhl has e-mail address axel.uhl@sap.com and home directory /home/axel_uhl/
+get_replacements_from_crontab_filename_as_sed_command() {
+    LINK_NAME="${1}"
+    AT_SIGN_REPLACEMENT=`mktemp -u XXXXXXXXXXXXXXXX`
+    UNDERSCORE_REPLACEMENT=`mktemp -u XXXXXXXXXXXXXXXX`
+    LINK_NAME_WITH_UNDERSCORES_REPLACED=$( echo "${LINK_NAME}" | sed -e 's|__|'${UNDERSCORE_REPLACEMENT}'|g' )
+    LINK_NAME_WITH_AT_LITERALS_REPLACED=$( echo "${LINK_NAME_WITH_UNDERSCORES_REPLACED}" | sed -e 's|@@|'${AT_SIGN_REPLACEMENT}'|g' )
+    IFS='@' read -r -a BASENAME_AND_SUBSTITUTIONS <<<"${LINK_NAME_WITH_AT_LITERALS_REPLACED}"
+    # Now, BASENAME_AND_SUBSTITUTIONS[0] is the link's base name, 1..n are the replacements
+    SED_COMMAND="sed -e 's| | |'"  # start with a no-op so that in case of no replacements we still have a valid sed command 
+    for REPLACEMENT in ${BASENAME_AND_SUBSTITUTIONS[@]:1}; do
+        IFS='=' read -r -a PARAM_AND_VALUE <<<"${REPLACEMENT}"
+        PARAM="${PARAM_AND_VALUE[0]}"
+        VALUE_WITH_SLASHES=$( echo "${PARAM_AND_VALUE[1]}" | sed -e 's|_|/|g' )
+        VALUE_WITH_UNDERSCORES=$( echo "${VALUE_WITH_SLASHES}" | sed -e 's|'${UNDERSCORE_REPLACEMENT}'|_|g' )
+        VALUE=$( echo "${VALUE_WITH_UNDERSCORES}" | sed -e 's|'${AT_SIGN_REPLACEMENT}'|@|g' )
+        SED_COMMAND="${SED_COMMAND} -e 's|${PARAM}|${VALUE}|g'"
+    done
+    echo "${SED_COMMAND}"
+}
+
 setup_keys() {
     # Installs the necessary aws and ssh keys for a given environment type, by copying from the key vault.
     # $1: Environment type.
