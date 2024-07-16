@@ -17,10 +17,10 @@
 # will be automatically enabled.
 # For options, see the help below.
 # This script should NOT be installed into /usr/local/bin. See the README for more.
-
+. repo/usr/local/bin/imageupgrade_functions.sh
 INSTALL_CRONTAB="true"
 COPY_FILES="true"
-CREATE_CRONTABS="true";
+CREATE_CRONTABS="true"
 options='fnc'
 while getopts $options option
 do
