@@ -489,13 +489,11 @@ Any scripts common to multiple environment scripts, may be found in the "repo", 
 The build-crontab-and-cp-files uses this structure to help setup an environment 
 type. It builds the crontab file, by combining all the referenced crontab 
 one-liners, storing a copy in the user's home directory and installing it to the specified user. It also copies across the contents of "files" to the corresponding location, de-refencing any symbolic links.
-The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the build-crontab-and-cp-files script.
+The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the `build-crontab-and-cp-files` script.
 
 This script has a couple of arguments and options. The most important are the arguments.
 1. Environment type.
-2. User with a checked out Git copy.
-3. The relative path within $2 to the Git copy.
-Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the string PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
+Some crontabs require references to specific users' files, so we have the string PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the `build-crontab-and-cp-files` script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
 ## Reverse proxy automation
@@ -578,9 +576,9 @@ write and quit, to install the cronjob.
 * * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
 ```
 
-If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
+If you want to quickly run this script, consider installing it in ``/usr/local/bin``, via `ln -s TARGET_PATH LINK_NAME`.
 
-You can use the build_crontab_and_setup_files (see below) to get these changes.
+You can use the `build_crontab_and_setup_files` (see below) to get these changes.
 
 ## Automated SSH Key Management
 

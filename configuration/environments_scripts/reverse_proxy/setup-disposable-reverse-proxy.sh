@@ -11,8 +11,6 @@ IP=$1
 BEARER_TOKEN=$2
 IMAGE_TYPE="reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
-GIT_COPY_USER="trac"
-RELATIVE_PATH_TO_GIT="gitcopy" # the relative path to the repo within the git_copy_user
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
 sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
@@ -35,7 +33,7 @@ scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/confi
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
 # setup files and crontab for the required users, both dependent on the environment type.
-build_crontab_and_setup_files "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"
+build_crontab_and_setup_files "${IMAGE_TYPE}"
 # setup mail
 setup_mail_sending
 # setup sshd config

@@ -47,7 +47,7 @@ else
   sudo systemctl enable crond.service
   sudo systemctl start crond.service
   . imageupgrade_functions.sh
-  if ! build_crontab_and_setup_files mysql_instance_setup ec2-user no_local_copy; then
+  if ! build_crontab_and_setup_files mysql_instance_setup; then
     exit 1
   fi    
   setup_sshd_resilience
