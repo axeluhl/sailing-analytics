@@ -581,9 +581,10 @@ write and quit, to install the cronjob.
 If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
 
 You can use the build_crontab_and_setup_files (see below) to get these changes.
+
 ## Automated SSH Key Management
 
-AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
+AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `ec2-user` user. For Ubuntu, it's the `ubuntu` user, for Debian it's `admin`. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
 
 We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
 
@@ -591,14 +592,16 @@ The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ss
 
 With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
 
-Two new scripts and a crontab file are provided under the configuration/ folder:
-- `update_authorized_keys_for_landscape_managers_if_changed`
-- `update_authorized_keys_for_landscape_managers`
-- `crontab` (found within configuration for historical reasons, but we should be using those in configuration/crontabs)
+Two new scripts and a crontab snippet are provided under the configuration/ folder:
+- `environments_scripts/repo/usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed`
+- `environments_scripts/repo/usr/local/bin/update_authorized_keys_for_landscape_managers`
+- `crontabs/crontab-update-authorized-keys@HOME_DIR`
+
+These files are intended to be used in specific ``environments_scripts/`` sub-folders to be deployed to a server for a given environment. The crontab snippet should be symbolically linked to, providing the home directory where to update the ``.ssh/authorized_keys`` in the symbolic link's name, such as ``crontab-update-authorized-keys@HOME_DIR=_root`` (where the '_' will get replaced by a '/' while compiling the ``crontab`` file from the snippets).
 
 The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
 
-The `crontab` file which is used during image-upgrade (see `configuration/imageupgrade.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
+The `crontab-update-authorized-keys@HOME_DIR` snippet has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
 
 ## Legacy Documentation for Manual Operations
 
