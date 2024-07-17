@@ -35,7 +35,7 @@ start_servers() {
     chmod 755 /usr/local/bin/cp_root_mail_properties
     if which $EC2_METADATA_CMD && $EC2_METADATA_CMD -d | sed "s/user-data\: //g" | grep "^image-upgrade$"; then
         echo "Found image-upgrade in EC2 user data; upgrading image, then probably shutting down for AMI creation depending on the no-shutdown user data string..." >>/var/log/sailing.err
-        /usr/local/bin/imageupgrade.sh
+        /usr/local/bin/imageupgrade
     else
         echo "No image-upgrade request found in EC2 user data $($EC2_METADATA_CMD -d); proceeding with regular server launch..." >>/var/log/sailing.err
         echo "Servers to launch: ${JAVA_START_INSTANCES}" >>/var/log/sailing.err
