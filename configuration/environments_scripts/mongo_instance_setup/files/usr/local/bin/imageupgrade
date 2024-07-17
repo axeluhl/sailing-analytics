@@ -18,7 +18,7 @@ clean_mongo_pid() {
 LOGON_USER_HOME=/home/ec2-user
 
 run_yum_update
-build_crontab_and_setup_files mongo_instance_setup root code
+build_crontab_and_setup_files mongo_instance_setup
 clean_startup_logs
 clean_mongo_pid
 finalize

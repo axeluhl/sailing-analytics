@@ -23,7 +23,7 @@ else
     sudo chown root:root /root/secrets
     sudo chmod 600 /root/secrets
     . imageupgrade_functions.sh
-    if ! build_crontab_and_setup_files build_server sailing code; then
+    if ! build_crontab_and_setup_files build_server; then
         exit 1
     fi
     # Make eu-west-1 the default region for any aws CLI interaction:

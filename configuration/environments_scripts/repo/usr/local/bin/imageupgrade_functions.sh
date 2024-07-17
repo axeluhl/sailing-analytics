@@ -69,15 +69,6 @@ clean_servers_dir() {
   rm -rf /home/sailing/servers/*
 }
 
-#DEPRECATED
-update_root_crontab() {
-  # The following assumes that /root/crontab is a symbolic link to /home/sailing/code/configuration/crontabs/<the crontab appropriate
-  # to the environment or user>
-  # which has previously been updated by a git pull:
-  cd /root
-  crontab crontab
-}
-
 build_crontab_and_setup_files() {
     if [[ "$#" -eq 0 ]]; then
         echo "Number of arguments is invalid. Please use the options and arguments as follows."
@@ -89,8 +80,6 @@ build_crontab_and_setup_files() {
         echo "  -f means no files are copied over, which is useful if you have already copied files accross or don't want to override existing files"
         echo "Then there are the arguments, where the order matters:"
         echo "  ENVIRONMENT_TYPE - the directory name in environments_scripts which will be used."
-        echo "  USER_WITH_COPY_OF_REPO - a user which will exist on the environment type, which has a checked out copy of the git workspace."
-        echo "  RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER - the relative path within the USER_WITH_COPY_OF_REPO to get to the git workspace."
     else
         TEMP=$(getopt -o fnch: -n 'options checker' -- "$@")
         [[ "$?" -eq 0 ]] || return 2
@@ -134,7 +123,7 @@ build_crontab_and_setup_files() {
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
-          PASS_OPTIONS+=( "$option")
+          PASS_OPTIONS+=( "$option" )
         done
         if ! sudo ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
           return 1
