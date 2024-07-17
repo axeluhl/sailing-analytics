@@ -6,8 +6,8 @@
 METADATA=$( /bin/ec2-metadata -d | sed -e 's/^user-data: //' )
 echo "Metadata: ${METADATA}"
 if echo "${METADATA}" | grep -q "^image-upgrade$"; then
-  echo "Image upgrade; not trying to mount/format ephemeral volume; calling imageupgrade instead..."
-  imageupgrade
+  echo "Image upgrade; not trying to mount/format ephemeral volume"
+  exit 0
 else
   echo "No image upgrade; looking for ephemeral volume and trying to format with xfs..."
   . imageupgrade_functions.sh
