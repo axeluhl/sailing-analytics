@@ -5,9 +5,8 @@
 # file for each user. It also takes the name of the user containing a copy of the git repo as well as the name of the 
 # dir within that user to go to. The created crontab for each user go into that user's home dir and are installed for
 # that user too.
-# Within these crontab stubs, are certain string literals, which are replaced: PATH_OF_GIT_HOME_DIR_TO_REPLACE becomes
-# the absolute path to the git home dir, and PATH_OF_HOME_DIR_TO_REPLACE is changed to the path of the home directory
-# in which the crontab will be installed (ie. that user's home).
+# Within these crontab stubs, are certain string literals, which are replaced: PATH_OF_HOME_DIR_TO_REPLACE is changed
+# to the path of the home directory in which the crontab will be installed (ie. that user's home).
 # Furthermore, within the users folder optional uid, gid and groups files an exist. uid should store the user's uid,
 # gid the group id and groups should have secondary groups (one per line). The user is added to the secondary groups
 # after all users are created.
@@ -104,7 +103,6 @@ if [[ -d "users" ]]; then
                     echo "">> $HOME_DIR/crontab
                 done
                 chown "$USERNAME":"$USERNAME" $HOME_DIR/crontab
-                sed -i "s|PATH_OF_GIT_HOME_DIR_TO_REPLACE|${GIT_PATH}|g" "$HOME_DIR"/crontab # Sets correct path to the git repo within the crontab.
                 sed -i "s|PATH_OF_HOME_DIR_TO_REPLACE|${HOME_DIR}|g" "$HOME_DIR"/crontab # Sets the correct path to the home dir of the user whose crontab will be installed.
                 sed -i '/^$/d' $HOME_DIR/crontab # purges random empty lines.
                 echo "">>$HOME_DIR/crontab  # Adds a newline

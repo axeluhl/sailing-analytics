@@ -495,7 +495,7 @@ This script has a couple of arguments and options. The most important are the ar
 1. Environment type.
 2. User with a checked out Git copy.
 3. The relative path within $2 to the Git copy.
-Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
+Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the string PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
 ## Reverse proxy automation
