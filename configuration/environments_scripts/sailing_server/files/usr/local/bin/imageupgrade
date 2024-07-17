@@ -11,5 +11,5 @@ clean_logrotate_target
 clean_httpd_logs
 clean_servers_dir
 clean_startup_logs
-build_crontab_and_setup_files sailing_server sailing code
+build_crontab_and_setup_files sailing_server sailing no-checked-out-workspace
 finalize
