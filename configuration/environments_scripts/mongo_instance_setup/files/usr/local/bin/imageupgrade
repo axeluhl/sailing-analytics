@@ -16,9 +16,13 @@ clean_mongo_pid() {
 }
 
 LOGON_USER_HOME=/home/ec2-user
-
-run_yum_update
-build_crontab_and_setup_files mongo_instance_setup
-clean_startup_logs
-clean_mongo_pid
-finalize
+METADATA=$( get_ec2_user_data )
+echo "Metadata: ${METADATA}"
+if echo "${METADATA}" | grep -q "^image-upgrade$"; then
+  echo "Image upgrade..."
+  run_yum_update
+  build_crontab_and_setup_files mongo_instance_setup
+  clean_startup_logs
+  clean_mongo_pid
+  finalize
+fi
