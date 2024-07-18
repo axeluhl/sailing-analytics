@@ -5,9 +5,12 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Type=simple
 User=mongod
 Group=mongod
 ExecStart=/bin/mongod --config /etc/mongodb/mongod-archive.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
 PIDFile=/var/run/mongodb/mongod-archive.pid
 RuntimeDirectory=mongodb
 # file size
