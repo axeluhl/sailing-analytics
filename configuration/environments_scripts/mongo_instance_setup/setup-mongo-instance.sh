@@ -29,11 +29,6 @@ else
     build_crontab_and_setup_files mongo_instance_setup
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
-    # Configure SSH daemon:
-    sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
-MaxStartups 100
-EOF
-"
     # Install MongoDB 4.4 and configure as replica set "live"
     sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
 [mongodb-org-4.4]

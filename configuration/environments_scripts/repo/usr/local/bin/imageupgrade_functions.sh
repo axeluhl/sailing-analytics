@@ -384,7 +384,8 @@ myorigin =${subdomain_of_sender_address}.sapsailing.com
 setup_sshd_resilience() {
     sudo su -c "echo 'ClientAliveInterval 3
 ClientAliveCountMax 3
-GatewayPorts yes' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
+GatewayPorts yes
+MaxStartups 100' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
 }
 
 identify_suitable_partition_for_ephemeral_volume() {

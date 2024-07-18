@@ -44,11 +44,6 @@ else
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
-    # Configure SSH daemon:
-    sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
-MaxStartups 100
-EOF
-"
     # Increase limits
     sudo su - -c "cat << EOF >>/etc/sysctl.conf
 # number of connections the firewall can track
