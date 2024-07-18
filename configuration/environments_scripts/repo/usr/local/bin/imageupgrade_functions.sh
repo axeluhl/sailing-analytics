@@ -135,7 +135,7 @@ build_crontab_and_setup_files() {
           return 1
         fi
         cd ..
-        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+        sudo rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
 }
 
