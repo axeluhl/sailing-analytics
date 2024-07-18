@@ -5,9 +5,12 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Type=simple
 User=mongod
 Group=mongod
 ExecStart=/bin/mongod --config /etc/mongodb/mongod-slow.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
 PIDFile=/var/run/mongodb/mongod-slow.pid
 RuntimeDirectory=mongodb
 # file size
