@@ -8,8 +8,9 @@
 
 
 # Source function library. This alters the PATH variable.
-. /etc/init.d/functions
-
+if [ -f /etc/init.d/functions ]; then
+  . /etc/init.d/functions
+fi
 RETVAL=0
 
 SERVERS_DIR=/home/sailing/servers
@@ -73,19 +74,12 @@ configure_and_start_server() {
   # If there is a secret /root/mail.properties, copy it into the default server's configuration directory:
   /usr/local/bin/cp_root_mail_properties "${conf}"
   su - sailing -c "cd ${SERVERS_DIR}/${conf} && refreshInstance.sh auto-install; ./start"
-  pushd ${SERVERS_DIR}/${conf}
-  ./defineReverseProxyMappings.sh
-  popd
-  RETVAL=$?
-  [ $RETVAL -eq 0 ] && success || failure
 }
 
 stop_servers() {
     for conf in $JAVA_START_INSTANCES; do
         echo "Stopping Java server $conf"
         su - sailing -c "cd $SERVERS_DIR/$conf && ./stop"
-        RETVAL=$?
-        [ $RETVAL -eq 0 ] && success || failure
         sync_logs
     done
 }
