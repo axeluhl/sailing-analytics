@@ -125,7 +125,7 @@ build_crontab_and_setup_files() {
         scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
         sudo chown root:root "${TEMP_ENVIRONMENTS_SCRIPTS}"
-        sudo chmod a+r "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        sudo chmod 755 "${TEMP_ENVIRONMENTS_SCRIPTS}"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
