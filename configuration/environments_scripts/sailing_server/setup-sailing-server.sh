@@ -32,9 +32,6 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
-    # The 2nd argument references a user home to navigate to and the 3rd argument is the path to navigate to within that user to find a checked
-    # out git workspace. This dependency will be removed in the future, when we no longer have any dependency on a checked out
-    # workspace on a sailing server.
     build_crontab_and_setup_files sailing_server
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
