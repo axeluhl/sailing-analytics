@@ -7,59 +7,64 @@ REBOOT_INDICATOR=/var/lib/sailing/is-rebooted
 LOGON_USER_HOME=/root
 
 run_yum_update() {
-  echo "Updating packages using yum" >>/var/log/sailing.err
+  echo "Updating packages using yum"
   yum -y update
 }
 
+run_dnf_upgrade() {
+  echo "Upgrading using dnf"
+  dnf -y upgrade --releasever=latest
+}
+
 run_apt_update_upgrade() {
-  echo "Updating packages using apt" >>/var/log/sailing.err
+  echo "Updating packages using apt"
   apt-get -y update; apt-get -y upgrade
   apt-get -y install linux-image-cloud-amd64
   apt-get -y autoremove
 }
 
 run_git_pull() {
-  echo "Pulling git to /home/sailing/code" >>/var/log/sailing.err
+  echo "Pulling git to /home/sailing/code"
   su - sailing -c "cd code; git pull"
 }
 
 download_and_install_latest_sap_jvm_8() {
-  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8" >>/var/log/sailing.err
+  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8"
   vmpath=$( curl -s --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt https://tools.hana.ondemand.com | grep additional/sapjvm-8\..*-linux-x64.zip | head -1 | sed -e 's/^.*a href="\(additional\/sapjvm-8\..*-linux-x64\.zip\)".*/\1/' )
   if [ -n "${vmpath}" ]; then
-    echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8" >>/var/log/sailing.err
+    echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8"
     if [ -z "${TMP}" ]; then
       TMP=/tmp
     fi
-    echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip" >>/var/log/sailing.err
-    curl --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
+    echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip"
+    curl --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip
     cd /opt
     rm -rf sapjvm_8
     if [ -f SIGNATURE.SMF ]; then
       rm -f SIGNATURE.SMF
     fi
-    unzip ${TMP}/sapjvm8-linux-x64.zip >>/var/log/sailing.err
+    unzip ${TMP}/sapjvm8-linux-x64.zip
     rm -f ${TMP}/sapjvm8-linux-x64.zip
     rm -f SIGNATURE.SMF
   else
-    echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade" >>/var/log/sailing.err
+    echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade"
   fi
 }
 
 clean_logrotate_target() {
-  echo "Clearing logrorate-targets" >>/var/log/sailing.err
+  echo "Clearing logrorate-targets"
   rm -rf /var/log/logrotate-target/*
 }
 
 clean_httpd_logs() {
-  echo "Clearing httpd logs" >>/var/log/sailing.err
+  echo "Clearing httpd logs"
   service httpd stop
   rm -rf /var/log/httpd/*
   rm -f /etc/httpd/conf.d/001-internals.conf
 }
 
 clean_startup_logs() {
-  echo "Clearing bootstrap logs" >>/var/log/sailing.err
+  echo "Clearing bootstrap logs"
   rm -f /var/log/sailing*
   # Ensure that upon the next boot the reboot indicator is not present, indicating that it's the first boot
   rm "${REBOOT_INDICATOR}"
@@ -119,7 +124,8 @@ build_crontab_and_setup_files() {
         # user of the scp command (as seen in the second command below).
         scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
-        sudo chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        sudo chown root:root "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        sudo chmod 777 "${TEMP_ENVIRONMENTS_SCRIPTS}"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
@@ -129,7 +135,7 @@ build_crontab_and_setup_files() {
           return 1
         fi
         cd ..
-        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+        sudo rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
 }
 
@@ -270,7 +276,7 @@ __setup_keys_using_local_copy() {
 }
 
 clean_root_ssh_dir_and_tmp() {
-  echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
+  echo "Cleaning up ${LOGON_USER_HOME}/.ssh"
   rm -rf ${LOGON_USER_HOME}/.ssh/authorized_keys
   rm -rf ${LOGON_USER_HOME}/.ssh/known_hosts
   rm -f /var/run/last_change_aws_landscape_managers_ssh_keys*
@@ -378,7 +384,8 @@ myorigin =${subdomain_of_sender_address}.sapsailing.com
 setup_sshd_resilience() {
     sudo su -c "echo 'ClientAliveInterval 3
 ClientAliveCountMax 3
-GatewayPorts yes' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
+GatewayPorts yes
+MaxStartups 100' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
 }
 
 identify_suitable_partition_for_ephemeral_volume() {
@@ -443,4 +450,19 @@ setup_swap() {
     sudo su - -c "echo \"$swapfile_location       none    swap    pri=0      0       0\" >> /etc/fstab"
     sudo swapon -a
     popd
+}
+
+setup_mongo_4_4() {
+    # Install MongoDB 4.4 and configure as replica set "live"
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
+[mongodb-org-4.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+EOF
+"
+    sudo yum -y update
+    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
 }

@@ -12,7 +12,7 @@ if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   echo "Image upgrade..."
   LOGON_USER_HOME="ec2-user"
   ENVIRONMENT_TYPE="reverse_proxy"
-  run_yum_update
+  run_dnf_upgrade
   build_crontab_and_setup_files "${ENVIRONMENT_TYPE}"
   finalize
 fi

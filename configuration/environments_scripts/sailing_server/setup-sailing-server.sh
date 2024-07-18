@@ -32,9 +32,6 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
-    # The 2nd argument references a user home to navigate to and the 3rd argument is the path to navigate to within that user to find a checked
-    # out git workspace. This dependency will be removed in the future, when we no longer have any dependency on a checked out
-    # workspace on a sailing server.
     build_crontab_and_setup_files sailing_server
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
@@ -47,11 +44,6 @@ else
     # Install SAP JVM 8:
     sudo mkdir -p /opt
     sudo su - -c "source /usr/local/bin/imageupgrade_functions.sh; download_and_install_latest_sap_jvm_8"
-    # Configure SSH daemon:
-    sudo su - -c "cat << EOF >>/etc/ssh/sshd_config
-MaxStartups 100
-EOF
-"
     # Increase limits
     sudo su - -c "cat << EOF >>/etc/sysctl.conf
 # number of connections the firewall can track
@@ -61,17 +53,7 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
-    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
-[mongodb-org-4.4]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
-EOF
-"
-    sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
+    setup_mongo_4_4
     sudo su - -c "cat << EOF >>/etc/mongod.conf
 replication:
   replSetName: replica
