@@ -32,7 +32,7 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
-    build_crontab_and_setup_files mongo_instance_setup
+    build_crontab_and_setup_files central_mongo_setup
     # obtain root SSH key from key vault:
     setup_keys "central_mongo_setup"
     # Create some swap space for the case mountnvmeswap hasn't created any
@@ -66,6 +66,7 @@ EOF
     echo " - attach these volumes to the new instance"
     echo " - issue the following commands on the new instance:"
     echo "   mount -a"
+    echo "   chmod -R mongod:mongod /var/lib/mongodb"
     echo "   systemctl start mongod-archive.service"
     echo "   systemctl start mongod-hidden-live-replica.service"
     echo "   systemctl start mongod-slow.service"
