@@ -30,17 +30,7 @@ else
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
     # Install MongoDB 4.4 and configure as replica set "live"
-    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
-[mongodb-org-4.4]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
-EOF
-"
-    sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
+    setup_mongo_4_4
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root:root /root/ssh-key-reader.token
