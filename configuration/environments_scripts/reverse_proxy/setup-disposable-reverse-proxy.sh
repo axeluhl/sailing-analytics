@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup script for Amazon Linux 2. May need to update macro definitions for the archive IP.
+# Setup script for Amazon Linux 2023. May need to update macro definitions for the archive IP.
 # Parameter 1 is the IP and parameter 2 is the bearer token to be installed in the root home dir.
 # Ensure that the security for requesting the metadata uses IMDSv1
 if [[ "$#" -ne 2 ]]; then
@@ -22,8 +22,8 @@ mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
 # update instance
-yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables nmap
+dnf upgrade -y --releasever=latest
+dnf install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables nmap
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
 cd /root

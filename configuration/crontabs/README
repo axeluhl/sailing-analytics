@@ -10,7 +10,7 @@ files or symbolic links used in the users/ directories, as follows:
     crontab-snippet@{PARAM1}={VALUE1}@{PARAM2}={VALUE2}...
 
 will replace all occurrences of PARAM1 in the snippet by VALUE1, etc. The values can be
-empty. If a value shall contain an @-sign, use @@ instead. For a / (slash) character
+empty. If a value shall contain an @ sign, use @@ instead. For a / (slash) character
 use an underscore _ character, and to produce a single underscore, double it (__), as
 illustrated by the following example:
 
