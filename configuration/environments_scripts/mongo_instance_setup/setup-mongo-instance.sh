@@ -46,8 +46,6 @@ EOF
 "
     sudo yum -y update
     sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
-    sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' \
-                -e 's|^processManagement:$|processManagement:\n  fork: true  # fork and run in background\n  pidFilePath: /var/run/mongodb/mongod.pid  # location of pidfile|' /etc/mongod.conf
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root:root /root/ssh-key-reader.token
