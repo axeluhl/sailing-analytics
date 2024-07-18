@@ -73,6 +73,7 @@ EOF
     echo " - assign the Route53 DNS record \"dbserver.internal.sapsailing.com\" to this"
     echo "   instance's internal IP address $( ec2-metadata --local-ipv4 | sed -e 's/^local-ipv4: //' )"
     echo " - name the new instance \"MongoDB Central\" and terminate the old instance"
+    echo " - tag the instance with mongo-replica-sets = live:10203,archive:10201,slow:10202"
   else
     echo "Not running on an AWS instance; refusing to run setup!" >&2
     echo "To prepare an instance running in AWS, provide its external IP as argument to this script." >&2
