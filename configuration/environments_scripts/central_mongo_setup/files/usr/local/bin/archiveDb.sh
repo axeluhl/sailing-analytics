@@ -12,7 +12,8 @@ else
 fi
 
 DB=$1
-DUMPBASEDIR=/mnt/mongodb-slow
+DUMPBASEDIR=/var/lib/mongodb/slow/.dump
+mkdir -p "${DUMPBASEDIR}"
 
 if [ "$CONFIRMATION" = "" ]; then
   echo -n "This will drop the database $DB in the archive DB before importing. Are you sure (y/n)? "
@@ -44,4 +45,4 @@ else
   echo "Hashes of old and new are empty of differ: ${ORIGINAL_HASH} and ${ARCHIVE_HASH}"
   exit 1
 fi
-
+rm -rf ${DUMPBASEDIR}"
