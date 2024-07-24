@@ -556,6 +556,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throws Exception {
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURIFromConfiguration
                 + " and storedURI " + storedURIFromConfiguration);
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
@@ -608,6 +609,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String raceUrl) throws Exception {
         logger.info(
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
                 getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
@@ -1308,6 +1310,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         logger.info(
                 "tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port);
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         Map<String, RegattaResults> cachedRegattaEntriesLists = new HashMap<String, RegattaResults>();
         for (SwissTimingRaceRecordDTO rr : rrs) {
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(rr.boatClass);
@@ -2588,6 +2591,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throws NotDenotedForRaceLogTrackingException, Exception {
         // no permission checks needed here, since they already exist in PermissionAwareRaceTrackingHandler
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
@@ -2598,6 +2602,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         for (final Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
             startRaceLogTracking(leaderboardRaceColumnFleetName.getA(), leaderboardRaceColumnFleetName.getB(),
                     leaderboardRaceColumnFleetName.getC(), trackWind, correctWindByDeclination);
