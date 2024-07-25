@@ -832,6 +832,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
         showUncorrectedTotalPointsCheckbox = new CheckBox(stringMessages.showUncorrectedTotalPoints());
+        showUncorrectedTotalPointsCheckbox.setTitle(stringMessages.showUncorrectedTotalPointsDescription());
         showUncorrectedTotalPointsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
