@@ -16,6 +16,22 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 3.15.13
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 26/07/2024
+
+ 1) Bugs
+
+- When a new race is added to the event, TracAPI receives a message with some information about the race. However, this
+ message does not include the location of the parameters file. TracAPI attempts to infer the URI using HTTP (instead
+ of HTTPS). This can cause a deadlock in locations where HTTP is not allowed (e.g., the Olympic Games) because TracAPI is
+ trying to download an invalid parameters file. From now on, TracAPI will infer the URI using HTTPS. This is a
+ temporary solution. The final solution will be to include the URI of the parameters file in the original message.
+ (Reported by Axel Uhl, 25/07/2024)
+
+********************************************
         TracAPI 3.15.12
 ********************************************
 This is a final version. It keeps the backward compatibility.
