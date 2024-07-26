@@ -27,7 +27,7 @@ else
 	message="Problem reaching palma2024.sailing.omegatiming.com from instance ${first} in region ${i}"
 	echo "${message}" | notify-operators "${message}"
       else
-	echo "Access from region ${i}, IP ${first} OK." >&2
+        echo "Access from region ${i}, IP ${first} OK." >&2
       fi
     fi
   done
