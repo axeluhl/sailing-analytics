@@ -30,10 +30,12 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.CONTENDER, BoatClassMasterdata.HANSA_303,
                 BoatClassMasterdata.FINN, BoatClassMasterdata.MUSTO_SKIFF, BoatClassMasterdata.OPEN_BIC,
                 BoatClassMasterdata.OPTIMIST, BoatClassMasterdata.PWA,
+                BoatClassMasterdata.OK,
                 BoatClassMasterdata.RS_AERO, BoatClassMasterdata.RS_X,
                 BoatClassMasterdata.IQFOIL_MEN, BoatClassMasterdata.IQFOIL_WOMEN, BoatClassMasterdata.IQFOIL_YOUTH, 
                 BoatClassMasterdata.SPLASH_BLUE, BoatClassMasterdata.SPLASH_RED, BoatClassMasterdata.SPLASH_GREEN,
-                BoatClassMasterdata.STAR, BoatClassMasterdata.TECHNO_293, BoatClassMasterdata.TECHNO_293_PLUS);
+                BoatClassMasterdata.STAR, BoatClassMasterdata.TECHNO_293, BoatClassMasterdata.TECHNO_293_PLUS,
+                BoatClassMasterdata.WINGFOIL);
         BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
                 BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer, BoatClassMasterdata.WASZP);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,
@@ -48,6 +50,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.J70, BoatClassMasterdata.J80, BoatClassMasterdata.J92, BoatClassMasterdata.J92S,
                 BoatClassMasterdata.B_ONE, BoatClassMasterdata.IRC, BoatClassMasterdata.LASER_SB3, BoatClassMasterdata.LONGTZE,
                 BoatClassMasterdata.RS_FEVA, BoatClassMasterdata.RS_TERA, BoatClassMasterdata.RS_VENTURE,
+                BoatClassMasterdata.RS_VAREO,
                 BoatClassMasterdata.RS100, BoatClassMasterdata.RS21, BoatClassMasterdata.TP52,
                 BoatClassMasterdata.CLUB_SWAN_50, BoatClassMasterdata.BAVARIA_CRUISER_41S, BoatClassMasterdata.BAVARIA_CRUISER_45,
                 BoatClassMasterdata.BAVARIA_CRUISER_46, BoatClassMasterdata.BENETEAU_FIRST_35, BoatClassMasterdata.BENETEAU_FIRST_45,

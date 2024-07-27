@@ -21,11 +21,10 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 ### Accounts
 
 1. Git Account
-   The primary Git repository for the project is hosted on sapsailing.com. It is mirrored on an hourly basis into SAP's internal Git/Gerrit repository, but branches from the external Git end up under the remote `sapsailing.com` in the internal repository, thus do not automatically merge into their branch counterparts. Conversely, commits pushed onto branches of the SAP-internal Gerrit will not by themselves end up on the external Git at sapsailing.com.
+   The primary Git repository for the project is hosted on Github (see [https://github.com/SAP/sailing-analytics](https://github.com/SAP/sailing-analytics)). To clone, use ``git@github.com:SAP/sailing-analytics.git``. To gain write access you have to become member of the [sailing-analytics-team](https://github.com/orgs/SAP/teams/sailing-analytics-team) organization. We still have a shadow repository around that, e.g., powers our Wiki at [https://wiki.sapsailing.com](https://wiki.sapsailing.com) and which lives at ``ssh://trac@sapsailing.com/home/trac/git``. 
 
-   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to Axel Uhl or Simon Marcel Pamies, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).  
+   - For access to the external git at `ssh://trac@sapsailing.com/home/trac/git` please send your SSH public key to one of the project maintainers, requesting git access. Make sure to NOT generate the key using Putty. Putty keys don't work reliably under Linux and on Windows/Cygwin environments. Use ssh-keygen in a Cygwin or Linux or MacOS/X environment instead. For further instructions for generating an ssh-key see [GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).  
    Note: If you want to use the ssh-key in the context of our solution, it can be an RSA or ED25519 format. Example for creating a key: `ssh-keygen -t ed25519 -b 512 -C "test@test.com"`. Make sure to set a non-empty password for your key.
-   - Alternatively, for access to the SAP-internal Git/Gerrit repository register yourself as a Git user in the SAP-Git under: [https://git.wdf.sap.corp:8080/](https://git.wdf.sap.corp:8080/); ask the Git administrator (Axel Uhl) to get on the list of enabled committers
 
 2. Bugzilla
 
@@ -35,7 +34,9 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 
 3. Wiki
 
-   - Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
+We have so far decided against migrating our existing Gollum-based Wiki to Github's Wiki pages. Therefore, for the time being, you can either push changes to the ``wiki/`` folder to the ``main`` branch of the repository from where they will make it to the Gollum-provided Wiki, or our can request a Gollum account to be created for you. This will also allow you to view non-public pages through [https://wiki.sapsailing.com](https://wiki.sapsailing.com).
+
+For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: [http://www.sha1-online.com/](http://www.sha1-online.com/).
 
 4. Hudson
 
@@ -46,7 +47,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
 1. JDK >= 11. No longer required by Eclipse because new Eclipse releases bring their own JDK bundled with the installer. Still, if you want to use Java 11 or Java 17, install any such JDK and set the `JAVA_HOME` variable to it.
 2. Eclipse IDE for Eclipse Committers, version 4.29.0 ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r) 
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
-4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)
+4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)still
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
 6. MongoDB (at least Release 4.4), download: [https://www.mongodb.com/](https://www.mongodb.com/). You may need to choose the community edition. In addition, install `mongosh`.
 7. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
@@ -257,10 +258,10 @@ Install the GWT Browser Plugin for the GWT Development mode. As of 2016-08-31 Fi
 If you want a hudson job to run when you push your branch then you can run a script in `configuration` called . Run options for a branch titled `createHudsonJobForBug.sh`. For you bug branch titled `bug<bug number>`, create a build job, which will create a release, by running the script like so: `./createHudsonJobForBug.sh <bug number>`.
 If on Windows, you may need to disable any web shields in antivirus software, to allow `curl` to function. If on Mac, you may need to install gnu-sed.
 
-###Issues when playing around with AWS
+### Issues when playing around with AWS
 - The problem: **aws cli (used for aws ec2 describe-tags) hangs in eu-west-2** in all AZs on new instances I created, using a target group which permitted all outbound connections and inbound https, http and ssh connections. I tried permitting everything but that didn’t work. When I attached (at Axel’s suggestion) the Java Application with Reverse Proxy security group, it worked but — even if I duplicated this security group, and applied that copy instead — it still didn’t work.
 Curl issue solution: it turns out that the network interface only permits certain outbound and inbounds from certain target groups. 
 The path to the solution: On my instance in eu-west-2a, I ran aws --debug ec2 describe-tags (you may need to do aws configure first). This is much akin to verbose mode of other unix commands. I noticed it hang on a request to  ec2.eu-west-2.amazonaws.com. If you do `dig -t any  ec2.eu-west-2.amazonaws.com` you see 3 ip addresses, which — as you will see later — are IPs in each of the eu-west-2 availability zones. When I ran curl -v ec2.eu-west-2.amazonaws.com (the v flag is verbose), one of the IPs from dig was used (namely the one in eu-west-2a, where the instance resides) and it hangs. I then went to endpoints for the VPC and noticed a service for the service `com.amazonaws.eu-west-2.ec2`. It had the default security group, which turned out to only allow inbound rules from the default or Java Application with Reverse Proxy target group. 
 - Problem: A load balancer's target group health checks fail. I was told the checks failed with 403 errors.
 Solution: This was occurring because the website didn't have any content in the /var/www/html. Whilst a site was still served (namely the Apache test page) it does throw a 403 error. If you fill the directory with and index.html the test then passes and a 200 code is returned
-
+- Problem: Target platform reload in Eclipse. Sometimes reloading via Window -> Plug-in Development -> Target Platform doesn't work, so open the target definition itself and try reloading there. Often a restart proves helpful after the reload. In addition, you can clean all projects and rebuild; then rebuild the individual projects that fail. Sometimes the errors are actually just warnings and you can try to run the GWT SDM (remember the other SDM's must be run if everything is brand new). Lastly, try clearing the plugins content found at `WORKSPACE_HOME/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins`.

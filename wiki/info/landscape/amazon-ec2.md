@@ -4,16 +4,18 @@
 
 ## Quickstart
 
-Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for [highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator).
+Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in the otherwise unused region eu-west-2 (London). Most regular operations can be handled through the AdminConsole's "Advanced / Landscape" tab. See, e.g., [https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:](https://security-service.sapsailing.com/gwt/AdminConsole.html#LandscapeManagementPlace:). Some operations occurring not so frequently still require more in-depth knowledge of steps, manual execution of commands on the command line and some basic Linux understanding. This also goes for highest-scale set-ups requiring an AWS Global Accelerator with or without Geo-Blocking through AWS Web Application Firewall (WAF) with Web ACLs as used for [Tokyo 2020](https://wiki.sapsailing.com/wiki/info/landscape/tokyo2020/olympic-setup#setup-for-the-olympic-summer-games-2020-2021-tokyo_aws-setup_global-accelerator) and [Paris 2024](https://wiki.sapsailing.com/wiki/info/landscape/paris2024/olympic-plan-for-paris-marseille-2024).
 
 ## Important Servers, Hostnames
 
 - Web Server / Central Reverse Proxy: reachable through SSH to sapsailing.com:22
-- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201, all other slow/archived DBs on 10202, hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com, mongo1.internal.sapsailing.com
+- Database Servers: dbserver.internal.sapsailing.com (archive server winddb on port 10201 and replica set "winddb", all other slow/archived DBs on 10202 for replica set "slow", hidden replica of "live" replica set on 10203), mongo0.internal.sapsailing.com (replica set "live"), mongo1.internal.sapsailing.com (replica set "live")
 - RabbitMQ Server: rabbit.internal.sapsailing.com
-- MySQL DB (mainly for Bugzilla): mysql.internal.sapsailing.com (currently co-deployed on the same old instance that also runs RabbitMQ, hence currently mysql.internal.sapsailing.com and rabbit.internal.sapsailing.com refer to the same instance)
-- Hudson Build Server: called "Build/Test/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
-- Additional "Build Slaves" launched by the Hudson Build Server: Named ``Hudson Ubuntu Slave``, used to run individual build jobs
+- MariaDB (mainly for Bugzilla): mysql.internal.sapsailing.com
+- Hudson Build Server: called "Build/Dev", running a Hudson instance reachable at ``hudson.sapsailing.com`` and a test instance of the SAP Sailing Analytics available under ``dev.sapsailing.com``
+- A central sailing application replica set called "security_service" reachable at ``security-service.sapsailing.com`` which is the hub for security-related information such as the user and groups database with permissions and roles, entity ownerships, as well as access control lists
+- Self-service at ``my.sapsailing.com`` which currently is the default server name used by the Sail Insight app, as two dedicated hosts running the replica set
+- Three multi-server instances shared by several sailing application replica sets, spread across all three availability zones (AZs) of eu-west-1
 
 ## Landscape Overview
 
@@ -31,15 +33,15 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 ### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
 A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
-Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server. The setup procedure can be found below.
 
 To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
 The IPs for all reverse proxies will automatically be added to ALB target groups with the tag key `allReverseProxies`, including the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
 and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
-Disposables instances are tagged with `disposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
+Disposables instances are tagged with `DisposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
 
-For security groups of the central reverse proxy, we want Webserver, as well as Disposable Reverse Proxy. The disposables just have the latter.
+For security groups of the central reverse proxy, we want Webserver, as well as Reverse Proxy. The disposables just have the latter.
 
 There is hope to also deploy the httpd on already existing instances, which have free resources and a certain tag permitting this 
 co-deployment.
@@ -94,7 +96,7 @@ Use Status 172.31.19.129 internal-server-status
 Use Status 127.0.0.1 internal-server-status
 ```
 
-The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
+The second obviously requires maintenance as the internal IP changes, e.g., when instantiating a new Webserver copy by creating an image and restoring from the image. This maintenance is managed by a service unit. When upgrading / moving / copying the webserver you may try to be smart and copy the contents of ``/etc/ssh``, in particular the ``ssh_host_...`` files that contain the host keys. As you switch, users will then not have to upgrade their ``known_hosts`` file, and even internal accounts such as the Wiki account or the sailing accounts on other hosts that clone the git, or the build infrastructure won't be affected.
 
 After (re-)booting the webserver, check that all services have come up before adding the instance to its respective target groups. For example, ensure that the Wiki "Gollum" service has been launched (see ``/home/wiki/serve.sh``). Furthermore, ensure that the Docker daemon is running and that it runs the Docker registry containers (``registry-ui-1`` and ``registry-registry-1``). See [here](https://wiki.sapsailing.com/wiki/info/landscape/docker-registry) for how this is set up.
 
@@ -102,7 +104,24 @@ The webserver must be tagged with key ``CentralReverseProxy`` where the value is
 
 The following diagram explains the disposable reverse proxies role a little better. 
 
-<img src="wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+<img src="/wiki/images/orchestration/disposable-reverse-proxy-architecture-from-bug1873.png" />
+
+## Setting up the Central Reverse Proxy
+
+A lot of the above procedure has since been combined into a series of setup scripts found under `configuration/environments_scripts/central_reverse_proxy`. The script requires that you have added an SSH key with maximum access to your SSH authentication agent. This can be done with 
+```
+eval `ssh-agent`
+ssh-add
+```
+
+You will also need the AWS CLI and must run `./awsmfalogon.sh` before running the first script below, to authenticate and gain a session token. Next, you should notify the community that internal services, such as Bugzilla will temporarily be down (make sure to notify them afterwards too, so they can continue their work). 
+
+Using the landscape tab of the admin console, ensure there is a disposable in the same AZ as the archive (this ensures we can still route traffic to the archive).
+
+Next, remove the central reverse proxy from all target groups tagged with `allReverseProxies`. Then when at the path described above, launch `./setup-central-reverse-proxy.sh` and follow the necessary instructions. You
+will need to unmount and detach volumes from the old instance and then reattach and mount on the new webserver.
+Then `setup-central-reverse-proxy-part-2.sh` runs to finish any setup that requires these mounts. Finally, `target-group-tag-route53-nfs-elasticIP-setup.sh`
+will run to configure the target groups, tags and route 53. You will need to then remove the old reverse proxy from the target groups tagged with `CentralReverseProxy`. 
 
 ### DNS and Application Load Balancers (ALBs)
 
@@ -127,8 +146,8 @@ There are currently three MongoDB replica sets:
    <img src="/wiki/info/landscape/images/MongoDBReplicaSets.png"/>
 
 - ``live``: Used by default for any new event or club server. The replica set consists of three nodes, two of which running on instances with fast but ephemeral NVMe storage for high write throughput, thus eligible as primary nodes; and a hidden replica with a slower EBS gp2 SSD volume that has a backup plan. The two NVMe-backed nodes have DNS names pointing to their internal IP addresses: ``mongo0.internal.sapsailing.com`` and ``mongo1.internal.sapsailing.com``. Their MongoDB processes run on the default port 27017 each. They run in different availability zones. The hidden replica runs on ``dbserver.internal.sapsailing.com:10203``.
-- ``archive``: Used by the ARCHIVE servers (production and failover). It host a DB called ``winddb`` (for historical reasons). Its primary and by default only node is found on ``dbserver.internal.sapsailing.com:10201``. If an ARCHIVE server is launched it is a good idea to scale this ``archive`` replica set by adding one or two secondary nodes that are reasonably sized, such as ``i3.2xlarge``. Note that the ARCHIVE server configuration prefers reading from secondary MongoDB instances, thus will prefer any newly launched node over the primary.
-- ``slow``: Used as target for archiving / backing up content from the ``live`` replica set once it is no longer needed for regular operations. The default node for this replica set can be found at ``dbserver.internal.sapsailing.com:10202`` and has a large (currently 4TB) yet slow and inexpensive sc1 disk attached. One great benefit of this replica set is that in case you want to resurrect an application replica set after it has been archived, you can do so with little effort, simply by launching an instance with a DB configuration pointing at the ``slow`` replica set.
+- ``archive``: Used by the ARCHIVE servers (production and failover). It hosts a DB called ``winddb`` (for historical reasons). This differs to the `live`, which has a DB per event. Its primary and by default only node is found on ``dbserver.internal.sapsailing.com:10201``. If an ARCHIVE server is launched it is a good idea to scale this ``archive`` replica set by adding one or two secondary nodes that are reasonably sized, such as ``i3.2xlarge``. Note that the ARCHIVE server configuration prefers reading from secondary MongoDB instances, thus will prefer any newly launched node over the primary.
+- ``slow``: Used as target for archiving / backing up content from the ``live`` replica set once it is no longer needed for regular operations. The DB for the event is copied into the winddb of the archive and also to the `slow` replica set, which acts as a sort of backup. However, the events remain as separate DBs on the `slow` replica set. The default node for this replica set can be found at ``dbserver.internal.sapsailing.com:10202`` and has a large (currently 4TB) yet slow and inexpensive sc1 disk attached. One great benefit of this replica set is that in case you want to resurrect an application replica set after it has been archived, you can do so with little effort, simply by launching an instance with a DB configuration pointing at the ``slow`` replica set.
 
 Furthermore, every application server instance hosts a local MongoDB process, configured as a primary of a replica set called ``replica``. It is intended to be used by application replica processes running on the instance, scaling with the number of replicas required, starting clean and empty and getting deleted as the instance is terminated. Yet, being configured as a MongoDB replica set there are powerful options available for attaching more MongoDB instances as needed, or upgrading to a new MongoDB release while remaining fully available, should this ever become an issue for longer-running replicas.
 
@@ -278,17 +297,19 @@ In all of the following sub-sections the text will assume that you have provided
 
 In several of the scenarios, both, AdminConsole and REST API, you will have the option to provide security bearer tokens that are used to authenticate requests to processes running the SAP Sailing Analytics. If you omit those, the credentials of the session used to authenticate your sailing user will be used. (Note, that for local test set-ups disconnected from the standard security realm used by all of the sapsailing.com-deployed processes, these credentials may not be accepted by the processes you're trying to control. In this case, please provide explicit bearer tokens instead.) We distinguish between the credentials required to replicate the information shared across the landscape, usually from ``security-service.sapsailing.com``, and those used by a replica in one of your application replica sets to authenticate for credentials to replicate the application replica set's master.
 
-There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at /root/key_vault on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
+There is now a single point of truth for the various ssh and AWS keys, and possibly others in the future. This can be found at `/root/key_vault` on the central reverse proxy. There you will find directories for different environments' key setups, named consistently with the environment types under `${GIT_HOME}/configuration/environments_scripts` (the directory names are the environment type). One can use the `setup_keys` function in `imageupgrade_functions.sh` to setup the keys. There is 1 parameter, the environment type.
 
 The structure of the vault is important for the efficacy of the script and should appear as below. There is an explanation afterwards.
 ```
-key_vault
+.
 ├── aws_credentials
+│   ├── axel-central-reverse-proxy-credentials
 │   └── disposable-reverse-proxy-automation
 ├── central_reverse_proxy
 │   ├── httpdConf
 │   │   ├── aws
-│   │   │   └── credentials -> ../../../aws_credentials/disposable-reverse-proxy-automation
+│   │   │   └── credentials
+│   │   │       └── disposable-reverse-proxy-automation -> ../../../../aws_credentials/disposable-reverse-proxy-automation
 │   │   └── ssh
 │   │       ├── authorized_keys
 │   │       │   ├── id_ed25519.pub@root@central_reverse_proxy -> ../../../root/ssh/id_ed25519.pub
@@ -296,23 +317,46 @@ key_vault
 │   │       ├── id_ed25519
 │   │       └── id_ed25519.pub
 │   ├── root
+│   │   ├── aws
+│   │   │   ├── config
+│   │   │   │   └── axel
+│   │   │   └── credentials
+│   │   │       ├── axel-central-reverse-proxy-credentials -> ../../../../aws_credentials/axel-central-reverse-proxy-credentials
+│   │   │       └── disposable-reverse-proxy-automation -> ../../../../aws_credentials/disposable-reverse-proxy-automation
 │   │   └── ssh
 │   │       ├── authorized_keys
 │   │       │   └── id_ed25519.pub@httpdConf@central_reverse_proxy -> ../../../httpdConf/ssh/id_ed25519.pub
 │   │       ├── id_ed25519
 │   │       └── id_ed25519.pub
+│   └── wiki
+│       └── ssh
+│           └── authorized_keys
+│               └── id_ed25519.pub@root@reverse_proxy -> ../../../../reverse_proxy/root/ssh/id_ed25519.pub
+├── README
+...
 ```
+
 1. So we have the aws_credentials directory, storing the credentials for specific AWS users.
+
 2. We also have directories named after the environment types (matching the directory names in GIT_HOME/configuration/environments_scripts).
+
 3. Nested within these, we have directories for each user that will require some keys, for the given environment type.
+
 4. For each user, we have optional directories "ssh" & "aws" (the naming is important).
-5. The aws folder should contain only credentials files which are sym links to the aws_credentials folder.
-6. If the setup_keys script is run, the contents of the aws folder will be copied, across to the respective .aws folder on the instance the script runs on, within the correct user's home directory. The config file will be created with the correct region. Although, it will *only* be the default profile.
+
+5. The aws folder can contain a config and credentials folder. The credentials folder contains sym links to aws_credentials, whilst the config folder contains config header and format. 
+
+6. If the setup_keys script is run, the contents of the credentials and config folders are concatenated into the credentials and config file respectively, which are found in .aws home dir of the user that the folders are nested within. The region is automatically added and so shouldn't be defined in the config. Note, that the general idea is to use the "default" header and define access control for that instance type through AWS credentials, reducing the number  of different profiles, as well as complexity of scripts.
+
 7. The ssh folder will contain the ssh keys of the user; they are named based on the type of the key.
+
 8. Furthermore, the folder will contain an authorized_keys directory, which holds references to the keys (elsewhere in the vault), which should be authorized to access the user. In the above example, the symbolic link named `id_ed25519.pub@httpdConf@central_reverse_proxy` means that the key referenced will be in the authorized keys
 for root, so the id_ed25519 key of the httpdConf user on the central reverse proxy will be able to access the root user.
+
 9. The name of these links doesn't matter, but by convention we will use the format used in the image above (`key_type@user@env_type`), using @ as a separator.
+
 10. The script will copy across the keys in the ssh folder (ignoring sym links or directories).
+
 11. The script will append every public key that is linked in the authorized_keys folder, to the authorized_keys file of the respective user. 
 
 ### Creating a New Application Replica Set
@@ -445,13 +489,11 @@ Any scripts common to multiple environment scripts, may be found in the "repo", 
 The build-crontab-and-cp-files uses this structure to help setup an environment 
 type. It builds the crontab file, by combining all the referenced crontab 
 one-liners, storing a copy in the user's home directory and installing it to the specified user. It also copies across the contents of "files" to the corresponding location, de-refencing any symbolic links.
-The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the build-crontab-and-cp-files script.
+The script should ideally be triggered using a function in `imageupgrade_functions.sh`, titled `build_crontab_and_setup_files`, that takes an environment type (see other arguments below), and temporarily copies (via scp) the environments_scripts folder. It then calls the `build-crontab-and-cp-files` script.
 
 This script has a couple of arguments and options. The most important are the arguments.
 1. Environment type.
-2. User with a checked out Git copy.
-3. The relative path within $2 to the Git copy.
-Ideally, we would have only a single checked out Git copy across all instances: one on the wiki user of the central. However, some crontabs require references to specific users' files, so we have the strings PATH_OF_GIT_HOME_DIR_TO_REPLACE & PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the build-crontab-and-cp-files script replaces with the right path.
+Some crontabs require references to specific users' files, so we have the string PATH_OF_HOME_DIR_TO_REPLACE, in the crontabs, as placeholders for the paths the string itself describes, which the `build-crontab-and-cp-files` script replaces with the right path.
 Have a look at the script itself for more details on the options and arguments.
 
 ## Reverse proxy automation
@@ -534,12 +576,13 @@ write and quit, to install the cronjob.
 * * * * * /home/wiki/gitwiki/configuration/switchoverArchive.sh "/etc/httpd/conf.d/000-macros.conf" 2 9
 ```
 
-If you want to quickly run this script, consider installing it in /usr/local/bin, via `ln -s TARGET_PATH LINK_NAME`.
+If you want to quickly run this script, consider installing it in ``/usr/local/bin``, via `ln -s TARGET_PATH LINK_NAME`.
 
-You can use the build_crontab_and_setup_files (see below) to get these changes.
+You can use the `build_crontab_and_setup_files` (see below) to get these changes.
+
 ## Automated SSH Key Management
 
-AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `root` user. For Ubuntu, it's the `ec2-user` or `ubuntu` user. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
+AWS by default adds the public key of the key pair used when launching an EC2 instance to the default user's `.ssh/authorized_keys` file. For a typical Amazon Linux machine, the default user is the `ec2-user` user. For Ubuntu, it's the `ubuntu` user, for Debian it's `admin`. The problem with this approach is that other users with landscape management permissions could not get at this instance with an SSH connection. In the past we worked around this problem by deploying those landscape-managing users' public SSH keys into the root user's `.ssh/authorized_keys` file already in the Amazon Machine Image (AMI) off which the instances were launched. The problem with this, however, is obviously that we have been slow to adjust for changes in the set of users permitted to manage the landscape.
 
 We decided early 2021 to change this so that things would be based on our own user and security sub-system (see [here](/wiki/info/security/security.md)). We introduced `LANDSCAPE` as a secured object type, with a special permission `MANAGE` and a special object identifier `AWS` such that the permission `LANDSCAPE:MANAGE:AWS` would permit users to manage all aspects of the AWS landscape, given they can present a valid AWS access key/secret. To keep the EC2 instances' SSH public key infrastructure in line, we made the instances poll the SSH public keys of those users with permissions, once per minute, updating the default user's `.ssh/authorized_keys` file accordingly.
 
@@ -547,14 +590,16 @@ The REST end point `/landscape/api/landscape/get_time_point_of_last_change_in_ss
 
 With this, the three REST API end points `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers`, `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS`, and `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=...` allow clients to efficiently find out whether the set of users with AWS landscape management permission and/or their set of SSH key pairs may have changed, and if so, poll the actual changes which requires a bit more computational effort.
 
-Two new scripts and a crontab file are provided under the configuration/ folder:
-- `update_authorized_keys_for_landscape_managers_if_changed`
-- `update_authorized_keys_for_landscape_managers`
-- `crontab` (found within configuration for historical reasons, but we should be using those in configuration/crontabs)
+Two new scripts and a crontab snippet are provided under the configuration/ folder:
+- `environments_scripts/repo/usr/local/bin/update_authorized_keys_for_landscape_managers_if_changed`
+- `environments_scripts/repo/usr/local/bin/update_authorized_keys_for_landscape_managers`
+- `crontabs/crontab-update-authorized-keys@HOME_DIR`
+
+These files are intended to be used in specific ``environments_scripts/`` sub-folders to be deployed to a server for a given environment. The crontab snippet should be symbolically linked to, providing the home directory where to update the ``.ssh/authorized_keys`` in the symbolic link's name, such as ``crontab-update-authorized-keys@HOME_DIR=_root`` (where the '_' will get replaced by a '/' while compiling the ``crontab`` file from the snippets).
 
 The first makes a call to `/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers` (currently coded to `https://security-service.sapsailing.com` in the crontab file). If no previous time stamp for the last change exists under `/var/run/last_change_aws_landscape_managers_ssh_keys` or the time stamp received in the response is newer, the `update_authorized_keys_for_landscape_managers` script is invoked using the bearer token provided in `/root/ssh-key-reader.token` as argument, granting the script READ access to the user list and their SSH key pairs. That script first asks for `/security/api/restsecurity/users_with_permission?permission=LANDSCAPE:MANAGE:AWS` and then uses `/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=..`. to obtain the actual SSH public key information for the landscape managers. The original `/root/.ssh/authorized_keys` file is copied to `/root/.ssh/authorized_keys.org` once and then used to insert the single public SSH key inserted by AWS, then appending all public keys received for the landscape-managing users.
 
-The `crontab` file which is used during image-upgrade (see `configuration/imageupgrade.sh`) has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
+The `crontab-update-authorized-keys@HOME_DIR` snippet has a randomized sleeping period within a one minute duration after which it calls the `update_authorized_keys_for_landscape_managers_if_changed` script which transitively invokes `update_authorized_keys_for_landscape_managers` in case of changes possible.
 
 ## Legacy Documentation for Manual Operations
 

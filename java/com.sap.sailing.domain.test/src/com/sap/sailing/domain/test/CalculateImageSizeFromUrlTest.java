@@ -22,7 +22,7 @@ public class CalculateImageSizeFromUrlTest {
     public void calculateImageSizeFromUrl() throws IOException {
         int width = 350;
         int height = 150;
-        ImageSize size = calculate("http://via.placeholder.com/" + width + "x" + height);
+        ImageSize size = calculate(getClass().getResource("/"+width+"x"+height+".png").toString());
         assertTrue(size.getWidth() == width);
         assertTrue(size.getHeight() == height);
     }

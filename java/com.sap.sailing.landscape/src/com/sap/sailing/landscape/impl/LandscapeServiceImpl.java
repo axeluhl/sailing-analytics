@@ -444,6 +444,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         final SailingServer from = sailingServerFactory.getSailingServer(new URL("https", hostnameFromWhichToArchive, "/"), bearerTokenOrNullForApplicationReplicaSetToArchive);
         final SailingServer archive = sailingServerFactory.getSailingServer(new URL("https", hostnameOfArchive, "/"), bearerTokenOrNullForArchive);
+        final SailingServer failoverArchive = sailingServerFactory.getSailingServer(new URL("https", SharedLandscapeConstants.ARCHIVE_FAILOVER_ADDRESS, "/"), bearerTokenOrNullForArchive);
         logger.info("Importing master data from "+from+" to "+archive);
         sendMailToReplicaSetOwner(archiveReplicaSet, "StartingToArchiveReplicaSetIntoSubject", "StartingToArchiveReplicaSetIntoBody", Optional.of(ServerActions.CAN_IMPORT_MASTERDATA));
         sendMailToReplicaSetOwner(applicationReplicaSetToArchive, "StartingToArchiveReplicaSetSubject", "StartingToArchiveReplicaSetBody", Optional.of(ServerActions.CAN_EXPORT_MASTERDATA));
@@ -490,6 +491,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                         logger.info("Removing remote sailing server references to "+from+" from archive server "+archive);
                         try {
                             archive.removeRemoteServerReference(from);
+                            failoverArchive.removeRemoteServerReference(from);
                         } catch (Exception e) {
                             logger.log(Level.INFO, "Exception trying to remove remote server reference to "+from+
                                     "; probably such a reference didn't exist");

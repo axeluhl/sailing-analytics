@@ -17,11 +17,15 @@ Then carry out these steps:
               gcc-c++ ncurses-devel geoip-devel perl-autodie docker
 ```
 
-* activate NFS by calling `chkconfig nfs on`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
+* activate NFS by calling `systemctl enable nfs-server`; ensure that `/var/log/old` and `/home/scores` are exposed in `/etc/exports` as follows:
 ```
 /var/log/old 172.31.0.0/16(rw,nohide,no_root_squash)
 /home/scores 172.31.0.0/16(rw,nohide,no_root_squash)
 ```
+rw = read/write allowed
+nohide = means sub-mounted volumes are included in the parent nfs share
+no_root_squash = Allows remote root users to act as root on the nfs share
+
 * launch the NFS service once using `service nfs start`
 * run the following command in order to obtain this feature required by Bugzilla:
 ```
@@ -177,4 +181,4 @@ The script sets up nfs/nvme mounts, installs/updates httpd + software for script
 
 ## Read Also
 
-Check out the details in [amazon-ec2](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies) on the disposables and central: namely the target group healthcheck and shared httpd configuration Git repo. Also, look over the key_vault and the build_crontab_and_setup_files detailed there.
+Check out the details in [amazon-ec2](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies) on the disposables and central: namely the target group healthcheck and shared httpd configuration Git repo. Also, look over the key_vault and the ``build_crontab_and_setup_files`` detailed there.

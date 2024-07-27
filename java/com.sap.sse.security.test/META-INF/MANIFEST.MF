@@ -24,6 +24,8 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  net.bytebuddy.byte-buddy;bundle-version="1.12.18",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Import-Package: com.sap.sse.security.shared,
+ com.sap.sse.security.shared.subscription,
+ com.sap.sse.security.shared.subscription.chargebee,
  com.sap.sse.security.ui.shared,
  org.apache.shiro.session.mgt
 Automatic-Module-Name: com.sap.sse.security.test

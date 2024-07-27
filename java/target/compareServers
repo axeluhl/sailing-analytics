@@ -44,6 +44,17 @@ NEWGROUPS=leaderboardgroups.new.sed
 OLDGROUPS_FOR_CONTINUE=${OLDGROUPS}.continue
 NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
+# Check old and new server for healthy status; no point in preparing for a switch if any
+# of them is unhealthy
+if ! curl --fail --silent "${OLDSERVER}/gwt/status" >/dev/null; then
+  echo "${OLDSERVER} unhealthy. Aborting."
+  exit 1
+fi
+if ! curl --fail --silent "${NEWSERVER}/gwt/status" >/dev/null; then
+  echo "${NEWSERVER} unhealthy. Aborting."
+  exit 1
+fi
+
 if [ "${useRestApi}" = "1" ]; then
   if [ -n "${BEARER_TOKEN}" ]; then
     AUTH="-H \"Authorization: Bearer ${BEARER_TOKEN}\""
@@ -76,7 +87,7 @@ else
   fi
 
   download_and_fix_boatclasses () {
-      wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | jq 'del(.leaderboards[].series[].fleets[].races[].raceViewerUrls)' | jq 'del(.displayName)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
+      wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | jq 'del(.leaderboards[].series[].fleets[].races[].raceViewerUrls)' | jq 'del(.displayName)' | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" | grep -v "\"timepoint-ms\":" >"$2" 2>$WGET_ERR
       #wget --no-cache $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | python -m json.tool | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
   }
 
