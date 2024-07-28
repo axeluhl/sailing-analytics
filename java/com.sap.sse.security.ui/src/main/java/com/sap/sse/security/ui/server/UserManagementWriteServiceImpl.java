@@ -20,6 +20,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -289,10 +290,15 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         final User user = getSecurityService().getUserByName(username);
         // Is, e.g., admin is allowed to update the password without knowing the old password and/or secret?
         if (getSecurityService().hasCurrentUserOneOfExplicitPermissions(user, UserActions.FORCE_OVERWRITE_PASSWORD)
-        || // someone knew a username and the correct password for that user
-        (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
-        || // someone provided the correct password reset secret for the correct username
-        (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
+        || ((
+               // someone knew a username and the correct password for that user
+            oldPassword != null && getSecurityService().checkPassword(username, oldPassword)
+            || // someone provided the correct password reset secret for the correct username
+            (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret)))
+               // but in any case the user as which they authenticate in one of these ways has to have the UPDATE permission
+          && PermissionChecker.isPermitted(user.getPermissionType().getPermission(DefaultActions.UPDATE),
+                user, getSecurityService().getAllUser(), getSecurityService().getOwnership(user.getIdentifier()).getAnnotation(),
+                getSecurityService().getAccessControlList(user.getIdentifier()).getAnnotation()))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             sendPasswordChangedMailAsync(username);
         } else {
