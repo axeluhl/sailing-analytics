@@ -2752,7 +2752,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (newSubscription != null && !newSubscription.hasPlan()) {
             Iterable<SubscriptionPlan> plans = allSubscriptionPlans.values();
             for (SubscriptionPlan plan : plans) {
-                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
+                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ true);
             }
         } else {
             assert currentSubscription == null || newSubscription == null
@@ -2787,6 +2787,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             } else {
                 rolesToRemove = getSubscriptionPlanUserRoles(user, plan);
             }
+            logger.info(() -> "Removing the following roles of subscription plan " + plan.getId()+" from user "+user.getName()+": "+
+                    Arrays.asList(rolesToRemove));
             for (Role role : rolesToRemove) {
                 store.removeRoleFromUser(user.getName(), role);
             }
@@ -2797,6 +2799,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (plan != null) {
             logger.info(() -> "Add user roles for subscription plan " + plan.getId());
             Role[] roles = getSubscriptionPlanUserRoles(user, plan);
+            logger.info(() -> "Adding the following roles of subscription plan " + plan.getId()+" to user "+user.getName()+": "+
+                    Arrays.asList(roles));
             for (Role role : roles) {
                 addRoleForUserAndSetUserAsOwner(user, role);
             }
@@ -2957,9 +2961,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // user roles need to be updated with granted new roles. Further, if the user is 
             // somehow in possession of roles he should not posess, the roles must be removed
             final SubscriptionPlan subscriptionPlanById = getSubscriptionPlanById(newSubscription.getPlanId());
-            if(subscriptionPlanById == null) {
+            if (subscriptionPlanById == null) {
                 result = false;
-            }else {
+            } else {
                 result = newSubscription.isActiveSubscription() || subscriptionPlanById.isUserInPossessionOfRoles(user);
             }
         } else {
