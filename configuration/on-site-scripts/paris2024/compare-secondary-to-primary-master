@@ -1,8 +1,13 @@
 #!/bin/bash
 PRIMARY_MASTER=https://paris2024-master.sailing.omegatiming.com:9443
 SECONDARY_MASTER=https://paris2024-secondary-master.sailing.omegatiming.com:9443
+OUTPUTFILE=/tmp/compareservers.out
+if [ ! -f "$OUTPUTFILE" ]; then
+  touch "$OUTPUTFILE"
+fi
+STORED_OUTPUT=$(cat $OUTPUTFILE)
 COMPARE_OUTPUT=$( /home/sailing/code/java/target/compareServers -ael ${SECONDARY_MASTER} ${PRIMARY_MASTER} )
-if [ "$?" != "0" ]; then
+if [ "$STORED_OUTPUT" != "$COMPARE_OUTPUT" ]; then
   echo "Comparing ${SECONDARY_MASTER} with ${PRIMARY_MASTER} showed differences:
 
 ${COMPARE_OUTPUT}
@@ -10,4 +15,5 @@ ${COMPARE_OUTPUT}
 Please consolidate, e.g., by doing a master data import or
 by repeating the administrative operation you carried out on
 the one side also on the other side." | notify-operators "DIFFERENCE BETWEEN PRIMARY AND SECONDARY MASTER"
+  echo "$COMPARE_OUTPUT" > "$OUTPUTFILE"
 fi
