@@ -181,6 +181,7 @@ import software.amazon.awssdk.services.route53.model.ChangeInfo;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsRequest;
 import software.amazon.awssdk.services.route53.model.ChangeResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.GetChangeRequest;
+import software.amazon.awssdk.services.route53.model.HostedZone;
 import software.amazon.awssdk.services.route53.model.ListResourceRecordSetsResponse;
 import software.amazon.awssdk.services.route53.model.RRType;
 import software.amazon.awssdk.services.route53.model.ResourceRecord;
@@ -1751,6 +1752,21 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final String hostedZoneId = getDNSHostedZoneId(AwsLandscape.getHostedZoneName(hostname));
         return route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZoneId).startRecordName(hostname)).handle((response, e)->
             Util.filter(response.resourceRecordSets(), resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname)));
+    }
+    
+    @Override
+    public String findHostnamesForIP(String ipAddress) {
+        final Route53Client route53Client = getRoute53Client();
+        for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
+            for (final ResourceRecordSet resourceRecordSet : route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZone.id())).resourceRecordSets()) {
+                for (final ResourceRecord resourceRecord : resourceRecordSet.resourceRecords()) {
+                    if (Util.equalsWithNull(resourceRecord.value(), ipAddress)) {
+                        return resourceRecordSet.name();
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     @Override

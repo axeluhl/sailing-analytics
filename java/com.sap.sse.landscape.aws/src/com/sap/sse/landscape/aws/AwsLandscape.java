@@ -757,6 +757,17 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<ResourceRecordSet>> getResourceRecordSetsAsync(String hostname);
 
+    /**
+     * For an IP address looks for Route53 resource records that hold an A- or AAAA-record pointing
+     * to that {@code ipAddress} and returns the record set name as the hostname. This searches
+     * the whole of all resource record sets in the AWS account.<p>
+     * 
+     * Example: asking for "172.31.13.233" may return something like "mongo0.internal.sapsailing.com"
+     * 
+     * @return the fully-qualified resource record set name if found, otherwise {@code null}
+     */
+    String findHostnamesForIP(String ipAddress);
+    
     Iterable<ResourceRecordSet> getResourceRecordSets(String hostname);
     
     DNSCache getNewDNSCache();
