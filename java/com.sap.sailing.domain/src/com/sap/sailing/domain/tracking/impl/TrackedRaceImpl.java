@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -192,6 +193,14 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
+/**
+ * Note to subclasses: you have to override {@link #readResolve()} and invoke
+ * {@code super.readResolve()} in the override to ensure that this class's
+ * implementation gets called.<p>
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
 
     private static final long serialVersionUID = -4825546964220003507L;
@@ -753,7 +762,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead, an
      * {@link EmptyWindStore} is used for the de-serialized instance.
      */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         distancesFromStarboardSideOfStartLineProjectedOntoLineCache = new ConcurrentHashMap<>();
         distancesFromStarboardSideOfStartLineProjectedOntoLineCacheLastAccessTimes = new ConcurrentHashMap<>();
@@ -774,15 +783,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         crossTrackErrorCache = new CrossTrackErrorCache(this); // this invokes this.addListener(crossTrackErrorCache)
-        crossTrackErrorCache.invalidate();                     // which is handled by the subclass which may not yet be
+                                                               // which is handled by the subclass which may not yet be
                                                                // fully initialized; see also bug 6039
         maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         maneuverCache = createManeuverCache();
+        logger.info("Deserialized race " + getRace().getName());
+    }
+    
+    /**
+     * Runs the things after de-serialization that require the object to be fully constructed,
+     * including its subclasses.<p>
+     * 
+     * Note that this method won't be called for an object that is instance of a subclass.
+     * Therefore, subclasses are advised to invoke this method in their own {@code readResolve()}
+     * implementation.
+     */
+    protected Object readResolve() throws ObjectStreamException {
+        crossTrackErrorCache.invalidate();
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
-        adjustStructureToCourse(); // a bit unclean: this also tries to work on the DynamicTrackedRaceImpl which isn't fully initialized yet; see also bug6039
+        try {
+            adjustStructureToCourse();
+        } catch (PatchFailedException e) {
+            throw new RuntimeException(e);
+        } // a bit unclean: this also tries to work on the DynamicTrackedRaceImpl which isn't fully initialized yet; see also bug6039
         triggerManeuverCacheRecalculationForAllCompetitors();  // a bit unclean: this also tries to work on the DynamicTrackedRaceImpl which isn't fully initialized yet; see also bug6039
-        logger.info("Deserialized race " + getRace().getName());
+        return this;
     }
 
     /**
