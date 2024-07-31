@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -175,11 +174,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         raceAbortedListeners = new HashSet<>();
     }
     
-    protected Object readResolve() throws ObjectStreamException {
+    protected Object readResolve() {
         if (markPassingCalculator != null) {
             logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
         }
-        return super.readResolve();
+        return this;
     }
 
     private RaceStateChangedListener createRaceStateStartTimeChangeListener() {

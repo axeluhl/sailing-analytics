@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -790,15 +789,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         logger.info("Deserialized race " + getRace().getName());
     }
     
-    /**
-     * Runs the things after de-serialization that require the object to be fully constructed,
-     * including its subclasses.<p>
-     * 
-     * Note that this method won't be called for an object that is instance of a subclass.
-     * Therefore, subclasses are advised to invoke this method in their own {@code readResolve()}
-     * implementation.
-     */
-    protected Object readResolve() throws ObjectStreamException {
+    @Override
+    public void initializeAfterDeserialization() {
         crossTrackErrorCache.invalidate();
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
@@ -808,7 +800,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             throw new RuntimeException(e);
         } // a bit unclean: this also tries to work on the DynamicTrackedRaceImpl which isn't fully initialized yet; see also bug6039
         triggerManeuverCacheRecalculationForAllCompetitors();  // a bit unclean: this also tries to work on the DynamicTrackedRaceImpl which isn't fully initialized yet; see also bug6039
-        return this;
     }
 
     /**
