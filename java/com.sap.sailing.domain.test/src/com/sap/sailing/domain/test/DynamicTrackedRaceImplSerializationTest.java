@@ -31,6 +31,7 @@ public class DynamicTrackedRaceImplSerializationTest extends AbstractSerializati
         final DynamicTrackedRaceImpl dtr = TrackBasedTest.createTestTrackedRace("Test", "Test", "470", competitorsAndBoats,
                 /* timePointForFixes */ TimePoint.now(), /* useMarkPassingCalculator */ false);
         final DynamicTrackedRaceImpl dtrClone = cloneBySerialization(dtr, DomainFactory.INSTANCE);
+        dtrClone.initializeAfterDeserialization();
         assertNotNull(dtrClone);
         final Field crossTrackErrorCacheField = TrackedRaceImpl.class.getDeclaredField("crossTrackErrorCache");
         crossTrackErrorCacheField.setAccessible(true);
