@@ -781,9 +781,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
-        crossTrackErrorCache = new CrossTrackErrorCache(this); // this invokes this.addListener(crossTrackErrorCache)
-                                                               // which is handled by the subclass which may not yet be
-                                                               // fully initialized; see also bug 6039
         maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
         maneuverCache = createManeuverCache();
         logger.info("Deserialized race " + getRace().getName());
@@ -791,7 +788,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public void initializeAfterDeserialization() {
-        crossTrackErrorCache.invalidate();
+        crossTrackErrorCache = new CrossTrackErrorCache(this); // this invokes this.addListener(crossTrackErrorCache)
+        // which is handled by the subclass which may not yet be
+        // fully initialized; see also bug 6039
         // considering the unlikely possibility that the course and this tracked race's internal structures
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
         try {
