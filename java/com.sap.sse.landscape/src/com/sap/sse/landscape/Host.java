@@ -66,6 +66,14 @@ public interface Host extends WithID {
     }
 
     /**
+     * By default, this returns the stringified {@link #getPrivateAddress()}. Specialized implementations
+     * may choose to try to map this to a host name through a reverse DNS lookup.
+     */
+    default String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
+        return getPrivateAddress(timeoutEmptyMeaningForever).getHostAddress();
+    }
+
+    /**
      * Connects to an SSH session for the username specified, using the SSH key pair used to launch the instance, and
      * opens a "shell" channel. Use the {@link Channel} returned by {@link Channel#setInputStream(java.io.InputStream)
      * setting an input stream} from which the commands to be sent to the server will be read, and by

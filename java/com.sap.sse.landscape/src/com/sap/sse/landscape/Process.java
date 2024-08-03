@@ -27,7 +27,7 @@ public interface Process<LogT extends Log, MetricsT extends Metrics> {
     }
     
     default String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
-        return getHost().getPrivateAddress(timeoutEmptyMeaningForever).getHostAddress();
+        return getHost().getHostname(timeoutEmptyMeaningForever);
     }
     
     /**

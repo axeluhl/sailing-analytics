@@ -152,6 +152,16 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     @Override
     public String getHostname() {
         final String privateIpAddress = getPrivateAddress().getHostAddress();
+        return getHostnameForPrivateAddress(privateIpAddress);
+    }
+
+    @Override
+    public String getHostname(Optional<Duration> timeoutEmptyMeaningForever) {
+        final String privateIpAddress = getPrivateAddress(timeoutEmptyMeaningForever).getHostAddress();
+        return getHostnameForPrivateAddress(privateIpAddress);
+    }
+
+    private String getHostnameForPrivateAddress(final String privateIpAddress) {
         final String result;
         if (privateIpAddress == null) {
             result = null;
