@@ -762,7 +762,9 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      * to that {@code ipAddress} and returns the record set name as the hostname. This searches
      * the whole of all resource record sets in the AWS account.<p>
      * 
-     * Example: asking for "172.31.13.233" may return something like "mongo0.internal.sapsailing.com"
+     * Example: asking for "172.31.13.233" may return something like "mongo0.internal.sapsailing.com"<p>
+     * 
+     * Note that this strips off any trailing "." (dot) from a resource record set name.
      * 
      * @return the fully-qualified resource record set name if found, otherwise {@code null}
      */

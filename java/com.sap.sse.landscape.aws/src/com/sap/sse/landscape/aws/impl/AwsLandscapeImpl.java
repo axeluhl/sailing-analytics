@@ -1761,7 +1761,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             for (final ResourceRecordSet resourceRecordSet : route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZone.id())).resourceRecordSets()) {
                 for (final ResourceRecord resourceRecord : resourceRecordSet.resourceRecords()) {
                     if (Util.equalsWithNull(resourceRecord.value(), ipAddress)) {
-                        return resourceRecordSet.name();
+                        return resourceRecordSet.name().replaceFirst("\\.$", "");
                     }
                 }
             }
