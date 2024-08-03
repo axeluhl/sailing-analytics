@@ -148,6 +148,24 @@ public class AwsInstanceImpl<ShardingKey> implements AwsInstance<ShardingKey> {
     public InetAddress getPrivateAddress(Optional<Duration> timeoutEmptyMeaningForever) {
         return getPrivateAddress();
     }
+    
+    @Override
+    public String getHostname() {
+        final String privateIpAddress = getPrivateAddress().getHostAddress();
+        final String result;
+        if (privateIpAddress == null) {
+            result = null;
+        } else {
+            // try a DNS reverse lookup:
+            final String hostname = landscape.findHostnamesForIP(privateIpAddress);
+            if (hostname == null) {
+                result = privateIpAddress;
+            } else {
+                result = hostname;
+            }
+        }
+        return result;
+    }
 
     /**
      * Establishes an unconnected session configured for the "root" user.
