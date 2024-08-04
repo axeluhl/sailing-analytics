@@ -124,6 +124,11 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
     }
     
     @Test
+    public void testReverseDNSLookup() {
+        assertEquals("mongo0.internal.sapsailing.com", landscape.findHostnamesForIP("172.31.13.233"));
+    }
+    
+    @Test
     public void testGetMasterOnApplicationProcess() throws Exception {
         final Iterable<SailingAnalyticsHost<String>> hosts = landscape.getApplicationProcessHostsByTag(region,
                 SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG,
