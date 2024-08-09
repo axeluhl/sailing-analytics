@@ -112,6 +112,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */30000, /* useSpeed */
     true, "TestWindTrack");
 
+    @Override
+    public void initializeAfterDeserialization() {
+    }
+
     public WindTrack getWindTrack() {
         return windTrack;
     }

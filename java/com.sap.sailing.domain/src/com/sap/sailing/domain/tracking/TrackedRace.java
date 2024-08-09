@@ -92,7 +92,12 @@ import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
  * <p>
  *
  * The overall race standings can be requested in terms of a competitor's ranking. More detailed information about what
- * happens / happened within a leg is available from {@link TrackedLeg} and {@link TrackedLegOfCompetitor}.
+ * happens / happened within a leg is available from {@link TrackedLeg} and {@link TrackedLegOfCompetitor}.<p>
+ * 
+ * Note: if you de-serialize objects of this type, make sure to invoke {@link #initializeAfterDeserialization} after the
+ * entire object graph, including any cycles across {@link Regatta} objects, such as through the race's
+ * {@link #getTrackedRegatta()} and {@link TrackedRegatta#getRegatta()} links, has been fully read and its structure
+ * established. This will, e.g., ensure that XTE and maneuver cache calculations are triggered initially.
  *
  * @author Axel Uhl (d043530)
  *
@@ -105,6 +110,17 @@ public interface TrackedRace
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
+    
+    /**
+     * Runs the things after de-serialization of the entire graph of the enclosing {@link Regatta} required to
+     * fully initialize this object, such as triggering an initial calculation of the {@link #crossTrackErrorCache},
+     * adjusting the leg structure to the race's current course, and triggering the maneuver cache calculations.
+     * <p>
+     * 
+     * Note that this method won't be called for an object that is instance of a subclass. Therefore, subclasses are
+     * advised to invoke this method in their own {@code readResolve()} implementation.
+     */
+    void initializeAfterDeserialization();
 
     RaceDefinition getRace();
 
