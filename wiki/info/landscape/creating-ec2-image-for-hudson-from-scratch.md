@@ -1,6 +1,6 @@
 # Setting up an image for the hudson.sapsailing.com server
 
-Like when setting up a regular sailing application server instance, start with a fresh Amazon Linux 2 image and create an instance with a 16GB root volume. Use the "Sailing Analytics Server" security group and something like a ``t3.small`` instance type for creating the image. Then, invoke the script
+Like when setting up a regular sailing application server instance, start with a fresh Amazon Linux 2 image and create an instance with a 32GB root volume. Use the "Sailing Analytics Server" security group and something like a ``t3.medium`` instance type. Then, invoke the script
 ```
     configuration/hudson_instance_setup/setup-hudson-server.sh {external-IP-of-new-instance}
 ```
@@ -10,7 +10,7 @@ The ``/home/hudson/android-sdk-linux`` folder that is later expected to be mount
 
 When the script has finished, proceed as follows:
 
-* make a volume available that holds the ``/home/hudson`` content, including the ``android-sdk-linux`` folder. This can happen, e.g., by creating a snapshot of the existing ``/home/hudson`` volume of the running "Build/Dev/Test" server, or you may search the weekly backup snapshots for the latest version to start with. Make sure to create the volume in the same availability zone (AZ) as your instance is running in.
+* make a volume available that holds the ``/home/hudson`` content, including the ``android-sdk-linux`` folder. This can happen, e.g., by creating a snapshot of the existing ``/home/hudson`` volume of the running "Build/Dev/Test" server, or you may search the weekly backup snapshots for the latest version to start with, or you may even stop the running Hudson, unmount and detach the /home/hudson volume and attach/mount on the new instance as long as the new instance runs in the same availability zone (AZ). Make sure to create the volume in the same availability zone (AZ) as your instance is running in.
 * Based on how full the volume already is, consider re-sizing it by creating the volume larger than the snapshot.
 * Attach it.
 * In the instance, as ``root`` user, call ``dmesg``. This will show the new volume that just got attached, as well as its partition names.

@@ -145,6 +145,17 @@ In this example, find your web application at http://localhost:32779 which is wh
 ```
 to connect to the server's OSGi console.
 
+Alternatively, use an "environment" definition that sets useful defaults, e.g., like this:
+```
+    docker run -P -it --rm -e "SERVER_NAME=test77" -e "USE_ENVIRONMENT=live-master-server" -e "REPLICATE_MASTER_BEARER_TOKEN=BRxGpF0nr68Z4m/f13/MgiYhdRB3xoDCYd+rLc17rTs=" ghcr.io/sap/sailing-analytics:latest \
+        bash -c "rm env.sh; echo \"
+SERVER_NAME=test77
+USE_ENVIRONMENT=live-master-server
+REPLICATE_MASTER_BEARER_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\" | ./refreshInstance.sh auto-install-from-stdin; ./start fg"
+```
+
+This will download and install the latest release and set up a primary/master instance, here as an example for server name "test77" and synchronize security data from ``security-service.sapsailing.com`` using the bearer token specified as ``REPLICA_MASTER_BEARER_TOKEN``.
+
 The default Docker image built by ``docker/makeImageForLatestRelease`` uses the ``eclipse-temurin:8-jdk`` base image. If you'd like to use the SAP JVM 8 which gives you great profiling and reversible on-the-fly debugging capabilities, you may build a Docker image for it, using ``docker/Dockerfile_sapjvm``. Using it to build an image will accept version 3.2 of the SAP tools developer license on your behalf. Build the image, e.g., like this:
 
 ```

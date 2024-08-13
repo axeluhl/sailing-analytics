@@ -44,8 +44,6 @@ IMAGEUPGRADE_FUNCTIONS_IP="$3"   # can be a domain name, such as sapsailing.com
 IMAGEUPGRADE_FUNCTIONS_PATH_ON_INSTANCE_TO_GIT="$4"
 IMAGE_TYPE="central_reverse_proxy"
 HTTP_LOGROTATE_ABSOLUTE=/etc/logrotate.d/httpd
-GIT_COPY_USER="wiki"
-RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
 # This authorized keys copying is essential as we rely on the ability to log into the root user.
 ssh -A "ec2-user@${IP}" "bash -s" << FIRSTEOF 
 # Correct authorized keys. May not be necessary if update_authorized_keys is running.
@@ -55,7 +53,7 @@ FIRSTEOF
 ssh -A "root@${IP}" "bash -s" << SECONDEOF
 # update instance
 yum update -y
-yum install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
+yum install -y python httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables mailx nmap icu mariadb105-server tree #icu is a c/c++ library that provides unicode and globalisation support for software development.
 # docker setup 
 yum install -y docker
 sudo curl --silent -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-\$(uname -s)-\$(uname -m)" -o /usr/local/bin/docker-compose
@@ -128,7 +126,7 @@ scp -o StrictHostKeyChecking=no -p root@"$IMAGEUPGRADE_FUNCTIONS_IP":"$IMAGEUPGR
 . imageupgrade_functions.sh
 setup_cloud_cfg_and_root_login
 # setup files
-if ! build_crontab_and_setup_files -c -n "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # -c & -n mean only files are copied over.
+if ! build_crontab_and_setup_files -c -n "${IMAGE_TYPE}"; then # -c & -n mean only files are copied over.
     exit 1
 fi
 setup_swap 5000

@@ -165,6 +165,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(deserializedCourse.getWaypoints()));
@@ -187,6 +188,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-2, Util.size(deserializedCourse.getWaypoints()));
@@ -208,6 +210,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one more waypoint
         assertEquals(Util.size(course.getWaypoints())+1, Util.size(deserializedCourse.getWaypoints()));
@@ -230,6 +233,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())+2, Util.size(deserializedCourse.getWaypoints()));
@@ -253,6 +257,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(deserializedCourse.getWaypoints()));
