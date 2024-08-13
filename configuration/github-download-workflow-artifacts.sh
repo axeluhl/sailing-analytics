@@ -12,8 +12,12 @@
 # an exit status of 2 is returned.
 BRANCH="${1}"
 BEARER_TOKEN="${2}"
+UNIX_TIME=$( date +%s )
+UNIX_DATE=$( date --iso-8601=second )
+UNIX_TIME_YESTERDAY=$(( UNIX_TIME - 2*24*3600 )) # look back two days in time
+DATE_YESTERDAY=$( date --iso-8601=second -d @${UNIX_TIME_YESTERDAY} )
 # Get the artifacts URL of the last workflow run triggered by a branch push for ${BRANCH}:
-LAST_WORKFLOW_FOR_BRANCH=$( curl --silent -L -H 'Authorization: Bearer '${BEARER_TOKEN} https://api.github.com/repos/SAP/sailing-analytics/actions/runs?per_page=100 2>/dev/null | jq -r '.workflow_runs | map(select(.status == "completed" and .name == "release" and ((.head_branch | startswith("'${BRANCH}'")) or (.head_branch | startswith("releases/'${BRANCH}'"))))) | sort_by(.updated_at) | reverse | .[0]' )
+LAST_WORKFLOW_FOR_BRANCH=$( curl --silent -L -H 'Authorization: Bearer '${BEARER_TOKEN} https://api.github.com/repos/SAP/sailing-analytics/actions/runs?created=${DATE_YESTERDAY/+/%2B}..${UNIX_DATE/+/%2B}\&per_page=100 2>/dev/null | jq -r '.workflow_runs | map(select(.status == "completed" and .name == "release" and ((.head_branch | startswith("'${BRANCH}'")) or (.head_branch | startswith("releases/'${BRANCH}'"))))) | sort_by(.updated_at) | reverse | .[0]' )
 ARTIFACTS_URL=$( echo "${LAST_WORKFLOW_FOR_BRANCH}" | jq -r '.artifacts_url' )
 CONCLUSION=$( echo "${LAST_WORKFLOW_FOR_BRANCH}" | jq -r '.conclusion' )
 ARTIFACTS_JSON=$( curl --silent -H 'Authorization: Bearer '${BEARER_TOKEN} "${ARTIFACTS_URL}" )
