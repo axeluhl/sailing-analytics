@@ -428,7 +428,8 @@ public class SecurityResource extends AbstractSecurityResource {
         final Object principal = SecurityUtils.getSubject().getPrincipal();
         if (principal != null) {
             final String username = principal.toString();
-            result = respondToRemoveAccessTokenForUser(username);
+            getService().removeAccessToken(username);
+            result = respondWithAccessTokenForAuthenticatedSubject();
         } else {
             result = Response.status(Status.UNAUTHORIZED).build();
         }
@@ -447,13 +448,6 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put(GRANTED, SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
         return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
-    }
-
-    Response respondToRemoveAccessTokenForUser(final String username) {
-        final Response result;
-        getService().removeAccessToken(username);
-        result = Response.ok().build();
-        return result;
     }
 
     private Response respondWithAccessTokenForAuthenticatedSubject() {
