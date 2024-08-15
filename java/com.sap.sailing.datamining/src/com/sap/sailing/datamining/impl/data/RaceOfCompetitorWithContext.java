@@ -219,6 +219,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         return getTrackedRaceContext().getLeaderboardContext().getLeaderboard().getMaxPointsReason(competitor,
                 getTrackedRaceContext().getRaceColumn(), MillisecondsTimePoint.now());
     }
+    
+    @Override
+    public boolean isDiscarded() {
+        return getTrackedRaceContext().getLeaderboardContext().getLeaderboard().isDiscarded(competitor,
+                getTrackedRaceContext().getRaceColumn(), MillisecondsTimePoint.now());
+    }
 
     @Override
     public Speed getSpeedWhenStarting() {
