@@ -1,6 +1,8 @@
 # Docker Registry
 
-At ``docker.sapsailing.com`` there is a Docker registry running which mainly holds two repositories:
+## `docker.sapsailing.com`
+
+Our "legacy" self-hosted docker registry is at ``docker.sapsailing.com``. It mainly holds two repositories:
 
 - sapsailing
 - sapjvm8
@@ -111,3 +113,6 @@ If you want to delete an entire repository, e.g., because you pushed images unde
   docker exec -it registry-registry-1 rm -rf /var/lib/registry/docker/registry/v2/repositories/{your-repository-name}
 ```
 
+## `ghcr.io`
+
+Our Github Actions-based builds produce Docker images and upload them to [https://github.com/SAP/sailing-analytics/pkgs/container/sailing-analytics](https://github.com/SAP/sailing-analytics/pkgs/container/sailing-analytics). This is currently still a private registry that may become public once the Github repository for `SAP/sailing-analytics` becomes public.
