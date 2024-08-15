@@ -30,6 +30,7 @@ public class SettingsUtilTest {
         private transient TestSettings nested;
 
         public OuterSettings() {
+            super();
         }
         
         @Override

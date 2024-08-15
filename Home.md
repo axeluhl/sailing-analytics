@@ -1,4 +1,4 @@
-﻿﻿# Welcome to the SAP Sailing Wiki
+﻿# Welcome to the SAP Sailing Wiki
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
@@ -125,6 +125,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
 * [[Whitelabelling|wiki/howto/whitelabelling]]
 * [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
+* [[Secured Settings|wiki/howto/development/secured-settings]]
 
 ### For Event Managers
 

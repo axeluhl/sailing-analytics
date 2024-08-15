@@ -13,6 +13,7 @@ public class SailorProfilePreferences extends AbstractGenericSerializableSetting
     private transient SettingsList<SailorProfilePreference> sailorProfiles;
 
     public SailorProfilePreferences(CompetitorAndBoatStore store) {
+        super();
         sailorProfiles = new SettingsList<>("sailorProfiles", this, () -> new SailorProfilePreference(store));
     }
 
