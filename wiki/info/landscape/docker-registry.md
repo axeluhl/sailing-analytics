@@ -2,10 +2,12 @@
 
 ## `docker.sapsailing.com`
 
-Our "legacy" self-hosted docker registry is at ``docker.sapsailing.com``. It mainly holds two repositories:
+Our "legacy" self-hosted docker registry is at ``docker.sapsailing.com``. It mainly holds four repositories:
 
 - sapsailing
 - sapjvm8
+- sapsailing_on_sapmachine17
+- windestimationtraining
 
 The ``sapsailing`` repository holds the images built, in particular, by the latest ``master`` branch build.
 See the corresponding [Hudson Job Configuration](https://hudson.sapsailing.com/job/SAPSailingAnalytics-master/).
