@@ -99,6 +99,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.SecurityChildSettingsContext;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 
@@ -1390,7 +1391,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
                 selectedLegDetails, selectedRaceDetails, selectedOverallDetailColumns, namesOfRaceColumnsToShow,
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), timer.getRefreshInterval(),
                 raceColumnSelection.getType(), isShowAddedScores(), isShowCompetitorShortName(),
-                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality, showCarryColumn);
+                isShowCompetitorFullName(), isShowCompetitorBoatInfo(), isShowCompetitorNationality, showCarryColumn, 
+                new SecurityChildSettingsContext(leaderboard, paywallResolver));
         return leaderboardSettings;
     }
 
@@ -1425,7 +1427,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel<EditableLeaderboa
     @Override
     protected EditableLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(
             EditableLeaderboardSettings currentSettings, LeaderboardDTO result) {
-        return currentSettings.withNamesOfRaceColumnsToShowDefaults(result.getNamesOfRaceColumns());
+        return currentSettings.withNamesOfRaceColumnsToShowDefaults(result.getNamesOfRaceColumns(),
+                new SecurityChildSettingsContext(leaderboard, paywallResolver));
     }
 
     @Override

@@ -43,6 +43,9 @@ public interface HasRaceResultOfCompetitorContext {
     @Dimension(messageKey="IRM")
     public MaxPointsReason getMaxPointsReason();
     
+    @Dimension(messageKey="Discarded")
+    boolean isDiscarded();
+    
     @Statistic(messageKey="NumberOfPodiumFinish", ordinal=3)
     public Boolean isPodiumFinish();
     

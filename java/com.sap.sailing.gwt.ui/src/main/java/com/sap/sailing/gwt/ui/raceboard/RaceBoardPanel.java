@@ -140,6 +140,7 @@ import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -308,7 +309,7 @@ public class RaceBoardPanel
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new RaceCompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider, competitorsAndTheirBoats);
         raceMapResources.raceMapStyle().ensureInjected();
-        final PaywallResolver paywallResolverRace = new PaywallResolver(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
+        final PaywallResolver paywallResolverRace = new PaywallResolverImpl(withSecurity.getUserService(), withSecurity.getSubscriptionServiceFactory());
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(stringMessages, paywallResolverRace, raceDTO);
         RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
         RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
@@ -356,8 +357,12 @@ public class RaceBoardPanel
                 public void onSuccess(RegattaDTO regattaDTO) {
                     Distance buoyZoneRadius = regattaDTO.getCalculatedBuoyZoneRadius();
                     RaceMapSettings existingMapSettings = raceMap.getSettings();
-                    if (!Util.equalsWithNull(buoyZoneRadius, existingMapSettings.getBuoyZoneRadius())) {
-                        final RaceMapSettings newRaceMapSettings = RaceMapSettings.createSettingsWithNewBuoyZoneRadius(existingMapSettings, buoyZoneRadius);
+                    if (existingMapSettings.isBuoyZoneRadiusDefaultValue()
+                            && !Util.equalsWithNull(buoyZoneRadius, existingMapSettings.getBuoyZoneRadius())) {
+                        final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(
+                                existingMapSettings, regattaDTO, paywallResolverRace)
+                                .withBuoyZoneRadius(buoyZoneRadius)
+                                .build();
                         raceMap.updateSettings(newRaceMapSettings);
                     }
                 }
