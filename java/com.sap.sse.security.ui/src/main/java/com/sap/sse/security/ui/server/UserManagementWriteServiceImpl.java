@@ -297,8 +297,9 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret)))
                // but in any case the user as which they authenticate in one of these ways has to have the UPDATE permission
           && PermissionChecker.isPermitted(user.getPermissionType().getPermission(DefaultActions.UPDATE),
-                user, getSecurityService().getAllUser(), getSecurityService().getOwnership(user.getIdentifier()).getAnnotation(),
-                getSecurityService().getAccessControlList(user.getIdentifier()).getAnnotation()))) {
+                user, getSecurityService().getAllUser(),
+                getSecurityService().getOwnership(user.getIdentifier())==null?null:getSecurityService().getOwnership(user.getIdentifier()).getAnnotation(),
+                getSecurityService().getAccessControlList(user.getIdentifier())==null?null:getSecurityService().getAccessControlList(user.getIdentifier()).getAnnotation()))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
             sendPasswordChangedMailAsync(username);
         } else {

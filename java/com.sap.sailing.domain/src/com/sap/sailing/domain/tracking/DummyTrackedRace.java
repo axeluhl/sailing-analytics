@@ -81,6 +81,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public void initializeAfterDeserialization() {
+    }
+
+    @Override
     public RaceDefinition getRace() {
         return race;
     }

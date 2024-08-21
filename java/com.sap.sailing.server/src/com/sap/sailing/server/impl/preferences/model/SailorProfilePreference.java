@@ -17,6 +17,7 @@ public class SailorProfilePreference extends AbstractGenericSerializableSettings
     private transient CompetitorSetSetting competitors;
 
     public SailorProfilePreference(CompetitorAndBoatStore store) {
+        super();
         uuid = new UUIDSetting("uuid", this);
         name = new StringSetting("name", this);
         competitors = new CompetitorSetSetting("competitors", this, store);
