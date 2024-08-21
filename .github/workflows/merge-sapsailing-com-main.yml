@@ -2,7 +2,7 @@
 # at wiki.sapsailing.com is operating on a Git workspace at wiki@sapsailing.com:gitwiki
 # which has been cloned from ssh://trac@sapsailing.com/home/trac/git. Its changes
 # shall be synchronized to the Github repo at github.com/SAP/sailing-analytics
-name: Merge master from sapsailing.com
+name: Merge main from trac@sapsailing.com:/home/trac/git
 on:
   schedule:
     - cron: "53 * * * *"   # every hour, at :53 minutes
@@ -27,5 +27,5 @@ jobs:
           GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing
           git config --global user.email "github@sapsailing.com"
           git config --global user.name "Github Auto-Merger"
-          git merge sapsailing/master
+          git merge sapsailing/main
           git push

@@ -37,6 +37,9 @@ public interface HasRaceOfCompetitorContext {
     
     @Dimension(messageKey="IRM")
     MaxPointsReason getMaxPointsReason();
+
+    @Dimension(messageKey="Discarded")
+    boolean isDiscarded();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceToStartLineAtStart();

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import com.sap.sse.common.SortingOrder;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.HasPermissions.SecuredEnum;
 
 /**
  * Identifies details that can be requested from the racing service. Optionally, the details can specify a precision as
@@ -23,7 +24,7 @@ import com.sap.sse.security.shared.HasPermissions.Action;
  * @author Axel Uhl (d043530)
  *
  */
-public enum DetailType implements Serializable {
+public enum DetailType implements Serializable, SecuredEnum {
     LEG_TACKTYPE_LONGTACK_SHORTTACK(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "TACKTYPE"),
     LEG_DISTANCE_TRAVELED(0, ASCENDING, PREMIUM_LEADERBOARD_INFORMATION, "DISTANCE_TRAVELED"),
     LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START(0, ASCENDING, null, "DISTANCE_TRAVELED_INCLUDING_GATE_START"),
