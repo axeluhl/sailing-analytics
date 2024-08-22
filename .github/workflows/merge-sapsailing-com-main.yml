@@ -25,6 +25,7 @@ jobs:
           git remote add sapsailing ssh://trac@sapsailing.com/home/trac/git
           git remote -v
           GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git fetch sapsailing main:sapsailing_main
+          GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push -f sapsailing_main:sapsailing_main
       - name: Merge sapsailing/main into main
         uses: devmasx/merge-branch@master
         env: 
