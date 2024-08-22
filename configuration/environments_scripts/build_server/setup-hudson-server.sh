@@ -26,6 +26,8 @@ else
     if ! build_crontab_and_setup_files build_server; then
         exit 1
     fi
+    # Install "xq" which is used by a hudson cron job to clean up workspaces of disabled jobs:
+    curl -sSL https://bit.ly/install-xq | sudo bash
     # Make eu-west-1 the default region for any aws CLI interaction:
     sudo su - -c "aws configure set default.region eu-west-1"
     # Clear "hudson" user's directory again which is to become a mount point
