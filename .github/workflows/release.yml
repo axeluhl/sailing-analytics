@@ -46,7 +46,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0
         with:
-          mongodb-version: 5.0
+          mongodb-version: 6.0
       - name: Start RabbitMQ
         uses: namoshek/rabbitmq-github-action@v1
         with:
