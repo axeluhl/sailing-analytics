@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -397,6 +398,26 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             duration = new MillisecondsDurationImpl(durationMillis);
         }
         return duration;
+    }
+
+    @Override
+    public Duration getDurationFromStartToFirstTack() {
+        final TrackedRace race = getTrackedRace();
+        final Duration result;
+        if (race.getStartOfRace() == null) {
+            result = null;
+        } else {
+            final Iterable<Maneuver> maneuvers = race.getManeuvers(competitor, /* wait for latest */ false);
+            final List<Maneuver> tacks = Util.asList(Util.filter(maneuvers,
+                    m->m.getType() == ManeuverType.TACK && !m.getTimePoint().before(race.getStartOfRace())));
+            if (tacks.isEmpty()) {
+                result = null;
+            } else {
+                tacks.sort(TimedComparator.INSTANCE);
+                result = race.getStartOfRace().until(tacks.get(0).getTimePoint());
+            }
+        }
+        return result;
     }
 
     @Override
