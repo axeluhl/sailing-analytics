@@ -20,7 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,10 +35,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
-import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -62,6 +64,7 @@ import com.sap.sse.landscape.aws.AwsInstance;
 import com.sap.sse.landscape.aws.AwsLandscape;
 import com.sap.sse.landscape.aws.AwsLandscapeState;
 import com.sap.sse.landscape.aws.HostSupplier;
+import com.sap.sse.landscape.aws.LandscapeConstants;
 import com.sap.sse.landscape.aws.ReverseProxyCluster;
 import com.sap.sse.landscape.aws.Tags;
 import com.sap.sse.landscape.aws.TargetGroup;
@@ -83,6 +86,7 @@ import com.sap.sse.landscape.ssh.SSHKeyPair;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.util.ThreadPoolUtil;
+
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -1754,19 +1758,72 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             Util.filter(response.resourceRecordSets(), resourceRecordSet->AwsLandscape.removeTrailingDotFromHostname(resourceRecordSet.name()).equals(hostname)));
     }
     
+    /**
+     * Stores {@link ResourceRecordSet}s keyed by the private IP address(es) (as {@link String}) to which they map.
+     * The values in this map are pairs whose {@link Pair#getA() first} component is the resource record set, the
+     * {@link Pair#getB() second} is the time point at which the resource record was cached.<p>
+     * 
+     * When a lookup finds an entry that, based on its {@link ResourceRecordSet#ttl() TTL} has already expired,
+     * the entry is removed from the cache, and a new lookup is triggered. If a lookup cannot find an entry,
+     * the {@code null} result is cached with the minimum TTL of 60s.<p>
+     * 
+     * Lookups using the {@link #findHostnamesForIP(String)} method must synchronize on this map to avoid duplicate
+     * and parallel remote DNS lookups.
+     */
+    private static final ConcurrentMap<String, Pair<ResourceRecordSet, TimePoint>> reverseDNSCache = new ConcurrentHashMap<>();
+    private static final Duration MINIMUM_DNS_CACHE_TTL_FOR_NOT_FOUND_ENTRIES = Duration.ONE_SECOND.times(60);
+    private static TimePoint timePointOfLastDNSListing;
     @Override
     public String findHostnamesForIP(String ipAddress) {
-        final Route53Client route53Client = getRoute53Client();
-        for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
-            for (final ResourceRecordSet resourceRecordSet : route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZone.id())).resourceRecordSets()) {
-                for (final ResourceRecord resourceRecord : resourceRecordSet.resourceRecords()) {
-                    if (Util.equalsWithNull(resourceRecord.value(), ipAddress)) {
-                        return resourceRecordSet.name().replaceFirst("\\.$", "");
+        synchronized (reverseDNSCache) {
+            final TimePoint now = TimePoint.now();
+            final boolean validCacheEntryFound; // has an entry or a null result been found that is still within the TTL?
+            final Pair<ResourceRecordSet, TimePoint> cacheEntryForPrivateIP = reverseDNSCache.get(ipAddress);
+            final ResourceRecordSet cachedRRS;
+            if (cacheEntryForPrivateIP != null) {
+                if (cacheEntryForPrivateIP.getB().plus(Duration.ONE_SECOND.times(cacheEntryForPrivateIP.getA().ttl())).before(now)) {
+                    // the entry existed but has expired
+                    reverseDNSCache.remove(ipAddress);
+                    cachedRRS = null;
+                    validCacheEntryFound = false;
+                } else {
+                    cachedRRS = cacheEntryForPrivateIP.getA();
+                    validCacheEntryFound = true;
+                }
+            } else {
+                cachedRRS = null;
+                // the null entry is a valid cache statement if the last full listing happened less than our minimum cache TTL ago
+                validCacheEntryFound = timePointOfLastDNSListing != null && !timePointOfLastDNSListing.plus(MINIMUM_DNS_CACHE_TTL_FOR_NOT_FOUND_ENTRIES).before(now);
+            }
+            String result;
+            if (validCacheEntryFound) {
+                if (cachedRRS != null) {
+                    result = getNameWithoutTrailingDotFromRRS(cachedRRS);
+                } else {
+                    result = null; // a null result was cached and is still within the 60s TTL
+                }
+            } else {
+                // perform a lookup
+                timePointOfLastDNSListing = now;
+                result = null;
+                final Route53Client route53Client = getRoute53Client();
+                for (final HostedZone hostedZone : route53Client.listHostedZones().hostedZones()) {
+                    for (final ResourceRecordSet resourceRecordSet : route53Client.listResourceRecordSets(b->b.hostedZoneId(hostedZone.id())).resourceRecordSets()) {
+                        for (final ResourceRecord resourceRecord : resourceRecordSet.resourceRecords()) {
+                            reverseDNSCache.put(resourceRecord.value(), new Pair<>(resourceRecordSet, now)); // cache all that we visit
+                            if (Util.equalsWithNull(resourceRecord.value(), ipAddress)) {
+                                result = getNameWithoutTrailingDotFromRRS(resourceRecordSet); // don't abort the inner loop but cache all we got
+                            }
+                        }
                     }
                 }
             }
+            return result;
         }
-        return null;
+    }
+
+    private String getNameWithoutTrailingDotFromRRS(final ResourceRecordSet cachedRRS) {
+        return cachedRRS.name().replaceFirst("\\.$", "");
     }
     
     @Override
