@@ -22,9 +22,6 @@ if [ "$?" -ne "0" ]; then
 else
   RELEASE_TAR_GZ_ASSET_ID=$( echo "${RELEASES}" | jq -r 'sort_by(.published_at) | reverse | map(select(.name | startswith("'${RELEASE_NAME_PREFIX}'")))[0].assets[] | select(.content_type=="application/x-tar").id' )
   RELEASE_FULL_NAME=$( echo "${RELEASES}" | jq -r 'sort_by(.published_at) | reverse | map(select(.name | startswith("'${RELEASE_NAME_PREFIX}'")))[0].assets[] | select(.content_type=="application/x-tar").name' | sed -e 's/\.tar\.gz$//')
-  # For backward compatibility with deployed versions of java/target/refreshInstance.sh
-  # which may be looking for a default release named "build-...", in case the release
-  # is a "main-..." release, additionally create a corresponding folder and symbolic links named "build-..."
   RELEASE_NAME=$( echo ${RELEASE_FULL_NAME} | sed -e 's/^\(.*\)-\([0-9]*\)$/\1/' )
   RELEASE_TIMESTAMP=$( echo ${RELEASE_FULL_NAME} | sed -e 's/^\(.*\)-\([0-9]*\)$/\2/' )
   echo "Found release ${RELEASE_FULL_NAME} with name ${RELEASE_NAME} and time stamp ${RELEASE_TIMESTAMP}, notes ID is ${RELEASE_NOTES_TXT_ASSET_ID}, tarball ID is ${RELEASE_TAR_GZ_ASSET_ID}" >&2
