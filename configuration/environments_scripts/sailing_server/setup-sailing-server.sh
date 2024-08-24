@@ -53,7 +53,7 @@ EOF
     sudo systemctl daemon-reload
     sudo systemctl enable mountnvmeswap.service
     # Install MongoDB 4.4 and configure as replica set "replica"
-    setup_mongo_4_4
+    setup_mongo_5_0
     sudo su - -c "cat << EOF >>/etc/mongod.conf
 replication:
   replSetName: replica

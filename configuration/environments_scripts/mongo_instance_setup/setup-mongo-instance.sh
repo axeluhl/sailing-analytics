@@ -30,7 +30,7 @@ else
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
     # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_4_4
+    setup_mongo_5_0
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root:root /root/ssh-key-reader.token

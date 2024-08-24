@@ -452,17 +452,17 @@ setup_swap() {
     popd
 }
 
-setup_mongo_4_4() {
-    # Install MongoDB 4.4 and configure as replica set "live"
-    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.4.4.repo
-[mongodb-org-4.4]
+setup_mongo_5_0() {
+    # Install MongoDB 5.0 and configure as replica set "live"
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.5.0.repo
+[mongodb-org-5.0]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc
 EOF
 "
     sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools
+    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh
 }

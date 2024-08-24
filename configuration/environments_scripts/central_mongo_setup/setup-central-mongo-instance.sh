@@ -38,7 +38,7 @@ else
     # Create some swap space for the case mountnvmeswap hasn't created any
     setup_swap 6000
     # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_4_4
+    setup_mongo_5_0
     # Disable default mongod service unit derived from /etc/init.d/mongod:
     sudo systemctl disable mongod.service
     # Prepare for the MongoDB volume mounts:
