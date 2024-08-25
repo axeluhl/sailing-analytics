@@ -1,6 +1,6 @@
-package com.sap.sailing.domain.common.test;
+package com.sap.sse.common.test;
 
-import static com.sap.sailing.domain.common.test.TimeTestHelpers.create;
+import static com.sap.sse.common.test.TimeTestHelpers.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
