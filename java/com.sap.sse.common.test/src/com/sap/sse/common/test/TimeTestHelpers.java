@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.test;
+package com.sap.sse.common.test;
 
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
