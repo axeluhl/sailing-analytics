@@ -1614,13 +1614,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Iterable<HostT> hosts = hostsSupplier.get();
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
-        final ConcurrentLinkedQueue<Future<?>> tasksToWaitFor = new ConcurrentLinkedQueue<>();
+        final ConcurrentLinkedQueue<Pair<Future<?>, String>> tasksToWaitForAndLogStringForTimeout = new ConcurrentLinkedQueue<>();
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Application Process Discovery "+UUID.randomUUID());
         for (final ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host : hosts) {
-            tasksToWaitFor.add(backgroundExecutor.submit(()->{
+            tasksToWaitForAndLogStringForTimeout.add(new Pair<>(backgroundExecutor.submit(()->{
                 try {
                     for (final ProcessT applicationProcess : host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase)) {
-                        tasksToWaitFor.add(backgroundExecutor.submit(()->{
+                        tasksToWaitForAndLogStringForTimeout.add(new Pair<>(backgroundExecutor.submit(()->{
                             String serverName;
                             try {
                                 serverName = applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
@@ -1647,20 +1647,21 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
-                        }));
+                        }), "Host: "+host.toString()+", process "+applicationProcess.toString()));
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }));
+            }), "Host: "+host.toString()));
         }
         // wait for all application processes on all hosts to be discovered
-        Future<?> taskToWaitFor;
-        while ((taskToWaitFor=tasksToWaitFor.poll()) != null) {
+        Pair<Future<?>, String> taskToWaitForAndTimeoutString;
+        while ((taskToWaitForAndTimeoutString=tasksToWaitForAndLogStringForTimeout.poll()) != null) {
+            final Future<?> taskToWaitFor = taskToWaitForAndTimeoutString.getA();
             try {
                 waitForFuture(taskToWaitFor, optionalTimeout);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Problem waiting for "+taskToWaitFor, e);
+                logger.log(Level.WARNING, "Problem waiting for "+taskToWaitFor+" for "+taskToWaitForAndTimeoutString.getB(), e);
             }
         }
         backgroundExecutor.shutdown();
