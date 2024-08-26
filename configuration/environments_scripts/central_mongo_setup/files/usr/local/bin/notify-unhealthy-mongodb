@@ -5,8 +5,11 @@ MAILINGLIST=/var/cache/landscapeManagersMailingList
 for db in $MONGODBS; do
     RS_STATUS=$( mongosh --eval "EJSON.stringify(rs.status())" --quiet "$db" )
     replicaset=$( echo "${RS_STATUS}" | jq -r '.set' )
-    echo $RS_STATUS | jq -r '.members[] | select(.health != 1) | "MongoDB replica set '${replicaset}' unhealthy, node "+.name+" has health "+(.health | tostring)+" and is in state "+(.state | tostring)+"
+    MAIL_BODY=$( echo "${RS_STATUS}" | jq -r '.members[] | select(.health != 1) | "MongoDB replica set '${replicaset}' unhealthy, node "+.name+" has health "+(.health | tostring)+" and is in state "+(.state | tostring)+"
 
-Check status of '${db}' urgently. To unsubscribe, change '${MAILINGLIST}' on '`hostname`'."' | mail -s "MongoDB Replica Set \"$replicaset\" Unhealthy" `cat "$MAILINGLIST"`
+Check status of '${db}' urgently. To unsubscribe, change '${MAILINGLIST}' on '`hostname`'."' )
+    if [ -n "${MAIL_BODY}" ]; then
+        echo "${MAIL_BODY}" | mail -s "MongoDB Replica Set \"${replicaset}\" Unhealthy" `cat "${MAILINGLIST}"`
+    fi
 done
 
