@@ -8,7 +8,7 @@ else
     GIT_ROOT=$1
 fi
 PATH_TO_TRAC_TRAC_URLS="configuration/tractrac-json-urls"
-urls=$(mongosh --quiet "mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive" --eval 'EJSON.stringify(db.TRACTRAC_CONFIGURATIONS.find({}, {TT_CONFIG_JSON_URL : 1, _id : 0}).toArray())' | jq -r '.[].TT_CONFIG_JSON_URL' )
+urls=$(ssh -o StrictHostKeyChecking=no ec2-user@dbserver.internal.sapsailing.com "mongosh --quiet \"mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive\" --eval \"EJSON.stringify(db.TRACTRAC_CONFIGURATIONS.find({}, {TT_CONFIG_JSON_URL : 1, _id : 0}).toArray())\"" | jq -r '.[].TT_CONFIG_JSON_URL' | sort -u )
 if [[ "$?" -ne 0 || "$urls" == "null" ]]; then
     echo "Mongo db returns null for tractrac url discovery" | notify-operators "MongoDB/tractrac urls issue"
     exit 1
