@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: TracTrac Client module
 Bundle-SymbolicName: com.tractrac.clientmodule
-Bundle-Version: 3.15.12
+Bundle-Version: 3.15.13
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/TracAPI.jar
@@ -33,7 +33,6 @@ Export-Package: com.tractrac.asio.lib.api,
  com.tractrac.dataflow.lib.api.ws,
  com.tractrac.dataflow.lib.impl,
  com.tractrac.dataflow.lib.impl.statistics,
- com.tractrac.dataflow.lib.prov.live.server,
  com.tractrac.dataflow.lib.prov.live.server.tcp,
  com.tractrac.dataflow.lib.prov.live.subscriptions,
  com.tractrac.dataflow.lib.prov.live.tcp,

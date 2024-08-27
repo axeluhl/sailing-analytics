@@ -434,6 +434,13 @@ public class SecurityResource extends AbstractSecurityResource {
         }
         return result;
     }
+
+    public Response respondToRemoveAccessTokenForUser(final String username) {
+        final Response result;
+        getService().removeAccessToken(username);
+        result = respondWithAccessTokenForAuthenticatedSubject();
+        return result;
+    }
     
     @GET
     @Path(HAS_PERMISSION_METHOD)
@@ -447,13 +454,6 @@ public class SecurityResource extends AbstractSecurityResource {
             entry.put(GRANTED, SecurityUtils.getSubject().isPermitted(permissionAsString));
         }
         return Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON_TYPE).build(); 
-    }
-
-    Response respondToRemoveAccessTokenForUser(final String username) {
-        final Response result;
-        getService().removeAccessToken(username);
-        result = Response.ok().build();
-        return result;
     }
 
     private Response respondWithAccessTokenForAuthenticatedSubject() {

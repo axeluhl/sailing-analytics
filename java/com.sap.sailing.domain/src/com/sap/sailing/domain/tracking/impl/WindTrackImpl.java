@@ -152,6 +152,20 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     @Override
+    public void add(Iterable<Wind> fixesToAdd) {
+        final List<Wind> fixesAdded = new ArrayList<>(Util.size(fixesToAdd));
+        for (final Wind wind : fixesToAdd) {
+            final Wind compactWind = compactify(wind);
+            if (super.add(compactWind, /* replace */ false)) {
+                fixesAdded.add(compactWind);
+            }
+        }
+        if (!fixesAdded.isEmpty()) {
+            notifyListenersAboutReceive(fixesAdded);
+        }
+    }
+
+    @Override
     public boolean add(Wind wind, boolean replace) {
         final Wind compactWind = compactify(wind);
         final boolean result = super.add(compactWind, replace);
@@ -175,6 +189,19 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (WindListener listener : listeners) {
                 try {
                     listener.windDataReceived(wind);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
+                    logger.log(Level.SEVERE, "notifyListenersAboutReceive(Wind)", e);
+                }
+            }
+        }
+    }
+
+    private void notifyListenersAboutReceive(Iterable<Wind> winds) {
+        synchronized (listeners) {
+            for (WindListener listener : listeners) {
+                try {
+                    listener.windDataReceived(winds);
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "WindListener " + listener + " threw exception " + e.getMessage());
                     logger.log(Level.SEVERE, "notifyListenersAboutReceive(Wind)", e);

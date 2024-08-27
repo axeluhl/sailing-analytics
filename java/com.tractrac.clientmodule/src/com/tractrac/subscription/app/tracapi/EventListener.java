@@ -80,12 +80,12 @@ public class EventListener extends AbstractListener {
                 return;
             }
         }
-        String message = "COTRLPOS " + control.getName() + " - " + markNumber +
-                "\t" + control.getShortName() + "\t" +
-                position.toString();
-        int posNumber = increasePos(controlPos, control.getId());
-        message += (", TOTAL POS: " + posNumber);
-       // show(message);
+//        String message = "COTRLPOS " + control.getName() + " - " + markNumber +
+//                "\t" + control.getShortName() + "\t" +
+//                position.toString();
+//        int posNumber = increasePos(controlPos, control.getId());
+//        message += (", TOTAL POS: " + posNumber);
+        //show(message);
     }
 
     private synchronized int increasePos(Map<UUID, Integer> map, UUID id) {
@@ -115,7 +115,7 @@ public class EventListener extends AbstractListener {
         message.append(position.toString());
         int posNumber = increasePos(compPos, raceCompetitor.getCompetitor().getId());
         message.append(", TOTAL POS: ").append(posNumber);
-        //show(message.toString());
+        show(message.toString());
     }
 
     @Override

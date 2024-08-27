@@ -565,7 +565,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStartMarkPassing != null) {
             TimePoint legStart = legStartMarkPassing.getTimePoint();
             final TimePoint to = getTimePointNotAfterFinishingOfLeg(timePoint);
-            result = getTrackedRace().getAverageSignedCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+            if (to != null) {
+                result = getTrackedRace().getAverageSignedCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
+            } else {
+                result = null;
+            }
         } else {
             result = null;
         }

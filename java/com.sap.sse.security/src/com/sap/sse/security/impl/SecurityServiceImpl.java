@@ -2752,7 +2752,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (newSubscription != null && !newSubscription.hasPlan()) {
             Iterable<SubscriptionPlan> plans = allSubscriptionPlans.values();
             for (SubscriptionPlan plan : plans) {
-                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ false);
+                removeUserPlanRoles(user, plan, /* checkOverlappingRoles */ true);
             }
         } else {
             assert currentSubscription == null || newSubscription == null

@@ -31,6 +31,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         private transient StringSetting booleanSetting;
         
         public UntypedSettings(String enumValue, Collection<String> enumValues, String numberValue, String booleanValue) {
+            super();
             enumSetting.setValue(enumValue);
             enumSetSetting.setValues(enumValues);
             numberSetting.setValue(numberValue);
@@ -47,6 +48,10 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
     }
     
     private static class TypedSettings extends AbstractGenericSerializableSettings {
+        public TypedSettings() {
+            super();
+        }
+
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient EnumSetting<TextOperator.Operators> enumSetting;

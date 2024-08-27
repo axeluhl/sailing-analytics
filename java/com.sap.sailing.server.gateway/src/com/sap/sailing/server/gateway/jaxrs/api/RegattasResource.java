@@ -2300,9 +2300,12 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 if (averageAbsolutXTE != null) {
                                     jsonCompetitorInLeg.put("averageAbsolutXTE-m", averageAbsolutXTE.getMeters());
                                 }
-                                Integer numberOfTacks = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.TACK, 0);
-                                Integer numberOfJibes = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.JIBE, 0);
-                                Integer numberOfPenaltyCircles = legDetail == null ? null : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.PENALTY_CIRCLE, 0);
+                                Integer numberOfTacks = legDetail == null ? null :
+                                    legDetail.numberOfManeuvers == null ? 0 : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.TACK, 0);
+                                Integer numberOfJibes = legDetail == null ? null :
+                                    legDetail.numberOfManeuvers == null ? 0 : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.JIBE, 0);
+                                Integer numberOfPenaltyCircles = legDetail == null ? null :
+                                    legDetail.numberOfManeuvers == null ? 0 : legDetail.numberOfManeuvers.getOrDefault(ManeuverType.PENALTY_CIRCLE, 0);
                                 jsonCompetitorInLeg.put("tacks", numberOfTacks);
                                 jsonCompetitorInLeg.put("jibes", numberOfJibes);
                                 jsonCompetitorInLeg.put("penaltyCircles", numberOfPenaltyCircles);

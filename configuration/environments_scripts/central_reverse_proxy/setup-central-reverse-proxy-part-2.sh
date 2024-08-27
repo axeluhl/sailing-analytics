@@ -17,8 +17,6 @@ if [[ "$#" -ne 2 ]]; then
 fi
 IP=$1
 IMAGE_TYPE="$2"
-GIT_COPY_USER="wiki"
-RELATIVE_PATH_TO_GIT="gitwiki" # the relative path to the repo within the git_copy_user
 TEMPORARY_HOME_COPY_LOCATION="/root/temporary_home_copy" # home nested within this.
 ssh -A "root@${IP}" "bash -s" << EOF
 sudo systemctl start crond.service
@@ -27,7 +25,7 @@ sudo systemctl start tmux-management-panel.service
 cp -r "$TEMPORARY_HOME_COPY_LOCATION"/home /
 rm -rf "$TEMPORARY_HOME_COPY_LOCATION"
 # Localhost works here as we are logged on as root and are using ssh agent forwarding.
-if ! build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}" "${GIT_COPY_USER}" "${RELATIVE_PATH_TO_GIT}"; then # files have already been copied so -f is used.
+if ! build_crontab_and_setup_files -h localhost -f "${IMAGE_TYPE}"; then # files have already been copied so -f is used.
     exit 1
 fi
 setup_keys -p "${IMAGE_TYPE}"

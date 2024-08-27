@@ -1151,6 +1151,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String racesScored();
     String racesScoredTooltip();
     String showUncorrectedTotalPoints();
+    String showUncorrectedTotalPointsDescription();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
     String setStartTimeReceivedNotice();

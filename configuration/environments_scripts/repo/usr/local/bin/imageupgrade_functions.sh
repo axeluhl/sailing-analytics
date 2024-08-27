@@ -7,59 +7,64 @@ REBOOT_INDICATOR=/var/lib/sailing/is-rebooted
 LOGON_USER_HOME=/root
 
 run_yum_update() {
-  echo "Updating packages using yum" >>/var/log/sailing.err
+  echo "Updating packages using yum"
   yum -y update
 }
 
+run_dnf_upgrade() {
+  echo "Upgrading using dnf"
+  dnf -y upgrade --releasever=latest
+}
+
 run_apt_update_upgrade() {
-  echo "Updating packages using apt" >>/var/log/sailing.err
+  echo "Updating packages using apt"
   apt-get -y update; apt-get -y upgrade
   apt-get -y install linux-image-cloud-amd64
   apt-get -y autoremove
 }
 
 run_git_pull() {
-  echo "Pulling git to /home/sailing/code" >>/var/log/sailing.err
+  echo "Pulling git to /home/sailing/code"
   su - sailing -c "cd code; git pull"
 }
 
 download_and_install_latest_sap_jvm_8() {
-  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8" >>/var/log/sailing.err
+  echo "Downloading and installing latest SAP JVM 8 to /opt/sapjvm_8"
   vmpath=$( curl -s --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt https://tools.hana.ondemand.com | grep additional/sapjvm-8\..*-linux-x64.zip | head -1 | sed -e 's/^.*a href="\(additional\/sapjvm-8\..*-linux-x64\.zip\)".*/\1/' )
   if [ -n "${vmpath}" ]; then
-    echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8" >>/var/log/sailing.err
+    echo "Found VM version ${vmpath}; upgrading installation at /opt/sapjvm_8"
     if [ -z "${TMP}" ]; then
       TMP=/tmp
     fi
-    echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip" >>/var/log/sailing.err
-    curl --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip 2>>/var/log/sailing.err
+    echo "Downloading SAP JVM 8 as ZIP file to ${TMP}/sapjvm8-linux-x64.zip"
+    curl --cookie eula_3_2_agreed=tools.hana.ondemand.com/developer-license-3_2.txt "https://tools.hana.ondemand.com/${vmpath}" > ${TMP}/sapjvm8-linux-x64.zip
     cd /opt
     rm -rf sapjvm_8
     if [ -f SIGNATURE.SMF ]; then
       rm -f SIGNATURE.SMF
     fi
-    unzip ${TMP}/sapjvm8-linux-x64.zip >>/var/log/sailing.err
+    unzip ${TMP}/sapjvm8-linux-x64.zip
     rm -f ${TMP}/sapjvm8-linux-x64.zip
     rm -f SIGNATURE.SMF
   else
-    echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade" >>/var/log/sailing.err
+    echo "Did not find SAP JVM 8 at tools.hana.ondemand.com; not trying to upgrade"
   fi
 }
 
 clean_logrotate_target() {
-  echo "Clearing logrorate-targets" >>/var/log/sailing.err
+  echo "Clearing logrorate-targets"
   rm -rf /var/log/logrotate-target/*
 }
 
 clean_httpd_logs() {
-  echo "Clearing httpd logs" >>/var/log/sailing.err
+  echo "Clearing httpd logs"
   service httpd stop
   rm -rf /var/log/httpd/*
   rm -f /etc/httpd/conf.d/001-internals.conf
 }
 
 clean_startup_logs() {
-  echo "Clearing bootstrap logs" >>/var/log/sailing.err
+  echo "Clearing bootstrap logs"
   rm -f /var/log/sailing*
   # Ensure that upon the next boot the reboot indicator is not present, indicating that it's the first boot
   rm "${REBOOT_INDICATOR}"
@@ -67,15 +72,6 @@ clean_startup_logs() {
 
 clean_servers_dir() {
   rm -rf /home/sailing/servers/*
-}
-
-#DEPRECATED
-update_root_crontab() {
-  # The following assumes that /root/crontab is a symbolic link to /home/sailing/code/configuration/crontabs/<the crontab appropriate
-  # to the environment or user>
-  # which has previously been updated by a git pull:
-  cd /root
-  crontab crontab
 }
 
 build_crontab_and_setup_files() {
@@ -89,8 +85,6 @@ build_crontab_and_setup_files() {
         echo "  -f means no files are copied over, which is useful if you have already copied files accross or don't want to override existing files"
         echo "Then there are the arguments, where the order matters:"
         echo "  ENVIRONMENT_TYPE - the directory name in environments_scripts which will be used."
-        echo "  USER_WITH_COPY_OF_REPO - a user which will exist on the environment type, which has a checked out copy of the git workspace."
-        echo "  RELATIVE_PATH_OF_GIT_DIR_WITHIN_USER - the relative path within the USER_WITH_COPY_OF_REPO to get to the git workspace."
     else
         TEMP=$(getopt -o fnch: -n 'options checker' -- "$@")
         [[ "$?" -eq 0 ]] || return 2
@@ -130,18 +124,52 @@ build_crontab_and_setup_files() {
         # user of the scp command (as seen in the second command below).
         scp -o StrictHostKeyChecking=no -pr wiki@"$HOSTNAME":~/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}"
         [[ "$?" -eq 0 ]] || scp -o StrictHostKeyChecking=no -pr root@"$HOSTNAME":/home/wiki/gitwiki/configuration/environments_scripts/* "${TEMP_ENVIRONMENTS_SCRIPTS}" # For initial setup as not all landscape managers have direct wiki access.
-        sudo chown root:root "$TEMP_ENVIRONMENTS_SCRIPTS"
+        sudo chown root:root "${TEMP_ENVIRONMENTS_SCRIPTS}"
+        sudo chmod 777 "${TEMP_ENVIRONMENTS_SCRIPTS}"
         cd "${TEMP_ENVIRONMENTS_SCRIPTS}"
         # Add all args to array, otherwise, if PASS_OPTIONS is empty, and we also pass $@ then argument $1 is in fact null, which would cause errors.
         for option in "$@"; do
-          PASS_OPTIONS+=( "$option")
+          PASS_OPTIONS+=( "$option" )
         done
-        if ! sudo  ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
+        if ! sudo ./build-crontab-and-cp-files "${PASS_OPTIONS[@]}"; then
           return 1
         fi
         cd ..
-        rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
+        sudo rm -rf "$TEMP_ENVIRONMENTS_SCRIPTS"
     fi
+}
+
+# Assumes a filename following the pattern "crontab*[@{param}={value} ...]"
+# It prints an "sed" command on the standard output that callers can use to
+# obtain a piping command through which to send the file's contents to achieve
+# the text pattern replacements requested by the @-parts in the file/link
+# name.
+# If a value shall contain the @ literal, it needs to be doubled, as, e.g., in
+#     crontab-some-mail-thing@EMAIL_ADDRESS=john.doe@@example.com
+# Multiple replacements may be requested by adding more @-phrases:
+#     crontab-something@A=x@B=y
+# Example usage:
+#   echo "The user USER has e-mail address EMAIL_ADDRESS and home directory HOME_DIR" | eval $( get_replacements_from_crontab_filename_as_sed_command crontab-humba@USER=uhl@EMAIL_ADDRESS=axel.uhl@@sap.com@HOME_DIR=_home_axel__uhl_ )
+# will output
+#   The user uhl has e-mail address axel.uhl@sap.com and home directory /home/axel_uhl/
+get_replacements_from_crontab_filename_as_sed_command() {
+    LINK_NAME="${1}"
+    AT_SIGN_REPLACEMENT=`mktemp -u XXXXXXXXXXXXXXXX`
+    UNDERSCORE_REPLACEMENT=`mktemp -u XXXXXXXXXXXXXXXX`
+    LINK_NAME_WITH_UNDERSCORES_REPLACED=$( echo "${LINK_NAME}" | sed -e 's|__|'${UNDERSCORE_REPLACEMENT}'|g' )
+    LINK_NAME_WITH_AT_LITERALS_REPLACED=$( echo "${LINK_NAME_WITH_UNDERSCORES_REPLACED}" | sed -e 's|@@|'${AT_SIGN_REPLACEMENT}'|g' )
+    IFS='@' read -r -a BASENAME_AND_SUBSTITUTIONS <<<"${LINK_NAME_WITH_AT_LITERALS_REPLACED}"
+    # Now, BASENAME_AND_SUBSTITUTIONS[0] is the link's base name, 1..n are the replacements
+    SED_COMMAND="sed -e 's| | |'"  # start with a no-op so that in case of no replacements we still have a valid sed command 
+    for REPLACEMENT in ${BASENAME_AND_SUBSTITUTIONS[@]:1}; do
+        IFS='=' read -r -a PARAM_AND_VALUE <<<"${REPLACEMENT}"
+        PARAM="${PARAM_AND_VALUE[0]}"
+        VALUE_WITH_SLASHES=$( echo "${PARAM_AND_VALUE[1]}" | sed -e 's|_|/|g' )
+        VALUE_WITH_UNDERSCORES=$( echo "${VALUE_WITH_SLASHES}" | sed -e 's|'${UNDERSCORE_REPLACEMENT}'|_|g' )
+        VALUE=$( echo "${VALUE_WITH_UNDERSCORES}" | sed -e 's|'${AT_SIGN_REPLACEMENT}'|@|g' )
+        SED_COMMAND="${SED_COMMAND} -e 's|${PARAM}|${VALUE}|g'"
+    done
+    echo "${SED_COMMAND}"
 }
 
 setup_keys() {
@@ -248,7 +276,7 @@ __setup_keys_using_local_copy() {
 }
 
 clean_root_ssh_dir_and_tmp() {
-  echo "Cleaning up ${LOGON_USER_HOME}/.ssh" >>/var/log/sailing.err
+  echo "Cleaning up ${LOGON_USER_HOME}/.ssh"
   rm -rf ${LOGON_USER_HOME}/.ssh/authorized_keys
   rm -rf ${LOGON_USER_HOME}/.ssh/known_hosts
   rm -f /var/run/last_change_aws_landscape_managers_ssh_keys*
@@ -356,7 +384,8 @@ myorigin =${subdomain_of_sender_address}.sapsailing.com
 setup_sshd_resilience() {
     sudo su -c "echo 'ClientAliveInterval 3
 ClientAliveCountMax 3
-GatewayPorts yes' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
+GatewayPorts yes
+MaxStartups 100' >> /etc/ssh/sshd_config && systemctl reload sshd.service"
 }
 
 identify_suitable_partition_for_ephemeral_volume() {
@@ -421,4 +450,19 @@ setup_swap() {
     sudo su - -c "echo \"$swapfile_location       none    swap    pri=0      0       0\" >> /etc/fstab"
     sudo swapon -a
     popd
+}
+
+setup_mongo_5_0() {
+    # Install MongoDB 5.0 and configure as replica set "live"
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.5.0.repo
+[mongodb-org-5.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc
+EOF
+"
+    sudo yum -y update
+    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh
 }
