@@ -83,7 +83,7 @@ public class TestAbortingHeavyLoadQuery {
     /** The time a step of a heavy load instruction blocks the executing thread (using {@link Thread#sleep(long)}). */
     private static final long HeavyLoadInstructionStepDuration = 50;
     /** The number of steps a heavy load instruction performs */
-    private static final int HeavyLoadInstructionNumberOfSteps = 10;
+    private static final int HeavyLoadInstructionNumberOfSteps = 100;
     /** The total time a heavy load instruction blocks the executing thread (using {@link Thread#sleep(long)}). */
     private static final long HeavyLoadInstructionTotalDuration = HeavyLoadInstructionStepDuration * HeavyLoadInstructionNumberOfSteps;
     
