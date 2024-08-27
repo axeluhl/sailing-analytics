@@ -113,8 +113,7 @@ public class MetadataCollection extends MongoFixHandler {
         return result;
     }
     
-    long getNumberOfFixes(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
+    long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
         final Document resultDocument = findMetadataObject(device);
         final long result;
         if (resultDocument == null) {

@@ -50,5 +50,4 @@ public abstract class StatefulProcessorInstruction<ResultType> extends AbstractP
     public boolean computeResultWasFinished() {
         return computeResultWasFinished;
     }
-
 }
