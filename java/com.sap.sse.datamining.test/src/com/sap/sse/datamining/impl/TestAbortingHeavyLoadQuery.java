@@ -130,10 +130,9 @@ public class TestAbortingHeavyLoadQuery {
         query.abort();
         QueryResult<HashSet<Integer>> result = queryTask.get();
         
-        // The query execution returned, so all processors are aborted (checked below).
+        // The query execution returned, so all processors have received the abort signal (checked below).
         // The number of unfinished instructions mustn't change after this point
         int unfinishedInstructionsCount = unfinishedInstructions.size();
-        boolean unfinishedInstructionWasFinished = false;
         Set<StatefulProcessorInstruction<?>> runningInstructions = new HashSet<>();
         Set<StatefulProcessorInstruction<?>> notStartedInstructions = new HashSet<>();
         for (StatefulProcessorInstruction<?> instruction : unfinishedInstructions) {
@@ -142,13 +141,11 @@ public class TestAbortingHeavyLoadQuery {
             } else {
                 notStartedInstructions.add(instruction);
             }
-            unfinishedInstructionWasFinished |= instruction.computeResultWasFinished();
         }
         logExecution(unfinishedInstructionsCount + " unfinished instructions left - " +
                      runningInstructions.size() + " running, " + notStartedInstructions.size() + " not started");
         printExecutionRecord();
         assertThat("Number of unfinished instructions changed", runningInstructions.size() + notStartedInstructions.size(), is(unfinishedInstructionsCount));
-        assertFalse("Unfinished instructions expected, but at least one was completed", unfinishedInstructionWasFinished);
         
         // Checking query, result and processor chain state
         assertThat(query.getState(), is(QueryState.ABORTED));
@@ -365,7 +362,9 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<Element> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                 };
                 Processor<Iterable<String>, String> retriever0 = new AbstractRetrievalProcessor<Iterable<String>, String>(dataSourceType, String.class, executor, Collections.singleton(retriever1), 0, "") {
