@@ -18,8 +18,8 @@ else
   fi
   if [ -n "$REPLICA_SET_PRIMARY" ]; then
     IP=$(ec2-metadata -o | sed -e 's/^local-ipv4: //')
-    echo "rs.add({host: \"$IP:27017\", priority: $REPLICA_SET_PRIORITY, votes: $REPLICA_SET_VOTES})" | mongo "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
+    mongosh --quiet --eval "rs.add({host: \"$IP:27017\", priority: $REPLICA_SET_PRIORITY, votes: $REPLICA_SET_VOTES})" "mongodb://$REPLICA_SET_PRIMARY/?replicaSet=$REPLICA_SET_NAME&retryWrites=true"
   else
-    echo "rs.initiate()" | mongo
+    mongosh --quiet --eval "rs.initiate()"
   fi
 fi

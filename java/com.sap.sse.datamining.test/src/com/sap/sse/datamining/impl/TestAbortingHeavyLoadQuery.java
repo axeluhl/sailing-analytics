@@ -282,7 +282,9 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<Map<GroupKey, HashSet<Integer>>> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                 };
                 
@@ -303,7 +305,9 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<GroupedDataEntry<Integer>> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                     
                     @Override
@@ -323,7 +327,9 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<Element> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                     
                     @Override
@@ -386,16 +392,16 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<String> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                 };
-
                 processors.add(retriever0);
                 processors.add(retriever1);
                 processors.add(heavyLoadProcessor);
                 processors.add(grouper);
                 processors.add(aggregator);
-                
                 return retriever0;
             }
         };

@@ -1,1 +1,0 @@
-environments_scripts/central_mongo_setup/files/var/lib/mongodb/archiveDb.sh

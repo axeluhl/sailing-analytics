@@ -37,6 +37,9 @@ public interface HasRaceOfCompetitorContext {
     
     @Dimension(messageKey="IRM")
     MaxPointsReason getMaxPointsReason();
+
+    @Dimension(messageKey="Discarded")
+    boolean isDiscarded();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     Distance getDistanceToStartLineAtStart();
@@ -139,6 +142,13 @@ public interface HasRaceOfCompetitorContext {
     
     @Statistic(messageKey="RaceDuration")
     Duration getDuration();
+    
+    /**
+     * The time between the start of the race and the {@link #getCompetitor() competitor}'s first tack;
+     * {@code null} if no tack is found for the competitor in the race.
+     */
+    @Statistic(messageKey="DurationFromRaceStartToFirstTack")
+    Duration getDurationFromStartToFirstTack();
     
     @Statistic(messageKey="DistanceToStarboardSideAtStartOfRace", resultDecimals=2)
     public Double getRelativeDistanceToStarboardSideAtStartOfRace();
