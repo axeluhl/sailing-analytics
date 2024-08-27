@@ -133,6 +133,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public void initializeAfterDeserialization() {
+    }
+
+    @Override
     public RaceDefinition getRace() {
         return race;
     }

@@ -1183,7 +1183,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             // old replica was on a shared instance; in this case we'll over-provision, but it won't be long.
             replicaConfigurationBuilder
                 .setInboundReplicationConfiguration(InboundReplicationConfiguration.builder()
-                    .setMasterHostname(master.getHost().getPrivateAddress().getHostAddress())
+                    .setMasterHostname(master.getHost().getHostname())
                     .setMasterHttpPort(master.getPort())
                     .setCredentials(new BearerTokenReplicationCredentials(replicationBearerToken))
                     .build());

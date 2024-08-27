@@ -128,11 +128,11 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -239,7 +239,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     protected LeaderboardDTO leaderboard;
-    final Map<Action, Boolean> premiumLeaderboardPermissions = new HashMap<>();
 
     private final TotalRankColumn totalRankColumn;
     
@@ -478,7 +477,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         LEG_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = style.getTableresources().cellTableStyle().cellTableTotalColumn();
-        this.paywallResolver = new PaywallResolver(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
+        this.paywallResolver = new PaywallResolverImpl(sailingCF.getUserService(), sailingCF.getSubscriptionServiceFactory());
         // Now register a user status event handler that notices changes in user sign-in/out or premium status change.
         // Leaderboard columns can depend on permissions, and currently (and we should change that!) the filtering
         // happens in the LeaderboardSettingsComponentDialog. Therefore, in order to filter the current settings
@@ -1508,9 +1507,9 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
 
         @Override
-        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren(boolean filterByPermissions) {
+        protected Iterable<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDirectChildren() {
             List<AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> result = new ArrayList<>();
-            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren(filterByPermissions)) {
+            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
             if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
@@ -2592,15 +2591,6 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      */
     public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
-            // check premium leaderboard permissions only on total set of actions defined on DetailType (should be less)
-            // instead of call hasPermission on each single DetailType and collect result in premiumLeaderboardPermissions map.
-            Set<Action> premiumLeaderboardActions = DetailType
-                    .getAllPremiumActionsFromSubset(overallDetailColumnMap.keySet());
-            premiumLeaderboardPermissions.clear();
-            premiumLeaderboardPermissions.putAll(paywallResolver
-                    .getHasPermissionMap(premiumLeaderboardActions, leaderboard));
-        }
-        if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(
                     leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -2894,8 +2884,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         for (DetailType overallDetailType : DetailType.getAvailableOverallDetailColumnTypes()) {
             if (selectedOverallDetailColumns.contains(overallDetailType)
                     && overallDetailColumnMap.containsKey(overallDetailType)
-                    && (overallDetailType.getPremiumAction() == null
-                            || premiumLeaderboardPermissions.get(overallDetailType.getPremiumAction()))) {
+                    ) {
                 overallDetailColumnsToShow.add(overallDetailColumnMap.get(overallDetailType));
             }
         }

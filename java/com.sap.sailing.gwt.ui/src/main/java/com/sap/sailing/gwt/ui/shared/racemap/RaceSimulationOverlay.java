@@ -367,10 +367,12 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                 } else {
                                     racePath = null;
                                 }
-                                visiblePaths = new Boolean[simulationResult.getPaths().length];
-                                Arrays.fill(visiblePaths, Boolean.TRUE);
-                                visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
-                                visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
+                                if (visiblePaths == null || visiblePaths.length != simulationResult.getPaths().length) {
+                                    visiblePaths = new Boolean[simulationResult.getPaths().length];
+                                    Arrays.fill(visiblePaths, Boolean.TRUE);
+                                    visiblePaths[1] = Boolean.FALSE; // hide left-opportunist by default
+                                    visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
+                                }
                                 clearCanvas();
                                 if (mapProjection != null) {
                                     drawPaths();

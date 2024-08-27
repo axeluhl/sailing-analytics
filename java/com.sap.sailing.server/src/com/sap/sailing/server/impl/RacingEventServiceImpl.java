@@ -3688,6 +3688,7 @@ Replicator {
                 for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     ((TrackedRaceImpl) trackedRace).setRaceLogResolver(this);
                     ((TrackedRaceImpl) trackedRace).registerRegattaListener();
+                    trackedRace.initializeAfterDeserialization();
                 }
             } finally {
                 trackedRegatta.unlockTrackedRacesAfterRead();

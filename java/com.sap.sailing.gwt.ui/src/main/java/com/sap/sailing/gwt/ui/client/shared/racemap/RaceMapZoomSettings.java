@@ -60,6 +60,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     }
     
     public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
+        this();
         this.typesToConsiderOnZoom.setValues(typesToConsider);
         this.zoomToSelectedCompetitors.setValue(zoomToSelected);
     }

@@ -23,7 +23,7 @@ else
   scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/admin
   sudo mv imageupgrade_functions.sh /usr/local/bin
   . imageupgrade_functions.sh
-  if ! build_crontab_and_setup_files 'rabbitmq_instance_setup' admin environments_scripts; then
+  if ! build_crontab_and_setup_files 'rabbitmq_instance_setup'; then
     exit 1
   fi
   setup_sshd_resilience
