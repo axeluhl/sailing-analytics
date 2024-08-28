@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
+# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2023 AMI with
 # 100GB of root partition size and the "Sailing Analytics App" security group
 # using an SSH key for which you have a working private key available.
 # Then, run this script on your local computer, using the external IP address
