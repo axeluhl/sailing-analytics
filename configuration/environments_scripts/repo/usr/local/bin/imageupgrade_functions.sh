@@ -479,5 +479,5 @@ gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc
 EOF
 "
     sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh
+    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh-shared-openssl3
 }
