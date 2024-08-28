@@ -26,11 +26,11 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    # Install MongoDB 5.0 and configure as replica set "live"
+    setup_mongo_5_0_on_AL2023
     build_crontab_and_setup_files mongo_instance_setup
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
-    # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_5_0
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root:root /root/ssh-key-reader.token
