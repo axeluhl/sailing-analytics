@@ -44,6 +44,7 @@ EOF
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
     setup_keys "sailing_server"
+    setup_mail_sending
     sudo su - sailing -c "mkdir servers"
     # Force acceptance of sapsailing.com's host key:
     sudo su - sailing -c "ssh -o StrictHostKeyChecking=false trac@sapsailing.com ls" >/dev/null
