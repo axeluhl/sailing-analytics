@@ -46,12 +46,10 @@ public class SensorFixStoreTest {
     protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
     protected SensorFixStore store;
     private ClientSession clientSession;
-    private ClientSession metadataCollectionClientSession;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
         clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
-        metadataCollectionClientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         newStore();
     }
@@ -59,7 +57,7 @@ public class SensorFixStoreTest {
     private void newStore() {
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
-                WriteConcern.MAJORITY, clientSession, metadataCollectionClientSession);
+                WriteConcern.MAJORITY, clientSession, clientSession);
     }
 
     @After
@@ -70,7 +68,7 @@ public class SensorFixStoreTest {
     private void dropPersistedData() {
         MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
         db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
-        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(metadataCollectionClientSession);
+        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
 
     @Test
