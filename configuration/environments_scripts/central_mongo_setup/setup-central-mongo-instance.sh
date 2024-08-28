@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
+# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2023 AMI with
 # 16GB of root partition size and the "Database and Messaging" security group
 # using an SSH key for which you have a working private key available.
 # Make sure to launch it in the same AZ as your current "MongoDB Central"
@@ -32,13 +32,13 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    # Install MongoDB 5.0 and configure as replica set "live"
+    setup_mongo_5_0_on_AL2023
     build_crontab_and_setup_files central_mongo_setup
     # obtain root SSH key from key vault:
     setup_keys "central_mongo_setup"
     # Create some swap space for the case mountnvmeswap hasn't created any
     setup_swap 6000
-    # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_5_0
     # Disable default mongod service unit derived from /etc/init.d/mongod:
     sudo systemctl disable mongod.service
     # Prepare for the MongoDB volume mounts:
