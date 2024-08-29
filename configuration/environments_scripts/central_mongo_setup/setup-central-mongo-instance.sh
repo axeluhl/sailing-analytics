@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: Launch an Amazon EC2 instance from an Amazon Linux 2023 AMI with
-# 16GB of root partition size and the "Database and Messaging" security group
-# using an SSH key for which you have a working private key available.
+# type m5.large and 16GB of root partition size and the "Database and Messaging"
+# security group using an SSH key for which you have a working private key available.
 # Make sure to launch it in the same AZ as your current "MongoDB Central"
 # instance, or you won't be able to attach the existing data volumes!
 # Then, run this script on your local computer, using the external IP address
