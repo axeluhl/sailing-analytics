@@ -453,7 +453,7 @@ setup_swap() {
 }
 
 setup_mongo_5_0() {
-    # Install MongoDB 5.0 and configure as replica set "live"
+    # Install MongoDB 5.0 on Amazon Linux 2 and configure as replica set "live"
     sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.5.0.repo
 [mongodb-org-5.0]
 name=MongoDB Repository
@@ -465,4 +465,19 @@ EOF
 "
     sudo yum -y update
     sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh
+}
+
+setup_mongo_5_0_on_AL2023() {
+    # Install MongoDB 5.0 on Amazon Linux 2023 and configure as replica set "live"
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.5.0.repo
+[mongodb-org-5.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/5.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-5.0.asc
+EOF
+"
+    sudo yum -y update
+    sudo yum -y install mongodb-org-server mongodb-org-shell mongodb-org-tools mongodb-mongosh-shared-openssl3
 }
