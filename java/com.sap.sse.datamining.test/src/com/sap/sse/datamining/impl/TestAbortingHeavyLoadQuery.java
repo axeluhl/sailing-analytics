@@ -170,7 +170,7 @@ public class TestAbortingHeavyLoadQuery {
         }
         // Checking state of unfinished instructions
         for (StatefulProcessorInstruction<?> instruction : runningInstructions) {
-            assertTrue("computeResult() of a running unfinished instruction didn't finish", !instruction.computeResultWasCalled() || instruction.computeResultWasFinished());
+            assertTrue("computeResult() of a running unfinished instruction didn't finish", instruction.computeResultWasCalled() == instruction.computeResultWasFinished());
             if (instruction instanceof StatefulBlockingInstruction) {
                 StatefulBlockingInstruction<?> blockingInstruction = (StatefulBlockingInstruction<?>) instruction;
                 assertTrue("computeResult() of a running heavy load instruction wasn't aborted", blockingInstruction.computeResultWasAborted());
