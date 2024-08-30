@@ -798,25 +798,22 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     /**
      * @param autoScalingGroups
-     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
-     *            this is important because the method will eventually remove the old launch configuration used by those
-     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     *            The launch template version used by {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() all}
+     *            auto-scaling groups of the replica set is updated.
      */
     void updateReleaseInAutoScalingGroups(Region region, LaunchTemplate oldLaunchTemplate, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, Release release);
 
     /**
      * @param autoScalingGroups
-     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
-     *            this is important because the method will eventually remove the old launch configuration used by those
-     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     *            The launch template version used by {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() all}
+     *            auto-scaling groups of the replica set is updated.
      */
     void updateImageInAutoScalingGroups(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, AmazonMachineImage<ShardingKey> ami);
 
     /**
      * @param autoScalingGroups
-     *            {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() All} auto-scaling groups of the replica set;
-     *            this is important because the method will eventually remove the old launch configuration used by those
-     *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
+     *            The launch template version used by {@link AwsApplicationReplicaSet#getAllAutoScalingGroups() all}
+     *            auto-scaling groups of the replica set is updated.
      */
     void updateInstanceTypeInAutoScalingGroup(Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, InstanceType instanceType);
 

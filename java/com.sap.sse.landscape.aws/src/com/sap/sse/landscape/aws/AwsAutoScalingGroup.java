@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 
 /**
  * Wraps an {@link AutoScalingGroup} and offers convenience methods that are aware of the procedures
- * filling the launch configuration's user data, including aspects such as the release and the image
+ * filling the launch template's user data, including aspects such as the release and the image
  * to use.
  * 
  * @author Axel Uhl (D043530)

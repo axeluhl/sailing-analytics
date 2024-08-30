@@ -85,7 +85,7 @@ import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
  * <li>SSH Key Pairs: generate, import, export, and deploy SSH key pairs used for spinning up and connect to compute
  * instances</li>
  * <li>Application server replica sets: single process per instance, or multiple processes per instance; with or without
- * auto scaling groups and launch configurations for auto-scaling the number of replicas; change the software version running on an application server
+ * auto scaling groups and launch templates for auto-scaling the number of replicas; change the software version running on an application server
  * replica set while maintaining availability as good as possible by de-registering the master instance from the master target group, then
  * spinning up a new master, then any desired number of replicas, then swap the old replicas for the new replicas in the public target group
  * and register the master instance again.</li>
@@ -430,7 +430,9 @@ public class LandscapeManagementPanel extends SimplePanel {
                 applicationReplicaSetToUpdateAutoScalingReplicaAmiFor -> updateAutoScalingReplicaAmi(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToUpdateAutoScalingReplicaAmiFor),
-                        machineImagesTable.getSelectionModel().getSelectedObject()));
+                        // if a specific sailing-analytics-server machine image was selected, use it:
+                        machineImagesTable.getSelectionModel().getSelectedObject()==null || machineImagesTable.getSelectionModel().getSelectedObject().getType().equals(SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING) ?
+                                null : machineImagesTable.getSelectionModel().getSelectedObject()));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_MOVE_MASTER_TO_OTHER_INSTANCE,
                 applicationReplicaSetToMoveMasterFor -> moveMasterToOtherInstance(stringMessages,
                         regionsTable.getSelectionModel().getSelectedObject(),
@@ -1359,10 +1361,9 @@ public class LandscapeManagementPanel extends SimplePanel {
      * until the replica has reached its healthy state. The replica is then registered in the public target group.<p>
      * 
      * Then, the {@code ./refreshInstance.sh install-release <release>} command is sent to the master which will
-     * download and unpack the new release but will not yet stop the master process. In parallel, an existing
-     * launch configuration will be copied and updated with user data reflecting the new release to be used.
-     * An existing auto-scaling group will then be updated to use the new launch configuration. The old launch
-     * configuration will then be removed.<p>
+     * download and unpack the new release but will not yet stop the master process. In parallel, the existing
+     * default launch template version will be copied and updated with user data reflecting the new release to be used.
+     * The auto-scaling group will then use the new default launch template version.<p>
      * 
      * Replication is then stopped for all existing replicas, then the master is de-registered from the master
      * target group and the public target group, effectively making the replica set "read-only." Then, the {@code ./stop}

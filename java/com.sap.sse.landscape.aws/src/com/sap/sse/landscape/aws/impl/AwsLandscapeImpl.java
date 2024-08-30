@@ -1889,7 +1889,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     @Override
     public CompletableFuture<Iterable<LaunchTemplateVersion>> getLaunchTemplateDefaultVersionsAsync(com.sap.sse.landscape.Region region) {
         final Set<LaunchTemplateVersion> result = new HashSet<>();
-        return getEc2AsyncClient(getRegion(region)).describeLaunchTemplateVersionsPaginator(b->b.versions("$Default")).subscribe(response->
+        return getEc2AsyncClient(getRegion(region)).describeLaunchTemplateVersionsPaginator(b->b.versions(LandscapeConstants.DEFAULT_LAUNCH_TEMPLATE_VERSION_NAME)).subscribe(response->
             result.addAll(response.launchTemplateVersions())).handle((v, e)->Collections.unmodifiableCollection(result));
     }
     
@@ -2021,7 +2021,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Ec2Client ec2Client = getEc2Client(getRegion(region));
         final LaunchTemplateVersion oldLaunchTemplateVersion = ec2Client.describeLaunchTemplateVersions(b->b
                 .launchTemplateName(oldLaunchTemplate.launchTemplateName())
-                .versions("$Default")).launchTemplateVersions().iterator().next();
+                .versions(LandscapeConstants.DEFAULT_LAUNCH_TEMPLATE_VERSION_NAME)).launchTemplateVersions().iterator().next();
         final String oldUserData = new String(Base64.getDecoder().decode(oldLaunchTemplateVersion.launchTemplateData().userData().getBytes()));
         final String newUserData = oldUserData.replaceFirst(
                 "(?m)^"+DefaultProcessConfigurationVariables.INSTALL_FROM_RELEASE.name()+"=(.*)$",
@@ -2031,7 +2031,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     private CreateLaunchTemplateVersionRequest.Builder copyLaunchTemplateVersionToCreateRequestBuilder(LaunchTemplate launchTemplateToCreateNewVersionFor, com.sap.sse.landscape.Region region) {
-        return CreateLaunchTemplateVersionRequest.builder().launchTemplateId(launchTemplateToCreateNewVersionFor.launchTemplateId()).sourceVersion("$Default");
+        return CreateLaunchTemplateVersionRequest.builder().launchTemplateId(launchTemplateToCreateNewVersionFor.launchTemplateId()).sourceVersion(LandscapeConstants.DEFAULT_LAUNCH_TEMPLATE_VERSION_NAME);
     }
 
     @Override
@@ -2063,7 +2063,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     private void createUpdatedDefaultLaunchTemplateVersion(com.sap.sse.landscape.Region region, Iterable<AwsAutoScalingGroup> autoScalingGroups,
             String newLaunchTemplateVersionDescription, Consumer<CreateLaunchTemplateVersionRequest.Builder> builderConsumer) {
         if (Util.isEmpty(autoScalingGroups)) {
-            throw new IllegalArgumentException("At least one auto-scaling group must be provided for updating a launch configuration");
+            throw new IllegalArgumentException("At least one auto-scaling group must be provided for updating a launch template");
         }
         logger.info("Creating a new, adjusted default launch template version for auto-scaling group(s) "+Util.join(", ", autoScalingGroups));
         final LaunchTemplate launchTemplate = Util.first(autoScalingGroups).getLaunchTemplate();
@@ -2087,7 +2087,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             TargetGroup<ShardingKey> publicTargetGroup, String keyName, InstanceType instanceType,
             String imageId, AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration,
             int minReplicas, int maxReplicas, int maxRequestsPerTarget) {
-        logger.info("Creating launch configuration for replica set "+replicaSetName);
+        logger.info("Creating launch template for replica set "+replicaSetName);
         final Region awsRegion = getRegion(region);
         final Ec2Client ec2Client = getEc2Client(awsRegion);
         final AutoScalingClient autoScalingClient = getAutoScalingClient(awsRegion);
@@ -2115,7 +2115,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     .targetGroupARNs(publicTargetGroup.getTargetGroupArn())
                     .launchTemplate(LaunchTemplateSpecification.builder()
                             .launchTemplateName(launchTemplateName)
-                            .version("$Default").build());
+                            .version(LandscapeConstants.DEFAULT_LAUNCH_TEMPLATE_VERSION_NAME).build());
             tags.ifPresent(t -> {
                 final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
                 for (final Entry<String, String> tag : t) {
@@ -2196,7 +2196,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .autoScalingGroupName(autoScalingGroupName)
                 .availabilityZones(availabilityZones)
                 .targetGroupARNs(targetGroup.getTargetGroupArn())
-                .launchTemplate(ltb->ltb.launchTemplateId(launchTemplateId).version("$Default"));
+                .launchTemplate(ltb->ltb.launchTemplateId(launchTemplateId).version(LandscapeConstants.DEFAULT_LAUNCH_TEMPLATE_VERSION_NAME));
             final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
             final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoScalingParent.getAutoScalingGroup().tags();
             for (final software.amazon.awssdk.services.autoscaling.model.TagDescription parentTag : parentTags) {
