@@ -554,8 +554,8 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
                 findFirst().map(asg->
                     new AwsAutoScalingGroupImpl(asg,
-                            Util.filter(launchTemplates, lt->Util.equalsWithNull(lt.launchTemplateId(), asg.launchTemplate().launchTemplateId())).iterator().next(),
-                            Util.filter(launchTemplateDefaultVersions, ltv->Util.equalsWithNull(ltv.launchTemplateId(), asg.launchTemplate().launchTemplateId())).iterator().next(),
+                            Util.first(Util.filter(launchTemplates, lt->Util.equalsWithNull(lt.launchTemplateId(), asg.launchTemplate()==null?null:asg.launchTemplate().launchTemplateId()))),
+                            Util.first(Util.filter(launchTemplateDefaultVersions, ltv->Util.equalsWithNull(ltv.launchTemplateId(), asg.launchTemplate()==null?null:asg.launchTemplate().launchTemplateId()))),
                             targetGroup.getRegion())).orElse(null));
     }
 

@@ -422,7 +422,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }),
                 applicationServerReplicaSet.getVersion(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
                 applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()),
-                applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplateDefaultVersion().launchTemplateData().imageId());
+                applicationServerReplicaSet.getAutoScalingGroup() == null ? null :
+                    applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplateDefaultVersion() == null ? null :
+                        applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplateDefaultVersion().launchTemplateData().imageId());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,

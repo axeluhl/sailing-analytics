@@ -568,9 +568,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         // Only then can we start terminating the replica processes:
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
-            // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
+            // remove the launch template used by the auto scaling group and the auto scaling group itself;
             // this will also terminate all replicas spun up by the auto-scaling group
-            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
+            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchTemplate(autoScalingGroup);
             Wait.wait(()->isAllAutoScalingReplicasShutDown(applicationReplicaSet, autoScalingGroup),
                     Landscape.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(10),
                     Level.INFO, "Waiting for auto-scaling replicas to shut down");

@@ -2151,13 +2151,16 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
 
     @Override
-    public CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup) {
-        final String launchConfigurationName = autoScalingGroup.getAutoScalingGroup().launchConfigurationName();
-        final AutoScalingAsyncClient autoScalingAsyncClient = getAutoScalingAsyncClient(getRegion(autoScalingGroup.getRegion()));
+    public CompletableFuture<Void> removeAutoScalingGroupAndLaunchTemplate(AwsAutoScalingGroup autoScalingGroup) {
+        final String launchTemplateId = autoScalingGroup.getAutoScalingGroup().launchTemplate()==null?null:autoScalingGroup.getAutoScalingGroup().launchTemplate().launchTemplateId();
+        final String launchTemplateName = autoScalingGroup.getAutoScalingGroup().launchTemplate()==null?null:autoScalingGroup.getAutoScalingGroup().launchTemplate().launchTemplateName();
+        final Ec2AsyncClient ec2AsyncClient = getEc2AsyncClient(getRegion(autoScalingGroup.getRegion()));
         return removeAutoScalingGroup(autoScalingGroup)
             .thenAccept(response->{
-                logger.info("Removing launch configuration "+launchConfigurationName);
-                autoScalingAsyncClient.deleteLaunchConfiguration(b->b.launchConfigurationName(launchConfigurationName));
+                if (launchTemplateId != null) {
+                    logger.info("Removing launch template "+launchTemplateName+" with ID "+launchTemplateId);
+                    ec2AsyncClient.deleteLaunchTemplate(b->b.launchTemplateId(launchTemplateId));
+                }
             });
     }
     

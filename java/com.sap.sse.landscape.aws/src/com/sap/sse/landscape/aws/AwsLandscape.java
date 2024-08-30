@@ -787,7 +787,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
             ProcessT master, Iterable<ProcessT> replicas) throws InterruptedException, ExecutionException, TimeoutException;
 
-    CompletableFuture<Void> removeAutoScalingGroupAndLaunchConfiguration(AwsAutoScalingGroup autoScalingGroup);
+    CompletableFuture<Void> removeAutoScalingGroupAndLaunchTemplate(AwsAutoScalingGroup autoScalingGroup);
     
     CompletableFuture<DeleteAutoScalingGroupResponse> removeAutoScalingGroup(AwsAutoScalingGroup autoScalingGroup);
     
