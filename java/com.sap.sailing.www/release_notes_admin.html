@@ -32,6 +32,11 @@
             <li>Inserting wind data into the database on the importing side of a "Master Data Import"
                 is now quicker, using mass insert instead of inserting the wind fixes one by one.</li>
             <li>Added Zoom8 as new pre-defined boat class.</li>
+            <li>Switched from Launch Configurations to Launch Templates for AWS landscape automation.
+                When this release is deployed, you will only be able to fully manage application
+                replica sets based on Launch Templates. Those still based on Launch Configurations
+                then need to be migrated manually in the AWS EC2 Console before you can manage
+                those replica sets again with this release.</li>
           </ul>
           <h2 class="articleSubheadline">July 2024</h2>
           <ul class="bulletList">
