@@ -422,7 +422,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }),
                 applicationServerReplicaSet.getVersion(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
                 applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()),
-                applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplate().imageId());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
@@ -653,7 +653,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(name, Optional.ofNullable(optionalDomainName)),
                 getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
-                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchTemplate().imageId());
     }
 
     @Override
@@ -731,7 +731,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }), release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(replicaSetName, Optional.ofNullable(optionalDomainName)),
                 getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
-                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchTemplate().imageId());
     }
 
     @Override

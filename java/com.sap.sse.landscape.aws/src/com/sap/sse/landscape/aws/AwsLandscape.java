@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
 import com.sap.sse.common.Duration;
@@ -34,17 +35,18 @@ import com.sap.sse.landscape.mongodb.MongoProcessInReplicaSet;
 import com.sap.sse.landscape.mongodb.MongoReplicaSet;
 import com.sap.sse.landscape.mongodb.impl.MongoProcessImpl;
 import com.sap.sse.landscape.ssh.SSHKeyPair;
+
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DeleteAutoScalingGroupResponse;
-import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
 import software.amazon.awssdk.services.ec2.model.Snapshot;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
@@ -734,7 +736,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     Credentials getMfaSessionCredentials(String nonEmptyMfaTokenCode);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
-    void createLaunchConfigurationAndAutoScalingGroup(Region region, String replicaSetName, Optional<Tags> tags,
+    void createLaunchTemplateAndAutoScalingGroup(Region region, String replicaSetName, Optional<Tags> tags,
                     TargetGroup<ShardingKey> targetGroup, String keyName, InstanceType instanceType, String imageId,
                     AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> replicaConfiguration, int minReplicas,
                     int maxReplicas, int maxRequestsPerTarget);
@@ -776,7 +778,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
 
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
 
-    CompletableFuture<Iterable<LaunchConfiguration>> getLaunchConfigurationsAsync(Region region);
+    CompletableFuture<Iterable<LaunchTemplate>> getLaunchTemplatesAsync(Region region);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
@@ -797,7 +799,7 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
      *            this is important because the method will eventually remove the old launch configuration used by those
      *            auto-scaling groups, and this will fail if there is any other auto-scaling group still using it.
      */
-    void updateReleaseInAutoScalingGroups(Region region, LaunchConfiguration oldLaunchConfiguration, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, Release release);
+    void updateReleaseInAutoScalingGroups(Region region, LaunchTemplate oldLaunchTemplate, Iterable<AwsAutoScalingGroup> autoScalingGroups, String replicaSetName, Release release);
 
     /**
      * @param autoScalingGroups

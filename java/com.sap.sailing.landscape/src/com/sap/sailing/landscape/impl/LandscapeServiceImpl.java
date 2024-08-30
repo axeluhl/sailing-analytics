@@ -971,7 +971,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
-        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchConfigurationsAsync(region);
+        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchTemplatesAsync(region);
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
@@ -1025,7 +1025,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
                 replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
-            getLandscape().updateReleaseInAutoScalingGroups(region, replicaSet.getAutoScalingGroup().getLaunchConfiguration(),
+            getLandscape().updateReleaseInAutoScalingGroups(region, replicaSet.getAutoScalingGroup().getLaunchTemplate(),
                     affectedAutoScalingGroups, replicaSet.getName(), release);
         }
         final SailingAnalyticsProcess<String> master = replicaSet.getMaster();

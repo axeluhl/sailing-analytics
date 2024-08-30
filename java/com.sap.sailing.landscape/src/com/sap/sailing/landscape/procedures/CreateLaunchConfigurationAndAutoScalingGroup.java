@@ -236,7 +236,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, replicaSetName, tags,
+        getLandscape().createLaunchTemplateAndAutoScalingGroup(region, replicaSetName, tags,
                 targetGroup, keyName, instanceType, imageId, replicaConfiguration, minReplicas, maxReplicas, maxRequestsPerTarget);
     }
 }

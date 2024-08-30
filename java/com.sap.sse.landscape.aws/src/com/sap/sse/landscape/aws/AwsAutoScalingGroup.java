@@ -4,7 +4,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.landscape.Region;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
-import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
 
 /**
  * Wraps an {@link AutoScalingGroup} and offers convenience methods that are aware of the procedures
@@ -21,7 +21,7 @@ public interface AwsAutoScalingGroup extends Named {
     public static int DEFAULT_MAX_REQUESTS_PER_TARGET = 15000;
     AutoScalingGroup getAutoScalingGroup();
     
-    LaunchConfiguration getLaunchConfiguration();
+    LaunchTemplate getLaunchTemplate();
 
     Region getRegion();
     
