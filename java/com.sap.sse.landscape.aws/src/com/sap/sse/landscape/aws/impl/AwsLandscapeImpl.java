@@ -2065,14 +2065,14 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         if (Util.isEmpty(autoScalingGroups)) {
             throw new IllegalArgumentException("At least one auto-scaling group must be provided for updating a launch configuration");
         }
-        logger.info("Adjusting launch configuration for auto-scaling group(s) "+Util.join(", ", autoScalingGroups));
+        logger.info("Creating a new, adjusted default launch template version for auto-scaling group(s) "+Util.join(", ", autoScalingGroups));
         final LaunchTemplate launchTemplate = Util.first(autoScalingGroups).getLaunchTemplate();
         final CreateLaunchTemplateVersionRequest.Builder createLaunchTemplateVersionRequestBuilder = copyLaunchTemplateVersionToCreateRequestBuilder(launchTemplate, region);
         createLaunchTemplateVersionRequestBuilder
             .versionDescription(newLaunchTemplateVersionDescription);
         builderConsumer.accept(createLaunchTemplateVersionRequestBuilder);
         final CreateLaunchTemplateVersionRequest createLaunchTemplateVersionRequest = createLaunchTemplateVersionRequestBuilder.build();
-        logger.info("Creating new launch tempate version "+newLaunchTemplateVersionDescription+" for launch template "+launchTemplate.launchTemplateName());
+        logger.info("Creating new launch template version \""+newLaunchTemplateVersionDescription+"\" for launch template "+launchTemplate.launchTemplateName());
         final Ec2Client ec2Client = getEc2Client(getRegion(region));
         final CreateLaunchTemplateVersionResponse launchTemplateVersionResponse = ec2Client.createLaunchTemplateVersion(createLaunchTemplateVersionRequest);
         ec2Client.modifyLaunchTemplate(b->b
@@ -2181,7 +2181,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     String createAutoScalingGroupFromExisting(AwsAutoScalingGroup autoScalingParent,
             String shardName, TargetGroup<ShardingKey> targetGroup, int minSize, Optional<Tags> tags) {
         final AutoScalingClient autoScalingClient = getAutoScalingClient(getRegion(autoScalingParent.getRegion()));
-        final String launchConfigurationName = autoScalingParent.getAutoScalingGroup().launchConfigurationName();
+        final String launchTemplateId = autoScalingParent.getLaunchTemplate().launchTemplateId();
         final String autoScalingGroupName = getAutoScalingGroupName(shardName);
         final List<String> availabilityZones = autoScalingParent.getAutoScalingGroup().availabilityZones();
         final int instanceWarmupTimeInSeconds = autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() != null ? autoScalingParent.getAutoScalingGroup().defaultInstanceWarmup() : 180 ;
@@ -2196,7 +2196,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 .autoScalingGroupName(autoScalingGroupName)
                 .availabilityZones(availabilityZones)
                 .targetGroupARNs(targetGroup.getTargetGroupArn())
-                .launchConfigurationName(launchConfigurationName);
+                .launchTemplate(ltb->ltb.launchTemplateId(launchTemplateId).version("$Default"));
             final List<software.amazon.awssdk.services.autoscaling.model.Tag> awsTags = new ArrayList<>();
             final List<software.amazon.awssdk.services.autoscaling.model.TagDescription> parentTags = autoScalingParent.getAutoScalingGroup().tags();
             for (final software.amazon.awssdk.services.autoscaling.model.TagDescription parentTag : parentTags) {
