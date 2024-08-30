@@ -1617,7 +1617,8 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups = getAutoScalingGroupsAsync(region);
-        final CompletableFuture<Iterable<LaunchTemplate>> allLaunchConfigurations = getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates = getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplateVersion>> allLaunchTemplateDefaultVersions = getLaunchTemplateDefaultVersionsAsync(region);
         final Iterable<HostT> hosts = hostsSupplier.get();
         final Map<String, ProcessT> mastersByServerName = new HashMap<>();
         final Map<String, Set<ProcessT>> replicasByServerName = new HashMap<>();
@@ -1681,7 +1682,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                 final Set<ProcessT> replicas = replicasByServerName.get(serverName);
                 final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = getApplicationReplicaSet(
                         serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
-                        allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchConfigurations, dnsCache);
+                        allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchTemplates, allLaunchTemplateDefaultVersions, dnsCache);
                 result.add(replicaSet);
             }
         }
@@ -1697,9 +1698,10 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = getAutoScalingGroupsAsync(region);
         final CompletableFuture<Iterable<LaunchTemplate>> launchTemplates = getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplateVersion>> launchTemplateDefaultVersions = getLaunchTemplateDefaultVersionsAsync(region);
         final DNSCache dnsCache = getNewDNSCache();
         return getApplicationReplicaSet(serverName, master, replicas, allLoadBalancersInRegion, allTargetGroupsInRegion,
-                allLoadBalancerRulesInRegion, autoScalingGroups, launchTemplates, dnsCache);
+                allLoadBalancerRulesInRegion, autoScalingGroups, launchTemplates, launchTemplateDefaultVersions, dnsCache);
     }
 
     private <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
@@ -1709,10 +1711,11 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             final CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             final CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates, final DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
+            final CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates, CompletableFuture<Iterable<LaunchTemplateVersion>> allLaunchTemplateDefaultVersions,
+            final DNSCache dnsCache) throws InterruptedException, ExecutionException, TimeoutException {
         final AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> replicaSet = new AwsApplicationReplicaSetImpl<ShardingKey, MetricsT, ProcessT>(
                 serverName, master, Optional.ofNullable(replicas), allLoadBalancersInRegion, allTargetGroupsInRegion,
-                allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchTemplates, dnsCache, pathPrefixForShardingKey);
+                allLoadBalancerRulesInRegion, this, allAutoScalingGroups, allLaunchTemplates, allLaunchTemplateDefaultVersions, dnsCache, pathPrefixForShardingKey);
         return replicaSet;
     }
     
@@ -1881,6 +1884,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
         final Set<LaunchTemplate> result = new HashSet<>();
         return getEc2AsyncClient(getRegion(region)).describeLaunchTemplatesPaginator().subscribe(response->
             result.addAll(response.launchTemplates())).handle((v, e)->Collections.unmodifiableCollection(result));
+    }
+    
+    @Override
+    public CompletableFuture<Iterable<LaunchTemplateVersion>> getLaunchTemplateDefaultVersionsAsync(com.sap.sse.landscape.Region region) {
+        final Set<LaunchTemplateVersion> result = new HashSet<>();
+        return getEc2AsyncClient(getRegion(region)).describeLaunchTemplateVersionsPaginator(b->b.versions("$Default")).subscribe(response->
+            result.addAll(response.launchTemplateVersions())).handle((v, e)->Collections.unmodifiableCollection(result));
     }
     
     private CompletableFuture<Map<Listener, Iterable<Rule>>> getListenerToRulesMap(com.sap.sse.landscape.Region region, Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers) {

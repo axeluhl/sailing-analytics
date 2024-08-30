@@ -5,6 +5,7 @@ import com.sap.sse.landscape.Region;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 
 /**
  * Wraps an {@link AutoScalingGroup} and offers convenience methods that are aware of the procedures
@@ -22,6 +23,8 @@ public interface AwsAutoScalingGroup extends Named {
     AutoScalingGroup getAutoScalingGroup();
     
     LaunchTemplate getLaunchTemplate();
+
+    LaunchTemplateVersion getLaunchTemplateDefaultVersion();
 
     Region getRegion();
     

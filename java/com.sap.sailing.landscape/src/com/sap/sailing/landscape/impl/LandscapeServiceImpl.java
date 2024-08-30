@@ -122,8 +122,9 @@ import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
-import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
@@ -971,12 +972,13 @@ public class LandscapeServiceImpl implements LandscapeService {
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
-        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplate>> launchTemplates = landscape.getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplateVersion>> launchTemplateDefaultVersions = landscape.getLaunchTemplateDefaultVersionsAsync(region);
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
-                        autoScalingGroups, launchConfigurations, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
+                        autoScalingGroups, launchTemplates, launchTemplateDefaultVersions, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         return applicationReplicaSet;
     }
 

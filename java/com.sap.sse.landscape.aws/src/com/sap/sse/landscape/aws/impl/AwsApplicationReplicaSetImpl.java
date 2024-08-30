@@ -35,6 +35,7 @@ import com.sap.sse.landscape.aws.orchestration.ShardProcedure;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2AsyncClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
@@ -86,7 +87,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates, DNSCache dnsCache, String pathPrefixForShardingKey) throws InterruptedException, ExecutionException, TimeoutException {
+            CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates,
+            CompletableFuture<Iterable<LaunchTemplateVersion>> allLaunchTemplateDefaultVersions,
+            DNSCache dnsCache, String pathPrefixForShardingKey) throws InterruptedException, ExecutionException, TimeoutException {
         super(replicaSetAndServerName, hostname, master, replicas);
         this.pathPrefixForShardingKey = pathPrefixForShardingKey;
         autoScalingGroup = new CompletableFuture<>();
@@ -103,8 +106,10 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 allTargetGroupsInRegion.thenCompose(targetGroupsAndTheirTargetHealthDescriptions->
                     allLoadBalancerRulesInRegion.thenCompose(listenersAndTheirRules->
                         allAutoScalingGroups.thenCompose(autoScalingGroups->
-                            allLaunchTemplates.handle((launchConfigurations, e)->establishState(
-                                    loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups, launchConfigurations, dnsCache))))))
+                            allLaunchTemplates.thenCompose(launchTemplates->
+                                allLaunchTemplateDefaultVersions.handle((launchTemplateDefaultVersions, e)->establishState(
+                                    loadBalancers, targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules, autoScalingGroups,
+                                    launchTemplates, launchTemplateDefaultVersions, dnsCache)))))))
                 .handle((v, e)->{
                     if (e != null) {
                         logger.log(Level.SEVERE, "Exception while trying to establish state of application replica set "+getName(), e);
@@ -127,11 +132,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
             CompletableFuture<Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion,
             CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion,
             AwsLandscape<ShardingKey> landscape, CompletableFuture<Iterable<AutoScalingGroup>> allAutoScalingGroups,
-            CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates, DNSCache dnsCache, String pathPrefixForShardingKey)
+            CompletableFuture<Iterable<LaunchTemplate>> allLaunchTemplates,
+            CompletableFuture<Iterable<LaunchTemplateVersion>> allLaunchTemplateDefaultVersions, DNSCache dnsCache, String pathPrefixForShardingKey)
                     throws InterruptedException, ExecutionException, TimeoutException {
         this(replicaSetAndServerName, /* hostname to be inferred */ null, master, replicas, allLoadBalancersInRegion,
                 allTargetGroupsInRegion, allLoadBalancerRulesInRegion, allAutoScalingGroups, allLaunchTemplates,
-                dnsCache, pathPrefixForShardingKey);
+                allLaunchTemplateDefaultVersions, dnsCache, pathPrefixForShardingKey);
     }
     
     /**
@@ -172,7 +178,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private Void establishState(Iterable<ApplicationLoadBalancer<ShardingKey>> loadBalancers,
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
-            Iterable<LaunchTemplate> launchTemplates, DNSCache dnsCache) {
+            Iterable<LaunchTemplate> launchTemplates, Iterable<LaunchTemplateVersion> launchTemplateDefaultVersions, DNSCache dnsCache) {
         TargetGroup<ShardingKey> myMasterTargetGroup = null;
         TargetGroup<ShardingKey> singleTargetGroupCandidate = null;
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
@@ -203,12 +209,12 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                     // the target group, and there is a rule that forwards
                     // requests with explicit replica-markup to this target group:
                     publicTargetGroup.complete(e.getKey());
-                    tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchTemplates);
+                    tryToFindAutoScalingGroup(e.getKey(), autoScalingGroups, launchTemplates, launchTemplateDefaultVersions);
                 }
             }
         }
         shards.putAll(establishShards(targetGroupsAndTheirTargetHealthDescriptions, listenersAndTheirRules,
-                autoScalingGroups, launchTemplates));
+                autoScalingGroups, launchTemplates, launchTemplateDefaultVersions));
         if (!autoScalingGroup.isDone()) { // no auto-scaling group was found after having looked at all target groups
             autoScalingGroup.complete(null);
         }
@@ -304,7 +310,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     }
 
     private AwsAutoScalingGroup getShardAutoscalingGroup(TargetGroup<ShardingKey> targetGroup,
-            Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchTemplate> launchTemplates) {
+            Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchTemplate> launchTemplates, Iterable<LaunchTemplateVersion> launchTemplateDefaultVersions) {
         AwsAutoScalingGroup autoscalinggroup = Util
                 .stream(autoScalingGroups).filter(
                         autoScalingGroup -> autoScalingGroup.targetGroupARNs()
@@ -312,7 +318,9 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                 .findFirst()
                 .map(asg -> new AwsAutoScalingGroupImpl(asg,
                         Util.filter(launchTemplates,
-                                lc -> Util.equalsWithNull(lc.launchTemplateName(), asg.launchTemplate().launchTemplateName()))
+                                lc -> Util.equalsWithNull(lc.launchTemplateId(), asg.launchTemplate().launchTemplateId()))
+                                .iterator().next(),
+                        Util.filter(launchTemplateDefaultVersions, ltv->Util.equalsWithNull(ltv.launchTemplateId(), asg.launchTemplate().launchTemplateId()))
                                 .iterator().next(),
                         targetGroup.getRegion()))
                 .orElse(null);
@@ -322,7 +330,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     private HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> establishShards(
             Map<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> targetGroupsAndTheirTargetHealthDescriptions,
             Map<Listener, Iterable<Rule>> listenersAndTheirRules, Iterable<AutoScalingGroup> autoScalingGroups,
-            Iterable<LaunchTemplate> launchTemplates) {
+            Iterable<LaunchTemplate> launchTemplates, Iterable<LaunchTemplateVersion> launchTemplateDefaultVersions) {
         HashMap<AwsShard<ShardingKey>, Iterable<ShardingKey>> shardMap = new HashMap<>();
         for (final Entry<TargetGroup<ShardingKey>, Iterable<TargetHealthDescription>> e : targetGroupsAndTheirTargetHealthDescriptions.entrySet()) {
             if ((e.getKey().getProtocol() == ProtocolEnum.HTTP || e.getKey().getProtocol() == ProtocolEnum.HTTPS)
@@ -347,7 +355,7 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
                         final ShardTargetGroupName shardName = ShardTargetGroupName.parse(e.getKey().getName(), tagName);
                         final AwsShardImpl<ShardingKey> shard = new AwsShardImpl<ShardingKey>(getName(),
                                 shardName.getShardName(), shardingKeys, e.getKey(),
-                                e.getKey().getLoadBalancer(), pathRules, getShardAutoscalingGroup(e.getKey(), autoScalingGroups, launchTemplates));
+                                e.getKey().getLoadBalancer(), pathRules, getShardAutoscalingGroup(e.getKey(), autoScalingGroups, launchTemplates, launchTemplateDefaultVersions));
                         shardMap.put(shard, shard.getKeys());
                     } catch (Exception e1) {
                         logger.info(e1.getMessage());
@@ -540,12 +548,14 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     /**
      * Completes the {@link #autoScalingGroup} with {@code null} if not found
      */
-    private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups, Iterable<LaunchTemplate> launchTemplates) {
+    private void tryToFindAutoScalingGroup(TargetGroup<ShardingKey> targetGroup, Iterable<AutoScalingGroup> autoScalingGroups,
+            Iterable<LaunchTemplate> launchTemplates, Iterable<LaunchTemplateVersion> launchTemplateDefaultVersions) {
         autoScalingGroup.complete(
             Util.stream(autoScalingGroups).filter(autoScalingGroup->autoScalingGroup.targetGroupARNs().contains(targetGroup.getTargetGroupArn())).
                 findFirst().map(asg->
                     new AwsAutoScalingGroupImpl(asg,
-                            Util.filter(launchTemplates, lt->Util.equalsWithNull(lt.launchTemplateName(), asg.launchTemplate().launchTemplateName())).iterator().next(),
+                            Util.filter(launchTemplates, lt->Util.equalsWithNull(lt.launchTemplateId(), asg.launchTemplate().launchTemplateId())).iterator().next(),
+                            Util.filter(launchTemplateDefaultVersions, ltv->Util.equalsWithNull(ltv.launchTemplateId(), asg.launchTemplate().launchTemplateId())).iterator().next(),
                             targetGroup.getRegion())).orElse(null));
     }
 

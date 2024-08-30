@@ -47,6 +47,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.KeyPairInfo;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.Snapshot;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
@@ -779,6 +780,8 @@ public interface AwsLandscape<ShardingKey> extends Landscape<ShardingKey> {
     CompletableFuture<Iterable<AutoScalingGroup>> getAutoScalingGroupsAsync(Region region);
 
     CompletableFuture<Iterable<LaunchTemplate>> getLaunchTemplatesAsync(Region region);
+
+    CompletableFuture<Iterable<LaunchTemplateVersion>> getLaunchTemplateDefaultVersionsAsync(Region region);
 
     <MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey, MetricsT, ProcessT>>
     AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> getApplicationReplicaSet(Region region, String serverName,
