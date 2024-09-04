@@ -2102,7 +2102,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
                     .keyName(keyName)
                     .imageId(imageId)
                     .monitoring(i->i.enabled(true))
-                    .securityGroups(securityGroup.getId())
+                    .securityGroupIds(securityGroup.getId())
                     .userData(Base64.getEncoder().encodeToString(replicaConfiguration.getAsEnvironmentVariableAssignments().getBytes()))
                     .instanceType(instanceType.toString())));
         logger.info("Creating auto-scaling group for replica set "+replicaSetName);
