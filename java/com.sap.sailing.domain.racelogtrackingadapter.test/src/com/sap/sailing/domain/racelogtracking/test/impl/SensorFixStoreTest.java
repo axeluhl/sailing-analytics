@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
@@ -33,6 +34,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;
@@ -43,9 +45,11 @@ public class SensorFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
     protected SensorFixStore store;
+    private ClientSession clientSession;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
+        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         newStore();
     }
@@ -53,7 +57,7 @@ public class SensorFixStoreTest {
     private void newStore() {
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
-                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
+                WriteConcern.MAJORITY, clientSession, clientSession);
     }
 
     @After
@@ -63,8 +67,8 @@ public class SensorFixStoreTest {
 
     private void dropPersistedData() {
         MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
-        db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
-        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
+        db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
 
     @Test
@@ -87,7 +91,6 @@ public class SensorFixStoreTest {
     @Test
     public void testFixDataIsPreservedOnStore() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-
         verifySingleFix(fix, 100, 200, device, true);
     }
     

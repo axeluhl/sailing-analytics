@@ -35,6 +35,14 @@
                 score difference highlighting now properly considers those column factors. This
                 should help in particular when importing medal race scores which by default are
                 doubled.</li>
+            <li>Inserting wind data into the database on the importing side of a "Master Data Import"
+                is now quicker, using mass insert instead of inserting the wind fixes one by one.</li>
+            <li>Added Zoom8 as new pre-defined boat class.</li>
+            <li>Switched from Launch Configurations to Launch Templates for AWS landscape automation.
+                When this release is deployed, you will only be able to fully manage application
+                replica sets based on Launch Templates. Those still based on Launch Configurations
+                then need to be migrated manually in the AWS EC2 Console before you can manage
+                those replica sets again with this release.</li>
           </ul>
           <h2 class="articleSubheadline">July 2024</h2>
           <ul class="bulletList">
@@ -349,7 +357,7 @@
                 up you can create and remove so-called "shards" to which you can assign zero or more leaderboards
                 offered by that replica set. Each shard gets its own auto-scaling group and target group in addition to the regular
                 auto-scaling group / target group pair used for the public target group. By default a minimum of two instances
-                are required by each shard to ensure availability. They are created with the same launch configuration
+                are required by each shard to ensure availability. They are created with the same launch template
                 used by the replica set's regular public target group. When a shard's instances are healthy,
                 rules are managed in the replica set's load balancer to route traffic regarding the leaderboards
                 selected for the shard to the shard's target group. This reduces traffic on the default public

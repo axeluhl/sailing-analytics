@@ -4,7 +4,7 @@
 #
 # To obtain the set of TracTrac JSON URLs currently in use by the archive, on
 # dbserver.internal.sapsailing.com try this:
-#   mongo --quiet "mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive" --eval 'db.TRACTRAC_CONFIGURATIONS.find({}, {TT_CONFIG_JSON_URL : 1}).toArray()' | grep -v ObjectId | jq -r '.[].TT_CONFIG_JSON_URL' | sort -u >/tmp/tractrac-json-urls
+#   mongosh --quiet "mongodb://dbserver.internal.sapsailing.com:10201/winddb?replicaSet=archive" --eval 'EJSON.stringify(db.TRACTRAC_CONFIGURATIONS.find({}, {TT_CONFIG_JSON_URL : 1, _id : 0}).toArray())' | jq -r '.[].TT_CONFIG_JSON_URL' | sort -u >/tmp/tractrac-json-urls
 # and then:
 #   for i in `cat /tmp/tractrac-json-urls`; do ./downloadTracTracEvent $i /tmp/tractrac-tracks; done
 # and you will get a folder per event under /tmp/tractrac-tracks with all .mtb and .txt files as well

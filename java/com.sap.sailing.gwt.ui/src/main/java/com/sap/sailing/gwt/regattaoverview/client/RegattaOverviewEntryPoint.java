@@ -24,6 +24,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
 
@@ -53,7 +54,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
         clockLabel.addStyleName(style.clockLabel());
 
         siteHeader = new SAPSailingHeaderWithAuthentication();
-        PaywallResolver paywallResolver = new PaywallResolver(getUserService(), getSubscriptionServiceFactory());
+        PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
         new FixedSailingAuthentication(getUserService(), paywallResolver, siteHeader.getAuthenticationMenuView());
 
         siteHeader.addWidgetToRightSide(clockLabel);

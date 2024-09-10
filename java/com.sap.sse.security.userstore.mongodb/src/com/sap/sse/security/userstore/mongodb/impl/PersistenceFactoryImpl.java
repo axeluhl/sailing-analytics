@@ -2,10 +2,12 @@ package com.sap.sse.security.userstore.mongodb.impl;
 
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
+import com.sap.sse.security.userstore.mongodb.impl.sessionwrapper.MongoDatabaseWrapperWithClientSession;
 
 public class PersistenceFactoryImpl implements PersistenceFactory {
     private final DomainObjectFactory defaultDomainObjectFactory;
@@ -18,10 +20,20 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     }
 
     public PersistenceFactoryImpl(MongoDBService mongoDBService) {
+        this(mongoDBService.startCausallyConsistentSession(), mongoDBService);
+    }
+    
+    public PersistenceFactoryImpl(ClientSession clientSessionForMajorityFactories, MongoDBService mongoDBService) {
         this.defaultDomainObjectFactory = new DomainObjectFactoryImpl(mongoDBService.getDB());
         this.defaultMongoObjectFactory = new MongoObjectFactoryImpl(mongoDBService.getDB());
-        this.defaultMajorityDomainObjectFactory = new DomainObjectFactoryImpl(mongoDBService.getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY));
-        this.defaultMajorityMongoObjectFactory = new MongoObjectFactoryImpl(mongoDBService.getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY));
+        this.defaultMajorityDomainObjectFactory = new DomainObjectFactoryImpl(
+                new MongoDatabaseWrapperWithClientSession(
+                        clientSessionForMajorityFactories,
+                        mongoDBService.getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY)));
+        this.defaultMajorityMongoObjectFactory = new MongoObjectFactoryImpl(
+                new MongoDatabaseWrapperWithClientSession(
+                        clientSessionForMajorityFactories,
+                        mongoDBService.getDB().withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY)));
     }
     
     /**

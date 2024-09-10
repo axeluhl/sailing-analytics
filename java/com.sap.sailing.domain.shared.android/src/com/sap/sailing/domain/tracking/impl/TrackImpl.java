@@ -405,10 +405,13 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return add(fix, /* replace */ false);
     }
 
+    /**
+     * @return {@code true} if the fix was added or replaced; {@code false} in case no change was performed
+     */
     protected boolean add(FixType fix, boolean replace) {
         lockForWrite();
         try {
-            final AddResult addResult =  addWithoutLocking(fix, replace);
+            final AddResult addResult = addWithoutLocking(fix, replace);
             return addResult == AddResult.ADDED || addResult == AddResult.REPLACED;
         } finally {
             unlockAfterWrite();
