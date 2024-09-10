@@ -12,9 +12,11 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 import com.mongodb.ConnectionString;
+import com.mongodb.client.ClientSession;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
@@ -45,7 +47,22 @@ public class SecurityStoreMerger {
     private final AccessControlStore targetAccessControlStore;
 
     public SecurityStoreMerger(MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
-        final PersistenceFactory targetPf = PersistenceFactory.create(cfgForTarget.getService());
+        this(cfgForTarget, cfgForTarget.getService(), targetDefaultCreationGroupName);
+    }
+    
+    public SecurityStoreMerger(MongoDBConfiguration cfgForTarget, MongoDBService serviceForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
+        this(PersistenceFactory.create(serviceForTarget), cfgForTarget, targetDefaultCreationGroupName);
+    }
+
+    public SecurityStoreMerger(ClientSession clientSession, MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
+        this(clientSession, cfgForTarget, cfgForTarget.getService(), targetDefaultCreationGroupName);
+    }
+
+    public SecurityStoreMerger(ClientSession clientSession, MongoDBConfiguration cfgForTarget, MongoDBService serviceForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
+        this(PersistenceFactory.create(clientSession, serviceForTarget), cfgForTarget, targetDefaultCreationGroupName);
+    }
+
+    public SecurityStoreMerger(PersistenceFactory targetPf, MongoDBConfiguration cfgForTarget, String targetDefaultCreationGroupName) throws UserStoreManagementException {
         logger.info("Loading target user store from "+cfgForTarget);
         this.targetUserStore = loadUserStore(targetPf, targetDefaultCreationGroupName);
         logger.info("Loading target access control store from "+cfgForTarget);
