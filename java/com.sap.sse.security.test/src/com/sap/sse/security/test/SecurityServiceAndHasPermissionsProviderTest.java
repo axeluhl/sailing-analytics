@@ -32,10 +32,14 @@ public class SecurityServiceAndHasPermissionsProviderTest {
 
     @Before
     public void setup() throws UserStoreManagementException {
+        new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), TEST_DEFAULT_TENANT).clear();
         userStore = new UserStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), TEST_DEFAULT_TENANT);
         userStore.ensureDefaultRolesExist();
         userStore.loadAndMigrateUsers();
+        new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), userStore).clear();
         accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultMajorityDomainObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultMajorityMongoObjectFactory(), userStore);
     }
