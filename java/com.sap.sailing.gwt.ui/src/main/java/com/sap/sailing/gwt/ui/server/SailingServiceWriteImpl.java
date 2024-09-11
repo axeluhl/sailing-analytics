@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -2167,10 +2168,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
-            throws NotFoundException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            throws Exception {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(raceColumn.getFleetByName(fleetName));
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserDeletePermission(trackedRace);
+            removeAndUntrackRaces(Arrays.asList(trackedRace.getRaceIdentifier()));
+        }
         getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
     }
 

@@ -46,7 +46,7 @@ start_servers() {
         else
             echo "This is a first-time boot. EC2 user data is evaluated for potential application deployment and configuration, and applications are launched."
             echo "Initializing local MongoDB replica set \"replica\"..."
-            while ! echo "rs.initiate()" | mongo; do
+            while ! mongosh --quiet --eval "rs.initiate()"; do
                 echo "MongoDB not ready yet; waiting and trying again..."
                 sleep 5
             done
