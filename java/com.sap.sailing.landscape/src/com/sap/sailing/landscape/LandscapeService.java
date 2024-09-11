@@ -151,7 +151,7 @@ public interface LandscapeService {
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
      * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
      * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
-     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * The {@code replicaInstanceType} is used to configure the launch template used by the auto-scaling group
      * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
      * type is known. The choice of {@code dynamicLoadBalancerMapping} must only be set if the host to deploy to lives
      * in the default region; otherwise, the DNS wildcard record for the overall domain would be made point to a wrong
@@ -218,10 +218,9 @@ public interface LandscapeService {
      * until the replica has reached its healthy state. The replica is then registered in the public target group.<p>
      * 
      * Then, the {@code ./refreshInstance.sh install-release <release>} command is sent to the master which will
-     * download and unpack the new release but will not yet stop the master process. In parallel, an existing
-     * launch configuration will be copied and updated with user data reflecting the new release to be used.
-     * An existing auto-scaling group will then be updated to use the new launch configuration. The old launch
-     * configuration will then be removed.<p>
+     * download and unpack the new release but will not yet stop the master process. In parallel, the existing
+     * default launch template version will be copied and updated with user data reflecting the new release to be used.
+     * The existing auto-scaling group will then use the new default launch template version.<p>
      * 
      * Replication is then stopped for all existing replicas, then the master is de-registered from the master
      * target group and the public target group, effectively making the replica set "read-only." Then, the {@code ./stop}
@@ -304,7 +303,7 @@ public interface LandscapeService {
             byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
-     * Updates the AMI to use in the launch configurations of those of the {@code replicaSets} that have an auto-scaling group.
+     * Updates the AMI to use in the launch template version of those of the {@code replicaSets} that have an auto-scaling group.
      * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
      * 
      * @param replicaSets
@@ -313,7 +312,7 @@ public interface LandscapeService {
      *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
      * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
      *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
-     *         hence no launch configuration to update
+     *         hence no launch template version to update
      */
     Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
             Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
@@ -399,14 +398,14 @@ public interface LandscapeService {
             InterruptedException, ExecutionException, Exception;
 
     /**
-     * If the {@code replicaSet} provided has one or more auto-scaling groups, their launch configuration is adjusted such that it
-     * matches the {@code optionalInstanceType}. The existing replicas managed currently by the auto-scaling group are
-     * replaced one by one with new instances with the new configuration. This happens by setting the auto-scaling
-     * group's new minimum size to the current number of instances managed by the auto-scaling group plus one, then
-     * waiting for the new instance to become available, and then terminating one of the old auto-scaling group managed
-     * replicas, again waiting for the one next new replica to become ready, and so on, until the last old auto-scaling
-     * replica has been stopped/terminated. Then, the auto-scaling group's minimum size is reset to what it was when
-     * this method was called.
+     * If the {@code replicaSet} provided has one or more auto-scaling groups, their default launch template version is
+     * adjusted such that it matches the {@code optionalInstanceType}. The existing replicas managed currently by the
+     * auto-scaling group are replaced one by one with new instances with the new configuration. This happens by setting
+     * the auto-scaling group's new minimum size to the current number of instances managed by the auto-scaling group
+     * plus one, then waiting for the new instance to become available, and then terminating one of the old auto-scaling
+     * group managed replicas, again waiting for the one next new replica to become ready, and so on, until the last old
+     * auto-scaling replica has been stopped/terminated. Then, the auto-scaling group's minimum size is reset to what it
+     * was when this method was called.
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,

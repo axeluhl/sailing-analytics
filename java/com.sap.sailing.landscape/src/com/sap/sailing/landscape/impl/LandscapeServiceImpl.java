@@ -42,7 +42,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.common.RemoteServiceMappingConstants;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
-import com.sap.sailing.landscape.procedures.CreateLaunchConfigurationAndAutoScalingGroup;
+import com.sap.sailing.landscape.procedures.CreateLaunchTemplateAndAutoScalingGroup;
 import com.sap.sailing.landscape.procedures.DeployProcessOnMultiServer;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsHostSupplier;
 import com.sap.sailing.landscape.procedures.SailingAnalyticsMasterConfiguration;
@@ -122,8 +122,9 @@ import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
-import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplate;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Rule;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
@@ -288,7 +289,7 @@ public class LandscapeServiceImpl implements LandscapeService {
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
      * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
      * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
-     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * The {@code replicaInstanceType} is used to configure the launch template used by the auto-scaling group
      * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
      * type is known.
      * <p>
@@ -567,9 +568,9 @@ public class LandscapeServiceImpl implements LandscapeService {
         // Only then can we start terminating the replica processes:
         terminateReplicasNotManagedByAutoScalingGroup(applicationReplicaSet, optionalKeyName, passphraseForPrivateKeyDecryption);
         if (autoScalingGroup != null) {
-            // remove the launch configuration used by the auto scaling group and the auto scaling group itself;
+            // remove the launch template used by the auto scaling group and the auto scaling group itself;
             // this will also terminate all replicas spun up by the auto-scaling group
-            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchConfiguration(autoScalingGroup);
+            autoScalingGroupRemoval = getLandscape().removeAutoScalingGroupAndLaunchTemplate(autoScalingGroup);
             Wait.wait(()->isAllAutoScalingReplicasShutDown(applicationReplicaSet, autoScalingGroup),
                     Landscape.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(10),
                     Level.INFO, "Waiting for auto-scaling replicas to shut down");
@@ -938,45 +939,46 @@ public class LandscapeServiceImpl implements LandscapeService {
             .setLandscape(landscape)
             .build();
         createLoadBalancerMapping.run();
-        // construct a replica configuration which is used to produce the user data for the launch configuration used in an auto-scaling group
+        // construct a replica configuration which is used to produce the user data for the launch template used in an auto-scaling group
         final Builder<?, String> replicaConfigurationBuilder = createReplicaConfigurationBuilder(region, replicaSetName, master.getPort(), release, bearerTokenUsedByReplicas, masterHostname);
         // Now wait for master to become healthy before creating auto-scaling; otherwise it may happen that the replica tried to start
         // replication before the master is ready (see also bug 5527).
         master.waitUntilReady(Landscape.WAIT_FOR_HOST_TIMEOUT);
-        final CreateLaunchConfigurationAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchConfigurationAndAutoScalingGroupBuilder =
-                CreateLaunchConfigurationAndAutoScalingGroup.builder(landscape, region, replicaSetName, createLoadBalancerMapping.getPublicTargetGroup());
-        createLaunchConfigurationAndAutoScalingGroupBuilder
+        final CreateLaunchTemplateAndAutoScalingGroup.Builder<String, ?, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> createLaunchTemplateAndAutoScalingGroupBuilder =
+                CreateLaunchTemplateAndAutoScalingGroup.builder(landscape, region, replicaSetName, createLoadBalancerMapping.getPublicTargetGroup());
+        createLaunchTemplateAndAutoScalingGroupBuilder
             .setInstanceType(InstanceType.valueOf(replicaInstanceType))
             .setTags(Tags.with(StartAwsHost.NAME_TAG_NAME, StartSailingAnalyticsHost.INSTANCE_NAME_DEFAULT_PREFIX+replicaSetName+" (Auto-Replica)")
                          .and(SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, replicaSetName))
             .setOptionalTimeout(Landscape.WAIT_FOR_HOST_TIMEOUT)
             .setReplicaConfiguration(replicaConfigurationBuilder.build()); // use the default scaling parameters (currently 1/30/30000)
-        minimumNumberOfReplicas.ifPresent(minNumberOfReplicas->createLaunchConfigurationAndAutoScalingGroupBuilder.setMinReplicas(minNumberOfReplicas));
-        maximumNumberOfReplicas.ifPresent(maxNumberOfReplicas->createLaunchConfigurationAndAutoScalingGroupBuilder.setMaxReplicas(maxNumberOfReplicas));
+        minimumNumberOfReplicas.ifPresent(minNumberOfReplicas->createLaunchTemplateAndAutoScalingGroupBuilder.setMinReplicas(minNumberOfReplicas));
+        maximumNumberOfReplicas.ifPresent(maxNumberOfReplicas->createLaunchTemplateAndAutoScalingGroupBuilder.setMaxReplicas(maxNumberOfReplicas));
         if (replicaMachineImage.isPresent()) {
-            createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(replicaMachineImage.get());
+            createLaunchTemplateAndAutoScalingGroupBuilder.setImage(replicaMachineImage.get());
         } else {
             // obtain the latest AMI for launching a Sailing Analytics replica host:
-            createLaunchConfigurationAndAutoScalingGroupBuilder.setImage(
+            createLaunchTemplateAndAutoScalingGroupBuilder.setImage(
                     StartSailingAnalyticsReplicaHost.replicaHostBuilder(replicaConfigurationBuilder)
                         .setLandscape(getLandscape())
                         .setRegion(region)
                         .getMachineImage());
         }
         if (optionalKeyName != null) {
-            createLaunchConfigurationAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
+            createLaunchTemplateAndAutoScalingGroupBuilder.setKeyName(optionalKeyName);
         }
-        createLaunchConfigurationAndAutoScalingGroupBuilder.build().run();
+        createLaunchTemplateAndAutoScalingGroupBuilder.build().run();
         final CompletableFuture<Iterable<ApplicationLoadBalancer<String>>> allLoadBalancersInRegion = landscape.getLoadBalancersAsync(region);
         final CompletableFuture<Map<TargetGroup<String>, Iterable<TargetHealthDescription>>> allTargetGroupsInRegion = landscape.getTargetGroupsAsync(region);
         final CompletableFuture<Map<Listener, Iterable<Rule>>> allLoadBalancerRulesInRegion = landscape.getLoadBalancerListenerRulesAsync(region, allLoadBalancersInRegion);
         final CompletableFuture<Iterable<AutoScalingGroup>> autoScalingGroups = landscape.getAutoScalingGroupsAsync(region);
-        final CompletableFuture<Iterable<LaunchConfiguration>> launchConfigurations = landscape.getLaunchConfigurationsAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplate>> launchTemplates = landscape.getLaunchTemplatesAsync(region);
+        final CompletableFuture<Iterable<LaunchTemplateVersion>> launchTemplateDefaultVersions = landscape.getLaunchTemplateDefaultVersionsAsync(region);
         final DNSCache dnsCache = landscape.getNewDNSCache();
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
-                        autoScalingGroups, launchConfigurations, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
+                        autoScalingGroups, launchTemplates, launchTemplateDefaultVersions, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
         return applicationReplicaSet;
     }
 
@@ -1025,7 +1027,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final SailingAnalyticsProcess<String> additionalReplicaStarted = ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(
                 replicaSet, optionalKeyName, privateKeyEncryptionPassphrase, effectiveReplicaReplicationBearerToken);
         if (replicaSet.getAutoScalingGroup() != null) {
-            getLandscape().updateReleaseInAutoScalingGroups(region, replicaSet.getAutoScalingGroup().getLaunchConfiguration(),
+            getLandscape().updateReleaseInAutoScalingGroups(region, replicaSet.getAutoScalingGroup().getLaunchTemplate(),
                     affectedAutoScalingGroups, replicaSet.getName(), release);
         }
         final SailingAnalyticsProcess<String> master = replicaSet.getMaster();
@@ -1688,7 +1690,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r)));
         } else {
             logger.info("Replica set "+replicaSet.getName()+
-                    " does not have an auto-scaling group configured, so no changes can be made to its launch configuration.");
+                    " does not have an auto-scaling group configured, so no changes can be made to its launch template.");
             result = replicaSet;
         }
         return result;

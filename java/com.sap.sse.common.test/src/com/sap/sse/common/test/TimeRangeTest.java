@@ -1,8 +1,9 @@
-package com.sap.sailing.domain.common.test;
+package com.sap.sse.common.test;
 
-import static com.sap.sailing.domain.common.test.TimeTestHelpers.create;
+import static com.sap.sse.common.test.TimeTestHelpers.create;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -253,5 +254,15 @@ public class TimeRangeTest {
                     create(expected[2*i+1]), timeRangeFromDiff.to());
             i++;
         }
+    }
+    
+    @Test
+    public void testBeginningOfTimeBeforeEndOfTime() {
+        assertTrue(TimePoint.BeginningOfTime.before(TimePoint.EndOfTime));
+    }
+    
+    @Test
+    public void testTimeRangeWithNullStartEndEndIsValid() {
+        assertNotNull(TimeRange.create(null, null));
     }
 }

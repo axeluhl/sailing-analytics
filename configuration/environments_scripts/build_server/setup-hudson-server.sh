@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
-# 100GB of root partition size and the "Sailing Analytics App" security group
+# Usage: Launch an Amazon EC2 t3.medium instance from an Amazon Linux 2023 AMI with
+# 30GB of root partition size and the "Sailing Analytics App" security group
 # using an SSH key for which you have a working private key available.
+# Launch it in the same Available Zone (AZ) as the current Build/DEV server
+# because you want to move the /home/hudson volume from the old to the new
+# instance.
 # Then, run this script on your local computer, using the external IP address
 # of the instance you just launched in AWS as only argument. This will then
 # turn the instance into an application server for the SAP Sailing Analytics
@@ -26,6 +29,8 @@ else
     if ! build_crontab_and_setup_files build_server; then
         exit 1
     fi
+    # Install "xq" which is used by a hudson cron job to clean up workspaces of disabled jobs:
+    curl -sSL https://bit.ly/install-xq | sudo bash
     # Make eu-west-1 the default region for any aws CLI interaction:
     sudo su - -c "aws configure set default.region eu-west-1"
     # Clear "hudson" user's directory again which is to become a mount point

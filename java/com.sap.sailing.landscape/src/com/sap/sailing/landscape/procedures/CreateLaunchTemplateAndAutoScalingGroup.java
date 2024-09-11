@@ -33,7 +33,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceType;
  *
  * @param <ShardingKey>
  */
-public class CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
+public class CreateLaunchTemplateAndAutoScalingGroup<ShardingKey, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
 extends AbstractProcedureImpl<ShardingKey>
 implements Procedure<ShardingKey> {
     private static final int DEFAULT_MIN_REPLICAS = 1;
@@ -44,7 +44,7 @@ implements Procedure<ShardingKey> {
      * @author Axel Uhl (D043530)
      */
     public static interface Builder<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
-    extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey> {
+    extends com.sap.sse.landscape.orchestration.Procedure.Builder<BuilderT, CreateLaunchTemplateAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey> {
         BuilderT setKeyName(String keyName);
 
         BuilderT setReplicaConfiguration(AwsApplicationConfiguration<ShardingKey, MetricsT, ProcessT> applicationConfiguration);
@@ -56,12 +56,12 @@ implements Procedure<ShardingKey> {
         BuilderT setTags(Tags tags);
         
         /**
-         * Set the minimum number of replicas. Defaults to 1 (see {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MIN_REPLICAS}).
+         * Set the minimum number of replicas. Defaults to 1 (see {@link CreateLaunchTemplateAndAutoScalingGroup#DEFAULT_MIN_REPLICAS}).
          */
         BuilderT setMinReplicas(int minReplicas);
 
         /**
-         * Set the maximum number of replicas. Defaults to 30 (see {@link CreateLaunchConfigurationAndAutoScalingGroup#DEFAULT_MAX_REPLICAS}).
+         * Set the maximum number of replicas. Defaults to 30 (see {@link CreateLaunchTemplateAndAutoScalingGroup#DEFAULT_MAX_REPLICAS}).
          */
         BuilderT setMaxReplicas(int maxReplicas);
 
@@ -73,7 +73,7 @@ implements Procedure<ShardingKey> {
     }
     
     protected static class BuilderImpl<ShardingKey, BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>, MetricsT extends ApplicationProcessMetrics, ProcessT extends AwsApplicationProcess<ShardingKey,MetricsT,ProcessT>>
-    extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
+    extends AbstractProcedureImpl.BuilderImpl<BuilderT, CreateLaunchTemplateAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT>, ShardingKey>
     implements Builder<ShardingKey, BuilderT, MetricsT, ProcessT> {
         private final String replicaSetName;
         private final TargetGroup<ShardingKey> targetGroup;
@@ -188,8 +188,8 @@ implements Procedure<ShardingKey> {
         }
 
         @Override
-        public CreateLaunchConfigurationAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT> build() throws Exception {
-            return new CreateLaunchConfigurationAndAutoScalingGroup<>(this);
+        public CreateLaunchTemplateAndAutoScalingGroup<ShardingKey, MetricsT, ProcessT> build() throws Exception {
+            return new CreateLaunchTemplateAndAutoScalingGroup<>(this);
         }
     }
     
@@ -214,7 +214,7 @@ implements Procedure<ShardingKey> {
     }
     
     protected <BuilderT extends Builder<ShardingKey, BuilderT, MetricsT, ProcessT>>
-    CreateLaunchConfigurationAndAutoScalingGroup(BuilderImpl<ShardingKey, BuilderT, MetricsT, ProcessT> builder) {
+    CreateLaunchTemplateAndAutoScalingGroup(BuilderImpl<ShardingKey, BuilderT, MetricsT, ProcessT> builder) {
         super(builder);
         this.region = builder.getRegion();
         this.replicaSetName = builder.getReplicaSetName();
@@ -236,7 +236,7 @@ implements Procedure<ShardingKey> {
 
     @Override
     public void run() throws Exception {
-        getLandscape().createLaunchConfigurationAndAutoScalingGroup(region, replicaSetName, tags,
+        getLandscape().createLaunchTemplateAndAutoScalingGroup(region, replicaSetName, tags,
                 targetGroup, keyName, instanceType, imageId, replicaConfiguration, minReplicas, maxReplicas, maxRequestsPerTarget);
     }
 }

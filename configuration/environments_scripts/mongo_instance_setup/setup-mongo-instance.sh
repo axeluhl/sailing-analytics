@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
+# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2023 AMI with
 # 8GB of root partition size and the "MongoDB Replica Set" security group
 # using an SSH key for which you have a working private key available.
 # Then, run this script on your local computer, using the external IP address
@@ -7,8 +7,8 @@
 # turn the instance into a MongoDB replica set node.
 # When the script is done you may log in to look around and check
 # things. When done, shut down the instance (Stop, not Terminate) and create
-# an image off of it, naming it, e.g., "MongoDB Live Replica Set NVMe 2.0" and
-# also tagging its root volume snapshot as, e.g., "MongoDB Live Replica Set NVMe 2.0 (Root)".
+# an image off of it, naming it, e.g., "MongoDB Live Replica Set NVMe 2.6" and
+# also tagging its root volume snapshot as, e.g., "MongoDB Live Replica Set NVMe 2.6 (Root)".
 # If you want to use the resulting image in production, also tag it with
 # tag key "image-type" and tag value "mongodb-server".
 if [ $# != 0 ]; then
@@ -26,11 +26,11 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    # Install MongoDB 5.0 and configure as replica set "live"
+    setup_mongo_5_0_on_AL2023
     build_crontab_and_setup_files mongo_instance_setup
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
-    # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_4_4
     scp root@sapsailing.com:ssh-key-reader.token /tmp
     sudo mv /tmp/ssh-key-reader.token /root
     sudo chown root:root /root/ssh-key-reader.token
