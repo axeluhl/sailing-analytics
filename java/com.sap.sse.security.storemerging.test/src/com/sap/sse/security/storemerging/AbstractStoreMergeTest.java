@@ -79,10 +79,10 @@ public abstract class AbstractStoreMergeTest {
     protected final static String defaultCreationGroupNameForTarget = "dummy-default-creation-group-for-target";
     protected static MongoDBConfiguration cfgForSource;
     protected static MongoDBConfiguration cfgForTarget;
-    private static ClientSession causallyConsistentSessionForSource;
+    protected static ClientSession causallyConsistentSessionForSource;
     private static ClientSession causallyConsistentSessionForTarget;
     private static MongoDBService targetService;
-    private static MongoDBService sourceService;
+    protected static MongoDBService sourceService;
     private MongoDatabase targetDb;
     protected SecurityStoreMerger merger;
     protected UserStore targetUserStore;
@@ -137,7 +137,7 @@ public abstract class AbstractStoreMergeTest {
      * @return the source user store and the source access control store in their original, merge-unmodified version
      */
     protected Pair<UserStore, AccessControlStore> readSourceStores() throws UserStoreManagementException {
-        return merger.readStores(cfgForSource, defaultCreationGroupNameForSource);
+        return merger.readStores(causallyConsistentSessionForSource, cfgForSource, sourceService, defaultCreationGroupNameForSource);
     }
 
     /**
