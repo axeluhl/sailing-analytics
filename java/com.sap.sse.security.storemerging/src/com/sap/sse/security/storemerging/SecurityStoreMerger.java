@@ -120,20 +120,21 @@ public class SecurityStoreMerger {
         final SecurityStoreMerger instance = new SecurityStoreMerger(cfgForTarget, System.getProperty(TARGET_DEFAULT_TENANT_NAME_SYSTEM_PROPERTY_NAME));
         for (int i=0; i<args.length/2; i++) {
             final MongoDBConfiguration cfgForSource = new MongoDBConfiguration(new ConnectionString(args[2*i]));
-            instance.importStores(cfgForSource, args[2*i+1]);
+            final MongoDBService sourceService = cfgForSource.getService();
+            instance.importStores(sourceService.startCausallyConsistentSession(), cfgForSource, sourceService, args[2*i+1]);
         }
     }
 
-    public Pair<UserStore, AccessControlStore> importStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
-        final Pair<UserStore, AccessControlStore> sourceStores = readStores(cfgForSource, defaultCreationGroupNameForSource);
+    public Pair<UserStore, AccessControlStore> importStores(ClientSession causallyConsistentSessionForSource, MongoDBConfiguration cfgForSource, MongoDBService sourceService, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
+        final Pair<UserStore, AccessControlStore> sourceStores = readStores(causallyConsistentSessionForSource, cfgForSource, sourceService, defaultCreationGroupNameForSource);
         logger.info("Importing user store and access control store read from "+cfgForSource);
         importStores(sourceStores.getA(), sourceStores.getB());
         return sourceStores;
     }
     
-    Pair<UserStore, AccessControlStore> readStores(MongoDBConfiguration cfgForSource, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
+    Pair<UserStore, AccessControlStore> readStores(ClientSession causallyConsistentSessionForSource, MongoDBConfiguration cfgForSource, MongoDBService sourceService, String defaultCreationGroupNameForSource) throws UserStoreManagementException {
         logger.info("Reading user store and access control store from "+cfgForSource);
-        final PersistenceFactory sourcePf = PersistenceFactory.create(cfgForSource.getService());
+        final PersistenceFactory sourcePf = PersistenceFactory.create(causallyConsistentSessionForSource, sourceService);
         final UserStore sourceUserStore = loadUserStore(sourcePf, defaultCreationGroupNameForSource);
         final AccessControlStore sourceAccessControlStore = loadAccessControlStore(sourcePf, sourceUserStore);
         return new Pair<>(sourceUserStore, sourceAccessControlStore);
