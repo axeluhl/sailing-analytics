@@ -37,9 +37,7 @@ public class PersistenceFactoryImpl implements PersistenceFactory {
     }
     
     /**
-     * A default domain object factory for test purposes only. In a server environment, ensure NOT to use this and use
-     * {@link #getDefaultMajorityDomainObjectFactory()} instead, using the base domain factory that
-     * is provided by <code>RacingEventService.getBaseDomainFactory</code>.
+     * A default domain object factory for test purposes only.
      */
     @Override
     public DomainObjectFactory getDefaultDomainObjectFactory() {
