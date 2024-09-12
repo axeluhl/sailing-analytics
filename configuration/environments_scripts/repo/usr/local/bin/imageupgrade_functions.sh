@@ -452,15 +452,15 @@ setup_swap() {
     popd
 }
 
-setup_mongo_6_0_on_AL2023() {
-    # Install MongoDB 6.0 on Amazon Linux 2023
-    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.6.0.repo
-[mongodb-org-6.0]
+setup_mongo_7_0_on_AL2023() {
+    # Install MongoDB 7.0 on Amazon Linux 2023
+    sudo su - -c "cat << EOF >/etc/yum.repos.d/mongodb-org.7.0.repo
+[mongodb-org-7.0]
 name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/6.0/x86_64/
+baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/7.0/x86_64/
 gpgcheck=1
 enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
+gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
 EOF
 "
     sudo yum -y update
