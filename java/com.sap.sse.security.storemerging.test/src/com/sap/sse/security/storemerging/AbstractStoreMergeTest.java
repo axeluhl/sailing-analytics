@@ -75,6 +75,10 @@ public abstract class AbstractStoreMergeTest {
             .getMongoClientURI().getConnectionString()
             .replace(MongoDBConfiguration.getDefaultTestConfiguration().getMongoClientURI().getDatabase(),
                     UUID.randomUUID().toString());
+    private final static String importTargetMongoDbUri = MongoDBConfiguration.getDefaultTestConfiguration()
+            .getMongoClientURI().getConnectionString()
+            .replace(MongoDBConfiguration.getDefaultTestConfiguration().getMongoClientURI().getDatabase(),
+                    UUID.randomUUID().toString());
     protected final static String defaultCreationGroupNameForSource = "dummy-default-creation-group-for-source";
     protected final static String defaultCreationGroupNameForTarget = "dummy-default-creation-group-for-target";
     protected static MongoDBConfiguration cfgForSource;
@@ -90,7 +94,7 @@ public abstract class AbstractStoreMergeTest {
 
     @BeforeClass
     public static void setUpCausallyConsistentSession() {
-        cfgForTarget = MongoDBConfiguration.getDefaultTestConfiguration();
+        cfgForTarget = new MongoDBConfiguration(new ConnectionString(importTargetMongoDbUri));
         targetService = cfgForTarget.getService();
         causallyConsistentSessionForTarget = targetService.startCausallyConsistentSession();
         new MongoDatabaseWrapperWithClientSession(causallyConsistentSessionForTarget, targetService.getDB()).withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY).drop();
@@ -112,6 +116,7 @@ public abstract class AbstractStoreMergeTest {
     @After
     public void tearDown() {
         new MongoDatabaseWrapperWithClientSession(causallyConsistentSessionForSource, sourceService.getDB()).withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY).drop();
+        new MongoDatabaseWrapperWithClientSession(causallyConsistentSessionForTarget, targetService.getDB()).withReadConcern(ReadConcern.MAJORITY).withWriteConcern(WriteConcern.MAJORITY).drop();
     }
 
     private void fill(final String variant, final MongoDatabase db) throws IOException {
