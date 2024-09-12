@@ -26,8 +26,7 @@ fi
 pushd "$DUMPBASEDIR"
 mongodump --port 10203 --db $DB
 # Drop the entire DB in the archive DB to ensure there are no left-over collections
-echo "use $DB
-db.dropDatabase()" | mongo --port 10202
+mongosh --eval "use $DB" --eval "db.dropDatabase()" --port 10202
 mongorestore --noIndexRestore --drop --port 10202 dump
 rm -rf dump/$DB
 popd
@@ -35,11 +34,8 @@ ORIGINAL_HASH=$(`dirname $0`/mongohash -p 10203 -d $DB)
 ARCHIVE_HASH=$(`dirname $0`/mongohash -p 10202 -d $DB)
 if [ -n "${ORIGINAL_HASH}" -a -n "${ARCHIVE_HASH}" -a $ORIGINAL_HASH = $ARCHIVE_HASH ]; then
   echo Hashes of old and new are equal: $ORIGINAL_HASH and $ARCHIVE_HASH. Dropping $DB and ${DB}-replica in live DB
-  echo "use $DB
-db.dropDatabase()
-use ${DB}-replica
-db.dropDatabase()" | mongo "mongodb://localhost:10203/$DB?replicaSet=live"
-  echo "Don't forget to switch your server's env.sh so it has MONGODB_URI=\"mongodb://dbserver.internal.sapsailing.com:10202/$DB\""
+  mongosh --eval "use ${DB}" --eval "db.dropDatabase()" --eval "use ${DB}-replica" --eval "db.dropDatabase()" "mongodb://localhost:10203/${DB}?replicaSet=live"
+  echo "Don't forget to switch your server's env.sh so it has MONGODB_URI=\"mongodb://dbserver.internal.sapsailing.com:10202/${DB}\""
   exit 0
 else
   echo "Hashes of old and new are empty of differ: ${ORIGINAL_HASH} and ${ARCHIVE_HASH}"

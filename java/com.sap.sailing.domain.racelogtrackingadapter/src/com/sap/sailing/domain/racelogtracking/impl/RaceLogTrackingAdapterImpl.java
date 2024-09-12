@@ -286,16 +286,17 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void removeDenotationForRaceLogTracking(RacingEventService service, RaceLog raceLog) {
-        RaceLogEvent denoteForTrackingEvent = new LastEventOfTypeFinder<>(raceLog, true,
-                RaceLogDenoteForTrackingEvent.class).analyze();
-        RaceLogEvent startTrackingEvent = new LastEventOfTypeFinder<>(raceLog, true, RaceLogStartTrackingEvent.class)
-                .analyze();
-        try {
-            raceLog.revokeEvent(service.getServerAuthor(), denoteForTrackingEvent, "remove denotation");
-            raceLog.revokeEvent(service.getServerAuthor(), startTrackingEvent,
-                    "reset start time upon removing denotation");
-        } catch (NotRevokableException e) {
-            logger.log(Level.WARNING, "could not remove denotation by adding RevokeEvents", e);
+        RaceLogEvent denoteForTrackingEvent = new LastEventOfTypeFinder<>(raceLog, true, RaceLogDenoteForTrackingEvent.class).analyze();
+        RaceLogEvent startTrackingEvent = new LastEventOfTypeFinder<>(raceLog, true, RaceLogStartTrackingEvent.class).analyze();
+        if (denoteForTrackingEvent != null) {
+            try {
+                raceLog.revokeEvent(service.getServerAuthor(), denoteForTrackingEvent, "remove denotation");
+                if (startTrackingEvent != null) {
+                    raceLog.revokeEvent(service.getServerAuthor(), startTrackingEvent, "reset start tracking time upon removing denotation");
+                }
+            } catch (NotRevokableException e) {
+                logger.log(Level.WARNING, "could not remove denotation by adding RevokeEvents", e);
+            }
         }
     }
 

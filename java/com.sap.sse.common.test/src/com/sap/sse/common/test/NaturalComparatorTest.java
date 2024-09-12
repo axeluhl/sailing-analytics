@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.test;
+package com.sap.sse.common.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

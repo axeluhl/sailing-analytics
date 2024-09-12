@@ -288,12 +288,6 @@ implements Procedure<ShardingKey> {
                     "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }
-        {
-            logger.info("Reloading/starting httpd on "+getHostToDeployTo()+" after application deployment");
-            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
-            logger.info("stdout: "+stdout);
-        }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),
                 serverDirectory, applicationConfiguration.getTelnetPort(),
                 applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort(), getLandscape());
