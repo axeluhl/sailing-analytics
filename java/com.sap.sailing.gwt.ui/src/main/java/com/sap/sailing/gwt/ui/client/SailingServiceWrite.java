@@ -662,13 +662,10 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * Revoke the {@link RaceLogDenoteForTrackingEvent}. This does not affect an existing {@code RaceLogRaceTracker} or
      * {@link TrackedRace} for this {@code RaceLog}.
      *
-     * @throws UnauthorizedException,
-     *             NotFoundException
-     *
      * @see RaceLogTrackingAdapter#removeDenotationForRaceLogTracking
      */
     void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
-            throws UnauthorizedException, NotFoundException;
+            throws UnauthorizedException, NotFoundException, Exception;
 
     /**
      * Removes public {@link TagDTO tag} from {@link RaceLog} and private {@link TagDTO tag} from {@link UserStore}.

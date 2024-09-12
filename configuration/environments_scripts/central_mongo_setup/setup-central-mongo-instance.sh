@@ -33,7 +33,7 @@ else
     # build-crontab
     . imageupgrade_functions.sh
     # Install MongoDB 5.0 and configure as replica set "live"
-    setup_mongo_5_0_on_AL2023
+    setup_mongo_7_0_on_AL2023
     build_crontab_and_setup_files central_mongo_setup
     # obtain root SSH key from key vault:
     setup_keys "central_mongo_setup"

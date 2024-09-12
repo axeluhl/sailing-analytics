@@ -8,3 +8,4 @@ Fragment-Host: com.sap.sse.security.storemerging
 Automatic-Module-Name: com.sap.sse.security.storemerging.test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit
+Import-Package: com.mongodb.client
