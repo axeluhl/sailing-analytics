@@ -491,6 +491,16 @@
             "key": "ASL2.0"
         },
         {
+            "name": "SAP HANA JDBC Driver",
+            "version": "2.8.14",
+            "owner": "sap.com",
+            "homepage": "https://sap.com",
+            "acknowledgements": [
+                "Copyright (c) 2004-2021 SAP SE"
+            ],
+            "key": "SAP"
+        },
+        {
             "name": "Simple Logging Facade for Java (SLF4J)",
             "version": "1.7.30",
             "owner": "QOS.ch",
@@ -589,6 +599,10 @@
         {
             "key": "BSD3CL",
             "file": "bsd3cl.txt"
+        },
+        {
+            "key": "SAP",
+            "file": "sap.txt"
         }
     ],
     "disclaimers":[
