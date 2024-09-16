@@ -3,19 +3,13 @@ package com.sap.sailing.domain.queclinkadapter.impl;
 import java.text.ParseException;
 
 import com.sap.sailing.domain.queclinkadapter.HBDAcknowledgement;
+import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
 
-public class HBDAcknowledgementImpl extends HBDMessageImpl implements HBDAcknowledgement {
-    private final String imei;
-    private final String deviceName;
-    private final TimePoint sendTime;
-
-    public HBDAcknowledgementImpl(int protocolVersion, String imei, String deviceName, TimePoint sendTime, short countNumber) {
-        super(Direction.ACK, protocolVersion, countNumber);
-        this.imei = imei;
-        this.deviceName = deviceName;
-        this.sendTime = sendTime;
+public class HBDAcknowledgementImpl extends MessageWithDeviceOriginImpl implements HBDAcknowledgement {
+    public HBDAcknowledgementImpl(int protocolVersion, short countNumber, String imei, String deviceName, TimePoint sendTime) {
+        super(MessageType.HBD, Direction.ACK, protocolVersion, imei, deviceName, sendTime, countNumber);
     }
     
     @Override
@@ -31,24 +25,9 @@ public class HBDAcknowledgementImpl extends HBDMessageImpl implements HBDAcknowl
     
     public static HBDAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
         return new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
+                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[4]),
                 /* imei */ parameterList[1],
                 /* deviceName */ parameterList[2],
-                /* sendTime */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[3]),
-                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[4]));
-    }
-
-    @Override
-    public TimePoint getSendTime() {
-        return sendTime;
-    }
-
-    @Override
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    @Override
-    public String getImei() {
-        return imei;
+                /* sendTime */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[3]));
     }
 }

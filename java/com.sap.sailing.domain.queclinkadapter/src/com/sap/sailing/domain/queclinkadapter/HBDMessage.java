@@ -1,7 +1,4 @@
 package com.sap.sailing.domain.queclinkadapter;
 
-public interface HBDMessage extends Message {
-    int getProtocolVersion();
-    
-    short getCountNumber();
+public interface HBDMessage extends MessageWithProtocolVersionAndCountNumber {
 }

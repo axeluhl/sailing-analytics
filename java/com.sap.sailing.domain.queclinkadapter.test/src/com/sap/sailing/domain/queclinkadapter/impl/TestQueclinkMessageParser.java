@@ -10,6 +10,9 @@ import java.util.regex.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.HBDAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.HBDServerAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.Message;
@@ -28,7 +31,7 @@ public class TestQueclinkMessageParser {
     @Test
     public void testSimpleMessageString() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
         final String ackHBDAsString = ackHBD.getMessageString();
         assertEquals("+ACK:GTHBD,301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E$", ackHBDAsString);
     }
@@ -36,7 +39,7 @@ public class TestQueclinkMessageParser {
     @Test
     public void testParsingSimpleHeartbeatAck() throws ParseException {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
         final String ackHBDAsString = ackHBD.getMessageString();
         final Message parsedMessage = messageParser.parse(ackHBDAsString);
         assertNotNull(parsedMessage);
@@ -59,7 +62,7 @@ public class TestQueclinkMessageParser {
     @Test
     public void simplePatternTestForACKMessage() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(ackHBD.getMessageString());
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+ackHBD.getMessageString(), matcher.matches());
         assertEquals("+ACK:", matcher.group(1));
@@ -85,5 +88,18 @@ public class TestQueclinkMessageParser {
         assertEquals("+SACK:", matcher.group(1));
         assertEquals(null, matcher.group(7));
         assertEquals("11F0", matcher.group(8));
+    }
+    
+    @Test
+    public void parseLiveFRIMessage() throws ParseException {
+        final String friMessageAsString = "+RESP:GTFRI,301201,860599002480051,,0,0,4,1,,,,-2.873013,52.161122,20240710164610,,,,,,1,,,,-2.873013,52.161122,20240710164615,,,,,,1,,,,-2.873013,52.161122,20240710164620,,,,,,1,,,,-2.873013,52.161122,20240710164625,,,,,,54,,2248$";
+        final Message friMessage = messageParser.parse(friMessageAsString);
+        assertNotNull(friMessage);
+        assertTrue(friMessage instanceof FRIReport);
+        final FRIReport friReport = (FRIReport) friMessage;
+        final Position expectedPosition = new DegreePosition(52.161122, -2.873013);
+        assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), 0.00000001);
+        assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), 0.00000001);
+        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710164610"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
 }
