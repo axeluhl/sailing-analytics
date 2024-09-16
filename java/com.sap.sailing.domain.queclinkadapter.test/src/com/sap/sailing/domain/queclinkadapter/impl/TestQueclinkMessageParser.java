@@ -21,6 +21,7 @@ import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
 
 public class TestQueclinkMessageParser {
+    private static final double EPSILON = 0.00000001;
     private QueclinkStreamParserImpl messageParser;
 
     @Before
@@ -98,8 +99,24 @@ public class TestQueclinkMessageParser {
         assertTrue(friMessage instanceof FRIReport);
         final FRIReport friReport = (FRIReport) friMessage;
         final Position expectedPosition = new DegreePosition(52.161122, -2.873013);
-        assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), 0.00000001);
-        assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), 0.00000001);
+        assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
+        assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
         assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710164610"), friReport.getPositionRelatedReports()[0].getValidityTime());
+    }
+    
+    @Test
+    public void parseFRIMessageFromSpecification() throws ParseException {
+        final String friMessageAsString = "+RESP:GTFRI,301303,860599004785994,,1,0,1,1,0.2,0,-43.4,117.129316,31.840015,20190923022045,0460,0000,550B,B969,,100,0001,20190923022046,034A$";
+        final Message friMessage = messageParser.parse(friMessageAsString);
+        assertNotNull(friMessage);
+        assertTrue(friMessage instanceof FRIReport);
+        final FRIReport friReport = (FRIReport) friMessage;
+        final Position expectedPosition = new DegreePosition(31.840015, 117.129316);
+        assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
+        assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
+        assertEquals(-43.4, friReport.getPositionRelatedReports()[0].getAltitude().getMeters(), EPSILON);
+        assertEquals(0.2, friReport.getPositionRelatedReports()[0].getCogAndSog().getKilometersPerHour(), EPSILON);
+        assertEquals(0, friReport.getPositionRelatedReports()[0].getCogAndSog().getBearing().getDegrees(), EPSILON);
+        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20190923022045"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
 }

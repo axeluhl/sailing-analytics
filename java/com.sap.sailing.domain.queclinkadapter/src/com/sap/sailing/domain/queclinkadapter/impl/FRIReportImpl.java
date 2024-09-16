@@ -40,15 +40,15 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
         final int sendTimeIndex;
         final int countNumberIndex;
         final IOStatus ioStatus;
-        if (parameterList.length > 10+numberOfFixes*FIELDS_PER_FIX) {
+        if (parameterList.length > 9+numberOfFixes*FIELDS_PER_FIX) {
             // optional field "I/O Status" seems present
+            ioStatus = new IOStatus(parameterList[7+numberOfFixes*FIELDS_PER_FIX]);
             sendTimeIndex = 8+numberOfFixes*FIELDS_PER_FIX;
             countNumberIndex = 9+numberOfFixes*FIELDS_PER_FIX;
-            ioStatus = null;
         } else {
-            ioStatus = new IOStatus(parameterList[6+numberOfFixes*FIELDS_PER_FIX]);
             sendTimeIndex = 7+numberOfFixes*FIELDS_PER_FIX;
             countNumberIndex = 8+numberOfFixes*FIELDS_PER_FIX;
+            ioStatus = null;
         }
         final List<PositionRelatedReport> positionRelatedReports = new ArrayList<>();
         for (int i=0; i<numberOfFixes; i++) {
@@ -61,8 +61,8 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
                     /* validity time */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[12+i*FIELDS_PER_FIX]),
                     /* mobileCountryCode */ Util.hasLength(parameterList[13+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[13+i*FIELDS_PER_FIX]):null,
                     /* mobileNetworkCode */ Util.hasLength(parameterList[14+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[14+i*FIELDS_PER_FIX]):null,
-                    /* locationAreaCode */ Util.hasLength(parameterList[15+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[15+i*FIELDS_PER_FIX]):null,
-                    /* cellId */ Util.hasLength(parameterList[16+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[16+i*FIELDS_PER_FIX]):null,
+                    /* locationAreaCode */ Util.hasLength(parameterList[15+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[15+i*FIELDS_PER_FIX], 16):null,
+                    /* cellId */ Util.hasLength(parameterList[16+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[16+i*FIELDS_PER_FIX], 16):null,
                     /* odometer */ Util.hasLength(parameterList[17+i*FIELDS_PER_FIX])?new MeterDistance(1000.0*Double.parseDouble(parameterList[17+i*FIELDS_PER_FIX])):null));
         }
         return new FRIReportImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
