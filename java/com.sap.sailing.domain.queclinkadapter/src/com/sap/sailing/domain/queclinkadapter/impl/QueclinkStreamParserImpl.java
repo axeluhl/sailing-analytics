@@ -28,7 +28,7 @@ import com.sap.sse.common.Util;
 public class QueclinkStreamParserImpl implements MessageParser {
     private final static Logger logger = Logger.getLogger(QueclinkStreamParserImpl.class.getName());
     private static final SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddhhmmss");
-    static final Pattern messagePattern = Pattern.compile("((AT\\+)|(\\+ACK:)|(\\+RESP:)|(\\+SACK:))(GT([A-Z]{3})[=,])?(.*)\\$");
+    static final Pattern messagePattern = Pattern.compile("((AT\\+)|(\\+ACK:)|(\\+RESP:)|(\\+BUFF:)|(\\+SACK:))(GT([A-Z]{3})[=,])?(.*)\\$");
     
     static TimePoint parseTimeStamp(String yyyyMMddHHMMSS) throws ParseException {
         final TimePoint timeStamp;
@@ -78,9 +78,9 @@ public class QueclinkStreamParserImpl implements MessageParser {
         }
         final String directionStringWithPrefixAndSuffix = matcher.group(1); // e.g., "+ACK:"
         final Direction direction = Direction.fromMessageStart(directionStringWithPrefixAndSuffix);
-        final String messageTypeString = matcher.group(7); // e.g., "HBD"; may be null for +SACK: messages
+        final String messageTypeString = matcher.group(8); // e.g., "HBD"; may be null for +SACK: messages
         final MessageType messageType = messageTypeString == null ? null : MessageType.valueOf(messageTypeString);
-        final String[] parameters = matcher.group(8).split(",");
+        final String[] parameters = matcher.group(9).split(",");
         final Message result;
         final MessageFactory messageFactory = MessageType.getMessageFactory(direction, messageType);
         if (messageFactory == null) {

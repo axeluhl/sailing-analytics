@@ -109,7 +109,13 @@ public enum MessageType {
          * a server acknowledgement, sent from the server to the "terminal" (tracking device); without a message type
          * identifier, this 
          */
-        SACK;
+        SACK,
+        
+        /**
+         * Basically the same as {@link #RESP}, but these message come from the device buffer after not having been
+         * able to send them out at the time they were recorded.
+         */
+        BUFF;
         
         public static Direction fromMessageStart(String messageStart) {
             return valueOf(messageStart.replace("+", "").replace(":", ""));
@@ -140,6 +146,9 @@ public enum MessageType {
     
     private void putMessageFactory(Direction direction, MessageFactory factory) {
         getMessageFactories().put(new Pair<>(direction, this), factory);
+        if (direction == Direction.RESP) {
+            putMessageFactory(Direction.BUFF, factory);
+        }
     }
     
     public static MessageFactory getMessageFactory(Direction direction, MessageType messageType) {

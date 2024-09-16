@@ -2,6 +2,7 @@ package com.sap.sailing.domain.queclinkadapter.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
@@ -67,8 +68,8 @@ public class TestQueclinkMessageParser {
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(ackHBD.getMessageString());
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+ackHBD.getMessageString(), matcher.matches());
         assertEquals("+ACK:", matcher.group(1));
-        assertEquals("HBD", matcher.group(7));
-        assertEquals("301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E", matcher.group(8));
+        assertEquals("HBD", matcher.group(8));
+        assertEquals("301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E", matcher.group(9));
     }
 
     @Test
@@ -77,8 +78,8 @@ public class TestQueclinkMessageParser {
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(sackHBD.getMessageString());
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+sackHBD.getMessageString(), matcher.matches());
         assertEquals("+SACK:", matcher.group(1));
-        assertEquals("HBD", matcher.group(7));
-        assertEquals("301303,033E", matcher.group(8));
+        assertEquals("HBD", matcher.group(8));
+        assertEquals("301303,033E", matcher.group(9));
     }
 
     @Test
@@ -87,8 +88,8 @@ public class TestQueclinkMessageParser {
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(sackMessage);
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+sackMessage, matcher.matches());
         assertEquals("+SACK:", matcher.group(1));
-        assertEquals(null, matcher.group(7));
-        assertEquals("11F0", matcher.group(8));
+        assertEquals(null, matcher.group(8));
+        assertEquals("11F0", matcher.group(9));
     }
     
     @Test
@@ -98,6 +99,7 @@ public class TestQueclinkMessageParser {
         assertNotNull(friMessage);
         assertTrue(friMessage instanceof FRIReport);
         final FRIReport friReport = (FRIReport) friMessage;
+        assertEquals(4, friReport.getNumberOfFixes());
         final Position expectedPosition = new DegreePosition(52.161122, -2.873013);
         assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
         assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
@@ -119,4 +121,21 @@ public class TestQueclinkMessageParser {
         assertEquals(0, friReport.getPositionRelatedReports()[0].getCogAndSog().getBearing().getDegrees(), EPSILON);
         assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20190923022045"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
+    
+    @Test
+    public void parseBufferedFRIMessage() throws ParseException {
+        final String friMessageAsString = "+BUFF:GTFRI,301201,860599002480051,,0,0,4,1,,,,-2.873120,52.161232,20240710153241,,,,,,1,,,,-2.873120,52.161232,20240710153246,,,,,,1,,,,-2.873120,52.161232,20240710153251,,,,,,1,,,,-2.873120,52.161232,20240710153256,,,,,,64,,2193$";
+        final Message friMessage = messageParser.parse(friMessageAsString);
+        assertNotNull(friMessage);
+        assertTrue(friMessage instanceof FRIReport);
+        final FRIReport friReport = (FRIReport) friMessage;
+        assertEquals(4, friReport.getNumberOfFixes());
+        final Position expectedPosition = new DegreePosition(52.161232, -2.873120);
+        assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
+        assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
+        assertNull(friReport.getPositionRelatedReports()[0].getCogAndSog());
+        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710153241"), friReport.getPositionRelatedReports()[0].getValidityTime());
+    }
+    
+    
 }
