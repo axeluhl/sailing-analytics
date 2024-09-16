@@ -97,6 +97,7 @@ public class QueclinkStreamParserImpl implements MessageParser {
      * Reads from the {@code reader} until EOF is reached and produces {@link Message}s based on {@link #parse(String)}
      * and the splitting of the input based on the termination character "$" (dollar sign).
      */
+    @Override
     public Iterable<Message> parse(Reader reader) throws ParseException, IOException {
         return new Iterable<Message>() {
             @Override

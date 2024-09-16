@@ -20,6 +20,7 @@ import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.HBDAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.HBDServerAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.Message;
+import com.sap.sailing.domain.queclinkadapter.MessageParser;
 import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
@@ -27,11 +28,11 @@ import com.sap.sse.common.Util;
 
 public class TestQueclinkMessageParser {
     private static final double EPSILON = 0.00000001;
-    private QueclinkStreamParserImpl messageParser;
+    private MessageParser messageParser;
 
     @Before
     public void setUp() {
-        this.messageParser = new QueclinkStreamParserImpl();
+        this.messageParser = MessageParser.INSTANCE;
     }
     
     @Test
