@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.queclinkadapter.impl;
 
+import java.text.ParseException;
+
 import com.sap.sailing.domain.queclinkadapter.HeartbeatAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
@@ -25,6 +27,14 @@ public class HeartbeatAcknowledgementImpl extends HeartbeatMessageImpl implement
                 getSendTime() == null ? "" : QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(getSendTime()),
                 QueclinkStreamParserImpl.formatCountNumberHex(getCountNumber())
         };
+    }
+    
+    public static HeartbeatAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
+        return new HeartbeatAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
+                /* imei */ parameterList[1],
+                /* deviceName */ parameterList[2],
+                /* sendTime */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[3]),
+                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[4]));
     }
 
     @Override

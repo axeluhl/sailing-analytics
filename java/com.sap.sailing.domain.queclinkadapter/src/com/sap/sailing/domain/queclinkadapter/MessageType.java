@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.queclinkadapter;
 
 /**
- * A Queclink GL 300 message type. 
+ * A Queclink GL 300 message type.
+ * 
  * @author Axel Uhl (d043530)
  *
  */
@@ -81,9 +82,28 @@ public enum MessageType {
     ;
     
     public enum Direction {
+        /**
+         * command sent to the "terminal" (tracking device)
+         */
         AT,
+        
+        /**
+         * message sent from the "terminal" (tracking device) to the server; in most cases an acknowledgement
+         * of an {@link #AT} command, but in some cases a spontaneous emission, such as for a heart beat message;
+         * see {@link MessageType#HBD}.
+         */
         ACK,
+        
+        /**
+         * response sent by the "terminal" (tracking device) to the server; for example, a single response to a request,
+         * or a repetitive response sent by the device on a regular basis, such as position report.
+         */
         RESP,
+        
+        /**
+         * a server acknowledgement, sent from the server to the "terminal" (tracking device); without a message type
+         * identifier, this 
+         */
         SACK;
     }
 

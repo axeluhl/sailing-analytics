@@ -5,7 +5,7 @@ import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 
 public class HeartbeatServerAcknowledgementImpl extends HeartbeatMessageImpl implements HeartbeatServerAcknowledgement {
     public HeartbeatServerAcknowledgementImpl(int protocolVersion, short countNumber) {
-        super(Direction.ACK, protocolVersion, countNumber);
+        super(Direction.SACK, protocolVersion, countNumber);
     }
 
     @Override
