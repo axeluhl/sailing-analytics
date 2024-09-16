@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageFactory;
+import com.sap.sailing.domain.queclinkadapter.MessageType;
+import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -71,10 +73,14 @@ public class QueclinkStreamParserImpl {
             throw new ParseException("Message "+messageIncludingTailCharacter+" cannot be parsed as Queclink message", 0);
         }
         final String directionStringWithPrefixAndSuffix = matcher.group(1); // e.g., "+ACK:"
+        final Direction direction = Direction.fromMessageStart(directionStringWithPrefixAndSuffix);
         final String messageTypeString = matcher.group(7); // e.g., "HBD"; may be null for +SACK: messages
+        final MessageType messageType = messageTypeString == null ? null : MessageType.valueOf(messageTypeString);
         final String[] parameters = matcher.group(8).split(",");
+        final Message result;
         // TODO find and use MessageFactory to create message from parameters
-        final MessageFactory messageFactory = null;
-        return messageFactory.createMessageWithParameters(parameters);
+        final MessageFactory messageFactory = MessageType.getMessageFactory(direction, messageType);
+        result = messageFactory.createMessageWithParameters(parameters);
+        return result;
     }
 }

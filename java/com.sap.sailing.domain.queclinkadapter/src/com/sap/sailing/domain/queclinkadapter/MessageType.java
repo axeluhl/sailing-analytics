@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.queclinkadapter;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.sap.sse.common.Util.Pair;
+
 /**
  * A Queclink GL 300 message type.
  * 
@@ -8,73 +13,73 @@ package com.sap.sailing.domain.queclinkadapter;
  */
 public enum MessageType {
     // commands to terminal with acknowledgement:
-    BSI(Direction.AT, Direction.ACK),
-    CFG(Direction.AT, Direction.ACK),
-    CMD(Direction.AT, Direction.ACK),
-    DAT(Direction.AT, Direction.ACK, Direction.RESP),
-    DIS(Direction.AT, Direction.ACK),
-    DOG(Direction.AT, Direction.ACK, Direction.RESP),
-    FKS(Direction.AT, Direction.ACK),
-    FRI(Direction.AT, Direction.ACK, Direction.RESP),
-    GAM(Direction.AT, Direction.ACK),
-    GEO(Direction.AT, Direction.ACK, Direction.RESP),
-    GLM(Direction.AT, Direction.ACK),
-    HBM(Direction.AT, Direction.ACK, Direction.RESP),
-    JDC(Direction.AT, Direction.ACK),
-    NMD(Direction.AT, Direction.ACK),
-    NTS(Direction.AT, Direction.ACK),
-    OWN(Direction.AT, Direction.ACK),
-    PDS(Direction.AT, Direction.ACK),
-    PIN(Direction.AT, Direction.ACK),
-    QSS(Direction.AT, Direction.ACK),
-    RMD(Direction.AT, Direction.ACK, Direction.RESP),
-    RTO(Direction.AT, Direction.ACK),
-    RVC(Direction.AT, Direction.ACK),
-    SPD(Direction.AT, Direction.ACK, Direction.RESP),
-    SRI(Direction.AT, Direction.ACK),
-    TEM(Direction.AT, Direction.ACK, Direction.RESP),
-    TMA(Direction.AT, Direction.ACK),
-    UPC(Direction.AT, Direction.ACK, Direction.RESP),
-    WLT(Direction.AT, Direction.ACK),
+    BSI(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    CFG(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    CMD(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    DAT(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    DIS(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    DOG(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    FKS(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    FRI(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    GAM(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    GEO(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    GLM(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    HBM(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    JDC(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    NMD(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    NTS(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    OWN(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    PDS(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    PIN(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    QSS(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    RMD(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    RTO(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    RVC(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    SPD(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    SRI(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    TEM(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    TMA(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
+    UPC(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null), new Pair<>(Direction.RESP, /* TODO */ null)),
+    WLT(new Pair<>(Direction.AT, /* TODO */ null), new Pair<>(Direction.ACK, /* TODO */ null)),
     // position-related reports:
-    GCR(Direction.RESP),
-    IGL(Direction.RESP),
-    LBC(Direction.RESP),
-    NMR(Direction.RESP),
-    PNL(Direction.RESP),
-    RTL(Direction.RESP),
-    SOS(Direction.RESP),
+    GCR(new Pair<>(Direction.RESP, /* TODO */ null)),
+    IGL(new Pair<>(Direction.RESP, /* TODO */ null)),
+    LBC(new Pair<>(Direction.RESP, /* TODO */ null)),
+    NMR(new Pair<>(Direction.RESP, /* TODO */ null)),
+    PNL(new Pair<>(Direction.RESP, /* TODO */ null)),
+    RTL(new Pair<>(Direction.RESP, /* TODO */ null)),
+    SOS(new Pair<>(Direction.RESP, /* TODO */ null)),
     // device information report:
-    INF(Direction.RESP),
+    INF(new Pair<>(Direction.RESP, /* TODO */ null)),
     // reports for querying:
-    ALL(Direction.RESP),
-    ALM(Direction.RESP),
-    ALS(Direction.RESP),
-    BAT(Direction.RESP),
-    BPL(Direction.RESP),
-    BTC(Direction.RESP),
-    CID(Direction.RESP),
-    CSQ(Direction.RESP),
-    EPF(Direction.RESP),
-    EPN(Direction.RESP),
-    EUC(Direction.RESP),
-    GPS(Direction.RESP),
-    GSM(Direction.RESP),
-    IGF(Direction.RESP),
-    IGN(Direction.RESP),
-    JDR(Direction.RESP),
-    JDS(Direction.RESP),
-    PDP(Direction.RESP),
-    PFA(Direction.RESP),
-    PNA(Direction.RESP),
-    STC(Direction.RESP),
-    STT(Direction.RESP),
-    SWG(Direction.RESP),
-    TMZ(Direction.RESP),
-    USW(Direction.RESP),
-    VER(Direction.RESP),
+    ALL(new Pair<>(Direction.RESP, /* TODO */ null)),
+    ALM(new Pair<>(Direction.RESP, /* TODO */ null)),
+    ALS(new Pair<>(Direction.RESP, /* TODO */ null)),
+    BAT(new Pair<>(Direction.RESP, /* TODO */ null)),
+    BPL(new Pair<>(Direction.RESP, /* TODO */ null)),
+    BTC(new Pair<>(Direction.RESP, /* TODO */ null)),
+    CID(new Pair<>(Direction.RESP, /* TODO */ null)),
+    CSQ(new Pair<>(Direction.RESP, /* TODO */ null)),
+    EPF(new Pair<>(Direction.RESP, /* TODO */ null)),
+    EPN(new Pair<>(Direction.RESP, /* TODO */ null)),
+    EUC(new Pair<>(Direction.RESP, /* TODO */ null)),
+    GPS(new Pair<>(Direction.RESP, /* TODO */ null)),
+    GSM(new Pair<>(Direction.RESP, /* TODO */ null)),
+    IGF(new Pair<>(Direction.RESP, /* TODO */ null)),
+    IGN(new Pair<>(Direction.RESP, /* TODO */ null)),
+    JDR(new Pair<>(Direction.RESP, /* TODO */ null)),
+    JDS(new Pair<>(Direction.RESP, /* TODO */ null)),
+    PDP(new Pair<>(Direction.RESP, /* TODO */ null)),
+    PFA(new Pair<>(Direction.RESP, /* TODO */ null)),
+    PNA(new Pair<>(Direction.RESP, /* TODO */ null)),
+    STC(new Pair<>(Direction.RESP, /* TODO */ null)),
+    STT(new Pair<>(Direction.RESP, /* TODO */ null)),
+    SWG(new Pair<>(Direction.RESP, /* TODO */ null)),
+    TMZ(new Pair<>(Direction.RESP, /* TODO */ null)),
+    USW(new Pair<>(Direction.RESP, /* TODO */ null)),
+    VER(new Pair<>(Direction.RESP, /* TODO */ null)),
     // heartbeat
-    HBD(Direction.ACK, Direction.SACK)
+    HBD(new Pair<>(Direction.ACK, HBDAcknowledgement.FACTORY), new Pair<>(Direction.SACK, HBDServerAcknowledgement.FACTORY))
     // there is a special "SACK" message for general server acknowledgement which differs from all other message formats
     // in that it doesn't contain the actual message type after the colon (":") but instead only has the count number as
     // a four-character HEX value after the colon. We don't provide a message type enum literal for this type of message
@@ -105,15 +110,39 @@ public enum MessageType {
          * identifier, this 
          */
         SACK;
+        
+        public static Direction fromMessageStart(String messageStart) {
+            return valueOf(messageStart.replace("+", "").replace(":", ""));
+        }
     }
 
-    private final Direction[] directions;
+    private static Map<Pair<Direction, MessageType>, MessageFactory> messageFactories;
     
-    private MessageType(Direction...directions) {
-        this.directions = directions;
+    private synchronized static Map<Pair<Direction, MessageType>, MessageFactory> getMessageFactories() {
+        if (messageFactories == null) {
+            messageFactories = new HashMap<>();
+        }
+        return messageFactories;
     }
-
-    public Direction[] getDirections() {
-        return directions;
+    
+    static {
+        // support special case: a server acknowledgement with no message type:
+        getMessageFactories().put(new Pair<>(Direction.SACK, null), ServerAcknowledgement.FACTORY);
+    }
+    
+    @SafeVarargs
+    private MessageType(Pair<Direction, MessageFactory>... factoryForDirection) {
+        for (final Pair<Direction, MessageFactory> directionAndFactory : factoryForDirection) {
+//            assert directionAndFactory.getB() != null; // TODO uncomment when all message types have their factories
+            putMessageFactory(directionAndFactory.getA(), directionAndFactory.getB());
+        }
+    }
+    
+    private void putMessageFactory(Direction direction, MessageFactory factory) {
+        getMessageFactories().put(new Pair<>(direction, this), factory);
+    }
+    
+    public static MessageFactory getMessageFactory(Direction direction, MessageType messageType) {
+        return getMessageFactories().get(new Pair<>(direction, messageType));
     }
 }

@@ -10,7 +10,8 @@ import java.util.regex.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.queclinkadapter.HeartbeatAcknowledgement;
+import com.sap.sailing.domain.queclinkadapter.HBDAcknowledgement;
+import com.sap.sailing.domain.queclinkadapter.HBDServerAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
@@ -27,7 +28,7 @@ public class TestQueclinkMessageParser {
     @Test
     public void testSimpleMessageString() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HeartbeatAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
         final String ackHBDAsString = ackHBD.getMessageString();
         assertEquals("+ACK:GTHBD,301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E$", ackHBDAsString);
     }
@@ -35,30 +36,30 @@ public class TestQueclinkMessageParser {
     @Test
     public void testParsingSimpleHeartbeatAck() throws ParseException {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HeartbeatAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
         final String ackHBDAsString = ackHBD.getMessageString();
         final Message parsedMessage = messageParser.parse(ackHBDAsString);
         assertNotNull(parsedMessage);
         assertEquals(MessageType.HBD, parsedMessage.getType());
         assertEquals(Direction.ACK, parsedMessage.getDirection());
-        assertTrue(parsedMessage instanceof HeartbeatAcknowledgement);
+        assertTrue(parsedMessage instanceof HBDAcknowledgement);
     }
     
     @Test
     public void testParsingSimpleHeartbeatSack() throws ParseException {
-        final Message sackHBD = new HeartbeatServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message sackHBD = new HBDServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
         final String sackHBDAsString = sackHBD.getMessageString();
         final Message parsedMessage = messageParser.parse(sackHBDAsString);
         assertNotNull(parsedMessage);
         assertEquals(MessageType.HBD, parsedMessage.getType());
-        assertEquals(Direction.ACK, parsedMessage.getDirection());
-        assertTrue(parsedMessage instanceof HeartbeatAcknowledgement);
+        assertEquals(Direction.SACK, parsedMessage.getDirection());
+        assertTrue(parsedMessage instanceof HBDServerAcknowledgement);
     }
     
     @Test
     public void simplePatternTestForACKMessage() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HeartbeatAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), "860599004785994", null, now, QueclinkStreamParserImpl.parseCountNumberHex("033E"));
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(ackHBD.getMessageString());
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+ackHBD.getMessageString(), matcher.matches());
         assertEquals("+ACK:", matcher.group(1));
@@ -68,7 +69,7 @@ public class TestQueclinkMessageParser {
 
     @Test
     public void simplePatternTestForSACKHeartbeatMessage() {
-        final Message sackHBD = new HeartbeatServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message sackHBD = new HBDServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
         final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(sackHBD.getMessageString());
         assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+sackHBD.getMessageString(), matcher.matches());
         assertEquals("+SACK:", matcher.group(1));
