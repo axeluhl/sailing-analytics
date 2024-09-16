@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.queclinkadapter.impl;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,10 +74,10 @@ public class QueclinkStreamParserImpl implements MessageParser {
     }
 
     @Override
-    public Message parse(String messageIncludingTailCharacter) throws ParseException {
-        final Matcher matcher = messagePattern.matcher(messageIncludingTailCharacter);
+    public Message parse(String singleMessageIncludingTailCharacter) throws ParseException {
+        final Matcher matcher = messagePattern.matcher(singleMessageIncludingTailCharacter);
         if (!matcher.matches()) {
-            throw new ParseException("Message "+messageIncludingTailCharacter+" cannot be parsed as Queclink message", 0);
+            throw new ParseException("Message "+singleMessageIncludingTailCharacter+" cannot be parsed as Queclink message", 0);
         }
         final String directionStringWithPrefixAndSuffix = matcher.group(1); // e.g., "+ACK:"
         final Direction direction = Direction.fromMessageStart(directionStringWithPrefixAndSuffix);
@@ -88,5 +91,52 @@ public class QueclinkStreamParserImpl implements MessageParser {
         }
         result = messageFactory == null ? null : messageFactory.createMessageWithParameters(parameters);
         return result;
+    }
+
+    /**
+     * Reads from the {@code reader} until EOF is reached and produces {@link Message}s based on {@link #parse(String)}
+     * and the splitting of the input based on the termination character "$" (dollar sign).
+     */
+    public Iterable<Message> parse(Reader reader) throws ParseException, IOException {
+        return new Iterable<Message>() {
+            @Override
+            public Iterator<Message> iterator() {
+                return new Iterator<Message>() {
+                    final StringBuilder buffer = new StringBuilder();
+                    int read;
+                    Message message = readNext();
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return message != null;
+                    }
+
+                    @Override
+                    public Message next() {
+                        final Message result = message;
+                        message = readNext();
+                        return result;
+                    }
+
+                    private Message readNext() {
+                        message = null;
+                        while (read != -1 && message == null) {
+                            try {
+                                while (message == null && (read=reader.read()) != -1) {
+                                    buffer.append((char) read);
+                                    if ((char) read == '$') {
+                                        message = parse(buffer.toString());
+                                        buffer.delete(0, buffer.length());
+                                    }
+                                }
+                            } catch (IOException | ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        return message;
+                    }
+                };
+            }
+        };
     }
 }

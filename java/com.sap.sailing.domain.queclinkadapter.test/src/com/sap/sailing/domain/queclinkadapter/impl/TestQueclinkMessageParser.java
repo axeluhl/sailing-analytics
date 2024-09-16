@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 
@@ -20,6 +23,7 @@ import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class TestQueclinkMessageParser {
     private static final double EPSILON = 0.00000001;
@@ -137,5 +141,10 @@ public class TestQueclinkMessageParser {
         assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710153241"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
     
-    
+    @Test
+    public void countMessagesInLog() throws ParseException, IOException {
+        final Reader reader = new InputStreamReader(getClass().getResourceAsStream("/queclink_stream"));
+        final Iterable<Message> messages = messageParser.parse(reader);
+        assertEquals(206, Util.size(messages));
+    }
 }

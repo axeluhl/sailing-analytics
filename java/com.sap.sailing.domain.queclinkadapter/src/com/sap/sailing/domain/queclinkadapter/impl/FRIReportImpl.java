@@ -57,7 +57,7 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
                     Util.hasLength(parameterList[7+i*FIELDS_PER_FIX]) && Util.hasLength(parameterList[8+i*FIELDS_PER_FIX]) ? new KilometersPerHourSpeedWithBearingImpl(
                             Double.parseDouble(parameterList[7+i*FIELDS_PER_FIX]), new DegreeBearingImpl(Double.parseDouble(parameterList[8+i*FIELDS_PER_FIX]))) : null,
                     /* altitude */ Util.hasLength(parameterList[9+i*FIELDS_PER_FIX]) ? new MeterDistance(Double.parseDouble(parameterList[9+i*FIELDS_PER_FIX])) : null,
-                    new DegreePosition(Double.parseDouble(parameterList[11+i*FIELDS_PER_FIX]), Double.parseDouble(parameterList[10+i*FIELDS_PER_FIX])),
+                    Util.hasLength(parameterList[11+i*FIELDS_PER_FIX]) && Util.hasLength(parameterList[10+i*FIELDS_PER_FIX])?new DegreePosition(Double.parseDouble(parameterList[11+i*FIELDS_PER_FIX]), Double.parseDouble(parameterList[10+i*FIELDS_PER_FIX])):null,
                     /* validity time */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[12+i*FIELDS_PER_FIX]),
                     /* mobileCountryCode */ Util.hasLength(parameterList[13+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[13+i*FIELDS_PER_FIX]):null,
                     /* mobileNetworkCode */ Util.hasLength(parameterList[14+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[14+i*FIELDS_PER_FIX]):null,
