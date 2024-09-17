@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.Message;
@@ -21,15 +23,18 @@ public class QueclinkGPSFixImporter extends BaseGPSFixImporterImpl {
     @Override
     public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
             boolean inferSpeedAndBearing, String sourceName) throws Exception {
+        final Map<String, TrackFileImportDeviceIdentifier> deviceIdentifiersForImeis = new HashMap<>();
         final PositionRelatedReportToGPSFixConverter converter = new PositionRelatedReportToGPSFixConverter();
         final Reader reader = new InputStreamReader(inputStream, charset);
         final MessageParser parser = MessageParser.INSTANCE;
         final MessageVisitor<Void> visitor = new AbstractMessageVisitor<Void>() {
             @Override
             public Void visit(FRIReport friReport) {
-                final TrackFileImportDeviceIdentifier deviceIdentifier = new TrackFileImportDeviceIdentifierImpl(sourceName, friReport.getImei());
+                final TrackFileImportDeviceIdentifier deviceIdentifier = deviceIdentifiersForImeis.computeIfAbsent(friReport.getImei(), imei->new TrackFileImportDeviceIdentifierImpl(sourceName, imei));
                 for (final PositionRelatedReport prr : friReport.getPositionRelatedReports()) {
-                    addFixAndInfer(callback, inferSpeedAndBearing, converter.createGPSFixFromPositionRelatedReport(prr), deviceIdentifier);
+                    if (prr.getPosition() != null) {
+                        addFixAndInfer(callback, inferSpeedAndBearing, converter.createGPSFixFromPositionRelatedReport(prr), deviceIdentifier);
+                    }
                 }
                 return null;
             }
