@@ -19,7 +19,9 @@ import com.sap.sailing.domain.queclinkadapter.impl.MessageParserImpl;
  *
  */
 public interface MessageParser {
-    MessageParser INSTANCE = new MessageParserImpl();
+    static MessageParser create() {
+        return new MessageParserImpl();
+    }
 
     /**
      * Tries to parse a single message that includes the termination character "$". If the message cannot be
@@ -37,5 +39,4 @@ public interface MessageParser {
      * that message is skipped, and the skipping is logged as a {@link Level#WARNING warning}.
      */
     Iterable<Message> parse(Reader reader) throws ParseException, IOException;
-
 }

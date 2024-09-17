@@ -30,6 +30,7 @@ import com.sap.sse.common.Util;
  */
 public class MessageParserImpl implements MessageParser {
     private final static Logger logger = Logger.getLogger(MessageParserImpl.class.getName());
+    static final char TERMINATION_CHARACTER = '$';
     private static final SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddhhmmss");
     static final Pattern messagePattern = Pattern.compile("((AT\\+)|(\\+ACK:)|(\\+RESP:)|(\\+BUFF:)|(\\+SACK:))(GT([A-Z]{3})[=,])?(.*)\\$");
     
@@ -125,7 +126,7 @@ public class MessageParserImpl implements MessageParser {
                             try {
                                 while (message == null && (read=reader.read()) != -1) {
                                     buffer.append((char) read);
-                                    if ((char) read == '$') {
+                                    if ((char) read == TERMINATION_CHARACTER) {
                                         message = parse(buffer.toString());
                                         buffer.delete(0, buffer.length());
                                     }

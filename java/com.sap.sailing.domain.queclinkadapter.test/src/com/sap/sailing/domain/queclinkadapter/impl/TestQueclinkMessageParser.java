@@ -32,7 +32,7 @@ public class TestQueclinkMessageParser {
 
     @Before
     public void setUp() {
-        this.messageParser = MessageParser.INSTANCE;
+        this.messageParser = MessageParser.create();
     }
     
     @Test

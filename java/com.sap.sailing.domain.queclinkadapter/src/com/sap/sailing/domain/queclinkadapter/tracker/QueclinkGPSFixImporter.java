@@ -26,7 +26,7 @@ public class QueclinkGPSFixImporter extends BaseGPSFixImporterImpl {
         final Map<String, TrackFileImportDeviceIdentifier> deviceIdentifiersForImeis = new HashMap<>();
         final PositionRelatedReportToGPSFixConverter converter = new PositionRelatedReportToGPSFixConverter();
         final Reader reader = new InputStreamReader(inputStream, charset);
-        final MessageParser parser = MessageParser.INSTANCE;
+        final MessageParser parser = MessageParser.create();
         final MessageVisitor<Void> visitor = new AbstractMessageVisitor<Void>() {
             @Override
             public Void visit(FRIReport friReport) {
