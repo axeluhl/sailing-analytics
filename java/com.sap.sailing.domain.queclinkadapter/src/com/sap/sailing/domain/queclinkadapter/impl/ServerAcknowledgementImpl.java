@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.queclinkadapter.impl;
 
-import com.sap.sailing.domain.queclinkadapter.ServerAcknowledgement;
+import java.text.ParseException;
+
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
+import com.sap.sailing.domain.queclinkadapter.ServerAcknowledgement;
 
 public class ServerAcknowledgementImpl extends MessageImpl implements ServerAcknowledgement {
     private final short countNumber;
@@ -11,6 +13,10 @@ public class ServerAcknowledgementImpl extends MessageImpl implements ServerAckn
         this.countNumber = countNumber;
     }
     
+    public static ServerAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
+        return new ServerAcknowledgementImpl(QueclinkStreamParserImpl.parseCountNumberHex(parameterList[0]));
+    }
+
     @Override
     public String getPrefix() {
         return String.format("+%s:", getDirection());
