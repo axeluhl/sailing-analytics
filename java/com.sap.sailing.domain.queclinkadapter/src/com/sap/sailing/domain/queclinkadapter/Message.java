@@ -20,4 +20,6 @@ public interface Message {
         return String.format("%s%c%s$", getPrefix(), getTypeSeparator(),
                 Util.joinStrings(",", Util.map(Arrays.asList(getParameters()), p->p==null?"":p)));
     }
+    
+    <T> T accept(MessageVisitor<T> visitor);
 }

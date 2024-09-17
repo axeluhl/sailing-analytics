@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import com.sap.sailing.domain.queclinkadapter.HBDServerAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
+import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
 
 public class HBDServerAcknowledgementImpl extends HBDMessageImpl implements HBDServerAcknowledgement {
     public HBDServerAcknowledgementImpl(int protocolVersion, short countNumber) {
@@ -18,5 +19,10 @@ public class HBDServerAcknowledgementImpl extends HBDMessageImpl implements HBDS
     @Override
     public String[] getParameters() {
         return new String[] { MessageParserImpl.formatProtocolVersionHex(getProtocolVersion()), MessageParserImpl.formatCountNumberHex(getCountNumber()) };
+    }
+
+    @Override
+    public <T> T accept(MessageVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

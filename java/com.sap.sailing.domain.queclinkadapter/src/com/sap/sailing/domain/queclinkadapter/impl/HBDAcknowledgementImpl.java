@@ -5,6 +5,7 @@ import java.text.ParseException;
 import com.sap.sailing.domain.queclinkadapter.HBDAcknowledgement;
 import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
+import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
 import com.sap.sse.common.TimePoint;
 
 public class HBDAcknowledgementImpl extends MessageWithDeviceOriginImpl implements HBDAcknowledgement {
@@ -29,5 +30,10 @@ public class HBDAcknowledgementImpl extends MessageWithDeviceOriginImpl implemen
                 /* imei */ parameterList[1],
                 /* deviceName */ parameterList[2],
                 /* sendTime */ MessageParserImpl.parseTimeStamp(parameterList[3]));
+    }
+
+    @Override
+    public <T> T accept(MessageVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

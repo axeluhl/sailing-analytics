@@ -1,13 +1,18 @@
 package com.sap.sailing.domain.queclinkadapter.impl;
 
+import java.util.Arrays;
+
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.MessageWithDeviceOrigin;
 import com.sap.sailing.domain.queclinkadapter.PositionRelatedReport;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
+import com.sap.sse.common.Util;
 
 /**
  * Takes objects of type {@link PositionRelatedReport} and produces objects of type {@link GPSFix} or
@@ -30,5 +35,11 @@ public class PositionRelatedReportToGPSFixConverter {
     
     public SmartphoneImeiIdentifier getDeviceIdentifier(MessageWithDeviceOrigin message) {
         return new SmartphoneImeiIdentifierImpl(message.getImei());
+    }
+    
+    public void ingestFixesToStore(SensorFixStore store, FRIReport fixesReceived) {
+        final SmartphoneImeiIdentifier deviceIdentifier = getDeviceIdentifier(fixesReceived);
+        final Iterable<GPSFix> fixes = Util.map(Arrays.asList(fixesReceived.getPositionRelatedReports()), this::createGPSFixFromPositionRelatedReport);
+        store.storeFixes(deviceIdentifier, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
     }
 }

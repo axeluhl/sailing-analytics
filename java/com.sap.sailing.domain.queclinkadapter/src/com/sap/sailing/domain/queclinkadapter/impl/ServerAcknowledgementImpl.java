@@ -3,6 +3,7 @@ package com.sap.sailing.domain.queclinkadapter.impl;
 import java.text.ParseException;
 
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
+import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
 import com.sap.sailing.domain.queclinkadapter.ServerAcknowledgement;
 
 public class ServerAcknowledgementImpl extends MessageImpl implements ServerAcknowledgement {
@@ -29,5 +30,10 @@ public class ServerAcknowledgementImpl extends MessageImpl implements ServerAckn
         
     public short getCountNumber() {
         return countNumber;
+    }
+
+    @Override
+    public <T> T accept(MessageVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

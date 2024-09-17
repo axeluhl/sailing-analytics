@@ -11,6 +11,7 @@ import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.IOStatus;
 import com.sap.sailing.domain.queclinkadapter.MessageType;
 import com.sap.sailing.domain.queclinkadapter.MessageType.Direction;
+import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
 import com.sap.sailing.domain.queclinkadapter.PositionRelatedReport;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -111,5 +112,10 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
     @Override
     public IOStatus getIoStatus() {
         return ioStatus;
+    }
+
+    @Override
+    public <T> T accept(MessageVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }
