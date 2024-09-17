@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -45,11 +46,15 @@ public class SensorFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
     protected SensorFixStore store;
-    private ClientSession clientSession;
+    private static ClientSession clientSession;
 
+    @BeforeClass
+    public static void setUpClass() {
+        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+    }
+    
     @Before
     public void setUp() throws UnknownHostException, MongoException {
-        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         newStore();
     }

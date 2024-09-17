@@ -44,7 +44,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 public class MetadataCollection extends MongoFixHandler {
     private static final Logger logger = Logger.getLogger(MetadataCollection.class.getName());
     private final MongoCollection<Document> metadataCollection;
-    private final HashMap<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
+    private final Map<DeviceIdentifier, MetadataUpdater> metadataUpdaters;
     private final WriteConcern writeConcern;
     private final ReadConcern readConcern;
 
