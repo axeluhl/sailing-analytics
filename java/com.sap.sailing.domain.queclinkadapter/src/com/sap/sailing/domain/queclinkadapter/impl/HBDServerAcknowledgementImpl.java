@@ -11,12 +11,12 @@ public class HBDServerAcknowledgementImpl extends HBDMessageImpl implements HBDS
     }
 
     public static HBDServerAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
-        return new HBDServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
-                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[1]));
+        return new HBDServerAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex(parameterList[0]),
+                MessageParserImpl.parseCountNumberHex(parameterList[1]));
     }
 
     @Override
     public String[] getParameters() {
-        return new String[] { QueclinkStreamParserImpl.formatProtocolVersionHex(getProtocolVersion()), QueclinkStreamParserImpl.formatCountNumberHex(getCountNumber()) };
+        return new String[] { MessageParserImpl.formatProtocolVersionHex(getProtocolVersion()), MessageParserImpl.formatCountNumberHex(getCountNumber()) };
     }
 }

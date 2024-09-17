@@ -15,19 +15,19 @@ public class HBDAcknowledgementImpl extends MessageWithDeviceOriginImpl implemen
     @Override
     public String[] getParameters() {
         return new String[] {
-                QueclinkStreamParserImpl.formatProtocolVersionHex(getProtocolVersion()),
+                MessageParserImpl.formatProtocolVersionHex(getProtocolVersion()),
                 getImei(),
                 getDeviceName(),
-                getSendTime() == null ? "" : QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(getSendTime()),
-                QueclinkStreamParserImpl.formatCountNumberHex(getCountNumber())
+                getSendTime() == null ? "" : MessageParserImpl.formatAsYYYYMMDDHHMMSS(getSendTime()),
+                MessageParserImpl.formatCountNumberHex(getCountNumber())
         };
     }
     
     public static HBDAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
-        return new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
-                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[4]),
+        return new HBDAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex(parameterList[0]),
+                MessageParserImpl.parseCountNumberHex(parameterList[4]),
                 /* imei */ parameterList[1],
                 /* deviceName */ parameterList[2],
-                /* sendTime */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[3]));
+                /* sendTime */ MessageParserImpl.parseTimeStamp(parameterList[3]));
     }
 }

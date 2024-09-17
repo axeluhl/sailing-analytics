@@ -58,29 +58,29 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
                             Double.parseDouble(parameterList[7+i*FIELDS_PER_FIX]), new DegreeBearingImpl(Double.parseDouble(parameterList[8+i*FIELDS_PER_FIX]))) : null,
                     /* altitude */ Util.hasLength(parameterList[9+i*FIELDS_PER_FIX]) ? new MeterDistance(Double.parseDouble(parameterList[9+i*FIELDS_PER_FIX])) : null,
                     Util.hasLength(parameterList[11+i*FIELDS_PER_FIX]) && Util.hasLength(parameterList[10+i*FIELDS_PER_FIX])?new DegreePosition(Double.parseDouble(parameterList[11+i*FIELDS_PER_FIX]), Double.parseDouble(parameterList[10+i*FIELDS_PER_FIX])):null,
-                    /* validity time */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[12+i*FIELDS_PER_FIX]),
+                    /* validity time */ MessageParserImpl.parseTimeStamp(parameterList[12+i*FIELDS_PER_FIX]),
                     /* mobileCountryCode */ Util.hasLength(parameterList[13+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[13+i*FIELDS_PER_FIX]):null,
                     /* mobileNetworkCode */ Util.hasLength(parameterList[14+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[14+i*FIELDS_PER_FIX]):null,
                     /* locationAreaCode */ Util.hasLength(parameterList[15+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[15+i*FIELDS_PER_FIX], 16):null,
                     /* cellId */ Util.hasLength(parameterList[16+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[16+i*FIELDS_PER_FIX], 16):null,
                     /* odometer */ Util.hasLength(parameterList[17+i*FIELDS_PER_FIX])?new MeterDistance(1000.0*Double.parseDouble(parameterList[17+i*FIELDS_PER_FIX])):null));
         }
-        return new FRIReportImpl(QueclinkStreamParserImpl.parseProtocolVersionHex(parameterList[0]),
+        return new FRIReportImpl(MessageParserImpl.parseProtocolVersionHex(parameterList[0]),
                 /* imei */ parameterList[1], /* deviceName */ parameterList[2],
                 /* reportId */ Util.hasLength(parameterList[3])?Byte.parseByte(parameterList[3]):null,
                 /* reportType */ Util.hasLength(parameterList[4])?Byte.parseByte(parameterList[4]):null,
                 positionRelatedReports.toArray(new PositionRelatedReport[positionRelatedReports.size()]),
                 /* batteryPercentage */ Util.hasLength(parameterList[6+numberOfFixes*FIELDS_PER_FIX])?Byte.parseByte(parameterList[6+numberOfFixes*FIELDS_PER_FIX]):null, ioStatus,
-                /* sendTime */ QueclinkStreamParserImpl.parseTimeStamp(parameterList[sendTimeIndex]),
-                QueclinkStreamParserImpl.parseCountNumberHex(parameterList[countNumberIndex]));
+                /* sendTime */ MessageParserImpl.parseTimeStamp(parameterList[sendTimeIndex]),
+                MessageParserImpl.parseCountNumberHex(parameterList[countNumberIndex]));
     }
 
     @Override
     public String[] getParameters() {
-        return new String[] { QueclinkStreamParserImpl.formatProtocolVersionHex(getProtocolVersion()), getImei(),
+        return new String[] { MessageParserImpl.formatProtocolVersionHex(getProtocolVersion()), getImei(),
                 getDeviceName(),
-                getSendTime() == null ? "" : QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(getSendTime()),
-                QueclinkStreamParserImpl.formatCountNumberHex(getCountNumber()) };
+                getSendTime() == null ? "" : MessageParserImpl.formatAsYYYYMMDDHHMMSS(getSendTime()),
+                MessageParserImpl.formatCountNumberHex(getCountNumber()) };
     }
 
     @Override

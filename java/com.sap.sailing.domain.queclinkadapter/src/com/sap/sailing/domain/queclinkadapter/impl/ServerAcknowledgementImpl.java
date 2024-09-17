@@ -14,7 +14,7 @@ public class ServerAcknowledgementImpl extends MessageImpl implements ServerAckn
     }
     
     public static ServerAcknowledgement createFromParameters(String[] parameterList) throws ParseException {
-        return new ServerAcknowledgementImpl(QueclinkStreamParserImpl.parseCountNumberHex(parameterList[0]));
+        return new ServerAcknowledgementImpl(MessageParserImpl.parseCountNumberHex(parameterList[0]));
     }
 
     @Override

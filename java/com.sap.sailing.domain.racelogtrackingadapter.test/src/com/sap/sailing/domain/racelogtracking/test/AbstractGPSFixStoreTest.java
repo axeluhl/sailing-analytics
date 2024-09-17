@@ -42,7 +42,7 @@ import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessionIdentifierWithGPSFixesDeserializer;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -62,7 +62,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected final  MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
     DeviceAndSessionIdentifierWithGPSFixesDeserializer deserializer =
             new MockDeviceAndSessionIdentifierWithGPSFixesDeserializer();
-    protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
+    protected final DeviceIdentifier device = new SmartphoneImeiIdentifierImpl("a");
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
     protected final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");

@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogDeviceMappings;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sse.common.MultiTimeRange;
@@ -34,7 +34,7 @@ public class DeviceMappingsAndSensorFixStoreLockingTest extends AbstractGPSFixSt
         final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
                 null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null, /* storePersistently */ true);
         final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
-        final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
+        final DeviceIdentifier device = new SmartphoneImeiIdentifierImpl("a");
         
         final CyclicBarrier barrier = new CyclicBarrier(2);
         final RegattaLog regattaLog = new RegattaLogImpl("regattalog");

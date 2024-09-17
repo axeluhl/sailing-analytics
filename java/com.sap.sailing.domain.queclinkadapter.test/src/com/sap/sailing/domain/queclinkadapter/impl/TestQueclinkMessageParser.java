@@ -38,15 +38,15 @@ public class TestQueclinkMessageParser {
     @Test
     public void testSimpleMessageString() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
+        final Message ackHBD = new HBDAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex("301303"), MessageParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
         final String ackHBDAsString = ackHBD.getMessageString();
-        assertEquals("+ACK:GTHBD,301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E$", ackHBDAsString);
+        assertEquals("+ACK:GTHBD,301303,860599004785994,,"+MessageParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E$", ackHBDAsString);
     }
     
     @Test
     public void testParsingSimpleHeartbeatAck() throws ParseException {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
+        final Message ackHBD = new HBDAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex("301303"), MessageParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
         final String ackHBDAsString = ackHBD.getMessageString();
         final Message parsedMessage = messageParser.parse(ackHBDAsString);
         assertNotNull(parsedMessage);
@@ -57,7 +57,7 @@ public class TestQueclinkMessageParser {
     
     @Test
     public void testParsingSimpleHeartbeatSack() throws ParseException {
-        final Message sackHBD = new HBDServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
+        final Message sackHBD = new HBDServerAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex("301303"), MessageParserImpl.parseCountNumberHex("033E"));
         final String sackHBDAsString = sackHBD.getMessageString();
         final Message parsedMessage = messageParser.parse(sackHBDAsString);
         assertNotNull(parsedMessage);
@@ -69,19 +69,19 @@ public class TestQueclinkMessageParser {
     @Test
     public void simplePatternTestForACKMessage() {
         final TimePoint now = TimePoint.now();
-        final Message ackHBD = new HBDAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
-        final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(ackHBD.getMessageString());
-        assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+ackHBD.getMessageString(), matcher.matches());
+        final Message ackHBD = new HBDAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex("301303"), MessageParserImpl.parseCountNumberHex("033E"), "860599004785994", null, now);
+        final Matcher matcher = MessageParserImpl.messagePattern.matcher(ackHBD.getMessageString());
+        assertTrue("Pattern "+MessageParserImpl.messagePattern.toString()+" doesn't match "+ackHBD.getMessageString(), matcher.matches());
         assertEquals("+ACK:", matcher.group(1));
         assertEquals("HBD", matcher.group(8));
-        assertEquals("301303,860599004785994,,"+QueclinkStreamParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E", matcher.group(9));
+        assertEquals("301303,860599004785994,,"+MessageParserImpl.formatAsYYYYMMDDHHMMSS(now)+",033E", matcher.group(9));
     }
 
     @Test
     public void simplePatternTestForSACKHeartbeatMessage() {
-        final Message sackHBD = new HBDServerAcknowledgementImpl(QueclinkStreamParserImpl.parseProtocolVersionHex("301303"), QueclinkStreamParserImpl.parseCountNumberHex("033E"));
-        final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(sackHBD.getMessageString());
-        assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+sackHBD.getMessageString(), matcher.matches());
+        final Message sackHBD = new HBDServerAcknowledgementImpl(MessageParserImpl.parseProtocolVersionHex("301303"), MessageParserImpl.parseCountNumberHex("033E"));
+        final Matcher matcher = MessageParserImpl.messagePattern.matcher(sackHBD.getMessageString());
+        assertTrue("Pattern "+MessageParserImpl.messagePattern.toString()+" doesn't match "+sackHBD.getMessageString(), matcher.matches());
         assertEquals("+SACK:", matcher.group(1));
         assertEquals("HBD", matcher.group(8));
         assertEquals("301303,033E", matcher.group(9));
@@ -90,8 +90,8 @@ public class TestQueclinkMessageParser {
     @Test
     public void simplePatternTestForBasicSACKMessage() {
         final String sackMessage = "+SACK:11F0$";
-        final Matcher matcher = QueclinkStreamParserImpl.messagePattern.matcher(sackMessage);
-        assertTrue("Pattern "+QueclinkStreamParserImpl.messagePattern.toString()+" doesn't match "+sackMessage, matcher.matches());
+        final Matcher matcher = MessageParserImpl.messagePattern.matcher(sackMessage);
+        assertTrue("Pattern "+MessageParserImpl.messagePattern.toString()+" doesn't match "+sackMessage, matcher.matches());
         assertEquals("+SACK:", matcher.group(1));
         assertEquals(null, matcher.group(8));
         assertEquals("11F0", matcher.group(9));
@@ -108,7 +108,7 @@ public class TestQueclinkMessageParser {
         final Position expectedPosition = new DegreePosition(52.161122, -2.873013);
         assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
         assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
-        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710164610"), friReport.getPositionRelatedReports()[0].getValidityTime());
+        assertEquals(MessageParserImpl.parseTimeStamp("20240710164610"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
     
     @Test
@@ -124,7 +124,7 @@ public class TestQueclinkMessageParser {
         assertEquals(-43.4, friReport.getPositionRelatedReports()[0].getAltitude().getMeters(), EPSILON);
         assertEquals(0.2, friReport.getPositionRelatedReports()[0].getCogAndSog().getKilometersPerHour(), EPSILON);
         assertEquals(0, friReport.getPositionRelatedReports()[0].getCogAndSog().getBearing().getDegrees(), EPSILON);
-        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20190923022045"), friReport.getPositionRelatedReports()[0].getValidityTime());
+        assertEquals(MessageParserImpl.parseTimeStamp("20190923022045"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
     
     @Test
@@ -139,7 +139,7 @@ public class TestQueclinkMessageParser {
         assertEquals(expectedPosition.getLatDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLatDeg(), EPSILON);
         assertEquals(expectedPosition.getLngDeg(), friReport.getPositionRelatedReports()[0].getPosition().getLngDeg(), EPSILON);
         assertNull(friReport.getPositionRelatedReports()[0].getCogAndSog());
-        assertEquals(QueclinkStreamParserImpl.parseTimeStamp("20240710153241"), friReport.getPositionRelatedReports()[0].getValidityTime());
+        assertEquals(MessageParserImpl.parseTimeStamp("20240710153241"), friReport.getPositionRelatedReports()[0].getValidityTime());
     }
     
     @Test

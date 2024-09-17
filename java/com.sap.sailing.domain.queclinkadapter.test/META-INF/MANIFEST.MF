@@ -11,3 +11,4 @@ Import-Package: com.sap.sailing.domain.common.impl,
  com.sap.sse.common.util,
  org.hamcrest;version="[2.2.0,3.0.0]",
  org.junit;version="[4.13.0,5.0.0]"
+Require-Bundle: com.sap.sse.common

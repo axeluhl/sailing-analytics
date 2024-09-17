@@ -1,16 +1,14 @@
-package com.sap.sailing.domain.racelog.tracking.test.mock;
+package com.sap.sailing.domain.racelogtracking.impl;
 
-import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
 
 
-public class SmartphoneImeiIdentifier implements DeviceIdentifier {
+public class SmartphoneImeiIdentifierImpl implements SmartphoneImeiIdentifier {
     private static final long serialVersionUID = -1830014229310181702L;
-
-    public static final String TYPE = "smartphoneImei";
 
     private final String imei;
 
-    public SmartphoneImeiIdentifier(String imei) {
+    public SmartphoneImeiIdentifierImpl(String imei) {
         this.imei = imei;
     }
 
@@ -30,8 +28,8 @@ public class SmartphoneImeiIdentifier implements DeviceIdentifier {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SmartphoneImeiIdentifier) {
-            return ((SmartphoneImeiIdentifier) obj).imei.equals(imei);
+        if (obj instanceof SmartphoneImeiIdentifierImpl) {
+            return ((SmartphoneImeiIdentifierImpl) obj).imei.equals(imei);
         }
         return false;
     }

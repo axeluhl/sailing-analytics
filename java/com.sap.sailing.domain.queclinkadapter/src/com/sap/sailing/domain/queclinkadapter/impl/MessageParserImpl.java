@@ -28,8 +28,8 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  *
  */
-public class QueclinkStreamParserImpl implements MessageParser {
-    private final static Logger logger = Logger.getLogger(QueclinkStreamParserImpl.class.getName());
+public class MessageParserImpl implements MessageParser {
+    private final static Logger logger = Logger.getLogger(MessageParserImpl.class.getName());
     private static final SimpleDateFormat timeStampFormat = new SimpleDateFormat("yyyyMMddhhmmss");
     static final Pattern messagePattern = Pattern.compile("((AT\\+)|(\\+ACK:)|(\\+RESP:)|(\\+BUFF:)|(\\+SACK:))(GT([A-Z]{3})[=,])?(.*)\\$");
     
