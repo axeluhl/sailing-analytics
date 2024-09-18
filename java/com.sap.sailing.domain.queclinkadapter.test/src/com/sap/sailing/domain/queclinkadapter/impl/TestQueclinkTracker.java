@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
 
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +44,7 @@ public class TestQueclinkTracker {
     public void setUp() throws MongoException, IOException {
         dropPersistedData();
         newStore();
-        tracker = new QueclinkTCPTracker(/* pick a port */ 0, Charset.forName("UTF-8"), store);
+        tracker = new QueclinkTCPTracker(/* pick a port */ 0, store);
     }
 
     private void newStore() {

@@ -8,7 +8,10 @@ import com.sap.sailing.domain.queclinkadapter.impl.ByteStreamToMessageStreamConv
 /**
  * A stateful converter that converts characters passed as a {@link CharBuffer} into {@link Message} objects. All
  * characters are consumed from the buffer. The buffer does not need to end with a complete message. The excess
- * characters are stored in this instance and are prepended in front of the next buffer's contents.
+ * characters are stored in this instance and are prepended in front of the next buffer's contents.<p>
+ * 
+ * Internally, a {@link StringBuilder} is used to keep track of excess characters not yet consumed because of
+ * incomplete messages.
  * 
  * @author Axel Uhl (d043530)
  *

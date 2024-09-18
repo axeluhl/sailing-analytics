@@ -24,14 +24,23 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
 
 /**
- * Listens on a given port for incoming TCP connections, using an asynchronous server socket. When a connection is
- * established, an asynchronous socket channel is used for reading data from that socket until the socket is closed. The
- * data read is assumed to consist of Queclink GL300 messages. When the device's IMEI is found in any of the messages
- * received, the asynchronous socket channel through which it was received is associated to that IMEI. This way, when
- * clients would like to send messages to the device, they can do so as long as the socket is still connected.<p>
+ * Receives Queclink GL300 messages over TCP socket connections, parses them and sends the results to a
+ * {@link SensorFixStore} so that they will be stored and forwarded to race trackers registered on that store for fixes
+ * coming from matching devices. Once messages have been received from a device and the socket connection with that
+ * device is still open, clients can use {@link #sendToDevice(SmartphoneImeiIdentifier, Message)} to send messages
+ * to that device, for example to change the device's configuration.
+ * <p>
  * 
- * Calling the {@link #stop} method will close all existing socket connections and will stop listening for new
- * incoming connections. After that, this tracker cannot be used anymore.
+ * Listens on a given port for incoming TCP connections (use {@code 0} to let the networking sub-system pick a free
+ * one), using an asynchronous server socket. When a connection is established, an asynchronous socket channel is used
+ * for reading data from that socket until the socket is closed. The data read is assumed to consist of Queclink GL300
+ * messages. When the device's IMEI is found in any of the messages received, the asynchronous socket channel through
+ * which it was received is associated to that IMEI. This way, when clients would like to send messages to the device,
+ * they can do so as long as the socket is still connected.
+ * <p>
+ * 
+ * Calling the {@link #stop} method will close all existing socket connections and will stop listening for new incoming
+ * connections. After that, this tracker cannot be used anymore.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -45,6 +54,16 @@ public class QueclinkTCPTracker {
     private final Charset charset;
     private volatile boolean stopped;
     private final static PositionRelatedReportToGPSFixConverter gpsFixFactory = new PositionRelatedReportToGPSFixConverter();
+
+    /**
+     * Initializes a tracker using the {@code ISO-8859-1} charset as a default (the specification talks about only
+     * printable ASCII characters being used; ISO-8859-1 seems to come closest here).
+     * 
+     * @param port when {@code 0}, any available port will be chosen; it can be queries using the {@link #getPort} method.
+     */
+    public QueclinkTCPTracker(int port, SensorFixStore sensorFixStore) throws IOException {
+        this(port, Charset.forName("ISO-8859-1"), sensorFixStore);
+    }
     
     /**
      * @param port when {@code 0}, any available port will be chosen; it can be queries using the {@link #getPort} method.
@@ -62,6 +81,11 @@ public class QueclinkTCPTracker {
         return ((InetSocketAddress) serverSocketChannel.getLocalAddress()).getPort();
     }
     
+    /**
+     * Sends the {@code message} to the device identified by {@code deviceIdentifier}; this only works if messages
+     * have already been received from that device by this tracker, and the socket connection is still open. Otherwise,
+     * an {@link IllegalStateException} will be thrown.
+     */
     public void sendToDevice(SmartphoneImeiIdentifier deviceIdentifier, Message message) {
         final String imei = deviceIdentifier.getImei();
         final AsynchronousSocketChannel channel = socketChannelsByImei.get(imei);
@@ -139,6 +163,9 @@ public class QueclinkTCPTracker {
         });
     }
 
+    /**
+     * Stops this tracker, closes all socket connections and stops listening on the TCP port identified by {@link #getPort()}.
+     */
     public void stop() throws IOException {
         stopped = true;
         for (final AsynchronousSocketChannel socketChannel : socketChannelsByImei.values()) {
