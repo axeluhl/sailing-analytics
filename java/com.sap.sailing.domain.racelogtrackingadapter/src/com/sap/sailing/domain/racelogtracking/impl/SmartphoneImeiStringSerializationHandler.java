@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelog.tracking.test.mock;
+package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 

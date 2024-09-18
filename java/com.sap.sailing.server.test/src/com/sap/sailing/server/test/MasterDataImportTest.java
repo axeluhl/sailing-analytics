@@ -131,7 +131,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFa
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DummyTrackedRace;
@@ -354,7 +354,7 @@ public class MasterDataImportTest {
         // Add some racelogtracking stuff
         TimePoint logTimePoint3 = new MillisecondsTimePoint(1372489210000L);
         TimePoint logTimePoint4 = new MillisecondsTimePoint(1372489200020L);
-        DeviceIdentifier deviceIdentifier = new SmartphoneImeiIdentifier("a");
+        DeviceIdentifier deviceIdentifier = new SmartphoneImeiIdentifierImpl("a");
         RegattaLogDeviceCompetitorMappingEvent mappingEvent = new RegattaLogDeviceCompetitorMappingEventImpl(
                 logTimePoint4, logTimePoint4, author, UUID.randomUUID(), competitor, deviceIdentifier, logTimePoint,
                 logTimePoint3);
@@ -367,7 +367,7 @@ public class MasterDataImportTest {
         DeviceIdentifier deviceBatch2 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "y", 5000);
         DeviceIdentifier deviceBatch3 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "z", 5001);
         // Add sensor fix
-        DeviceIdentifier deviceIdentifier2 = new SmartphoneImeiIdentifier("b");
+        DeviceIdentifier deviceIdentifier2 = new SmartphoneImeiIdentifierImpl("b");
         RegattaLogDeviceMappingEvent<Competitor> bravoMappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
                 logTimePoint4, author, competitor, deviceIdentifier2, logTimePoint,
                 logTimePoint3);
@@ -516,7 +516,7 @@ public class MasterDataImportTest {
 
     private DeviceIdentifier addDeviceMappingWithFixes(RacingEventService sourceService, Regatta regatta, CompetitorImpl competitor,
             TimePoint logTimePoint, TimePoint logTimePoint3, TimePoint logTimePoint4, String imei, int numFixes) {
-        DeviceIdentifier deviceIdentifier = new SmartphoneImeiIdentifier(imei);
+        DeviceIdentifier deviceIdentifier = new SmartphoneImeiIdentifierImpl(imei);
         RegattaLogDeviceCompetitorMappingEvent mappingEvent = new RegattaLogDeviceCompetitorMappingEventImpl(
                 logTimePoint4, logTimePoint4, author, UUID.randomUUID(), competitor, deviceIdentifier, logTimePoint,
                 logTimePoint3);

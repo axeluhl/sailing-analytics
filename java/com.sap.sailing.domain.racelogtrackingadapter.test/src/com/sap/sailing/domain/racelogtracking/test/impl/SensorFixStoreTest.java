@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -28,7 +29,7 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixSt
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
@@ -42,14 +43,18 @@ public class SensorFixStoreTest {
     private static final double FIX_RIDE_HEIGHT = 1337.0;
     private static final double FIX_RIDE_HEIGHT2 = 1338.0;
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
-    protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-    protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+    protected final DeviceIdentifier device = new SmartphoneImeiIdentifierImpl("a");
+    protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifierImpl("b");
     protected SensorFixStore store;
-    private ClientSession clientSession;
+    private static ClientSession clientSession;
 
+    @BeforeClass
+    public static void setUpClass() {
+        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+    }
+    
     @Before
     public void setUp() throws UnknownHostException, MongoException {
-        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         dropPersistedData();
         newStore();
     }

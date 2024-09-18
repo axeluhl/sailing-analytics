@@ -153,6 +153,7 @@
         <module>com.sap.sailing.domain.igtimiadapter</module>
         <module>com.sap.sailing.domain.igtimiadapter.gateway</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
+        <module>com.sap.sailing.domain.queclinkadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
         <module>com.sap.sailing.domain.swisstimingadapter</module>
@@ -220,6 +221,7 @@
         <module>com.sap.sailing.datamining.test</module>
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter.test</module>
+        <module>com.sap.sailing.domain.queclinkadapter.test</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
         <module>com.sap.sailing.xrr.resultimport.test</module>
         <module>com.sap.sailing.domain.shared.android.test</module>

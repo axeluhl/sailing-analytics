@@ -306,6 +306,7 @@
 <setEntry value="com.sap.sailing.landscape.common@default:default"/>
 <setEntry value="com.sap.sailing.landscape.ui@default:default"/>
 <setEntry value="com.sap.sailing.hanaexport@5:true"/>
+<setEntry value="com.sap.sailing.domain.queclinkadapter@5:true"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
@@ -356,6 +357,8 @@
 <setEntry value="com.sap.sailing.server.gateway@5:true"/>
 <setEntry value="com.sap.sailing.server.gateway.interfaces@default:default"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
+=======
+>>>>>>> main
 <setEntry value="com.sap.sailing.declination@default:default"/>
 <setEntry value="com.sap.sailing.domain.persistence@default:default"/>
 <setEntry value="com.sap.sailing.domain.swisstimingadapter@5:true"/>
@@ -421,6 +424,7 @@
 <setEntry value="com.sap.sailing.landscape.common@default:default"/>
 <setEntry value="com.sap.sailing.landscape.ui@default:default"/>
 <setEntry value="com.sap.sailing.hanaexport@5:true"/>
+<setEntry value="com.sap.sailing.domain.queclinkadapter@5:true"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
