@@ -18,17 +18,16 @@ import com.sap.sailing.domain.queclinkadapter.ByteStreamToMessageStreamConverter
 import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
-import com.sap.sailing.domain.queclinkadapter.impl.AbstractMessageVisitor;
-import com.sap.sailing.domain.queclinkadapter.impl.PositionRelatedReportToGPSFixConverter;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
 
 /**
- * Receives Queclink GL300 messages over TCP socket connections, parses them and sends the results to a
- * {@link SensorFixStore} so that they will be stored and forwarded to race trackers registered on that store for fixes
- * coming from matching devices. Once messages have been received from a device and the socket connection with that
- * device is still open, clients can use {@link #sendToDevice(SmartphoneImeiIdentifier, Message)} to send messages
- * to that device, for example to change the device's configuration.
+ * Receives Queclink GL300 messages over TCP socket connections, parses them and sends position fixes such as from a
+ * {@link FRIReport} message the results to a {@link SensorFixStore} so that they will be stored and forwarded to race
+ * trackers registered on that store for fixes coming from matching devices. Once messages have been received from a
+ * device and the socket connection with that device is still open, clients can use
+ * {@link #sendToDevice(SmartphoneImeiIdentifier, Message)} to send messages to that device, for example to change the
+ * device's configuration.
  * <p>
  * 
  * Listens on a given port for incoming TCP connections (use {@code 0} to let the networking sub-system pick a free
@@ -45,7 +44,7 @@ import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
  * @author Axel Uhl (d043530)
  *
  */
-public class QueclinkTCPTracker {
+public class QueclinkTCPTracker implements MessageToDeviceSender {
     private static final Logger logger = Logger.getLogger(QueclinkTCPTracker.class.getName());
 
     private final AsynchronousServerSocketChannel serverSocketChannel;
@@ -53,7 +52,6 @@ public class QueclinkTCPTracker {
     private final SensorFixStore sensorFixStore;
     private final Charset charset;
     private volatile boolean stopped;
-    private final static PositionRelatedReportToGPSFixConverter gpsFixFactory = new PositionRelatedReportToGPSFixConverter();
 
     /**
      * Initializes a tracker using the {@code ISO-8859-1} charset as a default (the specification talks about only
@@ -86,6 +84,7 @@ public class QueclinkTCPTracker {
      * have already been received from that device by this tracker, and the socket connection is still open. Otherwise,
      * an {@link IllegalStateException} will be thrown.
      */
+    @Override
     public void sendToDevice(SmartphoneImeiIdentifier deviceIdentifier, Message message) {
         final String imei = deviceIdentifier.getImei();
         final AsynchronousSocketChannel channel = socketChannelsByImei.get(imei);
@@ -103,14 +102,8 @@ public class QueclinkTCPTracker {
                 return "Exception trying to compute log message: "+e.getMessage();
             }
         });
-        final MessageVisitor<Void> storeFixVisitor = new AbstractMessageVisitor<Void>() {
-            @Override
-            public Void visit(FRIReport friReport) {
-                socketChannelsByImei.putIfAbsent(friReport.getImei(), socketChannel);
-                gpsFixFactory.ingestFixesToStore(sensorFixStore, friReport);
-                return null;
-            }
-        };
+        final MessageVisitor<Void> storeFixVisitor = new MessageVisitorWithSensorFixStore<AsynchronousSocketChannel>(
+                sensorFixStore, this, socketChannelsByImei, socketChannel);
         final ByteBuffer buf = ByteBuffer.allocateDirect(8192);
         final ByteStreamToMessageStreamConverter converter = ByteStreamToMessageStreamConverter.create();
         final CompletionHandler<Integer, Integer> connectionHandler = new CompletionHandler<Integer, Integer>() {

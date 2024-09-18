@@ -16,8 +16,6 @@ import com.sap.sailing.domain.queclinkadapter.ByteStreamToMessageStreamConverter
 import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
-import com.sap.sailing.domain.queclinkadapter.impl.AbstractMessageVisitor;
-import com.sap.sailing.domain.queclinkadapter.impl.PositionRelatedReportToGPSFixConverter;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
 import com.sap.sailing.udpconnector.UDPMessage;
@@ -27,10 +25,31 @@ import com.sap.sailing.udpconnector.UDPReceiver;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
-public class QueclinkUDPTracker implements UDPMessageListener<QueclinkUDPTracker.MessageAsUDPMessage> {
+/**
+ * Receives Queclink GL300 messages via UCP packets, parses them and sends position fixes such as from a
+ * {@link FRIReport} message to a {@link SensorFixStore} so that they will be stored and forwarded to race trackers
+ * registered on that store for fixes coming from matching devices. Once messages have been received from a device and
+ * the device is still using the same UDP port that it sent from, clients can use
+ * {@link #sendToDevice(SmartphoneImeiIdentifier, Message)} to send messages to that device, for example to change the
+ * device's configuration. This requires that the device's IP address is reachable via UDP from the server.
+ * <p>
+ * 
+ * Listens on a given port for incoming UDP packets (use {@code 0} to let the networking sub-system pick a free one).
+ * When a packet is received, the data is read and is assumed to consist of Queclink GL300 messages. When the device's
+ * IMEI is found in any of the messages received, the UDP datagram socket through which it was received is associated to
+ * that IMEI. This way, when clients would like to send messages to the device, they can do so as long as the socket is
+ * still connected.
+ * <p>
+ * 
+ * Calling the {@link #stop} method will close all existing socket connections and will stop listening for new incoming
+ * connections. After that, this tracker cannot be used anymore.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class QueclinkUDPTracker implements UDPMessageListener<QueclinkUDPTracker.MessageAsUDPMessage>, MessageToDeviceSender {
     private static final Logger logger = Logger.getLogger(QueclinkUDPTracker.class.getName());
 
-    private final static PositionRelatedReportToGPSFixConverter gpsFixFactory = new PositionRelatedReportToGPSFixConverter();
     private final UDPReceiver<QueclinkUDPTracker.MessageAsUDPMessage, QueclinkUDPTracker> udpReceiver;
     private final Charset charset;
     private ByteStreamToMessageStreamConverter converter;
@@ -112,6 +131,7 @@ public class QueclinkUDPTracker implements UDPMessageListener<QueclinkUDPTracker
      * have already been received from that device by this tracker, and the socket connection is still open. Otherwise,
      * an {@link IllegalStateException} will be thrown.
      */
+    @Override
     public void sendToDevice(SmartphoneImeiIdentifier deviceIdentifier, Message message) throws IOException {
         final String imei = deviceIdentifier.getImei();
         final Pair<DatagramSocket, SocketAddress> socketAddress = socketAddressesByImei.get(imei);
@@ -128,14 +148,8 @@ public class QueclinkUDPTracker implements UDPMessageListener<QueclinkUDPTracker
     @Override
     public void received(MessageAsUDPMessage message) {
         logger.fine(()->"Received a message with "+Util.size(message.getMessages())+" Queclink messages from "+message.getSender());
-        final MessageVisitor<Void> storeFixVisitor = new AbstractMessageVisitor<Void>() {
-            @Override
-            public Void visit(FRIReport friReport) {
-                socketAddressesByImei.putIfAbsent(friReport.getImei(), new Pair<>(message.getSocket(), message.getSender()));
-                gpsFixFactory.ingestFixesToStore(sensorFixStore, friReport);
-                return null;
-            }
-        };
+        final MessageVisitor<Void> storeFixVisitor = new MessageVisitorWithSensorFixStore<Pair<DatagramSocket, SocketAddress>>(
+                sensorFixStore, this, socketAddressesByImei, new Pair<>(message.getSocket(), message.getSender()));
         message.getMessages().forEach(m->m.accept(storeFixVisitor));
     }
 

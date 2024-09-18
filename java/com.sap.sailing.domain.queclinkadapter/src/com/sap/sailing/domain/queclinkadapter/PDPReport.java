@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.queclinkadapter;
 
-public interface PDPReport extends Report {
-    MessageFactory FACTORY = null;
+import com.sap.sailing.domain.queclinkadapter.impl.PDPReportImpl;
+
+public interface PDPReport extends MessageWithDeviceOrigin, Report {
+    MessageFactory FACTORY = PDPReportImpl::createFromParameters;
 }

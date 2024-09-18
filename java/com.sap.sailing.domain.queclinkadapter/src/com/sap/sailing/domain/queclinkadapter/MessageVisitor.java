@@ -10,4 +10,5 @@ public interface MessageVisitor<T> {
 
     T visit(ServerAcknowledgement serverAcknowledgement);
 
+    T visit(PDPReport pdpReportImpl);
 }
