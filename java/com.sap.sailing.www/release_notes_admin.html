@@ -28,6 +28,17 @@
             <li>When removing the denotation for smartphone tracking from a race, tracking of that race will
                 now be stopped and the tracked race will be removed. This ensures consistency when later
                 the denotation should be added again.</li>
+            <li>A file importer for the Queclink GL300 format (see, e.g.,
+                <a target="_" href="https://static.sapsailing.com/GL300%20@Track%20Air%20Interface%20Protocol_R13.03.pdf">here</a>)
+                has been added. This way, you can now create a "smartphone-tracked" race and import a file that contains
+                messages recorded from GL300 devices. Those messages look like this:
+                <pre>
+                  +BUFF:GTFRI,301201,860599002480051,,0,0,4,1,,,,-2.872803,52.161116,20240710154359,,,,,,1,,,,-2.872803,52.161116,20240710154404,,,,,,1,,,,-2.872803,52.161116,20240710154409,,,,,,1,,,,-2.872803,52.161116,20240710154414,,,,,,60,,21B0$
+                </pre>
+                The importer naturally supports out of order delivery. The position-related data doesn't have to be
+                ordered by increasing time stamps. This way, you can also activate buffering in your GL300 such that
+                when the tracker comes online again, live data transmission takes precedence over transmitting the
+                data buffered.</li>
           </ul>
           <h2 class="articleSubheadline">August 2024</h2>
           <ul class="bulletList">
