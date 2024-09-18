@@ -12,5 +12,6 @@ Require-Bundle: com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sailing.domain.racelogtrackingadapter,
- com.sap.sailing.server.trackfiles
+ com.sap.sailing.server.trackfiles,
+ com.sap.sailing.udpconnector
 Import-Package: org.osgi.framework;version="[1.10.0,2.0.0]"
