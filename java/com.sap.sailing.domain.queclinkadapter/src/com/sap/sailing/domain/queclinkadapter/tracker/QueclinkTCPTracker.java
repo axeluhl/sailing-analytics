@@ -18,12 +18,10 @@ import com.sap.sailing.domain.queclinkadapter.ByteStreamToMessageStreamConverter
 import com.sap.sailing.domain.queclinkadapter.FRIReport;
 import com.sap.sailing.domain.queclinkadapter.Message;
 import com.sap.sailing.domain.queclinkadapter.MessageVisitor;
-import com.sap.sailing.domain.queclinkadapter.PositionRelatedReport;
 import com.sap.sailing.domain.queclinkadapter.impl.AbstractMessageVisitor;
 import com.sap.sailing.domain.queclinkadapter.impl.PositionRelatedReportToGPSFixConverter;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 
 /**
  * Listens on a given port for incoming TCP connections, using an asynchronous server socket. When a connection is
@@ -33,7 +31,7 @@ import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
  * clients would like to send messages to the device, they can do so as long as the socket is still connected.<p>
  * 
  * Calling the {@link #stop} method will close all existing socket connections and will stop listening for new
- * incoming connections.
+ * incoming connections. After that, this tracker cannot be used anymore.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -45,15 +43,23 @@ public class QueclinkTCPTracker {
     private final ConcurrentMap<String, AsynchronousSocketChannel> socketChannelsByImei;
     private final SensorFixStore sensorFixStore;
     private final Charset charset;
+    private volatile boolean stopped;
     private final static PositionRelatedReportToGPSFixConverter gpsFixFactory = new PositionRelatedReportToGPSFixConverter();
     
+    /**
+     * @param port when {@code 0}, any available port will be chosen; it can be queries using the {@link #getPort} method.
+     */
     public QueclinkTCPTracker(int port, Charset charset, SensorFixStore sensorFixStore) throws IOException {
         this.sensorFixStore = sensorFixStore;
         this.charset = charset;
         socketChannelsByImei = new ConcurrentHashMap<>();
         serverSocketChannel = AsynchronousServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(port));
-        handleAccept(port);
+        handleAccept(getPort());
+    }
+    
+    public int getPort() throws IOException {
+        return ((InetSocketAddress) serverSocketChannel.getLocalAddress()).getPort();
     }
     
     public void sendToDevice(SmartphoneImeiIdentifier deviceIdentifier, Message message) {
@@ -66,16 +72,18 @@ public class QueclinkTCPTracker {
     }
     
     private void handleConnection(final AsynchronousSocketChannel socketChannel, final int port) {
+        logger.info(()->{
+            try {
+                return "Received connection on port "+getPort()+" from remote address "+socketChannel.getRemoteAddress();
+            } catch (IOException e) {
+                return "Exception trying to compute log message: "+e.getMessage();
+            }
+        });
         final MessageVisitor<Void> storeFixVisitor = new AbstractMessageVisitor<Void>() {
             @Override
             public Void visit(FRIReport friReport) {
                 socketChannelsByImei.putIfAbsent(friReport.getImei(), socketChannel);
-                final SmartphoneImeiIdentifier deviceIdentifier = new SmartphoneImeiIdentifierImpl(friReport.getImei());
-                for (final PositionRelatedReport prr : friReport.getPositionRelatedReports()) {
-                    if (prr.getPosition() != null) {
-                        sensorFixStore.storeFix(deviceIdentifier, gpsFixFactory.createGPSFixFromPositionRelatedReport(prr));
-                    }
-                }
+                gpsFixFactory.ingestFixesToStore(sensorFixStore, friReport);
                 return null;
             }
         };
@@ -87,10 +95,15 @@ public class QueclinkTCPTracker {
                 if (result != -1) {
                     buf.flip();
                     try {
-                        converter.convert(charset.decode(buf)).forEach(message->message.accept(storeFixVisitor));
+                        converter.convert(charset.decode(buf)).forEach(message->{
+                            logger.fine(()->"Processing message "+message);
+                            message.accept(storeFixVisitor);
+                        });
                     } catch (ParseException e) {
                         logger.log(Level.SEVERE, "Error trying to convert messages receive through TCP on port "+port, e);
                     }
+                    buf.clear();
+                    socketChannel.read(buf, /* attachment */ null, this);
                 } else {
                     // EOF reached; close the channel
                     try {
@@ -106,7 +119,7 @@ public class QueclinkTCPTracker {
                 logger.log(Level.SEVERE, "Error trying to read from TCP connection on port "+port, exc);
             }
         };
-        socketChannel.read(buf, /* attachment */ null, connectionHandler);
+        socketChannel.read(buf, /* attachment */ port, connectionHandler);
     }
 
     private void handleAccept(int port) {
@@ -119,12 +132,15 @@ public class QueclinkTCPTracker {
 
             @Override
             public void failed(Throwable exc, Integer port) {
-                logger.log(Level.SEVERE, "Error trying to accept TCP connection on port "+port, exc);
+                if (!stopped) {
+                    logger.log(Level.SEVERE, "Error trying to accept TCP connection on port "+port, exc);
+                }
             }
         });
     }
 
     public void stop() throws IOException {
+        stopped = true;
         for (final AsynchronousSocketChannel socketChannel : socketChannelsByImei.values()) {
             try {
                 socketChannel.close();

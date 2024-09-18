@@ -19,7 +19,7 @@ public interface ByteStreamToMessageStreamConverter {
     }
     
     /**
-     * The buffer {@code buf} is read from using {@link CharBuffer#get(char[])} with a {@code char[]}
+     * The buffer {@code buf} is read from, using {@link CharBuffer#get(char[])} with a {@code char[]}
      * the size of the buffer's {@link CharBuffer#limit() limit}, thus consuming all characters from
      * the buffer.
      */

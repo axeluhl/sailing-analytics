@@ -53,7 +53,7 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
         }
         final List<PositionRelatedReport> positionRelatedReports = new ArrayList<>();
         for (int i=0; i<numberOfFixes; i++) {
-            positionRelatedReports.add(new PositionRelatedReportImpl(
+            final PositionRelatedReportImpl positionRelatedReport = new PositionRelatedReportImpl(
                     /* hdop */ Util.hasLength(parameterList[6+i*FIELDS_PER_FIX])?Byte.parseByte(parameterList[6+i*FIELDS_PER_FIX]):null,
                     Util.hasLength(parameterList[7+i*FIELDS_PER_FIX]) && Util.hasLength(parameterList[8+i*FIELDS_PER_FIX]) ? new KilometersPerHourSpeedWithBearingImpl(
                             Double.parseDouble(parameterList[7+i*FIELDS_PER_FIX]), new DegreeBearingImpl(Double.parseDouble(parameterList[8+i*FIELDS_PER_FIX]))) : null,
@@ -64,7 +64,10 @@ public class FRIReportImpl extends MessageWithDeviceOriginImpl implements FRIRep
                     /* mobileNetworkCode */ Util.hasLength(parameterList[14+i*FIELDS_PER_FIX])?Short.parseShort(parameterList[14+i*FIELDS_PER_FIX]):null,
                     /* locationAreaCode */ Util.hasLength(parameterList[15+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[15+i*FIELDS_PER_FIX], 16):null,
                     /* cellId */ Util.hasLength(parameterList[16+i*FIELDS_PER_FIX])?Integer.parseInt(parameterList[16+i*FIELDS_PER_FIX], 16):null,
-                    /* odometer */ Util.hasLength(parameterList[17+i*FIELDS_PER_FIX])?new MeterDistance(1000.0*Double.parseDouble(parameterList[17+i*FIELDS_PER_FIX])):null));
+                    /* odometer */ Util.hasLength(parameterList[17+i*FIELDS_PER_FIX])?new MeterDistance(1000.0*Double.parseDouble(parameterList[17+i*FIELDS_PER_FIX])):null);
+            if (positionRelatedReport.getPosition() != null && positionRelatedReport.getValidityTime() != null) {
+                positionRelatedReports.add(positionRelatedReport);
+            }
         }
         return new FRIReportImpl(MessageParserImpl.parseProtocolVersionHex(parameterList[0]),
                 /* imei */ parameterList[1], /* deviceName */ parameterList[2],

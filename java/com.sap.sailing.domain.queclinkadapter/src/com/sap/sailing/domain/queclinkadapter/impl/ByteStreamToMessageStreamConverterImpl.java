@@ -23,14 +23,16 @@ public class ByteStreamToMessageStreamConverterImpl implements ByteStreamToMessa
         final int size = buf.limit();
         final char[] readFromBuffer = new char[size];
         buf.get(readFromBuffer);
-        buf.clear();
         buffer.append(readFromBuffer);
         final List<Message> messages = new ArrayList<>();
-        int previousTerminator = 0;
+        int previousTerminator = -1;
         int nextTerminator;
-        while ((nextTerminator=buffer.indexOf(TERMINATOR, previousTerminator)) != -1) {
-            messages.add(messageParser.parse(buffer.substring(previousTerminator, nextTerminator+1)));
+        while ((nextTerminator=buffer.indexOf(TERMINATOR, previousTerminator+1)) != -1) {
+            messages.add(messageParser.parse(buffer.substring(previousTerminator+1, nextTerminator+1)));
             previousTerminator = nextTerminator;
+        }
+        if (previousTerminator != -1) {
+            buffer.delete(0, previousTerminator+1);
         }
         return messages;
     }
