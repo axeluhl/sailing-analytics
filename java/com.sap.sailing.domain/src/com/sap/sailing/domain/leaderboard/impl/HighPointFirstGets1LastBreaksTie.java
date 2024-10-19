@@ -138,7 +138,11 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
                 });
                 for (int i=0; i<competitorsInRaceOrderedByScoreInRace.size(); i++) {
                     for (int j=i+1; j<competitorsInRaceOrderedByScoreInRace.size(); j++) {
-                        edges.add(DirectedEdge.create(competitorsInRaceOrderedByScoreInRace.get(i), competitorsInRaceOrderedByScoreInRace.get(j)));
+                        // add an edge only if the score comparison result is non-zero
+                        if (pureScoreComparator.compare(leaderboard.getTotalPoints(competitorsInRaceOrderedByScoreInRace.get(i), raceColumn, timePoint),
+                                                        leaderboard.getTotalPoints(competitorsInRaceOrderedByScoreInRace.get(j), raceColumn, timePoint)) < 0) {
+                            edges.add(DirectedEdge.create(competitorsInRaceOrderedByScoreInRace.get(i), competitorsInRaceOrderedByScoreInRace.get(j)));
+                        }
                     }
                 }
             }
