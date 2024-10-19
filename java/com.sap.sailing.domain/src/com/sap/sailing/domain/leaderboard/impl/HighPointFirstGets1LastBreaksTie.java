@@ -65,14 +65,14 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
         // node in the edge. This graph will be sorted such that competitors precede those over which
         // they won, except if there is a cycle in the graph in which case competitors on the cycle
         // will be ranked equal by this method, leaving the decision to other criteria
-        final Double o1NetPoints = leaderboard.getNetPoints(o1, timePoint);
-        final Double o2NetPoints = leaderboard.getNetPoints(o2, timePoint);
+        final Double o1NetPoints = leaderboard.getNetPoints(o1, raceColumnsToConsider, timePoint);
+        final Double o2NetPoints = leaderboard.getNetPoints(o2, raceColumnsToConsider, timePoint);
         assert Math.abs(o1NetPoints-o2NetPoints) < 0.00001;
         final Set<Competitor> nodesInGraph = new HashSet<>();
         nodesInGraph.add(o1);
         nodesInGraph.add(o2);
         for (final Competitor c : leaderboard.getCompetitors()) {
-            if (leaderboard.getNetPoints(c, timePoint).equals(o1NetPoints)) {
+            if (leaderboard.getNetPoints(c, raceColumnsToConsider, timePoint).equals(o1NetPoints)) {
                 nodesInGraph.add(c);
             }
         }
@@ -138,7 +138,11 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
                 });
                 for (int i=0; i<competitorsInRaceOrderedByScoreInRace.size(); i++) {
                     for (int j=i+1; j<competitorsInRaceOrderedByScoreInRace.size(); j++) {
-                        edges.add(DirectedEdge.create(competitorsInRaceOrderedByScoreInRace.get(i), competitorsInRaceOrderedByScoreInRace.get(j)));
+                        // add an edge only if the score comparison result is non-zero
+                        if (pureScoreComparator.compare(leaderboard.getTotalPoints(competitorsInRaceOrderedByScoreInRace.get(i), raceColumn, timePoint),
+                                                        leaderboard.getTotalPoints(competitorsInRaceOrderedByScoreInRace.get(j), raceColumn, timePoint)) < 0) {
+                            edges.add(DirectedEdge.create(competitorsInRaceOrderedByScoreInRace.get(i), competitorsInRaceOrderedByScoreInRace.get(j)));
+                        }
                     }
                 }
             }
