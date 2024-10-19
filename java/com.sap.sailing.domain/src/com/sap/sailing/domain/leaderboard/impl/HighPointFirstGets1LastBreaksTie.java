@@ -121,6 +121,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
      * {@code nodesInGraph} competed, and adds an edge to the result for each pair of competitors in that same
      * race, leading from the better to the worse competitor.
      */
+    // FIXME need raceColumnsToConsider here; create edges only for matches in those columns!
     private Set<DirectedEdge<Competitor>> constructEdges(Set<Competitor> nodesInGraph, Leaderboard leaderboard, TimePoint timePoint,
             boolean nullScoresAreBetter) {
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
