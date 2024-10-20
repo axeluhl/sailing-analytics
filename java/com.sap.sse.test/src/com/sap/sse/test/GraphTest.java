@@ -1,8 +1,10 @@
 package com.sap.sse.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -12,6 +14,9 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.graph.CycleCluster;
+import com.sap.sse.util.graph.CycleClusters;
 import com.sap.sse.util.graph.DirectedEdge;
 import com.sap.sse.util.graph.DirectedGraph;
 
@@ -29,6 +34,30 @@ public class GraphTest {
         DirectedGraph<String> graph = DirectedGraph.create(nodes, edges);
         assertEquals(1, Util.size(graph.getCycleClusters().getClusters()));
         assertEquals(2, graph.getCycleClusters().getClusters().iterator().next().getClusterNodes().size());
+    }
+
+    @Test
+    public void testVerySimpleCycleDetectionWithTwoCycles() {
+        final String a = "a";
+        final String b = "b";
+        final String c = "c";
+        final String d = "d";
+        final Set<String> nodes = new HashSet<>();
+        nodes.add(a);
+        nodes.add(b);
+        nodes.add(c);
+        nodes.add(d);
+        final Set<DirectedEdge<String>> edges = new HashSet<>();
+        edges.add(DirectedEdge.create(a, b));
+        edges.add(DirectedEdge.create(b, a));
+        edges.add(DirectedEdge.create(c, d));
+        edges.add(DirectedEdge.create(d, c));
+        edges.add(DirectedEdge.create(a, c)); // connect the two cycles, but not cyclically
+        DirectedGraph<String> graph = DirectedGraph.create(nodes, edges);
+        assertEquals(2, Util.size(graph.getCycleClusters().getClusters()));
+        for (final CycleCluster<String> cluster : graph.getCycleClusters().getClusters()) {
+            assertEquals(2, cluster.getClusterNodes().size());
+        }
     }
 
     @Test
@@ -155,5 +184,99 @@ public class GraphTest {
         DirectedGraph<String> graph = DirectedGraph.create(nodes, edges);
         assertEquals(1, Util.size(graph.getCycleClusters().getClusters()));
         assertEquals(6, graph.getCycleClusters().getClusters().iterator().next().getClusterNodes().size());
+    }
+    
+    @Test
+    public void testCompetitorGraphWithMultipleCycles() {
+        final String usa1 = "USA1";
+        final String cro = "CRO";
+        final String pol2 = "POL2";
+        final String fin = "FIN";
+        final String ger = "GER";
+        final String nor = "NOR";
+        final String ksss = "KSSS";
+        final String pot = "POT";
+        final String usa2 = "USA2";
+        final String mal = "MAL";
+        final Set<String> nodes = new LinkedHashSet<>();
+        nodes.addAll(Arrays.asList(usa2, nor, ksss, pot, pol2, usa1, cro, mal, fin, ger));
+        final Set<DirectedEdge<String>> edges = new HashSet<>();
+        // USA 2 LISOT Black with boat USA 2 LISOT Black=[Norway with boat Norway, Sweden KSSS with boat Sweden KSSS,
+        // Potsdamer Yacht Club with boat Potsdamer Yacht Club, Poland 2 with boat Poland 2, Sweden Malmström with boat
+        // Sweden Malmström, Finland with boat Finland, Germany Worlds with boat Germany Worlds]
+        edges.add(DirectedEdge.create(usa2, nor));
+        edges.add(DirectedEdge.create(usa2, ksss));
+        edges.add(DirectedEdge.create(usa2, pot));
+        edges.add(DirectedEdge.create(usa2, pol2));
+        edges.add(DirectedEdge.create(usa2, mal));
+        edges.add(DirectedEdge.create(usa2, fin));
+        edges.add(DirectedEdge.create(usa2, ger));
+        // Norway with boat Norway=[Finland with boat Finland]
+        edges.add(DirectedEdge.create(nor, fin));
+        // Sweden KSSS with boat Sweden KSSS=[Norway with boat Norway, Potsdamer Yacht Club with boat Potsdamer Yacht
+        // Club, Poland 2 with boat Poland 2, USA 1 Hampton Sailing Club with boat USA 1 Hampton Sailing Club, Finland
+        // with boat Finland]
+        edges.add(DirectedEdge.create(ksss, nor));
+        edges.add(DirectedEdge.create(ksss, pot));
+        edges.add(DirectedEdge.create(ksss, pol2));
+        edges.add(DirectedEdge.create(ksss, usa1));
+        edges.add(DirectedEdge.create(ksss, fin));
+        // Potsdamer Yacht Club with boat Potsdamer Yacht Club=[Norway with boat Norway, Finland with boat Finland]
+        edges.add(DirectedEdge.create(pot, nor));
+        edges.add(DirectedEdge.create(pot, fin));
+        // Poland 2 with boat Poland 2=[Norway with boat Norway, Sweden KSSS with boat Sweden KSSS, Potsdamer Yacht Club
+        // with boat Potsdamer Yacht Club, Finland with boat Finland]
+        edges.add(DirectedEdge.create(nor, ksss));
+        edges.add(DirectedEdge.create(nor, pot));
+        edges.add(DirectedEdge.create(nor, fin));
+        // USA 1 Hampton Sailing Club with boat USA 1 Hampton Sailing Club=[USA 2 LISOT Black with boat USA 2 LISOT
+        // Black, Norway with boat Norway, Sweden KSSS with boat Sweden KSSS, Potsdamer Yacht Club with boat Potsdamer
+        // Yacht Club, Poland 2 with boat Poland 2, Finland with boat Finland, Germany Worlds with boat Germany Worlds]
+        edges.add(DirectedEdge.create(usa1, usa2));
+        edges.add(DirectedEdge.create(usa1, nor));
+        edges.add(DirectedEdge.create(usa1, ksss));
+        edges.add(DirectedEdge.create(usa1, pot));
+        edges.add(DirectedEdge.create(usa1, pol2));
+        edges.add(DirectedEdge.create(usa1, fin));
+        edges.add(DirectedEdge.create(usa1, ger));
+        // Croatia with boat Croatia=[USA 2 LISOT Black with boat USA 2 LISOT Black, Norway with boat Norway, Sweden
+        // KSSS with boat Sweden KSSS, Potsdamer Yacht Club with boat Potsdamer Yacht Club, Poland 2 with boat Poland 2,
+        // USA 1 Hampton Sailing Club with boat USA 1 Hampton Sailing Club, Finland with boat Finland, Sweden Malmström
+        // with boat Sweden Malmström, Germany Worlds with boat Germany Worlds]
+        edges.add(DirectedEdge.create(cro, usa2));
+        edges.add(DirectedEdge.create(cro, nor));
+        edges.add(DirectedEdge.create(cro, ksss));
+        edges.add(DirectedEdge.create(cro, pot));
+        edges.add(DirectedEdge.create(cro, pol2));
+        edges.add(DirectedEdge.create(cro, usa1));
+        edges.add(DirectedEdge.create(cro, fin));
+        edges.add(DirectedEdge.create(cro, mal));
+        edges.add(DirectedEdge.create(cro, ger));
+        // Sweden Malmström with boat Sweden Malmström=[Norway with boat Norway, Sweden KSSS with boat Sweden KSSS,
+        // Potsdamer Yacht Club with boat Potsdamer Yacht Club, Poland 2 with boat Poland 2, USA 1 Hampton Sailing Club
+        // with boat USA 1 Hampton Sailing Club, Croatia with boat Croatia, Finland with boat Finland, Germany Worlds
+        // with boat Germany Worlds]
+        edges.add(DirectedEdge.create(mal, nor));
+        edges.add(DirectedEdge.create(mal, ksss));
+        edges.add(DirectedEdge.create(mal, pot));
+        edges.add(DirectedEdge.create(mal, pol2));
+        edges.add(DirectedEdge.create(mal, usa1));
+        edges.add(DirectedEdge.create(mal, cro));
+        edges.add(DirectedEdge.create(mal, fin));
+        edges.add(DirectedEdge.create(mal, ger));
+        // Finland with boat Finland=[Potsdamer Yacht Club with boat Potsdamer Yacht Club]
+        edges.add(DirectedEdge.create(fin, pot));
+        // Germany Worlds with boat Germany Worlds=[Norway with boat Norway, Sweden KSSS with boat Sweden KSSS,
+        // Potsdamer Yacht Club with boat Potsdamer Yacht Club, Poland 2 with boat Poland 2, Finland with boat Finland]
+        edges.add(DirectedEdge.create(ger, nor));
+        edges.add(DirectedEdge.create(ger, ksss));
+        edges.add(DirectedEdge.create(ger, pot));
+        edges.add(DirectedEdge.create(ger, pol2));
+        edges.add(DirectedEdge.create(ger, fin));
+        // graph construction:
+        final DirectedGraph<String> graph = DirectedGraph.create(nodes, edges);
+        final Pair<DirectedGraph<String>, CycleClusters<String>> dag = graph.graphWithCombinedCycleNodes();
+        // tests:
+        assertTrue(Util.isEmpty(dag.getA().getCycleClusters().getClusters()));
     }
 }
