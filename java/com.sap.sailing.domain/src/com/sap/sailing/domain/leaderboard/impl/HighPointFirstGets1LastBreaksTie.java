@@ -76,7 +76,7 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
                 nodesInGraph.add(c);
             }
         }
-        final Set<DirectedEdge<Competitor>> edges = constructEdges(nodesInGraph, leaderboard, timePoint, nullScoresAreBetter);
+        final Set<DirectedEdge<Competitor>> edges = constructEdges(nodesInGraph, leaderboard, raceColumnsToConsider, timePoint, nullScoresAreBetter);
         final DirectedGraph<Competitor> graph = DirectedGraph.create(nodesInGraph, edges);
         final TopologicalComparator<Competitor> comparator = new TopologicalComparator<>(graph);
         final int resultBasedOnGraphSort = comparator.compare(o1, o2);
@@ -121,11 +121,11 @@ public class HighPointFirstGets1LastBreaksTie extends HighPointFirstGetsFixedSco
      * {@code nodesInGraph} competed, and adds an edge to the result for each pair of competitors in that same
      * race, leading from the better to the worse competitor.
      */
-    private Set<DirectedEdge<Competitor>> constructEdges(Set<Competitor> nodesInGraph, Leaderboard leaderboard, TimePoint timePoint,
-            boolean nullScoresAreBetter) {
+    private Set<DirectedEdge<Competitor>> constructEdges(Set<Competitor> nodesInGraph, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint, boolean nullScoresAreBetter) {
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         final Set<DirectedEdge<Competitor>> edges = new HashSet<>();
-        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+        for (final RaceColumn raceColumn : raceColumnsToConsider) {
             for (final Fleet fleet : raceColumn.getFleets()) {
                 final Iterable<Competitor> competitorsInRace = leaderboard.getCompetitors(raceColumn, fleet);
                 final Set<Competitor> equalRankedCompetitorsInRace = new HashSet<>();
