@@ -213,7 +213,7 @@ __setup_keys_using_local_copy() {
     # "true" indicates the permissions and ownership of the .ssh and .aws folders will not be set.
     TEMP_KEY_DIR="$1"
     SET_PERMISSIONS="$2"
-    REGION="$(  ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
+    REGION="$( ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
@@ -284,7 +284,7 @@ clean_root_ssh_dir_and_tmp() {
 }
 
 get_ec2_user_data() {
-  /opt/aws/bin/ec2-metadata -d | sed -e 's/^user-data: //'
+  ec2-metadata -d | sed -e 's/^user-data: //'
 }
 
 finalize() {
