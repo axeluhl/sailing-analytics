@@ -9,7 +9,7 @@ METADATA=$( get_ec2_user_data )
 echo "Metadata: ${METADATA}"
 if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   echo "Image upgrade..."
-  run_yum_update
+  run_dnf_upgrade
   download_and_install_latest_sap_jvm_8
   clean_logrotate_target
   clean_httpd_logs
