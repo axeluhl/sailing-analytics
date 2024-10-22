@@ -133,7 +133,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     br.flush();
                     final CountingOutputStream countingOutputStream = new CountingOutputStream(
                             ros, /* log every megabyte */1024l * 1024l, Level.INFO,
-                            "HTTP output for initial load for " + req.getRemoteHost());
+                            "uncompressed output for initial load for " + req.getRemoteHost());
                     final LZ4BlockOutputStream compressingOutputStream = new LZ4BlockOutputStream(countingOutputStream);
                     for (String replicableIdAsString : replicableIdsAsStrings) {
                         logger.info("Serializing initial load for replicable "+replicableIdAsString+" for remote host "+req.getRemoteHost());
