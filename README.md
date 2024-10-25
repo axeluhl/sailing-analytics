@@ -6,15 +6,17 @@ The Sailing Analytics, formerly known as the "SAP Sailing Analytics," are a solu
 
 ## Description
 
-This is the software running the SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
+This is the software running the SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com). By having this under an open-source license, all interested parties can use this software, extend or modify it, host it in their cloud or on-premise environments, use it to run beautiful events with it, and keep it available to the sailing community.
 
-Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
+Sailing provided the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
 
 - Help sailors analyze performance and optimize strategy
 - Bring fans closer to the action
 - Provide the media with information and insights to deliver a greater informed commentary
 
-SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas.
+SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas. Highlights were two Olympic Summer Games (Tokyo/Enoshima 2020/2021, Paris/Marseille 2024) where the solution saw close to a million unique visitors.
+
+More background information is available in the project's Wiki which is currently hosted at [https://wiki.sapsailing.com](https://wiki.sapsailing.com). The Wiki's contents can also be found in the ``wiki/`` folder in the root of this repository.
 
 ## Quick Start with Docker Compose
 
