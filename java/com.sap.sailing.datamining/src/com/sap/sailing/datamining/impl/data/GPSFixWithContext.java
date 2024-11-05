@@ -113,7 +113,9 @@ public class GPSFixWithContext implements HasGPSFixContext {
     public Integer getTenthOfLeg() {
         final Distance windwardDistanceToGo = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getWindwardDistanceToGo(getGPSFix().getTimePoint(), WindPositionMode.LEG_MIDDLE);
         final Distance legWindwardDistance = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTrackedLeg().getWindwardDistance();
-        final double fractionSailed = legWindwardDistance.add(windwardDistanceToGo.scale(-1)).divide(legWindwardDistance);
+        // eliminate negative values which may result if the competitor has just entered the leg but is yet to arrive at the windward
+        // level of the waypoint just rounded:
+        final double fractionSailed = Math.max(0, legWindwardDistance.add(windwardDistanceToGo.scale(-1)).divide(legWindwardDistance));
         return (int) Math.min(10, 1+10*fractionSailed);
     }
 }
