@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Speed;
@@ -106,5 +107,13 @@ public class GPSFixWithContext implements HasGPSFixContext {
             result = getTrackedLegOfCompetitorContext().getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor()).getEstimatedSpeed(getTimePoint());
         }
         return result;
+    }
+
+    @Override
+    public Integer getTenthOfLeg() {
+        final Distance windwardDistanceToGo = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getWindwardDistanceToGo(getGPSFix().getTimePoint(), WindPositionMode.LEG_MIDDLE);
+        final Distance legWindwardDistance = getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTrackedLeg().getWindwardDistance();
+        final double fractionSailed = legWindwardDistance.add(windwardDistanceToGo.scale(-1)).divide(legWindwardDistance);
+        return (int) Math.min(10, 1+10*fractionSailed);
     }
 }
