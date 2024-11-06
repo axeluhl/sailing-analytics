@@ -12,6 +12,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.debranding.ClientConfigurationListener;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -200,6 +201,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         protected Iterable<String> getAdditionalJavaArgsForSharedSecurity(final String defaultDomainName, final String defaultSecurityServiceReplicaSetName) {
             return Arrays.asList(
                     "-Dsecurity.sharedAcrossSubdomainsOf="+defaultDomainName,
+                    "-D"+ClientConfigurationListener.DEBRANDING_PROPERTY_NAME+"=false", // activate branding when running under default SAP domain
                     "-Dsecurity.baseUrlForCrossDomainStorage=https://"+getDefaultSecurityServiceReplicaSetHostname(defaultDomainName, defaultSecurityServiceReplicaSetName),
                     "-Dgwt.acceptableCrossDomainStorageRequestOriginRegexp=https?://(.*\\.)?"+(defaultDomainName.replaceAll("\\.", "\\\\."))+"(:[0-9]*)?$");
         }
