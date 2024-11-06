@@ -38,4 +38,13 @@ public interface HasGPSFixContext {
     
     @Statistic(messageKey = "SmoothedSpeed", resultDecimals = 2)
     Speed getSmoothedSpeed();
+    
+    /**
+     * @return the tenth of the leg the fix is in, computed based on the "windward distance" along the leg; the first
+     *         tenth has number 1, the last tenth has number 10. Should the fix not be linked to any leg, the result is
+     *         {@code null}. For reaching legs, "windward distance" translates to rhumbline-based distance
+     *         (along-course).
+     */
+    @Dimension(messageKey="TenthInLeg")
+    Integer getTenthOfLeg();
 }
