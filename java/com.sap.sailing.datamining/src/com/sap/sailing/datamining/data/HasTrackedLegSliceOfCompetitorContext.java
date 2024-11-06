@@ -123,4 +123,10 @@ public interface HasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedL
     
     @Statistic(messageKey="RatioDistanceLongVsShortTack", resultDecimals=2)
     public double getRatioDistanceLongVsShortTack();
+    
+    /**
+     * one-based; e.g., if there are ten slices, they have slice numbers 1..10
+     */
+    @Dimension(messageKey="SliceNumber")
+    public Integer getSliceNumber();
 }
