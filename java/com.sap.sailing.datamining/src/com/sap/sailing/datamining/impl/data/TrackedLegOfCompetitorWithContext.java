@@ -13,7 +13,7 @@ import com.sap.sse.common.TimePoint;
  * Equality is based on the {@link #getTrackedLegOfCompetitor()} only. The {@link #getSliceNumber()} defaults to {@code 1} for this
  * special case of the entire leg. Start and finish times of this "slice" equal the start/finish times of the competitor in the leg.
  */
-public class TrackedLegOfCompetitorWithContext extends TrackedLegSliceOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
+public class TrackedLegOfCompetitorWithContext extends AbstractTrackedLegSliceOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
     private static final long serialVersionUID = 5944904146286262768L;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor, TackTypeSegmentsDataMiningSettings settings) {

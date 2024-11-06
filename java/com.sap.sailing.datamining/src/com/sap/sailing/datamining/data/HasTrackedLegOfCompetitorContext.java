@@ -1,4 +1,4 @@
 package com.sap.sailing.datamining.data;
 
-public interface HasTrackedLegOfCompetitorContext extends HasTrackedLegSliceOfCompetitorContext {
+public interface HasTrackedLegOfCompetitorContext extends AbstractHasTrackedLegSliceOfCompetitorContext {
 }

@@ -41,7 +41,7 @@ public class TrackedLegSliceOfCompetitorRetrievalProcessor extends AbstractRetri
 
     @Override
     protected Iterable<HasTrackedLegSliceOfCompetitorContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
-        Collection<HasTrackedLegSliceOfCompetitorContext> trackedLegSlicesOfCompetitorsWithContext = new ArrayList<>();
+        final Collection<HasTrackedLegSliceOfCompetitorContext> trackedLegSlicesOfCompetitorsWithContext = new ArrayList<>();
         for (int i=1; i<=10; i++) {
             if (isAborted()) {
                 break;
