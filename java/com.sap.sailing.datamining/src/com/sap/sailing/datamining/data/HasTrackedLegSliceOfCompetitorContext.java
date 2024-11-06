@@ -38,7 +38,7 @@ public interface HasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedL
     public Distance getDistanceTraveled();
     
     @Statistic(messageKey="SpeedAverage", resultDecimals=2, ordinal=0)
-    public Double getSpeedAverage();
+    public Double getSpeedAverageInKnots();
     
     @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)
     public Integer getRankGainsOrLosses();
@@ -47,7 +47,7 @@ public interface HasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedL
     public Double getRelativeRank();
     
     @Statistic(messageKey="AbsoluteRank", resultDecimals=0, ordinal=3)
-    public Integer getRankAtFinish();
+    public Integer getRankAtSliceFinish();
     
     @Statistic(messageKey="AbsoluteRankAfterFirstQuarter", resultDecimals=0, ordinal=4)
     public Integer getRankAfterFirstQuarter();

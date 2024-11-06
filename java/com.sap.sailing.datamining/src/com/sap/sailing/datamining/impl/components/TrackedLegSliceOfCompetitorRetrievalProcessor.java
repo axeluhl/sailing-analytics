@@ -12,9 +12,13 @@ import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 
 /**
- * Produces "slices" of a {@link HasTrackedLegOfCompetitorContext} object, splitting up the leg in multiple consecutive parts. The parts
- * are numbered. Slicing currently happens based on wind-based distance traveled in the leg, into ten slices. Future extensions, based on
- * settings, may offer more sophisticated ways of slicing. See also bug 6064. 
+ * Produces "slices" of a {@link HasTrackedLegOfCompetitorContext} object, splitting up the leg in multiple consecutive
+ * parts. The parts are numbered. Slicing currently happens based on the time sailed in the leg, into ten equally long
+ * slices. If the competitor hasn't finished the leg (yet), the duration sailed so far will be divided up into the slices.
+ * This makes this fact type less useful for live situation as the slices "grow" while the competitor continues to sail
+ * in the leg.<p>
+ * 
+ * Future extensions, based on settings, may offer more sophisticated ways of slicing. See also bug 6064.
  * 
  * @author Axel Uhl (d043530)
  *
