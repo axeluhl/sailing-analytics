@@ -247,8 +247,7 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
         final Integer result;
         if (getTrackedLegContext().getTrackedRaceContext().getTrackedRace() != null) {
             if (!isRankAtSliceStartInitialized) {
-                TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-                int rank = trackedRace.getRank(getCompetitor(), getSliceStartTime());
+                int rank = getTrackedLegOfCompetitor().getRank(getSliceStartTime());
                 rankAtSliceStart = rank == 0 ? null : rank;
                 isRankAtSliceStartInitialized = true;
             }
@@ -340,8 +339,7 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
     
     public Integer getRankAtSliceFinish() {
         if (!isRankAtSliceFinishInitialized) {
-            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            int rank = trackedRace.getRank(getCompetitor(), getSliceFinishTime());
+            int rank = getTrackedLegOfCompetitor().getRank(getSliceFinishTime());
             rankAtSliceFinish = rank == 0 ? null : rank;
             isRankAtSliceFinishInitialized = true;
         }
