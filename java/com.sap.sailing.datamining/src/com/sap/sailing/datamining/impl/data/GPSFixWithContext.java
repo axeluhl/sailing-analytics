@@ -1,11 +1,14 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.function.BiFunction;
+
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TackType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Bearing;
@@ -95,18 +98,29 @@ public class GPSFixWithContext implements HasGPSFixContext {
     
     @Override
     public Double getRelativeXTESigned() {
+        return getRelativeXTE(TrackedLegOfCompetitor::getSignedCrossTrackError);
+    }
+    
+    private Double getRelativeXTE(final BiFunction<TrackedLegOfCompetitor, TimePoint, Distance> xteFunction) {
+        final Double result;
         // The XTE is calculated relative to half the leg length
-        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getSignedCrossTrackError(getTimePoint())
-                .divide(getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedLeg().getGreatCircleDistance(getTimePoint()))
-                * 2.0; // half the leg length
+        final Distance xte = xteFunction.apply(getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor(), getTimePoint());
+        if (xte == null) {
+            result = null;
+        } else {
+            final Distance legLength = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedLeg().getGreatCircleDistance(getTimePoint());
+            if (legLength == null) {
+                result = null;
+            } else {
+                result = xte.divide(legLength) * 2.0; // half the leg length
+            }
+        }
+        return result;
     }
     
     @Override
     public Double getRelativeXTEUnsigned() {
-        // The XTE is calculated relative to the leg length
-        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getAbsoluteCrossTrackError(getTimePoint())
-                .divide(getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedLeg().getGreatCircleDistance(getTimePoint()))
-                * 2.0; // half the leg length
+        return getRelativeXTE(TrackedLegOfCompetitor::getAbsoluteCrossTrackError);
     }
     
 
