@@ -94,6 +94,23 @@ public class GPSFixWithContext implements HasGPSFixContext {
     }
     
     @Override
+    public Double getRelativeXTESigned() {
+        // The XTE is calculated relative to half the leg length
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getSignedCrossTrackError(getTimePoint())
+                .divide(getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedLeg().getGreatCircleDistance(getTimePoint()))
+                * 2.0; // half the leg length
+    }
+    
+    @Override
+    public Double getRelativeXTEUnsigned() {
+        // The XTE is calculated relative to the leg length
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getAbsoluteCrossTrackError(getTimePoint())
+                .divide(getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedLeg().getGreatCircleDistance(getTimePoint()))
+                * 2.0; // half the leg length
+    }
+    
+
+    @Override
     public TackType getTackType() throws NoWindException {
         return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTackType(getTimePoint());
     }
