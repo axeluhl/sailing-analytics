@@ -36,6 +36,12 @@ public interface HasGPSFixContext {
     @Statistic(messageKey = "AbsoluteXTE", resultDecimals = 2)
     Distance getAbsoluteXTE();
     
+    @Statistic(messageKey = "XTERelativeSigned", resultDecimals = 2)
+    Double getRelativeXTESigned();
+    
+    @Statistic(messageKey = "XTERelativeUnsigned", resultDecimals = 2)
+    Double getRelativeXTEUnsigned();
+    
     @Statistic(messageKey = "SmoothedSpeed", resultDecimals = 2)
     Speed getSmoothedSpeed();
     
