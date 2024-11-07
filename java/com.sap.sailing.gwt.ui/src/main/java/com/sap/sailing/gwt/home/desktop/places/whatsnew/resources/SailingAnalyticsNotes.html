@@ -13,6 +13,12 @@
             <li>Introduced an extended data mining retriever chain that allows users to drill into ten
                 equal-duration sub-slices of each leg to, e.g., compare average performance across different
                 parts of legs.</li>
+            <li>Added metrics for a "relative" cross-track error (XTE) in the data mining environment, both,
+                signed and unsigned. To allow for a comparison of XTE values across legs of different lengths,
+                the distances from the course middle line are divided by half the leg's length at that point
+                in time. This way, e.g., a position on one far side of an upwind leg after having sailed half
+                the leg, in a boat class that has approximately a 90° tacking angle would result in a value
+                close to <tt>(+/-) 1.0</tt>, regardless the length of the leg.</li>
          </ul>
          <h5 class="articleSubheadline">October 2024</h5>
          <ul class="bulletList">
