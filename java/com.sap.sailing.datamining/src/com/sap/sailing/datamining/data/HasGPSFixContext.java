@@ -42,6 +42,36 @@ public interface HasGPSFixContext {
     @Statistic(messageKey = "XTERelativeUnsigned", resultDecimals = 2)
     Double getRelativeXTEUnsigned();
     
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint.
+     */
+    @Statistic(messageKey = "XTEToWindAxisUnsigned", resultDecimals = 2)
+    Distance getXTEToWindAxisUnsigned();
+    
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint.
+     */
+    @Statistic(messageKey = "XTEToWindAxisSigned", resultDecimals = 2)
+    Distance getXTEToWindAxisSigned();
+    
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint. That distance is divided
+     * by half the leg length.
+     */
+    @Statistic(messageKey = "XTEToWindAxisRelativeUnsigned", resultDecimals = 2)
+    Double getXTEToWindAxisRelativeUnsigned();
+    
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint. That distance is divided
+     * by half the leg length.
+     */
+    @Statistic(messageKey = "XTEToWindAxisRelativeSigned", resultDecimals = 2)
+    Double getXTEToWindAxisRelativeSigned();
+    
     @Statistic(messageKey = "SmoothedSpeed", resultDecimals = 2)
     Speed getSmoothedSpeed();
     

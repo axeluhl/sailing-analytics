@@ -26,6 +26,7 @@ import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
@@ -543,7 +544,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Distance getAverageAbsoluteCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) {
         final Distance result;
-        MarkPassing legStart = getMarkPassingForLegStart();
+        final MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart != null) {
             final TimePoint to = getTimePointNotAfterFinishingOfLeg(timePoint);
             if (to != null) {
@@ -575,15 +576,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         }
         return result;
     }
-
-    @Override
-    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) {
+    
+    private Distance getSomeCrossTrackError(TimePoint timePoint, BiFunction<TrackedLeg, Position, Distance> crossTrackCalculatorAtTimePoint) {
         final Distance result;
         final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
         if (track != null) {
             final Position estimatedPosition = track.getEstimatedPosition(timePoint, /* extrapolate */ true);
             if (estimatedPosition != null) {
-                result = getTrackedLeg().getAbsoluteCrossTrackError(estimatedPosition, timePoint);
+                result = crossTrackCalculatorAtTimePoint.apply(getTrackedLeg(), estimatedPosition);
             } else {
                 result = null;
             }
@@ -594,20 +594,23 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Distance getAbsoluteCrossTrackError(TimePoint timePoint) {
+        return getSomeCrossTrackError(timePoint, (trackedLeg, estimatedPosition)->getTrackedLeg().getAbsoluteCrossTrackError(estimatedPosition, timePoint));
+    }
+
+    @Override
     public Distance getSignedCrossTrackError(TimePoint timePoint) {
-        final Distance result;
-        final GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitor());
-        if (track != null) {
-            final Position estimatedPosition = track.getEstimatedPosition(timePoint, /* extrapolate */ true);
-            if (estimatedPosition != null) {
-                result = getTrackedLeg().getSignedCrossTrackError(estimatedPosition, timePoint);
-            } else {
-                result = null;
-            }
-        } else {
-            result = null;
-        }
-        return result;
+        return getSomeCrossTrackError(timePoint, (trackedLeg, estimatedPosition)->getTrackedLeg().getSignedCrossTrackError(estimatedPosition, timePoint));
+    }
+
+    @Override
+    public Distance getUnsignedCrossTrackErrorToWindAxis(TimePoint timePoint) {
+        return getSomeCrossTrackError(timePoint, (trackedLeg, estimatedPosition)->getTrackedLeg().getUnsignedCrossTrackErrorToWindAxis(estimatedPosition, timePoint));
+    }
+
+    @Override
+    public Distance getSignedCrossTrackErrorToWindAxis(TimePoint timePoint) {
+        return getSomeCrossTrackError(timePoint, (trackedLeg, estimatedPosition)->getTrackedLeg().getSignedCrossTrackErrorToWindAxis(estimatedPosition, timePoint));
     }
 
     @Override
