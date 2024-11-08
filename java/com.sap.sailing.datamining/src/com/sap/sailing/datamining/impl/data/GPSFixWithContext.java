@@ -149,4 +149,24 @@ public class GPSFixWithContext implements HasGPSFixContext {
         final double fractionSailed = Math.max(0, legWindwardDistance.add(windwardDistanceToGo.scale(-1)).divide(legWindwardDistance));
         return (int) Math.min(10, 1+10*fractionSailed);
     }
+
+    @Override
+    public Distance getXTEToWindAxisUnsigned() {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getUnsignedCrossTrackErrorToWindAxis(getTimePoint());
+    }
+
+    @Override
+    public Distance getXTEToWindAxisSigned() {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getSignedCrossTrackErrorToWindAxis(getTimePoint());
+    }
+
+    @Override
+    public Double getXTEToWindAxisRelativeUnsigned() {
+        return getRelativeXTE(TrackedLegOfCompetitor::getUnsignedCrossTrackErrorToWindAxis);
+    }
+
+    @Override
+    public Double getXTEToWindAxisRelativeSigned() {
+        return getRelativeXTE(TrackedLegOfCompetitor::getSignedCrossTrackErrorToWindAxis);
+    }
 }
