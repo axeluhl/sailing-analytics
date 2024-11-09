@@ -19,6 +19,12 @@
                 in time. This way, e.g., a position on one far side of an upwind leg after having sailed half
                 the leg, in a boat class that has approximately a 90° tacking angle would result in a value
                 close to <tt>(+/-) 1.0</tt>, regardless the length of the leg.</li>
+            <li>Added cross-track error (XTE) metrics that don't project onto the course middle line ("rhumb line",
+                although instead of the "rhumb line" (see <a href="https://en.wikipedia.org/wiki/Rhumb_line">the Wikipedia definition</a>)
+                we use a great circle segment connecting the leg's waypoints), but onto the wind vector attached to the
+                leg's end waypoint (e.g., the windward mark for an upwind leg). The metrics are again
+                available in signed/unsigned as well as in absolute and relative (to half the leg distance)
+                variants.</li>
          </ul>
          <h5 class="articleSubheadline">October 2024</h5>
          <ul class="bulletList">
