@@ -13,7 +13,7 @@ services:
       REPLICATION_CHANNEL: test
       REPLICATION_PORT: 5672
   mongo:
-    image: "mongo:4.4-rc"
+    image: "mongo:7"
   rabbitmq:
     image: "rabbitmq:3.13"
 

@@ -140,6 +140,9 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLineAtStartOfRace", resultDecimals=2)
     Double getRelativeDistanceToAdvantageousEndOfLineAtStartOfRace();
     
+    @Statistic(messageKey="RelativeDistanceToAdvantageousEndOfLineAtStartOfCompetitor", resultDecimals=2)
+    Double getRelativeDistanceToAdvantageousEndOfLineAtStartOfCompetitor();
+    
     @Statistic(messageKey="RaceDuration")
     Duration getDuration();
     
