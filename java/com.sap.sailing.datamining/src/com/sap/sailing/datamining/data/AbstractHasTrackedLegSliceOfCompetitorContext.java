@@ -34,6 +34,11 @@ public interface AbstractHasTrackedLegSliceOfCompetitorContext extends HasWindOn
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
+    @Connector(messageKey="SailorProfile")
+    default public SailorProfile getSailorProfile() {
+        return getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboardGroupContext().getSailorProfiles().getProfileForCompetitor(getCompetitor());
+    }
+    
     @Statistic(messageKey="DistanceTraveled", resultDecimals=2, ordinal=0)
     public Distance getDistanceTraveled();
     

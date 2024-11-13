@@ -1,6 +1,10 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.datamining.data.SailorProfile;
 import com.sap.sailing.datamining.data.SailorProfiles;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -51,8 +55,13 @@ public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
     public synchronized SailorProfiles getSailorProfiles() {
         if (sailorProfiles == null) {
             final SailorProfilePreferences sailorProfilePreferences = getSecurityService().getPreferenceObject(getSecurityService().getCurrentUser().getName(), SailorProfilePreferences.PREF_NAME);
-            for (final SailorProfilePreference sailorProfilePreference : sailorProfilePreferences.getSailorProfiles()) {
-                
+            if (sailorProfilePreferences != null) {
+                final List<SailorProfile> theSailorProfiles = new ArrayList<>();
+                for (final SailorProfilePreference sailorProfilePreference : sailorProfilePreferences.getSailorProfiles()) {
+                    final SailorProfile sailorProfile = new SailorProfileImpl(sailorProfilePreference.getUuid(), sailorProfilePreference.getName(), sailorProfilePreference.getCompetitors());
+                    theSailorProfiles.add(sailorProfile);
+                }
+                sailorProfiles = new SailorProfilesImpl(theSailorProfiles);
             }
         }
         return sailorProfiles;
