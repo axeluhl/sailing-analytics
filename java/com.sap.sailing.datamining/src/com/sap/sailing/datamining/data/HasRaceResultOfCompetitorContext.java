@@ -19,6 +19,11 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(messageKey="Competitor", ordinal=2)
     public Competitor getCompetitor();
     
+    @Connector(messageKey="SailorProfile")
+    default public SailorProfile getSailorProfile() {
+        return getTrackedRaceContext().getLeaderboardContext().getLeaderboardGroupContext().getSailorProfiles().getProfileForCompetitor(getCompetitor());
+    }
+    
     @Connector(messageKey="Boat")
     public Boat getBoat();
 

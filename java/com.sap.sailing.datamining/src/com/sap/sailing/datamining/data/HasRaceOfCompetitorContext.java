@@ -23,6 +23,11 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="Competitor")
     Competitor getCompetitor();
     
+    @Connector(messageKey="SailorProfile")
+    default public SailorProfile getSailorProfile() {
+        return getTrackedRaceContext().getLeaderboardContext().getLeaderboardGroupContext().getSailorProfiles().getProfileForCompetitor(getCompetitor());
+    }
+    
     @Dimension(messageKey="TackAtStart", ordinal=12)
     Tack getTackAtStart() throws NoWindException;
     
