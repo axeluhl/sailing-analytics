@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl.preferences.model;
+package com.sap.sailing.server.preferences;
 
 import java.util.UUID;
 

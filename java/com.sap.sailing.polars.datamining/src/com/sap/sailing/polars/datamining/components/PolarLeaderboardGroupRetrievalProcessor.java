@@ -27,7 +27,7 @@ public class PolarLeaderboardGroupRetrievalProcessor extends AbstractRetrievalPr
             if (isAborted()) {
                 break;
             }
-            data.add(new LeaderboardGroupWithPolarContext(leaderboardGroup, element.getPolarDataService(), element.getBaseDomainFactory()));
+            data.add(new LeaderboardGroupWithPolarContext(leaderboardGroup, element.getPolarDataService(), element.getBaseDomainFactory(), element.getSecurityService()));
         }
         return data;
     }
