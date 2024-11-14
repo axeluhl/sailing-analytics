@@ -1,7 +1,6 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
@@ -14,14 +13,10 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
-public interface HasRaceOfCompetitorContext {
-    
+public interface HasRaceOfCompetitorContext extends HasSomethingOfCompetitorContext {
+    @Override
     @Connector(scanForStatistics=false)
     HasTrackedRaceContext getTrackedRaceContext();
-    
-    @Connector(messageKey="Competitor")
-    @Statistic(messageKey="Competitor")
-    Competitor getCompetitor();
     
     @Dimension(messageKey="TackAtStart", ordinal=12)
     Tack getTackAtStart() throws NoWindException;

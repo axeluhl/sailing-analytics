@@ -7,6 +7,9 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.geocoding,
  com.sap.sailing.server.interfaces,
+ com.sap.sailing.server.preferences,
+ com.sap.sse.replication,
+ com.sap.sse.security,
  org.osgi.framework;version="1.7.0"
 Export-Package: com.sap.sailing.datamining,
  com.sap.sailing.datamining.data,
