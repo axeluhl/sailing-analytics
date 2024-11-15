@@ -32,6 +32,7 @@ scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/confi
 . imageupgrade_functions.sh
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
+setup_swap 5000
 # setup files and crontab for the required users, both dependent on the environment type.
 build_crontab_and_setup_files "${IMAGE_TYPE}"
 # setup mail
@@ -53,8 +54,6 @@ setup_fail2ban
 # goaccess and apachetop
 setup_goaccess
 setup_apachetop
-# mount nvme if available
-mountnvmeswap
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out
