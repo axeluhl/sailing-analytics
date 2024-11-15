@@ -109,7 +109,8 @@
 outputMessage() {
     # parameter 1: the message to display on the site
     # parameter 2: the file to which to append the output
-    echo "Storing output in ${2}" | systemd-cat -t reverseProxyHealthcheck
+    # Possible log:
+    #echo "Storing output in ${2}" | systemd-cat -t reverseProxyHealthcheck
     echo "Content-type: text/html"
     echo ""
     echo "${1}"
@@ -121,7 +122,8 @@ outputMessage() {
 status() {
     # parameter 1: status code and messages
     # parameter 2: the file to which to append the output
-    echo "Recording HTTP status ${1} in ${2}" | systemd-cat -t reverseProxyHealthcheck
+    # Possible log:
+    #echo "Recording HTTP status ${1} in ${2}" | systemd-cat -t reverseProxyHealthcheck
     echo "Status: $1"
     echo "Status: $1" >>"${2}"
 }
@@ -165,10 +167,12 @@ exit_and_record_exit_status() {
     # A "nohup" background job is spawned that, after 60s, removes
     # all files starting with $2, then, if provided, $3, $4, and so on
     EXIT_CODE="${1}"
-    echo "Recording exit code ${EXIT_CODE} in file ${2}" | systemd-cat -t reverseProxyHealthcheck
+    # Possible log:
+    #echo "Recording exit code ${EXIT_CODE} in file ${2}" | systemd-cat -t reverseProxyHealthcheck
     echo "${EXIT_CODE}" >"${2}"
     while [ -n "${2}" ]; do
-        echo "Scheduling the deletion of result file ${2} for in 10s" | systemd-cat -t reverseProxyHealthcheck
+	# Possible log line:
+        #echo "Scheduling the deletion of result file ${2} for in 10s" | systemd-cat -t reverseProxyHealthcheck
 	FILE_TO_DELETE="${2}"
         nohup bash -c "sleep 10; rm \"${FILE_TO_DELETE}\"" 2>/dev/null >/dev/null &
 	shift
@@ -177,7 +181,6 @@ exit_and_record_exit_status() {
 }
 
 # The regex to extract the ip from a line ending in an ip.
-# TODO uncomment again
 PID_FILE=/var/run/reverseProxyHealthcheck/reverseProxyHealthcheck.pid
 PID_OF_RUNNING_HEALTH_CHECK=$( cat "${PID_FILE}" 2>/dev/null )
 PID_OF_THIS_HEALTH_CHECK="$$"
@@ -208,7 +211,8 @@ if [ -n "${PID_OF_RUNNING_HEALTH_CHECK}" ]; then
 	exit 4
     fi
 else
-    echo "No other process running yet; performing check and writing output to ${OUTPUT_FILE} and exit code to ${EXIT_CODE_FILE}" | systemd-cat -t reverseProxyHealthcheck
+    # Possible log:
+    #echo "No other process running yet; performing check and writing output to ${OUTPUT_FILE} and exit code to ${EXIT_CODE_FILE}" | systemd-cat -t reverseProxyHealthcheck
     echo "$$" >"${PID_FILE}"
     IP_REGEX="[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+$"
     MY_IP=$( ec2-metadata --local-ipv4 | grep -o "${IP_REGEX}")
