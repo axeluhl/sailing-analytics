@@ -318,6 +318,7 @@ setup_fail2ban() {
         python3.9 setup.py install
         cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
         sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
+        sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
         systemctl enable fail2ban
         chkconfig --level 23 fail2ban on
     fi
