@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# TODO: when any sort of bottleneck leads to a congestion on a server using this script
+# for a repetitive health check, multiple occurrences of this script may be launched
+# concurrently. This, however, may lead to accelerated resource depletion, making any
+# possible root cause for a bottleneck rather worse. We have seen hundreds of running
+# instances of this script, each running an "aws" script piping into a "jq" process,
+# all requiring memory that may be scarce on a disposable reverse proxy, with no swap
+# space allocated. Then, the OOM killer will at some point start turning the instance
+# useless/inconsistent. If in the worst case http://127.0.0.1/internal-server-status
+# remains responsive, the target group health check may still time out (unhealthy from the
+# target group's perspective) and other reverse proxies may not consider themselves healthy
+# because they deem the broken reverse proxy healthy.
+#
+# We should at least avoid concurrent invocations and instead have a new invocation attempt
+# wait for the response of an already running invocation.
+
 # Purpose: A smart health check for a Apache httpd reverse proxy server that takes three
 # things into account:
 #  - /internal-server-status local technical health check
