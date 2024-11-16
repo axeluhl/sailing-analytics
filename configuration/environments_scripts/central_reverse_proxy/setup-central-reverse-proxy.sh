@@ -178,9 +178,6 @@ sed -i "s/^#compress/compress/" /etc/logrotate.conf
 (/usr/local/bin/setupHttpdGitLocal.sh "httpdConf@sapsailing.com:repo.git" central "Central Reverse Proxy")
 scp -o StrictHostKeyChecking=no -r root@sapsailing.com:/etc/httpd/conf/pass* /etc/httpd/conf/
 chown root:root /etc/httpd/conf/pass*
-# Folder for reverseProxyHealthcheck outputs:
-mkdir /var/run/reverseProxyHealthcheck
-chown apache:apache /var/run/reverseProxyHealthcheck
 # create mountpoints (see part 2 for ownership changes)
 mkdir /var/log/old
 mkdir /var/www/static

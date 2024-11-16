@@ -25,9 +25,6 @@ mount -a
 dnf upgrade -y --best --allowerasing --releasever=latest
 dnf install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables nmap
 sudo systemctl enable crond.service
-# Folder for reverseProxyHealthcheck outputs:
-mkdir /var/run/reverseProxyHealthcheck
-chown apache:apache /var/run/reverseProxyHealthcheck
 # setup other users and crontabs to keep repo updated
 cd /root
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
