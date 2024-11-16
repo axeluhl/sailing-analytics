@@ -17,17 +17,17 @@ sudo su - -c "cat ~ec2-user/.ssh/authorized_keys > /root/.ssh/authorized_keys"
 FIRSTEOF
 # writes std error to local text file
 ssh -A "root@${IP}" "bash -s" << SECONDEOF  >stdoutLog.txt
-# Folder for reverseProxyHealthcheck outputs:
-mkdir /var/run/reverseProxyHealthcheck
-chown apache:apache /var/run/reverseProxyHealthcheck
 # fstab setup
 mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
 # update instance
-dnf upgrade -y --releasever=latest
+dnf upgrade -y --best --allowerasing --releasever=latest
 dnf install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables nmap
 sudo systemctl enable crond.service
+# Folder for reverseProxyHealthcheck outputs:
+mkdir /var/run/reverseProxyHealthcheck
+chown apache:apache /var/run/reverseProxyHealthcheck
 # setup other users and crontabs to keep repo updated
 cd /root
 scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh" /usr/local/bin
