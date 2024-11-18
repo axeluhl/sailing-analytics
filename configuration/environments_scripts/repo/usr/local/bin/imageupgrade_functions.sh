@@ -307,15 +307,15 @@ setup_cloud_cfg_and_root_login() {
 
 setup_fail2ban() {
     # Expects setup_mail_sending to have been invoked for fail2ban e-mails being sent properly
-    dnf install -y fail2ban whois
-    sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
-    systemctl enable fail2ban
+    sudo dnf install -y fail2ban whois
+    sudo sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
+    sudo systemctl enable fail2ban
     # the /etc/fail2ban/jail.d/ contents are expected to be provided by the files/etc/fail2ban/jail.d
     # folders in the respective environments_scripts sub-folder; use, e.g., a symbolic link to
     # configuration/environments_scripts/repo/etc/fail2ban/jail.d/customisation.local for a
     # systemd-based sshd-iptables filter.
-    touch /var/log/fail2ban.log
-    systemctl start fail2ban
+    sudo touch /var/log/fail2ban.log
+    sudo systemctl restart fail2ban
 }
 
 setup_mail_sending() {
@@ -335,7 +335,7 @@ setup_mail_sending() {
     if [[ -n "$1" ]]; then
         subdomain_of_sender_address="$1"
     fi
-    sudo yum install -y mailx postfix
+    sudo dnf install -y mailx postfix
     sudo systemctl enable postfix
     temp_mail_properties_location=$(mktemp /var/tmp/mail.properties_XXX)
     scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
@@ -393,8 +393,8 @@ setup_goaccess() {
     wget https://tar.goaccess.io/goaccess-1.9.1.tar.gz
     tar -xzvf goaccess-1.9.1.tar.gz
     cd goaccess-1.9.1/
-    yum install -y gcc-c++
-    yum install -y libmaxminddb-devel ncurses-devel
+    dnf install -y gcc-c++
+    dnf install -y libmaxminddb-devel ncurses-devel
     ./configure --enable-utf8
     make
     make install
@@ -407,8 +407,8 @@ setup_goaccess() {
 setup_apachetop() {
     # Compatible with Amazon Linux 2023
     pushd .
-    yum install -y gcc-c++
-    yum install -y ncurses-devel readline-devel
+    dnf install -y gcc-c++
+    dnf install -y ncurses-devel readline-devel
     cd /usr/local/src
     wget https://github.com/tessus/apachetop/releases/download/0.23.2/apachetop-0.23.2.tar.gz
     tar -xvzf apachetop-0.23.2.tar.gz
@@ -444,6 +444,6 @@ enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
 EOF
 "
-    sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-tools mongodb-mongosh-shared-openssl3
+    sudo dnf -y update
+    sudo dnf -y install mongodb-org-server mongodb-org-tools mongodb-mongosh-shared-openssl3
 }
