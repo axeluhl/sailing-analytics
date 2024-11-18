@@ -310,6 +310,12 @@ setup_fail2ban() {
     sudo dnf install -y fail2ban whois
     sudo sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
     sudo systemctl enable fail2ban
+    # The fail2ban service may depend on firewalld which then gets installed and
+    # injects all sorts of unwanted nftables/iptables rules that can make our services
+    # unreachable (MongoDB port 27017, MariaDB port 3306, application server port 8888, etc.).
+    # We use security groups in our VPC to control which ports can be reached from where.
+    # Therefore, we disable firewalld, should it have been installed
+    sudo systemctl disable firewalld
     # the /etc/fail2ban/jail.d/ contents are expected to be provided by the files/etc/fail2ban/jail.d
     # folders in the respective environments_scripts sub-folder; use, e.g., a symbolic link to
     # configuration/environments_scripts/repo/etc/fail2ban/jail.d/customisation.local for a
