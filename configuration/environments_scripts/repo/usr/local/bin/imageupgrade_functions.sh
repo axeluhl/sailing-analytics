@@ -306,36 +306,16 @@ setup_cloud_cfg_and_root_login() {
 }
 
 setup_fail2ban() {
-    pushd .
-    if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
-        yum install 2to3 -y
-        cd /usr/local/src
-        wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
-        tar -xvf 1.0.2.tar.gz
-        cd fail2ban-1.0.2/
-        ./fail2ban-2to3
-        python3.9 setup.py build
-        python3.9 setup.py install
-        cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
-        sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
-        sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
-        systemctl enable fail2ban
-        chkconfig --level 23 fail2ban on
-    fi
-    cat << EOF > /etc/fail2ban/jail.d/customisation.local
-    [ssh-iptables]
-
-    enabled  = true
-    filter   = sshd[mode=aggressive]
-    action   = iptables[name=SSH, port=ssh, protocol=tcp]
-            sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
-    logpath  = /var/log/fail2ban.log
-    maxretry = 5
-EOF
+    # Expects setup_mail_sending to have been invoked for fail2ban e-mails being sent properly
+    dnf install -y fail2ban whois
+    sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
+    systemctl enable fail2ban
+    # the /etc/fail2ban/jail.d/ contents are expected to be provided by the files/etc/fail2ban/jail.d
+    # folders in the respective environments_scripts sub-folder; use, e.g., a symbolic link to
+    # configuration/environments_scripts/repo/etc/fail2ban/jail.d/customisation.local for a
+    # systemd-based sshd-iptables filter.
     touch /var/log/fail2ban.log
-    service fail2ban start
-    yum remove -y firewalld
-    popd
+    systemctl start fail2ban
 }
 
 setup_mail_sending() {

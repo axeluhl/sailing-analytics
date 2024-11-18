@@ -1,6 +1,6 @@
 #!/bin/bash
 # Usage: ${0} [ -b {bugs-password] ] [ -r {root-password} ] {instance-ip}
-# Deploy with Amazon Linux 2023
+# Deploy with Amazon Linux 2023 with a 16GB root volume
 
 # Read options and assign to variables:
 options='b:r:'
@@ -39,8 +39,8 @@ else
   sudo chgrp ec2-user /home/ec2-user/ssh-key-reader.token
   sudo chmod 600 /home/ec2-user/ssh-key-reader.token
   # Install packages for MariaDB and cron/anacron/crontab:
-  sudo yum update -y
-  sudo yum -y install mariadb105-server cronie
+  sudo dnf -y --best --allowerasing --releasever=latest upgrade
+  sudo dnf -y install mariadb105-server cronie fail2ban
   sudo su -c "printf '\n[mysqld]\nlog_bin = /var/log/mariadb/mysql-bin.log\n' >> /etc/my.cnf.d/mariadb-server.cnf"
   sudo systemctl enable mariadb.service
   sudo systemctl start mariadb.service
@@ -51,6 +51,8 @@ else
     exit 1
   fi    
   setup_sshd_resilience
+  setup_mail_sending
+  setup_fail2ban
   sudo chown root:root /usr/local/bin/imageupgrade_functions.sh
   echo "Creating backup through mysql client on sapsailing.com..."
   ssh -o StrictHostKeyChecking=false root@sapsailing.com "mysqldump --all-databases -h mysql.internal.sapsailing.com --user=root --password=${ROOT_PW} --master-data  --skip-lock-tables  --lock-tables=0" >> ${BACKUP_FILE}
