@@ -61,8 +61,8 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
-import com.tractrac.model.lib.api.route.IControlPoint;
+import com.tractrac.model.lib.api.map.IPositionedItem;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -327,17 +327,17 @@ public interface DomainFactory {
 
     /**
      * Since TracAPI 3.6.1 the TracAPI provides a course area name for {@link IRace} objects. Furthermore, the
-     * {@link IControl} control points can now tell their {@link IControl#getCourseArea() course area}. This allows
-     * us to fetch the {@link IControl}s for a specific course area, thereby, e.g., restricting the marks of an
+     * {@link IMapItem} control points can now tell their {@link IMapItem#getCourseArea() course area}. This allows
+     * us to fetch the {@link IMapItem}s for a specific course area, thereby, e.g., restricting the marks of an
      * event that we offer to the Race Manager app's course designer to those available on the course area.
      */
-    Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
+    Iterable<IMapItem> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName);
 
     /**
-     * Looks for an {@link IControl} in the {@code candidates} that contains two {@link IControlPoint}s that map to the
+     * Looks for an {@link IMapItem} in the {@code candidates} that contains two {@link IPositionedItem}s that map to the
      * {@code first} and {@code second} mark.
      */
-    ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second);
+    ControlPoint getExistingControlWithTwoMarks(Iterable<IMapItem> candidates, Mark first, Mark second);
 
     /**
      * Event subscribers created by this call are cached in this domain factory, using the three parameters as a compound

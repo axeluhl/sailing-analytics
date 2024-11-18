@@ -30,7 +30,7 @@ public class ConnectToAllRaces {
         eventSubscriber.subscribeConnectionStatus(listener);
         eventSubscriber.subscribeEventMessages(listener);
         eventSubscriber.subscribeRaces(listener);
-        eventSubscriber.subscribeControls(listener);
+        eventSubscriber.subscribeMapItems(listener);
         eventSubscriber.subscribeCompetitors(listener);
 
         for (IRace race : event.getRaces()) {
@@ -41,7 +41,7 @@ public class ConnectToAllRaces {
                         race
                 );
                 raceSubscriber.subscribeConnectionStatus(listener);
-                raceSubscriber.subscribeControlPositions(listener);
+                raceSubscriber.subscribePositionedItemsPositions(listener);
                 raceSubscriber.subscribePositions(listener);
                 //raceSubscriber.subscribePositionsSnapped(listener);
                 raceSubscriber.subscribeControlPassings(listener);

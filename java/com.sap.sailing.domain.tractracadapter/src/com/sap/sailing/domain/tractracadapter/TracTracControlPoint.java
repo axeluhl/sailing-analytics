@@ -4,10 +4,10 @@ import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
 import com.tractrac.model.lib.api.event.IEvent;
-import com.tractrac.model.lib.api.route.IControlPoint;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
- * An interface that hides the subtle differences between a {@link IControlPoint} as obtained through TTCM and a
+ * An interface that hides the subtle differences between a {@link IPositionedItem} as obtained through TTCM and a
  * {@link com.sap.sailing.domain.tractracadapter.impl.ClientParamsPHP.ControlPoint} as obtained by reading the
  * <code>clientparams.php</code> file.
  * 

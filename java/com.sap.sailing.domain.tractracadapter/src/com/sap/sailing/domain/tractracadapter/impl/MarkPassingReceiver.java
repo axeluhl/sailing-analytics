@@ -23,7 +23,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
@@ -65,7 +65,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
                 Map<Waypoint, MarkPassing> passingsByWaypoint = new HashMap<Waypoint, MarkPassing>();
                 // Note: the entries always describe all mark passings for the competitor so far in the current race in order
                 for (IControlPassing passing : event.getB().getPassings()) {
-                    IControl controlPointPassed = passing.getControl();
+                    IMapItem controlPointPassed = passing.getControl();
                     com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
                             .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
                     Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint);

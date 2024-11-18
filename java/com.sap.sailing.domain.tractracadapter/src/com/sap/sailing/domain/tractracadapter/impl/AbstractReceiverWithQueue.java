@@ -23,7 +23,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
@@ -264,7 +264,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     }
     
     protected void ensureAllSingleMarksOfCourseAreaAreCreated(final IRace tractracRace) {
-        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+        for (final IMapItem tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
                 tractracRace.getCourseArea())) {
             if (!tractracControlPoint.isMultiple()) {
                 final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);

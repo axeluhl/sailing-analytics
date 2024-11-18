@@ -63,7 +63,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
@@ -244,8 +244,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testLastWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
         final IControlRoute routeData = waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
-        final IControl removedControlPoint = controlPoints.remove(controlPoints.size()-1);
+        final List<IMapItem> controlPoints = new ArrayList<>(routeData.getControls());
+        final IMapItem removedControlPoint = controlPoints.remove(controlPoints.size()-1);
         course.addCourseListener(new CourseListener() {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -268,8 +268,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void testLastButOneWaypointRemoved() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
         final IControlRoute routeData = waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
-        final IControl removedControlPoint = controlPoints.remove(1);
+        final List<IMapItem> controlPoints = new ArrayList<>(routeData.getControls());
+        final IMapItem removedControlPoint = controlPoints.remove(1);
         course.addCourseListener(new CourseListener() {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -299,9 +299,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testWaypointAddedAtEnd() throws PatchFailedException, InterruptedException {
         final boolean[] result = new boolean[1];
-        final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
+        final IMapItem cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
         final IControlRoute routeData = waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
+        final List<IMapItem> controlPoints = new ArrayList<>(routeData.getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override
@@ -326,8 +326,8 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         }
     }
 
-    private IControl createMockedControlPoint(String name, int numberOfMarks, UUID id) {
-        final IControl cp1 = Mockito.mock(IControl.class);
+    private IMapItem createMockedControlPoint(String name, int numberOfMarks, UUID id) {
+        final IMapItem cp1 = Mockito.mock(IMapItem.class);
         Mockito.when(cp1.getName()).thenReturn(name);
         Mockito.when(cp1.getSize()).thenReturn(numberOfMarks);
         Mockito.when(cp1.getId()).thenReturn(id);
@@ -337,9 +337,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     @Test
     public void testTrackedRacesTrackedLegsUpdatedProperly() throws InterruptedException, PatchFailedException {
         final boolean[] result = new boolean[1];
-        final IControl cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
+        final IMapItem cp1 = createMockedControlPoint("CP1", 1, UUID.randomUUID());
         final IControlRoute routeData = waitForRouteData();
-        final List<IControl> controlPoints = new ArrayList<>(routeData.getControls());
+        final List<IMapItem> controlPoints = new ArrayList<>(routeData.getControls());
         controlPoints.add(cp1);
         course.addCourseListener(new CourseListener() {
             @Override

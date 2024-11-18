@@ -40,7 +40,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.route.IPathRoute;
 import com.tractrac.model.lib.api.route.IRoute;
@@ -137,18 +137,18 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         ensureAllSingleMarksOfCourseAreaAreCreated(tractracRace); // this way, single marks will be known by their original name, even if used as virtual marks in gates/lines
         final IRoute route = event.getA();
         final String routeMetadataString = route.getMetadata() != null ? route.getMetadata().getText() : null;
-        final LinkedHashMap<IControl, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
-        for (IControl cp : getTracTracEvent().getControls()) {
+        final LinkedHashMap<IMapItem, TracTracControlPoint> ttControlPointsForAllOriginalEventControlPoints = new LinkedHashMap<>();
+        for (IMapItem cp : getTracTracEvent().getMapItems()) {
             ttControlPointsForAllOriginalEventControlPoints.put(cp, new ControlPointAdapter(cp));
         }
         final List<TracTracControlPoint> routeControlPoints = new ArrayList<>();
-        for (IControl cp : event.getA().getControls()) {
+        for (IMapItem cp : event.getA().getControls()) {
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
         final List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         int i = 0;
-        for (IControl cp : event.getA().getControls()) {
+        for (IMapItem cp : event.getA().getControls()) {
             PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : PassingInstruction.None;
             if (!ttControlPointsForAllOriginalEventControlPoints.containsKey(cp)) {
                 logger.warning("The TracTrac event "+getTracTracEvent()+" with ID "+
@@ -210,7 +210,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
      * method return those, helping clients asking for "available" marks.
      */
     private void addAllMarksFromCourseArea(DynamicTrackedRace trackedRace) {
-        for (final IControl tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
+        for (final IMapItem tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
                 tractracRace.getCourseArea())) {
             final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
             final ControlPoint cp = getDomainFactory().getOrCreateControlPoint(ttcp);

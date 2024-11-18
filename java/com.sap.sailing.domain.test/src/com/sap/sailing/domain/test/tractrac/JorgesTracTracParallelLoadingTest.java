@@ -32,15 +32,15 @@ import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.competitor.IPositionListener;
 import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
-import com.tractrac.subscription.lib.api.control.IControlPointPositionListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener;
 import com.tractrac.util.lib.api.autolog.LoggerLocator;
 
 /**
@@ -73,7 +73,7 @@ public class JorgesTracTracParallelLoadingTest {
                         SubscriptionLogger subscriptionLogger = new SubscriptionLogger(race);
                         IRaceSubscriber raceSubscriber = SubscriptionLocator.getSusbcriberFactory().createRaceSubscriber(race);
                         raceSubscriber.subscribePositions(subscriptionLogger);
-                        raceSubscriber.subscribeControlPositions(subscriptionLogger);
+                        raceSubscriber.subscribePositionedItemsPositions(subscriptionLogger);
                         raceSubscriber.subscribeControlPassings(subscriptionLogger);
                         raceSubscriber.subscribeConnectionStatus(subscriptionLogger);
                         raceSubscriber.start();
@@ -140,7 +140,7 @@ public class JorgesTracTracParallelLoadingTest {
     /**
      * Created by jorge on 15/02/17.
      */
-    public class SubscriptionLogger implements IControlPointPositionListener, IControlPassingsListener, IPositionListener,
+    public class SubscriptionLogger implements IPositionedItemPositionListener, IControlPassingsListener, IPositionListener,
             IConnectionStatusListener {
         private final IRace race;
         
@@ -191,7 +191,7 @@ public class JorgesTracTracParallelLoadingTest {
         }
 
         @Override
-        public void gotControlPointPosition(IControl control, IPosition position, int controlPointNumber) {
+        public void gotControlPointPosition(IMapItem control, IPosition position, int controlPointNumber) {
             String outputFile = race.getName() + "-Control-" + control.getName() + "-Positions.txt";
             String date = String.valueOf(position.getTimestamp());
 

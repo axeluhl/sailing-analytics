@@ -32,7 +32,7 @@ import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
@@ -164,17 +164,17 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         return race;
     }
 
-    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {
+    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IMapItem> controlPoints) {
         List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
-        for (IControl cp : controlPoints) {
+        for (IMapItem cp : controlPoints) {
             ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), PassingInstruction.None));
         }
         return ttControlPoints;
     }
     
-    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<IControl> controlPoints) {
+    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<IMapItem> controlPoints) {
         List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
-        for (IControl cp : controlPoints) {
+        for (IMapItem cp : controlPoints) {
             ttControlPoints.add(new ControlPointAdapter(cp));
         }
         return ttControlPoints;

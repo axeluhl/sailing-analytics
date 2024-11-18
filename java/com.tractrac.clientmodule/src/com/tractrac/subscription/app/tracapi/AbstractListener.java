@@ -2,19 +2,19 @@ package com.tractrac.subscription.app.tracapi;
 
 import com.tractrac.model.lib.api.data.*;
 import com.tractrac.model.lib.api.event.*;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.route.IPathRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.competitor.*;
 import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
-import com.tractrac.subscription.lib.api.control.IControlPointPositionListener;
 import com.tractrac.subscription.lib.api.control.IControlRouteChangeListener;
-import com.tractrac.subscription.lib.api.control.IControlsListener;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.IEventMessageListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
+import com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener;
+import com.tractrac.subscription.lib.api.map.IMapItemsListener;
 import com.tractrac.subscription.lib.api.race.IRaceCompetitorListener;
 import com.tractrac.subscription.lib.api.race.IRaceMessageListener;
 import com.tractrac.subscription.lib.api.race.IRaceStartStopTimesChangeListener;
@@ -28,10 +28,10 @@ import java.util.UUID;
  */
 public abstract class AbstractListener implements IEventMessageListener,
         IRaceMessageListener, IPositionListener, IPositionOffsetListener,
-        IPositionSnappedListener, IConnectionStatusListener, IControlPointPositionListener,
+        IPositionSnappedListener, IConnectionStatusListener, IPositionedItemPositionListener,
         IControlPassingsListener, IRaceStartStopTimesChangeListener,
         IControlRouteChangeListener, ICompetitorSensorDataListener,
-        IRacesListener, ICompetitorsListener, IControlsListener, IRaceCompetitorListener {
+        IRacesListener, ICompetitorsListener, IMapItemsListener, IRaceCompetitorListener {
 
     @Override
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
@@ -60,7 +60,7 @@ public abstract class AbstractListener implements IEventMessageListener,
     }
 
     @Override
-    public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
+    public void gotControlPointPosition(IMapItem control, IPosition position, int markNumber) {
 
     }
 
@@ -127,17 +127,17 @@ public abstract class AbstractListener implements IEventMessageListener,
     }
 
     @Override
-    public void updateControl(long timestamp, IControl control) {
+    public void updateMapItem(long timestamp, IMapItem control) {
 
     }
 
     @Override
-    public void addControl(long timestamp, IControl control) {
+    public void addMapItem(long timestamp, IMapItem control) {
 
     }
 
     @Override
-    public void deleteControl(long timestamp, UUID controlId) {
+    public void deleteMapItem(long timestamp, UUID controlId) {
 
     }
 

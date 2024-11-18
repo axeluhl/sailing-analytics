@@ -53,14 +53,14 @@ public class Main {
         eventSubscriber.subscribeConnectionStatus(listener);
         eventSubscriber.subscribeEventMessages(listener);
         eventSubscriber.subscribeRaces(listener);
-        eventSubscriber.subscribeControls(listener);
+        eventSubscriber.subscribeMapItems(listener);
         eventSubscriber.subscribeCompetitors(listener);
 
         IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(
                 race
         );
         raceSubscriber.subscribeConnectionStatus(listener);
-        raceSubscriber.subscribeControlPositions(listener);
+        raceSubscriber.subscribePositionedItemsPositions(listener);
         raceSubscriber.subscribePositions(listener);
         //raceSubscriber.subscribePositionsSnapped(listener);
         raceSubscriber.subscribeControlPassings(listener);

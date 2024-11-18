@@ -2,7 +2,7 @@ package com.tractrac.subscription.app.tracapi;
 
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.util.lib.api.TimeUtils;
 
 import java.util.Date;
@@ -13,7 +13,7 @@ import java.util.Date;
 public class DelayListener extends AbstractListener {
 
     @Override
-    public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
+    public void gotControlPointPosition(IMapItem control, IPosition position, int markNumber) {
         //printDelay(position.getTimestamp(), control.getName());
     }
 

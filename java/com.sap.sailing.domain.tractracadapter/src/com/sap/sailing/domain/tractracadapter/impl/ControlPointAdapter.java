@@ -3,13 +3,13 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import java.util.UUID;
 
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 
 public class ControlPointAdapter extends AbstractWithID implements TracTracControlPoint {
     private static final long serialVersionUID = 1012632574166553433L;
-    private final IControl controlPoint;
+    private final IMapItem controlPoint;
 
-    public ControlPointAdapter(IControl controlPoint) {
+    public ControlPointAdapter(IMapItem controlPoint) {
         super();
         this.controlPoint = controlPoint;
     }

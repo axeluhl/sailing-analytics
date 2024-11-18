@@ -115,7 +115,7 @@ import com.tractrac.model.lib.api.event.ICompetitorClass;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -724,10 +724,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<IControl> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
-        final Set<IControl> result = new HashSet<>();
+    public Iterable<IMapItem> getControlsForCourseArea(IEvent tracTracEvent, String tracTracCourseAreaName) {
+        final Set<IMapItem> result = new HashSet<>();
         if (tracTracCourseAreaName != null) {
-            for (final IControl control : tracTracEvent.getControls()) {
+            for (final IMapItem control : tracTracEvent.getMapItems()) {
                 if (control.getCourseArea() != null && control.getCourseArea().equals(tracTracCourseAreaName)) {
                     result.add(control);
                 }
@@ -737,11 +737,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public ControlPoint getExistingControlWithTwoMarks(Iterable<IControl> candidates, Mark first, Mark second) {
+    public ControlPoint getExistingControlWithTwoMarks(Iterable<IMapItem> candidates, Mark first, Mark second) {
         final Set<Mark> pairOfMarksToFind = new HashSet<>();
         pairOfMarksToFind.add(first);
         pairOfMarksToFind.add(second);
-        for (final IControl control : candidates) {
+        for (final IMapItem control : candidates) {
             TracTracControlPoint cp = new ControlPointAdapter(control);
             Set<Mark> marksInExistingControlPoint = new HashSet<>();
             final ControlPoint controlPoint = getOrCreateControlPoint(cp);
