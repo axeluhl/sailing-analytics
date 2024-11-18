@@ -17,7 +17,9 @@ else
   # Install packages for MariaDB and cron/anacron/crontab:
   sudo apt-get -y update
   sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng
+  # Note that the fail2ban installation on Debian automatically configures a jail for sshd based on auth.log;
+  # therefore, the setup_fail2ban function from imageupgrade_functions.sh does not need to be invoked in this case.
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install rabbitmq-server systemd-cron jq syslog-ng fail2ban
   sudo touch /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
   sudo chown admin:admin /var/run/last_change_aws_landscape_managers_ssh_keys__home_admin
   scp -o StrictHostKeyChecking=false -r root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh /home/admin
