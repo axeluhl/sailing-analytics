@@ -315,7 +315,7 @@ setup_fail2ban() {
     # configuration/environments_scripts/repo/etc/fail2ban/jail.d/customisation.local for a
     # systemd-based sshd-iptables filter.
     sudo touch /var/log/fail2ban.log
-    sudo systemctl start fail2ban
+    sudo systemctl restart fail2ban
 }
 
 setup_mail_sending() {
