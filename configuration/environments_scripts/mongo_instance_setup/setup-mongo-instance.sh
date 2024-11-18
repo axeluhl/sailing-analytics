@@ -26,11 +26,11 @@ else
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    build_crontab_and_setup_files mongo_instance_setup
     # Install MongoDB 5.0 and configure as replica set "live"
     setup_mongo_7_0_on_AL2023
     setup_mail_sending
     setup_fail2ban
-    build_crontab_and_setup_files mongo_instance_setup
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
     scp root@sapsailing.com:ssh-key-reader.token /tmp
