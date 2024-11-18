@@ -10,6 +10,7 @@ package com.tractrac.subscription.app.tracapi;
 import com.tractrac.model.lib.api.data.*;
 import com.tractrac.model.lib.api.event.*;
 import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
@@ -71,7 +72,7 @@ public class EventListener extends AbstractListener {
     }
 
     @Override
-    public void gotControlPointPosition(IMapItem control, IPosition position, int markNumber) {
+    public void gotPositionedItemPosition(IPositionedItem control, IPosition position) {
         if (this.race != null) {
             String markCourseArea = control.getCourseArea();
             String raceCourseArea = this.race.getCourseArea();
@@ -80,12 +81,11 @@ public class EventListener extends AbstractListener {
                 return;
             }
         }
-//        String message = "COTRLPOS " + control.getName() + " - " + markNumber +
-//                "\t" + control.getShortName() + "\t" +
-//                position.toString();
-//        int posNumber = increasePos(controlPos, control.getId());
-//        message += (", TOTAL POS: " + posNumber);
-        //show(message);
+        String message = "COTRLPOS " + control.getName() +
+                position.toString();
+        int posNumber = increasePos(controlPos, control.getId());
+        message += (", TOTAL POS: " + posNumber);
+        show(message);
     }
 
     private synchronized int increasePos(Map<UUID, Integer> map, UUID id) {
@@ -170,18 +170,18 @@ public class EventListener extends AbstractListener {
     }
 
     @Override
-    public void updateMapItem(long timestamp, IMapItem control) {
-        show("UPDATE CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void updateMapItem(long timestamp, IMapItem mapItem) {
+        show("UPDATE CONTROL " + mapItem.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override
-    public void addMapItem(long timestamp, IMapItem control) {
-        show("ADD CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void addMapItem(long timestamp, IMapItem mapItem) {
+        show("ADD CONTROL " + mapItem.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override
-    public void deleteMapItem(long timestamp, UUID controlId) {
-        show("DELETE CONTROL " + controlId + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void deleteMapItem(long timestamp, UUID mapItemId) {
+        show("DELETE CONTROL " + mapItemId + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override

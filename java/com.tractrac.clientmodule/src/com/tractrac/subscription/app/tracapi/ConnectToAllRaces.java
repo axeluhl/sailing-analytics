@@ -41,7 +41,7 @@ public class ConnectToAllRaces {
                         race
                 );
                 raceSubscriber.subscribeConnectionStatus(listener);
-                raceSubscriber.subscribePositionedItemsPositions(listener);
+                raceSubscriber.subscribePositionedItemPositions(listener);
                 raceSubscriber.subscribePositions(listener);
                 //raceSubscriber.subscribePositionsSnapped(listener);
                 raceSubscriber.subscribeControlPassings(listener);

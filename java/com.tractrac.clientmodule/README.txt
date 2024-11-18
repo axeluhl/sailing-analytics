@@ -16,6 +16,73 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 4.0.0
+********************************************
+This is the final version. It changes the model of objects and is not compatible with versions 3.x.x.
+
+The IControl interface represents "controls" that are part of a route. Competitors pass through these "controls"
+during their race. However, in some sports, particularly in sailing, a control may consist of one or more "buoys."
+To accommodate this, the TracTrac API introduces the concept of IControlPoint, which represents all the points
+that make up a control.
+
+The current TracTrac model, however, does not differentiate between "control" and "control point." In TracTrac,
+everything is treated as a control, which can either be singular (if attached to a tracking device)
+or composite (if represented by multiple controls). This model has a significant limitation: a tracking device
+cannot be attached to two or more controls simultaneously.
+
+To work around this limitation, the concept of a Virtual Tracker was introduced. A Virtual Tracker is a virtual tracking
+device that retrieves positions from a real tracking device. However, this approach created a secondary issue:
+the positions of a physical device were duplicated multiple times, significantly increasing the volume of data
+transmitted between the server and clients.
+
+This new TracAPI has been designed with the primary goal of eliminating the concept of Virtual Trackers. A secondary
+objective has been to support additional race objects that are neither competitors nor controls, such as offset marks,
+boundaries, wind sensors, etc.
+
+The new API introduces two key interfaces:
+
+1) com.tractrac.model.lib.api.map.IPositionedItem: Represents items with an attached position, either from a tracker
+or a static location. These objects are not rendered in the viewer; they represent "a concept of an object with a
+position on the map."
+
+2) com.tractrac.model.lib.api.map.IMapItem: Represents tangible objects that can be drawn in the viewer. They consist
+of one or more IPositionedItems, which are used to render them on the map.
+
+Breaking Changes from Version 3.x.x
+
+- com.tractrac.model.lib.api.route.IControl has been replaced by com.tractrac.model.lib.api.map.IMapItem.
+- com.tractrac.model.lib.api.route.IControlPoint has been replaced by com.tractrac.model.lib.api.map.IPositionedItem.
+- com.tractrac.model.lib.api.route.IControlRoute.getControls() now returns an array of IMapItems.
+- com.tractrac.model.lib.api.data.IControlPassing.getControl() now returns an IMapItem.
+- com.tractrac.model.lib.api.event.IEvent.getControls() has been removed. Use IEvent.getMapItems() or
+ IEvent.getPositionedItems() instead.
+- com.tractrac.model.lib.api.event.IEvent.getControl(UUID controlId) has been removed. Use IEvent.getMapItem(UUID mapItemId)
+ instead.
+- com.tractrac.subscription.lib.api.IEventSubscriber.subscribeControls(IControlsListener) has been replaced by
+IEventSubscriber.subscribeMapItems(IMapItemsListener).
+- com.tractrac.subscription.lib.api.IEventSubscriber.unsubscribeControls(IControlsListener) has been replaced
+by IEventSubscriber.unsubscribeMapItems(IMapItemsListener).
+- com.tractrac.subscription.lib.api.IRaceSubscriber.subscribeControlPositions(IControlPointPositionListener) has been
+ replaced by IRaceSubscriber.subscribePositionedItemPositions(IPositionedItemPositionListener).
+- com.tractrac.subscription.lib.api.IRaceSubscriber.unsubscribeControlPositions(IControlPointPositionListener) has been
+ replaced by IRaceSubscriber.unsubscribePositionedItemPositions(IPositionedItemPositionListener).
+- com.tractrac.subscription.lib.api.control.IControlsListener has been replaced by
+com.tractrac.subscription.lib.api.map.IMapItemsListener. All methods have also been updated: updateControl → updateMapItem,
+addControl → addMapItem, deleteControl → deleteMapItem
+- com.tractrac.subscription.lib.api.control.IControlPointPositionListener has been replaced by
+ com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener. The sole method in this interface
+ now returns the position of the IPositionedItem.
+
+Why IControl was renamed to IMapItem?
+
+The new API adopts a more generic model for objects. An IMapItem can now serve multiple purposes, such as being
+ part of a course or forming part of a line to define race boundaries. In this initial version, all IMapItems
+ are used as "controls." However, this will evolve in future iterations to support broader use cases.
+
+
+  Release date:
+
+********************************************
         TracAPI 3.15.13
 ********************************************
 This is a final version. It keeps the backward compatibility.
