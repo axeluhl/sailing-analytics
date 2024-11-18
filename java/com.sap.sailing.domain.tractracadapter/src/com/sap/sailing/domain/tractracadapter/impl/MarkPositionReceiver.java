@@ -11,12 +11,13 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
-import com.tractrac.model.lib.api.data.IPosition;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener;
@@ -36,7 +37,7 @@ import com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener;
  * @author Axel Uhl (d043530)
  * 
  */
-public class MarkPositionReceiver extends AbstractReceiverWithQueue<IMapItem, IPosition, Integer> {
+public class MarkPositionReceiver extends AbstractReceiverWithQueue<IPositionedItem, IPosition, Void> {
     private static final Logger logger = Logger.getLogger(MarkPositionReceiver.class.getName());
     
     private int received;
@@ -63,25 +64,25 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IMapItem, IP
         }
         listener = new IPositionedItemPositionListener() {
             @Override
-            public void gotControlPointPosition(IMapItem controlPoint, IPosition position, int arg2) {
-                enqueue(new Triple<IMapItem, IPosition, Integer>(controlPoint, position, arg2));
+            public void gotPositionedItemPosition(IPositionedItem mark, IPosition position) {
+                enqueue(new Triple<IPositionedItem, IPosition, Void>(mark, position, null));
             }
         };
     }
     
     @Override
     public void subscribe() {
-        getRaceSubscriber().subscribePositionedItemsPositions(listener);
+        getRaceSubscriber().subscribePositionedItemPositions(listener);
         startThread();
     }
     
     @Override
     protected void unsubscribe() {
-        getRaceSubscriber().unsubscribePositionedItemsPositions(listener);
+        getRaceSubscriber().unsubscribePositionedItemPositions(listener);
     }
 
     @Override
-    protected void handleEvent(Util.Triple<IMapItem, IPosition, Integer> event) {
+    protected void handleEvent(Util.Triple<IPositionedItem, IPosition, Void> event) {
         /* bug 5919 (https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=5919)
          * 
          * TracTrac has re-keyed all mark IDs from old events.

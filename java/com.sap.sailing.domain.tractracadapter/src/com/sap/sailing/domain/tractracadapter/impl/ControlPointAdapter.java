@@ -4,12 +4,13 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 
 public class ControlPointAdapter extends AbstractWithID implements TracTracControlPoint {
     private static final long serialVersionUID = 1012632574166553433L;
-    private final IMapItem controlPoint;
+    private final IPositionedItem controlPoint;
 
-    public ControlPointAdapter(IMapItem controlPoint) {
+    public ControlPointAdapter(IPositionedItem controlPoint) {
         super();
         this.controlPoint = controlPoint;
     }
@@ -46,17 +47,12 @@ public class ControlPointAdapter extends AbstractWithID implements TracTracContr
     }
 
     @Override
-    public boolean getHasTwoPoints() {
-        return controlPoint.isMultiple();
-    }
-
-    @Override
     public UUID getFirstMarkId() {
-        return controlPoint.getControlPoints().get(0).getId();
+        return controlPoint.getPositionedItems().get(0).getId();
     }
 
     @Override
     public UUID getSecondMarkId() {
-        return controlPoint.getControlPoints().get(1).getId();
+        return controlPoint.getPositionedItems().get(1).getId();
     }
 }

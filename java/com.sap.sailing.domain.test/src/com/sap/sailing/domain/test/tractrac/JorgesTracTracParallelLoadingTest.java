@@ -32,7 +32,7 @@ import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
-import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriptionLocator;
 import com.tractrac.subscription.lib.api.competitor.IPositionListener;
@@ -73,7 +73,7 @@ public class JorgesTracTracParallelLoadingTest {
                         SubscriptionLogger subscriptionLogger = new SubscriptionLogger(race);
                         IRaceSubscriber raceSubscriber = SubscriptionLocator.getSusbcriberFactory().createRaceSubscriber(race);
                         raceSubscriber.subscribePositions(subscriptionLogger);
-                        raceSubscriber.subscribePositionedItemsPositions(subscriptionLogger);
+                        raceSubscriber.subscribePositionedItemPositions(subscriptionLogger);
                         raceSubscriber.subscribeControlPassings(subscriptionLogger);
                         raceSubscriber.subscribeConnectionStatus(subscriptionLogger);
                         raceSubscriber.start();
@@ -191,7 +191,7 @@ public class JorgesTracTracParallelLoadingTest {
         }
 
         @Override
-        public void gotControlPointPosition(IMapItem control, IPosition position, int controlPointNumber) {
+        public void gotPositionedItemPosition(IPositionedItem control, IPosition position) {
             String outputFile = race.getName() + "-Control-" + control.getName() + "-Positions.txt";
             String date = String.valueOf(position.getTimestamp());
 
