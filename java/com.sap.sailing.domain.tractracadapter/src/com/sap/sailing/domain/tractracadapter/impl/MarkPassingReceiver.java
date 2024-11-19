@@ -66,8 +66,7 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<IRaceCompetit
                 // Note: the entries always describe all mark passings for the competitor so far in the current race in order
                 for (IControlPassing passing : event.getB().getPassings()) {
                     IMapItem controlPointPassed = passing.getControl();
-                    com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory()
-                            .getOrCreateControlPoint(new ControlPointAdapter(controlPointPassed));
+                    com.sap.sailing.domain.base.ControlPoint domainControlPoint = getDomainFactory().getOrCreateControlPoint(controlPointPassed);
                     Waypoint passed = findWaypointForControlPoint(trackedRace, waypointsIter, domainControlPoint);
                     if (passed != null) {
                         TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());

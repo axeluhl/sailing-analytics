@@ -56,7 +56,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Util;
@@ -255,7 +254,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             @Override
             public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
                 System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
-                ControlPoint cp = domainFactory.getOrCreateControlPoint(new ControlPointAdapter(removedControlPoint));
+                ControlPoint cp = domainFactory.getOrCreateControlPoint(removedControlPoint);
                 result[0] = zeroBasedIndex == controlPoints.size() && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
@@ -279,7 +278,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             @Override
             public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
                 System.out.println("waypointRemoved " + zeroBasedIndex + " / " + waypointThatGotRemoved);
-                ControlPoint cp = domainFactory.getOrCreateControlPoint(new ControlPointAdapter(removedControlPoint));
+                ControlPoint cp = domainFactory.getOrCreateControlPoint(removedControlPoint);
                 result[0] = zeroBasedIndex == 1 && waypointThatGotRemoved.getControlPoint() == cp;
             }
         });
@@ -307,7 +306,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
                 System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
-                ControlPoint cp = domainFactory.getOrCreateControlPoint(new ControlPointAdapter(cp1));
+                ControlPoint cp = domainFactory.getOrCreateControlPoint(cp1);
                 result[0] = zeroBasedIndex == controlPoints.size() - 1 && waypointThatGotAdded.getControlPoint() == cp;
             }
 
@@ -345,7 +344,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             @Override
             public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
                 System.out.println("waypointAdded " + zeroBasedIndex + " / " + waypointThatGotAdded);
-                ControlPoint cp = domainFactory.getOrCreateControlPoint(new ControlPointAdapter(cp1));
+                ControlPoint cp = domainFactory.getOrCreateControlPoint(cp1);
                 result[0] = zeroBasedIndex == controlPoints.size() - 1 && waypointThatGotAdded.getControlPoint() == cp;
             }
 

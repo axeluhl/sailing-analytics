@@ -30,7 +30,6 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.tractrac.model.lib.api.data.IControlPassing;
 import com.tractrac.model.lib.api.data.IControlPassings;
 import com.tractrac.model.lib.api.event.IRace;
@@ -157,18 +156,17 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         }
         assertNotNull(firstData[0]);
         assertTrue(firstData[0].getPassings().size() > 0);
-        IControlPassing entry = firstData[0].getPassings().iterator().next();
+        final IControlPassing entry = firstData[0].getPassings().iterator().next();
         assertNotNull(entry);
         // we expect to find the mark passings in order, so as we traverse the course for
         // its waypoints and compare their control points to the control point received,
         // the first waypoint is used
         boolean found = false;
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
-            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(new ControlPointAdapter(entry.getControl()))) {
+            if (waypoint.getControlPoint() == DomainFactory.INSTANCE.getOrCreateControlPoint(entry.getControl())) {
                 found = true;
             }
         }
         assertTrue(found);
     }
-
 }

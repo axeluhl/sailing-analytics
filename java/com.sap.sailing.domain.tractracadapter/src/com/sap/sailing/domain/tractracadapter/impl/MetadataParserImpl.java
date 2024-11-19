@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +15,7 @@ import java.util.UUID;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
-import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.NamedImpl;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
@@ -131,12 +128,12 @@ public class MetadataParserImpl implements MetadataParser {
      * </pre>
      */
     @Override
-    public Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints) {
+    public Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, int numberOfWaypoints) {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
             int start = routeMetadata.containsKey("Seq." + 0) ? 0 : 1;
-            for (int i = start; i < start + Util.size(controlPoints); i++) {
+            for (int i = start; i < start + numberOfWaypoints; i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
                 if (seqValue != null) {
                     final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
@@ -164,7 +161,6 @@ public class MetadataParserImpl implements MetadataParser {
 
     @Override
     public ControlPointMetaData parseControlPointMetadata(IPositionedItem controlPoint) {
-        final Iterable<ControlPointMetaData> result;
         final String controlPointMetadataString = controlPoint.getMetadata().getText();
         final String controlPointName = controlPoint.getName();
         final Map<String, String> controlPointMetadata;
@@ -197,16 +193,15 @@ public class MetadataParserImpl implements MetadataParser {
     }
     
     @Override
-    public Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
-            Iterable<? extends TracTracControlPoint> controlPoints) {
-        Map<String, Iterable<TracTracControlPoint>> result = new HashMap<String, Iterable<TracTracControlPoint>>();
+    public Map<String, Iterable<IPositionedItem>> parseSidelinesFromRaceMetadata(String raceMetadataString, Iterable<? extends IPositionedItem> allMarks) {
+        Map<String, Iterable<IPositionedItem>> result = new HashMap<>();
         if (raceMetadataString != null) {
             Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
             for (Entry<String, String> entry : sidelineMetadata.entrySet()) {
                 if (entry.getKey().startsWith("SIDELINE")) {
-                    List<TracTracControlPoint> sidelineCPs = new ArrayList<>();
+                    final List<IPositionedItem> sidelineCPs = new ArrayList<>();
                     result.put(entry.getKey(), sidelineCPs);
-                    for (TracTracControlPoint cp : controlPoints) {
+                    for (final IPositionedItem cp : allMarks) {
                         String cpName = cp.getName().trim();
                         if (cpName.equals(entry.getValue())) {
                             sidelineCPs.add(cp);

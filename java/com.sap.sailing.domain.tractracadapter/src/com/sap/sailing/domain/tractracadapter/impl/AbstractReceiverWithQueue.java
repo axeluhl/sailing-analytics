@@ -17,13 +17,13 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
-import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 
@@ -267,8 +267,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         for (final IMapItem tractracControlPoint : getDomainFactory().getControlsForCourseArea(getTracTracEvent(),
                 tractracRace.getCourseArea())) {
             if (!tractracControlPoint.isMultiple()) {
-                final TracTracControlPoint ttcp = new ControlPointAdapter(tractracControlPoint);
-                getDomainFactory().getOrCreateControlPoint(ttcp);
+                final IPositionedItem mark = tractracControlPoint.getPositionedItems().get(0);
+                getDomainFactory().getOrCreateMark(mark);
             }
         }
     }

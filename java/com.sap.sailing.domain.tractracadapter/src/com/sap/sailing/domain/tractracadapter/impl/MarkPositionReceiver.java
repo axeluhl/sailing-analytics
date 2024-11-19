@@ -108,7 +108,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<IPositionedI
                 singleMarksEnsuredAlready = true;
                 ensureAllSingleMarksOfCourseAreaAreCreated(tractracRace);
             }
-            Mark mark = getDomainFactory().getMark(new ControlPointAdapter(event.getA()), event.getC());
+            Mark mark = getDomainFactory().getMark(event.getA());
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
                 GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());

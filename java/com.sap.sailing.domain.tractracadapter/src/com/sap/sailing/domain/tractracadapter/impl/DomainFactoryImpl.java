@@ -89,12 +89,10 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.MetadataParser.BoatMetaData;
-import com.sap.sailing.domain.tractracadapter.MetadataParser.ControlPointMetaData;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
@@ -207,9 +205,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public void updateCourseWaypoints(Course courseToUpdate, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException {
+    public void updateCourseWaypoints(Course courseToUpdate, Iterable<Pair<IMapItem, PassingInstruction>> controlPoints) throws PatchFailedException {
         List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<>();
-        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> tractracControlPoint : controlPoints) {
+        for (Pair<IMapItem, PassingInstruction> tractracControlPoint : controlPoints) {
             com.sap.sailing.domain.base.ControlPoint newDomainControlPoint = getOrCreateControlPoint(tractracControlPoint.getA());
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>(newDomainControlPoint, tractracControlPoint.getB()));
         }
@@ -218,11 +216,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public List<Sideline> createSidelines(final String raceMetadataString, final Iterable<? extends TracTracControlPoint> allEventControlPoints) {
+    public List<Sideline> createSidelines(final String raceMetadataString, final Iterable<? extends IPositionedItem> allEventMarks) {
         List<Sideline> sidelines = new ArrayList<Sideline>();
-        Map<String, Iterable<TracTracControlPoint>> sidelinesMetadata = getMetadataParser().parseSidelinesFromRaceMetadata(
-                raceMetadataString, allEventControlPoints);
-        for (Entry<String, Iterable<TracTracControlPoint>> sidelineEntry : sidelinesMetadata.entrySet()) {
+        Map<String, Iterable<IPositionedItem>> sidelinesMetadata = getMetadataParser().parseSidelinesFromRaceMetadata(
+                raceMetadataString, allEventMarks);
+        for (Entry<String, Iterable<IPositionedItem>> sidelineEntry : sidelinesMetadata.entrySet()) {
             if (Util.size(sidelineEntry.getValue()) > 0) {
                 sidelines.add(createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
             }
@@ -230,70 +228,45 @@ public class DomainFactoryImpl implements DomainFactory {
         return sidelines;
     }
     
-    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(IMapItem mapItem) {
+    public ControlPoint getOrCreateControlPoint(IMapItem mapItem) {
         synchronized (controlPointCache) {
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(mapItem);
+            ControlPoint domainControlPoint = controlPointCache.get(mapItem);
             if (domainControlPoint == null) {
-                final MetadataParser.ControlPointMetaData controlPointMetadata = getMetadataParser().parseControlPointMetadata(positionedItem);
                 final List<Mark> marks = new ArrayList<Mark>();
-                for (ControlPointMetaData markMetadata : controlPointMetadata) {
-                    final Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
-                            /* no separate short name; use name as short name, too */ markMetadata.getName(),
-                            markMetadata.getType(), markMetadata.getColor(),
-                            markMetadata.getShape(), markMetadata.getPattern());
+                for (IPositionedItem positionedItem : mapItem.getPositionedItems()) {
+                    final Mark mark = getOrCreateMark(positionedItem);
                     marks.add(mark);
                 }
-                if (positionedItem.getHasTwoPoints()) {
-                    // it's a gate
-                    Iterator<Mark> markIter = marks.iterator();
-                    Mark mark1 = markIter.next();
-                    Mark mark2 = markIter.next();
-                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(positionedItem.getId(), mark1,
-                            mark2, positionedItem.getName(), positionedItem.getShortName());
+                if (mapItem.isMultiple()) {
+                    // it's a gate or line or mark with offset mark
+                    final Iterator<Mark> markIter = marks.iterator();
+                    final Mark mark1 = markIter.next();
+                    final Mark mark2 = markIter.next();
+                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(mapItem.getId(), mark1,
+                            mark2, mapItem.getName(), mapItem.getShortName());
                 } else {
-                    Mark mark = marks.iterator().next();
+                    final Mark mark = marks.iterator().next();
                     domainControlPoint = mark;
                 }
-                controlPointCache.put(positionedItem, domainControlPoint);
+                controlPointCache.put(mapItem, domainControlPoint);
             }
             return domainControlPoint;
         }
     }
 
-    public com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(IPositionedItem positionedItem) {
-        synchronized (controlPointCache) {
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = controlPointCache.get(positionedItem);
-            if (domainControlPoint == null) {
-                final MetadataParser.ControlPointMetaData controlPointMetadata = getMetadataParser().parseControlPointMetadata(positionedItem);
-                final List<Mark> marks = new ArrayList<Mark>();
-                for (ControlPointMetaData markMetadata : controlPointMetadata) {
-                    final Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
-                            /* no separate short name; use name as short name, too */ markMetadata.getName(),
-                            markMetadata.getType(), markMetadata.getColor(),
-                            markMetadata.getShape(), markMetadata.getPattern());
-                    marks.add(mark);
-                }
-                if (positionedItem.getHasTwoPoints()) {
-                    // it's a gate
-                    Iterator<Mark> markIter = marks.iterator();
-                    Mark mark1 = markIter.next();
-                    Mark mark2 = markIter.next();
-                    domainControlPoint = baseDomainFactory.createControlPointWithTwoMarks(positionedItem.getId(), mark1,
-                            mark2, positionedItem.getName(), positionedItem.getShortName());
-                } else {
-                    Mark mark = marks.iterator().next();
-                    domainControlPoint = mark;
-                }
-                controlPointCache.put(positionedItem, domainControlPoint);
-            }
-            return domainControlPoint;
-        }
+    public Mark getOrCreateMark(IPositionedItem positionedItem) {
+        final MetadataParser.ControlPointMetaData markMetadata = getMetadataParser().parseControlPointMetadata(positionedItem);
+        final Mark mark = baseDomainFactory.getOrCreateMark(markMetadata.getId(), markMetadata.getName(),
+                /* no separate short name; use name as short name, too */ markMetadata.getName(),
+                markMetadata.getType(), markMetadata.getColor(),
+                markMetadata.getShape(), markMetadata.getPattern());
+        return mark;
     }
 
     @Override
-    public Course createCourse(String name, Iterable<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) {
+    public Course createCourse(String name, Iterable<com.sap.sse.common.Util.Pair<IMapItem, PassingInstruction>> controlPoints) {
         List<Waypoint> waypointList = new ArrayList<Waypoint>();
-        for (com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction> controlPoint : controlPoints) {
+        for (com.sap.sse.common.Util.Pair<IMapItem, PassingInstruction> controlPoint : controlPoints) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(getOrCreateControlPoint(controlPoint.getA()), controlPoint.getB());
             waypointList.add(waypoint);
         }
@@ -301,10 +274,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints) {
-        List<Mark> marks = new ArrayList<Mark>();
-        for (TracTracControlPoint controlPoint : controlPoints) {
-            ControlPoint cp = getOrCreateControlPoint(controlPoint);
+    public Sideline createSideline(String name, Iterable<IPositionedItem> positionedItems) {
+        final List<Mark> marks = new ArrayList<Mark>();
+        for (final IPositionedItem controlPoint : positionedItems) {
+            ControlPoint cp = getOrCreateMark(controlPoint);
             for (Mark mark : cp.getMarks()) {
                 marks.add(mark);
             }
@@ -773,9 +746,8 @@ public class DomainFactoryImpl implements DomainFactory {
         pairOfMarksToFind.add(first);
         pairOfMarksToFind.add(second);
         for (final IMapItem control : candidates) {
-            TracTracControlPoint cp = new ControlPointAdapter(control);
-            Set<Mark> marksInExistingControlPoint = new HashSet<>();
-            final ControlPoint controlPoint = getOrCreateControlPoint(cp);
+            final Set<Mark> marksInExistingControlPoint = new HashSet<>();
+            final ControlPoint controlPoint = getOrCreateControlPoint(control);
             Util.addAll(controlPoint.getMarks(), marksInExistingControlPoint);
             if (marksInExistingControlPoint.equals(pairOfMarksToFind)) {
                 return controlPoint;
@@ -1046,20 +1018,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Mark getMark(IPositionedItem positionedItem) {
-        com.sap.sailing.domain.base.ControlPoint myControlPoint = getOrCreateControlPoint(positionedItem);
-        Mark result;
-        Iterator<Mark> iter = myControlPoint.getMarks().iterator();
-        if (controlPoint.getHasTwoPoints()) {
-            if (zeroBasedMarkIndex == 0) {
-                result = iter.next();
-            } else {
-                iter.next();
-                result = iter.next();
-            }
-        } else {
-            result = iter.next();
-        }
-        return result;
+        return getOrCreateMark(positionedItem);
     }
 
     @Override

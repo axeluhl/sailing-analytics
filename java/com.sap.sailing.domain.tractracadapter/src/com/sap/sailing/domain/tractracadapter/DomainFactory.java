@@ -84,9 +84,9 @@ public interface DomainFactory {
 
     com.sap.sse.common.TimePoint createTimePoint(long timestamp);
 
-    Course createCourse(String name, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints);
+    Course createCourse(String name, Iterable<Util.Pair<IMapItem, PassingInstruction>> controlPoints);
 
-    Sideline createSideline(String name, Iterable<TracTracControlPoint> controlPoints);
+    Sideline createSideline(String name, Iterable<IPositionedItem> marks);
 
     com.sap.sailing.domain.base.Boat getOrCreateBoat(Serializable boatId, String boatName, BoatClass boatClass,
             String sailId, Color boatColor, RaceTrackingHandler raceTrackingHandler);
@@ -230,7 +230,9 @@ public interface DomainFactory {
      */
     Mark getMark(IPositionedItem positionedItem);
 
-    com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint);
+    com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(IMapItem controlPoint);
+
+    com.sap.sailing.domain.base.ControlPoint getOrCreateMark(IPositionedItem mark);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
@@ -256,7 +258,7 @@ public interface DomainFactory {
      * of waypoints. The waypoints are created from the control points and represent usages of the control points
      * in a course. A single control point may be used more than once in a course's list of waypoints.
      */
-    void updateCourseWaypoints(Course courseToUpdate, Iterable<Util.Pair<TracTracControlPoint, PassingInstruction>> controlPoints) throws PatchFailedException;
+    void updateCourseWaypoints(Course courseToUpdate, Iterable<Util.Pair<IMapItem, PassingInstruction>> controlPoints) throws PatchFailedException;
 
     TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
             String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername,
@@ -315,7 +317,7 @@ public interface DomainFactory {
 
     BoatClass getDominantBoatClass(Iterable<String> competitorClassNames);
 
-    List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
+    List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends IPositionedItem> allEventMarks);
 
     /**
      * When a tracked race has been created for tracking with the TracTrac adapter, change listeners have to be subscribed to
