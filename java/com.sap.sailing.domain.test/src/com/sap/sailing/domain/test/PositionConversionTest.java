@@ -14,7 +14,7 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.model.lib.api.data.IPosition;
-import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.subscription.lib.api.map.IPositionedItemPositionListener;
 
 public class PositionConversionTest extends AbstractTracTracLiveTest {
@@ -31,7 +31,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
 
     @Test
     public void testReceiptOfControlPointPosition() {
-        final IMapItem[] firstTracked = new IMapItem[1];
+        final IPositionedItem[] firstTracked = new IPositionedItem[1];
         final IPosition[] firstData = new IPosition[1];
         final Object semaphor = new Object();
         
@@ -58,11 +58,11 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
 
             @Override
             public void subscribe() {
-                getRaceSubscriber().subscribePositionedItemsPositions(new IPositionedItemPositionListener() {
+                getRaceSubscriber().subscribePositionedItemPositions(new IPositionedItemPositionListener() {
                     private boolean first = true;
                     
                     @Override
-                    public void gotControlPointPosition(IMapItem control, IPosition position, int controlPointNumber) {
+                    public void gotPositionedItemPosition(IPositionedItem control, IPosition position) {
                         if (first) {
                             synchronized (semaphor) {
                                 firstTracked[0] = control;

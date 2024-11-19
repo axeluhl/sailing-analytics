@@ -10,6 +10,7 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Named;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -46,7 +47,7 @@ public interface MetadataParser {
     /**
      * Returns as many metadata objects as there are marks in the control point (two for a gate, one otherwise)
      */
-    Iterable<ControlPointMetaData> parseControlPointMetadata(TracTracControlPoint controlPoint);
+    ControlPointMetaData parseControlPointMetadata(IPositionedItem positionedItem);
 
     /**
      * Parses the race metadata for sideline information

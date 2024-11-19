@@ -228,7 +228,7 @@ public interface DomainFactory {
      * The record may be for a single mark or a gate. If for a gate, the {@link ControlPointPositionData#getIndex()
      * index} is used to determine which of its marks is affected.
      */
-    Mark getMark(TracTracControlPoint controlPoint, int zeroBasedMarkIndex);
+    Mark getMark(IPositionedItem positionedItem);
 
     com.sap.sailing.domain.base.ControlPoint getOrCreateControlPoint(TracTracControlPoint controlPoint);
 
