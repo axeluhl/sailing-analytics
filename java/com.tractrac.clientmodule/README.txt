@@ -16,6 +16,18 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 4.0.1
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 19/11/2024
+
+ 1) Bugs
+
+ - IPositionedItem.getMetadata() didn't get the content from the parameters file
+ (Reported by Axel Uhl, 19/11/2024)
+
+********************************************
         TracAPI 4.0.0
 ********************************************
 This is the final version. It changes the model of objects and is not compatible with versions 3.x.x.
@@ -79,8 +91,7 @@ The new API adopts a more generic model for objects. An IMapItem can now serve m
  part of a course or forming part of a line to define race boundaries. In this initial version, all IMapItems
  are used as "controls." However, this will evolve in future iterations to support broader use cases.
 
-
-  Release date:
+  Release date: 18/11/2024
 
 ********************************************
         TracAPI 3.15.13

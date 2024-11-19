@@ -22,6 +22,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.NamedImpl;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -162,9 +163,9 @@ public class MetadataParserImpl implements MetadataParser {
     }
 
     @Override
-    public Iterable<ControlPointMetaData> parseControlPointMetadata(TracTracControlPoint controlPoint) {
+    public ControlPointMetaData parseControlPointMetadata(IPositionedItem controlPoint) {
         final Iterable<ControlPointMetaData> result;
-        final String controlPointMetadataString = controlPoint.getMetadata();
+        final String controlPointMetadataString = controlPoint.getMetadata().getText();
         final String controlPointName = controlPoint.getName();
         final Map<String, String> controlPointMetadata;
         if (controlPointMetadataString == null) {
@@ -172,43 +173,13 @@ public class MetadataParserImpl implements MetadataParser {
         } else {
             controlPointMetadata = parseMetadata(controlPointMetadataString);
         }
-        if (controlPoint.getHasTwoPoints()) {
-            // it's a gate
-            MarkType type1 = resolveMarkTypeFromMetadata(controlPointMetadata, "P1.Type");
-            MarkType type2 = resolveMarkTypeFromMetadata(controlPointMetadata, "P2.Type");
-            String color1AsString = controlPointMetadata.get("P1.Color");
-            Color color1 = AbstractColor.getCssColor(color1AsString);
-            String color2AsString = controlPointMetadata.get("P2.Color");
-            Color color2 = AbstractColor.getCssColor(color2AsString);
-            String shape1 = controlPointMetadata.get("P1.Shape");
-            String shape2 = controlPointMetadata.get("P2.Shape");
-            String pattern1 = controlPointMetadata.get("P1.Pattern");
-            String pattern2 = controlPointMetadata.get("P2.Pattern");
-            UUID mark1UUID = controlPoint.getFirstMarkId();
-            UUID mark2UUID = controlPoint.getSecondMarkId();
-            String name1 = controlPointMetadata.get("P1.Name");
-            if (name1 == null) {
-                name1 = controlPointName + " (1)";
-            }
-            String name2 = controlPointMetadata.get("P2.Name");
-            if (name2 == null) {
-                name2 = controlPointName + " (2)";
-            }
-            final Serializable id1 = mark1UUID == null ? controlPoint.getId().toString()+" (1)" : mark1UUID;
-            ControlPointMetaData mark1Metadata = new ControlPointMetaDataImpl(name1, type1, color1, shape1, pattern1, id1);
-            final Serializable id2 = mark2UUID == null ? controlPoint.getId().toString()+" (2)" : mark2UUID;
-            ControlPointMetaData mark2Metadata = new ControlPointMetaDataImpl(name2, type2, color2, shape2, pattern2, id2);
-            result = Arrays.asList(new ControlPointMetaData[] { mark1Metadata, mark2Metadata });
-        } else {
-            MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
-            String colorAsString = controlPointMetadata.get("Color");
-            Color color = AbstractColor.getCssColor(colorAsString);
-            String shape = controlPointMetadata.get("Shape");
-            String pattern = controlPointMetadata.get("Pattern");
-            ControlPointMetaData markMetadata = new ControlPointMetaDataImpl(controlPointName, type, color, shape, pattern, controlPoint.getId());
-            result = Collections.singleton(markMetadata);
-        }
-        return result;
+        MarkType type = resolveMarkTypeFromMetadata(controlPointMetadata, "Type");
+        String colorAsString = controlPointMetadata.get("Color");
+        Color color = AbstractColor.getCssColor(colorAsString);
+        String shape = controlPointMetadata.get("Shape");
+        String pattern = controlPointMetadata.get("Pattern");
+        ControlPointMetaData markMetadata = new ControlPointMetaDataImpl(controlPointName, type, color, shape, pattern, controlPoint.getId());
+        return markMetadata;
     }
 
     private MarkType resolveMarkTypeFromMetadata(Map<String, String> controlPointMetadata, String typePropertyName) {
