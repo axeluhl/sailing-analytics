@@ -8,6 +8,7 @@ package com.igtimi.timesync.proto;
 /**
  * Protobuf type {@code com.igtimi.NTPResponse}
  */
+@SuppressWarnings({"unchecked"})
 public final class NTPResponse extends
     com.google.protobuf.GeneratedMessage implements
     // @@protoc_insertion_point(message_implements:com.igtimi.NTPResponse)

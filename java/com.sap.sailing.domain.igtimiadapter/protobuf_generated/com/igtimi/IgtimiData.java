@@ -5,6 +5,7 @@
 
 package com.igtimi;
 
+@SuppressWarnings({"unused", "unchecked"})
 public final class IgtimiData {
   private IgtimiData() {}
   static {
@@ -1342,7 +1343,7 @@ public final class IgtimiData {
     }
 
     public static final int DATA_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiData.DataMsg> data_;
     /**
      * <code>repeated .com.igtimi.DataMsg data = 1 [json_name = "dm"];</code>
@@ -2162,7 +2163,7 @@ public final class IgtimiData {
     }
 
     private int sourceCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object source_;
     public enum SourceCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -2204,7 +2205,7 @@ public final class IgtimiData {
     }
 
     public static final int DATA_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiData.DataPoint> data_;
     /**
      * <pre>
@@ -4093,7 +4094,7 @@ public final class IgtimiData {
     }
 
     private int dataCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object data_;
     public enum DataCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -20872,7 +20873,7 @@ public final class IgtimiData {
     }
 
     public static final int FILENAME_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object filename_ = "";
     /**
      * <code>string filename = 3 [json_name = "filename"];</code>
@@ -20911,7 +20912,7 @@ public final class IgtimiData {
     }
 
     public static final int MD5_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object md5_ = "";
     /**
      * <code>string md5 = 4 [json_name = "md5"];</code>
@@ -20950,7 +20951,7 @@ public final class IgtimiData {
     }
 
     public static final int CONTENT_TYPE_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object contentType_ = "";
     /**
      * <code>string content_type = 5 [json_name = "contentType"];</code>
@@ -30127,7 +30128,7 @@ public final class IgtimiData {
     }
 
     public static final int VALUE_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object value_ = "";
     /**
      * <code>string value = 2 [json_name = "val"];</code>
@@ -31234,7 +31235,7 @@ public final class IgtimiData {
     }
 
     public static final int VALUE_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object value_ = "";
     /**
      * <code>string value = 2 [json_name = "val"];</code>
@@ -32482,7 +32483,7 @@ public final class IgtimiData {
     }
 
     public static final int MESSAGE_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object message_ = "";
     /**
      * <code>string message = 2 [json_name = "msg"];</code>
@@ -33139,7 +33140,7 @@ public final class IgtimiData {
     }
 
     public static final int VALUE_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object value_ = "";
     /**
      * <code>string value = 2 [json_name = "val"];</code>
@@ -33950,7 +33951,7 @@ public final class IgtimiData {
       }
 
       public static final int ID_FIELD_NUMBER = 2;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <code>string id = 2 [json_name = "id"];</code>
@@ -33989,7 +33990,7 @@ public final class IgtimiData {
       }
 
       public static final int SERIAL_NUMBER_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object serialNumber_ = "";
       /**
        * <code>string serial_number = 3 [json_name = "serialNumber"];</code>
@@ -34713,7 +34714,7 @@ public final class IgtimiData {
       }
 
       public static final int KEY_FIELD_NUMBER = 2;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object key_ = "";
       /**
        * <code>string key = 2 [json_name = "key"];</code>
@@ -34752,7 +34753,7 @@ public final class IgtimiData {
       }
 
       public static final int VALUE_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object value_ = "";
       /**
        * <code>string value = 3 [json_name = "value"];</code>
@@ -35439,7 +35440,7 @@ public final class IgtimiData {
       }
 
       public static final int ORGANIZATIONAL_UNIT_FIELD_NUMBER = 1;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object organizationalUnit_ = "";
       /**
        * <code>string organizational_unit = 1 [json_name = "ou"];</code>
@@ -36673,7 +36674,7 @@ public final class IgtimiData {
       }
 
       public static final int ID_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <pre>
@@ -36720,7 +36721,7 @@ public final class IgtimiData {
       }
 
       public static final int REFERENCES_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.LazyStringArrayList references_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       /**
@@ -37799,7 +37800,7 @@ public final class IgtimiData {
     }
 
     private int entryCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object entry_;
     public enum EntryCase
         implements com.google.protobuf.Internal.EnumLite,

@@ -5,6 +5,7 @@
 
 package com.igtimi;
 
+@SuppressWarnings({"unused", "unchecked"})
 public final class IgtimiAPI {
   private IgtimiAPI() {}
   static {
@@ -99,7 +100,6 @@ public final class IgtimiAPI {
     }
 
     private int dataCase_ = 0;
-    @SuppressWarnings("serial")
     private java.lang.Object data_;
     public enum DataCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1126,7 +1126,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1182,7 +1182,7 @@ public final class IgtimiAPI {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object id_ = "";
     /**
      * <code>string id = 1 [json_name = "id"];</code>
@@ -3798,7 +3798,7 @@ public final class IgtimiAPI {
       }
 
       public static final int IDS_FIELD_NUMBER = 1;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.Internal.IntList ids_ =
           emptyIntList();
       /**
@@ -4881,7 +4881,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -6016,7 +6016,7 @@ public final class IgtimiAPI {
         }
 
         private int dataSourceCase_ = 0;
-        @SuppressWarnings("serial")
+        
         private java.lang.Object dataSource_;
         public enum DataSourceCase
             implements com.google.protobuf.Internal.EnumLite,
@@ -6131,7 +6131,7 @@ public final class IgtimiAPI {
         }
 
         public static final int SOURCE_ID_RANGE_FIELD_NUMBER = 3;
-        @SuppressWarnings("serial")
+        
         private volatile java.lang.Object sourceIdRange_ = "";
         /**
          * <pre>
@@ -6180,7 +6180,7 @@ public final class IgtimiAPI {
         }
 
         public static final int DATA_TYPE_RANGE_FIELD_NUMBER = 4;
-        @SuppressWarnings("serial")
+        
         private volatile java.lang.Object dataTypeRange_ = "";
         /**
          * <code>string data_type_range = 4 [json_name = "dataTypeRange"];</code>
@@ -7003,7 +7003,7 @@ public final class IgtimiAPI {
       }
 
       public static final int DATA_SOURCE_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private java.util.List<com.igtimi.IgtimiAPI.DataRequest.GetData.DataSource> dataSource_;
       /**
        * <pre>
@@ -7881,7 +7881,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -8792,7 +8792,7 @@ public final class IgtimiAPI {
       }
 
       public static final int SERIAL_NUMBERS_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.LazyStringArrayList serialNumbers_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       /**
@@ -9487,7 +9487,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -10416,7 +10416,7 @@ public final class IgtimiAPI {
       }
 
       public static final int SERIAL_NUMBERS_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.LazyStringArrayList serialNumbers_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       /**
@@ -10453,7 +10453,7 @@ public final class IgtimiAPI {
       }
 
       public static final int STREAM_IDS_FIELD_NUMBER = 5;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.Internal.IntList streamIds_ =
           emptyIntList();
       /**
@@ -11285,7 +11285,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -12072,7 +12072,7 @@ public final class IgtimiAPI {
       }
 
       private int addCase_ = 0;
-      @SuppressWarnings("serial")
+      
       private java.lang.Object add_;
       public enum AddCase
           implements com.google.protobuf.Internal.EnumLite,
@@ -12787,7 +12787,7 @@ public final class IgtimiAPI {
       }
 
       private int addCase_ = 0;
-      @SuppressWarnings("serial")
+      
       private java.lang.Object add_;
       public enum AddCase
           implements com.google.protobuf.Internal.EnumLite,
@@ -13431,7 +13431,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -14498,7 +14498,7 @@ public final class IgtimiAPI {
       }
 
       public static final int SERIAL_NUMBERS_FIELD_NUMBER = 1;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.LazyStringArrayList serialNumbers_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       /**
@@ -15251,7 +15251,7 @@ public final class IgtimiAPI {
       }
 
       public static final int PREFIX_FIELD_NUMBER = 1;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object prefix_ = "";
       /**
        * <code>string prefix = 1 [json_name = "prefix"];</code>
@@ -15301,7 +15301,7 @@ public final class IgtimiAPI {
       }
 
       public static final int UID_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object uid_ = "";
       /**
        * <code>string uid = 3 [json_name = "uid"];</code>
@@ -15340,7 +15340,7 @@ public final class IgtimiAPI {
       }
 
       public static final int IMEI_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object imei_ = "";
       /**
        * <code>string imei = 4 [json_name = "imei"];</code>
@@ -15390,7 +15390,7 @@ public final class IgtimiAPI {
       }
 
       public static final int TOKEN_FIELD_NUMBER = 6;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object token_ = "";
       /**
        * <code>string token = 6 [json_name = "token"];</code>
@@ -16313,7 +16313,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -17538,7 +17538,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -18371,7 +18371,7 @@ public final class IgtimiAPI {
       }
 
       private int tokenCase_ = 0;
-      @SuppressWarnings("serial")
+      
       private java.lang.Object token_;
       public enum TokenCase
           implements com.google.protobuf.Internal.EnumLite,
@@ -18517,7 +18517,7 @@ public final class IgtimiAPI {
       }
 
       public static final int PREFIX_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object prefix_ = "";
       /**
        * <pre>
@@ -18609,7 +18609,7 @@ public final class IgtimiAPI {
       }
 
       public static final int RECIPIENT_FIELD_NUMBER = 7;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object recipient_ = "";
       /**
        * <pre>
@@ -19770,7 +19770,7 @@ public final class IgtimiAPI {
     }
 
     private int requestCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object request_;
     public enum RequestCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -20634,7 +20634,7 @@ public final class IgtimiAPI {
     }
 
     private int contentCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object content_;
     public enum ContentCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -20686,7 +20686,7 @@ public final class IgtimiAPI {
     }
 
     public static final int ID_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object id_ = "";
     /**
      * <pre>
@@ -20766,7 +20766,7 @@ public final class IgtimiAPI {
     }
 
     public static final int REASON_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object reason_ = "";
     /**
      * <code>string reason = 5 [json_name = "reason"];</code>
@@ -23202,7 +23202,7 @@ public final class IgtimiAPI {
     }
 
     public static final int IDS_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private com.google.protobuf.Internal.IntList ids_ =
         emptyIntList();
     /**
@@ -23996,7 +23996,7 @@ public final class IgtimiAPI {
     }
 
     public static final int SESSION_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiAPI.Session> session_;
     /**
      * <code>repeated .com.igtimi.Session session = 1 [json_name = "session"];</code>
@@ -24825,7 +24825,6 @@ java.lang.String defaultValue);
       return com.igtimi.IgtimiAPI.internal_static_com_igtimi_Session_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
     @java.lang.Override
     protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
         int number) {
@@ -24858,7 +24857,7 @@ java.lang.String defaultValue);
     }
 
     public static final int NAME_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object name_ = "";
     /**
      * <code>string name = 2 [json_name = "name"];</code>
@@ -24989,7 +24988,7 @@ java.lang.String defaultValue);
     }
 
     public static final int OU_FIELD_NUMBER = 10;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object ou_ = "";
     /**
      * <code>string ou = 10 [json_name = "ou"];</code>
@@ -25050,7 +25049,7 @@ java.lang.String defaultValue);
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "");
     }
-    @SuppressWarnings("serial")
+    
     private com.google.protobuf.MapField<
         java.lang.String, java.lang.String> properties_;
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
@@ -25424,8 +25423,7 @@ java.lang.String defaultValue) {
         return com.igtimi.IgtimiAPI.internal_static_com_igtimi_Session_descriptor;
       }
 
-      @SuppressWarnings({"rawtypes"})
-      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
           int number) {
         switch (number) {
           case 12:
@@ -25435,7 +25433,6 @@ java.lang.String defaultValue) {
                 "Invalid map field number: " + number);
         }
       }
-      @SuppressWarnings({"rawtypes"})
       protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
           int number) {
         switch (number) {
@@ -26494,7 +26491,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int DEVICE_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiAPI.Device> device_;
     /**
      * <code>repeated .com.igtimi.Device device = 1 [json_name = "device"];</code>
@@ -27357,7 +27354,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int NAME_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object name_ = "";
     /**
      * <code>string name = 2 [json_name = "name"];</code>
@@ -27396,7 +27393,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int SERIAL_NUMBER_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object serialNumber_ = "";
     /**
      * <code>string serial_number = 3 [json_name = "serialNumber"];</code>
@@ -27435,7 +27432,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int UID_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object uid_ = "";
     /**
      * <code>string uid = 4 [json_name = "uID"];</code>
@@ -27474,7 +27471,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int IMEI_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object imei_ = "";
     /**
      * <code>string imei = 5 [json_name = "imei"];</code>
@@ -27513,7 +27510,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int SERVICE_TAG_FIELD_NUMBER = 6;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object serviceTag_ = "";
     /**
      * <code>string service_tag = 6 [json_name = "serviceTag"];</code>
@@ -27622,7 +27619,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int BLOB_CONTENT_FIELD_NUMBER = 12;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object blobContent_ = "";
     /**
      * <code>string blob_content = 12 [json_name = "blobContent"];</code>
@@ -27661,7 +27658,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int DEVICE_INFO_FIELD_NUMBER = 13;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object deviceInfo_ = "";
     /**
      * <code>string device_info = 13 [json_name = "deviceInfo"];</code>
@@ -29232,7 +29229,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int FIRST_NAME_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object firstName_ = "";
     /**
      * <code>string first_name = 2 [json_name = "firstName"];</code>
@@ -29271,7 +29268,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int SURNAME_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object surname_ = "";
     /**
      * <code>string surname = 3 [json_name = "surname"];</code>
@@ -29310,7 +29307,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int EMAIL_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object email_ = "";
     /**
      * <code>string email = 4 [json_name = "email"];</code>
@@ -30587,7 +30584,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int DATA_ACCESS_WINDOW_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiAPI.DataAccessWindow> dataAccessWindow_;
     /**
      * <code>repeated .com.igtimi.DataAccessWindow data_access_window = 1 [json_name = "dataAccessWindow"];</code>
@@ -31373,7 +31370,7 @@ java.lang.String defaultValue) {
 
     private int bitField0_;
     private int recipientCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object recipient_;
     public enum RecipientCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -31448,7 +31445,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int DEVICE_SERIAL_NUMBER_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object deviceSerialNumber_ = "";
     /**
      * <code>string device_serial_number = 4 [json_name = "deviceSerialNumber"];</code>
@@ -32547,7 +32544,7 @@ java.lang.String defaultValue) {
     }
 
     public static final int RESOURCE_FIELD_NUMBER = 1;
-    @SuppressWarnings("serial")
+    
     private java.util.List<com.igtimi.IgtimiAPI.Resource> resource_;
     /**
      * <code>repeated .com.igtimi.Resource resource = 1 [json_name = "resource"];</code>
@@ -33386,7 +33383,6 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue);
       return com.igtimi.IgtimiAPI.internal_static_com_igtimi_Resource_descriptor;
     }
 
-    @SuppressWarnings({"rawtypes"})
     @java.lang.Override
     protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
         int number) {
@@ -33592,7 +33588,6 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue);
       }
 
       public static final int SOURCE_IDS_FIELD_NUMBER = 1;
-      @SuppressWarnings("serial")
       private com.google.protobuf.Internal.IntList sourceIds_ =
           emptyIntList();
       /**
@@ -34088,7 +34083,6 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue);
 
     private int bitField0_;
     private int typeIdentifierCase_ = 0;
-    @SuppressWarnings("serial")
     private java.lang.Object typeIdentifier_;
     public enum TypeIdentifierCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -34254,7 +34248,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue);
     }
 
     public static final int DATA_TYPES_FIELD_NUMBER = 7;
-    @SuppressWarnings("serial")
+    
     private com.google.protobuf.Internal.IntList dataTypes_ =
         emptyIntList();
     /**
@@ -34295,7 +34289,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue);
                   com.google.protobuf.WireFormat.FieldType.MESSAGE,
                   com.igtimi.IgtimiAPI.Resource.SourceIDList.getDefaultInstance());
     }
-    @SuppressWarnings("serial")
+    
     private com.google.protobuf.MapField<
         java.lang.Integer, com.igtimi.IgtimiAPI.Resource.SourceIDList> sourceIdMap_;
     private com.google.protobuf.MapField<java.lang.Integer, com.igtimi.IgtimiAPI.Resource.SourceIDList>
@@ -34721,7 +34715,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue) {
         return com.igtimi.IgtimiAPI.internal_static_com_igtimi_Resource_descriptor;
       }
 
-      @SuppressWarnings({"rawtypes"})
+
       protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
           int number) {
         switch (number) {
@@ -34732,7 +34726,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue) {
                 "Invalid map field number: " + number);
         }
       }
-      @SuppressWarnings({"rawtypes"})
+
       protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
           int number) {
         switch (number) {
@@ -35846,7 +35840,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue) {
     }
 
     private int tokenCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object token_;
     public enum TokenCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -37220,7 +37214,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue) {
     }
 
     public static final int TOKEN_FIELD_NUMBER = 2;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object token_ = "";
     /**
      * <code>string token = 2 [json_name = "token"];</code>
@@ -37259,7 +37253,7 @@ com.igtimi.IgtimiAPI.Resource.SourceIDList defaultValue) {
     }
 
     public static final int PREFIX_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object prefix_ = "";
     /**
      * <code>string prefix = 3 [json_name = "prefix"];</code>

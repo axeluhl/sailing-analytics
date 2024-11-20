@@ -5,6 +5,7 @@
 
 package com.igtimi;
 
+@SuppressWarnings({"unused", "unchecked"})
 public final class IgtimiStream {
   private IgtimiStream() {}
   static {
@@ -148,7 +149,7 @@ public final class IgtimiStream {
     }
 
     private int msgCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object msg_;
     public enum MsgCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -1709,7 +1710,7 @@ public final class IgtimiStream {
     }
 
     public static final int REASON_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object reason_ = "";
     /**
      * <code>string reason = 4 [json_name = "reason"];</code>
@@ -2623,7 +2624,7 @@ public final class IgtimiStream {
     }
 
     private int mgmtCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object mgmt_;
     public enum MgmtCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -3836,7 +3837,7 @@ public final class IgtimiStream {
     }
 
     public static final int REASON_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object reason_ = "";
     /**
      * <code>string reason = 3 [json_name = "reason"];</code>
@@ -3875,7 +3876,7 @@ public final class IgtimiStream {
     }
 
     public static final int RECONNECT_URL_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
+    
     private volatile java.lang.Object reconnectUrl_ = "";
     /**
      * <code>string reconnect_url = 4 [json_name = "reconnectURL"];</code>
@@ -5401,7 +5402,7 @@ public final class IgtimiStream {
       }
 
       public static final int REASON_FIELD_NUMBER = 5;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object reason_ = "";
       /**
        * <code>string reason = 5 [json_name = "reason"];</code>
@@ -6190,7 +6191,7 @@ public final class IgtimiStream {
     }
 
     private int authCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object auth_;
     public enum AuthCase
         implements com.google.protobuf.Internal.EnumLite,
@@ -7404,7 +7405,7 @@ public final class IgtimiStream {
         }
 
         private int dataSourceCase_ = 0;
-        @SuppressWarnings("serial")
+        
         private java.lang.Object dataSource_;
         public enum DataSourceCase
             implements com.google.protobuf.Internal.EnumLite,
@@ -7519,7 +7520,7 @@ public final class IgtimiStream {
         }
 
         public static final int SOURCE_ID_RANGE_FIELD_NUMBER = 3;
-        @SuppressWarnings("serial")
+        
         private volatile java.lang.Object sourceIdRange_ = "";
         /**
          * <pre>
@@ -7568,7 +7569,7 @@ public final class IgtimiStream {
         }
 
         public static final int DATA_TYPE_RANGE_FIELD_NUMBER = 4;
-        @SuppressWarnings("serial")
+        
         private volatile java.lang.Object dataTypeRange_ = "";
         /**
          * <code>string data_type_range = 4 [json_name = "dataTypeRange"];</code>
@@ -8642,7 +8643,7 @@ public final class IgtimiStream {
       }
 
       public static final int DATA_SOURCE_FIELD_NUMBER = 2;
-      @SuppressWarnings("serial")
+      
       private java.util.List<com.igtimi.IgtimiStream.DataSubscription.SubscriptionRequest.DataSource> dataSource_;
       /**
        * <pre>
@@ -8741,7 +8742,7 @@ public final class IgtimiStream {
       }
 
       public static final int ID_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <pre>
@@ -10008,7 +10009,7 @@ public final class IgtimiStream {
       }
 
       public static final int REASON_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object reason_ = "";
       /**
        * <code>string reason = 4 [json_name = "reason"];</code>
@@ -10047,7 +10048,7 @@ public final class IgtimiStream {
       }
 
       public static final int ID_FIELD_NUMBER = 5;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <pre>
@@ -10918,7 +10919,7 @@ public final class IgtimiStream {
       }
 
       public static final int SERIAL_NUMBERS_FIELD_NUMBER = 2;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.LazyStringArrayList serialNumbers_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       /**
@@ -10955,7 +10956,7 @@ public final class IgtimiStream {
       }
 
       public static final int SESSION_IDS_FIELD_NUMBER = 3;
-      @SuppressWarnings("serial")
+      
       private com.google.protobuf.Internal.IntList sessionIds_ =
           emptyIntList();
       /**
@@ -10985,7 +10986,7 @@ public final class IgtimiStream {
       private int sessionIdsMemoizedSerializedSize = -1;
 
       public static final int ID_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <pre>
@@ -11945,7 +11946,7 @@ public final class IgtimiStream {
       }
 
       public static final int REASON_FIELD_NUMBER = 4;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object reason_ = "";
       /**
        * <code>string reason = 4 [json_name = "reason"];</code>
@@ -11984,7 +11985,7 @@ public final class IgtimiStream {
       }
 
       public static final int ID_FIELD_NUMBER = 5;
-      @SuppressWarnings("serial")
+      
       private volatile java.lang.Object id_ = "";
       /**
        * <pre>
@@ -12731,7 +12732,7 @@ public final class IgtimiStream {
     }
 
     private int subCase_ = 0;
-    @SuppressWarnings("serial")
+    
     private java.lang.Object sub_;
     public enum SubCase
         implements com.google.protobuf.Internal.EnumLite,

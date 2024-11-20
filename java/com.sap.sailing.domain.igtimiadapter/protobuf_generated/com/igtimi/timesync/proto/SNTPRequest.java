@@ -8,6 +8,7 @@ package com.igtimi.timesync.proto;
 /**
  * Protobuf type {@code com.igtimi.SNTPRequest}
  */
+@SuppressWarnings({"unused", "unchecked"})
 public final class SNTPRequest extends
     com.google.protobuf.GeneratedMessage implements
     // @@protoc_insertion_point(message_implements:com.igtimi.SNTPRequest)
@@ -43,7 +44,6 @@ private static final long serialVersionUID = 0L;
   }
 
   private int sendTimestampCase_ = 0;
-  @SuppressWarnings("serial")
   private java.lang.Object sendTimestamp_;
   public enum SendTimestampCase
       implements com.google.protobuf.Internal.EnumLite,
