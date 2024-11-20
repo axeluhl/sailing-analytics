@@ -317,7 +317,7 @@ public interface DomainFactory {
 
     BoatClass getDominantBoatClass(Iterable<String> competitorClassNames);
 
-    List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends IPositionedItem> allEventMarks);
+    List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends IMapItem> allEventControlPoints);
 
     /**
      * When a tracked race has been created for tracking with the TracTrac adapter, change listeners have to be subscribed to

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Named;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
@@ -61,7 +62,7 @@ public interface MetadataParser {
      * @return keys are the sideline names, such as "SIDELINE1", values are the control points that form the sideline
      */
     Map<String, Iterable<IPositionedItem>> parseSidelinesFromRaceMetadata(String raceMetadataString,
-            Iterable<? extends IPositionedItem> controlPoints);
+            Iterable<? extends IMapItem> controlPoints);
 
     /**
      * Parses the boat name, boad id and the boat color for a competitor (entry) of a race.

@@ -146,7 +146,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         Course course = getDomainFactory().createCourse(route.getName(), ttControlPoints);
         List<Sideline> sidelines = getDomainFactory().createSidelines(
                 tractracRace.getMetadata() != null ? tractracRace.getMetadata().getText() : null,
-                        tractracRace.getEvent().getPositionedItems());
+                        tractracRace.getEvent().getMapItems());
         RaceDefinition existingRaceDefinitionForRace = getDomainFactory().getExistingRaceDefinitionForRace(tractracRace.getId());
         DynamicTrackedRace trackedRace = null;
         // When the tracked race is created, we noted that for REPLAY races the TracAPI transmission of race times is not reliable.

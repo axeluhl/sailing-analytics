@@ -19,6 +19,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.NamedImpl;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
@@ -193,7 +194,7 @@ public class MetadataParserImpl implements MetadataParser {
     }
     
     @Override
-    public Map<String, Iterable<IPositionedItem>> parseSidelinesFromRaceMetadata(String raceMetadataString, Iterable<? extends IPositionedItem> allMarks) {
+    public Map<String, Iterable<IPositionedItem>> parseSidelinesFromRaceMetadata(String raceMetadataString, Iterable<? extends IMapItem> allControlPoints) {
         Map<String, Iterable<IPositionedItem>> result = new HashMap<>();
         if (raceMetadataString != null) {
             Map<String, String> sidelineMetadata = parseMetadata(raceMetadataString);
@@ -201,10 +202,10 @@ public class MetadataParserImpl implements MetadataParser {
                 if (entry.getKey().startsWith("SIDELINE")) {
                     final List<IPositionedItem> sidelineCPs = new ArrayList<>();
                     result.put(entry.getKey(), sidelineCPs);
-                    for (final IPositionedItem cp : allMarks) {
+                    for (final IMapItem cp : allControlPoints) {
                         String cpName = cp.getName().trim();
                         if (cpName.equals(entry.getValue())) {
-                            sidelineCPs.add(cp);
+                            sidelineCPs.addAll(cp.getPositionedItems());
                         }
                     }
                 }

@@ -216,10 +216,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public List<Sideline> createSidelines(final String raceMetadataString, final Iterable<? extends IPositionedItem> allEventMarks) {
-        List<Sideline> sidelines = new ArrayList<Sideline>();
-        Map<String, Iterable<IPositionedItem>> sidelinesMetadata = getMetadataParser().parseSidelinesFromRaceMetadata(
-                raceMetadataString, allEventMarks);
+    public List<Sideline> createSidelines(final String raceMetadataString, final Iterable<? extends IMapItem> allEventControlPoints) {
+        final List<Sideline> sidelines = new ArrayList<Sideline>();
+        final Map<String, Iterable<IPositionedItem>> sidelinesMetadata = getMetadataParser().parseSidelinesFromRaceMetadata(
+                raceMetadataString, allEventControlPoints);
         for (Entry<String, Iterable<IPositionedItem>> sidelineEntry : sidelinesMetadata.entrySet()) {
             if (Util.size(sidelineEntry.getValue()) > 0) {
                 sidelines.add(createSideline(sidelineEntry.getKey(), sidelineEntry.getValue()));
