@@ -18,3 +18,5 @@ source bundle manifest, so this needed manual adjustment, too. The Orbit bundle
 com.google.protobuf in version 2.4.1 is useless as it's missing many classes required.
 So the Maven-provided JARs need to be added to our "target-base" feature group in our
 local base p2 repository definition which is part of our target platform.
+
+The original .proto files used for code generation have been copied to the proto/ folder in the root of this bundle.
