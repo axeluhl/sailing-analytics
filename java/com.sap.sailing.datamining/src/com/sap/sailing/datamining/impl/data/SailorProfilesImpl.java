@@ -8,7 +8,7 @@ import com.sap.sailing.datamining.data.SailorProfiles;
 import com.sap.sailing.domain.base.Competitor;
 
 public class SailorProfilesImpl implements SailorProfiles {
-    final Map<Competitor, SailorProfile> profilesForCompetitor;
+    private final Map<Competitor, SailorProfile> profilesForCompetitor;
     
     /**
      * Constructs the mapping from {@link Competitor} to {@link SailorProfile} based on the
