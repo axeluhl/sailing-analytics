@@ -3648,7 +3648,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             mapOptions.setMinZoom(0);
         }
-        MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
+        MapTypeStyle[] mapTypeStyles = new MapTypeStyle[/*4*/ 3]; // FIXME bug 6071
 
         // hide all transit lines including ferry lines
         mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
@@ -3657,7 +3657,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // simplify road display
         mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
         // set water color
-        mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
+        // FIXME bug 6071 setting the color causes an exception in the Maps API since 2024-11-20
+//        mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
         mapOptions.setMapTypeStyles(mapTypeStyles);
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
