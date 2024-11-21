@@ -3,7 +3,7 @@
 # Script to deploy on an instance that has an ephemeral volume as /dev/nvme0n1 (adjust env var PARTITION if different)
 # Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
 # An existing xfs partition will be left alone.
-METADATA=$( /bin/ec2-metadata -d | sed -e 's/^user-data: //' )
+METADATA=$( ec2-metadata -d | sed -e 's/^user-data: //' )
 echo "Metadata: ${METADATA}"
 if echo "${METADATA}" | grep -q "^image-upgrade$"; then
   echo "Image upgrade; not trying to mount/format ephemeral volume"

@@ -21,7 +21,7 @@ Our default region in AWS EC2 is eu-west-1 (Ireland). Tests are currently run in
 
 In Route53 (the AWS DNS) we have registered the sapsailing.com domain and can manage records for any sub-domains. The "apex" record for sapsailing.com points to a Network Load Balancer (NLB), currently ``NLB-sapsailing-dot-com-f937a5b33246d221.elb.eu-west-1.amazonaws.com``, which does the following things:
 
-* accept SSH connects on port 22; these are forwarded to the internal IP of the web server through the target group ``SSH-to-sapsailing-dot-com-2``, currently with the internal IP target ``172.31.28.212``
+* accept SSH connects on port 22; these are forwarded to the internal IP of the central reverse proxy through the target group ``SSH-to-sapsailing-dot-com-2``; it is important that the target group is configured to preserve client IP addresses; otherwise, the ``fail2ban`` installation on the central reverse proxy would quickly block all SSH traffic, malicious and good, because they all would be identified as having one of the NLB's internal IP addresses as their source IP.
 * accept HTTP connections for ``sapsailing.com:80``, forwarding them to the target group ``HTTP-to-sapsailing-dot-com-2`` which is a TCP target group for port 80 with ip-based targets (instance-based was unfortunately not possible for the old ``m3`` instance type of our web server), again pointing to ``172.31.28.212``, the internal IP of our web server
 * accept HTTPS/TLS connections on port 443, using the ACM-managed certificate for ``*.sapsailing.com`` and ``sapsailing.com`` and also forwarding to the ``HTTP-to-sapsailing-dot-com-2`` target group
 * optionally, this NLB could be extended by UDP port mappings in case we see a use case for UDP-based data streams that need forwarding to specific applications, such as the Expedition data typically sent on ports 2010 and following
@@ -33,12 +33,12 @@ Further ALBs may exist in addition to the default ALB and the NLB for ``sapsaili
 ### Apache httpd, the central reverse proxy (Webserver) and disposable reverse proxies
 
 A key pillar of our architecture is the central reverse proxy, which handles traffic for the wiki, bugzilla, awstats, releases, p2, Git, jobs, static and is the target of the catch all rule in the Dynamic ALB.
-Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DDNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server. The setup procedure can be found below.
+Any traffic to the Hudson build server subdomain *does not* go through the central webserver. Instead, it gets directed by route 53 to a `DNSMapped` load balancer (which all route any port 80 traffic to 443), which has a rule pointing to a target group, that contains only the Hudson server. The setup procedure can be found below.
 
-To improve availability and reliability, we have a disposable environment type and AMI. The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
+To improve availability and reliability, we have a "disposable reverse proxy" environment type and AMI (see ``configuration/environments_scripts/reverse_proxy``). The instances from this AMI are only for serving requests to the archive but are lightweight and can be quickly started and shutdown, using the landscape management console.
 
 The IPs for all reverse proxies will automatically be added to ALB target groups with the tag key `allReverseProxies`, including the `CentralWebServerHTTP-Dyn` target group (in the dynamic ALB in eu-west-1)
-and all the `DDNSMapped-x-HTTP` (in all the DDNSMapped servers). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
+and all the `DDNSMapped-x-HTTP` (in all the DNSMapped ALBs). These are the target groups for the default rules and it ensures availability to the ARCHIVE especially.
 Disposables instances are tagged with `DisposableProxy` to indicate it hosts no vital services. `ReverseProxy` also identifies any reverse proxies. The health check for the target groups would change to trigger a script which returns different error codes: healthy/200 if in the same AZ as the archive (or if the failover archive is in use), whilst unhealthy/503 if in different AZs. This will reduce cross-AZ, archive traffic costs, but maintain availability and load balancing.
 
 For security groups of the central reverse proxy, we want Webserver, as well as Reverse Proxy. The disposables just have the latter.
@@ -519,13 +519,17 @@ disposables*. It is used to reduce costly cross-AZ traffic between our instances
 
 The general idea of this ALB target group healthcheck, is to make instances healthy only if in the same AZ as the archive (the correct AZ). However, availability takes priority over cost saving, so if there is no healthy instance in the "correct" AZ, the healthcheck returns healthy.
 
-All the target groups, tagged with allReverseProxies, have this healthcheck:
+All the target groups, tagged with ``allReverseProxies``, have this healthcheck:
 
 ```
 /cgi-bin/reverseProxyHealthcheck.sh?arn=TARGET_GROUP_ARN
 ```
 
-The healthcheck works by first checking internal-server-status. If genuinely unhealthy, then unhealthy is returned to the ELB (elastic load balancer) health checker. Otherwise, the instance uses cached CIDR masks (which correspond to AZ definitions) and nmap to check if in the same AZ as the archive.
+The script can be found under ``configuration/environments_scripts/repo/var/www/cgi-bin`` to where the environments for ``reverse_proxy`` (the disposables) and ``central_reverse_proxy`` link symbolically.
+
+The healthcheck works by first checking whether another instance of the healthcheck is already running. The PID of a running process is stored under ``/var/run/reverseProxyHealthcheck`` which is a folder created by a directive in ``/etc/tmpfiles.d/reverseProxyHealthcheck.conf`` upon boot. A healthcheck records its exit status and output in files under ``/var/run/reverseProxyHealthcheck`` which are removed after 10s by a background job again. If a health check is started while another is already running, the new one waits for the exit status of the already running one to be written to ``/var/run/reverseProxyHealthcheck``, then picks up that exit status and output to use it as exit status and output of the health check started concurrently. This way, we avoid congestion and clogging of reverse proxies by health checks which at times may be long-running, especially if the AWS CLI takes unusually long to discover the target groups and target health checks. Without the mechanics that shortcut these concurrent executions, we've see hundreds of concurrently executing health checks, even leading to out-of-memory situations at times.
+
+Then it checks the ``internal-server-status``. If genuinely unhealthy, then unhealthy is returned to the ELB (elastic load balancer) health checker. Otherwise, the instance uses cached CIDR masks (which correspond to AZ definitions) and nmap to check if in the same AZ as the archive.
 If in the same AZ, then "healthy" is returned to the ELB health checker. If not, then the target group ARN, passed as a parameter 
 to the healthcheck, is used to get the private IPs of the other instances in the target group, via a describe-target-health call to the AWS API. This is the most costly part of the check, so these values are cached.
 

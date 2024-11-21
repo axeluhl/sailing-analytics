@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.ui.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -38,21 +41,36 @@ public class ChartToCsvExporter {
 
     private static String createCsvExportContentForStatisticsCurve(Chart chartToExport) {
         if (chartToExport != null && chartToExport.getSeries().length > 0) {
-            StringBuilder csvStr = new StringBuilder("Series name");
-            for (Point point : chartToExport.getSeries()[0].getPoints()) {
-                String name = point.getName();
-                csvStr.append(';');
-                if (name != null && !name.isEmpty()) {
-                    csvStr.append(name);
-                } else {
-                    csvStr.append(point.getX());
+            final StringBuilder csvStr = new StringBuilder("Series name");
+            {
+                final List<String> columnNames = new ArrayList<>();
+                // collect column names across all series; some may not have points for all columns
+                for (final Series series : chartToExport.getSeries()) {
+                    for (Point point : series.getPoints()) {
+                        final String pointName = point.getName();
+                        final String columnName = pointName != null && !pointName.isEmpty() ? pointName : point.getX().toString();
+                        while (columnNames.size() <= point.getX().intValue()) {
+                            columnNames.add(columnNames.size(), null);
+                        }
+                        columnNames.set(point.getX().intValue(), columnName);
+                    }
+                }
+                for (final String columnName : columnNames) {
+                    csvStr.append(';');
+                    if (columnName != null && !columnName.isEmpty()) {
+                        csvStr.append(columnName);
+                    }
                 }
             }
             csvStr.append("\r\n");
             for (Series series : chartToExport.getSeries()) {
                 csvStr.append(series.getName());
+                int lastXIndex = -1;
                 for (Point point : series.getPoints()) {
-                    csvStr.append(';');
+                    while (lastXIndex < point.getX().intValue()) {
+                        csvStr.append(';');
+                        lastXIndex++;
+                    }
                     csvStr.append(NumberFormat.getDecimalFormat().format(point.getY()));
                 }
                 csvStr.append("\r\n");

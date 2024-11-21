@@ -19,16 +19,18 @@ else
   if ec2-metadata | grep -q instance-id; then
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
     # Install standard packages:
-    sudo yum -y update
-    sudo yum -y install nvme-cli chrony cronie cronie-anacron jq mailx
+    sudo dnf -y --best --allowerasing --releasever=latest upgrade
+    sudo dnf -y install nvme-cli chrony cronie cronie-anacron jq mailx whois iptables
     # Copy imageupgrade_function.sh
     scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh .
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    build_crontab_and_setup_files mongo_instance_setup
     # Install MongoDB 5.0 and configure as replica set "live"
     setup_mongo_7_0_on_AL2023
-    build_crontab_and_setup_files mongo_instance_setup
+    setup_mail_sending
+    setup_fail2ban
     # obtain root SSH key from key vault:
     setup_keys "mongo_instance_setup"
     scp root@sapsailing.com:ssh-key-reader.token /tmp

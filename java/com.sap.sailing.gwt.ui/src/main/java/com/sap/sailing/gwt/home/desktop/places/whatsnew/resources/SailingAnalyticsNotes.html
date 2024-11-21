@@ -5,6 +5,32 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">November 2024</h5>
+         <ul class="bulletList">
+            <li>Added a data mining dimension "tenth of leg" for competitor position fixes, such that, e.g.,
+                the first or last tenth of a leg (based on the windward distance) can be excluded during
+                data collection.</li>
+            <li>Introduced an extended data mining retriever chain that allows users to drill into ten
+                equal-duration sub-slices of each leg to, e.g., compare average performance across different
+                parts of legs.</li>
+            <li>Added metrics for a "relative" cross-track error (XTE) in the data mining environment, both,
+                signed and unsigned. To allow for a comparison of XTE values across legs of different lengths,
+                the distances from the course middle line are divided by half the leg's length at that point
+                in time. This way, e.g., a position on one far side of an upwind leg after having sailed half
+                the leg, in a boat class that has approximately a 90° tacking angle would result in a value
+                close to <tt>(+/-) 1.0</tt>, regardless the length of the leg.</li>
+            <li>Added cross-track error (XTE) metrics that don't project onto the course middle line ("rhumb line",
+                although instead of the "rhumb line" (see <a href="https://en.wikipedia.org/wiki/Rhumb_line">the Wikipedia definition</a>)
+                we use a great circle segment connecting the leg's waypoints), but onto the wind vector attached to the
+                leg's end waypoint (e.g., the windward mark for an upwind leg). The metrics are again
+                available in signed/unsigned as well as in absolute and relative (to half the leg distance)
+                variants.</li>
+            <li>Introduced a new Data Mining dimension "Sailor Profile Name." With this, if a user in their "User Details"
+                creates one or more "Sailor Profiles" to group multiple occurrences of what is to be considered "the same sailor"
+                into one profile, these profiles can be used for filtering and grouping in data mining.</li>
+            <li>Bug fix: data mining now correctly propagates the current user session to all data retrieval processes,
+                and all security checks for object readability by the current subject are now in place.</li>
+         </ul>
          <h5 class="articleSubheadline">October 2024</h5>
          <ul class="bulletList">
             <li>Bug fix: for match racing tie breaks, under very special circumstances the tie breaking

@@ -325,6 +325,18 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * @return {@code null} if the competitor has not started or already finished the leg
      */
     Distance getSignedCrossTrackError(TimePoint timePoint);
+    
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint.
+     */
+    Distance getUnsignedCrossTrackErrorToWindAxis(TimePoint timePoint);
+
+    /**
+     * Instead of projecting onto the course middle line connecting start and end of the leg,
+     * projects onto the wind axis, attached to the leg's end waypoint.
+     */ 
+    Distance getSignedCrossTrackErrorToWindAxis(TimePoint timePoint);
 
     TrackedLeg getTrackedLeg();
 

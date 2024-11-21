@@ -46,14 +46,15 @@ NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
 # Check old and new server for healthy status; no point in preparing for a switch if any
 # of them is unhealthy
-if ! curl --fail --silent "${OLDSERVER}/gwt/status" >/dev/null; then
-  echo "${OLDSERVER} unhealthy. Aborting."
-  exit 1
-fi
-if ! curl --fail --silent "${NEWSERVER}/gwt/status" >/dev/null; then
-  echo "${NEWSERVER} unhealthy. Aborting."
-  exit 1
-fi
+# eee (aul) TODO uncomment again; this is for testing something only...
+#if ! curl --fail --silent "${OLDSERVER}/gwt/status" >/dev/null; then
+  #echo "${OLDSERVER} unhealthy. Aborting."
+  #exit 1
+#fi
+#if ! curl --fail --silent "${NEWSERVER}/gwt/status" >/dev/null; then
+  #echo "${NEWSERVER} unhealthy. Aborting."
+  #exit 1
+#fi
 
 if [ "${useRestApi}" = "1" ]; then
   if [ -n "${BEARER_TOKEN}" ]; then

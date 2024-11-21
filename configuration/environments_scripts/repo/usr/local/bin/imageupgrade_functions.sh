@@ -213,7 +213,7 @@ __setup_keys_using_local_copy() {
     # "true" indicates the permissions and ownership of the .ssh and .aws folders will not be set.
     TEMP_KEY_DIR="$1"
     SET_PERMISSIONS="$2"
-    REGION="$(  ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
+    REGION="$( ec2-metadata | grep "^placement:" | sed -e 's/^.*: \(.*\).$/\1/')"
     cd "${TEMP_KEY_DIR}"
     for user in *; do
         [[ -e "$user" ]] || continue
@@ -284,7 +284,7 @@ clean_root_ssh_dir_and_tmp() {
 }
 
 get_ec2_user_data() {
-  /opt/aws/bin/ec2-metadata -d | sed -e 's/^user-data: //'
+  ec2-metadata -d | sed -e 's/^user-data: //'
 }
 
 finalize() {
@@ -306,35 +306,22 @@ setup_cloud_cfg_and_root_login() {
 }
 
 setup_fail2ban() {
-    pushd .
-    if [[ ! -f "/etc/systemd/system/fail2ban.service" ]]; then 
-        yum install 2to3 -y
-        cd /usr/local/src
-        wget https://github.com/fail2ban/fail2ban/archive/refs/tags/1.0.2.tar.gz
-        tar -xvf 1.0.2.tar.gz
-        cd fail2ban-1.0.2/
-        ./fail2ban-2to3
-        python3.9 setup.py build
-        python3.9 setup.py install
-        cp ./build/fail2ban.service /etc/systemd/system/fail2ban.service
-        sed -i 's|Environment=".*"|Environment="PYTHONPATH=/usr/local/lib/python3.9/site-packages"|' /etc/systemd/system/fail2ban.service
-        systemctl enable fail2ban
-        chkconfig --level 23 fail2ban on
-    fi
-    cat << EOF > /etc/fail2ban/jail.d/customisation.local
-    [ssh-iptables]
-
-    enabled  = true
-    filter   = sshd[mode=aggressive]
-    action   = iptables[name=SSH, port=ssh, protocol=tcp]
-            sendmail-whois[name=SSH, dest=axel.uhl@sap.com, sender=fail2ban@sapsailing.com]
-    logpath  = /var/log/fail2ban.log
-    maxretry = 5
-EOF
-    touch /var/log/fail2ban.log
-    service fail2ban start
-    yum remove -y firewalld
-    popd
+    # Expects setup_mail_sending to have been invoked for fail2ban e-mails being sent properly
+    sudo dnf install -y fail2ban whois
+    sudo sed -i 's|^backend *= *auto *$|backend = systemd|' /etc/fail2ban/jail.conf
+    # The fail2ban service may depend on firewalld which then gets installed and
+    # injects all sorts of unwanted nftables/iptables rules that can make our services
+    # unreachable (MongoDB port 27017, MariaDB port 3306, application server port 8888, etc.).
+    # We use security groups in our VPC to control which ports can be reached from where.
+    # Therefore, we disable firewalld, should it have been installed
+    sudo systemctl disable firewalld
+    sudo systemctl enable fail2ban
+    # the /etc/fail2ban/jail.d/ contents are expected to be provided by the files/etc/fail2ban/jail.d
+    # folders in the respective environments_scripts sub-folder; use, e.g., a symbolic link to
+    # configuration/environments_scripts/repo/etc/fail2ban/jail.d/customisation.local for a
+    # systemd-based sshd-iptables filter.
+    sudo touch /var/log/fail2ban.log
+    sudo systemctl start fail2ban
 }
 
 setup_mail_sending() {
@@ -354,7 +341,7 @@ setup_mail_sending() {
     if [[ -n "$1" ]]; then
         subdomain_of_sender_address="$1"
     fi
-    sudo yum install -y mailx postfix
+    sudo dnf install -y mailx postfix
     sudo systemctl enable postfix
     temp_mail_properties_location=$(mktemp /var/tmp/mail.properties_XXX)
     scp -o StrictHostKeyChecking=no  -p root@sapsailing.com:mail.properties "${temp_mail_properties_location}"
@@ -412,8 +399,8 @@ setup_goaccess() {
     wget https://tar.goaccess.io/goaccess-1.9.1.tar.gz
     tar -xzvf goaccess-1.9.1.tar.gz
     cd goaccess-1.9.1/
-    yum install -y gcc-c++
-    yum install -y libmaxminddb-devel ncurses-devel
+    dnf install -y gcc-c++
+    dnf install -y libmaxminddb-devel ncurses-devel
     ./configure --enable-utf8
     make
     make install
@@ -426,8 +413,8 @@ setup_goaccess() {
 setup_apachetop() {
     # Compatible with Amazon Linux 2023
     pushd .
-    yum install -y gcc-c++
-    yum install -y ncurses-devel readline-devel
+    dnf install -y gcc-c++
+    dnf install -y ncurses-devel readline-devel
     cd /usr/local/src
     wget https://github.com/tessus/apachetop/releases/download/0.23.2/apachetop-0.23.2.tar.gz
     tar -xvzf apachetop-0.23.2.tar.gz
@@ -463,6 +450,6 @@ enabled=1
 gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
 EOF
 "
-    sudo yum -y update
-    sudo yum -y install mongodb-org-server mongodb-org-tools mongodb-mongosh-shared-openssl3
+    sudo dnf -y update
+    sudo dnf -y install mongodb-org-server mongodb-org-tools mongodb-mongosh-shared-openssl3
 }
