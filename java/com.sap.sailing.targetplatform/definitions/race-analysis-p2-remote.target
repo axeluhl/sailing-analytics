@@ -420,6 +420,8 @@
 <plugin id="com.amazonaws.aws-lambda-java-core"/>
 <plugin id="com.amazonaws.aws-lambda-java-core.source"/>
 <plugin id="javax.cache.api"/>
+<plugin id="com.google.protobuf"/>
+<plugin id="com.google.protobuf.source"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>
