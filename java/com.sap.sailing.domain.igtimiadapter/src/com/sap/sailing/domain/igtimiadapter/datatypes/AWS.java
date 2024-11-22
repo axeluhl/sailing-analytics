@@ -10,14 +10,14 @@ import com.sap.sse.common.TimePoint;
 
 /**
  * Apparent wind speed, relative to the inertial system on which the wind speed was measured.
- * Speed is stored as kilometers per hour in the Igtimi database.
+ * Speed is stored as kilometers per hour in the Igtimi database.<p>
  * 
- * Mail from Brent from June 10th 2014:
- * The problem is units.  We store everything in the database in SI units – so SOG, STW, and AWS are all in KPH instead of Knots. 
+ * Mail from Brent from June 10th 2014:<p>
+ * "The problem is units.  We store everything in the database in SI units – so SOG, STW, and AWS are all in KPH instead of Knots. 
  * Simon, I think this explains the error you were seeing on the extreme 40 circuit as well.  The reason that I didn’t identify this 
  * before is that I incorrectly thought we had everything in Knots – which is what I had told Axel as well. My apologies for that error. 
  * Note that your TW calculation will still be correct because the units for SOG and AWS (input for T-calcs) are both KPH. 
- * However the output will need to be divided by 1.852 if you want to see the results in Knots.
+ * However the output will need to be divided by 1.852 if you want to see the results in Knots."
  * 
  * @author Axel Uhl (d043530)
  *

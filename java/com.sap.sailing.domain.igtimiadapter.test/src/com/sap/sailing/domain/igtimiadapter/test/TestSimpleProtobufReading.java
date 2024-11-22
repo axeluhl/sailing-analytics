@@ -32,4 +32,21 @@ public class TestSimpleProtobufReading {
         }
         is.close();
     }
+
+    @Test
+    public void testReadJansWindbotStartup() throws IOException {
+        final InputStream is = getClass().getResourceAsStream("/windbot_startup_jan.protobuf");
+        final ExtensionRegistry er = ExtensionRegistry.newInstance();
+        final CodedInputStream cis = CodedInputStream.newInstance(is);
+        for (int i=0; i<20; i++) { // we know there are four full messages in the stream:
+            final int lengthOfMessage = cis.readRawVarint32();
+            assertNotEquals(0, lengthOfMessage);
+            final int oldLimit = cis.pushLimit(lengthOfMessage);
+            final Msg msg = Msg.parseFrom(cis, er);
+            assertNotNull(msg);
+            logger.info(String.format("Parsed the following message #%d:\n %s", i, msg.toString()));
+            cis.popLimit(oldLimit);
+        }
+        is.close();
+    }
 }
