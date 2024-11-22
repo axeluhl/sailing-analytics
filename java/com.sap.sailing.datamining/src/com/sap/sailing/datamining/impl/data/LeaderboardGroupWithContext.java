@@ -12,6 +12,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.preferences.SailorProfilePreference;
 import com.sap.sailing.server.preferences.SailorProfilePreferences;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.User;
 
 public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
     private final LeaderboardGroup leaderboardGroup;
@@ -54,7 +55,11 @@ public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
     @Override
     public synchronized SailorProfiles getSailorProfiles() {
         if (sailorProfiles == null) {
-            final SailorProfilePreferences sailorProfilePreferences = getSecurityService().getPreferenceObject(getSecurityService().getCurrentUser().getName(), SailorProfilePreferences.PREF_NAME);
+            final User currentUser = getSecurityService().getCurrentUser();
+            if (currentUser == null) {
+                throw new NullPointerException("No user session in DataMining. Thread pool context problems? You may need to attach a user session to the thread.");
+            }
+            final SailorProfilePreferences sailorProfilePreferences = getSecurityService().getPreferenceObject(currentUser.getName(), SailorProfilePreferences.PREF_NAME);
             if (sailorProfilePreferences != null) {
                 final List<SailorProfile> theSailorProfiles = new ArrayList<>();
                 for (final SailorProfilePreference sailorProfilePreference : sailorProfilePreferences.getSailorProfiles()) {
