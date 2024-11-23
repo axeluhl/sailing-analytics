@@ -113,7 +113,7 @@ public class MetadataCollection extends MongoFixHandler {
         return result;
     }
     
-    long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    protected long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
         final Document resultDocument = findMetadataObject(device);
         final long result;
         if (resultDocument == null) {
@@ -142,7 +142,7 @@ public class MetadataCollection extends MongoFixHandler {
         return result;
     }
 
-    synchronized <FixT extends Timed> void enqueueMetadataUpdate(DeviceIdentifier device, final Object dbDeviceId,
+    protected synchronized <FixT extends Timed> void enqueueMetadataUpdate(DeviceIdentifier device, final Object dbDeviceId,
             final int nrOfTotalFixes, TimeRange fixesTimeRange, FixT latestFix) throws TransformationException {
         final MetadataUpdater metadataUpdaterForDevice = metadataUpdaters.computeIfAbsent(device, d->new MetadataUpdater(this, device));
         metadataUpdaterForDevice.enqueueMetadataUpdate(device, dbDeviceId, nrOfTotalFixes, fixesTimeRange, latestFix);
