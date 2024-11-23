@@ -46,15 +46,14 @@ NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
 # Check old and new server for healthy status; no point in preparing for a switch if any
 # of them is unhealthy
-# eee (aul) TODO uncomment again; this is for testing something only...
-#if ! curl --fail --silent "${OLDSERVER}/gwt/status" >/dev/null; then
-  #echo "${OLDSERVER} unhealthy. Aborting."
-  #exit 1
-#fi
-#if ! curl --fail --silent "${NEWSERVER}/gwt/status" >/dev/null; then
-  #echo "${NEWSERVER} unhealthy. Aborting."
-  #exit 1
-#fi
+if ! curl --fail --silent "${OLDSERVER}/gwt/status" >/dev/null; then
+  echo "${OLDSERVER} unhealthy. Aborting."
+  exit 1
+fi
+if ! curl --fail --silent "${NEWSERVER}/gwt/status" >/dev/null; then
+  echo "${NEWSERVER} unhealthy. Aborting."
+  exit 1
+fi
 
 if [ "${useRestApi}" = "1" ]; then
   if [ -n "${BEARER_TOKEN}" ]; then
@@ -83,8 +82,8 @@ if [ "${useRestApi}" = "1" ]; then
 else
   # If we continue, don't download again
   if [ "$continue" != "1" ]; then
-    wget --no-cache $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$OLDGROUPS
-    wget --no-cache $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' -e 's/\//%2F/g' | grep -v "^$" | sort >$NEWGROUPS
+    wget --no-cache $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | jq -r '.[]' | sed -e 's/\//%2F/g' | sort >$OLDGROUPS
+    wget --no-cache $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | jq -r '.[]' | sed -e 's/\//%2F/g' | sort >$NEWGROUPS
   fi
 
   download_and_fix_boatclasses () {
