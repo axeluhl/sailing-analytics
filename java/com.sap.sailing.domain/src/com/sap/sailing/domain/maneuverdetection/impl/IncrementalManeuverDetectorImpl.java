@@ -409,7 +409,7 @@ public class IncrementalManeuverDetectorImpl extends ManeuverDetectorImpl implem
                     .getDouglasPeuckerFixes()) {
                 latestDouglasPeuckerFix = fix;
             }
-            if (latestDouglasPeuckerFix.getTimePoint().until(latestRawFixTimePoint)
+            if (latestDouglasPeuckerFix.getTimePoint().until(latestRawFixTimePointOfPreviousManeuverDetectionIteration)
                     .asMillis() < maxDurationForDouglasPeuckerFixExtensionInManeuverAnalysisInMillis) {
                 return false;
             }
