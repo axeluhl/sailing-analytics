@@ -16,8 +16,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     @Override
     public void clear() {
-        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED)
-                .drop();
+        db.getCollection(CollectionNames.IGTIMI_ACCESS_TOKENS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
     }
 
     @Override

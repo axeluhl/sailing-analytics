@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.riot;
 
+import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
 
 import com.igtimi.IgtimiData.DataMsg;
@@ -36,11 +37,13 @@ import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
  *
  */
 public interface RiotServer {
-    static RiotServer create(int port) {
+    static RiotServer create(int port) throws IOException, InterruptedException {
         return new RiotServerImpl(port);
     }
     
     void addListener(BulkFixReceiver listener);
     
     void removeListener(BulkFixReceiver listener);
+
+    void stop() throws IOException;
 }
