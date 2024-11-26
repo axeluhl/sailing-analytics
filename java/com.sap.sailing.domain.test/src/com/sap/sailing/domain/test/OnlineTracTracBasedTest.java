@@ -149,9 +149,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
                 case Begin:
                     logger.info("Stored data begin");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
-                    if (getTrackedRace() != null) {
-                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
-                    }
+                    new Thread(()->{
+                        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(getTracTracRace().getId(), /* timeout in millis */ 10000);
+                        if (trackedRegatta != null && raceDefinition != null && trackedRegatta.getTrackedRace(raceDefinition) != null) {
+                            trackedRegatta.getTrackedRace(raceDefinition).onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
+                        }
+                    }, "waiting for race definition for race "+getTracTracRace().getId()).start();
                     break;
                 case End:
                     logger.info("Stored data end. Delaying status update on tracked race "+getTrackedRace()+" until all events queued in receivers so far have been processed");
