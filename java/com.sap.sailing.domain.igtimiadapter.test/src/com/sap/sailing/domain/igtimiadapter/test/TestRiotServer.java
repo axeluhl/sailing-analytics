@@ -19,7 +19,6 @@ import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.riot.RiotServer;
-import com.sap.sailing.domain.igtimiadapter.riot.impl.RiotServerImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.util.Wait;
@@ -42,7 +41,7 @@ public class TestRiotServer {
     
     @Test
     public void testSendingAFewMessages() throws Exception {
-        final RiotServer riot = new RiotServerImpl();
+        final RiotServer riot = RiotServer.create();
         final TestListener listener = new TestListener();
         riot.addListener(listener);
         try (final Socket socket = new Socket("localhost", riot.getPort())) {

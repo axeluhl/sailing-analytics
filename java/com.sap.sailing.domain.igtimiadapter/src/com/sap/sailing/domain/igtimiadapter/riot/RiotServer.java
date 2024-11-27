@@ -37,8 +37,19 @@ import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
  *
  */
 public interface RiotServer {
+    /**
+     * Created a {@link RiotServer} listening on the {@code port} specified. If the port is not
+     * available, an {@link IOException} will be thrown.
+     */
     static RiotServer create(int port) throws IOException, InterruptedException {
         return new RiotServerImpl(port);
+    }
+    
+    /**
+     * Creates a {@link RiotServer} listening on an available local TCP port selected automatically.
+     */
+    static RiotServer create() throws IOException, InterruptedException {
+        return new RiotServerImpl();
     }
     
     void addListener(BulkFixReceiver listener);
