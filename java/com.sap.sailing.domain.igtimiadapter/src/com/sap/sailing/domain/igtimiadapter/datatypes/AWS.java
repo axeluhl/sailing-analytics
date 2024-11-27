@@ -27,8 +27,12 @@ public class AWS extends Fix {
     private final Speed apparentWindSpeed;
     
     public AWS(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        this(timePoint, sensor, new KilometersPerHourSpeedImpl(((Number) valuesPerSubindex.get(1)).doubleValue()));
+    }
+
+    public AWS(TimePoint timePoint, Sensor sensor, Speed apparentWindSpeed) {
         super(sensor, timePoint);
-        apparentWindSpeed = new KilometersPerHourSpeedImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        this.apparentWindSpeed = apparentWindSpeed;
     }
 
     public Speed getApparentWindSpeed() {

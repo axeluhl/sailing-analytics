@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.riot;
 
+import java.util.logging.Logger;
+
 import com.igtimi.IgtimiAPI.APIData;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiDevice.DeviceManagement;
@@ -8,6 +10,8 @@ import com.igtimi.IgtimiStream.ChannelManagement;
 import com.igtimi.IgtimiStream.Msg;
 
 public interface MsgVisitor {
+    static final Logger logger = Logger.getLogger(MsgVisitor.class.getName());
+
     static void accept(Msg msg, MsgVisitor visitor) {
         switch (msg.getMsgCase()) {
         case ACK_RESPONSE:
@@ -26,7 +30,7 @@ public interface MsgVisitor {
             visitor.handleChannelManagement(msg.getChannelManagement());
             break;
         default:
-            throw new RuntimeException("Unknown message type "+msg.getMsgCase());
+            logger.warning("Unknown message type "+msg.getMsgCase());
         }
     }
     

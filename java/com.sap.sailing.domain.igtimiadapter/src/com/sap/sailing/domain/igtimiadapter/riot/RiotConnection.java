@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.riot;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -41,5 +42,5 @@ public interface RiotConnection extends Closeable {
      * <tr><td>GPS ON</td><td>Turns the GPS on</td></tr>
      * </table>
      */
-    void sendCommand(String command);
+    void sendCommand(String command) throws IOException;
 }

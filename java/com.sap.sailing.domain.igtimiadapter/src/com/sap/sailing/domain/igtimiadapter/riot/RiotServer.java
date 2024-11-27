@@ -45,5 +45,14 @@ public interface RiotServer {
     
     void removeListener(BulkFixReceiver listener);
 
+    /**
+     * Stops this server and frees its socket resources. If the server is not running, e.g., because it was already
+     * stopped by an earlier call to this method, calling this method has no effect.
+     */
     void stop() throws IOException;
+
+    /**
+     * @return the IP port this server is listening on for new connections
+     */
+    int getPort() throws IOException;
 }

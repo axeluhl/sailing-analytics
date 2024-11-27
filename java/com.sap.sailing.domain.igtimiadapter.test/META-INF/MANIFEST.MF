@@ -17,3 +17,4 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.objenesis;bundle-version="2.1.0",
  net.bytebuddy.byte-buddy;bundle-version="1.12.18",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
+Import-Package: com.sap.sse.shared.util

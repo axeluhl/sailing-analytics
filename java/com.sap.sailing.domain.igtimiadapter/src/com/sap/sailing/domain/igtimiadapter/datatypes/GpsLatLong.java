@@ -14,7 +14,15 @@ public class GpsLatLong extends Fix {
     private final Position position;
     
     public GpsLatLong(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        this(timePoint, sensor, getPosition(valuesPerSubindex));
+    }
+
+    public GpsLatLong(TimePoint timePoint, Sensor sensor, Position position) {
         super(sensor, timePoint);
+        this.position = position;
+    }
+
+    private static Position getPosition(Map<Integer, Object> valuesPerSubindex) {
         final double longitudeInDegrees = ((Number) valuesPerSubindex.get(1)).doubleValue();
         final double preliminaryLatitudeInDegrees = ((Number) valuesPerSubindex.get(2)).doubleValue();
         final double latitudeInDegrees;
@@ -31,9 +39,9 @@ public class GpsLatLong extends Fix {
         } else {
             latitudeInDegrees = preliminaryLatitudeInDegrees;
         }
-        position = new DegreePosition(latitudeInDegrees, longitudeInDegrees);
+        return new DegreePosition(latitudeInDegrees, longitudeInDegrees);
     }
-
+    
     public Position getPosition() {
         return position;
     }

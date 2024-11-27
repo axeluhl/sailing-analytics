@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.riot.impl;
 import java.io.IOException;
 import java.lang.Thread.State;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -37,68 +38,95 @@ public class RiotServerImpl implements RiotServer, Runnable {
      */
     private final Map<SocketChannel, RiotConnection> connections;
 
+    /**
+     * Like {@link #RiotServerImpl(int)}, only that an available port is selected automatically.
+     * The port can be obtained by calling {@link #getPort}.
+     */
+    public RiotServerImpl() throws IOException, InterruptedException {
+        this(null);
+    }
+    
     public RiotServerImpl(int port) throws IOException, InterruptedException {
+        this(new InetSocketAddress("localhost", port));
+    }
+    
+    /**
+     * @param localAddress if {@code null}, select a local port to listen on automatically
+     */
+    private RiotServerImpl(SocketAddress localAddress) throws IOException, InterruptedException {
         this.listeners = ConcurrentHashMap.newKeySet();
         this.connections = new ConcurrentHashMap<>();
         this.socketSelector = Selector.open();
         this.serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress("localhost", port));
+        serverSocketChannel.bind(localAddress);
         serverSocketChannel.configureBlocking(false);
         serverSocketChannel.register(socketSelector, SelectionKey.OP_ACCEPT);
         this.running = true;
-        this.communicatorThread = new Thread(this, "Riot thread listening on port "+port);
+        this.communicatorThread = new Thread(this, "Riot thread listening on port "+getPort());
         communicatorThread.setDaemon(true);
         communicatorThread.start();
         while (communicatorThread.getState() == State.NEW) {
             Thread.sleep(1);
         }
-        logger.info("Riot thread is running and listening for new connections on port "+port);
+        logger.info("Riot thread is running and listening for new connections on port "+getPort());
+    }
+    
+    @Override
+    public int getPort() throws IOException {
+        return ((InetSocketAddress) serverSocketChannel.getLocalAddress()).getPort();
     }
     
     @Override
     public void stop() throws IOException {
-        logger.info("Stopping Riot server listening on address "+serverSocketChannel.getLocalAddress());
-        running = false; // cause the thread to exit latest 1s after this call
-        serverSocketChannel.keyFor(socketSelector).cancel();
-        serverSocketChannel.close();
-        for (final SocketChannel deviceChannel : connections.keySet()) {
-            logger.info("Closing active device connection "+connections.get(deviceChannel)+" from "+deviceChannel.getRemoteAddress());
-            deviceChannel.keyFor(socketSelector).cancel();
+        if (running) {
+            logger.info("Stopping Riot server listening on address "+serverSocketChannel.getLocalAddress());
+            running = false; // cause the thread to exit latest 1s after this call
+            serverSocketChannel.keyFor(socketSelector).cancel();
+            serverSocketChannel.close();
+            for (final SocketChannel deviceChannel : connections.keySet()) {
+                logger.info("Closing active device connection "+connections.get(deviceChannel)+" from "+deviceChannel.getRemoteAddress());
+                deviceChannel.keyFor(socketSelector).cancel();
+            }
+            connections.clear();
+        } else {
+            logger.info("Trying to stop a Riot server that is not running. Ignoring.");
         }
-        connections.clear();
     }
 
     @Override
     public void run() {
         while (running) {
             try {
-                final int numberOfKeys = socketSelector.select(1000 /* ms timeout; e.g., in order to stop 1s after stop() was called */);
-                if (numberOfKeys > 0) {
-                    for (final SelectionKey selectedKey : socketSelector.selectedKeys()) {
-                        if (selectedKey.isAcceptable()) {
-                            final SocketChannel deviceChannel = serverSocketChannel.accept();
+                socketSelector.select(1000 /* ms timeout; e.g., in order to stop 1s after stop() was called */);
+                for (final SelectionKey selectedKey : socketSelector.selectedKeys()) {
+                    if (selectedKey.isAcceptable()) {
+                        final SocketChannel deviceChannel = serverSocketChannel.accept();
+                        if (deviceChannel != null) { // may be null because the server socket is in non-blocking mode
                             deviceChannel.configureBlocking(false);
                             deviceChannel.register(socketSelector, SelectionKey.OP_READ);
+                            connections.put(deviceChannel, new RiotConnectionImpl(deviceChannel, this));
                             logger.info("New device connection from "+deviceChannel.getRemoteAddress());
-                        } else if (selectedKey.isReadable()) {
-                            final SocketChannel deviceChannel = (SocketChannel) selectedKey.channel();
-                            final RiotConnection connection = connections.get(deviceChannel);
-                            final ByteBuffer buffer = ByteBuffer.allocate(4096);
-                            final int numberOfBytesRead = deviceChannel.read(buffer);
-                            if (numberOfBytesRead > 0 && connection != null) {
+                        }
+                    } else if (selectedKey.isReadable()) {
+                        final SocketChannel deviceChannel = (SocketChannel) selectedKey.channel();
+                        final ByteBuffer buffer = ByteBuffer.allocate(4096);
+                        final int numberOfBytesRead = deviceChannel.read(buffer);
+                        final RiotConnection connection = connections.get(deviceChannel);
+                        if (numberOfBytesRead > 0) {
+                            if (connection != null) {
                                 connection.dataReceived(buffer);
                             } else {
                                 logger.warning("Data received from a socket with address "+deviceChannel.getRemoteAddress()
                                               +" that we don't have a managed connection for");
                             }
-                            if (numberOfBytesRead == -1) { // EOF
-                                logger.info("Device channel from "+deviceChannel.getRemoteAddress()+" closed");
-                                if (connection != null) {
-                                    logger.info("The device was handled by connection "+connection);
-                                    connections.remove(deviceChannel);
-                                }
-                                deviceChannel.close();
+                        }
+                        if (numberOfBytesRead == -1) { // EOF
+                            logger.info("Device channel from "+deviceChannel.getRemoteAddress()+" closed");
+                            if (connection != null) {
+                                logger.info("The device was handled by connection "+connection);
+                                connections.remove(deviceChannel);
                             }
+                            deviceChannel.close();
                         }
                     }
                 }
