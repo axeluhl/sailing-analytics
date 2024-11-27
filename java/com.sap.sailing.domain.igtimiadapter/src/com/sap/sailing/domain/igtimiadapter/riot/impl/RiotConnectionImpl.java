@@ -15,7 +15,6 @@ import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.igtimi.IgtimiAPI.APIData;
 import com.igtimi.IgtimiAPI.Token;
 import com.igtimi.IgtimiData.ApparentWindAngle;
 import com.igtimi.IgtimiData.ApparentWindSpeed;
@@ -37,6 +36,7 @@ import com.igtimi.IgtimiStream.Authentication;
 import com.igtimi.IgtimiStream.Authentication.AuthResponse;
 import com.igtimi.IgtimiStream.ChannelManagement;
 import com.igtimi.IgtimiStream.Msg;
+import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -133,8 +133,12 @@ public class RiotConnectionImpl implements RiotConnection {
 
     @Override
     public void close() throws IOException {
-        heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
-        socketChannel.close();
+        try {
+            send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setDisconnect(ServerDisconnecting.newBuilder().setCode(500).setReason("Connection closed by server"))).build());
+        } finally {
+            heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
+            socketChannel.close();
+        }
     }
     
     @Override
@@ -298,14 +302,8 @@ public class RiotConnectionImpl implements RiotConnection {
             }
             
             @Override
-            public void handleApiData(APIData apiData) {
-                // TODO Auto-generated method stub
-                
-            }
-            
-            @Override
             public void handleAckResponse(AckResponse ackResponse) {
-                logger.info("Received AckResponse "+ackResponse);
+                logger.info("Received AckResponse from device "+getSerialNumber()+": "+ackResponse);
             }
         });
         riotServer.notifyListeners(fixes);

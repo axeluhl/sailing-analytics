@@ -150,7 +150,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return no trailing slash
      */
     private String getBaseUrl() {
-//        return "http://staging.igtimi.com"; // Use this for testing a staged Igtimi server version
         return "https://www.igtimi.com";
     }
 
