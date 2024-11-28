@@ -32,7 +32,6 @@ public class AuthorizationCallback {
     
     private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
     static final String V1 = "/v1";
-    static final String V1_AUTHORIZATIONCALLBACK = V1 + AUTHORIZATIONCALLBACK;
     private final IgtimiConnectionFactoryImpl connectionFactory;
     
     public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
