@@ -26,12 +26,11 @@ import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
 
-@Path(AuthorizationCallback.V1)
+@Path(RestApiApplication.V1)
 public class AuthorizationCallback {
     private static final Logger logger = Logger.getLogger(AuthorizationCallback.class.getName());
     
     private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
-    static final String V1 = "/v1";
     private final IgtimiConnectionFactoryImpl connectionFactory;
     
     public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {

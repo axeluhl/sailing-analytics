@@ -11,5 +11,6 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  com.rabbitmq.client,
  com.sap.sse.replication.testsupport,
  com.sap.sse.mail.replication.testsupport,
- com.sap.sse.replication.interfaces;bundle-version="1.0.0"
+ com.sap.sse.replication.interfaces,
+ com.sap.sse.replication
 Automatic-Module-Name: com.sap.sse.mail.replication.test

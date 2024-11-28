@@ -9,6 +9,8 @@ import javax.ws.rs.core.Application;
 import com.sap.sse.security.jaxrs.ShiroAuthorizationExceptionTo401ResponseMapper;
 
 public class RestApiApplication extends Application {
+    static final String V1 = "/v1";
+
     public RestApiApplication() {
     }
 
