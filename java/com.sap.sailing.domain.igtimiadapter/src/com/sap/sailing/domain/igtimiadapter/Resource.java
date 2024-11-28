@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 
 /**
@@ -12,7 +13,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Resource extends HasId, HasPermissions, HasStartAndEndTime {
+public interface Resource extends HasId, HasPermissions, HasStartAndEndTime, WithQualifiedObjectIdentifier {
 
     boolean isBlob();
 

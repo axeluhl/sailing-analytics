@@ -3,13 +3,18 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class ResourceImpl implements Resource {
+    private static final long serialVersionUID = -8944469021862963744L;
     private final long id;
     private final TimePoint startTime;
     private final TimePoint endTime;
@@ -67,5 +72,20 @@ public class ResourceImpl implements Resource {
     @Override
     public boolean isBlob() {
         return blob;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(""+getId()));
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.IGTIMI_RESOURCE;
+    }
+
+    @Override
+    public String getName() {
+        return "Igtimi Resource "+getId();
     }
 }

@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.SecurityEntity;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow {
+    private static final long serialVersionUID = -7076166985273850220L;
     private final TimePoint startTime;
     private final TimePoint endTime;
     private final String deviceSerialNumber;
@@ -50,5 +55,20 @@ public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow 
     @Override
     public String toString() {
         return "DAW "+getId()+" for device "+getDeviceSerialNumber()+" from "+getStartTime()+" to "+getEndTime()+", permissions "+getPermissions();
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getDeviceSerialNumber(), ""+getStartTime().asMillis(), ""+getEndTime().asMillis()));
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW;
+    }
+
+    @Override
+    public String getName() {
+        return "Data Access Window for device "+getDeviceSerialNumber()+" from "+getStartTime().asMillis()+" to "+getEndTime().asMillis();
     }
 }

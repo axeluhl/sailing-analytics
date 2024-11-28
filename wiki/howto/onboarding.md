@@ -45,7 +45,7 @@ For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that
 ### Installations
 
 1. JDK >= 11. No longer required by Eclipse because new Eclipse releases bring their own JDK bundled with the installer. Still, if you want to use Java 11 or Java 17, install any such JDK and set the `JAVA_HOME` variable to it.
-2. Eclipse IDE for Eclipse Committers, version 4.29.0 ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r) 
+2. Eclipse IDE for Eclipse Committers, version 4.33.0 ["2024-09"](https://www.eclipse.org/downloads/packages/release/2024-09/r) 
 3. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 4. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)still
 5. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
@@ -129,8 +129,7 @@ Out of the box, multiple settings in Eclipse need to be changed. Go to Window �
 - In "Web ⇒ HTML Files ⇒ Editor" activate indent using Spaces
 - In "XML(Wild Web Developer) ⇒ Validation & Resolution ⇒ Enable Validation" Disable the Checkbox
 - For Eclipse-based debugging of GWT web applications with SDBG, make sure that Chrome is set as your default browser: "General ⇒ Web Browser". If missing, add a profile for Chrome and specify "%URL%" as the parameter.
-- Install Eclipse eGit (optional)
-
+- Consider installing [https://marketplace.eclipse.org/content/protocol-buffer-editor](https://marketplace.eclipse.org/content/protocol-buffer-editor) for a Protocol Buffers (protobuf) editor
 
 ### Steps to build and run the Race Analysis Suite
 

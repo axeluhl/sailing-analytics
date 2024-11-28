@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+
 /**
  * When a device is shared to you, all that happens is that a DAW (Data Access Window) is being created for the time
  * interval that the device owner wants you to have access to the data from the device.<p>
@@ -15,7 +17,7 @@ package com.sap.sailing.domain.igtimiadapter;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface DataAccessWindow extends HasId, HasStartAndEndTime, HasPermissions {
+public interface DataAccessWindow extends HasId, HasStartAndEndTime, HasPermissions, WithQualifiedObjectIdentifier {
     String getDeviceSerialNumber();
 
     SecurityEntity getRecipient();

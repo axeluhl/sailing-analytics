@@ -5,7 +5,9 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-public interface Device extends HasId {
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+
+public interface Device extends HasId, WithQualifiedObjectIdentifier {
     /**
      * @return a string identifying the device, such as "AA-AA-AAAA"
      */
@@ -22,8 +24,6 @@ public interface Device extends HasId {
     Iterable<Permission> getPermissions();
 
     Boolean getBlob();
-
-    String getName();
 
     User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 }
