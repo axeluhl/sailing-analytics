@@ -1312,4 +1312,17 @@
          fragment="true"
          unpack="false"/>
 
+   <plugin
+         id="com.google.protobuf"
+         download-size="0"
+         install-size="0"
+         version="4.28.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.protobuf.source"
+         download-size="0"
+         install-size="0"
+         version="4.28.3"
+         unpack="false"/>
 </feature>
