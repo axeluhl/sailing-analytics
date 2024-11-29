@@ -240,6 +240,8 @@
 <setEntry value="org.jboss.marshalling.jboss-marshalling-osgi@default:default"/>
 <setEntry value="io.projectreactor.reactor-core@default:default"/>
 <setEntry value="com.diffplug.osgi.extension.sun.misc@default:default"/>
+<setEntry value="com.google.protobuf@default:default"/>
+<setEntry value="com.google.protobuf.source@default:default"/>
 </setAttribute>
     <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
@@ -355,8 +357,6 @@
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>
-<setEntry value="com.google.protobuf@default:default"/>
-<setEntry value="com.google.protobuf.source@default:default"/>
 <setEntry value="com.sap.sailing.server.gateway.test.support@5:true"/>
 
 </setAttribute>
