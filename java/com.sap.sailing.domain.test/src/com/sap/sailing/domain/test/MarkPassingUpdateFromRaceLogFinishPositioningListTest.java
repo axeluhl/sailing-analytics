@@ -64,12 +64,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (D043530)
  *
  */
-public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends AbstractManeuverDetectionTestCase {
+public class MarkPassingUpdateFromRaceLogFinishPositioningListTest extends AbstractManeuverDetectionTestCase {
     private FlexibleLeaderboard leaderboard;
     private RaceLog raceLog;
     private final AbstractLogEventAuthor author;
     
-    public MarkPassingUpdateFromRaceLogFinishPositioingListTest() throws MalformedURLException, URISyntaxException {
+    public MarkPassingUpdateFromRaceLogFinishPositioningListTest() throws MalformedURLException, URISyntaxException {
         super();
         author = new LogEventAuthorImpl("Me", 0);
     }

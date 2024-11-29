@@ -24,15 +24,13 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
-import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util.Pair;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.ISubscriberFactory;
@@ -164,22 +162,14 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         return race;
     }
 
-    public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {
-        List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
-        for (IControl cp : controlPoints) {
-            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), PassingInstruction.None));
+    public static Iterable<Pair<IMapItem, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IMapItem> controlPoints) {
+        List<Pair<IMapItem, PassingInstruction>> ttControlPoints = new ArrayList<>();
+        for (IMapItem cp : controlPoints) {
+            ttControlPoints.add(new Pair<IMapItem, PassingInstruction>(cp, PassingInstruction.None));
         }
         return ttControlPoints;
     }
     
-    public static Iterable<TracTracControlPoint> getTracTracControlPoints(Iterable<IControl> controlPoints) {
-        List<TracTracControlPoint> ttControlPoints = new ArrayList<>();
-        for (IControl cp : controlPoints) {
-            ttControlPoints.add(new ControlPointAdapter(cp));
-        }
-        return ttControlPoints;
-    }
-
     public static URI getCourseDesignUpdateURI() throws URISyntaxException {
         return new URI("http://" + TracTracConnectionConstants.HOST_NAME + "/update_course");
     }
