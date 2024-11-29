@@ -63,6 +63,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.tractrac.model.lib.api.event.IRace;
 import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
+import com.tractrac.model.lib.api.metadata.IMetadata;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
@@ -330,6 +332,18 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         Mockito.when(cp1.getName()).thenReturn(name);
         Mockito.when(cp1.getSize()).thenReturn(numberOfMarks);
         Mockito.when(cp1.getId()).thenReturn(id);
+        final List<IPositionedItem> markMocks = new ArrayList<>();
+        for (int i=0; i<numberOfMarks; i++) {
+            final IPositionedItem markMock = Mockito.mock(IPositionedItem.class);
+            final UUID markId = UUID.randomUUID();
+            Mockito.when(markMock.getId()).thenReturn(markId);
+            Mockito.when(markMock.getName()).thenReturn(name+" ("+i+")");
+            final IMetadata markMockMetadata = Mockito.mock(IMetadata.class);
+            Mockito.when(markMockMetadata.getText()).thenReturn("");
+            Mockito.when(markMock.getMetadata()).thenReturn(markMockMetadata);
+            markMocks.add(markMock);
+        }
+        Mockito.when(cp1.getPositionedItems()).thenReturn(markMocks);
         return cp1;
     }
     
