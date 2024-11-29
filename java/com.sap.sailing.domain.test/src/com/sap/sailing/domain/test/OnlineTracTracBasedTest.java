@@ -296,13 +296,13 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("K Start (1)", new DegreePosition(54.497439439999994, 10.205943000000001));
-        markPositions.put("K Start (2)", new DegreePosition(54.500209999999996, 10.20206472));
-        markPositions.put("K Mark4 (2)", new DegreePosition(54.499422999999986, 10.200381692));
-        markPositions.put("K Mark4 (1)", new DegreePosition(54.498954999999995, 10.200982));
+        markPositions.put("K Start - 1", new DegreePosition(54.497439439999994, 10.205943000000001));
+        markPositions.put("K Start - 2", new DegreePosition(54.500209999999996, 10.20206472));
+        markPositions.put("K Mark4 - 2", new DegreePosition(54.499422999999986, 10.200381692));
+        markPositions.put("K Mark4 - 1", new DegreePosition(54.498954999999995, 10.200982));
         markPositions.put("K Mark1", new DegreePosition(54.489738990000006, 10.17079423000015));
-        markPositions.put("K Finish (1)", new DegreePosition(54.48918199999999, 10.17003714));
-        markPositions.put("K Finish (2)", new DegreePosition(54.48891756, 10.170632146666675));
+        markPositions.put("K Finish - 1", new DegreePosition(54.48918199999999, 10.17003714));
+        markPositions.put("K Finish - 2", new DegreePosition(54.48891756, 10.170632146666675));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Mark mark : w.getMarks()) {
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));

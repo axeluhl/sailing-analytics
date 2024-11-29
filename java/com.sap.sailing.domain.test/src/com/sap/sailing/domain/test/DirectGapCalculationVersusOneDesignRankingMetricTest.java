@@ -43,8 +43,7 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
 
     @Override
     protected String getExpectedEventName() {
-        // don't worry about the missing "r" at the end of "Kiele"; this is what we're getting from TracTrac
-        return "Kiele Woche 2014 - Olympic Week";
+        return "Kieler Woche 2014 - Olympic Week";
     }
 
     @Before
@@ -68,7 +67,7 @@ public class DirectGapCalculationVersusOneDesignRankingMetricTest extends Abstra
      */
     @Test
     public void testBuhlisGapsAtVariousTimePoints() throws ParseException, NoWindException {
-        Competitor buhli = getCompetitorByName("Philipp Buhl");
+        Competitor buhli = getCompetitorByName("Buhl");
         TimePoint timePoint = getTrackedRace().getStartOfRace();
         for (int i=1; i<10; i++) {
             timePoint = timePoint.plus(Duration.ONE_MINUTE);
