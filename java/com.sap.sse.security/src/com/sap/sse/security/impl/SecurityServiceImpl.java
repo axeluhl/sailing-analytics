@@ -1090,6 +1090,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
+        store.updateUser(user);
         return null;
     }
 
@@ -1161,6 +1162,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final User user = getUserByName(username);
         user.setEmail(newEmail);
         user.startEmailValidation(validationSecret);
+        store.updateUser(user);
         return null;
     }
 

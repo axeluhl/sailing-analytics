@@ -349,6 +349,8 @@
 <setEntry value="com.sap.sse.landscape.aws.persistence@default:default"/>
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>
+<setEntry value="com.google.protobuf@default:default"/>
+<setEntry value="com.google.protobuf.source@default:default"/>
 </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
