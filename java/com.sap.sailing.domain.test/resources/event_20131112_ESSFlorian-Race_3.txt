@@ -1,4 +1,4 @@
-stored-uri:datafiles/4929fd30-31b2-0131-d269-10b11c4ed8fd.mtb
+stored-uri:datafiles/528a0f30-2dd0-0131-2819-60a44ce903c3.mtb
 StartReplay:1
 
 ResultColumn1Name:#
@@ -142,14 +142,14 @@ HighLoadEnabled:
 MultipleDataservers:0
 WebURL:https://www.tractrac.com/event-page/event_20131112_ESSFlorian/632
 
-RaceID:4929fd30-31b2-0131-d269-10b11c4ed8fd
-RaceName:Race 30
-RaceStartTime:
+RaceID:528a0f30-2dd0-0131-2819-60a44ce903c3
+RaceName:Race 3
+RaceStartTime:2013-11-14 17:04:00
 RaceEndTime:
-RaceTrackingStartTime:2013-11-17 02:00:00
-RaceTrackingEndTime:2013-11-18 00:00:00
-Initialized:0
-RaceDefaultRouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+RaceTrackingStartTime:2013-11-14 16:58:00
+RaceTrackingEndTime:2013-11-14 17:18:57
+Initialized:1
+RaceDefaultRouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 RaceHandicapSystem:NONE
 RaceStatus:NONE
 RaceStatusTime:
@@ -228,9 +228,10 @@ Comp1Nationality:SUI
 Comp1Description:
 Comp1Handicap:1.0000000000
 Comp1HandicapDistance:0.00000
+Comp1StartTime:2013-11-14 17:04:00
 Comp1PictureUUID:64a7b348-83db-11e2-88c0-10bf48d758ce
 Comp1ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp1RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp1RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp1Color:00FF00
 
 Comp2UUID:64bbff7e-83db-11e2-88c0-10bf48d758ce
@@ -240,9 +241,10 @@ Comp2Nationality:NZL
 Comp2Description:
 Comp2Handicap:1.0000000000
 Comp2HandicapDistance:0.00000
+Comp2StartTime:2013-11-14 17:04:00
 Comp2PictureUUID:64c3a8fa-83db-11e2-88c0-10bf48d758ce
 Comp2ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp2RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp2RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp2Color:000080
 
 Comp3UUID:64da7c24-83db-11e2-88c0-10bf48d758ce
@@ -252,9 +254,10 @@ Comp3Nationality:SUI
 Comp3Description:
 Comp3Handicap:1.0000000000
 Comp3HandicapDistance:0.00000
+Comp3StartTime:2013-11-14 17:04:00
 Comp3PictureUUID:64a7b348-83db-11e2-88c0-10bf48d758ce
 Comp3ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp3RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp3RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp3Color:000000
 
 Comp4UUID:65322500-83db-11e2-88c0-10bf48d758ce
@@ -264,9 +267,10 @@ Comp4Nationality:AUT
 Comp4Description:
 Comp4Handicap:1.0000000000
 Comp4HandicapDistance:0.00000
+Comp4StartTime:2013-11-14 17:04:00
 Comp4PictureUUID:653c1ab0-83db-11e2-88c0-10bf48d758ce
 Comp4ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp4RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp4RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp4Color:008080
 
 Comp5UUID:655bd56c-83db-11e2-88c0-10bf48d758ce
@@ -276,9 +280,10 @@ Comp5Nationality:DEN
 Comp5Description:
 Comp5Handicap:1.0000000000
 Comp5HandicapDistance:0.00000
+Comp5StartTime:2013-11-14 17:04:00
 Comp5PictureUUID:65637da8-83db-11e2-88c0-10bf48d758ce
 Comp5ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp5RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp5RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp5Color:FFFFFF
 
 Comp6UUID:657fa5a0-83db-11e2-88c0-10bf48d758ce
@@ -288,9 +293,10 @@ Comp6Nationality:OMA
 Comp6Description:
 Comp6Handicap:1.0000000000
 Comp6HandicapDistance:0.00000
+Comp6StartTime:2013-11-14 17:04:00
 Comp6PictureUUID:65875138-83db-11e2-88c0-10bf48d758ce
 Comp6ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp6RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp6RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp6Color:800080
 
 Comp7UUID:e442a414-83db-11e2-88c0-10bf48d758ce
@@ -300,8 +306,9 @@ Comp7Nationality:BRA
 Comp7Description:
 Comp7Handicap:1.0000000000
 Comp7HandicapDistance:0.00000
+Comp7StartTime:2013-11-14 17:04:00
 Comp7ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp7RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp7RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp7Color:FFFF00
 
 Comp8UUID:8716c6f0-eda3-0130-c5c1-10b11c4ed8fd
@@ -311,8 +318,9 @@ Comp8Nationality:CHN
 Comp8Description:
 Comp8Handicap:1.0000000000
 Comp8HandicapDistance:0.00000
+Comp8StartTime:2013-11-14 17:04:00
 Comp8ClassUUID:648ee25a-83db-11e2-88c0-10bf48d758ce
-Comp8RouteUUID:49260d20-31b2-0131-d268-10b11c4ed8fd
+Comp8RouteUUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
 Comp8Color:800000
 
 PositionedItem1UUID:aac2d6b0-855c-013d-98d0-1c6b00518c70
@@ -1070,12 +1078,13 @@ MapItem72PositionedItemIds:["b5495720-855c-013d-9929-1c6b00518c70", "b57bf700-85
 MapItem72DataSheet:P1.Type=Buoy###BREAKLINE###P1.Color=Black###BREAKLINE###P1.Shape=Conical###BREAKLINE###P1.Pattern=Checkered###BREAKLINE###P1.Name=Black Conical###BREAKLINE###P1.UUID=d78695ea-83be-11e2-88c0-10bf48d758ce###BREAKLINE###P2.Type=Buoy###BREAKLINE###P2.Color=Red###BREAKLINE###P2.Shape=Conical###BREAKLINE###P2.Name=Red###BREAKLINE###P2.UUID=5427c7d2-83be-11e2-88c0-10bf48d758ce###BREAKLINE###
 
 SegmentFile:segments.php
-Route1UUID:49260d20-31b2-0131-d268-10b11c4ed8fd
-Route1Description:Race 30
+Route1UUID:5289b6f0-2dd0-0131-2818-60a44ce903c3
+Route1Description:Race 3
 Route1Length:0
-Route1ControlPoint1UUID:133d41f0-2dca-0131-279a-60a44ce903c3
+Route1DataSheet:Seq.1=GATE###BREAKLINE###Seq.2=STARBOARD###BREAKLINE###Seq.3=GATE###BREAKLINE###Seq.4=STARBOARD###BREAKLINE###Seq.5=GATE###BREAKLINE###
+Route1ControlPoint1UUID:2b184930-2dca-0131-27a4-60a44ce903c3
 Route1ControlPoint2UUID:5427c7d2-83be-11e2-88c0-10bf48d758ce
-Route1ControlPoint3UUID:914f22b0-2dca-0131-27cc-60a44ce903c3
-Route1ControlPoint4UUID:785c3e44-83be-11e2-88c0-10bf48d758ce
-Route1ControlPoint5UUID:aa831320-2dc8-0131-272c-60a44ce903c3
+Route1ControlPoint3UUID:60e54960-2dc8-0131-2722-60a44ce903c3
+Route1ControlPoint4UUID:5427c7d2-83be-11e2-88c0-10bf48d758ce
+Route1ControlPoint5UUID:133d41f0-2dca-0131-279a-60a44ce903c3
 
