@@ -13,7 +13,7 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
-public interface HasRaceOfCompetitorContext extends HasSomethingOfCompetitorContext {
+public interface HasRaceOfCompetitorContext extends HasSomethingOfCompetitorContextWithTrackedRaceContext {
     @Override
     @Connector(scanForStatistics=false)
     HasTrackedRaceContext getTrackedRaceContext();
