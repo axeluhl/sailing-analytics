@@ -5,7 +5,7 @@ FROM sapmachine:11.0.17
 # obtain the tar.gz file for a specific or the latest "main" release.
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
-LABEL org.opencontainers.image.description Sailing Analytics with Java 11
+LABEL org.opencontainers.image.description="Sailing Analytics with Java 11"
 # Download and extract the release
 WORKDIR /home/sailing/servers/server
 RUN apt-get update \
@@ -22,4 +22,4 @@ RUN cat env-default-rules.sh >>env.sh
 COPY start .
 COPY JavaSE-11.profile .
 EXPOSE 8888 14888 8000 7091 6666
-CMD [ "/home/sailing/servers/server/start", "fg" ]
+CMD [ "/home/sailing/servers/server/start", "docker" ]

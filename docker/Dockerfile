@@ -7,7 +7,7 @@ FROM eclipse-temurin:8-jdk
 #FROM sapjvm8:8.1.102
 ARG RELEASE
 LABEL maintainer=axel.uhl@sap.com
-LABEL org.opencontainers.image.description Sailing Analytics with Java 8
+LABEL org.opencontainers.image.description="Sailing Analytics with Java 8"
 # Download and extract the release
 WORKDIR /home/sailing/servers/server
 RUN apt-get update \
@@ -24,4 +24,4 @@ RUN cat env-default-rules.sh >>env.sh
 COPY start .
 COPY JavaSE-11.profile .
 EXPOSE 8888 14888 8000 7091 6666
-CMD [ "/home/sailing/servers/server/start", "fg" ]
+CMD [ "/home/sailing/servers/server/start", "docker" ]
