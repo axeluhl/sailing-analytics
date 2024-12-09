@@ -87,7 +87,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         if (optionalSecurityService == null || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck)) {
             isPermittedToUseAccount = true;
         } else if (!SecurityUtils.getSubject().isAuthenticated()) {
-            // This is most probably a server reload where no security information is available
+            // This is most probably a server reload where no security information is available, or a separate thread
             final OwnershipAnnotation ownershipOfRace = optionalSecurityService.getOwnership(trackedRace.getIdentifier());
             final User userOwnerOfRace = ownershipOfRace == null ? null
                     : ownershipOfRace.getAnnotation().getUserOwner();
@@ -101,7 +101,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         : ownershipOfRace.getAnnotation().getTenantOwner();
                 if (groupOwner != null) {
                     if (groupOwner.equals(optionalSecurityService.getServerGroup())) {
-                        // It is assumed to be an auto-migration case
+                        // It is assumed to be an auto-migration case; FIXME: is this appropriate? Anyone with permissions to create objects in the server's group could then read all Igtimi accounts...
                         isPermittedToUseAccount = true;
                     } else {
                         final User allUser = optionalSecurityService.getAllUser();

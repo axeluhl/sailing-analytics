@@ -286,6 +286,10 @@
 <plugin id="org.eclipse.jetty.websocket.client.source"/>
 <plugin id="org.eclipse.jetty.websocket.common"/>
 <plugin id="org.eclipse.jetty.websocket.common.source"/>
+<plugin id="org.eclipse.jetty.websocket.server"/>
+<plugin id="org.eclipse.jetty.websocket.server.source"/>
+<plugin id="org.eclipse.jetty.websocket.servlet"/>
+<plugin id="org.eclipse.jetty.websocket.servlet.source"/>
 <plugin id="org.eclipse.jetty.xml"/>
 <plugin id="org.eclipse.jetty.xml.source"/>
 <plugin id="org.eclipse.osgi"/>

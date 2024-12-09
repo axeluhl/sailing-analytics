@@ -285,7 +285,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                 try {
                     if (getRemote() != null) {
                         logger.fine("Sending client heartbeat for " + WebSocketConnectionManager.this);
-                        getRemote().sendString("1");
+                        getRemote().sendStringByFuture("1");
                     }
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+WebSocketConnectionManager.this+". Will continue to try...", e);
