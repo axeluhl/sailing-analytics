@@ -1,0 +1,117 @@
+package com.sap.sailing.domain.igtimiadapter.websocket;
+
+import static org.junit.Assert.assertEquals;
+
+import java.net.URI;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.junit.Test;
+
+import com.sap.sse.common.Duration;
+import com.sap.sse.shared.util.Wait;
+
+public class TestWebsocketServer {
+    private static final Logger logger = Logger.getLogger(TestWebsocketServer.class.getName());
+
+    public static class ServerWebSocket extends WebSocketAdapter {
+        @Override
+        public void onWebSocketConnect(Session session) {
+            super.onWebSocketConnect(session);
+            logger.info("New connection: " + session.getRemoteAddress());
+        }
+
+        @Override
+        public void onWebSocketText(String message) {
+            logger.info("Received message: " + message);
+            // Echo the message back to the client
+            getRemote().sendStringByFuture(getEchoMessage(message));
+        }
+
+        String getEchoMessage(String message) {
+            return "Echo: " + message;
+        }
+
+        @Override
+        public void onWebSocketClose(int statusCode, String reason) {
+            logger.info("Closed with statusCode: " + statusCode + " reason: " + reason);
+        }
+
+        @Override
+        public void onWebSocketError(Throwable cause) {
+            cause.printStackTrace();
+        }
+    }
+    
+    public static class ClientWebSocket extends WebSocketAdapter {
+        private final StringBuilder sb;
+        
+        /**
+         * @param sb text messages received through {@link #onWebSocketText(String)} are appended to
+         * this string builder
+         */
+        ClientWebSocket(StringBuilder sb) {
+            this.sb = sb;
+        }
+        
+        @Override
+        public void onWebSocketText(String message) {
+            sb.append(message);
+        }
+    }
+    
+    // WebSocketServlet implementation
+    public static class MyWebSocketServlet extends WebSocketServlet {
+        private static final long serialVersionUID = 8904970922157313677L;
+
+        @Override
+        public void configure(WebSocketServletFactory factory) {
+            factory.register(ServerWebSocket.class); // Register the WebSocket handler class
+        }
+    }
+    
+    @Test
+    public void testWebsocketServer() throws Exception {
+        // Create Jetty server on a randomly allocated port
+        final Server server = new Server(0);
+        // Create a context handler for WebSocket connections
+        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        final String PATH = "/websocket";
+        // Add WebSocket handler to the context
+        context.addServlet(MyWebSocketServlet.class, PATH+"/*");
+        server.setHandler(context);
+        // Start the server
+        server.start();
+        final URI uri = server.getURI();
+        final URI wsUri = new URI("ws", uri.getAuthority(), PATH, uri.getQuery(), uri.getFragment());
+        final int port = uri.getPort();
+        logger.info("WebSocket Server listening on port "+port);
+        final WebSocketClient client = new WebSocketClient();
+        client.start();
+        final StringBuilder echo = new StringBuilder();
+        final ClientWebSocket currentSocket = new ClientWebSocket(echo);
+        client.connect(currentSocket, wsUri, new ClientUpgradeRequest());
+        try {
+            Wait.wait(()->currentSocket.getRemote() != null, Optional.of(Duration.ONE_SECOND), Duration.ONE_SECOND.divide(3));
+            final String text = "Hello world";
+            currentSocket.getRemote().sendString(text);
+            final String expectedEcho = new ServerWebSocket().getEchoMessage(text);
+            Wait.wait(()->echo.length() > 0, Optional.of(Duration.ONE_SECOND), Duration.ONE_SECOND.divide(3));
+            assertEquals(expectedEcho, echo.toString());
+        } finally {
+            client.stop();
+            client.destroy();
+            server.stop();
+            server.join();
+        }
+    }
+}
