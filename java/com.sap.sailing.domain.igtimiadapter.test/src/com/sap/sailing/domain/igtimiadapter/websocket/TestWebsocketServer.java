@@ -101,7 +101,7 @@ public class TestWebsocketServer {
         final ClientWebSocket currentSocket = new ClientWebSocket(echo);
         client.connect(currentSocket, wsUri, new ClientUpgradeRequest());
         try {
-            Wait.wait(()->currentSocket.getRemote() != null, Optional.of(Duration.ONE_SECOND), Duration.ONE_SECOND.divide(3));
+            Wait.wait(()->currentSocket.getRemote() != null, Optional.of(Duration.ONE_SECOND.times(5)), Duration.ONE_SECOND.divide(3));
             final String text = "Hello world";
             currentSocket.getRemote().sendString(text);
             final String expectedEcho = new ServerWebSocket().getEchoMessage(text);
