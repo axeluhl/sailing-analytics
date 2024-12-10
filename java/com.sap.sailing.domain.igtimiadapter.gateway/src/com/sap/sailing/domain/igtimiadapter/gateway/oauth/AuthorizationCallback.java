@@ -26,10 +26,11 @@ import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.impl.User;
 
-@Path(RestApiApplication.V1)
+@Path(AuthorizationCallback.OAUTH + RestApiApplication.V1 + AuthorizationCallback.AUTHORIZATIONCALLBACK)
 public class AuthorizationCallback {
     private static final Logger logger = Logger.getLogger(AuthorizationCallback.class.getName());
     
+    private static final String OAUTH = "/oauth";
     private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
     private final IgtimiConnectionFactoryImpl connectionFactory;
     
@@ -49,7 +50,6 @@ public class AuthorizationCallback {
      */
     @GET
     @Produces("text/plain;charset=UTF-8")
-    @Path(AUTHORIZATIONCALLBACK)
     public Response obtainAccessToken(@QueryParam("code") String code, @QueryParam("state") String state)
             throws ClientProtocolException, IOException, IllegalStateException, ParseException, URISyntaxException {
         Response result;

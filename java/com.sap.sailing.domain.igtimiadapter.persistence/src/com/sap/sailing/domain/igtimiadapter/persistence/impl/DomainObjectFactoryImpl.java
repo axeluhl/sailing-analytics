@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bson.Document;
@@ -47,13 +48,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Resource> getResources() {
         // TODO Auto-generated method stub
-        return null;
+        return Collections.emptySet();
     }
 
     @Override
     public Iterable<DataAccessWindow> getDataAccessWindows() {
         // TODO Auto-generated method stub
-        return null;
+        return Collections.emptySet();
     }
     
 }

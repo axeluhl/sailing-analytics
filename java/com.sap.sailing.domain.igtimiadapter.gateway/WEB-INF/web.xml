@@ -56,6 +56,6 @@
    	</servlet>
 	<servlet-mapping>
     	<servlet-name>Igtimi Oauth Callback REST API</servlet-name>
-    	<url-pattern>/oauth/*</url-pattern>
+    	<url-pattern>/*</url-pattern>
   	</servlet-mapping>
 </web-app>
