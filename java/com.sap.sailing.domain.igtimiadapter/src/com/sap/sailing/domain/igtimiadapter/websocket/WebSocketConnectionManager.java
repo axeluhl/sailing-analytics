@@ -208,7 +208,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                 }
             } else {
                 // try to parse server time stamp in response to the configuration message
-                synchronized (this) {
+                synchronized (WebSocketConnectionManager.this) {
                     igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
                     localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
                     logger.info("Received server timestamp "+igtimiServerTimepoint);
