@@ -30,8 +30,8 @@ import com.sap.sse.security.shared.impl.User;
 public class AuthorizationCallback {
     private static final Logger logger = Logger.getLogger(AuthorizationCallback.class.getName());
     
-    private static final String OAUTH = "/oauth";
-    private static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
+    protected static final String OAUTH = "/oauth";
+    protected static final String AUTHORIZATIONCALLBACK = "/authorizationcallback";
     private final IgtimiConnectionFactoryImpl connectionFactory;
     
     public AuthorizationCallback() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
