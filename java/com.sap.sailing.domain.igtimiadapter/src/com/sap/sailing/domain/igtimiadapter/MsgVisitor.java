@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot;
+package com.sap.sailing.domain.igtimiadapter;
 
 import java.util.logging.Logger;
 

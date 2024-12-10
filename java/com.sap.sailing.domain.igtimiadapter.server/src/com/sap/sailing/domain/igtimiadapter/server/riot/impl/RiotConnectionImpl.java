@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot.impl;
+package com.sap.sailing.domain.igtimiadapter.server.riot.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,6 +40,9 @@ import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
+import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
+import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
@@ -53,11 +56,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
-import com.sap.sailing.domain.igtimiadapter.impl.SensorImpl;
-import com.sap.sailing.domain.igtimiadapter.riot.ChannelManagementVisitor;
-import com.sap.sailing.domain.igtimiadapter.riot.DataPointVisitor;
-import com.sap.sailing.domain.igtimiadapter.riot.MsgVisitor;
-import com.sap.sailing.domain.igtimiadapter.riot.RiotConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -310,7 +309,7 @@ public class RiotConnectionImpl implements RiotConnection {
     }
 
     private Sensor getSensor() {
-        return new SensorImpl(getSerialNumber(), /* sub-device */ 0);
+        return Sensor.create(getSerialNumber(), /* sub-device */ 0);
     }
 
     private void sendHeartbeat() {

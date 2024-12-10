@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot;
+package com.sap.sailing.domain.igtimiadapter.server.riot;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
@@ -6,8 +6,11 @@ import java.nio.channels.ServerSocketChannel;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.riot.impl.RiotServerImpl;
+import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 
 /**
@@ -41,15 +44,15 @@ public interface RiotServer {
      * Created a {@link RiotServer} listening on the {@code port} specified. If the port is not
      * available, an {@link IOException} will be thrown.
      */
-    static RiotServer create(int port) throws IOException, InterruptedException {
-        return new RiotServerImpl(port);
+    static RiotServer create(int port, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+        return new RiotServerImpl(port, domainObjectFactory, mongoObjectFactory);
     }
     
     /**
      * Creates a {@link RiotServer} listening on an available local TCP port selected automatically.
      */
-    static RiotServer create() throws IOException, InterruptedException {
-        return new RiotServerImpl();
+    static RiotServer create(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+        return new RiotServerImpl(domainObjectFactory, mongoObjectFactory);
     }
     
     void addListener(BulkFixReceiver listener);

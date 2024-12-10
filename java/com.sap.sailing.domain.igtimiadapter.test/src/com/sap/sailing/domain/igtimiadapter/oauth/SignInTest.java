@@ -7,8 +7,6 @@ import static org.junit.Assert.assertSame;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.junit.After;
@@ -16,7 +14,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
@@ -25,6 +22,7 @@ import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.ClientImpl;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
@@ -45,16 +43,15 @@ public class SignInTest {
     }
 
     @Test
-    public void testSimpleSignIn() throws ClientProtocolException, IOException, IllegalStateException,
-            ParserConfigurationException, SAXException, ClassNotFoundException, InstantiationException,
-            IllegalAccessException, ClassCastException, ParseException {
+    public void testSimpleSignIn() throws Exception {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("7fcdd217e0aa16090edb4ad55b09ec43b2021090e209541fc9b7003c2a2b70c6",
                 "aa569cf4909bdc7b0e04b11873f3c4ea20687421e010fcc25b771cca9e6f3f9a", "http", "127.0.0.1", "8888", "/igtimi/oauth/v1/authorizationcallback");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
-        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
+        RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
         final String code = igtimiConnectionFactory.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
@@ -63,32 +60,30 @@ public class SignInTest {
     }
   
     @Test
-    public void testSimpleAuthorizeForAppNotYetAuthorized() throws ClientProtocolException, IOException,
-            IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException, ClassCastException {
+    public void testSimpleAuthorizeForAppNotYetAuthorized() throws Exception {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("a4cecd8593e12d43a03433a6db0eea243a411749f93c278dce6a26d4804eebd2",
                 "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http", "1.2.3.4", null, "/");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
-        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
+        RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
         final String code = igtimiConnectionFactory.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
     }
 
     @Test
-    public void testAuthorize() throws ClientProtocolException, IOException,
-            IllegalStateException, ParserConfigurationException, SAXException, ClassNotFoundException,
-            InstantiationException, IllegalAccessException, ClassCastException, ParseException {
+    public void testAuthorize() throws Exception {
         // use the credentials of "Another Test App"
         final Client testAppClient = new ClientImpl("a4cecd8593e12d43a03433a6db0eea243a411749f93c278dce6a26d4804eebd2",
                 "4d66022d1ec3e2991f8053514495b61cc076ff02d664f0dc8f3df9150c3864ef", "http", "1.2.3.4", null, "/");
         MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         MongoDBService mongoTestService = mongoTestConfig.getService();
-        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
+        RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
+        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
         final Account account = igtimiConnectionFactory.createAccountToAccessUserData("admin", "axel.uhl@gmx.de", "123456");
         assertNotNull(account);
         logger.info("Igtimi account is "+account);

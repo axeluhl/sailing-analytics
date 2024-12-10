@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot;
+package com.sap.sailing.domain.igtimiadapter;
 
 import com.igtimi.IgtimiData.Acceleration;
 import com.igtimi.IgtimiData.Angle;

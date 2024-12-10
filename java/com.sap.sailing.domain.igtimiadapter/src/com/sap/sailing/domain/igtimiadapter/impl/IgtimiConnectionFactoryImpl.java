@@ -49,9 +49,6 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.igtimiadapter.persistence.TokenAndCreator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
@@ -67,32 +64,18 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private final Map<String, Account> accountsByEmail;
     private final Map<Account, IgtimiConnection> connectionsByAccount;
     private final Client client;
-    private final MongoObjectFactory mongoObjectFactory;
     
-    public IgtimiConnectionFactoryImpl(Client client, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
+    public IgtimiConnectionFactoryImpl(Client client) {
         this.accessTokensByAccount = new HashMap<>();
         this.accountsByEmail = new HashMap<>();
         connectionsByAccount = new HashMap<>();
         this.client = client;
-        this.mongoObjectFactory = mongoObjectFactory;
-        for (TokenAndCreator accessTokenWithCreator : domainObjectFactory.getAccessTokens()) {
-            try {
-                storeIgtimiAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken(),
-                        getAccount(accessTokenWithCreator.getCreatorName(), accessTokenWithCreator.getAccessToken()));
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error registering Igtimi access token " + accessTokenWithCreator
-                        + "; probably the access token was revoked or expired.", e);
-                mongoObjectFactory.removeAccessToken(accessTokenWithCreator.getCreatorName(),
-                        accessTokenWithCreator.getAccessToken());
-            }
-        }
     }
 
     public void clear() {
         accessTokensByAccount.clear();
         accountsByEmail.clear();
         connectionsByAccount.clear();
-        mongoObjectFactory.clear();
     }
     
     @Override
@@ -109,7 +92,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     private Account storeIgtimiAccount(String creatorName, String accessToken, Account account) {
         accountsByEmail.put(account.getUser().getEmail(), account);
         accessTokensByAccount.put(account, accessToken);
-        mongoObjectFactory.storeAccessToken(creatorName, accessToken);
         return account;
     }
 
@@ -131,7 +113,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @return trailing slash
      */
     private String getApiV1BaseUrl() {
-        return getBaseUrl()+"/api/v1/";
+        return getBaseUrl()+"/igtimi/api/v1/";
     }
 
     private String getSignInUrl() {
@@ -149,8 +131,8 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     /**
      * @return no trailing slash
      */
-    private String getBaseUrl() {
-        return "https://www.igtimi.com";
+    protected String getBaseUrl() {
+        return "https://wind.sapsailing.com";
     }
 
     @Override
@@ -551,7 +533,6 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         if (account != null) {
             String accessToken = accessTokensByAccount.remove(account);
             accountsByEmail.remove(account.getUser().getEmail());
-            mongoObjectFactory.removeAccessToken(account.getCreatorName(), accessToken);
         }
     }
 }

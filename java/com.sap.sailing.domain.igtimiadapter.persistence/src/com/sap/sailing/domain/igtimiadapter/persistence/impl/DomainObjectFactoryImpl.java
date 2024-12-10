@@ -7,6 +7,8 @@ import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.TokenAndCreator;
 
@@ -40,6 +42,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.add(new TokenAndCreator(creatorName, accessToken));
         }
         return result;
+    }
+
+    @Override
+    public Iterable<Resource> getResources() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<DataAccessWindow> getDataAccessWindows() {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

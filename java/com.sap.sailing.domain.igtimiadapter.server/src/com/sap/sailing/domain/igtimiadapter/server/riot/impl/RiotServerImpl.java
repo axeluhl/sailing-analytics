@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot.impl;
+package com.sap.sailing.domain.igtimiadapter.server.riot.impl;
 
 import java.io.IOException;
 import java.lang.Thread.State;
@@ -10,19 +10,29 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.riot.RiotConnection;
-import com.sap.sailing.domain.igtimiadapter.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sse.common.Duration;
+import com.sap.sse.shared.util.Wait;
 
 public class RiotServerImpl implements RiotServer, Runnable {
     private static final Logger logger = Logger.getLogger(RiotServerImpl.class.getName());
 
+    private final ConcurrentMap<Long, Resource> resources;
+    private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
     private final Set<BulkFixReceiver> listeners;
     private final Selector socketSelector;
     private final ServerSocketChannel serverSocketChannel;
@@ -42,20 +52,28 @@ public class RiotServerImpl implements RiotServer, Runnable {
      * Like {@link #RiotServerImpl(int)}, only that an available port is selected automatically.
      * The port can be obtained by calling {@link #getPort}.
      */
-    public RiotServerImpl() throws IOException, InterruptedException {
-        this(null);
+    public RiotServerImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+        this(null, domainObjectFactory, mongoObjectFactory);
     }
     
-    public RiotServerImpl(int port) throws IOException, InterruptedException {
-        this(new InetSocketAddress("localhost", port));
+    public RiotServerImpl(int port, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+        this(new InetSocketAddress("localhost", port), domainObjectFactory, mongoObjectFactory);
     }
     
     /**
      * @param localAddress if {@code null}, select a local port to listen on automatically
      */
-    private RiotServerImpl(SocketAddress localAddress) throws IOException, InterruptedException {
+    private RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
         this.listeners = ConcurrentHashMap.newKeySet();
+        this.resources = new ConcurrentHashMap<>();
+        this.dataAccessWindows = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
+        for (final Resource resource : domainObjectFactory.getResources()) {
+            resources.put(resource.getId(), resource);
+        }
+        for (final DataAccessWindow daw : domainObjectFactory.getDataAccessWindows()) {
+            dataAccessWindows.put(daw.getId(), daw);
+        }
         this.socketSelector = Selector.open();
         this.serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(localAddress);
@@ -65,9 +83,7 @@ public class RiotServerImpl implements RiotServer, Runnable {
         this.communicatorThread = new Thread(this, "Riot thread listening on port "+getPort());
         communicatorThread.setDaemon(true);
         communicatorThread.start();
-        while (communicatorThread.getState() == State.NEW) {
-            Thread.sleep(1);
-        }
+        Wait.wait(()->communicatorThread.getState() != State.NEW, Optional.of(Duration.ONE_SECOND.times(5)), Duration.ONE_SECOND);
         logger.info("Riot thread is running and listening for new connections on port "+getPort());
     }
     
@@ -150,5 +166,15 @@ public class RiotServerImpl implements RiotServer, Runnable {
         for (final BulkFixReceiver listener : listeners) {
             listener.received(fixes);
         }
+    }
+
+
+    /**
+     * Use this method only for testing/debugging. It clears the transient state of this service,in particular
+     * all resources and data access windows.
+     */
+    public void clear() {
+        resources.clear();
+        dataAccessWindows.clear();
     }
 }

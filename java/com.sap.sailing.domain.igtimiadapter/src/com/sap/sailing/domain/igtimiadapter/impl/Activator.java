@@ -18,9 +18,6 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
-import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
@@ -64,13 +61,11 @@ public class Activator implements BundleActivator {
         final String clientRedirectHost = System.getProperty(CLIENT_REDIRECT_HOST_PROPERTY_NAME, DEFAULT_REDIRECT_HOST);
         final String clientRedirectPort = System.getProperty(CLIENT_REDIRECT_PORT_PROPERTY_NAME, DEFAULT_REDIRECT_PORT);
         final Client client = new ClientImpl(clientId, clientSecret, clientRedirectProtocol, clientRedirectHost, clientRedirectPort, CLIENT_REDIRECT_PATH);
-        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         connectionFactory = executor.submit(new Callable<IgtimiConnectionFactoryImpl>() {
             @Override
             public IgtimiConnectionFactoryImpl call() {
                 logger.info("Creating IgtimiConnectionFactory");
-                return new IgtimiConnectionFactoryImpl(client, domainObjectFactory, mongoObjectFactory);
+                return new IgtimiConnectionFactoryImpl(client);
             }
         });
         windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {

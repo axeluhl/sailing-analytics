@@ -18,9 +18,12 @@ import org.junit.Test;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.shared.util.Wait;
 
 public class TestRiotServer {
@@ -41,7 +44,10 @@ public class TestRiotServer {
     
     @Test
     public void testSendingAFewMessages() throws Exception {
-        final RiotServer riot = RiotServer.create();
+        final MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
+        final MongoDBService mongoTestService = mongoTestConfig.getService();
+        final RiotServer riot = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         final TestListener listener = new TestListener();
         riot.addListener(listener);
         try (final Socket socket = new Socket("localhost", riot.getPort())) {

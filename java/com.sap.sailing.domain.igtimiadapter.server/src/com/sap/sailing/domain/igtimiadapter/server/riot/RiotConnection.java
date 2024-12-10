@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.riot;
+package com.sap.sailing.domain.igtimiadapter.server.riot;
 
 import java.io.Closeable;
 import java.io.IOException;
