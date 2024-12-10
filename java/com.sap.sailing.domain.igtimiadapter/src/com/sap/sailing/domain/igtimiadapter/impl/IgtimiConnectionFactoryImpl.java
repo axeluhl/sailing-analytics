@@ -190,7 +190,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     
     /**
      * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
-     * live data from the units whose IDs are specified by <code>unitIds</code>. The sending units are expected to
+     * live data from the units whose IDs are specified by <code>deviceIds</code>. The sending units are expected to
      * belong to the user account to which this factory's application client has been granted permission.
      * 
      * @param account
