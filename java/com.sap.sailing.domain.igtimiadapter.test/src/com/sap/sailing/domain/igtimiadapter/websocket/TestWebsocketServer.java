@@ -1,9 +1,13 @@
 package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jetty.server.Server;
@@ -16,6 +20,8 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.junit.Test;
 
+import com.igtimi.IgtimiStream.ChannelManagement;
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sse.common.Duration;
 import com.sap.sse.shared.util.Wait;
 
@@ -36,6 +42,22 @@ public class TestWebsocketServer {
             getRemote().sendStringByFuture(getEchoMessage(message));
         }
 
+        @Override
+        public void onWebSocketBinary(byte[] payload, int offset, int len) {
+            // assumes to receive a simple heartbeat and responds with the heartbeat code
+            // incremented by one
+            final ByteBuffer bb = ByteBuffer.wrap(payload, offset, len);
+            try {
+                final Msg message = Msg.parseFrom(bb);
+                assertTrue(message.hasChannelManagement());
+                final Msg response = message.toBuilder().setChannelManagement(message.getChannelManagement().toBuilder().setHeartbeat(message.getChannelManagement().getHeartbeat() + 1).build()).build();
+                getRemote().sendBytes(ByteBuffer.wrap(response.toByteArray()));
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error trying to parse or send bytes received on web socket", e);
+                throw new RuntimeException(e);
+            }
+        }
+
         String getEchoMessage(String message) {
             return "Echo: " + message;
         }
@@ -53,6 +75,7 @@ public class TestWebsocketServer {
     
     public static class ClientWebSocket extends WebSocketAdapter {
         private final StringBuilder sb;
+        private Msg response;
         
         /**
          * @param sb text messages received through {@link #onWebSocketText(String)} are appended to
@@ -65,6 +88,21 @@ public class TestWebsocketServer {
         @Override
         public void onWebSocketText(String message) {
             sb.append(message);
+        }
+
+        @Override
+        public void onWebSocketBinary(byte[] payload, int offset, int len) {
+            final ByteBuffer bb = ByteBuffer.wrap(payload, offset, len);
+            try {
+                response = Msg.parseFrom(bb);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error trying to parse or send bytes received on web socket", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        Msg getResponse() {
+            return response;
         }
     }
     
@@ -104,9 +142,12 @@ public class TestWebsocketServer {
             Wait.wait(()->currentSocket.getRemote() != null, Optional.of(Duration.ONE_SECOND.times(5)), Duration.ONE_SECOND.divide(3));
             final String text = "Hello world";
             currentSocket.getRemote().sendString(text);
+            currentSocket.getRemote().sendBytes(ByteBuffer.wrap(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setHeartbeat(42).build()).build().toByteArray()));
             final String expectedEcho = new ServerWebSocket().getEchoMessage(text);
             Wait.wait(()->echo.length() > 0, Optional.of(Duration.ONE_SECOND), Duration.ONE_SECOND.divide(3));
             assertEquals(expectedEcho, echo.toString());
+            Wait.wait(()->currentSocket.getResponse() != null, Optional.of(Duration.ONE_SECOND), Duration.ONE_SECOND.divide(3));
+            assertEquals(43, currentSocket.getResponse().getChannelManagement().getHeartbeat());
         } finally {
             client.stop();
             client.destroy();
