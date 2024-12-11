@@ -18,7 +18,6 @@ public class AbstractTestWithIgtimiConnection {
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
-
     @Before
     public void setUp() throws Exception {
         Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());

@@ -9,6 +9,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
@@ -33,6 +35,7 @@ public class RiotServerImpl implements RiotServer, Runnable {
 
     private final ConcurrentMap<Long, Resource> resources;
     private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
+    private final ConcurrentMap<String, Device> devices;
     private final Set<BulkFixReceiver> listeners;
     private final Selector socketSelector;
     private final ServerSocketChannel serverSocketChannel;
@@ -67,6 +70,7 @@ public class RiotServerImpl implements RiotServer, Runnable {
         this.listeners = ConcurrentHashMap.newKeySet();
         this.resources = new ConcurrentHashMap<>();
         this.dataAccessWindows = new ConcurrentHashMap<>();
+        this.devices = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
         for (final Resource resource : domainObjectFactory.getResources()) {
             resources.put(resource.getId(), resource);
@@ -168,6 +172,20 @@ public class RiotServerImpl implements RiotServer, Runnable {
         }
     }
 
+    @Override
+    public Iterable<Resource> getResources() {
+        return Collections.unmodifiableCollection(resources.values());
+    }
+
+    @Override
+    public Iterable<Device> getDevices() {
+        return Collections.unmodifiableCollection(devices.values());
+    }
+
+    @Override
+    public Iterable<DataAccessWindow> getDataAccessWindows() {
+        return Collections.unmodifiableCollection(dataAccessWindows.values());
+    }
 
     /**
      * Use this method only for testing/debugging. It clears the transient state of this service,in particular

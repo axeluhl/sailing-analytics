@@ -1,13 +1,20 @@
 package com.sap.sailing.domain.igtimiadapter.server;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 
 /**
@@ -19,6 +26,7 @@ import com.sap.sse.util.ClearStateTestSupport;
  *
  */
 public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static final String RIOT_PORT_PROPERTY_NAME = "igtimi.riot.port";
     private static final String RIOT_PORT_DEFAULT = "6000";
@@ -45,6 +53,21 @@ public class Activator implements BundleActivator {
                 riotServerImpl.clear();
             }
         }, null);
+        new Thread(() -> {
+            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+            try {
+                final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
+                for (Resource resource : riotServer.getResources()) {
+                    securityService.migrateOwnership(resource);
+                }
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DEVICE.getName());
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_RESOURCE.getName());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to create missing ownerships for Igtimi entities", e);
+            }
+        }).start();
     }
 
     public void stop(BundleContext bundleContext) throws Exception {

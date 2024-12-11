@@ -6,7 +6,10 @@ import java.nio.channels.ServerSocketChannel;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
+import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
@@ -69,4 +72,10 @@ public interface RiotServer {
      * @return the IP port this server is listening on for new connections
      */
     int getPort() throws IOException;
+
+    Iterable<Resource> getResources();
+
+    Iterable<Device> getDevices();
+    
+    Iterable<DataAccessWindow> getDataAccessWindows();
 }
