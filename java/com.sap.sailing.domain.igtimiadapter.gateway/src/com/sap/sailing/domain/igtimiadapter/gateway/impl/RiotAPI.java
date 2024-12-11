@@ -19,7 +19,7 @@ import com.sap.sailing.domain.igtimiadapter.gateway.oauth.RestApiApplication;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotAPI.RESOURCES)
 public class RiotAPI {
-    private static final String RESOURCES = "/resources";
+    protected static final String RESOURCES = "/resources";
     private static final String DATA = "/data";
     
     @GET
