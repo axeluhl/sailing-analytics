@@ -14,6 +14,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
@@ -41,7 +42,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private final IgtimiWindTrackerFactory windTrackerFactory;
     private boolean stopping;
 
-    protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnectionFactory connectionFactory,
+    protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnection connection,
             final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination,
             SecurityService optionalSecurityService) throws Exception {
         super(trackedRace);
@@ -52,12 +53,12 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 logger.info("Starting up Igtimi wind tracker for race "+trackedRace.getRace().getName());
                 // avoid a race condition with stop() being called while this start-up thread is still running
                 synchronized (IgtimiWindTracker.this) {
-                    Iterable<Account> accounts = connectionFactory.getAllAccounts();
-                    for (Account account : accounts) {
-                        if (isPermittedToUseAccount(optionalSecurityService, trackedRace, account)) {
+                    final Iterable<Device> devices = connection.getDevices();
+                    for (Device device : devices) {
+                        if (isPermittedToUseAccount(optionalSecurityService, trackedRace, device)) {
                             try {
                                 if (!stopping) {
-                                    IgtimiConnection connection = connectionFactory.connect(account);
+                                    IgtimiConnection connection = connectionFactory.connect(device);
                                     Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                     if (!stopping) {
                                         LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
@@ -65,12 +66,12 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                         liveConnection.addListener(windReceiver);
                                         windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
                                         liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Triple<Iterable<String>, Account, IgtimiWindReceiver>(
-                                                devicesWeShouldListenTo, account, windReceiver));
+                                                devicesWeShouldListenTo, device, windReceiver));
                                     }
                                 }
                             } catch (Exception e) {
                                 logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
-                                        + getTrackedRace().getRace().getName() + " for account " + account, e);
+                                        + getTrackedRace().getRace().getName() + " for account " + device, e);
                             }
                         }
                     }
@@ -79,10 +80,14 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         }.start();
     }
 
+    /**
+     * TODO factor out the logic that determines the user account and from it the bearer token to use to
+     * authenticate that user when talking to the remote side; then use this to authenticate the {@link IgtimiConnection}
+     */
     private boolean isPermittedToUseAccount(SecurityService optionalSecurityService,
-            final DynamicTrackedRace trackedRace, Account account) {
+            final DynamicTrackedRace trackedRace, Device device) {
         final boolean isPermittedToUseAccount;
-        final WildcardPermission permissionToCheck = account.getIdentifier().getPermission(DefaultActions.READ);
+        final WildcardPermission permissionToCheck = device.getIdentifier().getPermission(DefaultActions.READ);
         final String stringPermissionToCheck = permissionToCheck.toString();
         if (optionalSecurityService == null || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck)) {
             isPermittedToUseAccount = true;
@@ -108,9 +113,9 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                         Iterable<UserGroup> userGroupsOfAllUser = allUser == null ? Collections.emptySet()
                                 : optionalSecurityService.getUserGroupsOfUser(allUser);
                         final OwnershipAnnotation ownershipOfAccount = optionalSecurityService
-                                .getOwnership(account.getIdentifier());
+                                .getOwnership(device.getIdentifier());
                         final AccessControlListAnnotation aclOfAccount = optionalSecurityService
-                                .getAccessControlList(account.getIdentifier());
+                                .getAccessControlList(device.getIdentifier());
                         // Checks if the permission would be granted by the group owner 
                         if (PermissionChecker.isPermitted(permissionToCheck, null, Collections.singleton(groupOwner),
                                 allUser, userGroupsOfAllUser,

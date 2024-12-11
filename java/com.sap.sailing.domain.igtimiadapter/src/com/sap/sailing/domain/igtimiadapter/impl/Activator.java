@@ -10,13 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.eclipse.jetty.util.ssl.SslContextFactory.Client;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.igtimiadapter.Account;
-import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
@@ -47,7 +46,7 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_PROTOCOL_PROPERTY_NAME = "igtimi.client.redirect.protocol";
     private static final String CLIENT_REDIRECT_HOST_PROPERTY_NAME = "igtimi.client.redirect.host";
     private static final String CLIENT_REDIRECT_PORT_PROPERTY_NAME = "igtimi.client.redirect.port";
-    private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
+    private final Future<IgtimiConnectionFactory> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
     private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
@@ -60,12 +59,11 @@ public class Activator implements BundleActivator {
         final String clientRedirectProtocol = System.getProperty(CLIENT_REDIRECT_PROTOCOL_PROPERTY_NAME, DEFAULT_REDIRECT_PROTOCOL);
         final String clientRedirectHost = System.getProperty(CLIENT_REDIRECT_HOST_PROPERTY_NAME, DEFAULT_REDIRECT_HOST);
         final String clientRedirectPort = System.getProperty(CLIENT_REDIRECT_PORT_PROPERTY_NAME, DEFAULT_REDIRECT_PORT);
-        final Client client = new ClientImpl(clientId, clientSecret, clientRedirectProtocol, clientRedirectHost, clientRedirectPort, CLIENT_REDIRECT_PATH);
-        connectionFactory = executor.submit(new Callable<IgtimiConnectionFactoryImpl>() {
+        connectionFactory = executor.submit(new Callable<IgtimiConnectionFactory>() {
             @Override
-            public IgtimiConnectionFactoryImpl call() {
+            public IgtimiConnectionFactory call() {
                 logger.info("Creating IgtimiConnectionFactory");
-                return new IgtimiConnectionFactoryImpl(client);
+                return new IgtimiConnectionFactoryImpl();
             }
         });
         windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {

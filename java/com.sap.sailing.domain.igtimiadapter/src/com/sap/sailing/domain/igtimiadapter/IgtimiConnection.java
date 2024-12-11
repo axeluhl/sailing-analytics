@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
@@ -13,6 +15,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 /**
  * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
@@ -20,11 +24,6 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  */
 public interface IgtimiConnection {
-
-    Iterable<User> getUsers() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    User getUser(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
     /**
      * @param startTime
      *            optional; may be <code>null</code>
@@ -45,7 +44,7 @@ public interface IgtimiConnection {
      * 
      * @param deviceSerialNumbers
      *            the serial numbers of the devices for which to return data; these numbers can be obtained, e.g., from
-     *            {@link #getOwnedDevices()}.{@link Device#getSerialNumber() getSerialNumber()} or from
+     *            {@link #getDevices()}.{@link Device#getSerialNumber() getSerialNumber()} or from
      *            {@link #getDataAccessWindows(Permission, TimePoint, TimePoint, Iterable)}.
      *            {@link DataAccessWindow#getDeviceSerialNumber() getDeviceSerialNumber()}.
      * @param typeAndCompression
@@ -99,27 +98,13 @@ public interface IgtimiConnection {
     LiveDataConnection getOrCreateLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
     /**
-     * @param sessionIds
-     *            the optional IDs of the sessions for which to obtain the metadata; if <code>null</code>, all available
-     *            sessions will be returned
-     * @param isPublic
-     *            optional; if <code>null</code> or <code>true</code>, only public sessions will be included in the
-     *            result
-     * @param limit
-     *            optional; if not <code>null</code>, no more than this many session objects will be returned
-     * @param includeIncomplete
-     *            optional; if not <code>false</code>, only completed sessions that have a start and an end time will be
-     *            returned
+     * Returns the devices that the requesting user authenticated through this connection can {@link DefaultActions#READ read}.
+     * Note that this doesn't necessarily imply the user can also read <em>data</em> from this device. Only the device
+     * properties such as the serial number and the device itself will then be returned.
+     * 
+     * TODO we could also add a Permission parameter here or use {@link HasPermissions.Action}.
      */
-    Iterable<Session> getSessions(Iterable<Long> sessionIds, Boolean isPublic, Integer limit, Boolean includeIncomplete)
-            throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Session getSession(long id) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-    
-    /**
-     * Returns the devices owned by the user to which the application client represented by this connection belongs.
-     */
-    Iterable<Device> getOwnedDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    Iterable<Device> getDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
     
     /**
      * Returns all devices that this connection has access to with the requested <code>permission</code>. Note that
@@ -135,14 +120,12 @@ public interface IgtimiConnection {
      * @param deviceSerialNumbers
      *            optional; if not <code>null</code> and not empty, only data access windows for the devices identified
      *            by these serial numbers will be returned
+     *            
+     * TODO consider replacing Permission by {@link HasPermissions.Action}
      */
     Iterable<DataAccessWindow> getDataAccessWindows(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
-
-    Iterable<Group> getGroups() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    Account getAccount();
 
     /**
      * Finds all data access windows that have wind data for the time span around the race, loads their wind data and
@@ -158,6 +141,8 @@ public interface IgtimiConnection {
     /**
      * Find all the devices from which we may read and which have logged GPS positions and apparent wind speed (AWS) or that
      * have never logged GPS nor wind (probably new sensors)
+     * 
+     * @return the serial numbers as {@link String}s for those devices that may send wind data; see also {@link Device#getSerialNumber()}.
      */
     Iterable<String> getWindDevices() throws IllegalStateException, IOException, ParseException;
 
@@ -167,4 +152,6 @@ public interface IgtimiConnection {
      * that is readable by the {@link #getAccount()} used by this connection.
      */
     Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
+    Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
 }

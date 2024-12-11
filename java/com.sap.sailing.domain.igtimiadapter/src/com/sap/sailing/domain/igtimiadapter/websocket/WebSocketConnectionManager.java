@@ -24,6 +24,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
@@ -46,14 +47,13 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     private static final long DURATION_BETWEEN_HEARTBEAT_SENDS_IN_MILLIS = 15000l;
     
     private static final Logger logger = Logger.getLogger(WebSocketConnectionManager.class.getName());
-    private final IgtimiConnectionFactoryImpl connectionFactory;
+    private final IgtimiConnection connection;
     private static enum TargetState { OPEN, CLOSED };
     private TargetState targetState;
     private WebSocketClient client;
     private final JSONObject configurationMessage;
     private final Timer timer;
     private final Iterable<String> deviceIds;
-    private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
     private final ConcurrentMap<BulkFixReceiver, BulkFixReceiver> listeners;
@@ -71,14 +71,13 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     
     private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
     
-    public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account, /* isDaemon */ true);
+    public WebSocketConnectionManager(IgtimiConnection connection, Iterable<String> deviceSerialNumbers) throws Exception {
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers, /* isDaemon */ true);
         this.deviceIds = deviceSerialNumbers;
-        this.account = account;
         this.fixFactory = new FixFactory();
-        this.connectionFactory = connectionFactory;
+        this.connection = connection;
         this.listeners = new ConcurrentHashMap<>();
-        configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
+        configurationMessage = connection.getWebSocketConfigurationMessage(deviceSerialNumbers);
         reconnect();
         startClientHeartbeat();
         startListeningForServerHeartbeat();
@@ -303,7 +302,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
             client.destroy();
         }
         IOException lastException = null;
-        for (URI uri : connectionFactory.getWebsocketServers()) {
+        for (URI uri : connection.getWebsocketServers()) {
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);

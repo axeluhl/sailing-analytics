@@ -23,8 +23,6 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
-import com.sap.sailing.domain.igtimiadapter.Session;
-import com.sap.sailing.domain.igtimiadapter.User;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -34,23 +32,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
-    @Test
-    public void testGetUsers() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<User> users = connection.getUsers();
-        assertTrue(Util.size(users)>=2);
-        Set<Long> userIds = new HashSet<>();
-        for (User user : users) {
-            userIds.add(user.getId());
-        }
-        assertTrue(userIds.contains(connection.getAccount().getUser().getId()));
-    }
-
-    @Test
-    public void testGetGroups() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<Group> groups = connection.getGroups();
-        assertTrue(Util.size(groups) > 1);
-    }
-
     @Test
     public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
@@ -76,16 +57,6 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         assertTrue(resources.iterator().hasNext());
     }
     
-    @Test
-    public void testGetSessions() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<Session> sessions = connection.getSessions(Collections.singleton(4846l), /* isPublic */ null, /* limit */ 1, /* includeIncomplete */ null);
-        assertTrue(sessions.iterator().hasNext());
-        final Session session = sessions.iterator().next();
-        assertEquals("Humba", session.getName());
-        User sessionOwher = connection.getUser(session.getOwnerId());
-        assertEquals("Uhl", sessionOwher.getSurname());
-    }
-
     @Test
     public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Map<Type, Double> typesAndCompression = new HashMap<>();

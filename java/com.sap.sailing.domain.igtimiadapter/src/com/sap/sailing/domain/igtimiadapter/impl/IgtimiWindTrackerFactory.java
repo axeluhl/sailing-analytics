@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -15,10 +16,10 @@ import com.sap.sse.security.SecurityService;
 
 public class IgtimiWindTrackerFactory implements WindTrackerFactory {
     private static final Logger logger = Logger.getLogger(IgtimiWindTrackerFactory.class.getName());
-    private final IgtimiConnectionFactoryImpl connectionFactory;
+    private final IgtimiConnectionFactory connectionFactory;
     private final WeakHashMap<RaceDefinition, WindTracker> trackersForRace;
     
-    public IgtimiWindTrackerFactory(IgtimiConnectionFactoryImpl connectionFactory) {
+    public IgtimiWindTrackerFactory(IgtimiConnectionFactory connectionFactory) {
         trackersForRace = new WeakHashMap<>();
         this.connectionFactory = connectionFactory;
     }
