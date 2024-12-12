@@ -3,7 +3,6 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,8 +14,10 @@ import javax.ws.rs.core.UriInfo;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.rest.StreamingOutputUtil;
+
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotServerListersResource.SERVER_LISTERS)
-public class RiotServerListersResource {
+public class RiotServerListersResource extends StreamingOutputUtil {
     protected static final String SERVER_LISTERS = "/server_listers";
     protected static final String WEB_SOCKETS = "/web_sockets";
     
@@ -33,6 +34,6 @@ public class RiotServerListersResource {
                 // preserve the Web Context Root (probably "/igtimi"), then append the WEB_SOCKET_PATH
                 requestUri.getPath().substring(0, requestUri.getPath().indexOf('/', 1))+RestApiApplication.WEB_SOCKET_PATH,
                 /* query */ null, /* fragment */ null).toString());
-        return Response.ok(result.toJSONString()).build();
+        return Response.ok(streamingOutput(result)).build();
     }
 }

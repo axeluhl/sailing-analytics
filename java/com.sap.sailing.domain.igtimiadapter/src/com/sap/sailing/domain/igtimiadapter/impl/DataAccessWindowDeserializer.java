@@ -3,11 +3,10 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class DataAccessWindowDeserializer extends HasPermissionsDeserializer {
-    public DataAccessWindow createDataAccessWindowFromJson(JSONObject resourceJson, IgtimiConnection conn) {
+public class DataAccessWindowDeserializer {
+    public DataAccessWindow createDataAccessWindowFromJson(JSONObject resourceJson) {
         return new DataAccessWindowImpl((Long) resourceJson.get("id"),
                 new MillisecondsTimePoint(((Number) resourceJson.get("start_time")).longValue()),
                 new MillisecondsTimePoint(((Number) resourceJson.get("end_time")).longValue()),

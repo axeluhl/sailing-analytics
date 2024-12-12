@@ -8,8 +8,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.sap.sse.rest.StreamingOutputUtil;
+
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotDevicesResource.DEVICES)
-public class RiotDevicesResource {
+public class RiotDevicesResource extends StreamingOutputUtil {
     protected static final String DEVICES = "/devices";
     
     @GET

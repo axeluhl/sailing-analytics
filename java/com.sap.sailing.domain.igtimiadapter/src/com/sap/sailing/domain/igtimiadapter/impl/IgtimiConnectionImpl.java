@@ -71,7 +71,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         JSONObject resourcesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Resource> result = new ArrayList<>();
         for (Object resourceJson : (JSONArray) resourcesJson.get("resources")) {
-            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"), this);
+            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"));
             result.add(resource);
         }
         return result;
@@ -176,7 +176,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         JSONObject devicesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Device> result = new ArrayList<>();
         for (Object deviceJson : (JSONArray) devicesJson.get("devices")) {
-            Device device = new DeviceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"), this);
+            Device device = new DeviceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"));
             result.add(device);
         }
         return result;
@@ -190,7 +190,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         final List<DataAccessWindow> result = new ArrayList<>();
         for (Object dataAccessWindowJson : (JSONArray) dataAccessWindowsJson.get("data_access_windows")) {
             DataAccessWindow dataAccessWindow = new DataAccessWindowDeserializer().createDataAccessWindowFromJson(
-                    (JSONObject) ((JSONObject) dataAccessWindowJson).get("data_access_window"), this);
+                    (JSONObject) ((JSONObject) dataAccessWindowJson).get("data_access_window"));
             result.add(dataAccessWindow);
         }
         return result;

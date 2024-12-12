@@ -8,8 +8,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import com.sap.sse.rest.StreamingOutputUtil;
+
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotDataAccessWindowsResource.DATA_ACCESS_WINDOWS)
-public class RiotDataAccessWindowsResource {
+public class RiotDataAccessWindowsResource extends StreamingOutputUtil {
     protected static final String DATA_ACCESS_WINDOWS = "/data_access_windows";
     
     @GET
