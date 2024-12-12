@@ -172,11 +172,11 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
 
     @Override
     public Iterable<Device> getDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpGet getResources = new HttpGet(getOwnedDevicesUrl());
+        HttpGet getResources = new HttpGet(getDevicesUrl());
         JSONObject devicesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Device> result = new ArrayList<>();
         for (Object deviceJson : (JSONArray) devicesJson.get("devices")) {
-            Device device = new DeviceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"));
+            Device device = new DeviceDeserializer().createDeviceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"));
             result.add(device);
         }
         return result;
@@ -321,7 +321,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     }
     
     // TODO owned? Or probably just the ones we can READ? Or maybe ask with permission filter?
-    private String getOwnedDevicesUrl() {
+    private String getDevicesUrl() {
         return getApiV1BaseUrl()+"devices/";
     }
 

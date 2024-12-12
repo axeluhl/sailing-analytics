@@ -25,6 +25,8 @@ import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.impl.ResourceSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
@@ -36,7 +38,7 @@ public class RiotResourcesResource extends StreamingOutputUtil {
     @GET
     @Produces("text/plain;charset=UTF-8")
     public Response getResources(@QueryParam("permission") String permission,
-            @QueryParam("start_time") String start_time, @QueryParam("end_time") String endTime,
+            @QueryParam("start_time") String startTime, @QueryParam("end_time") String endTime,
             @QueryParam("serial_numbers[]") Set<String> serialNumbers,
             @QueryParam("stream_ids[]") Set<String> streamIds)
             throws ClientProtocolException, IllegalStateException, IOException, ParseException {
@@ -45,7 +47,12 @@ public class RiotResourcesResource extends StreamingOutputUtil {
         final JSONArray resourcesJson = new JSONArray();
         result.put("resources", resourcesJson);
         for (final Resource resource : riot.getResources()) {
-            if (SecurityUtils.getSubject().isPermitted(resource.getIdentifier().getStringPermission(DefaultActions.READ))) {
+            if (SecurityUtils.getSubject().isPermitted(resource.getIdentifier().getStringPermission(DefaultActions.READ))
+             && serialNumbers.contains(resource.getDeviceSerialNumber())
+             && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
+                                 endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(
+                                         resource.getTimeRange())) {
+                // TODO further evaluate the query parameters to filter matching resources
                 resourcesJson.add(new ResourceSerializer().createJsonFromResource(resource));
             }
         }

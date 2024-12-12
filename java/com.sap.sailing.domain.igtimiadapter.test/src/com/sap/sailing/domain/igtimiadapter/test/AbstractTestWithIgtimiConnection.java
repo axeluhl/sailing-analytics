@@ -5,13 +5,21 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionImpl;
+import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
+// TODO this would need to become a Selenium test with a running OSGi product in order to reach a running Igtimi REST API
 public class AbstractTestWithIgtimiConnection {
+    protected RiotServer riot;
     protected IgtimiConnection connection;
     
     @Rule public Timeout AbstractTestWithIgtimiConnectionTimeout = Timeout.millis(2 * 60 * 1000);
@@ -20,9 +28,15 @@ public class AbstractTestWithIgtimiConnection {
 
     @Before
     public void setUp() throws Exception {
-        Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
-        final IgtimiConnectionFactory connectionFactory = Activator.getInstance().getConnectionFactory();
-        Account account = connectionFactory.registerAccountForWhichClientIsAuthorized("admin", "9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");
+        final SecurityService mockSecurityService = SecurityServiceMockFactory.mockSecurityService();
+        Activator.getInstance().setSecurityService(mockSecurityService);
+        final MongoDBConfiguration testDBConfig = MongoDBConfiguration.getDefaultTestConfiguration();
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(testDBConfig.getService());
+        mongoObjectFactory.clear();
+        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(testDBConfig.getService());
+        riot = RiotServer.create(domainObjectFactory, mongoObjectFactory);
+        final String bearerToken = mockSecurityService.getAccessToken(mockSecurityService.getCurrentUser().getName());
+        connection = new IgtimiConnectionImpl(new URL("http://127.0.0.1:"+riot.getPort()), bearerToken)
         connection = connectionFactory.connect(account);
     }
 

@@ -6,10 +6,15 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DataAccessWindowDeserializer {
+    static final String ID = "id";
+    static final String START_TIME = "start_time";
+    static final String END_TIME = "end_time";
+    static final String DEVICE_SERIAL_NUMBER = "device_serial_number";
+
     public DataAccessWindow createDataAccessWindowFromJson(JSONObject resourceJson) {
-        return new DataAccessWindowImpl((Long) resourceJson.get("id"),
-                new MillisecondsTimePoint(((Number) resourceJson.get("start_time")).longValue()),
-                new MillisecondsTimePoint(((Number) resourceJson.get("end_time")).longValue()),
-                (String) resourceJson.get("device_serial_number"));
+        return new DataAccessWindowImpl((Long) resourceJson.get(ID),
+                new MillisecondsTimePoint(((Number) resourceJson.get(START_TIME)).longValue()),
+                new MillisecondsTimePoint(((Number) resourceJson.get(END_TIME)).longValue()),
+                (String) resourceJson.get(DEVICE_SERIAL_NUMBER));
     }
 }

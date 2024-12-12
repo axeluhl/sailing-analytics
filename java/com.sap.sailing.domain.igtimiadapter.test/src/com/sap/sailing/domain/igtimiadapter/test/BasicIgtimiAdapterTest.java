@@ -31,6 +31,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+// TODO this needs to become a Selenium test with the OSGi product and the igtimiadapter.gateway bundle running
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
