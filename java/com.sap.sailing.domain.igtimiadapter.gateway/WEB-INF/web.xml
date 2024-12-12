@@ -46,7 +46,7 @@
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
-			<param-value>com.sap.sailing.domain.igtimiadapter.gateway.oauth.RestApiApplication</param-value>
+			<param-value>com.sap.sailing.domain.igtimiadapter.gateway.impl.RestApiApplication</param-value>
 		</init-param>
                 <init-param>
                         <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>

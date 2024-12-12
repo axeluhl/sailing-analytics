@@ -54,7 +54,7 @@ public class Activator implements BundleActivator {
             @Override
             public IgtimiWindTrackerFactory call() throws InterruptedException, ExecutionException {
                 logger.info("Creating IgtimiWindTrackerFactory");
-                return new IgtimiWindTrackerFactory(connectionFactory.get());
+                return new IgtimiWindTrackerFactory();
             }
         });
     }

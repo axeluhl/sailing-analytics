@@ -15,10 +15,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.igtimiadapter.gateway.oauth.RestApiApplication;
 
-@Path(RestApiApplication.API + RestApiApplication.V1 + RiotAPI.RESOURCES)
-public class RiotAPI {
+@Path(RestApiApplication.API + RestApiApplication.V1 + RiotResourcesResource.RESOURCES)
+public class RiotResourcesResource {
     protected static final String RESOURCES = "/resources";
     private static final String DATA = "/data";
     

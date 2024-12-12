@@ -40,9 +40,8 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private final IgtimiWindTrackerFactory windTrackerFactory;
     private boolean stopping;
 
-    protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiConnection connection,
-            final IgtimiWindTrackerFactory windTrackerFactory, final boolean correctByDeclination,
-            SecurityService optionalSecurityService) throws Exception {
+    protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiWindTrackerFactory windTrackerFactory,
+            final boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
@@ -52,6 +51,8 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 // avoid a race condition with stop() being called while this start-up thread is still running
                 synchronized (IgtimiWindTracker.this) {
                     try {
+                        // TODO determine authentication information by looking at current user, default to TrackedRace owner
+                        final IgtimiConnection connection = null;
                         final Iterable<Device> devices = connection.getDevices();
                         for (Device device : devices) {
                             try {
