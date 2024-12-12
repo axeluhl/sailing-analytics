@@ -35,7 +35,7 @@ public class RiotServerImpl implements RiotServer, Runnable {
 
     private final ConcurrentMap<Long, Resource> resources;
     private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
-    private final ConcurrentMap<String, Device> devices;
+    private final ConcurrentMap<Long, Device> devices;
     private final Set<BulkFixReceiver> listeners;
     private final Selector socketSelector;
     private final ServerSocketChannel serverSocketChannel;
@@ -72,6 +72,9 @@ public class RiotServerImpl implements RiotServer, Runnable {
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
+        for (final Device device : domainObjectFactory.getDevices()) {
+            devices.put(device.getId(), device);
+        }
         for (final Resource resource : domainObjectFactory.getResources()) {
             resources.put(resource.getId(), resource);
         }

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sse.common.TimePoint;
@@ -20,19 +18,14 @@ public class ResourceImpl implements Resource {
     private final TimePoint endTime;
     private final String deviceSerialNumber;
     private final int[] dataTypes;
-    private final Iterable<Permission> permissions;
-    private final boolean blob;
     
-    public ResourceImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber, int[] dataTypes,
-            Iterable<Permission> permissions, boolean blob, IgtimiConnection conn) {
+    public ResourceImpl(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber, int[] dataTypes) {
         super();
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
         this.deviceSerialNumber = deviceSerialNumber;
         this.dataTypes = dataTypes;
-        this.permissions = permissions;
-        this.blob = blob;
     }
 
     @Override
@@ -62,16 +55,6 @@ public class ResourceImpl implements Resource {
             result.add(Type.valueOf(dataType));
         }
         return result;
-    }
-
-    @Override
-    public Iterable<Permission> getPermissions() {
-        return permissions;
-    }
-
-    @Override
-    public boolean isBlob() {
-        return blob;
     }
 
     @Override

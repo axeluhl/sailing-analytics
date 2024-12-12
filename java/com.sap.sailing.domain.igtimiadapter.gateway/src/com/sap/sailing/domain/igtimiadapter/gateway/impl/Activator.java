@@ -3,12 +3,12 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
+import org.eclipse.jetty.util.ssl.SslContextFactory.Client;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;

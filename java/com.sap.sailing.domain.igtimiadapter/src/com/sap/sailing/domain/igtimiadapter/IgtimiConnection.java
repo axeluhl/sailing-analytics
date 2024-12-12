@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -154,4 +155,14 @@ public interface IgtimiConnection {
     Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
+
+    /**
+     * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
+     * live data from the units whose IDs are specified by <code>deviceIds</code>. The sending units are expected to
+     * belong to the user account to which this factory's application client has been granted permission.
+     * 
+     * @param deviceIds
+     *            IDs of the transmitting units expected to be visible to the requesting user
+     */
+    JSONObject getWebSocketConfigurationMessage(Iterable<String> deviceIds);
 }

@@ -19,7 +19,6 @@ public class RestApiApplication extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         return new HashSet<Class<?>>(Arrays.asList(new Class<?>[] {
-            AuthorizationCallback.class,
             RiotAPI.class,
             ShiroAuthorizationExceptionTo401ResponseMapper.class }));
     }

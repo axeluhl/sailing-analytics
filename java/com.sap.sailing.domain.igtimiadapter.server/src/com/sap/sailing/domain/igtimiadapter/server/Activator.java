@@ -7,6 +7,8 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
@@ -60,7 +62,15 @@ public class Activator implements BundleActivator {
                 for (Resource resource : riotServer.getResources()) {
                     securityService.migrateOwnership(resource);
                 }
-                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
+                for (DataAccessWindow daw : riotServer.getDataAccessWindows()) {
+                    securityService.migrateOwnership(daw);
+                }
+                for (Device device : riotServer.getDevices()) {
+                    securityService.migrateOwnership(device);
+                }
+                @SuppressWarnings("deprecation") // legacy secured type; SecurityService may still hold ownerships/ACLs somewhere...
+                final String igtimiAccountTypeName = SecuredDomainType.IGTIMI_ACCOUNT.getName();
+                securityService.assumeOwnershipMigrated(igtimiAccountTypeName);
                 securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW.getName());
                 securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DEVICE.getName());
                 securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_RESOURCE.getName());

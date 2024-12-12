@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTracker;
@@ -16,20 +16,19 @@ import com.sap.sse.security.SecurityService;
 
 public class IgtimiWindTrackerFactory implements WindTrackerFactory {
     private static final Logger logger = Logger.getLogger(IgtimiWindTrackerFactory.class.getName());
-    private final IgtimiConnectionFactory connectionFactory;
+    private final IgtimiConnection connection;
     private final WeakHashMap<RaceDefinition, WindTracker> trackersForRace;
     
-    public IgtimiWindTrackerFactory(IgtimiConnectionFactory connectionFactory) {
+    public IgtimiWindTrackerFactory(IgtimiConnection connectionFactory) {
         trackersForRace = new WeakHashMap<>();
-        this.connectionFactory = connectionFactory;
+        this.connection = connectionFactory;
     }
 
     @Override
     public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
             boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
         DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
-        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connectionFactory, this,
-                correctByDeclination, optionalSecurityService);
+        IgtimiWindTracker windTracker = new IgtimiWindTracker(trackedRace, connection, this, correctByDeclination, optionalSecurityService);
         trackersForRace.put(race, windTracker);
         return windTracker;
     }

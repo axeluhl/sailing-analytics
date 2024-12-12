@@ -3,7 +3,6 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -13,18 +12,16 @@ public class DeviceImpl extends HasIdImpl implements Device {
     private final String serialNumber;
     private final String name;
     private String serviceTag;
-    private Iterable<Permission> permissions;
     
     protected DeviceImpl(long id, String serialNumber, IgtimiConnection conn) {
-        this(id, serialNumber, /* name */ null, /* serviceTag */ null, /* permissions */ null);
+        this(id, serialNumber, /* name */ null, /* serviceTag */ null);
     }
 
-    public DeviceImpl(Long id, String serialNumber, String name, String serviceTag, Iterable<Permission> permissions) {
+    public DeviceImpl(Long id, String serialNumber, String name, String serviceTag) {
         super(id);
         this.serialNumber = serialNumber;
         this.name = name;
         this.serviceTag = serialNumber;
-        this.permissions = permissions;
     }
 
     @Override
@@ -35,11 +32,6 @@ public class DeviceImpl extends HasIdImpl implements Device {
     @Override
     public String getServiceTag() {
         return serviceTag;
-    }
-
-    @Override
-    public Iterable<Permission> getPermissions() {
-        return permissions;
     }
 
     @Override

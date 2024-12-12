@@ -22,13 +22,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
-import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -256,7 +254,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
 
     @Override
     public String toString() {
-        return "Web Socket Connection Manager for devices "+deviceIds+" and account "+account+" with web socket session "+getSession();
+        return "Web Socket Connection Manager for devices "+deviceIds+" with web socket session "+getSession();
     }
 
     private void startListeningForServerHeartbeat() {

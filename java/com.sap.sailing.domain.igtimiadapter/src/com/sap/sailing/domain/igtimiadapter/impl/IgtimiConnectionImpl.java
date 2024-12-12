@@ -309,6 +309,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
      * @param deviceIds
      *            IDs of the transmitting units expected to be visible to the requesting user
      */
+    @Override
     public JSONObject getWebSocketConfigurationMessage(Iterable<String> deviceIds) {
         JSONObject result = new JSONObject();
         JSONArray deviceIdsJson = new JSONArray();
