@@ -2143,7 +2143,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("detailType") final Set<DetailType> detailTypes,
             @QueryParam("leaderboardGroupNameOrUUID") final String leaderboardGroupName,
             @QueryParam("leaderboardName") final String leaderboardName,
-            @QueryParam("stepSizeMillis") final long stepSizeMillis) {
+            @QueryParam("stepSizeMillis") @DefaultValue("1000") final long stepSizeMillis) {
         final Response response;
         final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache> cachesByTimePoint = new ConcurrentHashMap<>();
         final TimePoint from;
@@ -2192,8 +2192,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                     }
                 }
             }
-            final int MAX_NUMBER_OF_FIXES_TO_QUERY = 10000; // TODO harmonize with SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY?
             final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            final int MAX_NUMBER_OF_FIXES_TO_QUERY = getSecurityService().hasCurrentUserExplicitPermissions(leaderboard, LeaderboardActions.PREMIUM_LEADERBOARD_INFORMATION) ? 1000 : 50000;
             final TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : from;
             final TimePoint endTime = (to == null || to.after(newestEvent)) ? newestEvent : to;
