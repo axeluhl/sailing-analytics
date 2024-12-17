@@ -150,6 +150,9 @@ elif [[ $PARAM == "debug" ]]; then
     "$JAVA_BINARY" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=y $JFR_OPTIONS ${COMMON_JAVA_ARGS}
 elif [[ $PARAM == "fg" ]]; then
     exec "$JAVA_BINARY" ${COMMON_JAVA_ARGS}
+elif [[ $PARAM == "docker" ]]; then
+    . generateMailProperties.sh
+    exec "$JAVA_BINARY" ${COMMON_JAVA_ARGS}
 fi
 
 

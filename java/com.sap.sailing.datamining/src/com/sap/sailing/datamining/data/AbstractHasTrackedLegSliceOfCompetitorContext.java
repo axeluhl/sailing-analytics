@@ -18,7 +18,7 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public interface AbstractHasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedLeg, HasSomethingOfCompetitorContext {
+public interface AbstractHasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedLeg, HasSomethingOfCompetitorContextWithTrackedRaceContext {
     @Connector(scanForStatistics=false)
     HasTrackedLegContext getTrackedLegContext();
     
