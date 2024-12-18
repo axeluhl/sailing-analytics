@@ -14,7 +14,7 @@ import com.sap.sailing.datamining.shared.TackTypeSegmentsDataMiningSettings;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public class RaceOfCompetitorRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasRaceOfCompetitorContext> {
     /**
@@ -42,7 +42,7 @@ public class RaceOfCompetitorRetrievalProcessor extends AbstractRetrievalProcess
                     break;
                 }
                 final Subject subject = SecurityUtils.getSubject();
-                if (subject.isPermitted(competitor.getIdentifier().getStringPermission(DefaultActions.READ))) {
+                if (subject.isPermitted(competitor.getIdentifier().getStringPermission(SecuredSecurityTypes.PublicReadableActions.READ_PUBLIC))) {
                     HasRaceOfCompetitorContext raceOfCompetitorWithContext = new RaceOfCompetitorWithContext(element, competitor, settings);
                     raceOfCompetitorsWithContext.add(raceOfCompetitorWithContext);
                 }
