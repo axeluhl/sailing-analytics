@@ -51,7 +51,7 @@ public class SignInTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, defaultBearerToken); // TODO bug6059: connect to the riotServer launched above
         final String code = igtimiConnectionFactory.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
@@ -68,7 +68,7 @@ public class SignInTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, defaultBearerToken); // TODO bug6059: connect to the riotServer launched above
         final String code = igtimiConnectionFactory.authorizeAndReturnAuthorizedCode("axel.uhl@gmx.de", "123456");
         logger.info("Igtimi OAuth code is "+code);
         assertNotNull(code);
@@ -83,7 +83,7 @@ public class SignInTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the riotServer launched above
+        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, defaultBearerToken); // TODO bug6059: connect to the riotServer launched above
         final Account account = igtimiConnectionFactory.createAccountToAccessUserData("admin", "axel.uhl@gmx.de", "123456");
         assertNotNull(account);
         logger.info("Igtimi account is "+account);

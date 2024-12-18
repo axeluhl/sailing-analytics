@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -60,6 +59,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -251,7 +251,8 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
-import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -326,7 +327,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -348,6 +348,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
@@ -4230,17 +4231,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
+    public Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                getIgtimiConnectionFactory().getAllAccounts(), this::toSecuredIgtimiAccountDTO);
+                getIgtimiConnectionFactory().createConnection(
+                        ()->getSecurityService().getCurrentUser() == null ? null
+                                : getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName())).getDevices(), this::toSecuredIgtimiDeviceDTO);
     }
 
-    private AccountWithSecurityDTO toSecuredIgtimiAccountDTO(final Account igtimiAccount) {
-        final com.sap.sailing.domain.igtimiadapter.User user = igtimiAccount.getUser();
-        final String email = user.getEmail();
-        final String name = user.getFirstName() + " " + user.getSurname();
-        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name,
-                igtimiAccount.getCreatorName());
+    private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice) {
+        final long id = igtimiDevice.getId();
+        final String serialNumber = igtimiDevice.getSerialNumber();
+        final String name = igtimiDevice.getName();
+        final String serviceTag = igtimiDevice.getServiceTag();
+        final IgtimiDeviceWithSecurityDTO securedAccount = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name, serviceTag);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount);
         return securedAccount;
     }
@@ -4263,11 +4266,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected YellowBrickTrackingAdapter getYellowBrickTrackingAdapter() {
         return getYellowBrickTrackingAdapterFactory().getYellowBrickTrackingAdapter(getBaseDomainFactory());
-    }
-
-    @Override
-    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws MalformedURLException, UnsupportedEncodingException {
-        return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 
     protected Set<DynamicTrackedRace> getAllTrackedRaces() {
@@ -6020,5 +6018,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public String getGoogleMapsLoaderAuthenticationParams() {
         return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
+    }
+
+    protected IgtimiConnection createIgtimiConnection() {
+        return getIgtimiConnectionFactory().createConnection(()->getSecurityService().getCurrentUser() != null ? getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()) : null);
     }
 }

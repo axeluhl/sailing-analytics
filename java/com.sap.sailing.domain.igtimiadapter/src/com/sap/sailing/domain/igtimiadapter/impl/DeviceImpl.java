@@ -2,7 +2,6 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -13,7 +12,7 @@ public class DeviceImpl extends HasIdImpl implements Device {
     private final String name;
     private String serviceTag;
     
-    protected DeviceImpl(long id, String serialNumber, IgtimiConnection conn) {
+    protected DeviceImpl(long id, String serialNumber) {
         this(id, serialNumber, /* name */ null, /* serviceTag */ null);
     }
 

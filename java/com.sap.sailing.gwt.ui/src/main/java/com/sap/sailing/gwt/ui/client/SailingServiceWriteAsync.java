@@ -576,7 +576,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
 
-    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+    void removeIgtimiDevice(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);

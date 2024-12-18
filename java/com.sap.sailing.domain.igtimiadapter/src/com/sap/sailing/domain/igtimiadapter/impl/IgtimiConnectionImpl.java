@@ -183,6 +183,18 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     }
 
     @Override
+    public Device getDeviceBySerialNumber(String serialNumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeDevice(Device existingDevice) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
     public Iterable<DataAccessWindow> getDataAccessWindows(Permission permission, TimePoint startTime,
             TimePoint endTime, Iterable<String> deviceSerialNumbers) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         HttpGet getDataAccessWindows = new HttpGet(getDataAccessWindowsUrl(permission, startTime, endTime, deviceSerialNumbers));

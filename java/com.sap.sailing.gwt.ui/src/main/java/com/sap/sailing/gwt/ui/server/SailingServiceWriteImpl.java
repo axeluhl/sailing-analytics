@@ -224,6 +224,7 @@ import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -2079,29 +2080,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
-        final Account account;
-        if (existingAccount == null) {
-            final String creatorName = getSecurityService().getCurrentUser().getName();
-            account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT,
-                    Account.getTypeRelativeObjectIdentifier(eMailAddress, creatorName), eMailAddress,
-                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress,
-                            password));
-        } else {
-            logger.warning("Igtimi account " + eMailAddress + " already exists.");
-            account = null; // account with that e-mail already exists
-        }
-        return account != null;
-    }
-
-    @Override
-    public void removeIgtimiAccount(String eMailOfAccountToRemove) {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
-        if (existingAccount != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingAccount, () -> {
-                getIgtimiConnectionFactory().removeAccount(existingAccount);
+    public void removeIgtimiDevice(String serialNumber) {
+        final IgtimiConnection igtimiConnection = createIgtimiConnection();
+        final Device existingDevice = igtimiConnection.getDeviceBySerialNumber(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingDevice, () -> {
+                igtimiConnection.removeDevice(existingDevice);
             });
         }
     }

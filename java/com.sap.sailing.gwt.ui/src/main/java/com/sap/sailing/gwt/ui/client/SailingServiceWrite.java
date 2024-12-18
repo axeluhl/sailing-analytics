@@ -242,7 +242,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean correctByDeclination)
             throws IllegalStateException, Exception;
 
-    void removeIgtimiAccount(String eMailOfAccountToRemove);
+    void removeIgtimiDevice(String serialNumber);
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 

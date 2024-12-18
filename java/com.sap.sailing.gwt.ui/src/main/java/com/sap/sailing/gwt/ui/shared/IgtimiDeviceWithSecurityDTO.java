@@ -9,37 +9,36 @@ import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 
-public class AccountWithSecurityDTO implements SecuredDTO {
+public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
     private static final long serialVersionUID = 176992188692729118L;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
-    private String email;
+    private long id;
     private String name;
-    private String creatorName;
+    private String serialNumber;
+    private String serviceTag;
 
-    public AccountWithSecurityDTO(String email, String name, String creatorName) {
-        this.email = email;
+    public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, String serviceTag) {
+        this.id = id;
+        this.serialNumber = serialNumber;
         this.name = name;
-        this.creatorName = creatorName;
+        this.serviceTag = serviceTag;
     }
 
-    public AccountWithSecurityDTO() {
+    public SecurityInformationDTO getSecurityInformation() {
+        return securityInformation;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public long getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getSerialNumber() {
+        return serialNumber;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getCreatorName() {
-        return creatorName;
+    public String getServiceTag() {
+        return serviceTag;
     }
 
     @Override
@@ -64,7 +63,7 @@ public class AccountWithSecurityDTO implements SecuredDTO {
 
     @Override
     public HasPermissions getPermissionType() {
-        return SecuredDomainType.IGTIMI_ACCOUNT;
+        return SecuredDomainType.IGTIMI_DEVICE;
     }
 
     @Override
@@ -73,8 +72,7 @@ public class AccountWithSecurityDTO implements SecuredDTO {
     }
 
     private TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return creatorName == null ? new TypeRelativeObjectIdentifier(email)
-                : new TypeRelativeObjectIdentifier(email, creatorName);
+        return new TypeRelativeObjectIdentifier(serialNumber);
     }
 
     @Override

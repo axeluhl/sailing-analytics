@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +34,19 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  */
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
+    /**
+     * Name of the system/OSGi property through which a base URL for the Igtimi REST API can be specified
+     * to which to connect in order to obtain live or recorded wind data from devices.
+     */
+    private static final String IGTIMI_BASE_URL_PROPERTY_NAME = "igtimi.base.url";
+    
+    /**
+     * The default value for the property whose name is given by {@link #IGTIMI_BASE_URL_PROPERTY_NAME}
+     */
+    private static final String IGTIMI_BASE_URL_DEFAULT = "https://wind.sapsailing.com";
+    
+    private static final String IGTIMI_DEFAULT_BEARER_TOKEN_PROPERTY_NAME = "igtimi.bearer.token";
+    
     private static Activator INSTANCE;
     
     private final Future<IgtimiConnectionFactory> connectionFactory;
@@ -43,18 +57,24 @@ public class Activator implements BundleActivator {
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");
+        final URL baseUrl = new URL(System.getProperty(IGTIMI_BASE_URL_PROPERTY_NAME, IGTIMI_BASE_URL_DEFAULT));
+        logger.info("Using base URL "+baseUrl+" for the Igtimi REST API");
         connectionFactory = executor.submit(new Callable<IgtimiConnectionFactory>() {
             @Override
             public IgtimiConnectionFactory call() {
                 logger.info("Creating IgtimiConnectionFactory");
-                return new IgtimiConnectionFactoryImpl();
+                final String defaultBearerToken = System.getProperty(IGTIMI_DEFAULT_BEARER_TOKEN_PROPERTY_NAME);
+                if (defaultBearerToken != null) {
+                    logger.info("A default bearer token has been provided for authentication to the Igtimi REST API at "+baseUrl);
+                }
+                return new IgtimiConnectionFactoryImpl(baseUrl, defaultBearerToken);
             }
         });
         windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {
             @Override
             public IgtimiWindTrackerFactory call() throws InterruptedException, ExecutionException {
                 logger.info("Creating IgtimiWindTrackerFactory");
-                return new IgtimiWindTrackerFactory();
+                return new IgtimiWindTrackerFactory(connectionFactory.get());
             }
         });
     }

@@ -10,11 +10,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.domain.tracking.AbstractWindTracker;
@@ -24,13 +24,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
 
 public class IgtimiWindTracker extends AbstractWindTracker implements WindTracker {
     private static final Logger logger = Logger.getLogger(IgtimiWindTracker.class.getName());
@@ -41,31 +36,29 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private boolean stopping;
 
     protected IgtimiWindTracker(final DynamicTrackedRace trackedRace, final IgtimiWindTrackerFactory windTrackerFactory,
-            final boolean correctByDeclination, SecurityService optionalSecurityService) throws Exception {
+            final boolean correctByDeclination, final SecurityService optionalSecurityService, final IgtimiConnectionFactory connectionFactory) throws Exception {
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
         new Thread("IgtimiWindTracker start-up thread for race " + trackedRace.getRace().getName()) {
             public void run() {
                 logger.info("Starting up Igtimi wind tracker for race "+trackedRace.getRace().getName());
+                // create the connection, preferring default credentials specified at bundle start-up over those we may
+                // extract here from the logged-on user or the tracked race's owner
+                final IgtimiConnection connection = connectionFactory.createConnection(()->getBearerToken(optionalSecurityService, trackedRace));
                 // avoid a race condition with stop() being called while this start-up thread is still running
                 synchronized (IgtimiWindTracker.this) {
                     try {
-                        // TODO determine authentication information by looking at current user, default to TrackedRace owner
-                        final IgtimiConnection connection = null;
-                        final Iterable<Device> devices = connection.getDevices();
-                        for (Device device : devices) {
+                        for (Device device : connection.getDevices()) {
                             try {
-                                if (isPermittedToUseAccount(optionalSecurityService, trackedRace, device)) {
+                                if (!stopping) {
+                                    final Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
                                     if (!stopping) {
-                                        Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
-                                        if (!stopping) {
-                                            LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
-                                            IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
-                                            liveConnection.addListener(windReceiver);
-                                            windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                            liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<>(devicesWeShouldListenTo, windReceiver));
-                                        }
+                                        LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
+                                        IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
+                                        liveConnection.addListener(windReceiver);
+                                        windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
+                                        liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<>(devicesWeShouldListenTo, windReceiver));
                                     }
                                 }
                             } catch (Exception e) {
@@ -82,59 +75,23 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     }
 
     /**
-     * TODO factor out the logic that determines the user account and from it the bearer token to use to
-     * authenticate that user when talking to the remote side; then use this to authenticate the {@link IgtimiConnection}
+     * From the {@link SecurityService#getCurrentUser() current user} and the {@code trackedRace} infers a bearer token
+     * to use to authenticate to the remote Igtimi REST API.<p>
+     * 
+     * If the {@link SecurityService#getCurrentUser() current user} is not {@code null}, its {@link SecurityService#getAccessToken(String) bearer token}
+     * is determined and returned. Otherwise, the user {@link SecurityService#getOwnership(com.sap.sse.security.shared.QualifiedObjectIdentifier) owning}
+     * the {@code trackedRace} will be determined, and if set, its bearer token will be used.
      */
-    private boolean isPermittedToUseAccount(SecurityService optionalSecurityService,
-            final DynamicTrackedRace trackedRace, Device device) {
-        final boolean isPermittedToUseAccount;
-        final WildcardPermission permissionToCheck = device.getIdentifier().getPermission(DefaultActions.READ);
-        final String stringPermissionToCheck = permissionToCheck.toString();
-        if (optionalSecurityService == null || SecurityUtils.getSubject().isPermitted(stringPermissionToCheck)) {
-            isPermittedToUseAccount = true;
-        } else if (!SecurityUtils.getSubject().isAuthenticated()) {
+    private String getBearerToken(SecurityService optionalSecurityService, final DynamicTrackedRace trackedRace) {
+        final User user;
+        if (!SecurityUtils.getSubject().isAuthenticated()) {
             // This is most probably a server reload where no security information is available, or a separate thread
             final OwnershipAnnotation ownershipOfRace = optionalSecurityService.getOwnership(trackedRace.getIdentifier());
-            final User userOwnerOfRace = ownershipOfRace == null ? null
-                    : ownershipOfRace.getAnnotation().getUserOwner();
-            if (userOwnerOfRace != null && SecurityUtils.getSecurityManager().isPermitted(
-                    new SimplePrincipalCollection(userOwnerOfRace.getName(), userOwnerOfRace.getName()),
-                    stringPermissionToCheck)) {
-                // The user owner of the TrackedRace would be permitted to use this Account
-                isPermittedToUseAccount = true;
-            } else {
-                final UserGroup groupOwner = ownershipOfRace == null ? null
-                        : ownershipOfRace.getAnnotation().getTenantOwner();
-                if (groupOwner != null) {
-                    if (groupOwner.equals(optionalSecurityService.getServerGroup())) {
-                        // It is assumed to be an auto-migration case; FIXME: is this appropriate? Anyone with permissions to create objects in the server's group could then read all Igtimi accounts...
-                        isPermittedToUseAccount = true;
-                    } else {
-                        final User allUser = optionalSecurityService.getAllUser();
-                        Iterable<UserGroup> userGroupsOfAllUser = allUser == null ? Collections.emptySet()
-                                : optionalSecurityService.getUserGroupsOfUser(allUser);
-                        final OwnershipAnnotation ownershipOfAccount = optionalSecurityService
-                                .getOwnership(device.getIdentifier());
-                        final AccessControlListAnnotation aclOfAccount = optionalSecurityService
-                                .getAccessControlList(device.getIdentifier());
-                        // Checks if the permission would be granted by the group owner 
-                        if (PermissionChecker.isPermitted(permissionToCheck, null, Collections.singleton(groupOwner),
-                                allUser, userGroupsOfAllUser,
-                                ownershipOfAccount == null ? null : ownershipOfAccount.getAnnotation(),
-                                aclOfAccount == null ? null : aclOfAccount.getAnnotation(), null)) {
-                            isPermittedToUseAccount = true;
-                        } else {
-                            isPermittedToUseAccount = false;
-                        }
-                    }
-                } else {
-                    isPermittedToUseAccount = false;
-                }
-            }
+            user = ownershipOfRace == null ? null : ownershipOfRace.getAnnotation().getUserOwner();
         } else {
-            isPermittedToUseAccount = false;
+            user = optionalSecurityService.getCurrentUser();
         }
-        return isPermittedToUseAccount;
+        return optionalSecurityService.getAccessToken(user.getName());
     }
 
     public static TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {

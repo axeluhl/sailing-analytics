@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.json.simple.parser.ParseException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -52,7 +54,7 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
-import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -311,9 +313,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     Util.Triple<Date, Date, Integer> getFinishingAndFinishTime(String leaderboardName, String raceColumnName,
             String fleetName) throws UnauthorizedException, NotFoundException;
 
-    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort)
-            throws UnauthorizedException, Exception;
-
     /**
      * Returns all private {@link TagDTO tags} of specified race and current user.
      * 
@@ -492,7 +491,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      */
     String createRaceBoardLinkQrCode(String url);
 
-    Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() throws UnauthorizedException;
+    Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws UnauthorizedException, IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta

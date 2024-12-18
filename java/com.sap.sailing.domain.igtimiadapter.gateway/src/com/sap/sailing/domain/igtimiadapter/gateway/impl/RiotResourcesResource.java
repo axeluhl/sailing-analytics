@@ -52,7 +52,6 @@ public class RiotResourcesResource extends StreamingOutputUtil {
              && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
                                  endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(
                                          resource.getTimeRange())) {
-                // TODO further evaluate the query parameters to filter matching resources
                 resourcesJson.add(new ResourceSerializer().createJsonFromResource(resource));
             }
         }

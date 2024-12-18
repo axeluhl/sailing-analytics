@@ -107,6 +107,10 @@ public interface IgtimiConnection {
      */
     Iterable<Device> getDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
     
+    Device getDeviceBySerialNumber(String serialNumber);
+    
+    void removeDevice(Device existingDevice);
+    
     /**
      * Returns all devices that this connection has access to with the requested <code>permission</code>. Note that
      * these don't necessarily need to be devices owned by the user to which this connection belongs. The user only

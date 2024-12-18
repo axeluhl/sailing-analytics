@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -67,13 +67,13 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelProvider<AccountWithSecurityDTO> {
+public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelProvider<IgtimiDeviceWithSecurityDTO> {
 
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
-    private final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel;
-    private final RefreshableMultiSelectionModel<AccountWithSecurityDTO> refreshableAccountsSelectionModel;
+    private final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterAccountsPanel;
+    private final RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO> refreshableAccountsSelectionModel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -106,25 +106,25 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
         // setup table
-        final FlushableCellTable<AccountWithSecurityDTO> cellTable = new FlushableCellTable<>(/* pageSize */ 50,
+        final FlushableCellTable<IgtimiDeviceWithSecurityDTO> cellTable = new FlushableCellTable<>(/* pageSize */ 50,
                 tableRes);
-        final ListDataProvider<AccountWithSecurityDTO> filteredAccounts = new ListDataProvider<>();
-        filterAccountsPanel = new LabeledAbstractFilterablePanel<AccountWithSecurityDTO>(
+        final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredAccounts = new ListDataProvider<>();
+        filterAccountsPanel = new LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO>(
                 new Label(stringMessages.igtimiAccounts()), Collections.emptyList(), filteredAccounts, stringMessages) {
             @Override
-            public Iterable<String> getSearchableStrings(AccountWithSecurityDTO t) {
+            public Iterable<String> getSearchableStrings(IgtimiDeviceWithSecurityDTO t) {
                 Set<String> strings = Collections.singleton(t.getEmail());
                 return strings;
             }
 
             @Override
-            public AbstractCellTable<AccountWithSecurityDTO> getCellTable() {
+            public AbstractCellTable<IgtimiDeviceWithSecurityDTO> getCellTable() {
                 return null;
             }
         };
         createIgtimiAccountsTable(cellTable, tableRes, presenter.getUserService(), filteredAccounts, filterAccountsPanel);
         // refreshableAccountsSelectionModel will be of correct type, see below in createIgtimiAccountsTable
-        refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<AccountWithSecurityDTO>) cellTable
+        refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO>) cellTable
                 .getSelectionModel();
 
         final Panel controlsPanel = new HorizontalPanel();
@@ -141,7 +141,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
         final Button removeAccountButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
-                    for (AccountWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
+                    for (IgtimiDeviceWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
                         removeAccount(account, filteredAccounts);
                     }
                 }
@@ -201,48 +201,48 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
         });
     }
 
-    private FlushableCellTable<AccountWithSecurityDTO> createIgtimiAccountsTable(
-            final FlushableCellTable<AccountWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
-            final UserService userService, final ListDataProvider<AccountWithSecurityDTO> filteredAccounts,
-            final LabeledAbstractFilterablePanel<AccountWithSecurityDTO> filterAccountsPanel) {
+    private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiAccountsTable(
+            final FlushableCellTable<IgtimiDeviceWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
+            final UserService userService, final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredAccounts,
+            final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterAccountsPanel) {
         filteredAccounts.addDataDisplay(table);
-        final SelectionCheckboxColumn<AccountWithSecurityDTO> accountSelectionCheckboxColumn = new SelectionCheckboxColumn<AccountWithSecurityDTO>(
+        final SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO> accountSelectionCheckboxColumn = new SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<AccountWithSecurityDTO>() {
+                new EntityIdentityComparator<IgtimiDeviceWithSecurityDTO>() {
                     @Override
-                    public boolean representSameEntity(AccountWithSecurityDTO a1, AccountWithSecurityDTO a2) {
+                    public boolean representSameEntity(IgtimiDeviceWithSecurityDTO a1, IgtimiDeviceWithSecurityDTO a2) {
                         return a1.getEmail().equals(a2.getEmail());
                     }
 
                     @Override
-                    public int hashCode(AccountWithSecurityDTO t) {
+                    public int hashCode(IgtimiDeviceWithSecurityDTO t) {
                         return t.getEmail().hashCode();
                     }
                 }, filterAccountsPanel.getAllListDataProvider(), table);
-        final ListHandler<AccountWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredAccounts.getList());
+        final ListHandler<IgtimiDeviceWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredAccounts.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getComparator());
-        final TextColumn<AccountWithSecurityDTO> accountNameColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<IgtimiDeviceWithSecurityDTO> accountNameColumn = new AbstractSortableTextColumn<>(
                 account -> account.getName(), columnSortHandler);
-        final TextColumn<AccountWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<IgtimiDeviceWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<>(
                 account -> account.getEmail(), columnSortHandler);
-        final TextColumn<AccountWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<>(
+        final TextColumn<IgtimiDeviceWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<>(
                 account -> account.getCreatorName(), columnSortHandler);
 
         final HasPermissions type = SecuredDomainType.IGTIMI_ACCOUNT;
-        final AccessControlledActionsColumn<AccountWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
+        final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         roleActionColumn.addAction(ACTION_DELETE, DELETE, account -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiAccount(account.getEmail()))) {
                 removeAccount(account, filteredAccounts);
             }
         });
-        final DialogConfig<AccountWithSecurityDTO> config = EditOwnershipDialog
+        final DialogConfig<IgtimiDeviceWithSecurityDTO> config = EditOwnershipDialog
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
-        final EditACLDialog.DialogConfig<AccountWithSecurityDTO> configACL = EditACLDialog
+        final EditACLDialog.DialogConfig<IgtimiDeviceWithSecurityDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
@@ -259,9 +259,9 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
     }
 
     public void refresh() {
-        sailingServiceWrite.getAllIgtimiAccountsWithSecurity(new AsyncCallback<Iterable<AccountWithSecurityDTO>>() {
+        sailingServiceWrite.getAllIgtimiDevicesWithSecurity(new AsyncCallback<Iterable<IgtimiDeviceWithSecurityDTO>>() {
             @Override
-            public void onSuccess(Iterable<AccountWithSecurityDTO> result) {
+            public void onSuccess(Iterable<IgtimiDeviceWithSecurityDTO> result) {
                 filterAccountsPanel.updateAll(result);
             }
 
@@ -372,9 +372,9 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
         new AddAccountDialog(this::refresh, sailingServiceWrite, stringMessages, errorReporter).show();
     }
 
-    private void removeAccount(final AccountWithSecurityDTO account,
-            final ListDataProvider<AccountWithSecurityDTO> removeFrom) {
-        sailingServiceWrite.removeIgtimiAccount(account.getEmail(), new AsyncCallback<Void>() {
+    private void removeAccount(final IgtimiDeviceWithSecurityDTO account,
+            final ListDataProvider<IgtimiDeviceWithSecurityDTO> removeFrom) {
+        sailingServiceWrite.removeIgtimiDevice(account.getEmail(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToRemoveIgtimiAccount(account.getEmail()));
@@ -390,7 +390,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
     }
 
     @Override
-    public AbstractFilterablePanel<AccountWithSecurityDTO> getFilterablePanel() {
+    public AbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> getFilterablePanel() {
         return filterAccountsPanel;
     }
 }

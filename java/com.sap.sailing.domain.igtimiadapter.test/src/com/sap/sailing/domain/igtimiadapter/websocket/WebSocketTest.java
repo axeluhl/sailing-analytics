@@ -178,7 +178,7 @@ public class WebSocketTest {
         MongoDBService mongoTestService = mongoTestConfig.getService();
         RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(client); // TODO bug6059: connect to the riotServer launched above
+        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(client, defaultBearerToken); // TODO bug6059: connect to the riotServer launched above
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
         // the data from baur@stg-academy.org, particularly containing the Berlin test data
         Account account = igtimiConnectionFactory.registerAccountForWhichClientIsAuthorized("admin", "9fded995cf21c8ed91ddaec13b220e8d5e44c65808d22ec2b1b7c32261121f26");

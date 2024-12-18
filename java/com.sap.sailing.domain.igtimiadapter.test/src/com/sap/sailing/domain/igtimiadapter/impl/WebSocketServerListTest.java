@@ -25,7 +25,7 @@ public class WebSocketServerListTest {
         final MongoDBService mongoTestService = mongoTestConfig.getService();
         RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
-        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient); // TODO bug6059: connect to the RiotServer launched above
+        final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(testAppClient, defaultBearerToken); // TODO bug6059: connect to the RiotServer launched above
         final Iterable<URI> serverUris = igtimiConnectionFactory.getWebsocketServers();
         assertFalse(Util.isEmpty(serverUris));
         for (final URI uri : serverUris) {

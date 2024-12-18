@@ -49,7 +49,7 @@ import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
-import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
@@ -373,8 +373,6 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void getFinishingAndFinishTime(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Util.Triple<Date, Date, Integer>> asyncCallback);
     
-    void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
-
     void getPrivateTags(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<List<TagDTO>> asyncCallback);
 
@@ -542,7 +540,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      */
     void createRaceBoardLinkQrCode(String url, AsyncCallback<String> asyncCallback);
 
-    void getAllIgtimiAccountsWithSecurity(AsyncCallback<Iterable<AccountWithSecurityDTO>> callback);
+    void getAllIgtimiDevicesWithSecurity(AsyncCallback<Iterable<IgtimiDeviceWithSecurityDTO>> callback);
 
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
