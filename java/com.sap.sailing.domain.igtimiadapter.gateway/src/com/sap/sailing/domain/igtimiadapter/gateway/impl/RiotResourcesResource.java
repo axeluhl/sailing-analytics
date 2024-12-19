@@ -65,7 +65,7 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final String startTime = queryParams.getFirst("start_time");
         final String endTime = queryParams.getFirst("end_time");
         final List<String> serialNumbers = queryParams.get("serial_numbers[]");
-        final Boolean restoreArchies = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;
+        final Boolean restoreArchives = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;
         final Map<Type, Double> typesAndCompression = new HashMap<>();
         for (final Type type : Type.values()) {
             final String typesAndCompressionKey = "types["+type.getCode()+"]";

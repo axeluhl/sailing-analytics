@@ -49,6 +49,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private final ServerSocketChannel serverSocketChannel;
     private final Thread communicatorThread;
     private boolean running;
+    private final MongoObjectFactory mongoObjectFactory;
     
     /**
      * The active connections managed by this server. Heartbeats will be sent into the channels found in the key set on
@@ -80,6 +81,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
+        this.mongoObjectFactory = mongoObjectFactory;
         for (final Device device : domainObjectFactory.getDevices()) {
             devices.put(device.getId(), device);
         }
@@ -201,6 +203,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalAddDevice(Device device) {
         devices.put(device.getId(), device);
+        mongoObjectFactory.storeDevice(device);
         return null;
     }
 
@@ -212,6 +215,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalRemoveDevice(long deviceId) {
         devices.remove(deviceId);
+        mongoObjectFactory.removeDevice(deviceId);
         return null;
     }
 
@@ -233,6 +237,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalAddResource(Resource resource) {
         resources.put(resource.getId(), resource);
+        mongoObjectFactory.storeResource(resource);
         return null;
     }
 
@@ -244,6 +249,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalRemoveResource(long resourceId) {
         resources.remove(resourceId);
+        mongoObjectFactory.removeResource(resourceId);
         return null;
     }
 
@@ -265,6 +271,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalAddDataAccessWindow(DataAccessWindow daw) {
         dataAccessWindows.put(daw.getId(), daw);
+        mongoObjectFactory.storeDataAccessWindow(daw);
         return null;
     }
     
@@ -276,6 +283,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalRemoveDataAccessWindow(long dawId) {
         dataAccessWindows.remove(dawId);
+        mongoObjectFactory.removeDataAccessWindow(dawId);
         return null;
     }
 

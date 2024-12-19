@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.server;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,6 +18,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 
@@ -49,6 +52,9 @@ public class Activator implements BundleActivator {
         final RiotServerImpl riotServerImpl = new RiotServerImpl(riotPort, domainObjectFactory, mongoObjectFactory);
         riotServer = riotServerImpl;
         context.registerService(RiotServer.class, riotServer, null);
+        final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, riotServer.getId().toString());
+        context.registerService(Replicable.class, riotServer, replicableServiceProperties);
         context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
             @Override
             public void clearState() throws Exception {
