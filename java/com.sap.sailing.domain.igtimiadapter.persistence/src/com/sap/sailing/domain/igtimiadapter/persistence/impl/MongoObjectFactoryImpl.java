@@ -38,6 +38,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void removeDevice(long deviceId) {
+        final Document filter = new Document(FieldNames.IGTIMI_DEVICES_ID.name(), deviceId);
+        db.getCollection(CollectionNames.IGTIMI_DEVICES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(filter);
+    }
+    
+    @Override
     public void storeResource(Resource resource) {
         final Document filter = new Document(FieldNames.IGTIMI_RESOURCES_ID.name(), resource.getId());
         final Document update = new Document();
@@ -50,6 +56,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void removeResource(long resourceId) {
+        final Document filter = new Document(FieldNames.IGTIMI_DEVICES_ID.name(), resourceId);
+        db.getCollection(CollectionNames.IGTIMI_RESOURCES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(filter);
+    }
+    
+    @Override
     public void storeDataAccessWindow(DataAccessWindow daw) {
         final Document filter = new Document(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_ID.name(), daw.getId());
         final Document update = new Document();
@@ -58,5 +70,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         update.put(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_START_TIME_MILLIS.name(), daw.getStartTime() == null ? null : daw.getStartTime().asMillis());
         update.put(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_END_TIME_MILLIS.name(), daw.getEndTime() == null ? null : daw.getEndTime().asMillis());
         db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(filter, update, new ReplaceOptions().upsert(true));
+    }
+
+    @Override
+    public void removeDataAccessWindow(long dawId) {
+        final Document filter = new Document(FieldNames.IGTIMI_DEVICES_ID.name(), dawId);
+        db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(filter);
     }
 }

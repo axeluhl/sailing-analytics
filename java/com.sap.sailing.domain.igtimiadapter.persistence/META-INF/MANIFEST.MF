@@ -14,6 +14,7 @@ Require-Bundle: com.sap.sse.mongodb,
 Export-Package: com.sap.sailing.domain.igtimiadapter.persistence
 Import-Package: com.sap.sailing.domain.common.security,
  com.sap.sse.common,
+ com.sap.sse.common.util,
  com.sap.sse.security,
  com.sap.sse.security.shared,
  com.sap.sse.util,

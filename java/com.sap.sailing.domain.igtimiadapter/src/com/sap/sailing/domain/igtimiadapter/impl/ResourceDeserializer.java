@@ -15,8 +15,8 @@ public class ResourceDeserializer {
 
     public Resource createResourceFromJson(JSONObject resourceJson) {
         return new ResourceImpl((Long) resourceJson.get(ID),
-                new MillisecondsTimePoint(((Double) resourceJson.get(START_TIME)).longValue()),
-                new MillisecondsTimePoint(((Double) resourceJson.get(END_TIME)).longValue()),
+                resourceJson.get(START_TIME)==null?null:new MillisecondsTimePoint(((Number) resourceJson.get(START_TIME)).longValue()),
+                resourceJson.get(END_TIME)==null?null:new MillisecondsTimePoint(((Number) resourceJson.get(END_TIME)).longValue()),
                 (String) resourceJson.get(DEVICE_SERIAL_NUMBER),
                 getDataTypes((JSONArray) resourceJson.get(DATA_TYPES)));
     }

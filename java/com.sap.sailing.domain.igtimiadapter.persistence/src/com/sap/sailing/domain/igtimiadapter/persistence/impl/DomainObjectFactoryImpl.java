@@ -26,10 +26,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final MongoCollection<org.bson.Document> resourcesCollection = db.getCollection(CollectionNames.IGTIMI_RESOURCES.name());
         for (Object o : resourcesCollection.find()) {
             final long id = ((Number) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_ID.name())).longValue();
-            final Number startTimeMillis = ((Number) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_START_TIME_MILLIS.name())).longValue();
-            final TimePoint startTime = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
-            final Number endTimeMillis = ((Number) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_END_TIME_MILLIS.name())).longValue();
-            final TimePoint endTime = endTimeMillis == null ? null : TimePoint.of(endTimeMillis.longValue());
+            final TimePoint startTime = getTimePoint((Document) o, FieldNames.IGTIMI_RESOURCES_START_TIME_MILLIS);
+            final TimePoint endTime = getTimePoint((Document) o, FieldNames.IGTIMI_RESOURCES_END_TIME_MILLIS);
             final String deviceSerialNumber = (String) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_DEVICE_SERIAL_NUMBER.name());
             final Integer[] dataTypesAsInteger = ((List<?>) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_DATA_TYPES.name())).toArray(new Integer[0]);
             final int[] dataTypes = new int[dataTypesAsInteger.length];
@@ -41,16 +39,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    private TimePoint getTimePoint(Document o, final FieldNames timePointFieldName) {
+        final Number startTimeMillisNumber = (Number) o.get(timePointFieldName.name());
+        final TimePoint startTime = startTimeMillisNumber == null ? null : TimePoint.of(startTimeMillisNumber.longValue());
+        return startTime;
+    }
+
     @Override
     public Iterable<DataAccessWindow> getDataAccessWindows() {
         final List<DataAccessWindow> result = new ArrayList<>();
         final MongoCollection<org.bson.Document> devicesCollection = db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name());
         for (Object o : devicesCollection.find()) {
             final Number id = ((Number) ((Document) o).get(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_ID.name()));
-            final Number startTimeMillis = ((Number) ((Document) o).get(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_START_TIME_MILLIS.name())).longValue();
-            final TimePoint startTime = startTimeMillis == null ? null : TimePoint.of(startTimeMillis.longValue());
-            final Number endTimeMillis = ((Number) ((Document) o).get(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_END_TIME_MILLIS.name())).longValue();
-            final TimePoint endTime = endTimeMillis == null ? null : TimePoint.of(endTimeMillis.longValue());
+            final TimePoint startTime = getTimePoint((Document) o, FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_START_TIME_MILLIS);
+            final TimePoint endTime = getTimePoint((Document) o, FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_END_TIME_MILLIS);
             final String deviceSerialNumber = (String) ((Document) o).get(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_DEVICE_SERIAL_NUMBER.name());
             result.add(DataAccessWindow.create(id.longValue(), startTime, endTime, deviceSerialNumber));
         }

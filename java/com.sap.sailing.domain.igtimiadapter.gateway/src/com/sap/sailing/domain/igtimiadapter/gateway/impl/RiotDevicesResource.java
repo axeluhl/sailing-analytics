@@ -49,7 +49,7 @@ public class RiotDevicesResource extends AbstractRiotServerResource {
     
     @POST
     @Consumes("application/json;charset=UTF-8")
-    public Response putDevice(@Context HttpServletRequest request) throws IOException, ParseException {
+    public Response postDevice(@Context HttpServletRequest request) throws IOException, ParseException {
         final RiotServer riot = getRiotService();
         final SecurityService securityService = getSecurityService();
         final InputStream inputStream = request.getInputStream();
