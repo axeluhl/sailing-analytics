@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.igtimiadapter.server.riot.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.Thread.State;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -25,12 +29,16 @@ import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.shared.util.Wait;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
-public class RiotServerImpl implements RiotServer, Runnable {
+public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<ReplicableRiotServer, RiotReplicationOperation<?>> implements RiotServer, ReplicableRiotServer, Runnable {
     private static final Logger logger = Logger.getLogger(RiotServerImpl.class.getName());
 
     private final ConcurrentMap<Long, Resource> resources;
@@ -176,18 +184,99 @@ public class RiotServerImpl implements RiotServer, Runnable {
     }
 
     @Override
-    public Iterable<Resource> getResources() {
-        return Collections.unmodifiableCollection(resources.values());
+    public Iterable<Device> getDevices() {
+        return Collections.unmodifiableCollection(devices.values());
+    }
+    
+    @Override
+    public Device getDeviceById(long id) {
+        return devices.get(id);
     }
 
     @Override
-    public Iterable<Device> getDevices() {
-        return Collections.unmodifiableCollection(devices.values());
+    public void addDevice(Device device) {
+        apply(s->s.internalAddDevice(device));
+    }
+    
+    @Override
+    public Void internalAddDevice(Device device) {
+        devices.put(device.getId(), device);
+        return null;
+    }
+
+    @Override
+    public void removeDevice(long deviceId) {
+        apply(s->s.internalRemoveDevice(deviceId));
+    }
+    
+    @Override
+    public Void internalRemoveDevice(long deviceId) {
+        devices.remove(deviceId);
+        return null;
+    }
+
+    @Override
+    public Iterable<Resource> getResources() {
+        return Collections.unmodifiableCollection(resources.values());
+    }
+    
+    @Override
+    public Resource getResourceById(long id) {
+        return resources.get(id);
+    }
+    
+    @Override
+    public void addResource(Resource resource) {
+        apply(s->s.internalAddResource(resource));
+    }
+    
+    @Override
+    public Void internalAddResource(Resource resource) {
+        resources.put(resource.getId(), resource);
+        return null;
+    }
+
+    @Override
+    public void removeResource(long resourceId) {
+        apply(s->s.internalRemoveResource(resourceId));
+    }
+    
+    @Override
+    public Void internalRemoveResource(long resourceId) {
+        resources.remove(resourceId);
+        return null;
     }
 
     @Override
     public Iterable<DataAccessWindow> getDataAccessWindows() {
         return Collections.unmodifiableCollection(dataAccessWindows.values());
+    }
+    
+    @Override
+    public DataAccessWindow getDataAccessWindowById(long id) {
+        return dataAccessWindows.get(id);
+    }
+
+    @Override
+    public void addDataAccessWindow(DataAccessWindow daw) {
+        apply(s->s.internalAddDataAccessWindow(daw));
+    }
+
+    @Override
+    public Void internalAddDataAccessWindow(DataAccessWindow daw) {
+        dataAccessWindows.put(daw.getId(), daw);
+        return null;
+    }
+    
+    @Override
+    public void removeDataAccessWindow(long dawId) {
+        apply(s->s.internalRemoveDataAccessWindow(dawId));
+    }
+
+    @Override
+    public Void internalRemoveDataAccessWindow(long dawId) {
+        dataAccessWindows.remove(dawId);
+        return null;
     }
 
     /**
@@ -195,7 +284,35 @@ public class RiotServerImpl implements RiotServer, Runnable {
      * all resources and data access windows.
      */
     public void clear() {
+        devices.clear();
         resources.clear();
         dataAccessWindows.clear();
+        connections.clear();
+        listeners.clear();
+    }
+
+    @Override
+    public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
+        clear();
+    }
+
+    @Override
+    public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is,
+            Map<String, Class<?>> classLoaderCache) throws IOException {
+        return new ObjectInputStreamResolvingAgainstCache<Object>(is, /* dummy cache */ new Object(), /* resolve listener */ null, classLoaderCache) {
+        }; // use anonymous inner class in this class loader to see all that this class sees
+    }
+
+    @Override
+    public void initiallyFillFromInternal(ObjectInputStream is)
+            throws IOException, ClassNotFoundException, InterruptedException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.writeObject(devices);
+        objectOutputStream.writeObject(resources);
+        objectOutputStream.writeObject(dataAccessWindows);
     }
 }

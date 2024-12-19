@@ -811,7 +811,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         SecuredDomainType.COMPETITOR, CompetitorImpl.getTypeRelativeObjectIdentifier(competitorUuid), name,
                         createCompetitorJob);
             }
-            regatta.registerCompetitor(competitor);
+            regatta.registerCompetitor(competitor); // FIXME what about replication???
             response = Response.ok(streamingOutput(CompetitorJsonSerializer.create().serialize(competitor)))
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             if (deviceUuid != null) {
@@ -964,7 +964,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 getSecurityService().checkCurrentUserHasOneOfExplicitPermissions(competitor,
                         SecuredSecurityTypes.PublicReadableActions.READ_AND_READ_PUBLIC_ACTIONS);
-                regatta.deregisterCompetitor(competitor);
+                regatta.deregisterCompetitor(competitor); // FIXME what about replication???
                 response = Response.ok().build();
             }
         }

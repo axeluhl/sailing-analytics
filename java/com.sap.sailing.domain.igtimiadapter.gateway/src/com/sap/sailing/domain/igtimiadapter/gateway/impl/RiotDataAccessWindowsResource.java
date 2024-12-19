@@ -20,15 +20,14 @@ import com.sap.sailing.domain.igtimiadapter.impl.DataAccessWindowSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotDataAccessWindowsResource.DATA_ACCESS_WINDOWS)
-public class RiotDataAccessWindowsResource extends StreamingOutputUtil {
+public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
     protected static final String DATA_ACCESS_WINDOWS = "/data_access_windows";
     
     @GET
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     public Response getDataAccessWindows(@QueryParam("permission") String permission,
             @QueryParam("start_time") String startTime, @QueryParam("end_time") String endTime,
             @QueryParam("serial_numbers[]") Set<String> serialNumbers,

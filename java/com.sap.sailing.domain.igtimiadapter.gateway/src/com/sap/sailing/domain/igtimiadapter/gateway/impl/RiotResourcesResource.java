@@ -27,16 +27,15 @@ import com.sap.sailing.domain.igtimiadapter.impl.ResourceSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotResourcesResource.RESOURCES)
-public class RiotResourcesResource extends StreamingOutputUtil {
+public class RiotResourcesResource extends AbstractRiotServerResource {
     protected static final String RESOURCES = "/resources";
     private static final String DATA = "/data";
     
     @GET
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     public Response getResources(@QueryParam("permission") String permission,
             @QueryParam("start_time") String startTime, @QueryParam("end_time") String endTime,
             @QueryParam("serial_numbers[]") Set<String> serialNumbers,
@@ -59,7 +58,7 @@ public class RiotResourcesResource extends StreamingOutputUtil {
     }
 
     @GET
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     @Path(DATA)
     public Response getResourcesData(@Context UriInfo ui) {
         final MultivaluedMap<String, String> queryParams = ui.getQueryParameters();

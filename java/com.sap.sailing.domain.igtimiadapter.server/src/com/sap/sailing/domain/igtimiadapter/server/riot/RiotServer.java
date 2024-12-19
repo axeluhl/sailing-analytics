@@ -13,8 +13,11 @@ import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sse.replication.Replicable;
 
 /**
  * A server implementation according to the protocol specification found
@@ -42,7 +45,7 @@ import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RiotServer {
+public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplicationOperation<?>> {
     /**
      * Created a {@link RiotServer} listening on the {@code port} specified. If the port is not
      * available, an {@link IOException} will be thrown.
@@ -74,8 +77,26 @@ public interface RiotServer {
     int getPort() throws IOException;
 
     Iterable<Resource> getResources();
+    
+    Resource getResourceById(long id);
+    
+    void addResource(Resource resource);
+    
+    void removeResource(long resourceId);
 
     Iterable<Device> getDevices();
     
+    Device getDeviceById(long id);
+    
+    void addDevice(Device device);
+    
+    void removeDevice(long deviceId);
+    
     Iterable<DataAccessWindow> getDataAccessWindows();
+    
+    DataAccessWindow getDataAccessWindowById(long id);
+    
+    void addDataAccessWindow(DataAccessWindow daw);
+    
+    void removeDataAccessWindow(long dawId);
 }

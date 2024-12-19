@@ -20,7 +20,7 @@ public class DeviceImpl extends HasIdImpl implements Device {
         super(id);
         this.serialNumber = serialNumber;
         this.name = name;
-        this.serviceTag = serialNumber;
+        this.serviceTag = serviceTag;
     }
 
     @Override

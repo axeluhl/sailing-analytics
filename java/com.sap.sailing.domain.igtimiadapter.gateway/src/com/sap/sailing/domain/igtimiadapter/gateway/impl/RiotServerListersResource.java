@@ -22,7 +22,7 @@ public class RiotServerListersResource extends StreamingOutputUtil {
     protected static final String WEB_SOCKETS = "/web_sockets";
     
     @GET
-    @Produces("text/plain;charset=UTF-8")
+    @Produces("application/json;charset=UTF-8")
     @Path(WEB_SOCKETS)
     public Response getDevices(@Context UriInfo uriInfo) throws MalformedURLException, URISyntaxException {
         final JSONObject result = new JSONObject();
