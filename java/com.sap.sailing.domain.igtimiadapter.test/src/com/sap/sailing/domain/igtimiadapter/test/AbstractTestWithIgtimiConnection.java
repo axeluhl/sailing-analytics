@@ -1,12 +1,13 @@
 package com.sap.sailing.domain.igtimiadapter.test;
 
+import java.net.URL;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionImpl;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
@@ -36,8 +37,7 @@ public class AbstractTestWithIgtimiConnection {
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(testDBConfig.getService());
         riot = RiotServer.create(domainObjectFactory, mongoObjectFactory);
         final String bearerToken = mockSecurityService.getAccessToken(mockSecurityService.getCurrentUser().getName());
-        connection = new IgtimiConnectionImpl(new URL("http://127.0.0.1:"+riot.getPort()), bearerToken)
-        connection = connectionFactory.connect(account);
+        connection = new IgtimiConnectionImpl(new URL("http://127.0.0.1:"+riot.getPort()), bearerToken);
     }
 
     @After

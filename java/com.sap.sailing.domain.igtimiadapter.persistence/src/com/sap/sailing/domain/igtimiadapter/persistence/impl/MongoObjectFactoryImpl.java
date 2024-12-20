@@ -34,7 +34,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     static MongoCollection<Document> getOrCreateMessagesCollection(MongoDatabase database) {
         final MongoCollection<Document> messagesCollection = database.getCollection(CollectionNames.IGTIMI_MESSAGES.name());
         final Document index = new Document()
-            .append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name()+"."+FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name(), "hashed")
             .append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), 1)
             .append(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name(), 1);
         final IndexOptions indexOptions = new IndexOptions().name("fixbydevandtime").background(false);

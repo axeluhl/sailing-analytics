@@ -114,5 +114,15 @@ public class IgtimiPersistenceTest {
         final DataPoint dataPoint = dataMessage.getData(0);
         final ApparentWindSpeed aws = dataPoint.getAws();
         assertEquals(AWS, aws.getValue(), 0.000000001);
+        // search with a time range *before* the actual message
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE.times(2)), AWS_TIME_POINT.minus(Duration.ONE_MINUTE)))));
+        // search with a time range *after* the actual message
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.plus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE.times(2))))));
+        // search with the wrong device serial number
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER+"-wrong", TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)))));
+        // search with a time range open at the end
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), null))));
+        // search with a time range open at the start
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(null, AWS_TIME_POINT.plus(Duration.ONE_MINUTE)))));
     }
 }
