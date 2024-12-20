@@ -40,242 +40,240 @@ import com.igtimi.IgtimiData.Torque;
 import com.igtimi.IgtimiData.TrueWindDirection;
 import com.igtimi.IgtimiData.TrueWindSpeed;
 
-public interface DataPointVisitor {
-    static void accept(DataPoint dataPoint, DataPointVisitor visitor) {
+public interface DataPointVisitor<ResultType> {
+    static <ResultType> ResultType accept(DataPoint dataPoint, DataPointVisitor<ResultType> visitor) {
         switch (dataPoint.getDataCase()) {
         case ACC:
-            visitor.handleAcc(dataPoint.getAcc());
-            break;
+            return visitor.handleAcc(dataPoint.getAcc());
         case AMP:
-            visitor.handleAmp(dataPoint.getAmp());
-            break;
+            return visitor.handleAmp(dataPoint.getAmp());
         case ANG:
-            visitor.handleAng(dataPoint.getAng());
-            break;
+            return visitor.handleAng(dataPoint.getAng());
         case AWA:
-            visitor.handleAwa(dataPoint.getAwa());
-            break;
+            return visitor.handleAwa(dataPoint.getAwa());
         case AWS:
-            visitor.handleAws(dataPoint.getAws());
-            break;
+            return visitor.handleAws(dataPoint.getAws());
         case BOOL:
-            visitor.handleBool(dataPoint.getBool());
-            break;
+            return visitor.handleBool(dataPoint.getBool());
         case CMD:
-            visitor.handleCmd(dataPoint.getCmd());
-            break;
+            return visitor.handleCmd(dataPoint.getCmd());
         case COG:
-            visitor.handleCog(dataPoint.getCog());
-            break;
+            return visitor.handleCog(dataPoint.getCog());
         case COR:
-            visitor.handleCor(dataPoint.getCor());
-            break;
+            return visitor.handleCor(dataPoint.getCor());
         case DATA_NOT_SET: // ignore message
-            break;
         case EVENT:
-            visitor.handleEvent(dataPoint.getEvent());
-            break;
+            return visitor.handleEvent(dataPoint.getEvent());
         case FILE:
-            visitor.handleFile(dataPoint.getFile());
-            break;
+            return visitor.handleFile(dataPoint.getFile());
         case FOR:
-            visitor.handleFor(dataPoint.getFor());
-            break;
+            return visitor.handleFor(dataPoint.getFor());
         case FREQ:
-            visitor.handleFreq(dataPoint.getFreq());
-            break;
+            return visitor.handleFreq(dataPoint.getFreq());
         case HDG:
-            visitor.handleHdg(dataPoint.getHdg());
-            break;
+            return visitor.handleHdg(dataPoint.getHdg());
         case HDGM:
-            visitor.handleHdgm(dataPoint.getHdgm());
-            break;
+            return visitor.handleHdgm(dataPoint.getHdgm());
         case HR:
-            visitor.handleHr(dataPoint.getHr());
-            break;
+            return visitor.handleHr(dataPoint.getHr());
         case INT:
-            visitor.handleInt(dataPoint.getInt());
-            break;
+            return visitor.handleInt(dataPoint.getInt());
         case JSON:
-            visitor.handleJson(dataPoint.getJson());
-            break;
+            return visitor.handleJson(dataPoint.getJson());
         case LEN:
-            visitor.handleLen(dataPoint.getLen());
-            break;
+            return visitor.handleLen(dataPoint.getLen());
         case LOG:
-            visitor.handleLog(dataPoint.getLog());
-            break;
+            return visitor.handleLog(dataPoint.getLog());
         case NUM:
-            visitor.handleNum(dataPoint.getNum());
-            break;
+            return visitor.handleNum(dataPoint.getNum());
         case ORI:
-            visitor.handleOri(dataPoint.getOri());
-            break;
+            return visitor.handleOri(dataPoint.getOri());
         case POS:
-            visitor.handlePos(dataPoint.getPos());
-            break;
+            return visitor.handlePos(dataPoint.getPos());
         case PRESS:
-            visitor.handlePress(dataPoint.getPress());
-            break;
+            return visitor.handlePress(dataPoint.getPress());
         case PWR:
-            visitor.handlePwr(dataPoint.getPwr());
-            break;
+            return visitor.handlePwr(dataPoint.getPwr());
         case SATC:
-            visitor.handleSatc(dataPoint.getSatc());
-            break;
+            return visitor.handleSatc(dataPoint.getSatc());
         case SATQ:
-            visitor.handleSatq(dataPoint.getSatq());
-            break;
+            return visitor.handleSatq(dataPoint.getSatq());
         case SLE:
-            visitor.handleSle(dataPoint.getSle());
-            break;
+            return visitor.handleSle(dataPoint.getSle());
         case SOG:
-            visitor.handleSog(dataPoint.getSog());
-            break;
+            return visitor.handleSog(dataPoint.getSog());
         case SPD:
-            visitor.handleSpd(dataPoint.getSpd());
-            break;
+            return visitor.handleSpd(dataPoint.getSpd());
         case STW:
-            visitor.handleStw(dataPoint.getStw());
-            break;
+            return visitor.handleStw(dataPoint.getStw());
         case TEMP:
-            visitor.handleTemp(dataPoint.getTemp());
-            break;
+            return visitor.handleTemp(dataPoint.getTemp());
         case TIME:
-            visitor.handleTime(dataPoint.getTime());
-            break;
+            return visitor.handleTime(dataPoint.getTime());
         case TORQ:
-            visitor.handleTorq(dataPoint.getTorq());
-            break;
+            return visitor.handleTorq(dataPoint.getTorq());
         case TWD:
-            visitor.handleTwd(dataPoint.getTwd());
-            break;
+            return visitor.handleTwd(dataPoint.getTwd());
         case TWS:
-            visitor.handleTws(dataPoint.getTws());
-            break;
+            return visitor.handleTws(dataPoint.getTws());
         case TXT:
-            visitor.handleTxt(dataPoint.getTxt());
-            break;
+            return visitor.handleTxt(dataPoint.getTxt());
         case VOLT:
-            visitor.handleVolt(dataPoint.getVolt());
-            break;
-        default:
-            throw new RuntimeException("Unknown data type " + dataPoint.getDataCase());
+            return visitor.handleVolt(dataPoint.getVolt());
         }
+        throw new RuntimeException("Internal error; shouldn't have reached here; found unknown data case "+dataPoint.getDataCase());
     }
 
-    default void handleAcc(Acceleration acc) {
+    default ResultType handleAcc(Acceleration acc) {
+        return null;
     }
 
-    default void handleAmp(ElectricalCurrent amp) {
+    default ResultType handleAmp(ElectricalCurrent amp) {
+        return null;
     }
 
-    default void handleAng(Angle ang) {
+    default ResultType handleAng(Angle ang) {
+        return null;
     }
 
-    default void handleAwa(ApparentWindAngle awa) {
+    default ResultType handleAwa(ApparentWindAngle awa) {
+        return null;
     }
 
-    default void handleAws(ApparentWindSpeed aws) {
+    default ResultType handleAws(ApparentWindSpeed aws) {
+        return null;
     }
 
-    default void handleBool(Boolean bool) {
+    default ResultType handleBool(Boolean bool) {
+        return null;
     }
 
-    default void handleCmd(Command cmd) {
+    default ResultType handleCmd(Command cmd) {
+        return null;
     }
 
-    default void handleCog(CourseOverGround cog) {
+    default ResultType handleCog(CourseOverGround cog) {
+        return null;
     }
 
-    default void handleCor(Corrections cor) {
+    default ResultType handleCor(Corrections cor) {
+        return null;
     }
 
-    default void handleEvent(Event event) {
+    default ResultType handleEvent(Event event) {
+        return null;
     }
 
-    default void handleFile(File file) {
+    default ResultType handleFile(File file) {
+        return null;
     }
 
-    default void handleFor(Force for1) {
+    default ResultType handleFor(Force for1) {
+        return null;
     }
 
-    default void handleFreq(Frequency freq) {
+    default ResultType handleFreq(Frequency freq) {
+        return null;
     }
 
-    default void handleHdg(Heading hdg) {
+    default ResultType handleHdg(Heading hdg) {
+        return null;
     }
 
-    default void handleHdgm(HeadingMagnetic hdgm) {
+    default ResultType handleHdgm(HeadingMagnetic hdgm) {
+        return null;
     }
 
-    default void handleHr(HeartRate hr) {
+    default ResultType handleHr(HeartRate hr) {
+        return null;
     }
 
-    default void handleInt(Integer int1) {
+    default ResultType handleInt(Integer int1) {
+        return null;
     }
 
-    default void handleJson(JSON json) {
+    default ResultType handleJson(JSON json) {
+        return null;
     }
 
-    default void handleLen(Length len) {
+    default ResultType handleLen(Length len) {
+        return null;
     }
 
-    default void handleLog(Log log) {
+    default ResultType handleLog(Log log) {
+        return null;
     }
 
-    default void handleNum(Number num) {
+    default ResultType handleNum(Number num) {
+        return null;
     }
 
-    default void handleOri(Orientation ori) {
+    default ResultType handleOri(Orientation ori) {
+        return null;
     }
 
-    default void handlePos(GNSS_Position pos) {
+    default ResultType handlePos(GNSS_Position pos) {
+        return null;
     }
 
-    default void handlePress(Pressure press) {
+    default ResultType handlePress(Pressure press) {
+        return null;
     }
 
-    default void handlePwr(Power pwr) {
+    default ResultType handlePwr(Power pwr) {
+        return null;
     }
 
-    default void handleSatc(GNSS_Sat_Count satc) {
+    default ResultType handleSatc(GNSS_Sat_Count satc) {
+        return null;
     }
 
-    default void handleSatq(GNSS_Quality satq) {
+    default ResultType handleSatq(GNSS_Quality satq) {
+        return null;
     }
 
-    default void handleSle(SessionLogEntry sle) {
+    default ResultType handleSle(SessionLogEntry sle) {
+        return null;
     }
 
-    default void handleSog(SpeedOverGround sog) {
+    default ResultType handleSog(SpeedOverGround sog) {
+        return null;
     }
 
-    default void handleSpd(Speed spd) {
+    default ResultType handleSpd(Speed spd) {
+        return null;
     }
 
-    default void handleStw(SpeedThroughWater stw) {
+    default ResultType handleStw(SpeedThroughWater stw) {
+        return null;
     }
 
-    default void handleTemp(Temperature temp) {
+    default ResultType handleTemp(Temperature temp) {
+        return null;
     }
 
-    default void handleTime(TimeInterval time) {
+    default ResultType handleTime(TimeInterval time) {
+        return null;
     }
 
-    default void handleTorq(Torque torq) {
+    default ResultType handleTorq(Torque torq) {
+        return null;
     }
 
-    default void handleTwd(TrueWindDirection twd) {
+    default ResultType handleTwd(TrueWindDirection twd) {
+        return null;
     }
 
-    default void handleTws(TrueWindSpeed tws) {
+    default ResultType handleTws(TrueWindSpeed tws) {
+        return null;
     }
 
-    default void handleTxt(Text txt) {
+    default ResultType handleTxt(Text txt) {
+        return null;
     }
 
-    default void handleVolt(ElectricalPotential volt) {
+    default ResultType handleVolt(ElectricalPotential volt) {
+        return null;
     }
 
 }

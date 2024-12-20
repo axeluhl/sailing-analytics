@@ -12,7 +12,8 @@ Require-Bundle: com.sap.sse.mongodb,
  org.mongodb.driver-sync;bundle-version="4.3.1",
  com.sap.sailing.domain.igtimiadapter
 Export-Package: com.sap.sailing.domain.igtimiadapter.persistence
-Import-Package: com.sap.sailing.domain.common.security,
+Import-Package: com.google.protobuf;version="[4.28.0,5.0.0)",
+ com.sap.sailing.domain.common.security,
  com.sap.sse.common,
  com.sap.sse.common.util,
  com.sap.sse.security,

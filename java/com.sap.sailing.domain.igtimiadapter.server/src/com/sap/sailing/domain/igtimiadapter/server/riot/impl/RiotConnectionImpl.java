@@ -55,6 +55,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualityHdop;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Log;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
@@ -232,58 +233,74 @@ public class RiotConnectionImpl implements RiotConnection {
                 for (final DataMsg dataMsg : data.getDataList()) {
                     serialNumber = dataMsg.getSerialNumber();
                     for (final DataPoint dataPoint : dataMsg.getDataList()) {
-                        DataPointVisitor.accept(dataPoint, new DataPointVisitor() {
+                        DataPointVisitor.accept(dataPoint, new DataPointVisitor<Void>() {
                             @Override
-                            public void handleAwa(ApparentWindAngle awa) {
+                            public Void handleAwa(ApparentWindAngle awa) {
                                 fixes.add(new AWA(TimePoint.of(awa.getTimestamp()), getSensor(), new DegreeBearingImpl(awa.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handleAws(ApparentWindSpeed aws) {
+                            public Void handleAws(ApparentWindSpeed aws) {
                                 fixes.add(new AWS(TimePoint.of(aws.getTimestamp()), getSensor(), new KilometersPerHourSpeedImpl(aws.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handleCog(CourseOverGround cog) {
+                            public Void handleCog(CourseOverGround cog) {
                                 fixes.add(new COG(TimePoint.of(cog.getTimestamp()), getSensor(), new DegreeBearingImpl(cog.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handleHdg(Heading hdg) {
+                            public Void handleHdg(Heading hdg) {
                                 fixes.add(new HDG(TimePoint.of(hdg.getTimestamp()), getSensor(), new DegreeBearingImpl(hdg.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handleHdgm(HeadingMagnetic hdgm) {
+                            public Void handleHdgm(HeadingMagnetic hdgm) {
                                 fixes.add(new HDGM(TimePoint.of(hdgm.getTimestamp()), getSensor(), new DegreeBearingImpl(hdgm.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handlePos(GNSS_Position pos) {
+                            public Void handlePos(GNSS_Position pos) {
                                 final Sensor sensor = getSensor();
                                 fixes.add(new GpsLatLong(TimePoint.of(pos.getTimestamp()), sensor, new DegreePosition(pos.getLatitude(), pos.getLongitude())));
                                 fixes.add(new GpsAltitude(TimePoint.of(pos.getTimestamp()), sensor, new MeterDistance(pos.getAltitude())));
+                                return null;
                             }
 
                             @Override
-                            public void handleSatq(GNSS_Quality hdop) {
+                            public Void handleSatq(GNSS_Quality hdop) {
                                 fixes.add(new GpsQualityHdop(TimePoint.of(hdop.getTimestamp()), getSensor(), new MeterDistance(hdop.getValue())));
+                                return null;
                             }
 
                             @Override
-                            public void handleSatc(GNSS_Sat_Count satCount) {
+                            public Void handleSatc(GNSS_Sat_Count satCount) {
                                 fixes.add(new GpsQualitySatCount(TimePoint.of(satCount.getTimestamp()), getSensor(), satCount.getValue()));
+                                return null;
                             }
 
                             @Override
-                            public void handleNum(com.igtimi.IgtimiData.Number num) {
+                            public Void handleNum(com.igtimi.IgtimiData.Number num) {
                                 // This is expected to represent the battery state of charge (SOC) in percent
                                 fixes.add(new BatteryLevel(TimePoint.of(num.getTimestamp()), getSensor(), num.getValue()));
+                                return null;
                             }
 
                             @Override
-                            public void handleSog(SpeedOverGround sog) {
+                            public Void handleSog(SpeedOverGround sog) {
                                 fixes.add(new SOG(TimePoint.of(sog.getTimestamp()), getSensor(), new KilometersPerHourSpeedImpl(sog.getValue())));
+                                return null;
+                            }
+                            
+                            @Override
+                            public Void handleLog(com.igtimi.IgtimiData.Log log) {
+                                fixes.add(new Log(TimePoint.of(log.getTimestamp()), getSensor(), log.getMessage(), log.getPriority()));
+                                return null;
                             }
                         });
                     }
