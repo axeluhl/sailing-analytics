@@ -3,6 +3,8 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,11 +24,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Resource;
@@ -36,6 +40,7 @@ import com.sap.sailing.domain.igtimiadapter.impl.ResourceSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -82,6 +87,11 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         return Response.ok().build();
     }
 
+    /**
+     * A response of a successful request contains a {@link JSONObject} where the keys are the device serial numbers,
+     * and where the values are arrays of {@link String}s representing Base64-encoded binary protobuf messages that are
+     * expected to parse as {@link Msg} objects. There is no guarantee for these messages to be in any specific order.
+     */
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path(DATA)
@@ -102,13 +112,27 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 typesAndCompression.put(type, Double.valueOf(queryParams.getFirst(typesAndCompressionKey)));
             }
         }
-        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(startTime, endTime, serialNumbers);
-        if (SecurityUtils.getSubject().isPermitted(resource.getIdentifier().getStringPermission(DefaultActions.READ))
-                && (serialNumbers.isEmpty() || serialNumbers.contains(resource.getDeviceSerialNumber()))
-                && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
-                                    endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(
-                                            resource.getTimeRange())) {
+        final TimeRange requestedTimeRange = TimeRange.create(startTime, endTime);
+        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(requestedTimeRange, serialNumbers);
+        // assemble results from DAWs readable by the user:
+        final JSONObject result = new JSONObject();
+        final Encoder base64Encoder = Base64.getEncoder();
+        for (final DataAccessWindow daw : daws) {
+            final TimeRange timeRangeIntersectionBetweenRequestAndDAW = requestedTimeRange.intersection(daw.getTimeRange());
+            final Iterable<Msg> messagesForDAW = getRiotService().getMessages(daw.getDeviceSerialNumber(), timeRangeIntersectionBetweenRequestAndDAW);
+            final JSONArray arrayForDevice = (JSONArray) result.computeIfAbsent(daw.getDeviceSerialNumber(), d->new JSONArray());
+            for (final Msg message : messagesForDAW) {
+                arrayForDevice.add(base64Encoder.encode(message.toByteArray()));
+            }
+        }
+        return Response.ok(streamingOutput(result)).build();
+    }
 
-        return Response.ok().build(); // TODO implement getResourcesData(...)
+    private Iterable<DataAccessWindow> getDataAccessWindowsReadableBySubject(TimeRange timeRange, List<String> serialNumbers) {
+        final Subject subject = SecurityUtils.getSubject();
+        return Util.filter(getRiotService().getDataAccessWindows(serialNumbers, timeRange),
+                daw->{
+                    return subject.isPermitted(daw.getIdentifier().getStringPermission(DefaultActions.READ));
+                });
     }
 }

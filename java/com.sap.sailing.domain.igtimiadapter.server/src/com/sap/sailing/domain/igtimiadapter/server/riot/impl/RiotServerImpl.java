@@ -14,6 +14,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,8 @@ import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
@@ -50,6 +53,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private final Thread communicatorThread;
     private boolean running;
     private final MongoObjectFactory mongoObjectFactory;
+    private final DomainObjectFactory domainObjectFactory;
     
     /**
      * The active connections managed by this server. Heartbeats will be sent into the channels found in the key set on
@@ -81,6 +85,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
+        this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         for (final Device device : domainObjectFactory.getDevices()) {
             devices.put(device.getId(), device);
@@ -264,6 +269,20 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
+    public Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> deviceSerialNumbers, TimeRange timeRange) {
+        final Set<DataAccessWindow> result = new HashSet<>();
+        final Set<String> deviceSerialNumbersAsSet = new HashSet<>();
+        Util.addAll(deviceSerialNumbers, deviceSerialNumbersAsSet);
+        // TODO provide a more efficient implementation if this turns out to become a performance bottleneck, e.g., by keeping the DataAccessWindows in a time-sorted TreeSet
+        for (final DataAccessWindow daw : getDataAccessWindows()) {
+            if (deviceSerialNumbersAsSet.contains(daw.getDeviceSerialNumber()) && timeRange.intersects(daw.getTimeRange())) {
+                result.add(daw);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public void addDataAccessWindow(DataAccessWindow daw) {
         apply(s->s.internalAddDataAccessWindow(daw));
     }
@@ -322,5 +341,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         objectOutputStream.writeObject(devices);
         objectOutputStream.writeObject(resources);
         objectOutputStream.writeObject(dataAccessWindows);
+    }
+
+    @Override
+    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange) {
+        return domainObjectFactory.getMessages(deviceSerialNumber, timeRange);
     }
 }

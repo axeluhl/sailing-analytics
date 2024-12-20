@@ -5,6 +5,7 @@ import java.nio.channels.ServerSocketChannel;
 
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotSer
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.replication.Replicable;
 
 /**
@@ -96,7 +98,12 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     DataAccessWindow getDataAccessWindowById(long id);
     
+    Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> serialNumbers, TimeRange timeRange);
+    
     void addDataAccessWindow(DataAccessWindow daw);
     
     void removeDataAccessWindow(long dawId);
+
+    // TODO clarify what this means in the presence of replication, when run on a Replica
+    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange);
 }
