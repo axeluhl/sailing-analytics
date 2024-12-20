@@ -56,6 +56,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
+import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -100,13 +101,19 @@ public class RiotConnectionImpl implements RiotConnection {
     
     private final RiotServerImpl riotServer;
     
+    /**
+     * Used mainly to store the fixes received durably in the database
+     */
+    private final MongoObjectFactory mongoObjectFactory;
+
     private String deviceGroupToken;
 
     private final ScheduledFuture<?> heartbeatSendingTask;
     
-    RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer) {
+    RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer, MongoObjectFactory mongoObjectFactory) {
         this.socketChannel = socketChannel;
         this.riotServer = riotServer;
+        this.mongoObjectFactory = mongoObjectFactory;
         this.messageLengthBuffer = ByteBuffer.allocate(5);
         heartbeatSendingTask = scheduleHeartbeat();
     }
@@ -174,6 +181,7 @@ public class RiotConnectionImpl implements RiotConnection {
                         messageBuffer.flip();
                         final Msg message = Msg.parseFrom(messageBuffer, protobufExtensionRegistry);       
                         processMessage(message);
+                        storeMessage(message);
                     } catch (InvalidProtocolBufferException e) {
                         logger.log(Level.SEVERE, "Error parsing message from device "+serialNumber, e);
                     }
@@ -182,6 +190,9 @@ public class RiotConnectionImpl implements RiotConnection {
         }
     }
     
+    private void storeMessage(Msg message) {
+        mongoObjectFactory.storeMessage(serialNumber, message);
+    }
 
     private void sendPositiveAuthResponse() throws IOException {
         final AuthResponse response = AuthResponse.newBuilder()

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
 import org.bson.Document;
 
+import com.igtimi.IgtimiStream.Msg;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.ReplaceOptions;
@@ -76,5 +77,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void removeDataAccessWindow(long dawId) {
         final Document filter = new Document(FieldNames.IGTIMI_DEVICES_ID.name(), dawId);
         db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).deleteOne(filter);
+    }
+
+    @Override
+    public void storeMessage(String serialNumber, Msg message) {
+        // TODO Auto-generated method stub
+        
     }
 }

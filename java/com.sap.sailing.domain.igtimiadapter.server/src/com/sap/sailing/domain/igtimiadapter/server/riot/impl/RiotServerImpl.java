@@ -137,7 +137,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                         if (deviceChannel != null) { // may be null because the server socket is in non-blocking mode
                             deviceChannel.configureBlocking(false);
                             deviceChannel.register(socketSelector, SelectionKey.OP_READ);
-                            connections.put(deviceChannel, new RiotConnectionImpl(deviceChannel, this));
+                            connections.put(deviceChannel, new RiotConnectionImpl(deviceChannel, this, mongoObjectFactory));
                             logger.info("New device connection from "+deviceChannel.getRemoteAddress());
                         }
                     } else if (selectedKey.isReadable()) {
