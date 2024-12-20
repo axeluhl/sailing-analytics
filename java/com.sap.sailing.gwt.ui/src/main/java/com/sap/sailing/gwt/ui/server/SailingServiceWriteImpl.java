@@ -223,10 +223,8 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -2094,7 +2092,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
@@ -2116,21 +2113,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             }
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
-        for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-            // filter account based on used permissions to read account:
-            if (getSecurityService().hasCurrentUserReadPermission(account)) {
-                IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-                Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces,
-                        correctByDeclination);
-                for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
-                    RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
-                    Integer i = numberOfWindFixesImportedPerRace.get(key);
-                    if (i == null) {
-                        i = 0;
-                    }
-                    numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
-                }
+        final IgtimiConnection conn = createIgtimiConnection();
+        // filter account based on used permissions to read account:
+        Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
+        for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
+            RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
+            Integer i = numberOfWindFixesImportedPerRace.get(key);
+            if (i == null) {
+                i = 0;
             }
+            numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
         }
         for (final TrackedRace trackedRace : trackedRaces) {
             // update polar sheets:

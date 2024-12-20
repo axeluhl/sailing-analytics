@@ -4,8 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -16,18 +14,8 @@ import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.ExtensionRegistry;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiAPI.Token;
-import com.igtimi.IgtimiData.ApparentWindAngle;
-import com.igtimi.IgtimiData.ApparentWindSpeed;
-import com.igtimi.IgtimiData.CourseOverGround;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiData.DataMsg;
-import com.igtimi.IgtimiData.DataPoint;
-import com.igtimi.IgtimiData.GNSS_Position;
-import com.igtimi.IgtimiData.GNSS_Quality;
-import com.igtimi.IgtimiData.GNSS_Sat_Count;
-import com.igtimi.IgtimiData.Heading;
-import com.igtimi.IgtimiData.HeadingMagnetic;
-import com.igtimi.IgtimiData.SpeedOverGround;
 import com.igtimi.IgtimiDevice.DeviceCommand;
 import com.igtimi.IgtimiDevice.DeviceManagement;
 import com.igtimi.IgtimiDevice.DeviceManagementRequest;
@@ -37,30 +25,10 @@ import com.igtimi.IgtimiStream.Authentication.AuthResponse;
 import com.igtimi.IgtimiStream.ChannelManagement;
 import com.igtimi.IgtimiStream.Msg;
 import com.igtimi.IgtimiStream.ServerDisconnecting;
-import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
-import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
-import com.sap.sailing.domain.igtimiadapter.Sensor;
-import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
-import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
-import com.sap.sailing.domain.igtimiadapter.datatypes.BatteryLevel;
-import com.sap.sailing.domain.igtimiadapter.datatypes.COG;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.datatypes.GpsAltitude;
-import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
-import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualityHdop;
-import com.sap.sailing.domain.igtimiadapter.datatypes.GpsQualitySatCount;
-import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
-import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Log;
-import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class RiotConnectionImpl implements RiotConnection {
@@ -69,6 +37,8 @@ public class RiotConnectionImpl implements RiotConnection {
     private final static ExtensionRegistry protobufExtensionRegistry = ExtensionRegistry.newInstance();
     private String serialNumber;
 
+    private String deviceGroupToken;
+    
     /**
      * The {@code varint32} indicating the length of the next protobuf message in bytes is read into
      * this buffer. The buffer is sized to five bytes which is the maximum length a {@code varint32}
@@ -106,8 +76,6 @@ public class RiotConnectionImpl implements RiotConnection {
      * Used mainly to store the fixes received durably in the database
      */
     private final MongoObjectFactory mongoObjectFactory;
-
-    private String deviceGroupToken;
 
     private final ScheduledFuture<?> heartbeatSendingTask;
     
@@ -181,7 +149,8 @@ public class RiotConnectionImpl implements RiotConnection {
                     try {
                         messageBuffer.flip();
                         final Msg message = Msg.parseFrom(messageBuffer, protobufExtensionRegistry);       
-                        processMessage(message);
+                        processMessage(message); // extract device serial number and device group token and send auth response for auth request
+                        riotServer.notifyListeners(message);
                         storeMessage(message);
                     } catch (InvalidProtocolBufferException e) {
                         logger.log(Level.SEVERE, "Error parsing message from device "+serialNumber, e);
@@ -220,8 +189,12 @@ public class RiotConnectionImpl implements RiotConnection {
         socketChannel.write(buf);
     }
     
+    /**
+     * Extracts the {@link #serialNumber} and the {@link #deviceGroupToken} from any message received. Furthermore, if
+     * an authentication request with a device group token is found, a positive authentication response is sent back to
+     * the client.
+     */
     private void processMessage(Msg message) {
-        final List<Fix> fixes = new ArrayList<>(); // the fixes extracted from the message
         MsgVisitor.accept(message, new MsgVisitor() {
             @Override
             public void handleDeviceManagement(DeviceManagement deviceManagement) {
@@ -232,78 +205,6 @@ public class RiotConnectionImpl implements RiotConnection {
             public void handleData(Data data) {
                 for (final DataMsg dataMsg : data.getDataList()) {
                     serialNumber = dataMsg.getSerialNumber();
-                    for (final DataPoint dataPoint : dataMsg.getDataList()) {
-                        DataPointVisitor.accept(dataPoint, new DataPointVisitor<Void>() {
-                            @Override
-                            public Void handleAwa(ApparentWindAngle awa) {
-                                fixes.add(new AWA(TimePoint.of(awa.getTimestamp()), getSensor(), new DegreeBearingImpl(awa.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleAws(ApparentWindSpeed aws) {
-                                fixes.add(new AWS(TimePoint.of(aws.getTimestamp()), getSensor(), new KilometersPerHourSpeedImpl(aws.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleCog(CourseOverGround cog) {
-                                fixes.add(new COG(TimePoint.of(cog.getTimestamp()), getSensor(), new DegreeBearingImpl(cog.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleHdg(Heading hdg) {
-                                fixes.add(new HDG(TimePoint.of(hdg.getTimestamp()), getSensor(), new DegreeBearingImpl(hdg.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleHdgm(HeadingMagnetic hdgm) {
-                                fixes.add(new HDGM(TimePoint.of(hdgm.getTimestamp()), getSensor(), new DegreeBearingImpl(hdgm.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handlePos(GNSS_Position pos) {
-                                final Sensor sensor = getSensor();
-                                fixes.add(new GpsLatLong(TimePoint.of(pos.getTimestamp()), sensor, new DegreePosition(pos.getLatitude(), pos.getLongitude())));
-                                fixes.add(new GpsAltitude(TimePoint.of(pos.getTimestamp()), sensor, new MeterDistance(pos.getAltitude())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleSatq(GNSS_Quality hdop) {
-                                fixes.add(new GpsQualityHdop(TimePoint.of(hdop.getTimestamp()), getSensor(), new MeterDistance(hdop.getValue())));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleSatc(GNSS_Sat_Count satCount) {
-                                fixes.add(new GpsQualitySatCount(TimePoint.of(satCount.getTimestamp()), getSensor(), satCount.getValue()));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleNum(com.igtimi.IgtimiData.Number num) {
-                                // This is expected to represent the battery state of charge (SOC) in percent
-                                fixes.add(new BatteryLevel(TimePoint.of(num.getTimestamp()), getSensor(), num.getValue()));
-                                return null;
-                            }
-
-                            @Override
-                            public Void handleSog(SpeedOverGround sog) {
-                                fixes.add(new SOG(TimePoint.of(sog.getTimestamp()), getSensor(), new KilometersPerHourSpeedImpl(sog.getValue())));
-                                return null;
-                            }
-                            
-                            @Override
-                            public Void handleLog(com.igtimi.IgtimiData.Log log) {
-                                fixes.add(new Log(TimePoint.of(log.getTimestamp()), getSensor(), log.getMessage(), log.getPriority()));
-                                return null;
-                            }
-                        });
-                    }
                 }
             }
             
@@ -333,11 +234,6 @@ public class RiotConnectionImpl implements RiotConnection {
                 logger.info("Received AckResponse from device "+getSerialNumber()+": "+ackResponse);
             }
         });
-        riotServer.notifyListeners(fixes);
-    }
-
-    private Sensor getSensor() {
-        return Sensor.create(getSerialNumber(), /* sub-device */ 0);
     }
 
     private void sendHeartbeat() {

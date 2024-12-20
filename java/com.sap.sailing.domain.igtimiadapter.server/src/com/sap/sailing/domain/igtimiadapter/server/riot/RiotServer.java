@@ -61,9 +61,9 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
         return new RiotServerImpl(domainObjectFactory, mongoObjectFactory);
     }
     
-    void addListener(BulkFixReceiver listener);
+    void addListener(RiotMessageListener listener);
     
-    void removeListener(BulkFixReceiver listener);
+    void removeListener(RiotMessageListener listener);
 
     /**
      * Stops this server and frees its socket resources. If the server is not running, e.g., because it was already

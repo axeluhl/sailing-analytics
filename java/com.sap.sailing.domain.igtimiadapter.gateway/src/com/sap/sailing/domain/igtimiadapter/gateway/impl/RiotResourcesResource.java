@@ -28,6 +28,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.impl.ResourceDeserializer;
@@ -86,10 +87,14 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     @Path(DATA)
     public Response getResourcesData(@Context UriInfo ui) {
         final MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
-        final String startTime = queryParams.getFirst("start_time");
-        final String endTime = queryParams.getFirst("end_time");
+        final String startTimeString = queryParams.getFirst("start_time");
+        final TimePoint startTime = startTimeString == null ? null : TimePoint.of(Long.valueOf(startTimeString));
+        final String endTimeString = queryParams.getFirst("end_time");
+        final TimePoint endTime = endTimeString == null ? null : TimePoint.of(Long.valueOf(endTimeString));
         final List<String> serialNumbers = queryParams.get("serial_numbers[]");
-        final Boolean restoreArchives = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;
+        // The "restore_archives" parameter was part of the original Riot API, but we currently don't implement any archiving
+        // procedure for the resource messages, so we ignore it.
+        // final Boolean restoreArchives = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;
         final Map<Type, Double> typesAndCompression = new HashMap<>();
         for (final Type type : Type.values()) {
             final String typesAndCompressionKey = "types["+type.getCode()+"]";
@@ -97,6 +102,13 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 typesAndCompression.put(type, Double.valueOf(queryParams.getFirst(typesAndCompressionKey)));
             }
         }
+        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(startTime, endTime, serialNumbers);
+        if (SecurityUtils.getSubject().isPermitted(resource.getIdentifier().getStringPermission(DefaultActions.READ))
+                && (serialNumbers.isEmpty() || serialNumbers.contains(resource.getDeviceSerialNumber()))
+                && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
+                                    endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(
+                                            resource.getTimeRange())) {
+
         return Response.ok().build(); // TODO implement getResourcesData(...)
     }
 }

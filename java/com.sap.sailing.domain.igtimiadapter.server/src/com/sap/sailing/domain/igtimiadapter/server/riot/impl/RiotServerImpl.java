@@ -22,16 +22,16 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
-import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
@@ -44,7 +44,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private final ConcurrentMap<Long, Resource> resources;
     private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
     private final ConcurrentMap<Long, Device> devices;
-    private final Set<BulkFixReceiver> listeners;
+    private final Set<RiotMessageListener> listeners;
     private final Selector socketSelector;
     private final ServerSocketChannel serverSocketChannel;
     private final Thread communicatorThread;
@@ -170,18 +170,18 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public void addListener(BulkFixReceiver listener) {
+    public void addListener(RiotMessageListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeListener(BulkFixReceiver listener) {
+    public void removeListener(RiotMessageListener listener) {
         listeners.remove(listener);
     }
     
-    void notifyListeners(Iterable<Fix> fixes) {
-        for (final BulkFixReceiver listener : listeners) {
-            listener.received(fixes);
+    void notifyListeners(Msg message) {
+        for (final RiotMessageListener listener : listeners) {
+            listener.onMessage(message);
         }
     }
 

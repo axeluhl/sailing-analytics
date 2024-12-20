@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.websocket;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -22,6 +23,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
@@ -186,16 +188,13 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                 if (messageCount % LOG_EVERY_SO_MANY_MESSAGES == 0) {
                     logger.info("Received another "+LOG_EVERY_SO_MANY_MESSAGES+" Igtimi messages. Last message was: "+message);
                 }
-                List<Fix> fixes = new ArrayList<>();
+                final List<Fix> fixes = new ArrayList<>();
                 try {
-                    JSONArray jsonArray = (JSONArray) new JSONParser().parse(message);
-                    for (Object o : jsonArray) {
+                    final JSONArray jsonArray = (JSONArray) new JSONParser().parse(message);
+                    for (final Object o : jsonArray) {
                         for (final Fix fix : fixFactory.createFixes((JSONObject) o)) {
                             fixes.add(fix);
-                            if (!Util.contains(deviceIds, fix.getSensor().getDeviceSerialNumber())) {
-                                logger.warning("Received fix "+fix+" in message "+message+" which is from device "+fix.getSensor().getDeviceSerialNumber()+
-                                        " which this connection is not configured for: "+deviceIds);
-                            }
+                            warnUnknownDeviceId(message, fix);
                         }
                     }
                     logger.finest(()->"Received fixes"+fixes+" for "+this);
@@ -211,6 +210,20 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.info("Received server timestamp "+igtimiServerTimepoint);
                     notifyAll();
                 }
+            }
+        }
+        
+        @Override
+        public void onWebSocketBinary(byte[] payload, int offset, int len) {
+            final ByteBuffer bb = ByteBuffer.wrap(payload, offset, len);
+            try {
+                final Msg msg = Msg.parseFrom(bb);
+                final Iterable<Fix> fixes = fixFactory.createFixes(msg);
+                fixes.forEach(fix->warnUnknownDeviceId(msg, fix));
+                notifyListeners(fixes);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error trying to parse or send bytes received on web socket", e);
+                throw new RuntimeException(e);
             }
         }
         
@@ -242,7 +255,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         listeners.remove(listener);
     }
 
-    private void notifyListeners(List<Fix> fixes) {
+    private void notifyListeners(Iterable<Fix> fixes) {
         for (BulkFixReceiver listener : listeners.keySet()) {
             try {
                 listener.received(fixes);
@@ -333,5 +346,12 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     @Override
     public InetSocketAddress getRemoteAddress() {
         return getSession() == null ? null : getSession().getRemoteAddress();
+    }
+
+    private void warnUnknownDeviceId(Object message, final Fix fix) {
+        if (!Util.contains(deviceIds, fix.getSensor().getDeviceSerialNumber())) {
+            logger.warning("Received fix "+fix+" in message "+message+" which is from device "+fix.getSensor().getDeviceSerialNumber()+
+                    " which this connection is not configured for: "+deviceIds);
+        }
     }
 }

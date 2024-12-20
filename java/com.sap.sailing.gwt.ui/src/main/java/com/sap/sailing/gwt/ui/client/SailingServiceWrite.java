@@ -244,8 +244,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeIgtimiDevice(String serialNumber);
 
-    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
-
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 
     boolean removeDeviceConfiguration(UUID deviceConfigurationId);
