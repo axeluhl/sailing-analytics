@@ -20,6 +20,9 @@ import com.sap.sse.security.shared.impl.User;
  *
  */
 public interface RiotWebsocketHandler {
+    /**
+     * Never {@code null}; may be the "<all>" user representing anonymous users
+     */
     User getAuthenticatedUser();
     
     Set<String> getDeviceSerialNumbers();

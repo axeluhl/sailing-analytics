@@ -90,6 +90,8 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     Iterable<Device> getDevices();
     
     Device getDeviceById(long id);
+
+    Device getDeviceBySerialNumber(String deviceSerialNumber);
     
     void addDevice(Device device);
     

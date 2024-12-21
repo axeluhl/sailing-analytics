@@ -24,12 +24,19 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.igtimi.IgtimiData.DataMsg;
+import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiDevice.DeviceManagement;
+import com.igtimi.IgtimiDevice.DeviceManagementResponse;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.DataPointTimePointExtractor;
+import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.Activator;
 import com.sap.sailing.domain.igtimiadapter.server.RiotWebsocketHandler;
 import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
@@ -37,10 +44,16 @@ import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -50,6 +63,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private final ConcurrentMap<Long, Resource> resources;
     private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
     private final ConcurrentMap<Long, Device> devices;
+    private final ConcurrentMap<String, Device> devicesBySerialNumber;
     private final Set<RiotMessageListener> listeners;
     private final Selector socketSelector;
     private final ServerSocketChannel serverSocketChannel;
@@ -88,12 +102,14 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.resources = new ConcurrentHashMap<>();
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
+        this.devicesBySerialNumber = new ConcurrentHashMap<>();
         this.connections = new ConcurrentHashMap<>();
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        this.liveWebSocketConnections = new HashSet<>();
+        this.liveWebSocketConnections = ConcurrentHashMap.newKeySet();
         for (final Device device : domainObjectFactory.getDevices()) {
             devices.put(device.getId(), device);
+            devicesBySerialNumber.put(device.getSerialNumber(), device);
         }
         for (final Resource resource : domainObjectFactory.getResources()) {
             resources.put(resource.getId(), resource);
@@ -201,10 +217,87 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      *            the serial number of the device from which the message originated
      */
     void notifyListeners(Msg message, String deviceSerialNumber) {
+        if (deviceSerialNumber != null) {
+            forwardMessageToEligibleWebSocketClients(message, deviceSerialNumber);
+        }
         for (final RiotMessageListener listener : listeners) {
             listener.onMessage(message);
         }
-        // TODO forward to live web socket connections
+    }
+
+    /**
+     * @param deviceSerialNumber must not be {@code null}
+     */
+    private void forwardMessageToEligibleWebSocketClients(Msg message, String deviceSerialNumber) {
+        final Device device = getDeviceBySerialNumber(deviceSerialNumber);
+        if (device == null) {
+            logger.info("Received message from unknown devices "+deviceSerialNumber);
+            // TODO should we use this as the trigger to *create* the device?
+        } else {
+            final byte[] messageAsBytes = message.toByteArray();
+            final SecurityService securityService = Activator.getInstance().getSecurityService();
+            final TimeRange messageDataTimeRange = getTimeRange(message);
+            final Iterable<DataAccessWindow> daws = getDataAccessWindows(Collections.singleton(deviceSerialNumber), messageDataTimeRange);
+            for (final RiotWebsocketHandler webSocketClient : liveWebSocketConnections) {
+                final User user = webSocketClient.getAuthenticatedUser();
+                final OwnershipAnnotation deviceOwnership = securityService.getOwnership(device.getIdentifier());
+                final AccessControlListAnnotation deviceAccessControlList = securityService.getAccessControlList(device.getIdentifier());
+                if (!Util.isEmpty(Util.filter(daws, daw->{
+                    final OwnershipAnnotation dawOownership = securityService.getOwnership(daw.getIdentifier());
+                    final AccessControlListAnnotation dawAccessControlList = securityService.getAccessControlList(daw.getIdentifier());
+                    return PermissionChecker.isPermitted(
+                            daw.getIdentifier().getPermission(DefaultActions.READ),
+                            user, securityService.getAllUser(),
+                            dawOownership==null?null:dawOownership.getAnnotation(),
+                            dawAccessControlList==null?null:dawAccessControlList.getAnnotation());
+                }))
+                && PermissionChecker.isPermitted(
+                        device.getIdentifier().getPermission(DefaultActions.READ),
+                        user, securityService.getAllUser(),
+                        deviceOwnership==null?null:deviceOwnership.getAnnotation(),
+                        deviceAccessControlList==null?null:deviceAccessControlList.getAnnotation()) ) {
+                    webSocketClient.sendBytesByFuture(ByteBuffer.wrap(messageAsBytes));
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a time range spanning the time point of the first and the last of the {@link DataPoint}s inside
+     * 
+     * @return {@code null} in case there is nothing inside the message that specifies a time point, otherwise a time
+     *         range that includes the time points of all elements from the message that have a time stamp and that
+     *         cannot be made any smaller while still containing all those elements.
+     */
+    private TimeRange getTimeRange(Msg message) {
+        TimePoint from = null;
+        TimePoint to = null;
+        if (message.hasData()) {
+            for (final DataMsg data : message.getData().getDataList()) {
+                for (final DataPoint dataPoint : data.getDataList()) {
+                    final TimePoint dataPointTimePoint = DataPointVisitor.accept(dataPoint, new DataPointTimePointExtractor());
+                    if (from==null || dataPointTimePoint.before(from)) {
+                        from = dataPointTimePoint;
+                    }
+                    if (to==null || dataPointTimePoint.after(to)) {
+                        to = dataPointTimePoint;
+                    }
+                }
+            }
+        } else if (message.hasDeviceManagement()) {
+            final DeviceManagement deviceManagement = message.getDeviceManagement();
+            if (deviceManagement.hasResponse()) {
+                final DeviceManagementResponse response = deviceManagement.getResponse();
+                final TimePoint timePoint = TimePoint.of(response.getTimestamp());
+                if (from==null || timePoint.before(from)) {
+                    from = timePoint;
+                }
+                if (to==null || timePoint.after(to)) {
+                    to = timePoint;
+                }
+            }
+        }
+        return TimeRange.create(from, to==null?null:to.plus(Duration.ONE_MILLISECOND));
     }
 
     @Override
@@ -216,6 +309,11 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Device getDeviceById(long id) {
         return devices.get(id);
     }
+    
+    @Override
+    public Device getDeviceBySerialNumber(String deviceSerialNumber) {
+        return devicesBySerialNumber.get(deviceSerialNumber);
+    }
 
     @Override
     public void addDevice(Device device) {
@@ -225,6 +323,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalAddDevice(Device device) {
         devices.put(device.getId(), device);
+        devicesBySerialNumber.put(device.getSerialNumber(), device);
         mongoObjectFactory.storeDevice(device);
         return null;
     }
@@ -236,7 +335,8 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     
     @Override
     public Void internalRemoveDevice(long deviceId) {
-        devices.remove(deviceId);
+        final Device device = devices.remove(deviceId);
+        devicesBySerialNumber.remove(device.getSerialNumber());
         mongoObjectFactory.removeDevice(deviceId);
         return null;
     }
@@ -329,6 +429,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      */
     public void clear() {
         devices.clear();
+        devicesBySerialNumber.clear();
         resources.clear();
         dataAccessWindows.clear();
         connections.clear();
@@ -352,6 +453,9 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
         devices.putAll((Map<Long, Device>) is.readObject());
+        for (final Device device : devices.values()) {
+            devicesBySerialNumber.put(device.getSerialNumber(), device);
+        }
         resources.putAll((Map<Long, Resource>) is.readObject());
         dataAccessWindows.putAll((Map<Long, DataAccessWindow>) is.readObject());
     }

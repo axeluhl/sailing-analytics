@@ -48,7 +48,7 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
-        logger.info("Connect with session "+session);
+        logger.info("Connect with session from "+session.getRemote());
         this.session = session;
         final UpgradeRequest upgradeRequest = session.getUpgradeRequest();
         final HttpServletRequest requestWrapper = new UpgradeRequestAsHttpServletRequestWrapper(upgradeRequest);
@@ -69,7 +69,8 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
         final Subject subject = SecurityUtils.getSubject();
         logger.info("Subject: "+subject+" with principal "+subject.getPrincipal());
         final Activator activator = Activator.getInstance();
-        authenticatedUser = activator.getSecurityService().getCurrentUser();
+        authenticatedUser = activator.getSecurityService().getCurrentUser() == null ?
+                activator.getSecurityService().getAllUser() : activator.getSecurityService().getCurrentUser();
         activator.getRiotServer().addWebSocketClient(this);
     }
 
@@ -135,5 +136,13 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
     @Override
     public void flush() throws IOException {
         session.getRemote().flush();
+    }
+    
+    @Override
+    public String toString() {
+        return "Riot web socket for session from "+
+                (session==null?"unknown target ":session.getRemote())+
+                ", subcribed to devices "+getDeviceSerialNumbers()+
+                " and with authenticated user "+getAuthenticatedUser();
     }
 }

@@ -31,7 +31,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotDataAccessWindowsResource.DATA_ACCESS_WINDOWS)
 public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
@@ -50,7 +49,7 @@ public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
         result.put("data_access_windows", dawsJson);
         for (final DataAccessWindow daw : riot.getDataAccessWindows()) {
             if (SecurityUtils.getSubject().isPermitted(daw.getIdentifier().getStringPermission(DefaultActions.READ))
-                    && serialNumbers.contains(daw.getDeviceSerialNumber())
+                    && (serialNumbers.isEmpty() || serialNumbers.contains(daw.getDeviceSerialNumber()))
                     && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
                                         endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(daw.getTimeRange())) {
                 final JSONObject dataAccessWindowJson = new JSONObject();
@@ -70,7 +69,7 @@ public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
         final JSONObject dawJson = (JSONObject) new JSONParser().parse(new InputStreamReader(inputStream));
         final DataAccessWindow daw = new DataAccessWindowDeserializer().createDataAccessWindowFromJson(dawJson);
         securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
-                new TypeRelativeObjectIdentifier(Long.toString(daw.getId())), daw.getName(),
+                daw.getIdentifier().getTypeRelativeObjectIdentifier(), daw.getName(),
                 ()->riot.addDataAccessWindow(daw));
         return Response.ok().build();
     }

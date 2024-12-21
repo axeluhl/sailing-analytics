@@ -19,13 +19,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.impl.DeviceDeserializer;
 import com.sap.sailing.domain.igtimiadapter.impl.DeviceSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotDevicesResource.DEVICES)
 public class RiotDevicesResource extends AbstractRiotServerResource {
@@ -55,8 +53,9 @@ public class RiotDevicesResource extends AbstractRiotServerResource {
         final InputStream inputStream = request.getInputStream();
         final JSONObject deviceJson = (JSONObject) new JSONParser().parse(new InputStreamReader(inputStream));
         final Device device = new DeviceDeserializer().createDeviceFromJson(deviceJson);
-        securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.IGTIMI_DEVICE, new TypeRelativeObjectIdentifier(device.getSerialNumber()), device.getName(),
-                ()->riot.addDevice(device));
+        securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                device.getPermissionType(), device.getIdentifier().getTypeRelativeObjectIdentifier(),
+                device.getName(), ()->riot.addDevice(device));
         return Response.ok().build();
     }
 }

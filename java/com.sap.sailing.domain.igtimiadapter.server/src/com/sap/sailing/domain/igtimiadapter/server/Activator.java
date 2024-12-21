@@ -37,7 +37,14 @@ public class Activator implements BundleActivator {
     private static final String RIOT_PORT_DEFAULT = "6000";
 
     private static BundleContext context;
+
+    private static Activator instance;
     private RiotServer riotServer;
+    private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
+    
+    public Activator() {
+        instance = this;
+    }
 
     static BundleContext getContext() {
         return context;
@@ -49,6 +56,7 @@ public class Activator implements BundleActivator {
         final int riotPort = Integer.valueOf(riotPortAsString);
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+        // TODO should we really start the RiotServer if no port is specified? We could interpret no specified port as a hint to not start the server
         final RiotServerImpl riotServerImpl = new RiotServerImpl(riotPort, domainObjectFactory, mongoObjectFactory);
         riotServer = riotServerImpl;
         context.registerService(RiotServer.class, riotServer, null);
@@ -62,7 +70,7 @@ public class Activator implements BundleActivator {
             }
         }, null);
         new Thread(() -> {
-            final FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
+            securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
             try {
                 final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
                 for (Resource resource : riotServer.getResources()) {
@@ -88,5 +96,17 @@ public class Activator implements BundleActivator {
 
     public void stop(BundleContext bundleContext) throws Exception {
         Activator.context = null;
+    }
+    
+    public static Activator getInstance() {
+        return instance;
+    }
+    
+    public RiotServer getRiotServer() {
+        return riotServer;
+    }
+    
+    public SecurityService getSecurityService() {
+        return securityServiceServiceTracker.getService();
     }
 }
