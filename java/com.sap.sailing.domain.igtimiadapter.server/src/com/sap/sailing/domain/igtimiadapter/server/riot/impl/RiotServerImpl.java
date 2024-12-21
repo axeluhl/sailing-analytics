@@ -14,6 +14,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
@@ -55,6 +57,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private boolean running;
     private final MongoObjectFactory mongoObjectFactory;
     private final DomainObjectFactory domainObjectFactory;
+    private final Set<RiotWebsocketHandler> liveWebSocketConnections;
     
     /**
      * The active connections managed by this server. Heartbeats will be sent into the channels found in the key set on
@@ -88,6 +91,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.connections = new ConcurrentHashMap<>();
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
+        this.liveWebSocketConnections = new HashSet<>();
         for (final Device device : domainObjectFactory.getDevices()) {
             devices.put(device.getId(), device);
         }
@@ -185,10 +189,22 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         listeners.remove(listener);
     }
     
-    void notifyListeners(Msg message) {
+    /**
+     * Forwards the {@code message} to all {@link #addListener(RiotMessageListener) registered} listeners and sends it
+     * to all {@link #liveWebSocketConnections} that are authorized to {@link DefaultActions#READ READ} from the
+     * {@link Device} from which the message originated and for which a READable {@link DataAccessWindow} exists for
+     * the web socket connection's authenticated user for the time points of the data points in the message.
+     * 
+     * @param message
+     *            the message received from the device
+     * @param deviceSerialNumber
+     *            the serial number of the device from which the message originated
+     */
+    void notifyListeners(Msg message, String deviceSerialNumber) {
         for (final RiotMessageListener listener : listeners) {
             listener.onMessage(message);
         }
+        // TODO forward to live web socket connections
     }
 
     @Override
@@ -331,17 +347,20 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         }; // use anonymous inner class in this class loader to see all that this class sees
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
-        // TODO Auto-generated method stub
+        devices.putAll((Map<Long, Device>) is.readObject());
+        resources.putAll((Map<Long, Resource>) is.readObject());
+        dataAccessWindows.putAll((Map<Long, DataAccessWindow>) is.readObject());
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
-        objectOutputStream.writeObject(devices);
-        objectOutputStream.writeObject(resources);
-        objectOutputStream.writeObject(dataAccessWindows);
+        objectOutputStream.writeObject(new HashMap<>(devices));
+        objectOutputStream.writeObject(new HashMap<>(resources));
+        objectOutputStream.writeObject(new HashMap<>(dataAccessWindows));
     }
 
     @Override
@@ -351,11 +370,11 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler) {
-        
+        liveWebSocketConnections.add(riotWebsocketHandler);
     }
     
     @Override
     public void removeWebSocketClient(RiotWebsocketHandler riotWebsocketHandler) {
-        
+        liveWebSocketConnections.remove(riotWebsocketHandler);
     }
 }

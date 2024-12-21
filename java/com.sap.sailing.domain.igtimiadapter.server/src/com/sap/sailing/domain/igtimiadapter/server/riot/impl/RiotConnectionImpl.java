@@ -150,7 +150,7 @@ public class RiotConnectionImpl implements RiotConnection {
                         messageBuffer.flip();
                         final Msg message = Msg.parseFrom(messageBuffer, protobufExtensionRegistry);       
                         processMessage(message); // extract device serial number and device group token and send auth response for auth request
-                        riotServer.notifyListeners(message);
+                        riotServer.notifyListeners(message, serialNumber);
                         storeMessage(message);
                     } catch (InvalidProtocolBufferException e) {
                         logger.log(Level.SEVERE, "Error parsing message from device "+serialNumber, e);
