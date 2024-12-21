@@ -29,6 +29,7 @@ import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.RiotWebsocketHandler;
 import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
@@ -346,5 +347,15 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange) {
         return domainObjectFactory.getMessages(deviceSerialNumber, timeRange);
+    }
+
+    @Override
+    public void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler) {
+        
+    }
+    
+    @Override
+    public void removeWebSocketClient(RiotWebsocketHandler riotWebsocketHandler) {
+        
     }
 }

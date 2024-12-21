@@ -14,6 +14,7 @@ import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.igtimiadapter.server.RiotWebsocketHandler;
 import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
@@ -106,4 +107,8 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
 
     // TODO clarify what this means in the presence of replication, when run on a Replica
     Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange);
+
+    void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
+
+    void removeWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
 }

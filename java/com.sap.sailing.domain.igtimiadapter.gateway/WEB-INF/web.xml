@@ -42,7 +42,7 @@
     </filter-mapping>
 
 	<servlet>
-		<servlet-name>Igtimi Oauth Callback REST API</servlet-name>
+		<servlet-name>Igtimi Riot REST API</servlet-name>
 		<servlet-class>com.sap.sailing.domain.igtimiadapter.gateway.impl.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>
@@ -55,7 +55,17 @@
     	<load-on-startup>1</load-on-startup>
    	</servlet>
 	<servlet-mapping>
-    	<servlet-name>Igtimi Oauth Callback REST API</servlet-name>
+    	<servlet-name>Igtimi Riot REST API</servlet-name>
     	<url-pattern>/*</url-pattern>
   	</servlet-mapping>
+    
+    <servlet>
+        <servlet-name>Igtimi Websocket Server</servlet-name>
+        <servlet-class>com.sap.sailing.domain.igtimiadapter.gateway.impl.websocket.RiotWebsocketServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Igtimi Websocket Server</servlet-name>
+        <url-pattern>/websocket/*</url-pattern>
+    </servlet-mapping>
 </web-app>

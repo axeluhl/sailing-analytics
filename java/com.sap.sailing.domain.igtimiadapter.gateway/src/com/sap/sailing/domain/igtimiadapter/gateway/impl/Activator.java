@@ -1,9 +1,5 @@
 package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 
-import java.io.IOException;
-
-import org.apache.http.client.ClientProtocolException;
-import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -25,7 +21,7 @@ public class Activator implements BundleActivator {
     private FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
     private ServiceTracker<RiotServer, RiotServer> riotServerTracker;
     
-    public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+    public Activator() {
     }
 
     @Override
@@ -35,7 +31,7 @@ public class Activator implements BundleActivator {
         riotServerTracker = ServiceTrackerFactory.createAndOpen(context, RiotServer.class);
     }
     
-    public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+    public static Activator getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new Activator(); // probably non-OSGi case, as in test execution
         }
