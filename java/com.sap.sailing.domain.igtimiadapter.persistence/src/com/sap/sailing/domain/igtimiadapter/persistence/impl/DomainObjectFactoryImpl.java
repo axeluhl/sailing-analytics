@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +14,7 @@ import org.bson.types.Binary;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiData.DataMsg;
+import com.igtimi.IgtimiData.DataMsg.Builder;
 import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
@@ -91,7 +94,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange) {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) {
         final Document query = new Document();
         appendTimeRangeQuery(query, timeRange);
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
@@ -99,7 +102,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return Util.map(queryResult,
                 doc->{
                     try {
-                        return Msg.parseFrom(doc.get(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name(), Binary.class).getData());
+                        final Msg msg = Msg.parseFrom(doc.get(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name(), Binary.class).getData());
+                        return filterMessageForDataCases(msg, dataCases);
                     } catch (InvalidProtocolBufferException e) {
                         logger.log(Level.SEVERE, "Error trying to parse an Igtimi message for device "+deviceSerialNumber, e);
                         return null;
@@ -107,21 +111,44 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 });
     }
     
+    private Msg filterMessageForDataCases(Msg msg, Set<DataCase> dataCases) {
+        final com.igtimi.IgtimiStream.Msg.Builder messageBuilder = msg.toBuilder();
+        final List<Builder> dataMsgBuilderList = messageBuilder.getDataBuilder().getDataBuilderList();
+        for (final Builder b : dataMsgBuilderList) {
+            final List<com.igtimi.IgtimiData.DataPoint.Builder> dataPointBuilderList = b.getDataBuilderList();
+            for (final Iterator<com.igtimi.IgtimiData.DataPoint.Builder> i=dataPointBuilderList.iterator(); i.hasNext(); ) {
+                final com.igtimi.IgtimiData.DataPoint.Builder dataPointBuilder = i.next();
+                if (!dataCases.contains(dataPointBuilder.getDataCase())) {
+                    i.remove(); // remove those data point builders that have a data case not in dataCases
+                }
+            }
+        }
+        return messageBuilder.build();
+    }
+
     @Override
     public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
         final Document query = new Document();
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
         final Iterable<Document> queryResult = messagesCollection.find(query).sort(Sorts.descending(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name()));
         for (final Document document : queryResult) {
-            final String messageBase64 = document.getString(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name());
-            final Msg msg = Msg.parseFrom(Base64.getDecoder().decode(messageBase64));
+            final Binary messageBinary = (Binary) document.get(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name());
+            final Msg msg = Msg.parseFrom(messageBinary.getData());
             if (msg.hasData()) {
                 final Data data = msg.getData();
-                for (final DataMsg dataMsg : data.getDataList()) {
-                    for (final DataPoint dataPoint : dataMsg.getDataList()) {
+                // iterate in reverse order to find the *last* match
+                for (final ListIterator<DataMsg> i=data.getDataList().listIterator(data.getDataCount()); i.hasPrevious(); ) {
+                    final DataMsg dataMsg = i.previous();
+                    for (final ListIterator<DataPoint> j=dataMsg.getDataList().listIterator(dataMsg.getDataCount()); j.hasPrevious(); ) {
+                        final DataPoint dataPoint = j.previous();
                         if (dataPoint.getDataCase() == dataCase) {
                             // the message has a data point of the type requested by dataCase; return it
-                            return msg;
+                            return Msg.newBuilder().setData(
+                                       Data.newBuilder().addData(
+                                           DataMsg.newBuilder().addData(dataPoint)
+                                           .build())
+                                       .build())
+                                   .build();
                         }
                     }
                 }

@@ -24,8 +24,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiDevice.DeviceManagement;
 import com.igtimi.IgtimiDevice.DeviceManagementResponse;
 import com.igtimi.IgtimiStream.Msg;
@@ -493,10 +495,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange) {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) {
         final Iterable<Msg> result;
         if (getMasterDescriptor() == null) {
-            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange);
+            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases);
         } else {
             // TODO fetch the data from the primary/master "somehow"
             result = Collections.emptySet();
@@ -513,5 +515,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public void removeWebSocketClient(RiotWebsocketHandler riotWebsocketHandler) {
         liveWebSocketConnections.remove(riotWebsocketHandler);
+    }
+
+    @Override
+    public Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
+        return domainObjectFactory.getLatestMessage(serialNumber, dataCase);
     }
 }

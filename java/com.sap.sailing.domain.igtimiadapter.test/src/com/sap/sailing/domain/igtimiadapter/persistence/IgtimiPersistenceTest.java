@@ -101,7 +101,7 @@ public class IgtimiPersistenceTest {
                 .build();
         logger.info("Storing message: "+msg);
         mongoObjectFactory.storeMessage(SERIAL_NUMBER, msg);
-        final Iterable<Msg> result = domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)));
+        final Iterable<Msg> result = domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases);
         final Iterator<Msg> iterator = result.iterator();
         assertTrue(iterator.hasNext());
         final Msg readMsg = iterator.next();
@@ -115,14 +115,14 @@ public class IgtimiPersistenceTest {
         final ApparentWindSpeed aws = dataPoint.getAws();
         assertEquals(AWS, aws.getValue(), 0.000000001);
         // search with a time range *before* the actual message
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE.times(2)), AWS_TIME_POINT.minus(Duration.ONE_MINUTE)))));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE.times(2)), AWS_TIME_POINT.minus(Duration.ONE_MINUTE)), dataCases)));
         // search with a time range *after* the actual message
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.plus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE.times(2))))));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.plus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE.times(2))), dataCases)));
         // search with the wrong device serial number
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER+"-wrong", TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)))));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER+"-wrong", TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases)));
         // search with a time range open at the end
-        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), null))));
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), null), dataCases)));
         // search with a time range open at the start
-        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(null, AWS_TIME_POINT.plus(Duration.ONE_MINUTE)))));
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(null, AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases)));
     }
 }

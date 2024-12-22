@@ -2,9 +2,12 @@ package com.sap.sailing.domain.igtimiadapter.server.riot;
 
 import java.io.IOException;
 import java.nio.channels.ServerSocketChannel;
+import java.util.Set;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -108,9 +111,20 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     void removeDataAccessWindow(long dawId);
 
     // TODO clarify what this means in the presence of replication, when run on a Replica
-    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange);
+    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases);
 
     void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
 
     void removeWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
+
+    /**
+     * From all messages received and recorded from the device identified by {@code serialNumber},
+     * find the last one that contains a {@link DataPoint} which has a {@link DataPoint#getDataCase() data case}
+     * as specified by {@code dataCase}. If no such message can be found, {@code null} is returned.
+     * 
+     * @return {@code null} if no message from the device identified by {@code serialNumber} is found that has
+     * a {@link DataPoint} with {@link DataPoint#getDataCase() data case} {@code dataCase}; otherwise that last
+     * message stripped down to the last data point with the requested data case.
+     */
+    Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException;
 }

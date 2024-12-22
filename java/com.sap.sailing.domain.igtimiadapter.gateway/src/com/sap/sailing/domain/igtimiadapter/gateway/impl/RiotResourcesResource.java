@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -51,6 +54,7 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 public class RiotResourcesResource extends AbstractRiotServerResource {
     protected static final String RESOURCES = "/resources";
     private static final String DATA = "/data";
+    private static final String LATEST = "/latest";
     
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -78,15 +82,22 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     /**
      * Output is the same format as for {@link #getResourcesData(UriInfo)}
      */
+    @Path(DATA+LATEST)
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLatestDatum(
             @QueryParam("serial_numbers[]") Set<String> serialNumbers,
-            @QueryParam("type") int type) {
+            @QueryParam("type") int type) throws InvalidProtocolBufferException {
         final RiotServer riot = Activator.getInstance().getRiotServer();
         final JSONObject result = new JSONObject();
-        // TODO find the last message of type "type" for devices with serialNumbers that the user is allowed to READ
-        // TODO put them into the result object, keyed by the device serial number, as an array of Base64-encoded Msg objects
+        for (final String serialNumber : serialNumbers) {
+            final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));
+            if (lastMessage != null) {
+                final JSONArray singleMessage = new JSONArray();
+                singleMessage.add(Base64.getEncoder().encodeToString(lastMessage.toByteArray()));
+                result.put(serialNumber, singleMessage);
+            }
+        }
         return Response.ok(streamingOutput(result)).build();
     }
 
@@ -123,10 +134,15 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         // procedure for the resource messages, so we ignore it.
         // final Boolean restoreArchives = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;
         final Map<Type, Double> typesAndCompression = new HashMap<>();
-        for (final Type type : Type.values()) {
-            final String typesAndCompressionKey = "types["+type.getCode()+"]";
+        final Set<DataCase> dataCases = new HashSet<>();
+        for (final DataCase dataCase : DataCase.values()) {
+            final String typesAndCompressionKey = "types["+dataCase.getNumber()+"]";
             if (queryParams.containsKey(typesAndCompressionKey)) {
-                typesAndCompression.put(type, Double.valueOf(queryParams.getFirst(typesAndCompressionKey)));
+                dataCases.add(dataCase);
+                final Type type;
+                if ((type = Type.valueOf(dataCase.getNumber())) != null) {
+                    typesAndCompression.put(type, Double.valueOf(queryParams.getFirst(typesAndCompressionKey)));
+                }
             }
         }
         final TimeRange requestedTimeRange = TimeRange.create(startTime, endTime);
@@ -136,8 +152,7 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final Encoder base64Encoder = Base64.getEncoder();
         for (final DataAccessWindow daw : daws) {
             final TimeRange timeRangeIntersectionBetweenRequestAndDAW = requestedTimeRange.intersection(daw.getTimeRange());
-            final Iterable<Msg> messagesForDAW = getRiotService().getMessages(daw.getDeviceSerialNumber(), timeRangeIntersectionBetweenRequestAndDAW);
-            // TODO filter by typesAndCompression
+            final Iterable<Msg> messagesForDAW = getRiotService().getMessages(daw.getDeviceSerialNumber(), timeRangeIntersectionBetweenRequestAndDAW, dataCases);
             final JSONArray arrayForDevice = (JSONArray) result.computeIfAbsent(daw.getDeviceSerialNumber(), d->new JSONArray());
             for (final Msg message : messagesForDAW) {
                 arrayForDevice.add(new String(base64Encoder.encode(message.toByteArray())));
