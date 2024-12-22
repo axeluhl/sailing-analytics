@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletRequest;
@@ -31,6 +34,7 @@ import com.sap.sailing.domain.igtimiadapter.gateway.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.server.RiotWebsocketHandler;
 import com.sap.sse.security.BearerTokenOrBasicOrFormAuthenticationFilter;
 import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.util.ThreadPoolUtil;
 
 @WebSocket
 public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
@@ -41,6 +45,8 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
     private Session session;
     
     private final Set<String> deviceSerialNumbers;
+
+    private ScheduledFuture<?> heartbeatSendingTask;
     
     public RiotWebsocketHandlerImpl() {
         this.deviceSerialNumbers = new HashSet<>();
@@ -72,6 +78,11 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
         authenticatedUser = activator.getSecurityService().getCurrentUser() == null ?
                 activator.getSecurityService().getAllUser() : activator.getSecurityService().getCurrentUser();
         activator.getRiotServer().addWebSocketClient(this);
+        heartbeatSendingTask = scheduleHeartbeat();
+    }
+
+    private ScheduledFuture<?> scheduleHeartbeat() {
+        return ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this::sendHeartbeat, 15, 15, TimeUnit.SECONDS);
     }
 
     /**
@@ -97,10 +108,19 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
         logger.fine(()->"Received heartbeat for "+session);
     }
 
+    private void sendHeartbeat() {
+        try {
+            sendString("1");
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Exception trying to send heartbeat to client "+session.getRemote(), e);
+        }
+    }
+    
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        logger.info("Session "+session+" closed with statusCode "+statusCode+" for reaosn "+reason);
-        Activator.getInstance().getRiotServer().removeWebSocketClient(this);;
+        logger.info("Session "+session+" closed with statusCode "+statusCode+" for reason "+reason);
+        Activator.getInstance().getRiotServer().removeWebSocketClient(this);
+        heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ true);
     }
     
     @Override
@@ -136,6 +156,11 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
     @Override
     public void flush() throws IOException {
         session.getRemote().flush();
+    }
+    
+    @Override
+    public void close(int statusCode, String reason) {
+        session.close(statusCode, reason);
     }
     
     @Override

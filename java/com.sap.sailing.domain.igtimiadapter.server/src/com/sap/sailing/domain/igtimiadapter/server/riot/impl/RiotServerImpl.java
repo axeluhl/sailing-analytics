@@ -97,7 +97,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     /**
      * @param localAddress if {@code null}, select a local port to listen on automatically
      */
-    private RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+    public RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
         this.listeners = ConcurrentHashMap.newKeySet();
         this.resources = new ConcurrentHashMap<>();
         this.dataAccessWindows = new ConcurrentHashMap<>();
@@ -147,6 +147,9 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                 deviceChannel.keyFor(socketSelector).cancel();
             }
             connections.clear();
+            for (final RiotWebsocketHandler liveConnection : liveWebSocketConnections) {
+                liveConnection.close(1000, "Riot Server Stopped");
+            }
         } else {
             logger.info("Trying to stop a Riot server that is not running. Ignoring.");
         }
@@ -163,7 +166,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                         if (deviceChannel != null) { // may be null because the server socket is in non-blocking mode
                             deviceChannel.configureBlocking(false);
                             deviceChannel.register(socketSelector, SelectionKey.OP_READ);
-                            connections.put(deviceChannel, new RiotConnectionImpl(deviceChannel, this, mongoObjectFactory));
+                            connections.put(deviceChannel, new RiotConnectionImpl(deviceChannel, this));
                             logger.info("New device connection from "+deviceChannel.getRemoteAddress());
                         }
                     } else if (selectedKey.isReadable()) {
@@ -209,7 +212,14 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      * Forwards the {@code message} to all {@link #addListener(RiotMessageListener) registered} listeners and sends it
      * to all {@link #liveWebSocketConnections} that are authorized to {@link DefaultActions#READ READ} from the
      * {@link Device} from which the message originated and for which a READable {@link DataAccessWindow} exists for
-     * the web socket connection's authenticated user for the time points of the data points in the message.
+     * the web socket connection's authenticated user for the time points of the data points in the message.<p>
+     * 
+     * This is a replicating operation which only {@link #apply(RiotReplicationOperation) applies} this request to
+     * the replicable; if running as primary/master, the request will be applied locally and replicated to all replicas
+     * which will forward the {@code message} to their respective live websocket connections. If on a replica, the
+     * {@code message} will be applied on the replica and sent to the master/primary for forwarding to the primary's
+     * web socket listeners. The persistent storage of the message on the primary/master is essential for retrieving
+     * resource data at a later point, e.g., for "replay" purposes. The replicas' persistence is to be ignored.
      * 
      * @param message
      *            the message received from the device
@@ -217,12 +227,23 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      *            the serial number of the device from which the message originated
      */
     void notifyListeners(Msg message, String deviceSerialNumber) {
+        apply(s->s.internalNotifyListeners(message, deviceSerialNumber));
+    }
+    
+    @Override
+    public Void internalNotifyListeners(Msg message, String deviceSerialNumber) {
+        storeMessage(message, deviceSerialNumber);
         if (deviceSerialNumber != null) {
             forwardMessageToEligibleWebSocketClients(message, deviceSerialNumber);
         }
         for (final RiotMessageListener listener : listeners) {
             listener.onMessage(message);
         }
+        return null;
+    }
+
+    private void storeMessage(Msg message, String deviceSerialNumber) {
+        mongoObjectFactory.storeMessage(deviceSerialNumber, message);
     }
 
     /**
@@ -469,7 +490,15 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange) {
-        return domainObjectFactory.getMessages(deviceSerialNumber, timeRange);
+        final Iterable<Msg> result;
+        if (getMasterDescriptor() == null) {
+            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange);
+        } else {
+            // TODO fetch the data from the primary/master "somehow"
+            result = Collections.emptySet();
+            logger.severe("TODO: fetch data from primary!!!");
+        }
+        return result;
     }
 
     @Override

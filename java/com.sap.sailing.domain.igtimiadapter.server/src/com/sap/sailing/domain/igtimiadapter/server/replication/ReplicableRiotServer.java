@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.server.replication;
 
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
@@ -18,5 +19,7 @@ public interface ReplicableRiotServer extends RiotServer {
     Void internalAddDataAccessWindow(DataAccessWindow daw);
 
     Void internalRemoveDataAccessWindow(long dawId);
+
+    Void internalNotifyListeners(Msg message, String deviceSerialNumber);
 
 }

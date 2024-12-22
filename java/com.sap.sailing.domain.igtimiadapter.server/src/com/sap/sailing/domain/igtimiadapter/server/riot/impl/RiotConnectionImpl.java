@@ -27,7 +27,6 @@ import com.igtimi.IgtimiStream.Msg;
 import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
-import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -72,17 +71,11 @@ public class RiotConnectionImpl implements RiotConnection {
     
     private final RiotServerImpl riotServer;
     
-    /**
-     * Used mainly to store the fixes received durably in the database
-     */
-    private final MongoObjectFactory mongoObjectFactory;
-
     private final ScheduledFuture<?> heartbeatSendingTask;
     
-    RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer, MongoObjectFactory mongoObjectFactory) {
+    RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer) {
         this.socketChannel = socketChannel;
         this.riotServer = riotServer;
-        this.mongoObjectFactory = mongoObjectFactory;
         this.messageLengthBuffer = ByteBuffer.allocate(5);
         heartbeatSendingTask = scheduleHeartbeat();
     }
@@ -151,17 +144,12 @@ public class RiotConnectionImpl implements RiotConnection {
                         final Msg message = Msg.parseFrom(messageBuffer, protobufExtensionRegistry);
                         processMessage(message); // extract device serial number and device group token and send auth response for auth request
                         riotServer.notifyListeners(message, serialNumber);
-                        storeMessage(message);
                     } catch (InvalidProtocolBufferException e) {
                         logger.log(Level.SEVERE, "Error parsing message from device "+serialNumber, e);
                     }
                 }
             }
         }
-    }
-    
-    private void storeMessage(Msg message) {
-        mongoObjectFactory.storeMessage(serialNumber, message);
     }
 
     private void sendPositiveAuthResponse() throws IOException {

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.server;
 
+import java.net.InetSocketAddress;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.logging.Level;
@@ -24,8 +25,8 @@ import com.sap.sse.util.ClearStateTestSupport;
 
 /**
  * When {@link #start(BundleContext) started}, creates a {@link RiotServer} instance listening on the
- * TCP port as specified by the property named {@link #RIOT_PORT_PROPERTY_NAME}, defaulting to the
- * value specified in {@link #RIOT_PORT_DEFAULT} and using the default persistence.
+ * TCP port as specified by the property named {@link #RIOT_PORT_PROPERTY_NAME}. If this property is not
+ * provided, the {@link RiotServer} will be started listening on an automatically assigned port so far unused.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -34,7 +35,6 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static final String RIOT_PORT_PROPERTY_NAME = "igtimi.riot.port";
-    private static final String RIOT_PORT_DEFAULT = "6000";
 
     private static BundleContext context;
 
@@ -52,12 +52,11 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME, RIOT_PORT_DEFAULT);
-        final int riotPort = Integer.valueOf(riotPortAsString);
+        final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME);
+        final InetSocketAddress bindAddress = riotPortAsString == null ? null : new InetSocketAddress("localhost", Integer.valueOf(riotPortAsString));
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        // TODO should we really start the RiotServer if no port is specified? We could interpret no specified port as a hint to not start the server
-        final RiotServerImpl riotServerImpl = new RiotServerImpl(riotPort, domainObjectFactory, mongoObjectFactory);
+        final RiotServerImpl riotServerImpl = new RiotServerImpl(bindAddress, domainObjectFactory, mongoObjectFactory);
         riotServer = riotServerImpl;
         context.registerService(RiotServer.class, riotServer, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
@@ -95,6 +94,7 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
+        getRiotServer().stop();
         Activator.context = null;
     }
     

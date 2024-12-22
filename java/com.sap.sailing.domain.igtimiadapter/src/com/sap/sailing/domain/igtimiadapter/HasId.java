@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
-public interface HasId {
+import java.io.Serializable;
+
+public interface HasId extends Serializable {
     long getId();
 }

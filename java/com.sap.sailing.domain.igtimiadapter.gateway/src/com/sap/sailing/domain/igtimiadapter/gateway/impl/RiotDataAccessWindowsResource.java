@@ -7,9 +7,11 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -73,4 +75,17 @@ public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
                 ()->riot.addDataAccessWindow(daw));
         return Response.ok().build();
     }
-}
+    
+    @Path("{id}")
+    @DELETE
+    public Response deleteDataAccessWindow(@PathParam("id") long id) throws IOException, ParseException {
+        final RiotServer riot = getRiotService();
+        final SecurityService securityService = getSecurityService();
+        final DataAccessWindow daw = riot.getDataAccessWindowById(id);
+        if (daw != null) {
+            securityService.checkCurrentUserDeletePermission(daw);
+            riot.removeDataAccessWindow(id);
+            securityService.deleteAllDataForRemovedObject(daw.getIdentifier());
+        }
+        return Response.ok().build();
+    }}

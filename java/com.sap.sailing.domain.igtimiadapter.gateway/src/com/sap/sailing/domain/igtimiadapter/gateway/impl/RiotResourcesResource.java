@@ -12,9 +12,11 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -120,9 +122,10 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         for (final DataAccessWindow daw : daws) {
             final TimeRange timeRangeIntersectionBetweenRequestAndDAW = requestedTimeRange.intersection(daw.getTimeRange());
             final Iterable<Msg> messagesForDAW = getRiotService().getMessages(daw.getDeviceSerialNumber(), timeRangeIntersectionBetweenRequestAndDAW);
+            // TODO filter by typesAndCompression
             final JSONArray arrayForDevice = (JSONArray) result.computeIfAbsent(daw.getDeviceSerialNumber(), d->new JSONArray());
             for (final Msg message : messagesForDAW) {
-                arrayForDevice.add(base64Encoder.encode(message.toByteArray()));
+                arrayForDevice.add(new String(base64Encoder.encode(message.toByteArray())));
             }
         }
         return Response.ok(streamingOutput(result)).build();
@@ -134,5 +137,19 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 daw->{
                     return subject.isPermitted(daw.getIdentifier().getStringPermission(DefaultActions.READ));
                 });
+    }
+    
+    @Path("{id}")
+    @DELETE
+    public Response deleteResource(@PathParam("id") long id) throws IOException, ParseException {
+        final RiotServer riot = getRiotService();
+        final SecurityService securityService = getSecurityService();
+        final Resource resource = riot.getResourceById(id);
+        if (resource != null) {
+            securityService.checkCurrentUserDeletePermission(resource);
+            riot.removeResource(id);
+            securityService.deleteAllDataForRemovedObject(resource.getIdentifier());
+        }
+        return Response.ok().build();
     }
 }

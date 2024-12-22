@@ -36,4 +36,6 @@ public interface RiotWebsocketHandler {
     Future<Void> sendStringByFuture(String text);
 
     void flush() throws IOException;
+
+    void close(int statusCode, String reason);
 }
