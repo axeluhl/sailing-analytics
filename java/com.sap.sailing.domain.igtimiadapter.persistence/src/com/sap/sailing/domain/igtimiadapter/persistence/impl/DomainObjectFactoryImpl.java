@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,9 +10,14 @@ import org.bson.Document;
 import org.bson.types.Binary;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.igtimi.IgtimiData.Data;
+import com.igtimi.IgtimiData.DataMsg;
+import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Sorts;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
@@ -99,6 +105,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         return null;
                     }
                 });
+    }
+    
+    public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
+        final Document query = new Document();
+        query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
+        final Iterable<Document> queryResult = messagesCollection.find(query).sort(Sorts.descending(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name()));
+        for (final Document document : queryResult) {
+            final String messageBase64 = document.getString(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name());
+            final Msg msg = Msg.parseFrom(Base64.getDecoder().decode(messageBase64));
+            if (msg.hasData()) {
+                final Data data = msg.getData();
+                for (final DataMsg dataMsg : data.getDataList()) {
+                    for (final DataPoint dataPoint : dataMsg.getDataList()) {
+                        if (dataPoint.getDataCase() == dataCase) {
+                            // the message has a data point of the type requested by dataCase; return it
+                            return msg;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     private void appendTimeRangeQuery(Document query, TimeRange timeRange) {

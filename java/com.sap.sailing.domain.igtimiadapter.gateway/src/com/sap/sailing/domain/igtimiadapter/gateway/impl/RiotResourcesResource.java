@@ -75,6 +75,9 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         return Response.ok(streamingOutput(result)).build();
     }
 
+    /**
+     * Output is the same format as for {@link #getResourcesData(UriInfo)}
+     */
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getLatestDatum(
@@ -82,9 +85,8 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
             @QueryParam("type") int type) {
         final RiotServer riot = Activator.getInstance().getRiotServer();
         final JSONObject result = new JSONObject();
-        final JSONArray resourcesJson = new JSONArray();
-        result.put("resources", resourcesJson);
         // TODO find the last message of type "type" for devices with serialNumbers that the user is allowed to READ
+        // TODO put them into the result object, keyed by the device serial number, as an array of Base64-encoded Msg objects
         return Response.ok(streamingOutput(result)).build();
     }
 

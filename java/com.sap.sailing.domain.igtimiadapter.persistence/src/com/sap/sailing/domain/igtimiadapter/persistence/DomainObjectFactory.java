@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.igtimiadapter.persistence;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
@@ -14,4 +17,10 @@ public interface DomainObjectFactory {
     Iterable<Device> getDevices();
     
     Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange);
+
+    /**
+     * Finds the latest message received from the device identified by {@code deviceSerialNumber}
+     * that has a {@link DataPoint} of the correct {@link DataCase}.
+     */
+    Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException;
 }
