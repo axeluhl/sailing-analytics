@@ -75,6 +75,19 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         return Response.ok(streamingOutput(result)).build();
     }
 
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response getLatestDatum(
+            @QueryParam("serial_numbers[]") Set<String> serialNumbers,
+            @QueryParam("type") int type) {
+        final RiotServer riot = Activator.getInstance().getRiotServer();
+        final JSONObject result = new JSONObject();
+        final JSONArray resourcesJson = new JSONArray();
+        result.put("resources", resourcesJson);
+        // TODO find the last message of type "type" for devices with serialNumbers that the user is allowed to READ
+        return Response.ok(streamingOutput(result)).build();
+    }
+
     @POST
     @Consumes("application/json;charset=UTF-8")
     public Response postResource(@Context HttpServletRequest request) throws IOException, ParseException {
