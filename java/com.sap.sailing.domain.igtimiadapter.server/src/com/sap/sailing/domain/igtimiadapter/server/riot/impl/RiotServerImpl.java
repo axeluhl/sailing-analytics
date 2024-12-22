@@ -232,12 +232,16 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     
     @Override
     public Void internalNotifyListeners(Msg message, String deviceSerialNumber) {
-        storeMessage(message, deviceSerialNumber);
-        if (deviceSerialNumber != null) {
-            forwardMessageToEligibleWebSocketClients(message, deviceSerialNumber);
-        }
-        for (final RiotMessageListener listener : listeners) {
-            listener.onMessage(message);
+        try {
+            if (deviceSerialNumber != null) {
+                forwardMessageToEligibleWebSocketClients(message, deviceSerialNumber);
+            }
+            for (final RiotMessageListener listener : listeners) {
+                listener.onMessage(message);
+            }
+        } finally {
+            // store the message, regardless of how badly the client forwarding or any listeners fail
+            storeMessage(message, deviceSerialNumber);
         }
         return null;
     }

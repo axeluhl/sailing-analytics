@@ -18,6 +18,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
@@ -53,7 +54,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME);
-        final InetSocketAddress bindAddress = riotPortAsString == null ? null : new InetSocketAddress("localhost", Integer.valueOf(riotPortAsString));
+        final InetSocketAddress bindAddress = Util.hasLength(riotPortAsString) ? new InetSocketAddress("localhost", Integer.valueOf(riotPortAsString)) : null;
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         final RiotServerImpl riotServerImpl = new RiotServerImpl(bindAddress, domainObjectFactory, mongoObjectFactory);
