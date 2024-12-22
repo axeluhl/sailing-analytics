@@ -107,6 +107,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 });
     }
     
+    @Override
     public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
         final Document query = new Document();
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
