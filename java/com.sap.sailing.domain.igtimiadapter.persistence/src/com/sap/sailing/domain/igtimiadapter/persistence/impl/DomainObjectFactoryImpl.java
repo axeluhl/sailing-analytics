@@ -99,7 +99,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         appendTimeRangeQuery(query, timeRange);
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
         final Iterable<Document> queryResult = messagesCollection.find(query);
-        return Util.map(queryResult,
+        return Util.filter(Util.map(queryResult,
                 doc->{
                     try {
                         final Msg msg = Msg.parseFrom(doc.get(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name(), Binary.class).getData());
@@ -108,22 +108,35 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         logger.log(Level.SEVERE, "Error trying to parse an Igtimi message for device "+deviceSerialNumber, e);
                         return null;
                     }
-                });
+                }), r->r != null);
     }
     
+    /**
+     * @return {@code null} in case the {@code msg} message does not contain at least one data point whose data case is
+     *         in the set of {@code dataCases}; otherwise the stripped-down message that contains only those data points
+     *         matching the {@code dataCases}.
+     */
     private Msg filterMessageForDataCases(Msg msg, Set<DataCase> dataCases) {
         final com.igtimi.IgtimiStream.Msg.Builder messageBuilder = msg.toBuilder();
         final List<Builder> dataMsgBuilderList = messageBuilder.getDataBuilder().getDataBuilderList();
         for (final Builder b : dataMsgBuilderList) {
             final List<com.igtimi.IgtimiData.DataPoint.Builder> dataPointBuilderList = b.getDataBuilderList();
+            final List<com.igtimi.IgtimiData.DataPoint.Builder> dataPointBuilders = new ArrayList<>();
             for (final Iterator<com.igtimi.IgtimiData.DataPoint.Builder> i=dataPointBuilderList.iterator(); i.hasNext(); ) {
                 final com.igtimi.IgtimiData.DataPoint.Builder dataPointBuilder = i.next();
-                if (!dataCases.contains(dataPointBuilder.getDataCase())) {
-                    i.remove(); // remove those data point builders that have a data case not in dataCases
+                if (dataCases.contains(dataPointBuilder.getDataCase())) {
+                    dataPointBuilders.add(dataPointBuilder);
                 }
             }
+            b.clearData();
+            dataPointBuilders.forEach(dpb->b.addData(dpb));
         }
-        return messageBuilder.build();
+        final Msg result = messageBuilder.build();
+        return hasDataPoints(result) ? result : null;
+    }
+
+    private boolean hasDataPoints(Msg result) {
+        return result.getData().getDataList().stream().filter(dataMsg->dataMsg.getDataCount() > 0).findAny().isPresent();
     }
 
     @Override
