@@ -20,7 +20,6 @@ import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
-import com.sap.sailing.domain.igtimiadapter.Group;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
@@ -40,7 +39,7 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         assertFalse(Util.isEmpty(daws));
         for (DataAccessWindow daw : daws) {
             assertEquals("DD-EE-AAGA", daw.getDeviceSerialNumber());
-            assertTrue(daw.getId() == 17012 || daw.getRecipient() instanceof Group);
+            assertTrue(daw.getId() == 17012);
         }
     }
     

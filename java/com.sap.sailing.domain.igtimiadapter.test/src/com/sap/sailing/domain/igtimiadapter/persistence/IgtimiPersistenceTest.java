@@ -4,7 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -14,6 +17,7 @@ import com.igtimi.IgtimiData.ApparentWindSpeed;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
+import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
@@ -101,6 +105,7 @@ public class IgtimiPersistenceTest {
                 .build();
         logger.info("Storing message: "+msg);
         mongoObjectFactory.storeMessage(SERIAL_NUMBER, msg);
+        final Set<DataCase> dataCases = new HashSet<>(Arrays.asList(DataCase.values()));
         final Iterable<Msg> result = domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases);
         final Iterator<Msg> iterator = result.iterator();
         assertTrue(iterator.hasNext());

@@ -16,9 +16,10 @@ import java.util.logging.Logger;
 import org.junit.Test;
 
 import com.igtimi.IgtimiStream.Msg;
-import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -29,16 +30,17 @@ import com.sap.sse.shared.util.Wait;
 public class TestRiotServer {
     private static final Logger logger = Logger.getLogger(TestRiotServer.class.getName());
 
-    private static class TestListener implements BulkFixReceiver {
+    private static class TestListener implements RiotMessageListener {
         private final List<Fix> fixes = new ArrayList<>();
-        
-        @Override
-        public void received(Iterable<Fix> fixes) {
-            Util.addAll(fixes, this.fixes);
-        }
         
         public Iterable<Fix> getAllFixesReceived() {
             return fixes;
+        }
+
+        @Override
+        public void onMessage(Msg message) {
+            Util.addAll(new FixFactory().createFixes(message), fixes);
+            
         }
     }
     
