@@ -13,7 +13,7 @@ import com.sap.sailing.selenium.pages.PageArea;
  * @author
  *   D049941
  */
-public class IgtimiAccountsManagementPanelPO extends PageArea {
+public class IgtimiDevicesManagementPanelPO extends PageArea {
     
     @FindBy(how = BySeleniumId.class, using = "addIgtimiAccount")
     private WebElement addIgtimiAccount;
@@ -26,7 +26,7 @@ public class IgtimiAccountsManagementPanelPO extends PageArea {
      * @param element
      *   
      */
-    public IgtimiAccountsManagementPanelPO(WebDriver driver, WebElement element) {
+    public IgtimiDevicesManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

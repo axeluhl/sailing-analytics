@@ -1000,9 +1000,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String hasAdditionalGolfDownTime();
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
-    String igtimiAccounts();
-    String errorFetchingIgtimiAccounts(String message);
-    String addIgtimiAccount();
+    String igtimiDevices();
+    String errorFetchingIgtimiDevices(String message);
     String errorAuthorizingAccessToIgtimiUser(String text, String message);
     String successfullyAuthorizedAccessToIgtimiUser(String username);
     String couldNotAuthorizedAccessToIgtimiUser(String text);

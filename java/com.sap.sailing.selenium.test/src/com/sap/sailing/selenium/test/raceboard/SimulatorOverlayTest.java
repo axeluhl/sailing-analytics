@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
-import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiAccountsManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiDevicesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
@@ -112,8 +112,8 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-            IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
-            igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
+            IgtimiDevicesManagementPanelPO igtimiDevicesManagementPanel = adminConsole.goToIgtimi();
+            igtimiDevicesManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
             WindPanelPO windPanel = adminConsole.goToWind();
             windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
         }

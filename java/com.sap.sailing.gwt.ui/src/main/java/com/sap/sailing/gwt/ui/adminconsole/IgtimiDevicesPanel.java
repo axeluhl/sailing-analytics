@@ -67,7 +67,7 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelProvider<IgtimiDeviceWithSecurityDTO> {
+public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProvider<IgtimiDeviceWithSecurityDTO> {
 
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -97,7 +97,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
     }
 
     @SuppressWarnings("unchecked")
-    public IgtimiAccountsPanel(final Presenter presenter,
+    public IgtimiDevicesPanel(final Presenter presenter,
             final StringMessages stringMessages) {
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
@@ -110,7 +110,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
                 tableRes);
         final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredAccounts = new ListDataProvider<>();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO>(
-                new Label(stringMessages.igtimiAccounts()), Collections.emptyList(), filteredAccounts, stringMessages) {
+                new Label(stringMessages.igtimiDevices()), Collections.emptyList(), filteredAccounts, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(IgtimiDeviceWithSecurityDTO t) {
                 Set<String> strings = Collections.singleton(t.getEmail());
@@ -167,7 +167,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(
-                        IgtimiAccountsPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),
+                        IgtimiDevicesPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),
                         /* silentMode */ true);
             }
 
@@ -267,7 +267,7 @@ public class IgtimiAccountsPanel extends FlowPanel implements FilterablePanelPro
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorFetchingIgtimiAccounts(caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorFetchingIgtimiDevices(caught.getMessage()));
             }
         });
     }
