@@ -258,8 +258,8 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private void forwardMessageToEligibleWebSocketClients(Msg message, String deviceSerialNumber) {
         final Device device = getDeviceBySerialNumber(deviceSerialNumber);
         if (device == null) {
-            logger.info("Received message from unknown devices "+deviceSerialNumber);
-            // TODO should we use this as the trigger to *create* the device?
+            logger.info("Received message from unknown devices "+deviceSerialNumber+"; creating Device");
+            createDevice(deviceSerialNumber);
         } else {
             final byte[] messageAsBytes = message.toByteArray();
             final SecurityService securityService = Activator.getInstance().getSecurityService();
@@ -340,6 +340,19 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Device getDeviceBySerialNumber(String deviceSerialNumber) {
         return devicesBySerialNumber.get(deviceSerialNumber);
+    }
+
+    @Override
+    public Device createDevice(final String deviceSerialNumber) {
+        return apply(s->s.internalCreateDevice(deviceSerialNumber));
+    }
+    
+    @Override
+    public Device internalCreateDevice(String deviceSerialNumber) {
+        final long id = devices.isEmpty() ? 1 : Collections.max(devices.keySet()) + 1;
+        final Device device = Device.create(id, deviceSerialNumber);
+        internalAddDevice(device);
+        return device;
     }
 
     @Override

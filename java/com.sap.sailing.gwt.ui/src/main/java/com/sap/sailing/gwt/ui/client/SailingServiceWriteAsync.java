@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -574,7 +575,9 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
-    void removeIgtimiDevice(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+    void addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to, AsyncCallback<IgtimiDataAccessWindowWithSecurityDTO> asyncCallback);
+    
+    void removeIgtimiDevice(String deviceSerialNumber, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
@@ -692,4 +695,5 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            configuration object is {@code null}, this means that the original password is to be left unchanged.
      */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
+
 }

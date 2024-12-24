@@ -95,6 +95,11 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     Device getDeviceById(long id);
 
     Device getDeviceBySerialNumber(String deviceSerialNumber);
+
+    /**
+     * Assigns a unique ID and leaves service tag and name {@code null}
+     */
+    Device createDevice(String deviceSerialNumber);
     
     void addDevice(Device device);
     

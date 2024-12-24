@@ -1,9 +1,7 @@
 package com.sap.sailing.selenium.test.raceboard;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -113,7 +111,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             IgtimiDevicesManagementPanelPO igtimiDevicesManagementPanel = adminConsole.goToIgtimi();
-            igtimiDevicesManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
+            // TODO bug6059: where to get Igtimi wind from? Shall we add a data access window? Which data to use?
             WindPanelPO windPanel = adminConsole.goToWind();
             windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
         }
@@ -141,17 +139,5 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         racesToWaitLoadingFor.add(new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
         trackedRacesList.waitForTrackedRaces(racesToWaitLoadingFor, Status.FINISHED, 600);
-    }
-    
-    private String getIgtimiAccountUser() {
-        return decodeBase64("c2FpbGluZ19hbmFseXRpY3NAc2FwLmNvbQ==");
-    }
-    
-    private String getIgtimiAccountPassword() {
-        return decodeBase64("MTIzNDU2");
-    }
-
-    private String decodeBase64(String base64EncodedString) {
-        return new String(Base64.getDecoder().decode(base64EncodedString.getBytes(StandardCharsets.US_ASCII)), StandardCharsets.UTF_8);
     }
 }

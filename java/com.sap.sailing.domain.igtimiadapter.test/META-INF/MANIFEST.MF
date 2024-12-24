@@ -18,6 +18,7 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  net.bytebuddy.byte-buddy;bundle-version="1.12.18",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
 Import-Package: com.sap.sailing.domain.igtimiadapter.persistence,
+ com.sap.sailing.domain.igtimiadapter.server,
  com.sap.sailing.domain.igtimiadapter.server.riot,
  com.sap.sse.shared.util,
  javax.servlet,

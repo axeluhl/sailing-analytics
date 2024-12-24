@@ -42,6 +42,8 @@ public class Activator implements BundleActivator {
     private static Activator instance;
     private RiotServer riotServer;
     private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
+
+    private SecurityService securityServiceTest;
     
     public Activator() {
         instance = this;
@@ -100,6 +102,9 @@ public class Activator implements BundleActivator {
     }
     
     public static Activator getInstance() {
+        if (instance == null) {
+            instance = new Activator();
+        }
         return instance;
     }
     
@@ -107,7 +112,16 @@ public class Activator implements BundleActivator {
         return riotServer;
     }
     
+    /** Only used by tests. */
+    public void setSecurityService(SecurityService securityService) {
+        securityServiceTest = securityService;
+    }
+
     public SecurityService getSecurityService() {
-        return securityServiceServiceTracker.getService();
+        try {
+            return securityServiceTest == null ? securityServiceServiceTracker.getInitializedService(0) : securityServiceTest;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

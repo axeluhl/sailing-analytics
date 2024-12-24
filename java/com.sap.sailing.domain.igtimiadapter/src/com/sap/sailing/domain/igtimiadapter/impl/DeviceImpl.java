@@ -12,7 +12,7 @@ public class DeviceImpl extends HasIdImpl implements Device {
     private final String name;
     private String serviceTag;
     
-    protected DeviceImpl(long id, String serialNumber) {
+    public DeviceImpl(long id, String serialNumber) {
         this(id, serialNumber, /* name */ null, /* serviceTag */ null);
     }
 

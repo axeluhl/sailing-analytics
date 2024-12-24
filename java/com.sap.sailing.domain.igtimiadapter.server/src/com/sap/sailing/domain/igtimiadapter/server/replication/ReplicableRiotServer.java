@@ -22,4 +22,6 @@ public interface ReplicableRiotServer extends RiotServer {
 
     Void internalNotifyListeners(Msg message, String deviceSerialNumber);
 
+    Device internalCreateDevice(String deviceSerialNumber);
+
 }

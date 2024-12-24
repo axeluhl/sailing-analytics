@@ -1001,6 +1001,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String additionalGolfDownTimeHelpText();
     String invalidColor(String message);
     String igtimiDevices();
+    String addIgtimiDevice();
     String errorFetchingIgtimiDevices(String message);
     String errorAuthorizingAccessToIgtimiUser(String text, String message);
     String successfullyAuthorizedAccessToIgtimiUser(String username);
@@ -1009,8 +1010,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addIgtimiUser();
     String doYouReallyWantToRemoveTrackedRaces();
     String doYouReallyWantToRemoveNonVisibleTrackedRaces(String trackedRacesName);
-    String errorTryingToRemoveIgtimiAccount(String eMailOfAccountToRemove);
-    String successfullyRemoveIgtimiAccount(String eMailOfAccountToRemove);
     String eMailMustNotBeEmpty();
     String emailAddress();
     String searchTag();
@@ -1018,8 +1017,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
     String failedToSetNewFinishingAndFinishTime();
-    String doYouReallyWantToRemoveIgtimiAccount(String accountEmail);
+    String doYouReallyWantToRemoveIgtimiDevice(String accountEmail);
     String igtimiWindImport();
+    String addIgtimiDataAccessWindow();
+    String deviceSerialNumberMustNotBeEmpty();
+    String errorCreatingDataAccessWindow(String deviceSerialNumber, String message);
+    String errorTryingToRemoveIgtimiDevice(String deviceSerialNumber, String message);
+    String successfullyRemoveIgtimiDevice(String deviceSerialNumber);
+    String successfullyCreatedIgtimiDataAccessWindow(String deviceSerialNumber);
+    String serialNumber();
+    String serviceTag();
     String seeIgtimiTabForAccountSettings();
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);
@@ -1873,7 +1880,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editExpeditionDeviceConfiguration();
     String expeditionBoatId();
     String doYouReallyWantToRemoveTheSelectedExpeditionDeviceConfigurations();
-    String doYouReallyWantToRemoveTheSelectedIgtimiAccounts();
+    String doYouReallyWantToRemoveTheSelectedIgtimiDevices();
     String currentDepthInMeters();
     String currentDriftInDegrees();
     String currentLeewayInDegrees();

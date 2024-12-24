@@ -8,12 +8,11 @@ import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCe
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -21,25 +20,23 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.DialogBox.CaptionImpl;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -53,7 +50,8 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
@@ -67,13 +65,20 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
+/**
+ * TODO bug 6059: implement a second table shown when a single device is selected in the devices table that shows the
+ * data access windows for that device; alternatively we could show all data access windows for all devices when nothing
+ * is selected. Move the "Add" button from devices to DAWs.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProvider<IgtimiDeviceWithSecurityDTO> {
-
     private final StringMessages stringMessages;
     private final SailingServiceWriteAsync sailingServiceWrite;
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterAccountsPanel;
-    private final RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO> refreshableAccountsSelectionModel;
+    private final RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO> refreshableDevicesSelectionModel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -113,7 +118,17 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 new Label(stringMessages.igtimiDevices()), Collections.emptyList(), filteredAccounts, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(IgtimiDeviceWithSecurityDTO t) {
-                Set<String> strings = Collections.singleton(t.getEmail());
+                final Set<String> strings = new HashSet<>();
+                strings.add(""+t.getId());
+                if (t.getName() != null) {
+                    strings.add(t.getName());
+                }
+                if (t.getSerialNumber() != null) {
+                    strings.add(t.getSerialNumber());
+                }
+                if (t.getServiceTag() != null) {
+                    strings.add(t.getServiceTag());
+                }
                 return strings;
             }
 
@@ -122,121 +137,75 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 return null;
             }
         };
-        createIgtimiAccountsTable(cellTable, tableRes, presenter.getUserService(), filteredAccounts, filterAccountsPanel);
+        createIgtimiDevicesTable(cellTable, tableRes, presenter.getUserService(), filteredAccounts, filterAccountsPanel);
         // refreshableAccountsSelectionModel will be of correct type, see below in createIgtimiAccountsTable
-        refreshableAccountsSelectionModel = (RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO>) cellTable
+        refreshableDevicesSelectionModel = (RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO>) cellTable
                 .getSelectionModel();
-
         final Panel controlsPanel = new HorizontalPanel();
         filterAccountsPanel
                 .setUpdatePermissionFilterForCheckbox(account -> presenter.getUserService().hasPermission(account, DefaultActions.UPDATE));
         controlsPanel.add(filterAccountsPanel);
-
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(),
-                SecuredDomainType.IGTIMI_ACCOUNT);
+                SecuredDomainType.IGTIMI_DEVICE);
         controlsPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
-
         // setup controls
-        final Button removeAccountButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            if (refreshableAccountsSelectionModel.getSelectedSet().size() > 0) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiAccounts())) {
-                    for (IgtimiDeviceWithSecurityDTO account : refreshableAccountsSelectionModel.getSelectedSet()) {
-                        removeAccount(account, filteredAccounts);
+        final Button removeDeviceButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            if (refreshableDevicesSelectionModel.getSelectedSet().size() > 0) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiDevices())) {
+                    for (IgtimiDeviceWithSecurityDTO account : refreshableDevicesSelectionModel.getSelectedSet()) {
+                        removeDevice(account, filteredAccounts);
                     }
                 }
             }
         });
-        removeAccountButton.setEnabled(false);
-        refreshableAccountsSelectionModel.addSelectionChangeHandler(
-                e -> removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedSet().size() > 0));
+        removeDeviceButton.setEnabled(false);
+        refreshableDevicesSelectionModel.addSelectionChangeHandler(
+                e -> removeDeviceButton.setEnabled(refreshableDevicesSelectionModel.getSelectedSet().size() > 0));
         add(controlsPanel);
         add(cellTable);
-
         // add button
-        final Button addAccountButton = buttonPanel.addCreateAction(stringMessages.addIgtimiAccount(),
-                () -> addAccount());
-        addAccountButton.ensureDebugId("addIgtimiAccount");
-
-        final String protocol = Window.Location.getProtocol().endsWith(":")
-                ? Window.Location.getProtocol().substring(0, Window.Location.getProtocol().length() - 1)
-                : Window.Location.getProtocol();
-        final String hostname = Window.Location.getHostName();
-        final String port = Window.Location.getPort();
-        this.sailingServiceWrite.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(
-                        IgtimiDevicesPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),
-                        /* silentMode */ true);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                buttonPanel.addCreateAction(stringMessages.addIgtimiUser() + " (OAuth)", () -> {
-                    Frame frame = new Frame(UriUtils.fromString(result).asString());
-                    frame.addLoadHandler(loadEvent -> refresh());
-                    frame.setPixelSize(520, 770);
-                    final CaptionImpl caption = new CaptionImpl();
-                    caption.setText(stringMessages.addIgtimiUser());
-                    final DialogBox dialogBox = new DialogBox(/* autoHide */ false, /* modal */ true);
-                    Button closeButton = new Button(stringMessages.close());
-                    closeButton.addClickHandler(new ClickHandler() {
-                        public void onClick(ClickEvent event) {
-                            dialogBox.hide();
-                        }
-                    });
-                    dialogBox.setText(stringMessages.addIgtimiUser());
-                    dialogBox.setGlassEnabled(true);
-                    final VerticalPanel panel = new VerticalPanel();
-                    dialogBox.setWidget(panel);
-                    panel.add(frame);
-                    panel.add(closeButton);
-                    dialogBox.addCloseHandler(event -> {
-                        refresh();
-                    });
-                    dialogBox.center();
-                        });
-            }
-        });
+        final Button addDeviceButton = buttonPanel.addCreateAction(stringMessages.addIgtimiDevice(), () -> addDataAccessWindow());
+        addDeviceButton.ensureDebugId("addIgtimiDevice");
     }
 
-    private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiAccountsTable(
+    private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiDevicesTable(
             final FlushableCellTable<IgtimiDeviceWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
-            final UserService userService, final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredAccounts,
-            final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterAccountsPanel) {
-        filteredAccounts.addDataDisplay(table);
-        final SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO> accountSelectionCheckboxColumn = new SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO>(
+            final UserService userService, final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredDevices,
+            final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterDevicesPanel) {
+        filteredDevices.addDataDisplay(table);
+        final SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO> devicesSelectionCheckboxColumn = new SelectionCheckboxColumn<IgtimiDeviceWithSecurityDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
                 new EntityIdentityComparator<IgtimiDeviceWithSecurityDTO>() {
                     @Override
                     public boolean representSameEntity(IgtimiDeviceWithSecurityDTO a1, IgtimiDeviceWithSecurityDTO a2) {
-                        return a1.getEmail().equals(a2.getEmail());
+                        return a1.getId() == a2.getId();
                     }
 
                     @Override
                     public int hashCode(IgtimiDeviceWithSecurityDTO t) {
-                        return t.getEmail().hashCode();
+                        return 7482 ^ (int) t.getId();
                     }
-                }, filterAccountsPanel.getAllListDataProvider(), table);
-        final ListHandler<IgtimiDeviceWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredAccounts.getList());
+                }, filterDevicesPanel.getAllListDataProvider(), table);
+        final ListHandler<IgtimiDeviceWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredDevices.getList());
         table.addColumnSortHandler(columnSortHandler);
-        columnSortHandler.setComparator(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getComparator());
-        final TextColumn<IgtimiDeviceWithSecurityDTO> accountNameColumn = new AbstractSortableTextColumn<>(
-                account -> account.getName(), columnSortHandler);
-        final TextColumn<IgtimiDeviceWithSecurityDTO> accountEmailColumn = new AbstractSortableTextColumn<>(
-                account -> account.getEmail(), columnSortHandler);
-        final TextColumn<IgtimiDeviceWithSecurityDTO> creatorNameColumn = new AbstractSortableTextColumn<>(
-                account -> account.getCreatorName(), columnSortHandler);
-
-        final HasPermissions type = SecuredDomainType.IGTIMI_ACCOUNT;
+        columnSortHandler.setComparator(devicesSelectionCheckboxColumn, devicesSelectionCheckboxColumn.getComparator());
+        final TextColumn<IgtimiDeviceWithSecurityDTO> deviceIdColumn = new AbstractSortableTextColumn<>(
+                device -> ""+device.getId(), columnSortHandler);
+        final TextColumn<IgtimiDeviceWithSecurityDTO> deviceNameColumn = new AbstractSortableTextColumn<>(
+                device -> device.getName(), columnSortHandler);
+        final TextColumn<IgtimiDeviceWithSecurityDTO> deviceSerialNumberColumn = new AbstractSortableTextColumn<>(
+                device -> device.getSerialNumber(), columnSortHandler);
+        final TextColumn<IgtimiDeviceWithSecurityDTO> serviceTagColumn = new AbstractSortableTextColumn<>(
+                device -> device.getServiceTag(), columnSortHandler);
+        final HasPermissions type = SecuredDomainType.IGTIMI_DEVICE;
         final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-        roleActionColumn.addAction(ACTION_DELETE, DELETE, account -> {
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiAccount(account.getEmail()))) {
-                removeAccount(account, filteredAccounts);
+        roleActionColumn.addAction(ACTION_DELETE, DELETE, device -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
+                removeDevice(device, filteredDevices);
             }
         });
         final DialogConfig<IgtimiDeviceWithSecurityDTO> config = EditOwnershipDialog
@@ -246,15 +215,16 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
-
-        table.addColumn(accountSelectionCheckboxColumn, accountSelectionCheckboxColumn.getHeader());
-        table.addColumn(accountNameColumn, stringMessages.name());
-        table.addColumn(accountEmailColumn, stringMessages.email());
-        table.addColumn(creatorNameColumn, stringMessages.creatorName());
+        // add columns to table:
+        table.addColumn(devicesSelectionCheckboxColumn, devicesSelectionCheckboxColumn.getHeader());
+        table.addColumn(deviceIdColumn, stringMessages.id());
+        table.addColumn(deviceNameColumn, stringMessages.name());
+        table.addColumn(deviceSerialNumberColumn, stringMessages.serialNumber());
+        table.addColumn(serviceTagColumn, stringMessages.serviceTag());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(roleActionColumn, stringMessages.actions());
-        table.setSelectionModel(accountSelectionCheckboxColumn.getSelectionModel(),
-                accountSelectionCheckboxColumn.getSelectionManager());
+        table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),
+                devicesSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
 
@@ -272,64 +242,71 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         });
     }
 
-    private static class UserData {
-        private final String eMail;
-        private final String password;
+    private static class DataAccessWindowData {
+        private final String deviceSerialNumber;
+        private final Date from;
+        private final Date to;
 
-        protected UserData(String eMail, String password) {
+        protected DataAccessWindowData(String deviceSerialNumber, Date from, Date to) {
             super();
-            this.eMail = eMail;
-            this.password = password;
+            this.deviceSerialNumber = deviceSerialNumber;
+            this.from = from;
+            this.to = to;
         }
 
-        protected String geteMail() {
-            return eMail;
+        protected String getDeviceSerialNumber() {
+            return deviceSerialNumber;
         }
 
-        protected String getPassword() {
-            return password;
+        protected Date getFrom() {
+            return from;
+        }
+
+        protected Date getTo() {
+            return to;
         }
     }
 
-    private class AddAccountDialog extends DataEntryDialog<UserData> {
-        private TextBox eMail;
-        private PasswordTextBox password;
+    private class AddDataAccessWindowDialog extends DataEntryDialogWithDateTimeBox<DataAccessWindowData> {
+        private TextBox deviceSerialNumber;
+        private DateAndTimeInput from;
+        private DateAndTimeInput to;
 
-        public AddAccountDialog(final Runnable refresher, final SailingServiceWriteAsync sailingServiceWrite,
+        public AddDataAccessWindowDialog(final Runnable refresher, final SailingServiceWriteAsync sailingServiceWrite,
                 final StringMessages stringMessages, final ErrorReporter errorReporter) {
-            super(stringMessages.addIgtimiUser(), stringMessages.addIgtimiUser(), stringMessages.ok(),
-                    stringMessages.cancel(), new Validator<UserData>() {
+            super(stringMessages.addIgtimiDataAccessWindow(), stringMessages.addIgtimiDataAccessWindow(), stringMessages.ok(),
+                    stringMessages.cancel(), new Validator<DataAccessWindowData>() {
                         @Override
-                        public String getErrorMessage(UserData valueToValidate) {
+                        public String getErrorMessage(DataAccessWindowData valueToValidate) {
                             final String errorMessage;
-                            if (valueToValidate.geteMail() == null || valueToValidate.geteMail().isEmpty()) {
-                                errorMessage = stringMessages.eMailMustNotBeEmpty();
+                            if (Util.hasLength(valueToValidate.getDeviceSerialNumber())) {
+                                errorMessage = stringMessages.deviceSerialNumberMustNotBeEmpty();
                             } else {
                                 errorMessage = null;
                             }
                             return errorMessage;
                         }
-                    }, /* animationEnabled */ true, new DialogCallback<UserData>() {
+                    }, /* animationEnabled */ true, new DialogCallback<DataAccessWindowData>() {
                         @Override
-                        public void ok(final UserData editedObject) {
-                            sailingServiceWrite.authorizeAccessToIgtimiUser(editedObject.geteMail(),
-                                    editedObject.getPassword(), new AsyncCallback<Boolean>() {
+                        public void ok(final DataAccessWindowData editedObject) {
+                            sailingServiceWrite.addIgtimiDataAccessWindow(editedObject.getDeviceSerialNumber(),
+                                    editedObject.getFrom(), editedObject.getTo(), new AsyncCallback<IgtimiDataAccessWindowWithSecurityDTO>() {
                                         @Override
                                         public void onFailure(Throwable caught) {
-                                            errorReporter.reportError(stringMessages.errorAuthorizingAccessToIgtimiUser(
-                                                    editedObject.geteMail(), caught.getMessage()));
+                                            errorReporter.reportError(stringMessages.errorCreatingDataAccessWindow(
+                                                    editedObject.getDeviceSerialNumber(), caught.getMessage()));
                                         }
 
                                         @Override
-                                        public void onSuccess(Boolean result) {
-                                            if (result) {
+                                        public void onSuccess(IgtimiDataAccessWindowWithSecurityDTO result) {
+                                            if (result != null) {
                                                 Notification
-                                                        .notify(stringMessages.successfullyAuthorizedAccessToIgtimiUser(
-                                                                editedObject.geteMail()), NotificationType.SUCCESS);
+                                                        .notify(stringMessages.successfullyCreatedIgtimiDataAccessWindow(
+                                                                editedObject.getDeviceSerialNumber()), NotificationType.SUCCESS);
                                                 refresher.run();
                                             } else {
                                                 Notification.notify(stringMessages.couldNotAuthorizedAccessToIgtimiUser(
-                                                        editedObject.geteMail()), NotificationType.ERROR);
+                                                        editedObject.getDeviceSerialNumber()), NotificationType.ERROR);
                                             }
                                         }
                                     });
@@ -340,51 +317,55 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                         }
 
                     });
-            ensureDebugId("AddIgtimiAccountDialog");
+            ensureDebugId("AddIgtimiDeviceDialog");
         }
 
         @Override
         protected Widget getAdditionalWidget() {
-            Grid grid = new Grid(2, 2);
-            grid.setWidget(0, 0, new Label(stringMessages.emailAddress()));
-            eMail = createTextBox("");
-            eMail.ensureDebugId("igtimiAccountEmail");
-            grid.setWidget(0, 1, eMail);
-            grid.setWidget(1, 0, new Label(stringMessages.password()));
-            password = createPasswordTextBox("");
-            password.ensureDebugId("igtimiAccountPassword");
-            grid.setWidget(1, 1, password);
+            Grid grid = new Grid(3, 2);
+            grid.setWidget(0, 0, new Label(stringMessages.serialNumber()));
+            deviceSerialNumber = createTextBox(""); // TODO bug6059: use an Oracle based on all existing devices
+            deviceSerialNumber.ensureDebugId("igtimiDeviceSerialNumber");
+            grid.setWidget(0, 1, deviceSerialNumber);
+            grid.setWidget(1, 0, new Label(stringMessages.from()));
+            from = createDateTimeBox(/* initial value */ null, Accuracy.SECONDS);
+            from.ensureDebugId("igtimiDataAccessWindowFrom");
+            grid.setWidget(1, 1, from);
+            grid.setWidget(2, 0, new Label(stringMessages.to()));
+            to = createDateTimeBox(/* initial value */ null, Accuracy.SECONDS);
+            to.ensureDebugId("igtimiDataAccessWindowTo");
+            grid.setWidget(2, 1, to);
             return grid;
         }
 
         @Override
         protected FocusWidget getInitialFocusWidget() {
-            return eMail;
+            return deviceSerialNumber;
         }
 
         @Override
-        protected UserData getResult() {
-            return new UserData(eMail.getText(), password.getText());
+        protected DataAccessWindowData getResult() {
+            return new DataAccessWindowData(deviceSerialNumber.getText(), from.getValue(), to.getValue());
         }
     }
 
-    private void addAccount() {
-        new AddAccountDialog(this::refresh, sailingServiceWrite, stringMessages, errorReporter).show();
+    private void addDataAccessWindow() {
+        new AddDataAccessWindowDialog(this::refresh, sailingServiceWrite, stringMessages, errorReporter).show();
     }
 
-    private void removeAccount(final IgtimiDeviceWithSecurityDTO account,
+    private void removeDevice(final IgtimiDeviceWithSecurityDTO device,
             final ListDataProvider<IgtimiDeviceWithSecurityDTO> removeFrom) {
-        sailingServiceWrite.removeIgtimiDevice(account.getEmail(), new AsyncCallback<Void>() {
+        sailingServiceWrite.removeIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorTryingToRemoveIgtimiAccount(account.getEmail()));
+                errorReporter.reportError(stringMessages.errorTryingToRemoveIgtimiDevice(device.getSerialNumber(), caught.getMessage()));
             }
 
             @Override
             public void onSuccess(Void result) {
-                Notification.notify(stringMessages.successfullyRemoveIgtimiAccount(account.getEmail()),
+                Notification.notify(stringMessages.successfullyRemoveIgtimiDevice(device.getSerialNumber()),
                         NotificationType.INFO);
-                removeFrom.getList().remove(account);
+                removeFrom.getList().remove(device);
             }
         });
     }

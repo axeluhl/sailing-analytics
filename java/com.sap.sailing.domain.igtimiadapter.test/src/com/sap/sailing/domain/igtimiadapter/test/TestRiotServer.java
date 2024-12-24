@@ -13,18 +13,24 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
+import com.sap.sailing.domain.igtimiadapter.server.Activator;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 import com.sap.sse.shared.util.Wait;
 
 public class TestRiotServer {
@@ -44,6 +50,12 @@ public class TestRiotServer {
         }
     }
     
+    @Before
+    public void setUp() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        final SecurityService mockSecurityService = SecurityServiceMockFactory.mockSecurityService();
+        Activator.getInstance().setSecurityService(mockSecurityService);
+    }
+
     @Test
     public void testSendingAFewMessages() throws Exception {
         final MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();

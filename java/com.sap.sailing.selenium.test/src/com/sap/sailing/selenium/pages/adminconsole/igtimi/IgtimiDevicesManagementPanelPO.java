@@ -15,8 +15,8 @@ import com.sap.sailing.selenium.pages.PageArea;
  */
 public class IgtimiDevicesManagementPanelPO extends PageArea {
     
-    @FindBy(how = BySeleniumId.class, using = "addIgtimiAccount")
-    private WebElement addIgtimiAccount;
+    @FindBy(how = BySeleniumId.class, using = "addIgtimiDevice")
+    private WebElement addIgtimiDevice;
     
     /**
      * <p></p>
@@ -30,17 +30,16 @@ public class IgtimiDevicesManagementPanelPO extends PageArea {
         super(driver, element);
     }
     
-    public AddIgtimiAccountDialogPO openAddIgtimiAccountDialog() {
-        addIgtimiAccount.click();
-        return getPO(AddIgtimiAccountDialogPO::new, "AddIgtimiAccountDialog");
+    public AddIgtimiDeviceDialogPO openAddIgtimiDeviceDialog() {
+        addIgtimiDevice.click();
+        return getPO(AddIgtimiDeviceDialogPO::new, "AddIgtimiDeviceDialog");
     }
     
-    public void addAccount(String email, String password) throws InterruptedException {
-        AddIgtimiAccountDialogPO addIgtimiAccountDialog = openAddIgtimiAccountDialog();
-        addIgtimiAccountDialog.setEmail(email);
-        addIgtimiAccountDialog.setPassword(password);
-        addIgtimiAccountDialog.pressOk();
-        
+    public void addDevice(String email, String password) throws InterruptedException {
+        AddIgtimiDeviceDialogPO addIgtimiDeviceDialog = openAddIgtimiDeviceDialog();
+        addIgtimiDeviceDialog.setEmail(email);
+        addIgtimiDeviceDialog.setPassword(password);
+        addIgtimiDeviceDialog.pressOk();
         waitForNotificationAndDismiss();
     }
 }
