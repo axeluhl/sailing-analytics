@@ -223,6 +223,7 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -2080,8 +2081,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to) {
-        // TODO
-        return null;
+        final IgtimiConnection igtimiConnection = createIgtimiConnection();
+        final DataAccessWindow result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
+                new TypeRelativeObjectIdentifier(deviceSerialNumber, ""+from.getTime(), ""+to.getTime()),
+                "Data Access Window for device "+deviceSerialNumber+" from "+from+" to "+to,
+                ()->igtimiConnection.createDataAccessWindow(deviceSerialNumber, TimePoint.of(from), TimePoint.of(to)));
+        final IgtimiDataAccessWindowWithSecurityDTO resultWithSecurity = new IgtimiDataAccessWindowWithSecurityDTO(result.getId(), result.getDeviceSerialNumber(),
+                result.getStartTime().asDate(), result.getEndTime().asDate());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), resultWithSecurity);
+        return resultWithSecurity;
     }
 
     @Override

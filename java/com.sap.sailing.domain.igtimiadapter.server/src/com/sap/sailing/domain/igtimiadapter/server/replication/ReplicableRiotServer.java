@@ -5,6 +5,7 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sse.common.TimePoint;
 
 public interface ReplicableRiotServer extends RiotServer {
 
@@ -16,7 +17,7 @@ public interface ReplicableRiotServer extends RiotServer {
 
     Void internalRemoveResource(long resourceId);
 
-    Void internalAddDataAccessWindow(DataAccessWindow daw);
+    DataAccessWindow internalAddDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
 
     Void internalRemoveDataAccessWindow(long dawId);
 

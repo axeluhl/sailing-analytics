@@ -70,10 +70,13 @@ public class RiotDataAccessWindowsResource extends AbstractRiotServerResource {
         final InputStream inputStream = request.getInputStream();
         final JSONObject dawJson = (JSONObject) new JSONParser().parse(new InputStreamReader(inputStream));
         final DataAccessWindow daw = new DataAccessWindowDeserializer().createDataAccessWindowFromJson(dawJson);
-        securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
-                daw.getIdentifier().getTypeRelativeObjectIdentifier(), daw.getName(),
-                ()->riot.addDataAccessWindow(daw));
-        return Response.ok().build();
+        final DataAccessWindow newDaw = securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
+                daw.getIdentifier().getTypeRelativeObjectIdentifier(),
+                daw.getName(),
+                ()->riot.createDataAccessWindow(daw.getDeviceSerialNumber(), daw.getStartTime(), daw.getEndTime()));
+        return Response.ok(
+                streamingOutput(new DataAccessWindowSerializer().createJsonFromDataAccessWindow(newDaw))).build();
     }
     
     @Path("{id}")

@@ -440,15 +440,17 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public void addDataAccessWindow(DataAccessWindow daw) {
-        apply(s->s.internalAddDataAccessWindow(daw));
+    public DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint from, TimePoint to) {
+        return apply(s->s.internalAddDataAccessWindow(deviceSerialNumber, from, to));
     }
 
     @Override
-    public Void internalAddDataAccessWindow(DataAccessWindow daw) {
+    public DataAccessWindow internalAddDataAccessWindow(String deviceSerialNumber, TimePoint from, TimePoint to) {
+        final long newId = dataAccessWindows.isEmpty() ? 1 : Collections.max(dataAccessWindows.keySet()) + 1;
+        final DataAccessWindow daw = DataAccessWindow.create(newId, from, to, deviceSerialNumber);
         dataAccessWindows.put(daw.getId(), daw);
         mongoObjectFactory.storeDataAccessWindow(daw);
-        return null;
+        return daw;
     }
     
     @Override

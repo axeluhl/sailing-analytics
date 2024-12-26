@@ -109,7 +109,7 @@ public interface IgtimiConnection {
     
     Device getDeviceBySerialNumber(String serialNumber);
     
-    void removeDevice(Device existingDevice);
+    void removeDevice(Device existingDevice) throws ClientProtocolException, IOException, ParseException;
     
     /**
      * Returns all devices that this connection has access to with the requested <code>permission</code>. Note that
@@ -131,6 +131,8 @@ public interface IgtimiConnection {
     Iterable<DataAccessWindow> getDataAccessWindows(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
+    
+    DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime) throws ClientProtocolException, IOException, ParseException;
 
     /**
      * Finds all data access windows that have wind data for the time span around the race, loads their wind data and

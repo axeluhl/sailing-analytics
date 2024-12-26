@@ -163,7 +163,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         add(controlsPanel);
         add(cellTable);
         // add button
-        final Button addDeviceButton = buttonPanel.addCreateAction(stringMessages.addIgtimiDevice(), () -> addDataAccessWindow());
+        final Button addDeviceButton = buttonPanel.addCreateAction(stringMessages.addIgtimiDataAccessWindow(), () -> addDataAccessWindow());
         addDeviceButton.ensureDebugId("addIgtimiDevice");
     }
 
@@ -277,7 +277,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                         @Override
                         public String getErrorMessage(DataAccessWindowData valueToValidate) {
                             final String errorMessage;
-                            if (Util.hasLength(valueToValidate.getDeviceSerialNumber())) {
+                            if (!Util.hasLength(valueToValidate.getDeviceSerialNumber())) {
                                 errorMessage = stringMessages.deviceSerialNumberMustNotBeEmpty();
                             } else {
                                 errorMessage = null;

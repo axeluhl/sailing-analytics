@@ -16,7 +16,11 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -189,9 +193,15 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     }
 
     @Override
-    public void removeDevice(Device existingDevice) {
-        // TODO Auto-generated method stub
-        
+    public void removeDevice(Device existingDevice) throws ClientProtocolException, IOException, ParseException {
+        HttpDelete getResources = new HttpDelete(getDeleteDeviceUrl(existingDevice.getId()));
+        if (getJsonParsedResponse(getResources).getB() >= 400) {
+            throw new RuntimeException("Error deleting device with ID "+existingDevice.getId());
+        }
+    }
+
+    private String getDeleteDeviceUrl(long id) {
+        return getApiV1BaseUrl()+"devices/"+id;
     }
 
     @Override
@@ -206,6 +216,22 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
             result.add(dataAccessWindow);
         }
         return result;
+    }
+
+    @Override
+    public DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime) throws ClientProtocolException, IOException, ParseException {
+        HttpPost createDataAccessWindows = new HttpPost(getCreateDataAccessWindowsUrl(deviceSerialNumber, startTime, endTime));
+        createDataAccessWindows.setEntity(new StringEntity(new DataAccessWindowSerializer().createJsonFromDataAccessWindow(
+                DataAccessWindow.create(0, startTime, endTime, deviceSerialNumber)).toJSONString(), ContentType.APPLICATION_JSON));
+        final JSONObject dataAccessWindowsJson = (JSONObject) getJsonParsedResponse(createDataAccessWindows).getA();
+        DataAccessWindow dataAccessWindow = new DataAccessWindowDeserializer().createDataAccessWindowFromJson(dataAccessWindowsJson);
+        return dataAccessWindow;
+    }
+
+    private String getCreateDataAccessWindowsUrl(String deviceSerialNumber, TimePoint startTime, TimePoint endTime) {
+        StringBuilder url = new StringBuilder(getApiV1BaseUrl());
+        url.append("data_access_windows");
+        return url.toString();
     }
 
     @Override
@@ -332,7 +358,6 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         return result;
     }
     
-    // TODO owned? Or probably just the ones we can READ? Or maybe ask with permission filter?
     private String getDevicesUrl() {
         return getApiV1BaseUrl()+"devices/";
     }

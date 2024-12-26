@@ -42,7 +42,9 @@ public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow 
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getDeviceSerialNumber(), ""+getStartTime().asMillis(), ""+getEndTime().asMillis()));
+        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getDeviceSerialNumber(),
+                ""+(getStartTime()==null?"null":getStartTime().asMillis()),
+                ""+(getEndTime()==null?"null":getEndTime().asMillis())));
     }
 
     @Override

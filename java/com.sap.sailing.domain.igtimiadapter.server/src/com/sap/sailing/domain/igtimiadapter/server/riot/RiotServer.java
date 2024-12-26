@@ -22,6 +22,7 @@ import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotSer
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.replication.Replicable;
 
@@ -111,7 +112,7 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> serialNumbers, TimeRange timeRange);
     
-    void addDataAccessWindow(DataAccessWindow daw);
+    DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
     
     void removeDataAccessWindow(long dawId);
 
