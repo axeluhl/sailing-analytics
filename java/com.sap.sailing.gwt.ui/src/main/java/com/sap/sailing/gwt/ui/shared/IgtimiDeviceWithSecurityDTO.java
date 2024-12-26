@@ -17,6 +17,9 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
     private String name;
     private String serialNumber;
     private String serviceTag;
+    
+    @Deprecated // GWT serialization only
+    IgtimiDeviceWithSecurityDTO() {}
 
     public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, String serviceTag) {
         this.id = id;
@@ -79,5 +82,4 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
     public QualifiedObjectIdentifier getIdentifier() {
         return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
     }
-
 }

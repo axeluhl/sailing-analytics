@@ -176,7 +176,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         JSONObject devicesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Device> result = new ArrayList<>();
         for (Object deviceJson : (JSONArray) devicesJson.get("devices")) {
-            Device device = new DeviceDeserializer().createDeviceFromJson((JSONObject) ((JSONObject) deviceJson).get("device"));
+            Device device = new DeviceDeserializer().createDeviceFromJson((JSONObject) deviceJson);
             result.add(device);
         }
         return result;

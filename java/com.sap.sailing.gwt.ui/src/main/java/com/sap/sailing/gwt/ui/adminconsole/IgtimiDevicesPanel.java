@@ -107,9 +107,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-
         // setup table
         final FlushableCellTable<IgtimiDeviceWithSecurityDTO> cellTable = new FlushableCellTable<>(/* pageSize */ 50,
                 tableRes);

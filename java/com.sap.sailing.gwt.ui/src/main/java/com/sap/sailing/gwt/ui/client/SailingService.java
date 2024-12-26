@@ -9,9 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.json.simple.parser.ParseException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -54,7 +52,6 @@ import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImp
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
-import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -65,6 +62,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -423,7 +421,7 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     SerializationDummy serializationDummy(PersonDTO dummy, CountryCode ccDummy,
             PreciseCompactPosition preciseCompactPosition, TypeRelativeObjectIdentifier typeRelativeObjectIdentifier,
             SecondsDurationImpl secondsDuration, KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl,
-            HasPermissions hasPermissions) throws UnauthorizedException;
+            HasPermissions hasPermissions, IgtimiDeviceWithSecurityDTO igtimiDeviceWithSecurityDTO) throws UnauthorizedException;
 
     Collection<CompetitorDTO> getEliminatedCompetitors(String leaderboardName) throws UnauthorizedException;
 
@@ -491,8 +489,8 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      */
     String createRaceBoardLinkQrCode(String url);
 
-    Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws UnauthorizedException, IllegalStateException, ClientProtocolException, IOException, ParseException;
-
+    Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws Exception;
+    
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
      */

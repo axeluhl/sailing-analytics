@@ -442,7 +442,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     void serializationDummy(PersonDTO dummy, CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
             KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions,
-            AsyncCallback<SerializationDummy> callback);
+            IgtimiDeviceWithSecurityDTO igtimiDeviceWithSecurityDTO, AsyncCallback<SerializationDummy> callback);
 
     /**
      * @param leaderboardName

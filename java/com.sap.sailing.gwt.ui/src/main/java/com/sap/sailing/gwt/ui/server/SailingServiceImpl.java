@@ -768,7 +768,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public SerializationDummy serializationDummy(PersonDTO dummy,
             CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
-            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions) {
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions,
+            IgtimiDeviceWithSecurityDTO igtimiDeviceWithSecurityDTO) {
         return null;
     }
 

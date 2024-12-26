@@ -20,6 +20,9 @@ public class IgtimiDataAccessWindowWithSecurityDTO implements SecuredDTO {
     private Date from;
     private Date to;
     
+    @Deprecated // GWT serialization only
+    IgtimiDataAccessWindowWithSecurityDTO() {}
+    
     public IgtimiDataAccessWindowWithSecurityDTO(long id, String deviceSerialNumber, Date from, Date to) {
         this.id = id;
         this.deviceSerialNumber = deviceSerialNumber;

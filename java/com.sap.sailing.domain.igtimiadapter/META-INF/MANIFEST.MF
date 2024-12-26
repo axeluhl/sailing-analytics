@@ -49,3 +49,4 @@ Export-Package: com.igtimi,
  com.sap.sailing.domain.igtimiadapter.impl;x-friends:="com.sap.sailing.domain.igtimiadapter.gateway",
  com.sap.sailing.domain.igtimiadapter.shared
 Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter
+Bundle-ActivationPolicy: lazy
