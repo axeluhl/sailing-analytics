@@ -576,7 +576,9 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
     void addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to, AsyncCallback<IgtimiDataAccessWindowWithSecurityDTO> asyncCallback);
-    
+
+    void removeIgtimiDataAccessWindow(long id, AsyncCallback<Void> asyncCallback);
+
     void removeIgtimiDevice(String deviceSerialNumber, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
@@ -695,5 +697,4 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            configuration object is {@code null}, this means that the original password is to be left unchanged.
      */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
-
 }

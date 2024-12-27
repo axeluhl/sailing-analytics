@@ -1020,6 +1020,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String doYouReallyWantToRemoveIgtimiDevice(String accountEmail);
     String igtimiWindImport();
     String addIgtimiDataAccessWindow();
+    String doYouReallyWantToRemoveIgtimiDataAccessWindow(String deviceSerialNumber, String from, String to);
+    String errorTryingToRemoveIgtimiDataAccessWindow(String id, String message);
+    String successfullyRemovedIgtimiDataAccessWindow(String id);
     String deviceSerialNumberMustNotBeEmpty();
     String errorCreatingDataAccessWindow(String deviceSerialNumber, String message);
     String errorTryingToRemoveIgtimiDevice(String deviceSerialNumber, String message);

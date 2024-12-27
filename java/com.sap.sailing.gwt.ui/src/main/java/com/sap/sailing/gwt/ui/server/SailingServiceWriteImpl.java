@@ -2094,6 +2094,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public void removeIgtimiDataAccessWindow(long id) {
+        final RiotServer riotServer = getRiotServer();
+        final DataAccessWindow daw = riotServer.getDataAccessWindowById(id);
+        if (daw != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(daw, ()->getRiotServer().removeDataAccessWindow(id));
+        }
+    }
+
+    @Override
     public void removeIgtimiDevice(String serialNumber) {
         final RiotServer riotServer = getRiotServer();
         final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);

@@ -244,6 +244,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             throws IllegalStateException, Exception;
 
     IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to);
+
+    void removeIgtimiDataAccessWindow(long id);
     
     void removeIgtimiDevice(String serialNumber);
 
