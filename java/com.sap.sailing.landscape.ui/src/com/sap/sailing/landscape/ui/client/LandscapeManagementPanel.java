@@ -24,7 +24,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -1265,7 +1265,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
 
             @Override
-            protected FocusWidget getInitialFocusWidget() {
+            protected Focusable getInitialFocusWidget() {
                 return bearerTokenOrNullForApplicationReplicaSetToArchiveBox;
             }
 
@@ -1342,7 +1342,7 @@ public class LandscapeManagementPanel extends SimplePanel {
             }
 
             @Override
-            protected FocusWidget getInitialFocusWidget() {
+            protected Focusable getInitialFocusWidget() {
                 return useDynamicLoadBalancerCheckbox;
             }
 

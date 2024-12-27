@@ -21,12 +21,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -107,7 +107,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         this.sailingServiceWrite = presenter.getSailingService();
         this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         // setup table
         final FlushableCellTable<IgtimiDeviceWithSecurityDTO> cellTable = new FlushableCellTable<>(/* pageSize */ 50,
                 tableRes);
@@ -163,8 +163,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         add(controlsPanel);
         add(cellTable);
         // add button
-        final Button addDeviceButton = buttonPanel.addCreateAction(stringMessages.addIgtimiDataAccessWindow(), () -> addDataAccessWindow());
-        addDeviceButton.ensureDebugId("addIgtimiDevice");
+        final Button addDataAccessWindoweButton = buttonPanel.addCreateAction(stringMessages.addIgtimiDataAccessWindow(), () -> addDataAccessWindow());
+        addDataAccessWindoweButton.ensureDebugId("addIgtimiDataAccessWindow");
     }
 
     private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiDevicesTable(
@@ -266,7 +266,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     }
 
     private class AddDataAccessWindowDialog extends DataEntryDialogWithDateTimeBox<DataAccessWindowData> {
-        private TextBox deviceSerialNumber;
+        private SuggestBox deviceSerialNumber;
         private DateAndTimeInput from;
         private DateAndTimeInput to;
 
@@ -322,8 +322,12 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         protected Widget getAdditionalWidget() {
             Grid grid = new Grid(3, 2);
             grid.setWidget(0, 0, new Label(stringMessages.serialNumber()));
-            deviceSerialNumber = createTextBox(""); // TODO bug6059: use an Oracle based on all existing devices
+            deviceSerialNumber = createSuggestBox(
+                    Util.stream(filterAccountsPanel.getAll()).map(d->d.getSerialNumber()).sorted()::iterator);
             deviceSerialNumber.ensureDebugId("igtimiDeviceSerialNumber");
+            if (refreshableDevicesSelectionModel.getSelectedSet().size() == 1) {
+                deviceSerialNumber.setText(refreshableDevicesSelectionModel.getSelectedSet().iterator().next().getSerialNumber());
+            }
             grid.setWidget(0, 1, deviceSerialNumber);
             grid.setWidget(1, 0, new Label(stringMessages.from()));
             from = createDateTimeBox(/* initial value */ null, Accuracy.SECONDS);
@@ -337,7 +341,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         }
 
         @Override
-        protected FocusWidget getInitialFocusWidget() {
+        protected Focusable getInitialFocusWidget() {
             return deviceSerialNumber;
         }
 
