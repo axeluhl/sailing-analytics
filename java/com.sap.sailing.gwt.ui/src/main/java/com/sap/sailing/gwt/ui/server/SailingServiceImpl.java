@@ -254,6 +254,7 @@ import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -546,7 +547,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterTracker;
 
-    private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
+    private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiConnectionFactoryTracker;
+    
+    private final ServiceTracker<RiotServer, RiotServer> riotServerTracker;
 
     private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
 
@@ -608,7 +611,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
+        igtimiConnectionFactoryTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
+        riotServerTracker = ServiceTrackerFactory.createAndOpen(context, RiotServer.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
@@ -4234,9 +4238,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                getIgtimiConnectionFactory().createConnection(
-                        ()->getSecurityService().getCurrentUser() == null ? null
-                                : getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName())).getDevices(), this::toSecuredIgtimiDeviceDTO);
+                getRiotServer().getDevices(), this::toSecuredIgtimiDeviceDTO);
     }
 
     private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice) {
@@ -4250,7 +4252,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     protected IgtimiConnectionFactory getIgtimiConnectionFactory() {
-        return igtimiAdapterTracker.getService();
+        return igtimiConnectionFactoryTracker.getService();
+    }
+    
+    protected RiotServer getRiotServer() {
+        return riotServerTracker.getService();
     }
 
     protected RaceLogTrackingAdapterFactory getRaceLogTrackingAdapterFactory() {

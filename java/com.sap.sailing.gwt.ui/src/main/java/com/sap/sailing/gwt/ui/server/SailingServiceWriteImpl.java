@@ -226,6 +226,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -2081,12 +2082,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to) {
-        final IgtimiConnection igtimiConnection = createIgtimiConnection();
         final DataAccessWindow result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
                 new TypeRelativeObjectIdentifier(deviceSerialNumber, ""+from.getTime(), ""+to.getTime()),
                 "Data Access Window for device "+deviceSerialNumber+" from "+from+" to "+to,
-                ()->igtimiConnection.createDataAccessWindow(deviceSerialNumber, TimePoint.of(from), TimePoint.of(to)));
+                ()->getRiotServer().createDataAccessWindow(deviceSerialNumber, TimePoint.of(from), TimePoint.of(to)));
         final IgtimiDataAccessWindowWithSecurityDTO resultWithSecurity = new IgtimiDataAccessWindowWithSecurityDTO(result.getId(), result.getDeviceSerialNumber(),
                 result.getStartTime().asDate(), result.getEndTime().asDate());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), resultWithSecurity);
@@ -2095,11 +2095,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeIgtimiDevice(String serialNumber) {
-        final IgtimiConnection igtimiConnection = createIgtimiConnection();
-        final Device existingDevice = igtimiConnection.getDeviceBySerialNumber(serialNumber);
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
         if (existingDevice != null) {
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingDevice, () -> {
-                igtimiConnection.removeDevice(existingDevice);
+                riotServer.removeDevice(existingDevice.getId());
             });
         }
     }
