@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter;
 import com.sap.sailing.domain.igtimiadapter.impl.DataAccessWindowImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
@@ -24,5 +25,11 @@ public interface DataAccessWindow extends HasId, HasStartAndEndTime, WithQualifi
 
     static DataAccessWindow create(long id, TimePoint startTime, TimePoint endTime, String deviceSerialNumber) {
         return new DataAccessWindowImpl(id, startTime, endTime, deviceSerialNumber);
+    }
+    
+    static TypeRelativeObjectIdentifier createTypeRelativeObjectIdentifier(String deviceSerialNumber, TimePoint startTime, TimePoint endTime) {
+        return new TypeRelativeObjectIdentifier(deviceSerialNumber,
+                ""+(startTime==null?"null":startTime.asMillis()),
+                ""+(endTime==null?"null":endTime.asMillis()));
     }
 }

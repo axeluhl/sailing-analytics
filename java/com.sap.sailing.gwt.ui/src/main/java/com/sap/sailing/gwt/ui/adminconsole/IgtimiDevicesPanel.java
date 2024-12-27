@@ -21,6 +21,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
@@ -112,10 +114,13 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         this.stringMessages = stringMessages;
         final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         // setup devices table
+        final CaptionPanel devicesCaptionPanel = new CaptionPanel(stringMessages.igtimiDevices());
+        final VerticalPanel devicesCaptionPanelContents = new VerticalPanel();
+        devicesCaptionPanel.add(devicesCaptionPanelContents);
         final FlushableCellTable<IgtimiDeviceWithSecurityDTO> devicesTable = new FlushableCellTable<>(/* pageSize */ 50, tableRes);
         final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredDevices = new ListDataProvider<>();
         filterDevicesPanel = new LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO>(
-                new Label(stringMessages.igtimiDevices()), Collections.emptyList(), filteredDevices, stringMessages) {
+                new Label(stringMessages.filterBy()), Collections.emptyList(), filteredDevices, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(IgtimiDeviceWithSecurityDTO t) {
                 final Set<String> strings = new HashSet<>();
@@ -147,7 +152,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         devicesControlsPanel.add(buttonPanel);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refreshDevices());
         // setup controls
-        final Button removeDeviceButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        final Button removeDeviceButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableDevicesSelectionModel,
+                /* with confirmation */ true, () -> {
             if (refreshableDevicesSelectionModel.getSelectedSet().size() > 0) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiDevices())) {
                     for (IgtimiDeviceWithSecurityDTO device : refreshableDevicesSelectionModel.getSelectedSet()) {
@@ -157,13 +163,17 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
             }
         });
         removeDeviceButton.setEnabled(false);
-        add(devicesControlsPanel);
-        add(devicesTable);
+        devicesCaptionPanelContents.add(devicesControlsPanel);
+        devicesCaptionPanelContents.add(devicesTable);
+        add(devicesCaptionPanel);
         // set up Data Access Window table
+        final CaptionPanel dataAccessWindowsCaptionPanel = new CaptionPanel(stringMessages.igtimiDataAccessWindows());
+        final VerticalPanel dataAccessWindowsCaptionPanelContents = new VerticalPanel();
+        dataAccessWindowsCaptionPanel.add(dataAccessWindowsCaptionPanelContents);
         final FlushableCellTable<IgtimiDataAccessWindowWithSecurityDTO> dawTable = new FlushableCellTable<>(/* pageSize */ 50, tableRes);
         final ListDataProvider<IgtimiDataAccessWindowWithSecurityDTO> filteredDAWs = new ListDataProvider<>();
         filterDataAccessWindowPanel = new LabeledAbstractFilterablePanel<IgtimiDataAccessWindowWithSecurityDTO>(
-                new Label(stringMessages.igtimiDataAccessWindows()), Collections.emptyList(), filteredDAWs, stringMessages) {
+                new Label(stringMessages.filterBy()), Collections.emptyList(), filteredDAWs, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(IgtimiDataAccessWindowWithSecurityDTO t) {
                 final Set<String> strings = new HashSet<>();
@@ -192,7 +202,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         dawControlsPanel.add(dawButtonPanel);
         dawButtonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refreshDataAccessWindows());
         // setup controls
-        final Button removeDAWButton = dawButtonPanel.addRemoveAction(stringMessages.remove(), () -> {
+        final Button removeDAWButton = dawButtonPanel.addRemoveAction(stringMessages.remove(), refreshableDataAccessWindowsSelectionModel,
+                /* with confirmation */ true, () -> {
             if (refreshableDataAccessWindowsSelectionModel.getSelectedSet().size() > 0) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiDataAccessWindows())) {
                     for (IgtimiDataAccessWindowWithSecurityDTO daw : refreshableDataAccessWindowsSelectionModel.getSelectedSet()) {
@@ -205,8 +216,10 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         refreshableDevicesSelectionModel.addSelectionChangeHandler(
                 e -> {
                     removeDeviceButton.setEnabled(refreshableDevicesSelectionModel.getSelectedSet().size() > 0);
-                    dawTable.setVisible(refreshableDevicesSelectionModel.getSelectedSet().size() == 1);
-                    if (refreshableDevicesSelectionModel.getSelectedSet().size() == 1) {
+                    final boolean exactlyOneDeviceSelected = refreshableDevicesSelectionModel.getSelectedSet().size() == 1;
+                    dawTable.setVisible(exactlyOneDeviceSelected);
+                    dawControlsPanel.setVisible(exactlyOneDeviceSelected);
+                    if (exactlyOneDeviceSelected) {
                         filterDataAccessWindowPanel.search(refreshableDevicesSelectionModel.getSelectedSet().iterator().next().getSerialNumber());
                     }
                 });
@@ -214,8 +227,9 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 e -> {
                     removeDAWButton.setEnabled(refreshableDataAccessWindowsSelectionModel.getSelectedSet().size() > 0);
                 });
-        add(dawControlsPanel);
-        add(dawTable);
+        dataAccessWindowsCaptionPanelContents.add(dawControlsPanel);
+        dataAccessWindowsCaptionPanelContents.add(dawTable);
+        add(dataAccessWindowsCaptionPanel);
         // "Add" button for DAWs
         final Button addDataAccessWindoweButton = dawButtonPanel.addCreateAction(stringMessages.addIgtimiDataAccessWindow(), () -> addDataAccessWindow());
         addDataAccessWindoweButton.ensureDebugId("addIgtimiDataAccessWindow");

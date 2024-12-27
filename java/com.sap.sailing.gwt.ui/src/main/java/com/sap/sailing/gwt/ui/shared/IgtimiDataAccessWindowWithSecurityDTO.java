@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -76,7 +77,13 @@ public class IgtimiDataAccessWindowWithSecurityDTO implements SecuredDTO {
     }
 
     private TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
-        return new TypeRelativeObjectIdentifier(deviceSerialNumber);
+        // TODO it would be nice to factor the redundancy with DataAccessWindow.getTypeRelativeObjectIdentifier but it
+        // would require introducing a new .common bundle
+        final TimePoint startTime = TimePoint.of(getFrom());
+        final TimePoint endTime = TimePoint.of(getTo());
+        return new TypeRelativeObjectIdentifier(getSerialNumber(),
+                "" + (startTime == null ? "null" : startTime.asMillis()),
+                "" + (endTime == null ? "null" : endTime.asMillis()));
     }
 
     @Override

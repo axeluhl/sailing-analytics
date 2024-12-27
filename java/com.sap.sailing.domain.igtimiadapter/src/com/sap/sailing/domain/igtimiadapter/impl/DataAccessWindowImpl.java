@@ -5,7 +5,6 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow {
     private static final long serialVersionUID = -7076166985273850220L;
@@ -42,9 +41,8 @@ public class DataAccessWindowImpl extends HasIdImpl implements DataAccessWindow 
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getPermissionType().getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(getDeviceSerialNumber(),
-                ""+(getStartTime()==null?"null":getStartTime().asMillis()),
-                ""+(getEndTime()==null?"null":getEndTime().asMillis())));
+        return getPermissionType().getQualifiedObjectIdentifier(DataAccessWindow.createTypeRelativeObjectIdentifier(
+                getDeviceSerialNumber(), getStartTime(), getEndTime()));
     }
 
     @Override
