@@ -49,7 +49,7 @@ public class Activator implements BundleActivator {
     
     private static Activator INSTANCE;
     
-    private final Future<IgtimiConnectionFactory> connectionFactory;
+    private final IgtimiConnectionFactory connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
     private FullyInitializedReplicableTracker<SecurityService> securityServiceServiceTracker;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
@@ -59,22 +59,17 @@ public class Activator implements BundleActivator {
         logger.info(getClass().getName()+" constructor");
         final URL baseUrl = new URL(System.getProperty(IGTIMI_BASE_URL_PROPERTY_NAME, IGTIMI_BASE_URL_DEFAULT));
         logger.info("Using base URL "+baseUrl+" for the Igtimi REST API");
-        connectionFactory = executor.submit(new Callable<IgtimiConnectionFactory>() {
-            @Override
-            public IgtimiConnectionFactory call() {
-                logger.info("Creating IgtimiConnectionFactory");
-                final String defaultBearerToken = System.getProperty(IGTIMI_DEFAULT_BEARER_TOKEN_PROPERTY_NAME);
-                if (defaultBearerToken != null) {
-                    logger.info("A default bearer token has been provided for authentication to the Igtimi REST API at "+baseUrl);
-                }
-                return new IgtimiConnectionFactoryImpl(baseUrl, defaultBearerToken);
-            }
-        });
+        logger.info("Creating IgtimiConnectionFactory");
+        final String defaultBearerToken = System.getProperty(IGTIMI_DEFAULT_BEARER_TOKEN_PROPERTY_NAME);
+        if (defaultBearerToken != null) {
+            logger.info("A default bearer token has been provided for authentication to the Igtimi REST API at "+baseUrl);
+        }
+        connectionFactory = new IgtimiConnectionFactoryImpl(baseUrl, defaultBearerToken);
         windTrackerFactory = executor.submit(new Callable<IgtimiWindTrackerFactory>() {
             @Override
             public IgtimiWindTrackerFactory call() throws InterruptedException, ExecutionException {
                 logger.info("Creating IgtimiWindTrackerFactory");
-                return new IgtimiWindTrackerFactory(connectionFactory.get());
+                return new IgtimiWindTrackerFactory(connectionFactory);
             }
         });
     }
@@ -91,7 +86,7 @@ public class Activator implements BundleActivator {
             @Override
             public void run() {
                 try {
-                    context.registerService(IgtimiConnectionFactory.class, connectionFactory.get(), /* properties */ null);
+                    context.registerService(IgtimiConnectionFactory.class, connectionFactory, /* properties */ null);
                     context.registerService(WindTrackerFactory.class, windTrackerFactory.get(), /* properties */ null);
                     context.registerService(IgtimiWindTrackerFactory.class, windTrackerFactory.get(), /* properties */ null);
                 } catch (InterruptedException | ExecutionException e) {
@@ -118,6 +113,10 @@ public class Activator implements BundleActivator {
         }
     }
 
+    public IgtimiConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+    
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
         try {
             return windTrackerFactory.get();

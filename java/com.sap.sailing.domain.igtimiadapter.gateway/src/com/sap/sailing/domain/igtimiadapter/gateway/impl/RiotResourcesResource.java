@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path(DATA)
-    public Response getResourcesData(@Context UriInfo ui) {
+    public Response getResourcesData(@Context UriInfo ui) throws MalformedURLException {
         final MultivaluedMap<String, String> queryParams = ui.getQueryParameters();
         final String startTimeString = queryParams.getFirst("start_time");
         final TimePoint startTime = startTimeString == null ? null : TimePoint.of(Long.valueOf(startTimeString));

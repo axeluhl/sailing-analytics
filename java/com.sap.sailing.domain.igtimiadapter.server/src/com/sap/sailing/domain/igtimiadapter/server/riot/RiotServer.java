@@ -1,8 +1,12 @@
 package com.sap.sailing.domain.igtimiadapter.server.riot;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Set;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
@@ -116,8 +120,7 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     void removeDataAccessWindow(long dawId);
 
-    // TODO clarify what this means in the presence of replication, when run on a Replica
-    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases);
+    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws MalformedURLException, IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
 

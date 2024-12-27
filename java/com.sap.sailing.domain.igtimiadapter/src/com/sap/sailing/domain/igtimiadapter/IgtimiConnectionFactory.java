@@ -1,8 +1,14 @@
 package com.sap.sailing.domain.igtimiadapter;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.function.Supplier;
 
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
+
+import com.sap.sailing.domain.igtimiadapter.impl.Activator;
+import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sse.security.SecurityService;
 
 /**
@@ -64,5 +70,22 @@ public interface IgtimiConnectionFactory {
      */
     default IgtimiConnection createConnection(Supplier<String> bearerTokenSupplierIfHasNoCredentials) {
         return hasCredentials() ? createConnection() : createConnection(bearerTokenSupplierIfHasNoCredentials.get());
+    }
+
+    /**
+     * @param defaultBearerToken
+     *            Used when {@code null} is passed to {@link #createConnection(String)} as a bearer token. If this field
+     *            is {@code null}, too, requests to the REST API will be made through the connections returned from
+     *            {@link #createConnection(String)} without an authenticated user.
+     */
+    static IgtimiConnectionFactory create(URL baseUrl, String defaultBearerToken) {
+        return new IgtimiConnectionFactoryImpl(baseUrl, defaultBearerToken);
+    }
+    
+    /**
+     * Delivers the default connection factory as per the system property configuration read by this bundle's activator.
+     */
+    static IgtimiConnectionFactory getDefault() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
+        return Activator.getInstance().getConnectionFactory();
     }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
@@ -25,6 +26,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
@@ -47,6 +50,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.util.impl.SecuredServerImpl;
+import com.sun.jersey.core.util.Base64;
 
 public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiConnection {
     private static final Logger logger = Logger.getLogger(IgtimiConnectionImpl.class.getName());
@@ -91,8 +95,21 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     @Override
     public Iterable<Fix> getResourceData(final TimePoint startTime, final TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        return getResourceContent(startTime, endTime, deviceSerialNumbers, typeAndCompression,
+                resourceDataJson->{
+                    try {
+                        return new FixFactory().createFixes(resourceDataJson);
+                    } catch (InvalidProtocolBufferException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    private <T> Iterable<T> getResourceContent(final TimePoint startTime, final TimePoint endTime,
+            Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression,
+            Function<JSONObject, Iterable<T>> messageParser) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         logger.info("Requested resource data from "+startTime+" to "+endTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
-        final List<Fix> result = new ArrayList<>(); 
+        final List<T> result = new ArrayList<>(); 
         // Cut interval into slices that are at most one week long. See also the discussion at
         // http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=2002 that talks about a one-month limitation
         // imposed by the Igtimi API
@@ -113,7 +130,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
                         + " to " + windowEndTime + " from devices " + deviceSerialNumbers + ": " + error
                         + (reason == null ? "" : ". Reason: " + reason));
             }
-            Util.addAll(new FixFactory().createFixes(resourceDataJson), result);
+            Util.addAll(messageParser.apply(resourceDataJson), result);
             windowStartTime = windowEndTime.plus(1);
         }
         return result;
@@ -127,6 +144,29 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
             typeAndCompression.put(type, 0.0);
         }
         return getResourceData(startTime, endTime, deviceSerialNumbers, typeAndCompression);
+    }
+    
+    @Override
+    public Iterable<Msg> getMessages(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers, Type[] types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+        final Map<Type, Double> typeAndCompression = new HashMap<>();
+        for (final Type type : types) {
+            typeAndCompression.put(type, 0.0);
+        }
+        return getResourceContent(startTime, endTime, deviceSerialNumbers, typeAndCompression,
+                resourceDataJson->{
+                    final List<Msg> messages = new ArrayList<>();
+                    for (final Entry<Object, Object> e : resourceDataJson.entrySet()) {
+                        final JSONArray messagesAsBase64 = (JSONArray) e.getValue();
+                        for (final Object msgAsBase64 : messagesAsBase64) {
+                            try {
+                                messages.add(Msg.parseFrom(Base64.decode(msgAsBase64.toString())));
+                            } catch (InvalidProtocolBufferException e1) {
+                                throw new RuntimeException(e1);
+                            }
+                        }
+                    }
+                    return messages;
+                });
     }
 
     @Override
@@ -176,8 +216,8 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
 
     @Override
     public Iterable<Device> getDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpGet getResources = new HttpGet(getDevicesUrl());
-        JSONObject devicesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
+        final HttpGet getResources = new HttpGet(getDevicesUrl());
+        final JSONObject devicesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Device> result = new ArrayList<>();
         for (Object deviceJson : (JSONArray) devicesJson.get("devices")) {
             Device device = new DeviceDeserializer().createDeviceFromJson((JSONObject) deviceJson);
@@ -187,14 +227,8 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     }
 
     @Override
-    public Device getDeviceBySerialNumber(String serialNumber) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public void removeDevice(Device existingDevice) throws ClientProtocolException, IOException, ParseException {
-        HttpDelete getResources = new HttpDelete(getDeleteDeviceUrl(existingDevice.getId()));
+        final HttpDelete getResources = new HttpDelete(getDeleteDeviceUrl(existingDevice.getId()));
         if (getJsonParsedResponse(getResources).getB() >= 400) {
             throw new RuntimeException("Error deleting device with ID "+existingDevice.getId());
         }

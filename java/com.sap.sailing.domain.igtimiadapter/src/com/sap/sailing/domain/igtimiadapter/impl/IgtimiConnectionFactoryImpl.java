@@ -19,7 +19,10 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
      * @param baseUrl
      *            base URL of the service where Igtimi wind data can be requested from; example:
      *            {@code https://wind.sapsailing.com}
-     * @param defaultBearerToken if no explicit 
+     * @param defaultBearerToken
+     *            Used when {@code null} is passed to {@link #createConnection(String)} as a bearer token. If this field
+     *            is {@code null}, too, requests to the REST API will be made through the connections returned from
+     *            {@link #createConnection(String)} without an authenticated user.
      */
     public IgtimiConnectionFactoryImpl(URL baseUrl, String defaultBearerToken) {
         this.baseUrl = baseUrl;

@@ -9,6 +9,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -65,6 +66,8 @@ public interface IgtimiConnection {
             Type... types) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
 
+    Iterable<Msg> getMessages(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers, Type[] types) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+
     /**
      * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
      * any type. The fixes received are forwarded to the {@link BulkFixReceiver} <code>bulkFixReceiver</code> in one call.
@@ -107,8 +110,6 @@ public interface IgtimiConnection {
      */
     Iterable<Device> getDevices() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
     
-    Device getDeviceBySerialNumber(String serialNumber);
-    
     void removeDevice(Device existingDevice) throws ClientProtocolException, IOException, ParseException;
     
     /**
@@ -135,7 +136,8 @@ public interface IgtimiConnection {
     DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime) throws ClientProtocolException, IOException, ParseException;
 
     /**
-     * Finds all data access windows that have wind data for the time span around the race, loads their wind data and
+     * Finds al@Override
+    l data access windows that have wind data for the time span around the race, loads their wind data and
      * {@link DynamicTrackedRace#recordWind(com.sap.sailing.domain.tracking.Wind, com.sap.sailing.domain.common.WindSource)
      * records it} in the tracked races.
      * 

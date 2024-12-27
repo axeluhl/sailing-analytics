@@ -8,6 +8,7 @@ import java.lang.Thread.State;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.SocketAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -24,6 +25,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.client.ClientProtocolException;
+import org.json.simple.parser.ParseException;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
@@ -35,7 +39,10 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.DataPointTimePointExtractor;
 import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.Resource;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.Activator;
@@ -510,14 +517,24 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         final Iterable<Msg> result;
         if (getMasterDescriptor() == null) {
             result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases);
         } else {
-            // TODO fetch the data from the primary/master "somehow"
-            result = Collections.emptySet();
-            logger.severe("TODO: fetch data from primary!!!");
+            final int masterPort = getMasterDescriptor().getServletPort();
+            final String masterHostname = getMasterDescriptor().getHostname();
+            final SecurityService securityService = Activator.getInstance().getSecurityService();
+            final String currentUserBearerToken = securityService == null ? null : securityService.getAccessToken(securityService.getCurrentUser().getName());
+            final IgtimiConnectionFactory igtimiConnectionFactory =
+                    IgtimiConnectionFactory.create(new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/"), currentUserBearerToken);
+            final IgtimiConnection connection = igtimiConnectionFactory.createConnection();
+            final Type[] types = new Type[dataCases.size()];
+            int i=0;
+            for (final DataCase dataCase : dataCases) {
+                types[i++] = Type.valueOf(dataCase.getNumber());
+            }
+            result = connection.getMessages(timeRange.from(), timeRange.to(), Collections.singleton(deviceSerialNumber), types);
         }
         return result;
     }
