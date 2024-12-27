@@ -21,7 +21,8 @@ public class IgtimiDevicesPanelSupplier extends AdminConsolePanelSupplier<Igtimi
     public IgtimiDevicesPanel init() {
         IgtimiDevicesPanel igtimiAccountsPanel = new IgtimiDevicesPanel(presenter, stringMessages);
         igtimiAccountsPanel.ensureDebugId("IgtimiDevices");
-        igtimiAccountsPanel.refresh();
+        igtimiAccountsPanel.refreshDevices();
+        igtimiAccountsPanel.refreshDataAccessWindows();
         return igtimiAccountsPanel;
     }
 

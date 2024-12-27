@@ -251,6 +251,7 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -349,6 +350,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -4236,9 +4238,15 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                getRiotServer().getDevices(), this::toSecuredIgtimiDeviceDTO);
+    public ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        return new ArrayList<>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getRiotServer().getDevices(), this::toSecuredIgtimiDeviceDTO)));
+    }
+
+    @Override
+    public ArrayList<IgtimiDataAccessWindowWithSecurityDTO> getAllIgtimiDataAccessWindowsWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        return new ArrayList<IgtimiDataAccessWindowWithSecurityDTO>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getRiotServer().getDataAccessWindows(), this::toSecuredIgtimiDataAccessWindowDTO)));
     }
 
     private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice) {
@@ -4246,9 +4254,19 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final String serialNumber = igtimiDevice.getSerialNumber();
         final String name = igtimiDevice.getName();
         final String serviceTag = igtimiDevice.getServiceTag();
-        final IgtimiDeviceWithSecurityDTO securedAccount = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name, serviceTag);
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount);
-        return securedAccount;
+        final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name, serviceTag);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDevice);
+        return securedDevice;
+    }
+
+    private IgtimiDataAccessWindowWithSecurityDTO toSecuredIgtimiDataAccessWindowDTO(final DataAccessWindow daw) {
+        final long id = daw.getId();
+        final String serialNumber = daw.getDeviceSerialNumber();
+        final Date from = daw.getStartTime() == null ? null : daw.getStartTime().asDate();
+        final Date to = daw.getEndTime() == null ? null : daw.getEndTime().asDate();
+        final IgtimiDataAccessWindowWithSecurityDTO securedDAW = new IgtimiDataAccessWindowWithSecurityDTO(id, serialNumber, from, to);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDAW);
+        return securedDAW;
     }
 
     protected IgtimiConnectionFactory getIgtimiConnectionFactory() {

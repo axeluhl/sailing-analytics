@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
@@ -489,7 +490,9 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
      */
     String createRaceBoardLinkQrCode(String url);
 
-    Iterable<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws Exception;
+    ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws Exception;
+    
+    ArrayList<IgtimiDataAccessWindowWithSecurityDTO> getAllIgtimiDataAccessWindowsWithSecurity() throws Exception;
     
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta

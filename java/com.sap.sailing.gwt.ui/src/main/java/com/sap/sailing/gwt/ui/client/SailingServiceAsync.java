@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.shiro.authz.AuthorizationException;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -49,7 +50,6 @@ import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
-import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
@@ -59,6 +59,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -540,7 +542,9 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
      */
     void createRaceBoardLinkQrCode(String url, AsyncCallback<String> asyncCallback);
 
-    void getAllIgtimiDevicesWithSecurity(AsyncCallback<Iterable<IgtimiDeviceWithSecurityDTO>> callback);
+    void getAllIgtimiDevicesWithSecurity(AsyncCallback<ArrayList<IgtimiDeviceWithSecurityDTO>> callback);
+
+    void getAllIgtimiDataAccessWindowsWithSecurity(AsyncCallback<ArrayList<IgtimiDataAccessWindowWithSecurityDTO>> callback);
 
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta

@@ -6,6 +6,7 @@ import static com.sap.sse.security.ui.client.component.AccessControlledActionsCo
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -144,7 +145,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         devicesControlsPanel.add(filterDevicesPanel);
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(), SecuredDomainType.IGTIMI_DEVICE);
         devicesControlsPanel.add(buttonPanel);
-        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refreshDevices());
         // setup controls
         final Button removeDeviceButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
             if (refreshableDevicesSelectionModel.getSelectedSet().size() > 0) {
@@ -156,16 +157,13 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
             }
         });
         removeDeviceButton.setEnabled(false);
-        refreshableDevicesSelectionModel.addSelectionChangeHandler(
-                e -> removeDeviceButton.setEnabled(refreshableDevicesSelectionModel.getSelectedSet().size() > 0));
         add(devicesControlsPanel);
         add(devicesTable);
-        // add button
         // set up Data Access Window table
         final FlushableCellTable<IgtimiDataAccessWindowWithSecurityDTO> dawTable = new FlushableCellTable<>(/* pageSize */ 50, tableRes);
         final ListDataProvider<IgtimiDataAccessWindowWithSecurityDTO> filteredDAWs = new ListDataProvider<>();
         filterDataAccessWindowPanel = new LabeledAbstractFilterablePanel<IgtimiDataAccessWindowWithSecurityDTO>(
-                new Label(stringMessages.igtimiDevices()), Collections.emptyList(), filteredDAWs, stringMessages) {
+                new Label(stringMessages.igtimiDataAccessWindows()), Collections.emptyList(), filteredDAWs, stringMessages) {
             @Override
             public Iterable<String> getSearchableStrings(IgtimiDataAccessWindowWithSecurityDTO t) {
                 final Set<String> strings = new HashSet<>();
@@ -189,14 +187,14 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         refreshableDataAccessWindowsSelectionModel = (RefreshableMultiSelectionModel<IgtimiDataAccessWindowWithSecurityDTO>) dawTable.getSelectionModel();
         final Panel dawControlsPanel = new HorizontalPanel();
         filterDataAccessWindowPanel.setUpdatePermissionFilterForCheckbox(daw -> presenter.getUserService().hasPermission(daw, DefaultActions.UPDATE));
-        dawControlsPanel.add(filterDevicesPanel);
+        dawControlsPanel.add(filterDataAccessWindowPanel);
         final AccessControlledButtonPanel dawButtonPanel = new AccessControlledButtonPanel(presenter.getUserService(), SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW);
         dawControlsPanel.add(dawButtonPanel);
-        dawButtonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refresh());
+        dawButtonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refreshDataAccessWindows());
         // setup controls
         final Button removeDAWButton = dawButtonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            if (refreshableDevicesSelectionModel.getSelectedSet().size() > 0) {
-                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiDevices())) {
+            if (refreshableDataAccessWindowsSelectionModel.getSelectedSet().size() > 0) {
+                if (Window.confirm(stringMessages.doYouReallyWantToRemoveTheSelectedIgtimiDataAccessWindows())) {
                     for (IgtimiDataAccessWindowWithSecurityDTO daw : refreshableDataAccessWindowsSelectionModel.getSelectedSet()) {
                         removeDataAccessWindow(daw, filteredDAWs);
                     }
@@ -206,8 +204,15 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         removeDAWButton.setEnabled(false);
         refreshableDevicesSelectionModel.addSelectionChangeHandler(
                 e -> {
-                    removeDAWButton.setEnabled(refreshableDevicesSelectionModel.getSelectedSet().size() > 0);
+                    removeDeviceButton.setEnabled(refreshableDevicesSelectionModel.getSelectedSet().size() > 0);
                     dawTable.setVisible(refreshableDevicesSelectionModel.getSelectedSet().size() == 1);
+                    if (refreshableDevicesSelectionModel.getSelectedSet().size() == 1) {
+                        filterDataAccessWindowPanel.search(refreshableDevicesSelectionModel.getSelectedSet().iterator().next().getSerialNumber());
+                    }
+                });
+        refreshableDataAccessWindowsSelectionModel.addSelectionChangeHandler(
+                e -> {
+                    removeDAWButton.setEnabled(refreshableDataAccessWindowsSelectionModel.getSelectedSet().size() > 0);
                 });
         add(dawControlsPanel);
         add(dawTable);
@@ -257,10 +262,10 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
             }
         });
         final DialogConfig<IgtimiDeviceWithSecurityDTO> config = EditOwnershipDialog
-                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDevices(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<IgtimiDeviceWithSecurityDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDevices(), stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         // add columns to table:
@@ -278,10 +283,10 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
 
     private FlushableCellTable<IgtimiDataAccessWindowWithSecurityDTO> createIgtimiDataAccessWindowsTable(
             final FlushableCellTable<IgtimiDataAccessWindowWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
-            final UserService userService, final ListDataProvider<IgtimiDataAccessWindowWithSecurityDTO> filteredDevices,
-            final LabeledAbstractFilterablePanel<IgtimiDataAccessWindowWithSecurityDTO> filterDevicesPanel) {
-        filteredDevices.addDataDisplay(table);
-        final SelectionCheckboxColumn<IgtimiDataAccessWindowWithSecurityDTO> devicesSelectionCheckboxColumn = new SelectionCheckboxColumn<IgtimiDataAccessWindowWithSecurityDTO>(
+            final UserService userService, final ListDataProvider<IgtimiDataAccessWindowWithSecurityDTO> filteredDAWs,
+            final LabeledAbstractFilterablePanel<IgtimiDataAccessWindowWithSecurityDTO> filterDataAccessWindowsPanel) {
+        filteredDAWs.addDataDisplay(table);
+        final SelectionCheckboxColumn<IgtimiDataAccessWindowWithSecurityDTO> dawsSelectionCheckboxColumn = new SelectionCheckboxColumn<IgtimiDataAccessWindowWithSecurityDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
@@ -295,10 +300,10 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     public int hashCode(IgtimiDataAccessWindowWithSecurityDTO t) {
                         return 7482 ^ (int) t.getId();
                     }
-                }, filterDevicesPanel.getAllListDataProvider(), table);
-        final ListHandler<IgtimiDataAccessWindowWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredDevices.getList());
+                }, filterDataAccessWindowsPanel.getAllListDataProvider(), table);
+        final ListHandler<IgtimiDataAccessWindowWithSecurityDTO> columnSortHandler = new ListHandler<>(filteredDAWs.getList());
         table.addColumnSortHandler(columnSortHandler);
-        columnSortHandler.setComparator(devicesSelectionCheckboxColumn, devicesSelectionCheckboxColumn.getComparator());
+        columnSortHandler.setComparator(dawsSelectionCheckboxColumn, dawsSelectionCheckboxColumn.getComparator());
         final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawIdColumn = new AbstractSortableTextColumn<>(
                 daw -> ""+daw.getId(), columnSortHandler);
         final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawNameColumn = new AbstractSortableTextColumn<>(
@@ -314,18 +319,18 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_DELETE, DELETE, daw -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDataAccessWindow(daw.getSerialNumber(), daw.getFrom().toString(), daw.getTo().toString()))) {
-                removeDataAccessWindow(daw, filteredDevices);
+                removeDataAccessWindow(daw, filteredDAWs);
             }
         });
         final DialogConfig<IgtimiDataAccessWindowWithSecurityDTO> config = EditOwnershipDialog
-                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDataAccessWindows(), stringMessages);
         actionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<IgtimiDataAccessWindowWithSecurityDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refresh(), stringMessages);
+                .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDataAccessWindows(), stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         // add columns to table:
-        table.addColumn(devicesSelectionCheckboxColumn, devicesSelectionCheckboxColumn.getHeader());
+        table.addColumn(dawsSelectionCheckboxColumn, dawsSelectionCheckboxColumn.getHeader());
         table.addColumn(dawIdColumn, stringMessages.id());
         table.addColumn(dawNameColumn, stringMessages.name());
         table.addColumn(dawSerialNumberColumn, stringMessages.serialNumber());
@@ -333,21 +338,35 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         table.addColumn(dawToColumn, stringMessages.to());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
-        table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),
-                devicesSelectionCheckboxColumn.getSelectionManager());
+        table.setSelectionModel(dawsSelectionCheckboxColumn.getSelectionModel(),
+                dawsSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
 
-    public void refresh() {
-        sailingServiceWrite.getAllIgtimiDevicesWithSecurity(new AsyncCallback<Iterable<IgtimiDeviceWithSecurityDTO>>() {
+    public void refreshDevices() {
+        sailingServiceWrite.getAllIgtimiDevicesWithSecurity(new AsyncCallback<ArrayList<IgtimiDeviceWithSecurityDTO>>() {
             @Override
-            public void onSuccess(Iterable<IgtimiDeviceWithSecurityDTO> result) {
+            public void onSuccess(ArrayList<IgtimiDeviceWithSecurityDTO> result) {
                 filterDevicesPanel.updateAll(result);
             }
 
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorFetchingIgtimiDevices(caught.getMessage()));
+            }
+        });
+    }
+
+    public void refreshDataAccessWindows() {
+        sailingServiceWrite.getAllIgtimiDataAccessWindowsWithSecurity(new AsyncCallback<ArrayList<IgtimiDataAccessWindowWithSecurityDTO>>() {
+            @Override
+            public void onSuccess(ArrayList<IgtimiDataAccessWindowWithSecurityDTO> result) {
+                filterDataAccessWindowPanel.updateAll(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorFetchingIgtimiDataAccessWindows(caught.getMessage()));
             }
         });
     }
@@ -464,7 +483,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     }
 
     private void addDataAccessWindow() {
-        new AddDataAccessWindowDialog(this::refresh, sailingServiceWrite, stringMessages, errorReporter).show();
+        new AddDataAccessWindowDialog(this::refreshDataAccessWindows, sailingServiceWrite, stringMessages, errorReporter).show();
     }
 
     private void removeDevice(final IgtimiDeviceWithSecurityDTO device,

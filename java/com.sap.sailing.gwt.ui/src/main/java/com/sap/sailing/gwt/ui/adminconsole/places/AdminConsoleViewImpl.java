@@ -369,7 +369,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     @Override
                     public void refreshAfterBecomingVisible() {
                         if (getWidget() != null) {
-                            getWidget().refresh();
+                            getWidget().refreshDevices();
                         }
                     }
                 }, stringMessages.igtimiDevices(), new IgtimiDevicesPlace((String) null /* no place token */),
