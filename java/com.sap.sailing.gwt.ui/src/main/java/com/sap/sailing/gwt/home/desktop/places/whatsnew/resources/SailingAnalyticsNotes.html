@@ -8,6 +8,12 @@
          <h5 class="articleSubheadline">December 2024</h5>
          <ul class="bulletList">
             <li>Polar data in Data Mining can now be filtered and grouped by sailor profiles.</li>
+            <li>Added a new REST API method: <tt>/api/v1/regattas/{regattaname}/races/{racename}/competitordata</tt>
+                for requesting time series of values for one or more parameters such as rank or distance, for one or more competitors.
+                See <a href="/sailingserver/webservices/api/v1/raceDetailsGetCompetitorData.html">here</a> for more details on what it does.</li>
+            <li>Bug Fix: Accidentally, when hardening the data mining security, Competitor entities were only processed anymore if
+                the user had <tt>READ</tt> and not only <tt>READ_PUBLIC</tt> permission, often leading to empty results.
+                The bug had been introduced late November 2024. Apologies to all data mining users.</li>
          </ul>
          <h5 class="articleSubheadline">November 2024</h5>
          <ul class="bulletList">
