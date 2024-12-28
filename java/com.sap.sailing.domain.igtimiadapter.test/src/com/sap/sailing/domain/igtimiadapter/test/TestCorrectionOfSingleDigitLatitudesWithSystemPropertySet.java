@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 
@@ -78,7 +79,7 @@ public class TestCorrectionOfSingleDigitLatitudesWithSystemPropertySet {
     }
     
     @Test
-    public void testSimpleLatLongConversionForTwoNorthLatDigitsWithTwoDigitMinutes() throws ParseException {
+    public void testSimpleLatLongConversionForTwoNorthLatDigitsWithTwoDigitMinutes() throws ParseException, InvalidProtocolBufferException {
         double latitude = 11.0 + 17.0/60.0; // with two-digit minutes it cannot have been an incorrect parse
         JSONObject json = (JSONObject) new JSONParser().parse("{ \"AA-AA-AAA-5\":{ \"1\":{ \"t\":[ 1360618858970 ], \"1\":[ 172.04 ], \"2\":[ "+latitude+" ] } } }");
         GpsLatLong pos = (GpsLatLong) new FixFactory().createFixes(json).iterator().next();
@@ -87,7 +88,7 @@ public class TestCorrectionOfSingleDigitLatitudesWithSystemPropertySet {
     }
 
     @Test
-    public void testSimpleLatLongConversionForTwoSouthLatDigitsWithTwoDigitMinutes() throws ParseException {
+    public void testSimpleLatLongConversionForTwoSouthLatDigitsWithTwoDigitMinutes() throws ParseException, InvalidProtocolBufferException {
         double latitude = -11.0 - 17.0/60.0; // with two-digit minutes it cannot have been an incorrect parse
         JSONObject json = (JSONObject) new JSONParser().parse("{ \"AA-AA-AAA-5\":{ \"1\":{ \"t\":[ 1360618858970 ], \"1\":[ 172.04 ], \"2\":[ "+latitude+" ] } } }");
         GpsLatLong pos = (GpsLatLong) new FixFactory().createFixes(json).iterator().next();
@@ -96,7 +97,7 @@ public class TestCorrectionOfSingleDigitLatitudesWithSystemPropertySet {
     }
 
     @Test
-    public void testSimpleLatLongConversionForTwoLatDigitsWithOneDigitMinutesFromOriginalSingaporeData() throws ParseException {
+    public void testSimpleLatLongConversionForTwoLatDigitsWithOneDigitMinutesFromOriginalSingaporeData() throws ParseException, InvalidProtocolBufferException {
         // NMEA latitude was "116.9341N", meaning 1° 16.9341' North
         final double incorrectLatitude = 11. + 6.9341/60.;
         final double correctLatitude = 1.0 + 16.9341/60.;
@@ -107,7 +108,7 @@ public class TestCorrectionOfSingleDigitLatitudesWithSystemPropertySet {
     }
 
     @Test
-    public void testSimpleLatLongConversionForTwoSouthLatDigitsWithOneDigitMinutesFromOriginalSingaporeData() throws ParseException {
+    public void testSimpleLatLongConversionForTwoSouthLatDigitsWithOneDigitMinutesFromOriginalSingaporeData() throws ParseException, InvalidProtocolBufferException {
         // NMEA latitude was "116.9341N", meaning 1° 16.9341' North
         final double incorrectLatitude = -11. - 6.9341/60.;
         final double correctLatitude = -1.0 - 16.9341/60.;

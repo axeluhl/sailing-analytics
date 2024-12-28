@@ -11,6 +11,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sse.common.Util;
@@ -24,7 +25,7 @@ public class FixFactoryTest {
     }
     
     @Test
-    public void testUnknownFixTypes() throws ParseException {
+    public void testUnknownFixTypes() throws ParseException, InvalidProtocolBufferException {
         final String[] messages = new String[] {
                                "{\"DC-FE-AAKG\":{\"1\":{\"t\":[1510174025500],\"1\":[170.5044476],\"2\":[-45.87697]}}}",
                                "{\"DC-FE-AAKG\":{\"2\":{\"t\":[1510174025500],\"1\":[1]}}}",

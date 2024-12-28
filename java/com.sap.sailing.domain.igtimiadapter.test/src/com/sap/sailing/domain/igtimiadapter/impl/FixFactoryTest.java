@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AntHrm;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
@@ -103,7 +104,7 @@ public class FixFactoryTest {
     }
     
     @Test
-    public void testFixProduction() {
+    public void testFixProduction() throws InvalidProtocolBufferException {
         FixFactory fixFactory = new FixFactory();
         Iterable<Fix> fixes = fixFactory.createFixes(json);
         assertFalse(Util.isEmpty(fixes));

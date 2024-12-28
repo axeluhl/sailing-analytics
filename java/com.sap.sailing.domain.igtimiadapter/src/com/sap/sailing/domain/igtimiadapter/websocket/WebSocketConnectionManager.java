@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -199,7 +200,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     }
                     logger.finest(()->"Received fixes"+fixes+" for "+this);
                     notifyListeners(fixes);
-                } catch (ParseException e) {
+                } catch (ParseException | InvalidProtocolBufferException e) {
                     logger.log(Level.SEVERE, "Error trying to parse a web socket data package coming from Igtimi "+this, e);
                 }
             } else {

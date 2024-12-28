@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.HttpRequestHeaderConstants;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -122,6 +123,8 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
             logger.info("Obtaining resource data from "+windowStartTime+" to "+windowEndTime+" for devices "+deviceSerialNumbers+" for types "+typeAndCompression);
             final HttpGet getResourceData = new HttpGet(getResourceDataUrl(windowStartTime, windowEndTime,
                     deviceSerialNumbers, typeAndCompression));
+            // resource data can be found only on the primary/master instance, so add the corresponding header to the request:
+            getResourceData.addHeader(HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getA(), HttpRequestHeaderConstants.HEADER_FORWARD_TO_MASTER.getB());
             final JSONObject resourceDataJson = (JSONObject) getJsonParsedResponse(getResourceData).getA();
             final String error = (String) resourceDataJson.get(ERROR);
             if (error != null) {
