@@ -23,6 +23,49 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">December 2024</h2>
+          <ul class="bulletList">
+                <li>The Igtimi WindBot connector has been re-designed. This became necessary because
+                    Riedel Communications GmbH deprecated and then stopped their "Riot" back-end
+                    which so far allowed WindBot and YachtBot devices to register, send their data to and provide
+                    client applications access to live and historic WindBot data.<p>
+                    The new architecture features a built-in "Riot" server replacement in every
+                    Sailing Analytics server. It can be configured using the <tt>igtimi.riot.port</tt>
+                    system property, which is controlled through the <tt>IGTIMI_RIOT_PORT</tt>
+                    environment variable set for the <tt>start</tt> script. When left empty,
+                    the Riot server will listen on a random port unused so far. This port can
+                    be obtained using the <tt>/igtimi/api/v1/server</tt> REST GET method, found
+                    in the <tt>port</tt> attribute of the JSON document responded with.<p>
+                    Devices can be configured to send to that port, directly to the server's IP
+                    address with the specific port, or, e.g., through a network load balancer
+                    such as the Amazon Web Services (AWS) NLB, allowing for multiple servers
+                    such as a primary/master and one or more replicas to be registered for
+                    high availability. With an AWS NLB it is important to configure the target group
+                    such that the client IP address is preserved, so the server knows where to send
+                    responses and commands to.<p>
+                    The new version of the Igtimi Devices panel in the Admin Console (see
+                    <tt>/gwt/AdminConsole.html#IgtimiDevicesPlace:</tt>) now shows the devices
+                    and their sharing to clients through so-called "Data Access Windows." The
+                    device entities are created automatically when messages are received.
+                    Data Access Windows (DAWs), however, need to be created manually in order to share
+                    the content delivered by the devices with authenticated users. You can use
+                    the DAWs' ownership and access control list (ACL) settings and grant users
+                    explicit permissions to individual DAWs. Click on the "Change Ownership" action icon
+                    to see the key of a DAW in case you want to use it in an individual permission
+                    that you grant to a user.<p>
+                    There is a REST API that mimics the old Riot REST API to a certain degree.
+                    Sailing Analytics users and operators typically don't work with this API directly.
+                    Yet, the API is exposed under <tt>/igtimi/api/v1</tt> and has end points for
+                    managing devices and DAWs, retrieving data recorded from the devices,
+                    as well as for finding out the web socket server end
+                    point for connecting to live data and connecting to it,
+                    and the above-mentioned method for finding
+                    out the Riot server socket's listening port.<p>
+                    The protocol used for transmitting device data to REST API clients has changed in
+                    so far that the device message payloads are no longer sent as JSON objects; instead,
+                    the original Protocol Buffer (protobuf) binary messages are encoded using Base64
+                    and transmitted as an array of such Base64 strings.</li>
+          </ul>
           <h2 class="articleSubheadline">November 2024</h2>
           <ul class="bulletList">
                 <li>The system property for removing the SAP branding from the solution has changed its default. It used

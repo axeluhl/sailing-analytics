@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -402,7 +403,7 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     private String getDataAccessWindowsUrl(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers) {
         StringBuilder url = new StringBuilder(getApiV1BaseUrl());
-        url.append("devices/data_access_windows?type=");
+        url.append("data_access_windows?type=");
         url.append(permission.name());
         if (startTime != null) {
             url.append("&start_time=");
@@ -482,16 +483,20 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     
     @Override
     public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
-        final HttpGet getWebsocketServers = new HttpGet(getBaseUrl()+"/server_listers/web_sockets");
+        final HttpGet getWebsocketServers = new HttpGet(getApiV1BaseUrl()+"server_listers/web_sockets");
         final JSONObject serversJson = (JSONObject) getJsonParsedResponse(getWebsocketServers).getA();
         final List<URI> result = new ArrayList<>();
         for (Object serverUrl : (JSONArray) serversJson.get("web_socket_servers")) {
             URI uri = new URI((String) serverUrl);
             result.add(uri);
         }
-        // sort those to the front that don't do port 443 nor wss://
         Collections.shuffle(result); // shuffle as a failover strategy
         logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
+    }
+
+    @Override
+    public void authenticate(ClientUpgradeRequest websocketUpgradeRequest) {
+        super.authenticate(websocketUpgradeRequest);
     }
 }

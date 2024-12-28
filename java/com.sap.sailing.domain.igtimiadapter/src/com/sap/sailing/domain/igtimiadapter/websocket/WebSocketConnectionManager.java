@@ -209,7 +209,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     igtimiServerTimepoint = new MillisecondsTimePoint(Long.valueOf(message));
                     localTimepointWhenServerTimepointWasReceived = MillisecondsTimePoint.now();
                     logger.info("Received server timestamp "+igtimiServerTimepoint);
-                    notifyAll();
+                    WebSocketConnectionManager.this.notifyAll();
                 }
             }
         }
@@ -322,7 +322,9 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     client.start();
                     currentSocket = new WebSocket();
                     igtimiServerTimepoint = null;
-                    client.connect(currentSocket, uri, new ClientUpgradeRequest());
+                    final ClientUpgradeRequest clientUpgradeRequest = new ClientUpgradeRequest();
+                    connection.authenticate(clientUpgradeRequest);
+                    client.connect(currentSocket, uri, clientUpgradeRequest);
                     if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
                         logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
                         lastException = null;

@@ -23,6 +23,7 @@ public class RestApiApplication extends Application {
             RiotResourcesResource.class,
             RiotDataAccessWindowsResource.class,
             RiotServerListersResource.class,
+            RiotServerResource.class,
             ShiroAuthorizationExceptionTo401ResponseMapper.class }));
     }
 }

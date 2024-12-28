@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
@@ -49,25 +48,19 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 // avoid a race condition with stop() being called while this start-up thread is still running
                 synchronized (IgtimiWindTracker.this) {
                     try {
-                        for (Device device : connection.getDevices()) {
-                            try {
-                                if (!stopping) {
-                                    final Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
-                                    if (!stopping) {
-                                        LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
-                                        IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
-                                        liveConnection.addListener(windReceiver);
-                                        windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                        liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<>(devicesWeShouldListenTo, windReceiver));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
-                                        + getTrackedRace().getRace().getName() + " for device " + device, e);
+                        if (!stopping) {
+                            final Iterable<String> devicesWeShouldListenTo = connection.getWindDevices();
+                            if (!stopping) {
+                                LiveDataConnection liveConnection = connection.getOrCreateLiveConnection(devicesWeShouldListenTo);
+                                IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
+                                liveConnection.addListener(windReceiver);
+                                windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
+                                liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<>(devicesWeShouldListenTo, windReceiver));
                             }
                         }
                     } catch (Exception e) {
-                        logger.log(Level.SEVERE, "Exception fetching Igtimi devices", e);
+                        logger.log(Level.SEVERE, "Exception trying to start Igtimi wind tracker for race "
+                                + getTrackedRace().getRace().getName(), e);
                     }
                 }
             }

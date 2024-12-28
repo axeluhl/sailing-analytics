@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
+import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
@@ -21,7 +22,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 /**
- * A connection to the Igtimi system for one {@link Client} and one {@link Account}.
+ * A connection to an Igtimi Riot system
  * 
  * @author Axel Uhl (d043530)
  */
@@ -166,11 +167,19 @@ public interface IgtimiConnection {
 
     /**
      * Retrieves the JSON object to send in its string-serialized form to a web socket connection in order to receive
-     * live data from the units whose IDs are specified by <code>deviceIds</code>. The sending units are expected to
-     * belong to the user account to which this factory's application client has been granted permission.
+     * live data from the units whose IDs are specified by <code>deviceIds</code>. This connection's authentication
+     * information is used, and data will be received only from devices that the user has {@link DefaultActions#READ}
+     * permission for and a {@link DataAccessWindow} must exist for the device, spanning the current time point and with
+     * the user authenticated having {@link DefaultActions#READ} permission for.
      * 
      * @param deviceIds
      *            IDs of the transmitting units expected to be visible to the requesting user
      */
     JSONObject getWebSocketConfigurationMessage(Iterable<String> deviceIds);
+    
+    /**
+     * If this connection has a bearer token set, it will be used to authenticate the web socket
+     * upgrade request passed as argument. Otherwise, this is a no-op.
+     */
+    void authenticate(ClientUpgradeRequest websocketUpgradeRequest);
 }

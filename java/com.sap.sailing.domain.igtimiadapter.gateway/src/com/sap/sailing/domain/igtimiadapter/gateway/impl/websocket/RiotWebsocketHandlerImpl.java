@@ -96,6 +96,10 @@ public class RiotWebsocketHandlerImpl implements RiotWebsocketHandler {
         if (text.equals("1")) {
             handleHeartbeat();
         } else {
+            // expecting a configuration message through which the client tells the
+            // devices to the data of which it wants to subscribe; as a response
+            // we'll send our server's current time as a Unix timestamp:
+            session.getRemote().sendStringByFuture(""+System.currentTimeMillis());
             final JSONObject jsonObject = (JSONObject) new JSONParser().parse(text);
             final JSONArray devices = (JSONArray) jsonObject.get("devices");
             deviceSerialNumbers.clear();

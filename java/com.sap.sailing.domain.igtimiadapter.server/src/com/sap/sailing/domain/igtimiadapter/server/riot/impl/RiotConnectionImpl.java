@@ -3,6 +3,7 @@ package com.sap.sailing.domain.igtimiadapter.server.riot.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -227,9 +228,17 @@ public class RiotConnectionImpl implements RiotConnection {
     private void sendHeartbeat() {
         try {
             send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setHeartbeat(1)).build());
+        } catch (ClosedChannelException cce) {
+            logger.warning("Channel "+socketChannel+" closed. Forwarding exception to stop sending heartbeat to closed connection");
+            throw new RuntimeException(cce);
         } catch (IOException e) {
             logger.log(Level.WARNING, "Problem while trying to send heartbeat message to device "+getSerialNumber(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "RiotConnectionImpl [serialNumber=" + serialNumber + ", socketChannel=" + socketChannel + "]";
     }
 }

@@ -190,12 +190,16 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                                 logger.warning("Data received from a socket with address "+deviceChannel.getRemoteAddress()
                                               +" that we don't have a managed connection for");
                             }
-                        }
-                        if (numberOfBytesRead == -1) { // EOF
+                        } else if (numberOfBytesRead == -1) { // EOF
                             logger.info("Device channel from "+deviceChannel.getRemoteAddress()+" closed");
                             if (connection != null) {
                                 logger.info("The device was handled by connection "+connection);
                                 connections.remove(deviceChannel);
+                                try {
+                                    connection.close();
+                                } catch (Exception e) {
+                                    logger.warning("Trying to properly close a connection for which we read EOF from its channel threw an exception: "+e.getMessage());
+                                }
                             }
                             deviceChannel.close();
                         }
