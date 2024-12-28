@@ -29,6 +29,7 @@ import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class RiotConnectionImpl implements RiotConnection {
@@ -74,6 +75,8 @@ public class RiotConnectionImpl implements RiotConnection {
     
     private final ScheduledFuture<?> heartbeatSendingTask;
     
+    private TimePoint lastHeartbeatReceivedAt;
+    
     RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer) {
         this.socketChannel = socketChannel;
         this.riotServer = riotServer;
@@ -100,6 +103,11 @@ public class RiotConnectionImpl implements RiotConnection {
         return socketChannel;
     }
 
+    @Override
+    public TimePoint getLastHeartbeatReceivedAt() {
+        return lastHeartbeatReceivedAt;
+    }
+    
     @Override
     public void close() throws IOException {
         try {
@@ -214,6 +222,11 @@ public class RiotConnectionImpl implements RiotConnection {
                                 }
                             }
                         }
+                    }
+
+                    @Override
+                    public void handleHeartbeat(long heartbeat) {
+                        lastHeartbeatReceivedAt = TimePoint.now();
                     }
                 });
             }

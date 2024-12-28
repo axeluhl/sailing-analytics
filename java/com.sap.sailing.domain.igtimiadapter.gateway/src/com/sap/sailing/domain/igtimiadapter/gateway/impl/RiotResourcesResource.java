@@ -33,11 +33,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.impl.ResourceDeserializer;
@@ -87,15 +87,19 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response getLatestDatum(
             @QueryParam("serial_numbers[]") Set<String> serialNumbers,
-            @QueryParam("type") int type) throws InvalidProtocolBufferException {
+            @QueryParam("type") int type) throws ParseException, IOException {
         final RiotServer riot = Activator.getInstance().getRiotServer();
         final JSONObject result = new JSONObject();
+        final Subject subject = SecurityUtils.getSubject();
         for (final String serialNumber : serialNumbers) {
-            final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));
-            if (lastMessage != null) {
-                final JSONArray singleMessage = new JSONArray();
-                singleMessage.add(Base64.getEncoder().encodeToString(lastMessage.toByteArray()));
-                result.put(serialNumber, singleMessage);
+            if (subject.isPermitted(
+                        getRiotService().getDeviceBySerialNumber(serialNumber).getIdentifier().getStringPermission(DefaultActions.READ))) {
+                final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));
+                if (lastMessage != null) {
+                    final JSONArray singleMessage = new JSONArray();
+                    singleMessage.add(Base64.getEncoder().encodeToString(lastMessage.toByteArray()));
+                    result.put(serialNumber, singleMessage);
+                }
             }
         }
         return Response.ok(streamingOutput(result)).build();
@@ -118,7 +122,11 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     /**
      * A response of a successful request contains a {@link JSONObject} where the keys are the device serial numbers,
      * and where the values are arrays of {@link String}s representing Base64-encoded binary protobuf messages that are
-     * expected to parse as {@link Msg} objects. There is no guarantee for these messages to be in any specific order.
+     * expected to parse as {@link Msg} objects. There is no guarantee for these messages to be in any specific order.<p>
+     * 
+     * Should this request have arrived on a replica (although our own client implementation {@link IgtimiConnection} would
+     * explicitly address the master/primary instance), a remote request using an {@link IgtimiConnection} is issued to
+     * the primary/master to obtain and forward the data requested.
      */
     @GET
     @Produces("application/json;charset=UTF-8")
@@ -146,7 +154,11 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
             }
         }
         final TimeRange requestedTimeRange = TimeRange.create(startTime, endTime);
-        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(requestedTimeRange, serialNumbers);
+        final Subject subject = SecurityUtils.getSubject();
+        final Iterable<String> serialNumbersOfDevicesUserCanRead =
+                Util.filter(serialNumbers, serialNumber->subject.isPermitted(
+                        getRiotService().getDeviceBySerialNumber(serialNumber).getIdentifier().getStringPermission(DefaultActions.READ)));
+        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(requestedTimeRange, serialNumbersOfDevicesUserCanRead);
         // assemble results from DAWs readable by the user:
         final JSONObject result = new JSONObject();
         final Encoder base64Encoder = Base64.getEncoder();
@@ -161,7 +173,7 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         return Response.ok(streamingOutput(result)).build();
     }
 
-    private Iterable<DataAccessWindow> getDataAccessWindowsReadableBySubject(TimeRange timeRange, List<String> serialNumbers) {
+    private Iterable<DataAccessWindow> getDataAccessWindowsReadableBySubject(TimeRange timeRange, Iterable<String> serialNumbers) {
         final Subject subject = SecurityUtils.getSubject();
         return Util.filter(getRiotService().getDataAccessWindows(serialNumbers, timeRange),
                 daw->{

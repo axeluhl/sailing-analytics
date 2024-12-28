@@ -1033,6 +1033,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyCreatedIgtimiDataAccessWindow(String deviceSerialNumber);
     String serialNumber();
     String serviceTag();
+    String lastHeartBeat();
+    String remoteAddress();
     String seeIgtimiTabForAccountSettings();
     String importWindFromIgtimi();
     String errorImportingIgtimiWind(String message);

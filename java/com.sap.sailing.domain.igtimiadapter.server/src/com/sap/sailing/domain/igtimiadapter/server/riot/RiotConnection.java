@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 
 import com.google.protobuf.CodedInputStream;
 import com.igtimi.IgtimiStream.Msg;
+import com.sap.sse.common.TimePoint;
 
 public interface RiotConnection extends Closeable {
     String getSerialNumber();
@@ -43,4 +44,6 @@ public interface RiotConnection extends Closeable {
      * </table>
      */
     void sendCommand(String command) throws IOException;
+
+    TimePoint getLastHeartbeatReceivedAt();
 }

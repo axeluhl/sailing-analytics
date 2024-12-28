@@ -77,8 +77,8 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     @Override
     public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpGet getResources = new HttpGet(getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds));
-        JSONObject resourcesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
+        final HttpGet getResources = new HttpGet(getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds));
+        final JSONObject resourcesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
         final List<Resource> result = new ArrayList<>();
         for (Object resourceJson : (JSONArray) resourcesJson.get("resources")) {
             Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"));
@@ -89,11 +89,25 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     
     @Override
     public Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        HttpGet getLatestData = new HttpGet(getLatestDatumUrl(deviceSerialNumbers, type));
-        JSONObject latestDataJson = (JSONObject) getJsonParsedResponse(getLatestData).getA();
+        final HttpGet getLatestData = new HttpGet(getLatestDatumUrl(deviceSerialNumbers, type));
+        final JSONObject latestDataJson = (JSONObject) getJsonParsedResponse(getLatestData).getA();
         return new FixFactory().createFixes(latestDataJson);
     }
     
+    @Override
+    public Msg getLastMessage(String serialNumber, Type type) throws ClientProtocolException, IOException, ParseException {
+        final HttpGet getLatestData = new HttpGet(getLatestDatumUrl(Collections.singleton(serialNumber), type));
+        final JSONObject latestDataJson = (JSONObject) getJsonParsedResponse(getLatestData).getA();
+        final JSONArray messages = (JSONArray) latestDataJson.get(serialNumber);
+        final Msg result;
+        if (messages == null || messages.isEmpty()) {
+            result = null;
+        } else {
+            result = Msg.parseFrom(Base64.decode((String) messages.get(0)));
+        }
+        return result;
+    }
+
     @Override
     public Iterable<Fix> getResourceData(final TimePoint startTime, final TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
@@ -107,6 +121,9 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
                 });
     }
 
+    /**
+     * Reads data from the remote Riot server, in case of replication addressing the request to the master/primary
+     */
     private <T> Iterable<T> getResourceContent(final TimePoint startTime, final TimePoint endTime,
             Iterable<String> deviceSerialNumbers, Map<Type, Double> typeAndCompression,
             Function<JSONObject, Iterable<T>> messageParser) throws IllegalStateException, ClientProtocolException, IOException, ParseException {

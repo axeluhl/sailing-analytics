@@ -56,7 +56,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME);
-        final InetSocketAddress bindAddress = Util.hasLength(riotPortAsString) ? new InetSocketAddress("localhost", Integer.valueOf(riotPortAsString)) : null;
+        final InetSocketAddress bindAddress = Util.hasLength(riotPortAsString) ? new InetSocketAddress("0.0.0.0", Integer.valueOf(riotPortAsString)) : null;
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         final RiotServerImpl riotServerImpl = new RiotServerImpl(bindAddress, domainObjectFactory, mongoObjectFactory);

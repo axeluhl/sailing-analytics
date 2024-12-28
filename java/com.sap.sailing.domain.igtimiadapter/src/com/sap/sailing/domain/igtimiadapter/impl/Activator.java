@@ -43,7 +43,7 @@ public class Activator implements BundleActivator {
     /**
      * The default value for the property whose name is given by {@link #IGTIMI_BASE_URL_PROPERTY_NAME}
      */
-    private static final String IGTIMI_BASE_URL_DEFAULT = "https://wind.sapsailing.com";
+    private static final String IGTIMI_BASE_URL_DEFAULT = "https://wind.sapsailing.com/";
     
     private static final String IGTIMI_DEFAULT_BEARER_TOKEN_PROPERTY_NAME = "igtimi.bearer.token";
     

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Supplier;
 
@@ -78,7 +79,7 @@ public interface IgtimiConnectionFactory {
      *            is {@code null}, too, requests to the REST API will be made through the connections returned from
      *            {@link #createConnection(String)} without an authenticated user.
      */
-    static IgtimiConnectionFactory create(URL baseUrl, String defaultBearerToken) {
+    static IgtimiConnectionFactory create(URL baseUrl, String defaultBearerToken) throws MalformedURLException {
         return new IgtimiConnectionFactoryImpl(baseUrl, defaultBearerToken);
     }
     

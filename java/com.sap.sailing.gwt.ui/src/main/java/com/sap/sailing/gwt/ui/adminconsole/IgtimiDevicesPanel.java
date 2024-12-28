@@ -267,6 +267,11 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 device -> device.getSerialNumber(), columnSortHandler);
         final TextColumn<IgtimiDeviceWithSecurityDTO> serviceTagColumn = new AbstractSortableTextColumn<>(
                 device -> device.getServiceTag(), columnSortHandler);
+        final TextColumn<IgtimiDeviceWithSecurityDTO> lastHeartBeatColumn = new AbstractSortableTextColumn<>(
+                device -> device.getLastHeartBeat()==null?"":device.getLastHeartBeat().toString(), columnSortHandler,
+                (a,b)->Util.compareToWithNull(a.getLastHeartBeat(), b.getLastHeartBeat(), /* null is less */ true));
+        final TextColumn<IgtimiDeviceWithSecurityDTO> remoteAddressColumn = new AbstractSortableTextColumn<>(
+                device -> device.getRemoteAddress(), columnSortHandler);
         final HasPermissions type = SecuredDomainType.IGTIMI_DEVICE;
         final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
@@ -288,6 +293,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         table.addColumn(deviceNameColumn, stringMessages.name());
         table.addColumn(deviceSerialNumberColumn, stringMessages.serialNumber());
         table.addColumn(serviceTagColumn, stringMessages.serviceTag());
+        table.addColumn(lastHeartBeatColumn, stringMessages.lastHeartBeat());
+        table.addColumn(remoteAddressColumn, stringMessages.remoteAddress());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),

@@ -16,6 +16,7 @@ import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -120,6 +121,11 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     void removeDataAccessWindow(long dawId);
 
+    /**
+     * Tries to read the data requested from this Riot server's persistent store. However, should this be a replica, an
+     * {@link IgtimiConnection} is established to the REST API end point of the primary/master instance of this replica
+     * to obtain the content requested.
+     */
     Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws MalformedURLException, IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
@@ -135,5 +141,13 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * a {@link DataPoint} with {@link DataPoint#getDataCase() data case} {@code dataCase}; otherwise that last
      * message stripped down to the last data point with the requested data case.
      */
-    Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException;
+    Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException, ParseException, IOException;
+
+    /**
+     * @return the inbound connections from devices currently tracked; they identify the device
+     *         {@link RiotConnection#getSerialNumber() serial number} which may be used, e.g., to resolve the device
+     *         with {@link #getDeviceBySerialNumber(String)}, as well as the
+     *         {@link RiotConnection#getLastHeartbeatReceivedAt() last heart beat}.
+     */
+    Iterable<RiotConnection> getLiveConnections();
 }

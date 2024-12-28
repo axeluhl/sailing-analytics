@@ -67,6 +67,9 @@ public interface IgtimiConnection {
             Type... types) throws IllegalStateException, ClientProtocolException, IOException,
             ParseException;
 
+    /**
+     * Reads data from the remote Riot server, in case of replication explicitly addressing the request to the master/primary
+     */
     Iterable<Msg> getMessages(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers, Type[] types) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     /**
@@ -163,6 +166,8 @@ public interface IgtimiConnection {
      */
     Iterable<Fix> getLatestFixes(Iterable<String> deviceSerialNumbers, Type type) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
 
+    Msg getLastMessage(String serialNumber, Type type) throws ClientProtocolException, IOException, ParseException;
+    
     Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException;
 
     /**

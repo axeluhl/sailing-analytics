@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -255,6 +256,7 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -4239,8 +4241,22 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     @Override
     public ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        final Map<String, TimePoint> lastHeartBeatsByDeviceSerialNumber = new HashMap<>();
+        final Map<String, SocketAddress> remoteAddressByDeviceSerialNumber = new HashMap<>();
+        for (final RiotConnection connection : getRiotServer().getLiveConnections()) {
+            final String serialNumber = connection.getSerialNumber();
+            if (serialNumber != null) {
+                if (Util.compareToWithNull(connection.getLastHeartbeatReceivedAt(), lastHeartBeatsByDeviceSerialNumber.get(serialNumber), /* null is less */ true) > 0) {
+                    lastHeartBeatsByDeviceSerialNumber.put(serialNumber, connection.getLastHeartbeatReceivedAt());
+                }
+                remoteAddressByDeviceSerialNumber.put(serialNumber, connection.getSocketChannel().getRemoteAddress());
+            }
+        }
         return new ArrayList<>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                getRiotServer().getDevices(), this::toSecuredIgtimiDeviceDTO)));
+                getRiotServer().getDevices(),
+                device->toSecuredIgtimiDeviceDTO(device,
+                                                 lastHeartBeatsByDeviceSerialNumber.get(device.getSerialNumber()),
+                                                 remoteAddressByDeviceSerialNumber.get(device.getSerialNumber())))));
     }
 
     @Override
@@ -4249,12 +4265,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 getRiotServer().getDataAccessWindows(), this::toSecuredIgtimiDataAccessWindowDTO)));
     }
 
-    private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice) {
+    private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice, final TimePoint lastHeartBeat, final SocketAddress remoteAddress) {
         final long id = igtimiDevice.getId();
         final String serialNumber = igtimiDevice.getSerialNumber();
         final String name = igtimiDevice.getName();
         final String serviceTag = igtimiDevice.getServiceTag();
-        final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name, serviceTag);
+        final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(
+                id, serialNumber, name, serviceTag, lastHeartBeat, remoteAddress==null?null:remoteAddress.toString());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDevice);
         return securedDevice;
     }

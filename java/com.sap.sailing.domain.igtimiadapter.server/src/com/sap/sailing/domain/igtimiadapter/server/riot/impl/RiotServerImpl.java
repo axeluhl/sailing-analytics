@@ -28,7 +28,6 @@ import java.util.logging.Logger;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
@@ -89,18 +88,18 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      * forwarded} to the {@link RiotConnection} object associated with the key socket channel. It is the connection's
      * responsibility to respond to messages that require a response, such as an authentication request.
      */
-    private final Map<SocketChannel, RiotConnection> connections;
+    private final ConcurrentMap<SocketChannel, RiotConnection> connections;
 
     /**
      * Like {@link #RiotServerImpl(int)}, only that an available port is selected automatically.
      * The port can be obtained by calling {@link #getPort}.
      */
     public RiotServerImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
-        this(null, domainObjectFactory, mongoObjectFactory);
+        this(0, domainObjectFactory, mongoObjectFactory);
     }
     
     public RiotServerImpl(int port, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
-        this(new InetSocketAddress("localhost", port), domainObjectFactory, mongoObjectFactory);
+        this(new InetSocketAddress("0.0.0.0", port), domainObjectFactory, mongoObjectFactory);
     }
     
     /**
@@ -142,6 +141,11 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public int getPort() throws IOException {
         return ((InetSocketAddress) serverSocketChannel.getLocalAddress()).getPort();
+    }
+    
+    @Override
+    public Iterable<RiotConnection> getLiveConnections() {
+        return Collections.unmodifiableCollection(connections.values());
     }
     
     @Override
@@ -526,21 +530,36 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         if (getMasterDescriptor() == null) {
             result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases);
         } else {
-            final int masterPort = getMasterDescriptor().getServletPort();
-            final String masterHostname = getMasterDescriptor().getHostname();
-            final SecurityService securityService = Activator.getInstance().getSecurityService();
-            final String currentUserBearerToken = securityService == null ? null : securityService.getAccessToken(securityService.getCurrentUser().getName());
-            final IgtimiConnectionFactory igtimiConnectionFactory =
-                    IgtimiConnectionFactory.create(new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/"), currentUserBearerToken);
-            final IgtimiConnection connection = igtimiConnectionFactory.createConnection();
             final Type[] types = new Type[dataCases.size()];
             int i=0;
             for (final DataCase dataCase : dataCases) {
                 types[i++] = Type.valueOf(dataCase.getNumber());
             }
-            result = connection.getMessages(timeRange.from(), timeRange.to(), Collections.singleton(deviceSerialNumber), types);
+            result = getFromPrimary(deviceSerialNumber, types,
+                    (c, dsn, ts)->c.getMessages(timeRange.from(), timeRange.to(), Collections.singleton(dsn), ts));
         }
         return result;
+    }
+    
+    private <T> T getFromPrimary(String deviceSerialNumber, Type[] types, MessageLoader<T> resultProvider) throws ParseException, IOException {
+        final int masterPort = getMasterDescriptor().getServletPort();
+        final String masterHostname = getMasterDescriptor().getHostname();
+        final SecurityService securityService = Activator.getInstance().getSecurityService();
+        final String currentUserBearerToken = securityService == null ? null : securityService.getAccessToken(securityService.getCurrentUser().getName());
+        try {
+            final URL baseUrl = new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/");
+            final IgtimiConnectionFactory igtimiConnectionFactory =
+                    IgtimiConnectionFactory.create(baseUrl, currentUserBearerToken);
+            final IgtimiConnection connection = igtimiConnectionFactory.createConnection();
+            return resultProvider.getResult(connection, deviceSerialNumber, types);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    @FunctionalInterface
+    private static interface MessageLoader<T> {
+        T getResult(IgtimiConnection connection, String deviceSerialNumber, Type[] types) throws IOException, ParseException;
     }
 
     @Override
@@ -554,7 +573,14 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
-        return domainObjectFactory.getLatestMessage(serialNumber, dataCase);
+    public Msg getLastMessage(String serialNumber, DataCase dataCase) throws ParseException, IOException {
+        final Msg result;
+        if (getMasterDescriptor() == null) {
+            result = domainObjectFactory.getLatestMessage(serialNumber, dataCase);
+        } else {
+            result = getFromPrimary(serialNumber, new Type[] { Type.valueOf(dataCase.getNumber()) },
+                    (c, dsn, ts)->c.getLastMessage(dsn, ts[0]));
+        }
+        return result;
     }
 }

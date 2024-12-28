@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.impl;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -18,14 +19,14 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     /**
      * @param baseUrl
      *            base URL of the service where Igtimi wind data can be requested from; example:
-     *            {@code https://wind.sapsailing.com}
+     *            {@code https://wind.sapsailing.com}; trailing slashes will be removed implicitly here.
      * @param defaultBearerToken
      *            Used when {@code null} is passed to {@link #createConnection(String)} as a bearer token. If this field
      *            is {@code null}, too, requests to the REST API will be made through the connections returned from
      *            {@link #createConnection(String)} without an authenticated user.
      */
-    public IgtimiConnectionFactoryImpl(URL baseUrl, String defaultBearerToken) {
-        this.baseUrl = baseUrl;
+    public IgtimiConnectionFactoryImpl(URL baseUrl, String defaultBearerToken) throws MalformedURLException {
+        this.baseUrl = (baseUrl.toString().endsWith("/") ? new URL(baseUrl.toString().substring(0, baseUrl.toString().length()-1)) : baseUrl);
         this.defaultBearerToken = defaultBearerToken;
     }
 
