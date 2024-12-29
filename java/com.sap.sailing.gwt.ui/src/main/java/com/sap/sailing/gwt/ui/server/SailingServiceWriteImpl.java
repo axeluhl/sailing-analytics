@@ -227,6 +227,7 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -2122,6 +2123,21 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 riotServer.removeDevice(existingDevice.getId());
             });
         }
+    }
+
+    @Override
+    public boolean sendGPSOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_OFF);
+    }
+
+    @Override
+    public boolean sendGPSOnCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_ON);
+    }
+
+    @Override
+    public boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_POWER_OFF);
     }
 
     @Override

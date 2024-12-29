@@ -2484,4 +2484,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String reallyTurnGPSOffForIgtimiDevice(String serialNumber);
     String reallyTurnGPSOnForIgtimiDevice(String serialNumber);
     String reallyPowerOffIgtimiDevice(String serialNumber);
+    String noLiveConnectionFoundForIgtimiDevice(String serialNumber);
+    String successfullyTurnedGPSOnForIgtimiDevice(String serialNumber);
+    String errorTurningGPSOnForIgtimiDevice(String serialNumber, String message);
+    String successfullyTurnedGPSOffForIgtimiDevice(String serialNumber);
+    String errorTurningGPSOffForIgtimiDevice(String serialNumber, String message);
+    String errorPoweringOffIgtimiDevice(String serialNumber, String message);
+    String successfullyPoweredOffIgtimiDevice(String serialNumber);
 }

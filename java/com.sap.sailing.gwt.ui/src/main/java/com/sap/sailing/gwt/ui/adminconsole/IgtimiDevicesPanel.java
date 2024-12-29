@@ -674,19 +674,61 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
 
     private void sendGPSOff(IgtimiDeviceWithSecurityDTO device) {
         if (Window.confirm(stringMessages.reallyTurnGPSOffForIgtimiDevice(device.getSerialNumber()))) {
-            // TODO implement sendGPSOff
+            sailingServiceWrite.sendGPSOffCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorTurningGPSOffForIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Notification.notify(stringMessages.successfullyTurnedGPSOffForIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
+                    } else {
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                    }
+                }
+            });
         }
     }
 
     private void sendGPSOn(IgtimiDeviceWithSecurityDTO device) {
         if (Window.confirm(stringMessages.reallyTurnGPSOnForIgtimiDevice(device.getSerialNumber()))) {
-            // TODO implement sendGPSOn
+            sailingServiceWrite.sendGPSOnCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorTurningGPSOnForIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Notification.notify(stringMessages.successfullyTurnedGPSOnForIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
+                    } else {
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                    }
+                }
+            });
         }
     }
 
     private void sendPowerOff(IgtimiDeviceWithSecurityDTO device) {
         if (Window.confirm(stringMessages.reallyPowerOffIgtimiDevice(device.getSerialNumber()))) {
-            // TODO implement sendPowerOff
+            sailingServiceWrite.sendGPSOffCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorPoweringOffIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Notification.notify(stringMessages.successfullyPoweredOffIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
+                    } else {
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                    }
+                }
+            });
         }
     }
 }

@@ -587,6 +587,12 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
+    void sendGPSOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    void sendGPSOnCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    void sendPowerOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
      *         so
