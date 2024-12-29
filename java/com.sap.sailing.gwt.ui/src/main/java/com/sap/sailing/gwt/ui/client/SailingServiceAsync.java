@@ -546,6 +546,8 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
 
     void getAllIgtimiDataAccessWindowsWithSecurity(AsyncCallback<ArrayList<IgtimiDataAccessWindowWithSecurityDTO>> callback);
 
+    void getIgtimiConnectionFactoryBaseUrl(AsyncCallback<Pair<String, Boolean>> callback);
+
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
      */

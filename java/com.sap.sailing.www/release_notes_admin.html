@@ -35,14 +35,36 @@
                     environment variable set for the <tt>start</tt> script. When left empty,
                     the Riot server will listen on a random port unused so far. This port can
                     be obtained using the <tt>/igtimi/api/v1/server</tt> REST GET method, found
-                    in the <tt>port</tt> attribute of the JSON document responded with.<p>
+                    in the <tt>port</tt> attribute of the JSON document responded with.
+                    The built-in Riot server is replicated by default, and devices and data access
+                    windows are kept synchronized between primary and replicas. Dedicated instances
+                    may be set up with the only purpose of acting as a highly-available Riot server
+                    farm. Messages sent to one of the instances in the replica set will make it to
+                    all instances in the replica set and will eventually get stored persistently in
+                    the primary's database.
+                    <p>
                     Devices can be configured to send to that port, directly to the server's IP
                     address with the specific port, or, e.g., through a network load balancer
                     such as the Amazon Web Services (AWS) NLB, allowing for multiple servers
                     such as a primary/master and one or more replicas to be registered for
                     high availability. With an AWS NLB it is important to configure the target group
                     such that the client IP address is preserved, so the server knows where to send
-                    responses and commands to.<p>
+                    responses and commands to.
+                    <p>
+                    Instead of managing Igtimi "Accounts" there now is a system property <tt>igtimi.base.url</tt>
+                    that defines the base URL of the Riot service to which the Sailing Analytics server will
+                    connect for live and stored WindBot data. The new environment variable <tt>IGTIMI_BASE_URL</tt>
+                    is mapped to the <tt>igtimi.base.url</tt> property in the start scripts.
+                    The property defaults to <tt>https://wind.sapsailing.com</tt>.
+                    By default, authentication for the remote service is handled using the local user's bearer token
+                    of the user tracking or owning the race for which wind data is requested. The <tt>igtimi.bearer.token</tt>
+                    system property can be used as an override, e.g., in case the local Sailing Analytics server
+                    does not share the security service with the replica set running the Riot service. The corresponding
+                    environment variable is <tt>IGTIMI_BEARER_TOKEN</tt>. With this,
+                    the <tt>igtimi.client.id</tt> and <tt>igtimi.client.secret</tt> system properties, as well as
+                    their environment variable counterparts <tt>IGTIMI_CLIENT_ID</tt> and <tt>IGTIMI_CLIENT_SECRET</tt>,
+                    respectively, are no longer used.
+                    <p>
                     The new version of the Igtimi Devices panel in the Admin Console (see
                     <tt>/gwt/AdminConsole.html#IgtimiDevicesPlace:</tt>) now shows the devices
                     and their sharing to clients through so-called "Data Access Windows." The
@@ -52,7 +74,8 @@
                     the DAWs' ownership and access control list (ACL) settings and grant users
                     explicit permissions to individual DAWs. Click on the "Change Ownership" action icon
                     to see the key of a DAW in case you want to use it in an individual permission
-                    that you grant to a user.<p>
+                    that you grant to a user.
+                    <p>
                     There is a REST API that mimics the old Riot REST API to a certain degree.
                     Sailing Analytics users and operators typically don't work with this API directly.
                     Yet, the API is exposed under <tt>/igtimi/api/v1</tt> and has end points for
@@ -60,11 +83,13 @@
                     as well as for finding out the web socket server end
                     point for connecting to live data and connecting to it,
                     and the above-mentioned method for finding
-                    out the Riot server socket's listening port.<p>
+                    out the Riot server socket's listening port.
+                    <p>
                     The protocol used for transmitting device data to REST API clients has changed in
                     so far that the device message payloads are no longer sent as JSON objects; instead,
                     the original Protocol Buffer (protobuf) binary messages are encoded using Base64
-                    and transmitted as an array of such Base64 strings.</li>
+                    and transmitted as an array of such Base64 strings.
+                    </li>
           </ul>
           <h2 class="articleSubheadline">November 2024</h2>
           <ul class="bulletList">

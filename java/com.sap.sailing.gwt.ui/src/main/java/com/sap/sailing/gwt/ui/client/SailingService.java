@@ -493,7 +493,9 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
     ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws Exception;
     
     ArrayList<IgtimiDataAccessWindowWithSecurityDTO> getAllIgtimiDataAccessWindowsWithSecurity() throws Exception;
-    
+
+    Pair<String, Boolean> getIgtimiConnectionFactoryBaseUrl();
+
     /**
      * Allows reading public Boats, or Boats that are registered in races belonging in the given regatta
      */

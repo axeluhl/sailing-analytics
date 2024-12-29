@@ -20,6 +20,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -40,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -69,12 +71,7 @@ import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
- * TODO bug 6059: implement a second table shown when a single device is selected in the devices table that shows the
- * data access windows for that device; alternatively we could show all data access windows for all devices when nothing
- * is selected. Move the "Add" button from devices to DAWs.
- * 
  * @author Axel Uhl (d043530)
- *
  */
 public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProvider<IgtimiDeviceWithSecurityDTO> {
     private final StringMessages stringMessages;
@@ -113,6 +110,27 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
         final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        final Label igtimiConnectionFactoryParams = new Label();
+        final Anchor linkToRemoteRiotAdminPanel = new Anchor(stringMessages.configuration(), (String) null, /* target */ "_blank");
+        final HorizontalPanel remoteRiotConfig = new HorizontalPanel();
+        remoteRiotConfig.setSpacing(5);
+        remoteRiotConfig.add(igtimiConnectionFactoryParams);
+        remoteRiotConfig.add(linkToRemoteRiotAdminPanel);
+        add(remoteRiotConfig);
+        add(new Label(stringMessages.localServer()));
+        sailingServiceWrite.getIgtimiConnectionFactoryBaseUrl(new AsyncCallback<Pair<String, Boolean>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorGettingIgtimiConnectionFactoryParams(caught.getMessage()), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(Pair<String, Boolean> result) {
+                igtimiConnectionFactoryParams.setText(stringMessages.igtimiConnectionFactoryParams(result.getA(),
+                        result.getB() ? stringMessages.yes() : stringMessages.no()));
+                linkToRemoteRiotAdminPanel.setHref(result.getA()+"/gwt/AdminConsole.html#IgtimiDevicesPlace:");
+            }
+        });
         // setup devices table
         final CaptionPanel devicesCaptionPanel = new CaptionPanel(stringMessages.igtimiDevices());
         final VerticalPanel devicesCaptionPanelContents = new VerticalPanel();

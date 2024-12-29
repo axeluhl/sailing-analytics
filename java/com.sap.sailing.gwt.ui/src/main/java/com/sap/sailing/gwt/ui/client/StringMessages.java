@@ -2472,4 +2472,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String endOfRepeatablePartMustBeAtOfAfterStart();
     String endOfRepeatablePartIsGreaterThanNumberOfWaypoints();
     String configureCourse();
+    String errorGettingIgtimiConnectionFactoryParams(String message);
+    String igtimiConnectionFactoryParams(String baseUrl, String hasCredentialsYesOrNo);
 }

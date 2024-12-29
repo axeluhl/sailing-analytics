@@ -4240,6 +4240,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
+    public Pair<String, Boolean> getIgtimiConnectionFactoryBaseUrl() {
+        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
+        return new Pair<>(igtimiConnectionFactory.getBaseUrl().toString(), igtimiConnectionFactory.hasCredentials());
+    }
+    
+    @Override
     public ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity() throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
         final Map<String, TimePoint> lastHeartBeatsByDeviceSerialNumber = new HashMap<>();
         final Map<String, SocketAddress> remoteAddressByDeviceSerialNumber = new HashMap<>();
