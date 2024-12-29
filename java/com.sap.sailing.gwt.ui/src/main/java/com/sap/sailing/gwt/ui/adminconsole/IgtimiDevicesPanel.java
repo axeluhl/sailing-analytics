@@ -2,9 +2,11 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +32,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -57,6 +60,8 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
@@ -149,9 +154,6 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 if (t.getSerialNumber() != null) {
                     strings.add(t.getSerialNumber());
                 }
-                if (t.getServiceTag() != null) {
-                    strings.add(t.getServiceTag());
-                }
                 return strings;
             }
 
@@ -196,9 +198,6 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
             public Iterable<String> getSearchableStrings(IgtimiDataAccessWindowWithSecurityDTO t) {
                 final Set<String> strings = new HashSet<>();
                 strings.add(""+t.getId());
-                if (t.getName() != null) {
-                    strings.add(t.getName());
-                }
                 if (t.getSerialNumber() != null) {
                     strings.add(t.getSerialNumber());
                 }
@@ -283,41 +282,97 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 device -> device.getName(), columnSortHandler);
         final TextColumn<IgtimiDeviceWithSecurityDTO> deviceSerialNumberColumn = new AbstractSortableTextColumn<>(
                 device -> device.getSerialNumber(), columnSortHandler);
-        final TextColumn<IgtimiDeviceWithSecurityDTO> serviceTagColumn = new AbstractSortableTextColumn<>(
-                device -> device.getServiceTag(), columnSortHandler);
         final TextColumn<IgtimiDeviceWithSecurityDTO> lastHeartBeatColumn = new AbstractSortableTextColumn<>(
                 device -> device.getLastHeartBeat()==null?"":device.getLastHeartBeat().toString(), columnSortHandler,
                 (a,b)->Util.compareToWithNull(a.getLastHeartBeat(), b.getLastHeartBeat(), /* null is less */ true));
         final TextColumn<IgtimiDeviceWithSecurityDTO> remoteAddressColumn = new AbstractSortableTextColumn<>(
                 device -> device.getRemoteAddress(), columnSortHandler);
         final HasPermissions type = SecuredDomainType.IGTIMI_DEVICE;
-        final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> roleActionColumn = create(
+        final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
                 new DefaultActionsImagesBarCell(stringMessages), userService);
-        roleActionColumn.addAction(ACTION_DELETE, DELETE, device -> {
+        actionColumn.addAction(ACTION_UPDATE, UPDATE, device -> {
+            editDevice(device, filteredDevices);
+        });
+        actionColumn.addAction(ACTION_DELETE, DELETE, device -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
                 removeDevice(device, filteredDevices);
             }
         });
         final DialogConfig<IgtimiDeviceWithSecurityDTO> config = EditOwnershipDialog
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDevices(), stringMessages);
-        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
+        actionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openOwnershipDialog);
         final EditACLDialog.DialogConfig<IgtimiDeviceWithSecurityDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementWriteService(), type, roleDefinition -> refreshDevices(), stringMessages);
-        roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+        actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         // add columns to table:
         table.addColumn(devicesSelectionCheckboxColumn, devicesSelectionCheckboxColumn.getHeader());
         table.addColumn(deviceIdColumn, stringMessages.id());
         table.addColumn(deviceNameColumn, stringMessages.name());
         table.addColumn(deviceSerialNumberColumn, stringMessages.serialNumber());
-        table.addColumn(serviceTagColumn, stringMessages.serviceTag());
         table.addColumn(lastHeartBeatColumn, stringMessages.lastHeartBeat());
         table.addColumn(remoteAddressColumn, stringMessages.remoteAddress());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
-        table.addColumn(roleActionColumn, stringMessages.actions());
+        table.addColumn(actionColumn, stringMessages.actions());
         table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),
                 devicesSelectionCheckboxColumn.getSelectionManager());
         return table;
+    }
+    
+    private void editDevice(IgtimiDeviceWithSecurityDTO device, ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredDevices) {
+        new DataEntryDialog<IgtimiDeviceWithSecurityDTO>(stringMessages.editDevice(), stringMessages.editDevice(),
+                stringMessages.ok(), stringMessages.cancel(),
+                /* validator */ null, new DialogCallback<IgtimiDeviceWithSecurityDTO>() {
+                    @Override
+                    public void ok(IgtimiDeviceWithSecurityDTO editedObject) {
+                        filteredDevices.getList().remove(device);
+                        filteredDevices.getList().add(editedObject);
+                        sailingServiceWrite.updateIgtimiDevice(editedObject, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Notification.notify(stringMessages.errorUpdatingIgtimiDevice(caught.getMessage()), NotificationType.ERROR);
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                Notification.notify(stringMessages.successfullyUpdatedIgtimiDevice(editedObject.getSerialNumber()), NotificationType.INFO);
+                            }
+                            
+                        });
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+            
+        }) {
+            private TextBox nameField = createTextBox(device.getName());
+            
+            @Override
+            protected Widget getAdditionalWidget() {
+                final HorizontalPanel result = new HorizontalPanel();
+                result.setSpacing(3);
+                result.add(new Label(stringMessages.name()));
+                result.add(nameField);
+                return result;
+            }
+
+            @Override
+            protected Focusable getInitialFocusWidget() {
+                return nameField;
+            }
+
+            @Override
+            protected IgtimiDeviceWithSecurityDTO getResult() {
+                final IgtimiDeviceWithSecurityDTO result = new IgtimiDeviceWithSecurityDTO(
+                        device.getId(), device.getSerialNumber(),
+                        nameField.getText(), device.getLastHeartBeat(),
+                        device.getRemoteAddress());
+                result.setAccessControlList(device.getAccessControlList());
+                result.setOwnership(device.getOwnership());
+                return result;
+            }
+        }.show();
     }
 
     private FlushableCellTable<IgtimiDataAccessWindowWithSecurityDTO> createIgtimiDataAccessWindowsTable(
@@ -345,8 +400,6 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         columnSortHandler.setComparator(dawsSelectionCheckboxColumn, dawsSelectionCheckboxColumn.getComparator());
         final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawIdColumn = new AbstractSortableTextColumn<>(
                 daw -> ""+daw.getId(), columnSortHandler);
-        final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawNameColumn = new AbstractSortableTextColumn<>(
-                daw -> daw.getName(), columnSortHandler);
         final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawSerialNumberColumn = new AbstractSortableTextColumn<>(
                 daw -> daw.getSerialNumber(), columnSortHandler);
         final TextColumn<IgtimiDataAccessWindowWithSecurityDTO> dawFromColumn = new AbstractSortableTextColumn<>(
@@ -371,7 +424,6 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         // add columns to table:
         table.addColumn(dawsSelectionCheckboxColumn, dawsSelectionCheckboxColumn.getHeader());
         table.addColumn(dawIdColumn, stringMessages.id());
-        table.addColumn(dawNameColumn, stringMessages.name());
         table.addColumn(dawSerialNumberColumn, stringMessages.serialNumber());
         table.addColumn(dawFromColumn, stringMessages.from());
         table.addColumn(dawToColumn, stringMessages.to());

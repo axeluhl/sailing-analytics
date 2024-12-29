@@ -57,7 +57,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         update.put(FieldNames.IGTIMI_DEVICES_ID.name(), device.getId());
         update.put(FieldNames.IGTIMI_DEVICES_NAME.name(), device.getName());
         update.put(FieldNames.IGTIMI_DEVICES_SERIAL_NUMBER.name(), device.getSerialNumber());
-        update.put(FieldNames.IGTIMI_DEVICES_SERVICE_TAG.name(), device.getServiceTag());
         db.getCollection(CollectionNames.IGTIMI_DEVICES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED).replaceOne(filter, update, new ReplaceOptions().upsert(true));
     }
 

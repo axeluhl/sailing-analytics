@@ -87,8 +87,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Number id = ((Number) ((Document) o).get(FieldNames.IGTIMI_DEVICES_ID.name()));
             final String serialNumber = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_SERIAL_NUMBER.name());
             final String name = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_NAME.name());
-            final String serviceTag = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_SERVICE_TAG.name());
-            result.add(Device.create(id.longValue(), serialNumber, name, serviceTag));
+            result.add(Device.create(id.longValue(), serialNumber, name));
         }
         return result;
     }

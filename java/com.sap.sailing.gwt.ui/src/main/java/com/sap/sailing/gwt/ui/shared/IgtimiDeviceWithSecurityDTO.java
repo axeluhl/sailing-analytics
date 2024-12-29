@@ -17,18 +17,16 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
     private long id;
     private String name;
     private String serialNumber;
-    private String serviceTag;
     private TimePoint lastHeartBeat;
     private String remoteAddress;
     
     @Deprecated // GWT serialization only
     IgtimiDeviceWithSecurityDTO() {}
 
-    public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, String serviceTag, TimePoint lastHeartBeat, String remoteAddress) {
+    public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, TimePoint lastHeartBeat, String remoteAddress) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.name = name;
-        this.serviceTag = serviceTag;
         this.lastHeartBeat = lastHeartBeat;
         this.remoteAddress = remoteAddress;
     }
@@ -43,10 +41,6 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
 
     public String getSerialNumber() {
         return serialNumber;
-    }
-
-    public String getServiceTag() {
-        return serviceTag;
     }
 
     public TimePoint getLastHeartBeat() {

@@ -8,10 +8,9 @@ public class DeviceDeserializer {
     static final String ID = "id";
     static final String SERIAL_NUMBER = "serial_number";
     static final String NAME = "name";
-    static final String SERVICE_TAG = "service_tag";
 
     public Device createDeviceFromJson(JSONObject deviceJson) {
         return new DeviceImpl((Long) deviceJson.get(ID), (String) deviceJson.get(SERIAL_NUMBER),
-                (String) deviceJson.get(NAME), (String) deviceJson.get(SERVICE_TAG));
+                (String) deviceJson.get(NAME));
     }
 }

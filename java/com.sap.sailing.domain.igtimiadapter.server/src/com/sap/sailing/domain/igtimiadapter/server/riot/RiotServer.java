@@ -111,6 +111,8 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     void removeDevice(long deviceId);
     
+    void updateDeviceName(long deviceId, String name);
+    
     Iterable<DataAccessWindow> getDataAccessWindows();
     
     DataAccessWindow getDataAccessWindowById(long id);

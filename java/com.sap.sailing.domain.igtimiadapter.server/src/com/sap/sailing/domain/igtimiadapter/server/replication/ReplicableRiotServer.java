@@ -13,6 +13,8 @@ public interface ReplicableRiotServer extends RiotServer {
 
     Void internalRemoveDevice(long deviceId);
 
+    Void internalUpdateDeviceName(long deviceId, String name);
+    
     Void internalAddResource(Resource resource);
 
     Void internalRemoveResource(long resourceId);

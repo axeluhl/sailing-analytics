@@ -9,18 +9,16 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 public class DeviceImpl extends HasIdImpl implements Device {
     private static final long serialVersionUID = 7224992550721569935L;
     private final String serialNumber;
-    private final String name;
-    private String serviceTag;
+    private String name;
     
     public DeviceImpl(long id, String serialNumber) {
-        this(id, serialNumber, /* name */ null, /* serviceTag */ null);
+        this(id, serialNumber, /* name */ null);
     }
 
-    public DeviceImpl(Long id, String serialNumber, String name, String serviceTag) {
+    public DeviceImpl(Long id, String serialNumber, String name) {
         super(id);
         this.serialNumber = serialNumber;
         this.name = name;
-        this.serviceTag = serviceTag;
     }
 
     @Override
@@ -29,13 +27,13 @@ public class DeviceImpl extends HasIdImpl implements Device {
     }
 
     @Override
-    public String getServiceTag() {
-        return serviceTag;
-    }
-
-    @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

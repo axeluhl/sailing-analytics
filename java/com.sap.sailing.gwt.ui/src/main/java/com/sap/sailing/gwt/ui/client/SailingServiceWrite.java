@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -247,6 +248,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     void removeIgtimiDataAccessWindow(long id);
     
+    void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject);
+
     void removeIgtimiDevice(String serialNumber);
 
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;

@@ -44,13 +44,12 @@ public class IgtimiPersistenceTest {
 
     @Test
     public void testStoringAndLoadingSimpleDevice() {
-        final Device device = Device.create(123, "DE-AC-AAHJ", "The tricky one", "ABCDE");
+        final Device device = Device.create(123, "DE-AC-AAHJ", "The tricky one");
         mongoObjectFactory.storeDevice(device);
         final Device loadedDevice = domainObjectFactory.getDevices().iterator().next();
         assertEquals(device.getId(), loadedDevice.getId());
         assertEquals(device.getName(), loadedDevice.getName());
         assertEquals(device.getSerialNumber(), loadedDevice.getSerialNumber());
-        assertEquals(device.getServiceTag(), loadedDevice.getServiceTag());
     }
 
     @Test

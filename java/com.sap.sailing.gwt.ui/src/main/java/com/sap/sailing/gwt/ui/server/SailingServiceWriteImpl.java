@@ -271,6 +271,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -2099,6 +2100,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         final DataAccessWindow daw = riotServer.getDataAccessWindowById(id);
         if (daw != null) {
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(daw, ()->getRiotServer().removeDataAccessWindow(id));
+        }
+    }
+
+    @Override
+    public void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(editedObject.getSerialNumber());
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+            riotServer.updateDeviceName(existingDevice.getId(), editedObject.getName());
         }
     }
 

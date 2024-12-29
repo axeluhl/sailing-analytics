@@ -2474,4 +2474,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String configureCourse();
     String errorGettingIgtimiConnectionFactoryParams(String message);
     String igtimiConnectionFactoryParams(String baseUrl, String hasCredentialsYesOrNo);
+    String editDevice();
+    String successfullyUpdatedIgtimiDevice(String serialNumber);
+    String errorUpdatingIgtimiDevice(String message);
 }

@@ -398,6 +398,21 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
+    public void updateDeviceName(long deviceId, String name) {
+        apply(s->s.internalUpdateDeviceName(deviceId, name));
+    }
+
+    @Override
+    public Void internalUpdateDeviceName(long deviceId, String name) {
+        final Device existingDevice = devices.get(deviceId);
+        if (existingDevice != null) {
+            existingDevice.setName(name);
+            mongoObjectFactory.storeDevice(existingDevice);
+        }
+        return null;
+    }
+
+    @Override
     public Iterable<Resource> getResources() {
         return Collections.unmodifiableCollection(resources.values());
     }

@@ -4275,9 +4275,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final long id = igtimiDevice.getId();
         final String serialNumber = igtimiDevice.getSerialNumber();
         final String name = igtimiDevice.getName();
-        final String serviceTag = igtimiDevice.getServiceTag();
         final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(
-                id, serialNumber, name, serviceTag, lastHeartBeat, remoteAddress==null?null:remoteAddress.toString());
+                id, serialNumber, name, lastHeartBeat, remoteAddress==null?null:remoteAddress.toString());
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDevice);
         return securedDevice;
     }

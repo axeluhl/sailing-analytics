@@ -10,7 +10,6 @@ public class DeviceSerializer {
         result.put(DeviceDeserializer.ID, device.getId());
         result.put(DeviceDeserializer.SERIAL_NUMBER, device.getSerialNumber());
         result.put(DeviceDeserializer.NAME, device.getName());
-        result.put(DeviceDeserializer.SERVICE_TAG, device.getServiceTag());
         return result;
     }
 }
