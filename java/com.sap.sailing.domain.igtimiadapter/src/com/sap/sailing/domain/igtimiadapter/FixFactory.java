@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.impl;
+package com.sap.sailing.domain.igtimiadapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +24,6 @@ import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
-import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
-import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
-import com.sap.sailing.domain.igtimiadapter.Sensor;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.BatteryLevel;

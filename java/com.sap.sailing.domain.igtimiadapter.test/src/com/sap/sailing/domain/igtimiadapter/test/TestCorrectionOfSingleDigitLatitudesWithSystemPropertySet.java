@@ -11,8 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
-import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 
 /**
  * See bug 1794: http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=1794. Here is an offending string:

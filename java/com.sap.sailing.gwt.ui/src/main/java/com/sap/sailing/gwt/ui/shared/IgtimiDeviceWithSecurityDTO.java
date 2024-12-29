@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.shared.HasPermissions;
@@ -19,16 +20,21 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
     private String serialNumber;
     private TimePoint lastHeartBeat;
     private String remoteAddress;
+    private Position lastKnownPosition;
+    private double lastKnownBatteryPercent;
     
     @Deprecated // GWT serialization only
     IgtimiDeviceWithSecurityDTO() {}
 
-    public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, TimePoint lastHeartBeat, String remoteAddress) {
+    public IgtimiDeviceWithSecurityDTO(long id, String serialNumber, String name, TimePoint lastHeartBeat,
+            String remoteAddress, Position lastKnownPosition, double lastKnownBatteryPercent) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.name = name;
         this.lastHeartBeat = lastHeartBeat;
         this.remoteAddress = remoteAddress;
+        this.lastKnownPosition = lastKnownPosition;
+        this.lastKnownBatteryPercent = lastKnownBatteryPercent;
     }
 
     public SecurityInformationDTO getSecurityInformation() {
@@ -49,6 +55,14 @@ public class IgtimiDeviceWithSecurityDTO implements SecuredDTO {
 
     public String getRemoteAddress() {
         return remoteAddress;
+    }
+
+    public Position getLastKnownPosition() {
+        return lastKnownPosition;
+    }
+
+    public double getLastKnownBatteryPercent() {
+        return lastKnownBatteryPercent;
     }
 
     @Override

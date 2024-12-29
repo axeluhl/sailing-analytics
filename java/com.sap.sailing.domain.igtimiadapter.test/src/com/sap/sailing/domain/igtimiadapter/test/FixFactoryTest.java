@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sse.common.Util;
 
 public class FixFactoryTest {

@@ -15,9 +15,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -252,6 +257,28 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         addDataAccessWindoweButton.ensureDebugId("addIgtimiDataAccessWindow");
         dawTable.setVisible(false); // make visible if and only if a single device is selected in the devices table
     }
+    
+    private static class DevicesImagesBarCell extends DefaultActionsImagesBarCell {
+        public static final String ACTION_GPS_OFF = "ACTION_GPS_OFF";
+        public static final String ACTION_GPS_ON = "ACTION_GPS_ON";
+        public static final String ACTION_POWER_OFF = "ACTION_POWER_OFF";
+        private final StringMessages stringMessages;
+
+        public DevicesImagesBarCell(StringMessages stringMessages) {
+            super(stringMessages);
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        protected Iterable<ImageSpec> getImageSpecs() {
+            return Arrays.asList(getUpdateImageSpec(),
+                    new ImageSpec(ACTION_GPS_OFF, stringMessages.turnGPSOff(), IconResources.INSTANCE.noGpsSymbol()),
+                    new ImageSpec(ACTION_GPS_ON, stringMessages.turnGPSOn(), IconResources.INSTANCE.gpsSymbol()),
+                    new ImageSpec(ACTION_POWER_OFF, stringMessages.powerOff(), IconResources.INSTANCE.powerButton()),
+                    getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
+        }
+    }
+
 
     private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiDevicesTable(
             final FlushableCellTable<IgtimiDeviceWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
@@ -287,12 +314,40 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 (a,b)->Util.compareToWithNull(a.getLastHeartBeat(), b.getLastHeartBeat(), /* null is less */ true));
         final TextColumn<IgtimiDeviceWithSecurityDTO> remoteAddressColumn = new AbstractSortableTextColumn<>(
                 device -> device.getRemoteAddress(), columnSortHandler);
+        final SafeHtmlCell lastKnownPositionCell = new SafeHtmlCell();
+        final Column<IgtimiDeviceWithSecurityDTO, SafeHtml> lastKnownPositionColumn = new Column<IgtimiDeviceWithSecurityDTO, SafeHtml>(lastKnownPositionCell) {
+            @Override
+            public SafeHtml getValue(IgtimiDeviceWithSecurityDTO device) {
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                if (device.getLastKnownPosition() != null) {
+                    final String mapsUrl = "https://maps.google.com/maps?t=k&q=loc:"
+                            +device.getLastKnownPosition().getLatDeg()
+                            +","
+                            +device.getLastKnownPosition().getLngDeg()
+                            +"&ll="
+                            +device.getLastKnownPosition().getLatDeg()
+                            +","
+                            +device.getLastKnownPosition().getLngDeg()
+                            +"&z=14";
+                    builder.appendHtmlConstant("<a href=\""+mapsUrl+"\" target=\"_blank\">");
+                    builder.appendEscaped(device.getLastKnownPosition().toString());
+                    builder.appendHtmlConstant("</a>");
+                }
+                return builder.toSafeHtml();
+            }
+        };
+        final TextColumn<IgtimiDeviceWithSecurityDTO> lastKnownBatteryPercentColumn = new AbstractSortableTextColumn<>(
+                device -> Double.isNaN(device.getLastKnownBatteryPercent()) ? "?" :
+                    NumberFormat.getFormat("0.0").format(device.getLastKnownBatteryPercent()), columnSortHandler);
         final HasPermissions type = SecuredDomainType.IGTIMI_DEVICE;
-        final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = create(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
+        final AccessControlledActionsColumn<IgtimiDeviceWithSecurityDTO, DevicesImagesBarCell> actionColumn = create(
+                new DevicesImagesBarCell(stringMessages), userService);
         actionColumn.addAction(ACTION_UPDATE, UPDATE, device -> {
             editDevice(device, filteredDevices);
         });
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_GPS_OFF, UPDATE, this::sendGPSOff);
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_GPS_ON, UPDATE, this::sendGPSOn);
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_POWER_OFF, UPDATE, this::sendPowerOff);
         actionColumn.addAction(ACTION_DELETE, DELETE, device -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
                 removeDevice(device, filteredDevices);
@@ -312,6 +367,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         table.addColumn(deviceSerialNumberColumn, stringMessages.serialNumber());
         table.addColumn(lastHeartBeatColumn, stringMessages.lastHeartBeat());
         table.addColumn(remoteAddressColumn, stringMessages.remoteAddress());
+        table.addColumn(lastKnownPositionColumn, stringMessages.position());
+        table.addColumn(lastKnownBatteryPercentColumn, stringMessages.batteryPercent());
         SecuredDTOOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
         table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),
@@ -367,7 +424,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 final IgtimiDeviceWithSecurityDTO result = new IgtimiDeviceWithSecurityDTO(
                         device.getId(), device.getSerialNumber(),
                         nameField.getText(), device.getLastHeartBeat(),
-                        device.getRemoteAddress());
+                        device.getRemoteAddress(), device.getLastKnownPosition(), device.getLastKnownBatteryPercent());
                 result.setAccessControlList(device.getAccessControlList());
                 result.setOwnership(device.getOwnership());
                 return result;
@@ -613,5 +670,23 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     @Override
     public AbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> getFilterablePanel() {
         return filterDevicesPanel;
+    }
+
+    private void sendGPSOff(IgtimiDeviceWithSecurityDTO device) {
+        if (Window.confirm(stringMessages.reallyTurnGPSOffForIgtimiDevice(device.getSerialNumber()))) {
+            // TODO implement sendGPSOff
+        }
+    }
+
+    private void sendGPSOn(IgtimiDeviceWithSecurityDTO device) {
+        if (Window.confirm(stringMessages.reallyTurnGPSOnForIgtimiDevice(device.getSerialNumber()))) {
+            // TODO implement sendGPSOn
+        }
+    }
+
+    private void sendPowerOff(IgtimiDeviceWithSecurityDTO device) {
+        if (Window.confirm(stringMessages.reallyPowerOffIgtimiDevice(device.getSerialNumber()))) {
+            // TODO implement sendPowerOff
+        }
     }
 }

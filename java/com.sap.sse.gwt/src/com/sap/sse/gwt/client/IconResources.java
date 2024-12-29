@@ -64,4 +64,13 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/moveAway.png")
     ImageResource moveAway();
+
+    @Source("images/power_button.png")
+    ImageResource powerButton();
+
+    @Source("images/gps_symbol.png")
+    ImageResource gpsSymbol();
+
+    @Source("images/no_gps_symbol.png")
+    ImageResource noGpsSymbol();
 }

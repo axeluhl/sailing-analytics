@@ -16,10 +16,12 @@ import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.server.RiotWebsocketHandler;
@@ -29,6 +31,7 @@ import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.replication.Replicable;
 
 /**
@@ -144,6 +147,24 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * message stripped down to the last data point with the requested data case.
      */
     Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException, ParseException, IOException;
+    
+    default <T extends Fix> T getLastFix(String serialNumber, Class<T> type) throws InvalidProtocolBufferException, ParseException, IOException {
+        final Msg lastMessage = getLastMessage(serialNumber, DataCase.forNumber(Type.getType(type).getCode()));
+        final T result;
+        if (lastMessage != null) {
+            final Iterable<Fix> fixes = new FixFactory().createFixes(lastMessage);
+            if (fixes != null) {
+                @SuppressWarnings("unchecked")
+                final T tResult = (T) Util.first(fixes);
+                result = tResult;
+            } else {
+                result = null;
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
 
     /**
      * @return the inbound connections from devices currently tracked; they identify the device

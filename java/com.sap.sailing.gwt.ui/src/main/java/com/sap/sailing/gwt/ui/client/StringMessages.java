@@ -2477,4 +2477,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editDevice();
     String successfullyUpdatedIgtimiDevice(String serialNumber);
     String errorUpdatingIgtimiDevice(String message);
+    String batteryPercent();
+    String turnGPSOff();
+    String turnGPSOn();
+    String powerOff();
+    String reallyTurnGPSOffForIgtimiDevice(String serialNumber);
+    String reallyTurnGPSOnForIgtimiDevice(String serialNumber);
+    String reallyPowerOffIgtimiDevice(String serialNumber);
 }

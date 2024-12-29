@@ -33,6 +33,7 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;

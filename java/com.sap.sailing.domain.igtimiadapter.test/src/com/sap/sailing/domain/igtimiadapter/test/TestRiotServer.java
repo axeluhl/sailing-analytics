@@ -19,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.igtimi.IgtimiStream.Msg;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.impl.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.igtimiadapter.server.Activator;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;

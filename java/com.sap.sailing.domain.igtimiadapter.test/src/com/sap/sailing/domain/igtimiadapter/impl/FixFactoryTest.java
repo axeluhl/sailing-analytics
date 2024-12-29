@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AntHrm;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
