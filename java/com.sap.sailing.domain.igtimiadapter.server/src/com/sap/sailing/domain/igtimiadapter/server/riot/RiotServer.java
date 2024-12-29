@@ -173,4 +173,10 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      *         {@link RiotConnection#getLastHeartbeatReceivedAt() last heart beat}.
      */
     Iterable<RiotConnection> getLiveConnections();
+    
+    /**
+     * Returns {@code true} if and only if a {@link #getLiveConnections() live connection} was found that belongs to the
+     * device identified by {@code deviceSerialNumber}.
+     */
+    boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException;
 }

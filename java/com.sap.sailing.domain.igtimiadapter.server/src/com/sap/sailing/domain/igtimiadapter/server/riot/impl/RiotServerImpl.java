@@ -51,6 +51,7 @@ import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOp
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -598,5 +599,18 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                     (c, dsn, ts)->c.getLastMessage(dsn, ts[0]));
         }
         return result;
+    }
+
+    @Override
+    public boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+        boolean foundConnection = false;
+        for (final RiotConnection connection : getLiveConnections()) {
+            if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
+                connection.sendCommand(command.name());
+                foundConnection = true;
+                break;
+            }
+        }
+        return foundConnection;
     }
 }

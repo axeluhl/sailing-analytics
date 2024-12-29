@@ -42,6 +42,7 @@ public interface RiotConnection extends Closeable {
      * <tr><td>GPS OFF</td><td>Turns the GPS off</td></tr>
      * <tr><td>GPS ON</td><td>Turns the GPS on</td></tr>
      * </table>
+     * See {@link RiotStandardCommand} for convenience commands.
      */
     void sendCommand(String command) throws IOException;
 
