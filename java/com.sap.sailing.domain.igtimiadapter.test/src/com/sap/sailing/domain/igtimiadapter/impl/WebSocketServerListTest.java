@@ -26,7 +26,7 @@ public class WebSocketServerListTest {
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         final IgtimiConnectionFactoryImpl igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(
                 new URL("http://127.0.0.1:8888"), /* defaultBearerToken */ null); // TODO bug6059: connect to the RiotServer launched above
-        final Iterable<URI> serverUris = igtimiConnectionFactory.createConnection().getWebsocketServers();
+        final Iterable<URI> serverUris = igtimiConnectionFactory.getOrCreateConnection().getWebsocketServers();
         assertFalse(Util.isEmpty(serverUris));
         for (final URI uri : serverUris) {
             uri.getScheme().startsWith("ws");

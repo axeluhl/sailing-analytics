@@ -113,10 +113,6 @@ public class Activator implements BundleActivator {
         }
     }
 
-    public IgtimiConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
-    
     public IgtimiWindTrackerFactory getWindTrackerFactory() {
         try {
             return windTrackerFactory.get();

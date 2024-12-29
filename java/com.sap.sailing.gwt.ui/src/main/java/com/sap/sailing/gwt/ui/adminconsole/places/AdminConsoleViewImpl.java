@@ -373,7 +373,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                         }
                     }
                 }, stringMessages.igtimiDevices(), new IgtimiDevicesPlace((String) null /* no place token */),
-                SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
+                SecuredDomainType.IGTIMI_DEVICE.getPermission(DefaultActions.values()));
         /* Expedition Device Configurations */
         final ExpeditionDeviceConfigurationsPanelSupplier expeditionDeviceConfigurationsPanelSupplier =
                 new ExpeditionDeviceConfigurationsPanelSupplier(stringMessages, presenter);

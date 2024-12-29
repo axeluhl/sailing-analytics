@@ -6069,6 +6069,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     protected IgtimiConnection createIgtimiConnection() {
-        return getIgtimiConnectionFactory().createConnection(()->getSecurityService().getCurrentUser() != null ? getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()) : null);
+        return getIgtimiConnectionFactory().getOrCreateConnection(()->getSecurityService().getCurrentUser() != null ? getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()) : null);
     }
 }

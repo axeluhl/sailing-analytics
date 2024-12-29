@@ -129,7 +129,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServletWithPost
         igtimiWindReceiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         igtimiWindReceiver.addListener(this);
         IgtimiConnection igtimiConnection = igtimiConnectionFactory
-                .createConnection(() -> getSecurityService().getCurrentUser() == null ? null
+                .getOrCreateConnection(() -> getSecurityService().getCurrentUser() == null ? null
                         : getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()));
         try {
             LiveDataConnection newIgtimiConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());

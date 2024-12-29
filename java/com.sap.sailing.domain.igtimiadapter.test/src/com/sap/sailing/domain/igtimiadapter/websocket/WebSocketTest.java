@@ -178,7 +178,7 @@ public class WebSocketTest {
                 /* defaultBearerToken */ null); // TODO bug6059: connect to the riotServer launched above
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
         // the data from baur@stg-academy.org, particularly containing the Berlin test data
-        IgtimiConnection conn = igtimiConnectionFactory.createConnection();
+        IgtimiConnection conn = igtimiConnectionFactory.getOrCreateConnection();
         LiveDataConnection liveDataConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
         LiveDataConnection redundantSecondSharedConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));
         assertTrue(liveDataConnection instanceof LiveDataConnectionWrapper);

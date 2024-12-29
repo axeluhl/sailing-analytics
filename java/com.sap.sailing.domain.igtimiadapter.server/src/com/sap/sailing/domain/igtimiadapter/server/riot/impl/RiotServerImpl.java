@@ -105,7 +105,8 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     /**
      * @param localAddress if {@code null}, select a local port to listen on automatically
      */
-    public RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
+    public RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory,
+            MongoObjectFactory mongoObjectFactory) throws Exception {
         this.listeners = ConcurrentHashMap.newKeySet();
         this.resources = new ConcurrentHashMap<>();
         this.dataAccessWindows = new ConcurrentHashMap<>();
@@ -550,7 +551,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
             final URL baseUrl = new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/");
             final IgtimiConnectionFactory igtimiConnectionFactory =
                     IgtimiConnectionFactory.create(baseUrl, currentUserBearerToken);
-            final IgtimiConnection connection = igtimiConnectionFactory.createConnection();
+            final IgtimiConnection connection = igtimiConnectionFactory.getOrCreateConnection();
             return resultProvider.getResult(connection, deviceSerialNumber, types);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

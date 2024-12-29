@@ -44,7 +44,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                 logger.info("Starting up Igtimi wind tracker for race "+trackedRace.getRace().getName());
                 // create the connection, preferring default credentials specified at bundle start-up over those we may
                 // extract here from the logged-on user or the tracked race's owner
-                final IgtimiConnection connection = connectionFactory.createConnection(()->getBearerToken(optionalSecurityService, trackedRace));
+                final IgtimiConnection connection = connectionFactory.getOrCreateConnection(()->getBearerToken(optionalSecurityService, trackedRace));
                 // avoid a race condition with stop() being called while this start-up thread is still running
                 synchronized (IgtimiWindTracker.this) {
                     try {

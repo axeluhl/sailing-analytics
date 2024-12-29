@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.igtimiadapter.server;
 
-import java.net.InetSocketAddress;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.logging.Level;
@@ -18,7 +17,6 @@ import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
-import com.sap.sse.common.Util;
 import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
@@ -55,12 +53,11 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME);
-        final InetSocketAddress bindAddress = Util.hasLength(riotPortAsString) ? new InetSocketAddress("0.0.0.0", Integer.valueOf(riotPortAsString)) : null;
+        final String riotPortAsString = System.getProperty(RIOT_PORT_PROPERTY_NAME, "0");
+        final int bindPort = Integer.valueOf(riotPortAsString);
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        final RiotServerImpl riotServerImpl = new RiotServerImpl(bindAddress, domainObjectFactory, mongoObjectFactory);
-        riotServer = riotServerImpl;
+        riotServer = RiotServer.create(bindPort, domainObjectFactory, mongoObjectFactory);
         context.registerService(RiotServer.class, riotServer, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, riotServer.getId().toString());
@@ -68,7 +65,7 @@ public class Activator implements BundleActivator {
         context.registerService(ClearStateTestSupport.class.getName(), new ClearStateTestSupport() {
             @Override
             public void clearState() throws Exception {
-                riotServerImpl.clear();
+                ((RiotServerImpl) riotServer).clear();
             }
         }, null);
         new Thread(() -> {
