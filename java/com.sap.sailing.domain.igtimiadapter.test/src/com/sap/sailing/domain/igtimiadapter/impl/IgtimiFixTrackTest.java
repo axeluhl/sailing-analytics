@@ -1,29 +1,30 @@
-package com.sap.sailing.domain.igtimiadapter.test;
+package com.sap.sailing.domain.igtimiadapter.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
-import com.sap.sailing.domain.igtimiadapter.Permission;
+import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
+import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
+import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
+import com.sap.sailing.domain.igtimiadapter.test.AbstractTestWithIgtimiConnection;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Igtimi fixes come as isolated single fixes from separate sensors, and even if they are attached to the same device,
@@ -39,20 +40,17 @@ public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
     
     @Test
     public void testFetchFixesIntoTracks() throws Exception {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
-        final TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
-        final TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
-        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
-        final Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
-        final Set<String> deviceSerialNumbers = new HashSet<>();
-        for (final DataAccessWindow daw : daws) {
-            deviceSerialNumbers.add(daw.getDeviceSerialNumber());
-        }
-        logger.info("Retrieving resource data as tracks...");
-        final Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getResourceDataAsTracks(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
+        final String DEVICE_SERIAL_NUMBER = "DD-EE-AAHG";
+        final List<Fix> fixes = new ArrayList<>();
+        // Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
+        final SensorImpl sensor = new SensorImpl(DEVICE_SERIAL_NUMBER, 0);
+        fixes.add(new AWA(TimePoint.now(), sensor, new DegreeBearingImpl(123.0)));
+        fixes.add(new AWS(TimePoint.now(), sensor, new KnotSpeedImpl(12.0)));
+        fixes.add(new HDGM(TimePoint.now(), sensor, new DegreeBearingImpl(86.0)));
+        final Map<String, Map<Type, DynamicTrack<Fix>>> data = ((IgtimiConnectionImpl) connection).getFixesAsTracks(fixes);
         logger.info("Successfully retrieved resource data as tracks");
         assertFalse(data.isEmpty());
-        final Map<Type, DynamicTrack<Fix>> windSensorMap = data.get("DD-EE-AAHG");
+        final Map<Type, DynamicTrack<Fix>> windSensorMap = data.get(DEVICE_SERIAL_NUMBER);
         assertNotNull(windSensorMap);
         assertTrue(windSensorMap.containsKey(Type.AWA));
         assertTrue(windSensorMap.containsKey(Type.AWS));

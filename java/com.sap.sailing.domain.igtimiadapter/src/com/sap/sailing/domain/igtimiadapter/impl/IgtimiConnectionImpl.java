@@ -204,8 +204,13 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     @Override
     public Map<String, Map<Type, DynamicTrack<Fix>>> getResourceDataAsTracks(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers,
             Type... types) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
-        Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
+        final Iterable<Fix> fixes = getResourceData(startTime, endTime, deviceSerialNumbers, types);
+        final Map<String, Map<Type, DynamicTrack<Fix>>> result = getFixesAsTracks(fixes);
+        return result;
+    }
+
+    Map<String, Map<Type, DynamicTrack<Fix>>> getFixesAsTracks(final Iterable<Fix> fixes) {
+        final Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
         for (Fix fix : fixes) {
             String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();
             Type type = fix.getType();
