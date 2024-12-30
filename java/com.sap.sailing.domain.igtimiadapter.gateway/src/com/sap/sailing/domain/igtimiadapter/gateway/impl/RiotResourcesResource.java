@@ -90,7 +90,10 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final RiotServer riot = Activator.getInstance().getRiotServer();
         final JSONObject result = new JSONObject();
         final Subject subject = SecurityUtils.getSubject();
-        for (final String serialNumber : serialNumbers) {
+        final Iterable<String> serialNumbersToUse = serialNumbers==null || serialNumbers.isEmpty()
+                ? Util.map(getRiotService().getDevices(), d->d.getSerialNumber())
+                : serialNumbers;
+        for (final String serialNumber : serialNumbersToUse) {
             if (subject.isPermitted(
                         getRiotService().getDeviceBySerialNumber(serialNumber).getIdentifier().getStringPermission(DefaultActions.READ))) {
                 final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));

@@ -17,18 +17,15 @@ import com.sap.sse.common.Util;
 
 public class LatestDatumTest {
 
-    private final String sample1 = "{\"DD-EE-AAGA\":{\"9\":{\"t\":[1.384091813E12],\"resource_id\":1012353,\"1\":[0.5556]}},\"DD-EE-AAHG\":{\"9\":{\"t\":[1.386186319E12],\"resource_id\":1012677,\"1\":[0.0]}}}";
+    private final String sample1 = "{\"DC-MM-AACN\":[\"EiIKIAoSShAIkNG7/LQyESkGSDSBItI/EgpEQy1NTS1BQUNO\"]}";
     
     @Test
     public void testFixProductionFromSample1() throws ParseException, InvalidProtocolBufferException {
         Iterable<Fix> fixes = new FixFactory().createFixes((JSONObject) new JSONParser().parse(sample1));
-        assertEquals(2, Util.size(fixes));
+        assertEquals(1, Util.size(fixes));
         Iterator<Fix> i = fixes.iterator();
         Fix fix1 = i.next();
-        assertEquals("DD-EE-AAGA", fix1.getSensor().getDeviceSerialNumber());
+        assertEquals("DC-MM-AACN", fix1.getSensor().getDeviceSerialNumber());
         assertEquals(Type.SOG, fix1.getType());
-        Fix fix2 = i.next();
-        assertEquals("DD-EE-AAHG", fix2.getSensor().getDeviceSerialNumber());
-        assertEquals(Type.SOG, fix2.getType());
     }
 }

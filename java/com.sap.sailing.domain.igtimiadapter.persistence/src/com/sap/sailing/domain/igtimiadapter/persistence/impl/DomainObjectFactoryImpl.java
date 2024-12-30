@@ -168,7 +168,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             // the message has a data point of the type requested by dataCase; return it
                             return Msg.newBuilder().setData(
                                        Data.newBuilder().addData(
-                                           DataMsg.newBuilder().addData(dataPoint)
+                                           DataMsg.newBuilder()
+                                               .addData(dataPoint)
+                                               .setSerialNumber(deviceSerialNumber)
                                            .build())
                                        .build())
                                    .build();
