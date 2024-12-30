@@ -49,7 +49,7 @@ public class AbstractTestWithIgtimiConnection {
         riot = RiotServer.create(domainObjectFactory, mongoObjectFactory);
         final String bearerToken = mockSecurityService.getCurrentUser() == null ? null
                 : mockSecurityService.getAccessToken(mockSecurityService.getCurrentUser().getName());
-        connection = new IgtimiConnectionImpl(new URL("http://127.0.0.1:"+riot.getPort()), bearerToken);
+        connection = new IgtimiConnectionImpl(new URL("http://127.0.0.1:8888"), bearerToken);
     }
 
     @After

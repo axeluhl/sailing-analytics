@@ -7,7 +7,6 @@ import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -137,7 +136,8 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final TimePoint startTime = startTimeString == null ? null : TimePoint.of(Long.valueOf(startTimeString));
         final String endTimeString = queryParams.getFirst("end_time");
         final TimePoint endTime = endTimeString == null ? null : TimePoint.of(Long.valueOf(endTimeString));
-        final List<String> serialNumbers = queryParams.get("serial_numbers[]");
+        final Iterable<String> serialNumbers = queryParams.get("serial_numbers[]") == null ?
+                Util.map(getRiotService().getDevices(), d->d.getSerialNumber()) : queryParams.get("serial_numbers[]");
         // The "restore_archives" parameter was part of the original Riot API, but we currently don't implement any archiving
         // procedure for the resource messages, so we ignore it.
         // final Boolean restoreArchives = queryParams.containsKey("restore_archives") ? Boolean.valueOf(queryParams.getFirst("restore_archives")) : null;

@@ -461,7 +461,6 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> deviceSerialNumbers, TimeRange timeRange) {
         final Set<DataAccessWindow> result = new HashSet<>();
         final Set<String> deviceSerialNumbersAsSet = new HashSet<>();
-        Util.addAll(deviceSerialNumbers, deviceSerialNumbersAsSet);
         // TODO provide a more efficient implementation if this turns out to become a performance bottleneck, e.g., by keeping the DataAccessWindows in a time-sorted TreeSet
         for (final DataAccessWindow daw : getDataAccessWindows()) {
             if (deviceSerialNumbersAsSet.contains(daw.getDeviceSerialNumber()) && timeRange.intersects(daw.getTimeRange())) {

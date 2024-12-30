@@ -120,6 +120,9 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     DataAccessWindow getDataAccessWindowById(long id);
     
+    /**
+     * @param serialNumbers must not be {@link null}; if empty, no results will be delivered
+     */
     Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> serialNumbers, TimeRange timeRange);
     
     DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
