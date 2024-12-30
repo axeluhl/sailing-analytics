@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.igtimi.IgtimiData.ApparentWindSpeed;
@@ -19,6 +20,7 @@ import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
+import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
@@ -27,26 +29,39 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class IgtimiPersistenceTest {
     private static final Logger logger = Logger.getLogger(IgtimiPersistenceTest.class.getName());
 
+    private static ClientSession clientSession;
+
+    private static MongoDBConfiguration testDBConfig;
+
+    private static MongoDBService mongoDBService;
+
     private MongoObjectFactory mongoObjectFactory;
     private DomainObjectFactory domainObjectFactory;
     
+    @BeforeClass
+    public static void setUpClientSession() {
+        testDBConfig = MongoDBConfiguration.getDefaultTestConfiguration();
+        mongoDBService = testDBConfig.getService();
+        clientSession = mongoDBService.startCausallyConsistentSession();
+    }
+    
     @Before
     public void setUp() {
-        MongoDBConfiguration testDBConfig = MongoDBConfiguration.getDefaultTestConfiguration();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(testDBConfig.getService());
-        mongoObjectFactory.clear();
-        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(testDBConfig.getService());
+        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+        mongoObjectFactory.clear(clientSession);
+        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService);
     }
 
     @Test
     public void testStoringAndLoadingSimpleDevice() {
         final Device device = Device.create(123, "DE-AC-AAHJ", "The tricky one");
-        mongoObjectFactory.storeDevice(device);
-        final Device loadedDevice = domainObjectFactory.getDevices().iterator().next();
+        mongoObjectFactory.storeDevice(device, clientSession);
+        final Device loadedDevice = domainObjectFactory.getDevices(clientSession).iterator().next();
         assertEquals(device.getId(), loadedDevice.getId());
         assertEquals(device.getName(), loadedDevice.getName());
         assertEquals(device.getSerialNumber(), loadedDevice.getSerialNumber());
@@ -57,8 +72,8 @@ public class IgtimiPersistenceTest {
         final TimePoint from = TimePoint.now();
         final TimePoint to = from.plus(Duration.ONE_MINUTE);
         final Resource resource = Resource.create(234, from, to, "AA-DE-AACC", new int[] { 1, 4, 7 });
-        mongoObjectFactory.storeResource(resource);
-        final Resource loadedResource = domainObjectFactory.getResources().iterator().next();
+        mongoObjectFactory.storeResource(resource, clientSession);
+        final Resource loadedResource = domainObjectFactory.getResources(clientSession).iterator().next();
         assertEquals(resource.getId(), loadedResource.getId());
         assertEquals(resource.getName(), loadedResource.getName()); // an inferred value; still useful to compare
         assertEquals(resource.getStartTime(), loadedResource.getStartTime());
@@ -72,8 +87,8 @@ public class IgtimiPersistenceTest {
         final TimePoint from = TimePoint.now();
         final TimePoint to = from.plus(Duration.ONE_MINUTE);
         final DataAccessWindow daw = DataAccessWindow.create(345, from, to, "AA-CC-AAEH");
-        mongoObjectFactory.storeDataAccessWindow(daw);
-        final DataAccessWindow loadedDaw = domainObjectFactory.getDataAccessWindows().iterator().next();
+        mongoObjectFactory.storeDataAccessWindow(daw, clientSession);
+        final DataAccessWindow loadedDaw = domainObjectFactory.getDataAccessWindows(clientSession).iterator().next();
         assertEquals(daw.getId(), loadedDaw.getId());
         assertEquals(daw.getName(), loadedDaw.getName()); // an inferred value; still useful to compare
         assertEquals(daw.getStartTime(), loadedDaw.getStartTime());
@@ -103,9 +118,9 @@ public class IgtimiPersistenceTest {
                     .build())
                 .build();
         logger.info("Storing message: "+msg);
-        mongoObjectFactory.storeMessage(SERIAL_NUMBER, msg);
+        mongoObjectFactory.storeMessage(SERIAL_NUMBER, msg, clientSession);
         final Set<DataCase> dataCases = new HashSet<>(Arrays.asList(DataCase.values()));
-        final Iterable<Msg> result = domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases);
+        final Iterable<Msg> result = domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases, clientSession);
         final Iterator<Msg> iterator = result.iterator();
         assertTrue(iterator.hasNext());
         final Msg readMsg = iterator.next();
@@ -119,14 +134,14 @@ public class IgtimiPersistenceTest {
         final ApparentWindSpeed aws = dataPoint.getAws();
         assertEquals(AWS, aws.getValue(), 0.000000001);
         // search with a time range *before* the actual message
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE.times(2)), AWS_TIME_POINT.minus(Duration.ONE_MINUTE)), dataCases)));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE.times(2)), AWS_TIME_POINT.minus(Duration.ONE_MINUTE)), dataCases, clientSession)));
         // search with a time range *after* the actual message
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.plus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE.times(2))), dataCases)));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.plus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE.times(2))), dataCases, clientSession)));
         // search with the wrong device serial number
-        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER+"-wrong", TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases)));
+        assertTrue(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER+"-wrong", TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases, clientSession)));
         // search with a time range open at the end
-        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), null), dataCases)));
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(AWS_TIME_POINT.minus(Duration.ONE_MINUTE), null), dataCases, clientSession)));
         // search with a time range open at the start
-        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(null, AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases)));
+        assertFalse(Util.isEmpty(domainObjectFactory.getMessages(SERIAL_NUMBER, TimeRange.create(null, AWS_TIME_POINT.plus(Duration.ONE_MINUTE)), dataCases, clientSession)));
     }
 }

@@ -18,6 +18,8 @@ import com.igtimi.IgtimiData.DataMsg.Builder;
 import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
@@ -41,10 +43,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Resource> getResources() {
+    public Iterable<Resource> getResources(ClientSession clientSessionOrNull) {
         final List<Resource> result = new ArrayList<>();
         final MongoCollection<org.bson.Document> resourcesCollection = db.getCollection(CollectionNames.IGTIMI_RESOURCES.name());
-        for (Object o : resourcesCollection.find()) {
+        final FindIterable<Document> resourceDocuments =
+                clientSessionOrNull == null ? resourcesCollection.find() : resourcesCollection.find(clientSessionOrNull);
+        for (Object o : resourceDocuments) {
             final long id = ((Number) ((Document) o).get(FieldNames.IGTIMI_RESOURCES_ID.name())).longValue();
             final TimePoint startTime = getTimePoint((Document) o, FieldNames.IGTIMI_RESOURCES_START_TIME_MILLIS);
             final TimePoint endTime = getTimePoint((Document) o, FieldNames.IGTIMI_RESOURCES_END_TIME_MILLIS);
@@ -66,10 +70,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<DataAccessWindow> getDataAccessWindows() {
+    public Iterable<DataAccessWindow> getDataAccessWindows(ClientSession clientSessionOrNull) {
         final List<DataAccessWindow> result = new ArrayList<>();
-        final MongoCollection<org.bson.Document> devicesCollection = db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name());
-        for (Object o : devicesCollection.find()) {
+        final MongoCollection<org.bson.Document> dataAcccessWindowsCollection = db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name());
+        final FindIterable<Document> dawDocuments = clientSessionOrNull == null ? dataAcccessWindowsCollection.find()
+                : dataAcccessWindowsCollection.find(clientSessionOrNull);
+        for (Object o : dawDocuments) {
             final Number id = ((Number) ((Document) o).get(FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_ID.name()));
             final TimePoint startTime = getTimePoint((Document) o, FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_START_TIME_MILLIS);
             final TimePoint endTime = getTimePoint((Document) o, FieldNames.IGTIMI_DATA_ACCESS_WINDOWS_END_TIME_MILLIS);
@@ -80,10 +86,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Device> getDevices() {
+    public Iterable<Device> getDevices(ClientSession clientSessionOrNull) {
         final List<Device> result = new ArrayList<>();
         final MongoCollection<org.bson.Document> devicesCollection = db.getCollection(CollectionNames.IGTIMI_DEVICES.name());
-        for (Object o : devicesCollection.find()) {
+        final FindIterable<Document> deviceDocuments = clientSessionOrNull == null ? devicesCollection.find()
+                : devicesCollection.find(clientSessionOrNull);
+        for (Object o : deviceDocuments) {
             final Number id = ((Number) ((Document) o).get(FieldNames.IGTIMI_DEVICES_ID.name()));
             final String serialNumber = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_SERIAL_NUMBER.name());
             final String name = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_NAME.name());
@@ -93,11 +101,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases, ClientSession clientSessionOrNull) {
         final Document query = new Document();
         appendTimeRangeQuery(query, timeRange);
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
-        final Iterable<Document> queryResult = messagesCollection.find(query);
+        final Iterable<Document> queryResult = clientSessionOrNull == null ? messagesCollection.find(query)
+                : messagesCollection.find(clientSessionOrNull, query);
         return Util.filter(Util.map(queryResult,
                 doc->{
                     try {
@@ -139,10 +148,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException {
+    public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase, ClientSession clientSessionOrNull) throws InvalidProtocolBufferException {
         final Document query = new Document();
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
-        final Iterable<Document> queryResult = messagesCollection.find(query).sort(Sorts.descending(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name()));
+        final FindIterable<Document> documentsUnsorted = clientSessionOrNull == null ? messagesCollection.find(query)
+                : messagesCollection.find(clientSessionOrNull, query);
+        final Iterable<Document> queryResult = documentsUnsorted.sort(Sorts.descending(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name()));
         for (final Document document : queryResult) {
             final Binary messageBinary = (Binary) document.get(FieldNames.IGTIMI_MESSAGES_PROTOBUF_MESSAGE.name());
             final Msg msg = Msg.parseFrom(messageBinary.getData());

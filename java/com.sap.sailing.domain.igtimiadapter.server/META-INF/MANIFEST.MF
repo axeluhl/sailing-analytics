@@ -10,6 +10,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter.server
 Import-Package: com.google.protobuf;version="[4.28.0,5.0.0)",
+ com.mongodb.client;version="4.11.1",
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.security,
  com.sap.sse.common,

@@ -6,23 +6,24 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
+import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sse.common.TimeRange;
 
 public interface DomainObjectFactory {
-    Iterable<Resource> getResources();
+    Iterable<Resource> getResources(ClientSession clientSessionOrNull);
 
-    Iterable<DataAccessWindow> getDataAccessWindows();
+    Iterable<DataAccessWindow> getDataAccessWindows(ClientSession clientSessionOrNull);
 
-    Iterable<Device> getDevices();
+    Iterable<Device> getDevices(ClientSession clientSessionOrNull);
     
-    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases);
+    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases, ClientSession clientSessionOrNull);
 
     /**
      * Finds the latest message received from the device identified by {@code deviceSerialNumber}
      * that has a {@link DataPoint} of the correct {@link DataCase}.
      */
-    Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase) throws InvalidProtocolBufferException;
+    Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase, ClientSession clientSessionOrNull) throws InvalidProtocolBufferException;
 }

@@ -117,14 +117,14 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
         this.liveWebSocketConnections = ConcurrentHashMap.newKeySet();
-        for (final Device device : domainObjectFactory.getDevices()) {
+        for (final Device device : domainObjectFactory.getDevices(/* clientSessionOrNull */ null)) {
             devices.put(device.getId(), device);
             devicesBySerialNumber.put(device.getSerialNumber(), device);
         }
-        for (final Resource resource : domainObjectFactory.getResources()) {
+        for (final Resource resource : domainObjectFactory.getResources(/* clientSessionOrNull */ null)) {
             resources.put(resource.getId(), resource);
         }
-        for (final DataAccessWindow daw : domainObjectFactory.getDataAccessWindows()) {
+        for (final DataAccessWindow daw : domainObjectFactory.getDataAccessWindows(/* clientSessionOrNull */ null)) {
             dataAccessWindows.put(daw.getId(), daw);
         }
         this.socketSelector = Selector.open();
@@ -266,7 +266,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     private void storeMessage(Msg message, String deviceSerialNumber) {
-        mongoObjectFactory.storeMessage(deviceSerialNumber, message);
+        mongoObjectFactory.storeMessage(deviceSerialNumber, message, /* clientSessionOrNull */ null);
     }
 
     /**
@@ -381,7 +381,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Void internalAddDevice(Device device) {
         devices.put(device.getId(), device);
         devicesBySerialNumber.put(device.getSerialNumber(), device);
-        mongoObjectFactory.storeDevice(device);
+        mongoObjectFactory.storeDevice(device, /* clientSessionOrNull */ null);
         return null;
     }
 
@@ -394,7 +394,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Void internalRemoveDevice(long deviceId) {
         final Device device = devices.remove(deviceId);
         devicesBySerialNumber.remove(device.getSerialNumber());
-        mongoObjectFactory.removeDevice(deviceId);
+        mongoObjectFactory.removeDevice(deviceId, /* clientSessionOrNull */ null);
         return null;
     }
 
@@ -408,7 +408,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         final Device existingDevice = devices.get(deviceId);
         if (existingDevice != null) {
             existingDevice.setName(name);
-            mongoObjectFactory.storeDevice(existingDevice);
+            mongoObjectFactory.storeDevice(existingDevice, /* clientSessionOrNull */ null);
         }
         return null;
     }
@@ -431,7 +431,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalAddResource(Resource resource) {
         resources.put(resource.getId(), resource);
-        mongoObjectFactory.storeResource(resource);
+        mongoObjectFactory.storeResource(resource, /* clientSessionOrNull */ null);
         return null;
     }
 
@@ -443,7 +443,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalRemoveResource(long resourceId) {
         resources.remove(resourceId);
-        mongoObjectFactory.removeResource(resourceId);
+        mongoObjectFactory.removeResource(resourceId, /* clientSessionOrNull */ null);
         return null;
     }
 
@@ -481,7 +481,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         final long newId = dataAccessWindows.isEmpty() ? 1 : Collections.max(dataAccessWindows.keySet()) + 1;
         final DataAccessWindow daw = DataAccessWindow.create(newId, from, to, deviceSerialNumber);
         dataAccessWindows.put(daw.getId(), daw);
-        mongoObjectFactory.storeDataAccessWindow(daw);
+        mongoObjectFactory.storeDataAccessWindow(daw, /* clientSessionOrNull */ null);
         return daw;
     }
     
@@ -493,7 +493,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Void internalRemoveDataAccessWindow(long dawId) {
         dataAccessWindows.remove(dawId);
-        mongoObjectFactory.removeDataAccessWindow(dawId);
+        mongoObjectFactory.removeDataAccessWindow(dawId, /* clientSessionOrNull */ null);
         return null;
     }
 
@@ -545,7 +545,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         final Iterable<Msg> result;
         if (getMasterDescriptor() == null) {
-            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases);
+            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases, /* clientSessionOrNull */ null);
         } else {
             final Type[] types = new Type[dataCases.size()];
             int i=0;
@@ -593,7 +593,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Msg getLastMessage(String serialNumber, DataCase dataCase) throws ParseException, IOException {
         final Msg result;
         if (getMasterDescriptor() == null) {
-            result = domainObjectFactory.getLatestMessage(serialNumber, dataCase);
+            result = domainObjectFactory.getLatestMessage(serialNumber, dataCase, /* clientSessionOrNull */ null);
         } else {
             result = getFromPrimary(serialNumber, new Type[] { Type.valueOf(dataCase.getNumber()) },
                     (c, dsn, ts)->c.getLastMessage(dsn, ts[0]));
