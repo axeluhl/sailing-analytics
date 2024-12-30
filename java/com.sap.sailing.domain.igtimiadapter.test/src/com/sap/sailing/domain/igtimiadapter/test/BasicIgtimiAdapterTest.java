@@ -30,7 +30,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-// TODO this needs to become a Selenium test with the OSGi product and the igtimiadapter.gateway bundle running
+// TODO This needs to become a Selenium test with the OSGi product and the igtimiadapter.gateway bundle running.
+// TODO Furthermore, the test assumes specific data to be present in some Riot server to test against; is this a good idea?
+// TODO If so, we would need to ensure that the data against which to test is actually present in the Riot test server...
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
