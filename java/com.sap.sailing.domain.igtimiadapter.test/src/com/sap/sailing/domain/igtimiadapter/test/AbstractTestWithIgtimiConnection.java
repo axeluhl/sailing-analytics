@@ -31,20 +31,21 @@ public class AbstractTestWithIgtimiConnection {
     @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
     private static ClientSession clientSession;
+    private static MongoDBService mongoDBService;
 
     @BeforeClass
     public static void setUpClientSession() {
-        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+        mongoDBService = MongoDBConfiguration.getDefaultTestConfiguration().getService();
+        clientSession = mongoDBService.startCausallyConsistentSession();
     }
 
     @Before
     public void setUp() throws Exception {
         final SecurityService mockSecurityService = SecurityServiceMockFactory.mockSecurityService();
         Activator.getInstance().setSecurityService(mockSecurityService);
-        final MongoDBConfiguration testDBConfig = MongoDBConfiguration.getDefaultTestConfiguration();
-        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(testDBConfig.getService());
+        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
         mongoObjectFactory.clear(clientSession);
-        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(testDBConfig.getService());
+        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService);
         riot = RiotServer.create(domainObjectFactory, mongoObjectFactory);
         final String bearerToken = mockSecurityService.getCurrentUser() == null ? null
                 : mockSecurityService.getAccessToken(mockSecurityService.getCurrentUser().getName());
