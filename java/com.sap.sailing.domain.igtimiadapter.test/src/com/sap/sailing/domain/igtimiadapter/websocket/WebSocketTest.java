@@ -44,11 +44,7 @@ import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.impl.Activator;
 import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
-import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
-import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.Util;
-import com.sap.sse.mongodb.MongoDBConfiguration;
-import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
 public class WebSocketTest {
@@ -170,10 +166,6 @@ public class WebSocketTest {
     @Test
     public void testWebSocketConnect() throws Exception {
         final List<Fix> allFixesReceived = new ArrayList<>();
-        MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
-        MongoDBService mongoTestService = mongoTestConfig.getService();
-        RiotServer riotServer = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
         final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(new URL("http://127.0.0.1:8888"),
                 /* defaultBearerToken */ null); // TODO bug6059: connect to the riotServer launched above
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
