@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.websocket;
+package com.sap.sailing.selenium.api.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,7 +20,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.client.ClientProtocolException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -30,8 +29,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,12 +39,11 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
-import com.sap.sailing.domain.igtimiadapter.impl.Activator;
-import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
+import com.sap.sailing.domain.igtimiadapter.websocket.LiveDataConnectionWrapper;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.testsupport.SecurityServiceMockFactory;
 
-public class WebSocketTest {
+public class WebSocketTest extends AbstractSeleniumTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
 
     @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(1 * 60 * 1000);
@@ -117,56 +113,37 @@ public class WebSocketTest {
         }
     }
     
-    @Before
-    public void setUp() throws ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        Activator.getInstance().setSecurityService(SecurityServiceMockFactory.mockSecurityService());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        Activator.getInstance().setSecurityService(null);
-    }
-
     @Ignore("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
     @Test
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
         WebSocketClient client = new WebSocketClient();
         SimpleEchoTestSocket socket = new SimpleEchoTestSocket();
-        try {
-            client.start();
-            URI echoUri = new URI(destUri);
-            ClientUpgradeRequest request = new ClientUpgradeRequest();
-            client.connect(socket, echoUri, request);
-            logger.info("Connecting to : "+echoUri);
-            synchronized (socket) {
-                while (socket.getSession() == null) {
-                    socket.wait();
-                }
-            }
-            socket.sendAndWait("Humba Humba");
-            synchronized (socket) {
-                if (socket.getStringsReceived().isEmpty()) {
-                    socket.wait(2000); // wait for 2s for the echo response to arrive
-                }
-            }
-            socket.closeSession();
-            socket.awaitClose(5, TimeUnit.SECONDS);
-            assertEquals(1, socket.getStringsReceived().size());
-            assertEquals("Humba Humba", socket.getStringsReceived().get(0));
-        } finally {
-            try {
-                client.stop();
-            } catch (Exception e) {
-                e.printStackTrace();
+        URI echoUri = new URI(destUri);
+        ClientUpgradeRequest request = new ClientUpgradeRequest();
+        client.connect(socket, echoUri, request);
+        logger.info("Connecting to : "+echoUri);
+        synchronized (socket) {
+            while (socket.getSession() == null) {
+                socket.wait();
             }
         }
+        socket.sendAndWait("Humba Humba");
+        synchronized (socket) {
+            if (socket.getStringsReceived().isEmpty()) {
+                socket.wait(2000); // wait for 2s for the echo response to arrive
+            }
+        }
+        socket.closeSession();
+        socket.awaitClose(5, TimeUnit.SECONDS);
+        assertEquals(1, socket.getStringsReceived().size());
+        assertEquals("Humba Humba", socket.getStringsReceived().get(0));
     }
     
     @Test
     public void testWebSocketConnect() throws Exception {
         final List<Fix> allFixesReceived = new ArrayList<>();
-        final IgtimiConnectionFactory igtimiConnectionFactory = new IgtimiConnectionFactoryImpl(new URL("http://127.0.0.1:8888"),
+        final IgtimiConnectionFactory igtimiConnectionFactory = IgtimiConnectionFactory.create(new URL(getContextRoot()),
                 /* defaultBearerToken */ null); // TODO bug6059: connect to the riotServer launched above
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
         // the data from baur@stg-academy.org, particularly containing the Berlin test data

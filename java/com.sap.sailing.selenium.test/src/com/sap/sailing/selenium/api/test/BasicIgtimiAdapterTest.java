@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.test;
+package com.sap.sailing.selenium.api.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

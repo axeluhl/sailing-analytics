@@ -1,9 +1,10 @@
-package com.sap.sailing.domain.igtimiadapter.impl;
+package com.sap.sailing.domain.igtimiadapter.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +15,14 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.Sensor;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDGM;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.igtimiadapter.test.AbstractTestWithIgtimiConnection;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.TimePoint;
@@ -35,7 +38,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Axel Uhl (d043530)
  *
  */
-public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
+public class IgtimiFixTrackTest {
     private static final Logger logger = Logger.getLogger(IgtimiFixTrackTest.class.getName());
     
     @Test
@@ -43,11 +46,12 @@ public class IgtimiFixTrackTest extends AbstractTestWithIgtimiConnection {
         final String DEVICE_SERIAL_NUMBER = "DD-EE-AAHG";
         final List<Fix> fixes = new ArrayList<>();
         // Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG, Type.HDGM);
-        final SensorImpl sensor = new SensorImpl(DEVICE_SERIAL_NUMBER, 0);
+        final Sensor sensor = Sensor.create(DEVICE_SERIAL_NUMBER, 0);
         fixes.add(new AWA(TimePoint.now(), sensor, new DegreeBearingImpl(123.0)));
         fixes.add(new AWS(TimePoint.now(), sensor, new KnotSpeedImpl(12.0)));
         fixes.add(new HDGM(TimePoint.now(), sensor, new DegreeBearingImpl(86.0)));
-        final Map<String, Map<Type, DynamicTrack<Fix>>> data = ((IgtimiConnectionImpl) connection).getFixesAsTracks(fixes);
+        final IgtimiConnection connection = IgtimiConnectionFactory.create(new URL("http://127.0.0.1:8888"), null).getOrCreateConnection();
+        final Map<String, Map<Type, DynamicTrack<Fix>>> data = connection.getFixesAsTracks(fixes);
         logger.info("Successfully retrieved resource data as tracks");
         assertFalse(data.isEmpty());
         final Map<Type, DynamicTrack<Fix>> windSensorMap = data.get(DEVICE_SERIAL_NUMBER);

@@ -209,7 +209,8 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         return result;
     }
 
-    Map<String, Map<Type, DynamicTrack<Fix>>> getFixesAsTracks(final Iterable<Fix> fixes) {
+    @Override
+    public Map<String, Map<Type, DynamicTrack<Fix>>> getFixesAsTracks(final Iterable<Fix> fixes) {
         final Map<String, Map<Type, DynamicTrack<Fix>>> result = new HashMap<>();
         for (Fix fix : fixes) {
             String deviceSerialNumber = fix.getSensor().getDeviceSerialNumber();

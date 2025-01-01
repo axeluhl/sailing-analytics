@@ -48,6 +48,7 @@ Export-Package: com.igtimi,
  com.sap.sailing.domain.igtimiadapter,
  com.sap.sailing.domain.igtimiadapter.datatypes,
  com.sap.sailing.domain.igtimiadapter.impl;x-friends:="com.sap.sailing.domain.igtimiadapter.gateway",
- com.sap.sailing.domain.igtimiadapter.shared
+ com.sap.sailing.domain.igtimiadapter.shared,
+ com.sap.sailing.domain.igtimiadapter.websocket;x-friends:="com.sap.sailing.selenium.test"
 Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter
 Bundle-ActivationPolicy: lazy

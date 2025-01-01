@@ -187,4 +187,6 @@ public interface IgtimiConnection {
      * upgrade request passed as argument. Otherwise, this is a no-op.
      */
     void authenticate(ClientUpgradeRequest websocketUpgradeRequest);
+
+    Map<String, Map<Type, DynamicTrack<Fix>>> getFixesAsTracks(Iterable<Fix> fixes);
 }
