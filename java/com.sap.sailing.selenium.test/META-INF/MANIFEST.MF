@@ -20,7 +20,8 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  com.sap.sse.security
 Bundle-ClassPath: .
 Automatic-Module-Name: com.sap.sailing.selenium.test
-Import-Package: com.sap.sailing.domain.igtimiadapter,
+Import-Package: com.google.protobuf;version="[4.28.0,5.0.0)",
+ com.sap.sailing.domain.igtimiadapter,
  com.sap.sailing.domain.igtimiadapter.datatypes,
  com.sap.sailing.domain.igtimiadapter.impl,
  com.sap.sailing.domain.igtimiadapter.server.riot,

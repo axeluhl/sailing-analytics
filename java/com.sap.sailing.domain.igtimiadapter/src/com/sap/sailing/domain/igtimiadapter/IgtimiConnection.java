@@ -189,4 +189,9 @@ public interface IgtimiConnection {
     void authenticate(ClientUpgradeRequest websocketUpgradeRequest);
 
     Map<String, Map<Type, DynamicTrack<Fix>>> getFixesAsTracks(Iterable<Fix> fixes);
+
+    /**
+     * The TCP port the Riot server is listening on for device connections
+     */
+    int getRiotPort() throws ClientProtocolException, IOException, ParseException;
 }

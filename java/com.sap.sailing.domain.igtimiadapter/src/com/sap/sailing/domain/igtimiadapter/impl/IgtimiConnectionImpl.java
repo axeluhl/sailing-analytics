@@ -518,6 +518,13 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
     }
+    
+    @Override
+    public int getRiotPort() throws ClientProtocolException, IOException, ParseException {
+        final HttpGet getServer = new HttpGet(getApiV1BaseUrl()+"server");
+        final JSONObject serverJson = (JSONObject) getJsonParsedResponse(getServer).getA();
+        return Integer.valueOf(serverJson.get("port").toString());
+    }
 
     @Override
     public void authenticate(ClientUpgradeRequest websocketUpgradeRequest) {

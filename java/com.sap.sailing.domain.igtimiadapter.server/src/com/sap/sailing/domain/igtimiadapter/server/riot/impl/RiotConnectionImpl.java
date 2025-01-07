@@ -30,6 +30,7 @@ import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class RiotConnectionImpl implements RiotConnection {
@@ -120,6 +121,8 @@ public class RiotConnectionImpl implements RiotConnection {
     
     @Override
     public void sendCommand(String command) throws IOException {
+        // TODO the following line would set the connected device's serial number to "DC-GD-AAED"
+//        send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setUpdateDeviceInformation(DeviceInformation.newBuilder().setSerialNumber("DC-GD-AAED").build()).build()).build());
         send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
                 .setCommand(DeviceCommand.newBuilder().setText(command)))).build());
     }
@@ -164,7 +167,6 @@ public class RiotConnectionImpl implements RiotConnection {
     private void sendPositiveAuthResponse() throws IOException {
         final AuthResponse response = AuthResponse.newBuilder()
             .setTimestamp(System.currentTimeMillis())
-            .setToken(Token.newBuilder().setDeviceGroupToken(getDeviceGroupToken()))
             .setAck(true)
             .setCode(200)
             .setReason("Authenticated")
@@ -201,7 +203,10 @@ public class RiotConnectionImpl implements RiotConnection {
             @Override
             public void handleData(Data data) {
                 for (final DataMsg dataMsg : data.getDataList()) {
-                    serialNumber = dataMsg.getSerialNumber();
+                    final String messageSerialNumber = dataMsg.getSerialNumber();
+                    if (Util.hasLength(messageSerialNumber)) {
+                        serialNumber = dataMsg.getSerialNumber();
+                    }
                 }
             }
             

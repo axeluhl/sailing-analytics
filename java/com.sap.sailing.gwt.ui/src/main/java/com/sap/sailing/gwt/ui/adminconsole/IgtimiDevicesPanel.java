@@ -558,6 +558,10 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                             final String errorMessage;
                             if (!Util.hasLength(valueToValidate.getDeviceSerialNumber())) {
                                 errorMessage = stringMessages.deviceSerialNumberMustNotBeEmpty();
+                            } else if (valueToValidate.getFrom() == null) {
+                                errorMessage = stringMessages.fromTimeNotSet();
+                            } else if (valueToValidate.getTo() == null) {
+                                errorMessage = stringMessages.toTimeNotSet();
                             } else {
                                 errorMessage = null;
                             }

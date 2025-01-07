@@ -507,6 +507,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         dataAccessWindows.clear();
         connections.clear();
         listeners.clear();
+        mongoObjectFactory.clear(/* clientSessionOrNull */ null);
     }
 
     @Override
