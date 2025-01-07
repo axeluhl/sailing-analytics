@@ -15,7 +15,7 @@ public class DeviceImpl extends HasIdImpl implements Device {
         this(id, serialNumber, /* name */ null);
     }
 
-    public DeviceImpl(Long id, String serialNumber, String name) {
+    public DeviceImpl(long id, String serialNumber, String name) {
         super(id);
         this.serialNumber = serialNumber;
         this.name = name;

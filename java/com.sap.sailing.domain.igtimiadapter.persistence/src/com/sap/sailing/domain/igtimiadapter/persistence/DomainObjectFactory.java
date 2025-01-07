@@ -9,12 +9,9 @@ import com.igtimi.IgtimiStream.Msg;
 import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sse.common.TimeRange;
 
 public interface DomainObjectFactory {
-    Iterable<Resource> getResources(ClientSession clientSessionOrNull);
-
     Iterable<DataAccessWindow> getDataAccessWindows(ClientSession clientSessionOrNull);
 
     Iterable<Device> getDevices(ClientSession clientSessionOrNull);

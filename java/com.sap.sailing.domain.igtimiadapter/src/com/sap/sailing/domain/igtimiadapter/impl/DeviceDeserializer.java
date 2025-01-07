@@ -10,7 +10,7 @@ public class DeviceDeserializer {
     static final String NAME = "name";
 
     public Device createDeviceFromJson(JSONObject deviceJson) {
-        return new DeviceImpl((Long) deviceJson.get(ID), (String) deviceJson.get(SERIAL_NUMBER),
+        return new DeviceImpl((Long) deviceJson.getOrDefault(ID, 0), (String) deviceJson.get(SERIAL_NUMBER),
                 (String) deviceJson.get(NAME));
     }
 }

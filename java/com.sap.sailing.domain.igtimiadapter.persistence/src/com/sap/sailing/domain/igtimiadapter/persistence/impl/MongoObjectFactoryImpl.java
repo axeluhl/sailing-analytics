@@ -18,7 +18,6 @@ import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.DataPointTimePointExtractor;
 import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -45,16 +44,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void clear(ClientSession clientSessionOrNull) {
         final MongoCollection<Document> devicesCollection = db.getCollection(CollectionNames.IGTIMI_DEVICES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED);
-        final MongoCollection<Document> resourcesCollection = db.getCollection(CollectionNames.IGTIMI_RESOURCES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED);
         final MongoCollection<Document> dataAccessWindowsCollections = db.getCollection(CollectionNames.IGTIMI_DATA_ACCESS_WINDOWS.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED);
         if (clientSessionOrNull == null) {
             devicesCollection.drop();
-            resourcesCollection.drop();
             dataAccessWindowsCollections.drop();
             messagesCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop();
         } else {
             devicesCollection.drop(clientSessionOrNull);
-            resourcesCollection.drop(clientSessionOrNull);
             dataAccessWindowsCollections.drop(clientSessionOrNull);
             messagesCollection.withWriteConcern(WriteConcern.ACKNOWLEDGED).drop(clientSessionOrNull);
         }
@@ -84,34 +80,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             deviceCollection.deleteOne(filter);
         } else {
             deviceCollection.deleteOne(clientSessionOrNull, filter);
-        }
-    }
-    
-    @Override
-    public void storeResource(Resource resource, ClientSession clientSessionOrNull) {
-        final Document filter = new Document(FieldNames.IGTIMI_RESOURCES_ID.name(), resource.getId());
-        final Document update = new Document();
-        update.put(FieldNames.IGTIMI_RESOURCES_ID.name(), resource.getId());
-        update.put(FieldNames.IGTIMI_RESOURCES_DEVICE_SERIAL_NUMBER.name(), resource.getDeviceSerialNumber());
-        update.put(FieldNames.IGTIMI_RESOURCES_START_TIME_MILLIS.name(), resource.getStartTime() == null ? null : resource.getStartTime().asMillis());
-        update.put(FieldNames.IGTIMI_RESOURCES_END_TIME_MILLIS.name(), resource.getEndTime() == null ? null : resource.getEndTime().asMillis());
-        update.put(FieldNames.IGTIMI_RESOURCES_DATA_TYPES.name(), Util.asList(Util.map(resource.getDataTypes(), dataType->dataType.getCode())));
-        final MongoCollection<Document> resourcesCollection = db.getCollection(CollectionNames.IGTIMI_RESOURCES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED);
-        if (clientSessionOrNull == null) {
-            resourcesCollection.replaceOne(filter, update, new ReplaceOptions().upsert(true));
-        } else {
-            resourcesCollection.replaceOne(clientSessionOrNull, filter, update, new ReplaceOptions().upsert(true));
-        }
-    }
-
-    @Override
-    public void removeResource(long resourceId, ClientSession clientSessionOrNull) {
-        final Document filter = new Document(FieldNames.IGTIMI_DEVICES_ID.name(), resourceId);
-        final MongoCollection<Document> resourcesCollection = db.getCollection(CollectionNames.IGTIMI_RESOURCES.name()).withWriteConcern(WriteConcern.ACKNOWLEDGED);
-        if (clientSessionOrNull == null) {
-            resourcesCollection.deleteOne(filter);
-        } else {
-            resourcesCollection.deleteOne(clientSessionOrNull, filter);
         }
     }
     

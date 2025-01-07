@@ -11,7 +11,6 @@ import org.osgi.framework.BundleContext;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
@@ -72,9 +71,6 @@ public class Activator implements BundleActivator {
             securityServiceServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
             try {
                 final SecurityService securityService = securityServiceServiceTracker.getInitializedService(0);
-                for (Resource resource : riotServer.getResources()) {
-                    securityService.migrateOwnership(resource);
-                }
                 for (DataAccessWindow daw : riotServer.getDataAccessWindows()) {
                     securityService.migrateOwnership(daw);
                 }
@@ -86,7 +82,6 @@ public class Activator implements BundleActivator {
                 securityService.assumeOwnershipMigrated(igtimiAccountTypeName);
                 securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW.getName());
                 securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_DEVICE.getName());
-                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_RESOURCE.getName());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to create missing ownerships for Igtimi entities", e);
             }

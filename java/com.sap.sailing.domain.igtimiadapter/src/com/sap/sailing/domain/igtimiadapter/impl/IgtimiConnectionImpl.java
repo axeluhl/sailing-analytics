@@ -37,7 +37,6 @@ import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.Permission;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
@@ -73,19 +72,6 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
     public IgtimiConnectionImpl(final URL baseUrl, final String bearerToken) {
         super(baseUrl, bearerToken);
         liveDataConnectionFactory = new LiveDataConnectionFactoryImpl(this);
-    }
-    
-    @Override
-    public Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        final HttpGet getResources = new HttpGet(getResourcesUrl(permission, startTime, endTime, deviceIds, streamIds));
-        final JSONObject resourcesJson = (JSONObject) getJsonParsedResponse(getResources).getA();
-        final List<Resource> result = new ArrayList<>();
-        for (Object resourceJson : (JSONArray) resourcesJson.get("resources")) {
-            Resource resource = new ResourceDeserializer().createResourceFromJson((JSONObject) ((JSONObject) resourceJson).get("resource"));
-            result.add(resource);
-        }
-        return result;
     }
     
     @Override
@@ -191,8 +177,11 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
                 });
     }
 
-    @Override
-    public Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
+    /**
+     * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
+     * any type. The fixes received are forwarded to the {@link BulkFixReceiver} <code>bulkFixReceiver</code> in one call.
+     */
+    private Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
             Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
             throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         Iterable<Fix> result = getResourceData(startTime, endTime, deviceSerialNumbers, types);
@@ -307,29 +296,9 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
             final TimePoint receivingEndTime = IgtimiWindTracker.getReceivingEndTime(trackedRace);
             endOfWindow = Collections.max(Arrays.asList(endOfWindow, receivingEndTime==null?MillisecondsTimePoint.now():receivingEndTime));
         }
-        Iterable<DataAccessWindow> daws = getDataAccessWindows(Permission.read, startOfWindow, endOfWindow, /* find all deviceSerialNumbers for window */ null);
-        logger.info("Found "+Util.size(daws)+" data access windows. Analyzing which ones contain wind data...");
-        Set<String> deviceSerialNumbers = new HashSet<>();
-        for (DataAccessWindow daw : daws) {
-            String deviceSerialNumber = daw.getDeviceSerialNumber();
-            // now filter for the wind-providing devices
-            Iterable<Resource> resources = getResources(Permission.read, startOfWindow, endOfWindow,
-                    Collections.singleton(deviceSerialNumber), /* streamIds */ null);
-            if (hasWind(resources)) {
-                StringBuilder resourceIDs = new StringBuilder();
-                boolean first = true;
-                for (Resource resource : resources) {
-                    if (!first) {
-                        resourceIDs.append(", ");
-                    } else {
-                        first = false;
-                    }
-                    resourceIDs.append(resource.getId());
-                }
-                logger.info("  Resources ["+resourceIDs+"] for device "+deviceSerialNumber+" contain wind data");
-                deviceSerialNumbers.add(deviceSerialNumber);
-            }
-        }
+        final Iterable<DataAccessWindow> daws = getDataAccessWindows(Permission.read, startOfWindow, endOfWindow, /* find all deviceSerialNumbers for window */ null);
+        logger.info("Found "+Util.size(daws)+" data access windows.");
+        final Set<String> deviceSerialNumbers = Util.asSet(Util.map(daws, DataAccessWindow::getDeviceSerialNumber));
         final Map<TrackedRace, Integer> result;
         if (!deviceSerialNumbers.isEmpty()) {
             IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
@@ -345,15 +314,6 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
             result = new HashMap<>();
         }
         return result;
-    }
-
-    private boolean hasWind(Iterable<Resource> resources) {
-        for (Resource resource : resources) {
-            if (Util.contains(resource.getDataTypes(), Type.AWS)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -475,36 +435,6 @@ public class IgtimiConnectionImpl extends SecuredServerImpl implements IgtimiCon
         return url.toString();
     }
 
-    private String getResourcesUrl(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> serialNumbers, Iterable<String> streamIds) {
-        final StringBuilder url = new StringBuilder(getApiV1BaseUrl());
-        url.append("resources?");
-        url.append("permission=");
-        url.append(permission.name());
-        if (startTime != null) {
-            url.append("&start_time=");
-            url.append(startTime.asMillis());
-        }
-        if (endTime != null) {
-            url.append("&end_time=");
-            url.append(endTime.asMillis());
-        }
-        if (serialNumbers != null) {
-            for (String serialNumber : serialNumbers) {
-                url.append("&serial_numbers[]=");
-                url.append(serialNumber);
-            }
-        }
-        if (streamIds != null) {
-            for (String streamId : streamIds) {
-                url.append("&stream_ids[]=");
-                url.append(streamId);
-            }
-        }
-        return url.toString();
-    }
-
-    
     @Override
     public Iterable<URI> getWebsocketServers() throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
         final HttpGet getWebsocketServers = new HttpGet(getApiV1BaseUrl()+"server_listers/web_sockets");

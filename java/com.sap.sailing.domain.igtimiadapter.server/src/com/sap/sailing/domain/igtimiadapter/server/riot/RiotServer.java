@@ -19,7 +19,6 @@ import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.FixFactory;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
@@ -91,14 +90,6 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      */
     int getPort() throws IOException;
 
-    Iterable<Resource> getResources();
-    
-    Resource getResourceById(long id);
-    
-    void addResource(Resource resource);
-    
-    void removeResource(long resourceId);
-
     Iterable<Device> getDevices();
     
     Device getDeviceById(long id);
@@ -109,8 +100,6 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * Assigns a unique ID and leaves service tag and name {@code null}
      */
     Device createDevice(String deviceSerialNumber);
-    
-    void addDevice(Device device);
     
     void removeDevice(long deviceId);
     

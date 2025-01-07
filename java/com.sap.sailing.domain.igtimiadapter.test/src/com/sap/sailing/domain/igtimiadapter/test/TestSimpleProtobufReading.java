@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -24,12 +25,14 @@ public class TestSimpleProtobufReading {
         final InputStream is = getClass().getResourceAsStream("/windbot_session_20250107.base64");
         final BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String base64;
+        int messageCount = 0;
         while ((base64=br.readLine()) != null) {
             final Msg msg = Msg.parseFrom(Base64.decode(base64));
             assertNotNull(msg);
-            logger.info(String.format("Parsed the following message:\n %s", msg.toString()));
+            messageCount++;
         }
         is.close();
+        assertEquals(17920, messageCount);
     }
 
     @Test
@@ -52,23 +55,6 @@ public class TestSimpleProtobufReading {
     @Test
     public void testReadJansWindbotStartup() throws IOException {
         final InputStream is = getClass().getResourceAsStream("/windbot_startup_jan.protobuf");
-        final ExtensionRegistry er = ExtensionRegistry.newInstance();
-        final CodedInputStream cis = CodedInputStream.newInstance(is);
-        for (int i=0; i<20; i++) { // we know there are four full messages in the stream:
-            final int lengthOfMessage = cis.readRawVarint32();
-            assertNotEquals(0, lengthOfMessage);
-            final int oldLimit = cis.pushLimit(lengthOfMessage);
-            final Msg msg = Msg.parseFrom(cis, er);
-            assertNotNull(msg);
-            logger.info(String.format("Parsed the following message #%d:\n %s", i, msg.toString()));
-            cis.popLimit(oldLimit);
-        }
-        is.close();
-    }
-
-    @Test
-    public void testReadSAPWindbotStartup() throws IOException {
-        final InputStream is = getClass().getResourceAsStream("/windbot_wdf53_20250107_2.protobuf");
         final ExtensionRegistry er = ExtensionRegistry.newInstance();
         final CodedInputStream cis = CodedInputStream.newInstance(is);
         for (int i=0; i<20; i++) { // we know there are four full messages in the stream:

@@ -57,7 +57,7 @@ public class RiotDevicesResource extends AbstractRiotServerResource {
         final Device device = new DeviceDeserializer().createDeviceFromJson(deviceJson);
         securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 device.getPermissionType(), device.getIdentifier().getTypeRelativeObjectIdentifier(),
-                device.getName(), ()->riot.addDevice(device));
+                device.getName(), ()->riot.createDevice(device.getSerialNumber()));
         return Response.ok().build();
     }
     

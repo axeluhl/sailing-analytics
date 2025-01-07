@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.gateway.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.HashMap;
@@ -10,13 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -29,26 +22,19 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
-import com.sap.sailing.domain.igtimiadapter.impl.ResourceDeserializer;
-import com.sap.sailing.domain.igtimiadapter.impl.ResourceSerializer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + RiotResourcesResource.RESOURCES)
 public class RiotResourcesResource extends AbstractRiotServerResource {
@@ -56,29 +42,6 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
     private static final String DATA = "/data";
     private static final String LATEST = "/latest";
     
-    @GET
-    @Produces("application/json;charset=UTF-8")
-    public Response getResources(@QueryParam("permission") String permission,
-            @QueryParam("start_time") String startTime, @QueryParam("end_time") String endTime,
-            @QueryParam("serial_numbers[]") Set<String> serialNumbers,
-            @QueryParam("stream_ids[]") Set<String> streamIds)
-            throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        final RiotServer riot = Activator.getInstance().getRiotServer();
-        final JSONObject result = new JSONObject();
-        final JSONArray resourcesJson = new JSONArray();
-        result.put("resources", resourcesJson);
-        for (final Resource resource : riot.getResources()) {
-            if (SecurityUtils.getSubject().isPermitted(resource.getIdentifier().getStringPermission(DefaultActions.READ))
-             && (serialNumbers.isEmpty() || serialNumbers.contains(resource.getDeviceSerialNumber()))
-             && TimeRange.create(startTime == null ? null : TimePoint.of(Long.valueOf(startTime)),
-                                 endTime == null ? null : TimePoint.of(Long.valueOf(endTime))).intersects(
-                                         resource.getTimeRange())) {
-                resourcesJson.add(new ResourceSerializer().createJsonFromResource(resource));
-            }
-        }
-        return Response.ok(streamingOutput(result)).build();
-    }
-
     /**
      * Output is the same format as for {@link #getResourcesData(UriInfo)}
      */
@@ -107,20 +70,6 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
             }
         }
         return Response.ok(streamingOutput(result)).build();
-    }
-
-    @POST
-    @Consumes("application/json;charset=UTF-8")
-    public Response postResource(@Context HttpServletRequest request) throws IOException, ParseException {
-        final RiotServer riot = getRiotService();
-        final SecurityService securityService = getSecurityService();
-        final InputStream inputStream = request.getInputStream();
-        final JSONObject resourceJson = (JSONObject) new JSONParser().parse(new InputStreamReader(inputStream));
-        final Resource resource = new ResourceDeserializer().createResourceFromJson(resourceJson);
-        securityService.setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.IGTIMI_RESOURCE,
-                new TypeRelativeObjectIdentifier(Long.toString(resource.getId())), resource.getName(),
-                ()->riot.addResource(resource));
-        return Response.ok().build();
     }
 
     /**
@@ -184,19 +133,5 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 daw->{
                     return subject.isPermitted(daw.getIdentifier().getStringPermission(DefaultActions.READ));
                 });
-    }
-    
-    @Path("{id}")
-    @DELETE
-    public Response deleteResource(@PathParam("id") long id) throws IOException, ParseException {
-        final RiotServer riot = getRiotService();
-        final SecurityService securityService = getSecurityService();
-        final Resource resource = riot.getResourceById(id);
-        if (resource != null) {
-            securityService.checkCurrentUserDeletePermission(resource);
-            riot.removeResource(id);
-            securityService.deleteAllDataForRemovedObject(resource.getIdentifier());
-        }
-        return Response.ok().build();
     }
 }

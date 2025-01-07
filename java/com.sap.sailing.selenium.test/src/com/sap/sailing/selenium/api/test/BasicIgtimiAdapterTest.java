@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWA;
 import com.sap.sailing.domain.igtimiadapter.datatypes.AWS;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
@@ -30,18 +29,15 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-// TODO This needs to become a Selenium test with the OSGi product and the igtimiadapter.gateway bundle running.
-// TODO Furthermore, the test assumes specific data to be present in some Riot server to test against; is this a good idea?
-// TODO If so, we would need to ensure that the data against which to test is actually present in the Riot test server...
 public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testGetDataAccessWindows() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, /* startTime */ null,
-                /* endTime */ null, /* deviceSerialNumbers */ Collections.singleton("DD-EE-AAGA"));
+                /* endTime */ null, /* deviceSerialNumbers */ Collections.singleton("DC-GD-AAED"));
         assertFalse(Util.isEmpty(daws));
         for (DataAccessWindow daw : daws) {
-            assertEquals("DD-EE-AAGA", daw.getDeviceSerialNumber());
-            assertTrue(daw.getId() == 17012);
+            assertEquals("DC-GD-AAED", daw.getDeviceSerialNumber());
+            assertTrue(daw.getId() == 1);
         }
     }
     
@@ -53,27 +49,22 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     }
     
     @Test
-    public void testGetResources() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Iterable<Resource> resources = connection.getResources(Permission.read, /* start time */ null, /* end time */ null,
-                /* serial numbers */ Collections.singleton("GA-EN-AAEJ"), /* stream IDs */ null);
-        assertTrue(resources.iterator().hasNext());
-    }
-    
-    @Test
-    public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
-        Map<Type, Double> typesAndCompression = new HashMap<>();
+    public void testGetResourceData() throws ClientProtocolException, IllegalStateException, IOException, ParseException, java.text.ParseException {
+        final Map<Type, Double> typesAndCompression = new HashMap<>();
         typesAndCompression.put(Type.gps_latlong, 0.0);
-        Iterable<Fix> data = connection.getResourceData(new MillisecondsTimePoint(1384068419000l),
-                new MillisecondsTimePoint(1384091860000l), Collections.singleton("DD-EE-AAGA"), typesAndCompression);
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
+        final TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2025-01-07T07:00:00Z"));
+        final TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2025-01-08T18:00:00Z"));
+        final Iterable<Fix> data = connection.getResourceData(start, end,
+                Collections.singleton("DC-GD-AAED"), typesAndCompression);
         assertTrue(data.iterator().hasNext());
     }
     
     @Test
     public void testDataAccessWindowForGivenTimeFrame() throws java.text.ParseException, IllegalStateException, ClientProtocolException, IOException, ParseException {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
-        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-07T08:00:00Z"));
-        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T18:00:00Z"));
-        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
+        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2025-01-07T07:00:00Z"));
+        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2025-01-08T18:00:00Z"));
         Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
         assertFalse(Util.isEmpty(daws));
         for (DataAccessWindow daw : daws) {
@@ -86,15 +77,14 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     @Test
     public void testResourceDataForGivenTimeFrame() throws java.text.ParseException, IllegalStateException, ClientProtocolException, IOException, ParseException {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.GERMAN);
-        TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:00:00Z"));
-        TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2013-11-09T07:10:00Z"));
-        // URL is https://www.igtimi.com/api/v1/devices/data_access_windows?type=read&start_time=1383811200000&end_time=1383933600000&access_token=3b6cbd0522423bb1ac274ddb9e7e579c4b3be6667622271086c4fdbf30634ba9
-        Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
-        Set<String> deviceSerialNumbers = new HashSet<>();
-        for (DataAccessWindow daw : daws) {
+        final TimePoint start = new MillisecondsTimePoint(dateFormat.parse("2025-01-07T07:00:00Z"));
+        final TimePoint end   = new MillisecondsTimePoint(dateFormat.parse("2025-01-08T18:00:00Z"));
+        final Iterable<DataAccessWindow> daws = connection.getDataAccessWindows(Permission.read, start, end, /* deviceSerialNumbers; get all devices available for that time */ null);
+        final Set<String> deviceSerialNumbers = new HashSet<>();
+        for (final DataAccessWindow daw : daws) {
             deviceSerialNumbers.add(daw.getDeviceSerialNumber());
         }
-        Iterable<Fix> windData = connection.getResourceData(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG);
+        final Iterable<Fix> windData = connection.getResourceData(start, end, deviceSerialNumbers, Type.gps_latlong, Type.AWA, Type.AWS, Type.HDG);
         assertFalse(Util.isEmpty(windData));
         boolean foundWind = false;
         for (Fix fix : windData) {
@@ -106,15 +96,12 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
     
     @Test
     public void testReadLatestData() throws IllegalStateException, ClientProtocolException, IOException, ParseException {
-        Iterable<Fix> fixes = connection.getLatestFixes(Arrays.asList(new String[] { "DD-EE-AAHG", "GA-EN-AAEA", "DD-EE-AAGA" }), Type.SOG );
-        assertEquals(2, Util.size(fixes));
+        Iterable<Fix> fixes = connection.getLatestFixes(Arrays.asList(new String[] { "DC-GD-AAED", "GA-EN-AAEA", "DD-EE-AAGA" }), Type.SOG );
+        assertEquals(1, Util.size(fixes));
         Iterator<Fix> i = fixes.iterator();
         Fix fix1 = i.next();
-        assertEquals("DD-EE-AAGA", fix1.getSensor().getDeviceSerialNumber());
+        assertEquals("DC-GD-AAED", fix1.getSensor().getDeviceSerialNumber());
         assertEquals(Type.SOG, fix1.getType());
-        Fix fix2 = i.next();
-        assertEquals("DD-EE-AAHG", fix2.getSensor().getDeviceSerialNumber());
-        assertEquals(Type.SOG, fix2.getType());
     }
     
 }

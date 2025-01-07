@@ -40,7 +40,6 @@ import com.sap.sailing.domain.igtimiadapter.DataPointVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
@@ -69,7 +68,6 @@ import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<ReplicableRiotServer, RiotReplicationOperation<?>> implements RiotServer, ReplicableRiotServer, Runnable {
     private static final Logger logger = Logger.getLogger(RiotServerImpl.class.getName());
 
-    private final ConcurrentMap<Long, Resource> resources;
     private final ConcurrentMap<Long, DataAccessWindow> dataAccessWindows;
     private final ConcurrentMap<Long, Device> devices;
     private final ConcurrentMap<String, Device> devicesBySerialNumber;
@@ -109,7 +107,6 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public RiotServerImpl(SocketAddress localAddress, DomainObjectFactory domainObjectFactory,
             MongoObjectFactory mongoObjectFactory) throws Exception {
         this.listeners = ConcurrentHashMap.newKeySet();
-        this.resources = new ConcurrentHashMap<>();
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
         this.devicesBySerialNumber = new ConcurrentHashMap<>();
@@ -120,9 +117,6 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         for (final Device device : domainObjectFactory.getDevices(/* clientSessionOrNull */ null)) {
             devices.put(device.getId(), device);
             devicesBySerialNumber.put(device.getSerialNumber(), device);
-        }
-        for (final Resource resource : domainObjectFactory.getResources(/* clientSessionOrNull */ null)) {
-            resources.put(resource.getId(), resource);
         }
         for (final DataAccessWindow daw : domainObjectFactory.getDataAccessWindows(/* clientSessionOrNull */ null)) {
             dataAccessWindows.put(daw.getId(), daw);
@@ -368,21 +362,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public Device internalCreateDevice(String deviceSerialNumber) {
         final long id = devices.isEmpty() ? 1 : Collections.max(devices.keySet()) + 1;
         final Device device = Device.create(id, deviceSerialNumber);
-        internalAddDevice(device);
-        return device;
-    }
-
-    @Override
-    public void addDevice(Device device) {
-        apply(s->s.internalAddDevice(device));
-    }
-    
-    @Override
-    public Void internalAddDevice(Device device) {
         devices.put(device.getId(), device);
         devicesBySerialNumber.put(device.getSerialNumber(), device);
         mongoObjectFactory.storeDevice(device, /* clientSessionOrNull */ null);
-        return null;
+        return device;
     }
 
     @Override
@@ -414,40 +397,6 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<Resource> getResources() {
-        return Collections.unmodifiableCollection(resources.values());
-    }
-    
-    @Override
-    public Resource getResourceById(long id) {
-        return resources.get(id);
-    }
-    
-    @Override
-    public void addResource(Resource resource) {
-        apply(s->s.internalAddResource(resource));
-    }
-    
-    @Override
-    public Void internalAddResource(Resource resource) {
-        resources.put(resource.getId(), resource);
-        mongoObjectFactory.storeResource(resource, /* clientSessionOrNull */ null);
-        return null;
-    }
-
-    @Override
-    public void removeResource(long resourceId) {
-        apply(s->s.internalRemoveResource(resourceId));
-    }
-    
-    @Override
-    public Void internalRemoveResource(long resourceId) {
-        resources.remove(resourceId);
-        mongoObjectFactory.removeResource(resourceId, /* clientSessionOrNull */ null);
-        return null;
-    }
-
-    @Override
     public Iterable<DataAccessWindow> getDataAccessWindows() {
         return Collections.unmodifiableCollection(dataAccessWindows.values());
     }
@@ -460,7 +409,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> deviceSerialNumbers, TimeRange timeRange) {
         final Set<DataAccessWindow> result = new HashSet<>();
-        final Set<String> deviceSerialNumbersAsSet = new HashSet<>();
+        final Set<String> deviceSerialNumbersAsSet = Util.asSet(deviceSerialNumbers);
         // TODO provide a more efficient implementation if this turns out to become a performance bottleneck, e.g., by keeping the DataAccessWindows in a time-sorted TreeSet
         for (final DataAccessWindow daw : getDataAccessWindows()) {
             if (deviceSerialNumbersAsSet.contains(daw.getDeviceSerialNumber()) && timeRange.intersects(daw.getTimeRange())) {
@@ -472,11 +421,11 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint from, TimePoint to) {
-        return apply(s->s.internalAddDataAccessWindow(deviceSerialNumber, from, to));
+        return apply(s->s.internalCreateDataAccessWindow(deviceSerialNumber, from, to));
     }
 
     @Override
-    public DataAccessWindow internalAddDataAccessWindow(String deviceSerialNumber, TimePoint from, TimePoint to) {
+    public DataAccessWindow internalCreateDataAccessWindow(String deviceSerialNumber, TimePoint from, TimePoint to) {
         final long newId = dataAccessWindows.isEmpty() ? 1 : Collections.max(dataAccessWindows.keySet()) + 1;
         final DataAccessWindow daw = DataAccessWindow.create(newId, from, to, deviceSerialNumber);
         dataAccessWindows.put(daw.getId(), daw);
@@ -503,7 +452,6 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     public void clear() {
         devices.clear();
         devicesBySerialNumber.clear();
-        resources.clear();
         dataAccessWindows.clear();
         connections.clear();
         listeners.clear();
@@ -530,14 +478,12 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         for (final Device device : devices.values()) {
             devicesBySerialNumber.put(device.getSerialNumber(), device);
         }
-        resources.putAll((Map<Long, Resource>) is.readObject());
         dataAccessWindows.putAll((Map<Long, DataAccessWindow>) is.readObject());
     }
 
     @Override
     public void serializeForInitialReplicationInternal(ObjectOutputStream objectOutputStream) throws IOException {
         objectOutputStream.writeObject(new HashMap<>(devices));
-        objectOutputStream.writeObject(new HashMap<>(resources));
         objectOutputStream.writeObject(new HashMap<>(dataAccessWindows));
     }
 

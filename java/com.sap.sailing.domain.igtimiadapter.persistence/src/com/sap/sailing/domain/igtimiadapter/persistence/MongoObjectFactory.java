@@ -4,14 +4,11 @@ import com.igtimi.IgtimiStream.Msg;
 import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sse.common.TimePoint;
 
 public interface MongoObjectFactory {
     void storeDevice(Device device, ClientSession clientSessionOrNull);
     void removeDevice(long deviceId, ClientSession clientSessionOrNull);
-    void storeResource(Resource resource, ClientSession clientSessionOrNull);
-    void removeResource(long resourceId, ClientSession clientSessionOrNull);
     void storeDataAccessWindow(DataAccessWindow daw, ClientSession clientSessionOrNull);
     void removeDataAccessWindow(long dawId, ClientSession clientSessionOrNull);
     

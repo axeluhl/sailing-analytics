@@ -28,21 +28,6 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
  */
 public interface IgtimiConnection {
     /**
-     * @param startTime
-     *            optional; may be <code>null</code>
-     * @param endTime
-     *            optional; may be <code>null</code>
-     * @param deviceIds
-     *            optional (may be <code>null</code>) if <code>permission</code> is {@link Permission#modify}; lists the
-     *            devices for which to look for resources
-     * @param streamIds
-     *            optional; may be <code>null</code>
-     */
-    Iterable<Resource> getResources(Permission permission, TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceIds, Iterable<String> streamIds) throws IllegalStateException,
-            ClientProtocolException, IOException, ParseException;
-
-    /**
      * All arguments are mandatory.
      * 
      * @param deviceSerialNumbers
@@ -71,15 +56,6 @@ public interface IgtimiConnection {
      * Reads data from the remote Riot server, in case of replication explicitly addressing the request to the master/primary
      */
     Iterable<Msg> getMessages(TimePoint startTime, TimePoint endTime, Iterable<String> deviceSerialNumbers, Type[] types) throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
-    /**
-     * Shorthand for {@link #getResourceData(TimePoint, TimePoint, Iterable, Map)} where no compression is requested for
-     * any type. The fixes received are forwarded to the {@link BulkFixReceiver} <code>bulkFixReceiver</code> in one call.
-     */
-    Iterable<Fix> getAndNotifyResourceData(TimePoint startTime, TimePoint endTime,
-            Iterable<String> deviceSerialNumbers, BulkFixReceiver bulkFixReceiver, Type... types)
-            throws IllegalStateException, ClientProtocolException, IOException, ParseException;
-
 
     /**
      * Same as {@link #getResourceData(TimePoint, TimePoint, Iterable, Type...)}, but the resulting {@link Fix}es are

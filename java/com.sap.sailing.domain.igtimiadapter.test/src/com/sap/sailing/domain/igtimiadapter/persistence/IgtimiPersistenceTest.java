@@ -23,7 +23,6 @@ import com.igtimi.IgtimiStream.Msg;
 import com.mongodb.client.ClientSession;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -65,21 +64,6 @@ public class IgtimiPersistenceTest {
         assertEquals(device.getId(), loadedDevice.getId());
         assertEquals(device.getName(), loadedDevice.getName());
         assertEquals(device.getSerialNumber(), loadedDevice.getSerialNumber());
-    }
-
-    @Test
-    public void testStoringAndLoadingSimpleResource() {
-        final TimePoint from = TimePoint.now();
-        final TimePoint to = from.plus(Duration.ONE_MINUTE);
-        final Resource resource = Resource.create(234, from, to, "AA-DE-AACC", new int[] { 1, 4, 7 });
-        mongoObjectFactory.storeResource(resource, clientSession);
-        final Resource loadedResource = domainObjectFactory.getResources(clientSession).iterator().next();
-        assertEquals(resource.getId(), loadedResource.getId());
-        assertEquals(resource.getName(), loadedResource.getName()); // an inferred value; still useful to compare
-        assertEquals(resource.getStartTime(), loadedResource.getStartTime());
-        assertEquals(resource.getEndTime(), loadedResource.getEndTime());
-        assertEquals(resource.getDeviceSerialNumber(), loadedResource.getDeviceSerialNumber());
-        assertEquals(Util.asSet(resource.getDataTypes()), Util.asSet(loadedResource.getDataTypes()));
     }
 
     @Test

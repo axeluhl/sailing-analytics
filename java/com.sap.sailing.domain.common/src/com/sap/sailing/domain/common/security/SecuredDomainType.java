@@ -102,7 +102,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     @Deprecated
     public static final HasPermissions IGTIMI_ACCOUNT = new SecuredDomainType("IGTIMI_ACCOUNT");
     public static final HasPermissions IGTIMI_DEVICE = new SecuredDomainType("IGTIMI_DEVICE");
-    public static final HasPermissions IGTIMI_RESOURCE = new SecuredDomainType("IGTIMI_RESOURCE");
     public static final HasPermissions IGTIMI_DATA_ACCESS_WINDOW = new SecuredDomainType("IGTIMI_DATA_ACCESS_WINDOW");
     public static final HasPermissions SWISS_TIMING_ACCOUNT = new SecuredDomainType("SWISS_TIMING_ACCOUNT");
     public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType(

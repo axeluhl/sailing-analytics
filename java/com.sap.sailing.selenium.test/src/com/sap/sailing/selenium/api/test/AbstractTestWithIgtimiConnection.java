@@ -3,23 +3,25 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 
-import com.google.protobuf.CodedOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
+import com.google.protobuf.CodedOutputStream;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.Authenticator;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+import com.sap.sse.common.TimePoint;
 import com.sun.jersey.core.util.Base64;
 
 /**
@@ -68,7 +70,10 @@ public class AbstractTestWithIgtimiConnection extends AbstractSeleniumTest {
             cos.flush();
             sos.close();
             socket.close();
-            // TODO do we need to wait until the data has been received and processed?
+            final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+            connection.createDataAccessWindow("DC-GD-AAED",
+                    TimePoint.of(df.parse("2025-01-07T08:00:00Z")),
+                    TimePoint.of(df.parse("2025-01-07T22:00:00Z")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

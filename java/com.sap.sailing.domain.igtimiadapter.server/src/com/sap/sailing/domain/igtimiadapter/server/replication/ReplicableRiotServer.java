@@ -3,23 +3,16 @@ package com.sap.sailing.domain.igtimiadapter.server.replication;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
-import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sse.common.TimePoint;
 
 public interface ReplicableRiotServer extends RiotServer {
 
-    Void internalAddDevice(Device device);
-
     Void internalRemoveDevice(long deviceId);
 
     Void internalUpdateDeviceName(long deviceId, String name);
     
-    Void internalAddResource(Resource resource);
-
-    Void internalRemoveResource(long resourceId);
-
-    DataAccessWindow internalAddDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
+    DataAccessWindow internalCreateDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
 
     Void internalRemoveDataAccessWindow(long dawId);
 
