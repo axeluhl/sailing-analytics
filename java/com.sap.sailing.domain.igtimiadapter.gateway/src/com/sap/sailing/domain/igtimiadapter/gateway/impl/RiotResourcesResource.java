@@ -36,6 +36,7 @@ import com.igtimi.IgtimiData.DataPoint.DataCase;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.Resource;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
@@ -94,8 +95,9 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 ? Util.map(getRiotService().getDevices(), d->d.getSerialNumber())
                 : serialNumbers;
         for (final String serialNumber : serialNumbersToUse) {
-            if (subject.isPermitted(
-                        getRiotService().getDeviceBySerialNumber(serialNumber).getIdentifier().getStringPermission(DefaultActions.READ))) {
+            final Device device = getRiotService().getDeviceBySerialNumber(serialNumber);
+            if (device != null && subject.isPermitted(
+                        device.getIdentifier().getStringPermission(DefaultActions.READ))) {
                 final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));
                 if (lastMessage != null) {
                     final JSONArray singleMessage = new JSONArray();
