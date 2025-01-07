@@ -605,7 +605,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
-                connection.sendCommand(command.name());
+                connection.sendCommand(command.getCommand());
                 foundConnection = true;
                 break;
             }
