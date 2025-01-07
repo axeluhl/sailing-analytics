@@ -50,7 +50,7 @@ public class AbstractTestWithIgtimiConnection extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
         super.setUp();
         ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
-        Authenticator authenticator = new Authenticator(getContextRoot());
+        final Authenticator authenticator = new Authenticator(getContextRoot());
         String token = authenticator.authForToken(ApiContext.ADMIN_USERNAME, ApiContext.ADMIN_PASSWORD);
         try {
             connection = IgtimiConnectionFactory.create(new URL(getContextRoot()), token).getOrCreateConnection();
@@ -74,6 +74,7 @@ public class AbstractTestWithIgtimiConnection extends AbstractSeleniumTest {
             connection.createDataAccessWindow("DC-GD-AAED",
                     TimePoint.of(df.parse("2025-01-07T08:00:00Z")),
                     TimePoint.of(df.parse("2025-01-07T22:00:00Z")));
+            Thread.sleep(2000); // give RiotServer time to process and store messages
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

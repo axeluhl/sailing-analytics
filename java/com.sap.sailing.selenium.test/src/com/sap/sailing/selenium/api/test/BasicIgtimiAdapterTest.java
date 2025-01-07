@@ -103,5 +103,4 @@ public class BasicIgtimiAdapterTest extends AbstractTestWithIgtimiConnection {
         assertEquals("DC-GD-AAED", fix1.getSensor().getDeviceSerialNumber());
         assertEquals(Type.SOG, fix1.getType());
     }
-    
 }
