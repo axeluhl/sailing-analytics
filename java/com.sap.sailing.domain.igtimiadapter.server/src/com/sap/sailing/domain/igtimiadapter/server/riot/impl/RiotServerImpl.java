@@ -270,7 +270,9 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         final Device device = getDeviceBySerialNumber(deviceSerialNumber);
         if (device == null) {
             logger.info("Received message from unknown devices "+deviceSerialNumber+"; creating Device");
-            createDevice(deviceSerialNumber);
+            final Device newDevice = createDevice(deviceSerialNumber);
+            getSecurityService().setOwnership(newDevice.getIdentifier(), /* user owner */ null,
+                    getSecurityService().getServerGroup(), newDevice.getName());
         } else {
             final byte[] messageAsBytes = message.toByteArray();
             final SecurityService securityService = getSecurityService();
