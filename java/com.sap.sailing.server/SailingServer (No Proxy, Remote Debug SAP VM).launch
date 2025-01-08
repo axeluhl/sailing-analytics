@@ -83,6 +83,10 @@
 <setEntry value="org.eclipse.jetty.websocket.client.source@default:default"/>
 <setEntry value="org.eclipse.jetty.websocket.common@default:default"/>
 <setEntry value="org.eclipse.jetty.websocket.common.source@default:default"/>
+<setEntry value="org.eclipse.jetty.websocket.server@default:default"/>
+<setEntry value="org.eclipse.jetty.websocket.server.source@default:default"/>
+<setEntry value="org.eclipse.jetty.websocket.servlet@default:default"/>
+<setEntry value="org.eclipse.jetty.websocket.servlet.source@default:default"/>
 <setEntry value="org.eclipse.jetty.xml@default:default"/>
 <setEntry value="org.eclipse.jetty.xml.source@default:default"/>
 <setEntry value="slf4j.api@default:default"/>
@@ -264,7 +268,8 @@
 <setEntry value="com.sap.sailing.velum.resultimport@4:true"/>
 <setEntry value="com.sap.sailing.monitoring@7:true"/>
 <setEntry value="com.sap.sailing.xrr.resultimport@4:true"/>
-<setEntry value="com.sap.sailing.domain.igtimiadapter@4:true"/>
+<setEntry value="com.sap.sailing.domain.igtimiadapter@default:default"/>
+<setEntry value="com.sap.sailing.domain.igtimiadapter.server@4:true"/>
 <setEntry value="com.sap.sailing.domain.igtimiadapter.persistence@default:default"/>
 <setEntry value="com.sap.sailing.domain.racelogtrackingadapter@4:true"/>
 <setEntry value="com.sap.sailing.domain.deckmanadapter@5:true"/>

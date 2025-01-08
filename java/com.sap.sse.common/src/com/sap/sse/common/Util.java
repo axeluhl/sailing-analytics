@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1266,5 +1267,20 @@ public class Util {
             }
         }
         return result;
+    }
+    
+    public static <T> Enumeration<T> getEnumerationFromIterable(Iterable<T> iterable) {
+        return new Enumeration<T>() {
+            final Iterator<T> i = iterable.iterator();
+            @Override
+            public boolean hasMoreElements() {
+                return i.hasNext();
+            }
+
+            @Override
+            public T nextElement() {
+                return i.next();
+            }
+        };
     }
 }

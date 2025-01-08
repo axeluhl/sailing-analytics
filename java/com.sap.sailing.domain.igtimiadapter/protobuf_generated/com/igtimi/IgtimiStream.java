@@ -2678,8 +2678,20 @@ public final class IgtimiStream {
     public boolean hasHeartbeat() {
       return mgmtCase_ == 1;
     }
+    
     /**
      * <code>uint64 heartbeat = 1 [json_name = "hb"];</code>
+     * <p>
+     * 
+     * RIoT uses heartbeats to indicate that a connection is still active. The server sends a Channel Management
+     * heartbeat message every 15 seconds and expects to receive at least one message from the device every 30 seconds
+     * to keep the connection active. Inactive connections will be queued for disconnection.
+     * <p>
+     * 
+     * Yachtbot devices send a heartbeat message every 15 seconds and attempt to reconnect if no heartbeat messages have
+     * been received in 30 seconds.
+     * <p>
+     * 
      * @return The heartbeat.
      */
     @java.lang.Override
@@ -4574,8 +4586,27 @@ public final class IgtimiStream {
 
     com.igtimi.IgtimiStream.Authentication.AuthCase getAuthCase();
   }
+  
   /**
    * Protobuf type {@code com.igtimi.Authentication}
+   * <p>
+   * 
+   * <b>Tokens</b>
+   * <p>
+   * 
+   * Igtimi uses two distinct types of tokens for authentication.
+   * <ol>
+   * <li>User token</li>
+   * 
+   * A user token is a standard OAuth 2.0 token used to authenticate a user. A user token allows a client to subscribe
+   * or request data from the system. A user token also allows the client to insert data for a session. A client may
+   * authenticate only ONE user token at a time, meaning that attempting to authenticate a 2nd token will clear the
+   * first, and any data subscriptions will be lost (regardless of ACK or NAK).
+   * <li>Device Group Token</li>
+   * 
+   * A device group token authenticates a client to insert data for a device or group of devices. A client may
+   * authenticate using multiple device group tokens by simply sending another authentication request.
+   * </ol>
    */
   public static final class Authentication extends
       com.google.protobuf.GeneratedMessage implements
@@ -4636,8 +4667,14 @@ public final class IgtimiStream {
        */
       com.igtimi.IgtimiAPI.TokenOrBuilder getTokenOrBuilder();
     }
+    
     /**
      * Protobuf type {@code com.igtimi.Authentication.AuthRequest}
+     * <p>
+     * 
+     * To authenticate a connection with RIoT a client should send an Authentication Request in the correct format,
+     * providing a token along with the current timestamp. The client should assume the connection is un-authenticated
+     * until a response indicating successful authentication is received.
      */
     public static final class AuthRequest extends
         com.google.protobuf.GeneratedMessage implements
@@ -5303,8 +5340,15 @@ public final class IgtimiStream {
       com.google.protobuf.ByteString
           getReasonBytes();
     }
+    
     /**
      * Protobuf type {@code com.igtimi.Authentication.AuthResponse}
+     * <p>
+     * 
+     * For every authentication request there is a response. This response will indicate whether the request has been
+     * successful, along with both a machine and human readable reason. The response code is equivalent to a HTTP
+     * response code, therefore for a full list of codes and their meaning refer to the list maintained by the Internet
+     * Assigned Numbers Authority (IANA).
      */
     public static final class AuthResponse extends
         com.google.protobuf.GeneratedMessage implements

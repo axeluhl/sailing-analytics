@@ -80,7 +80,7 @@ public class SecurityResourceTest {
             assertNotNull(session);
             servlet = new SecurityResource() {
                 @Override
-                public SecurityService getService() {
+                public SecurityService getSecurityService() {
                     return service;
                 }
             };

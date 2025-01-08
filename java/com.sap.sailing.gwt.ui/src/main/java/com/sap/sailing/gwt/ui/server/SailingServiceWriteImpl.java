@@ -223,9 +223,11 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -269,6 +271,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -2079,38 +2083,72 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
-        final Account account;
-        if (existingAccount == null) {
-            final String creatorName = getSecurityService().getCurrentUser().getName();
-            account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT,
-                    Account.getTypeRelativeObjectIdentifier(eMailAddress, creatorName), eMailAddress,
-                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress,
-                            password));
-        } else {
-            logger.warning("Igtimi account " + eMailAddress + " already exists.");
-            account = null; // account with that e-mail already exists
-        }
-        return account != null;
+    public IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to) {
+        final DataAccessWindow result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
+                new TypeRelativeObjectIdentifier(deviceSerialNumber, ""+from.getTime(), ""+to.getTime()),
+                "Data Access Window for device "+deviceSerialNumber+" from "+from+" to "+to,
+                ()->getRiotServer().createDataAccessWindow(deviceSerialNumber, TimePoint.of(from), TimePoint.of(to)));
+        final IgtimiDataAccessWindowWithSecurityDTO resultWithSecurity = new IgtimiDataAccessWindowWithSecurityDTO(result.getId(), result.getDeviceSerialNumber(),
+                result.getStartTime().asDate(), result.getEndTime().asDate());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), resultWithSecurity);
+        return resultWithSecurity;
     }
 
     @Override
-    public void removeIgtimiAccount(String eMailOfAccountToRemove) {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
-        if (existingAccount != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingAccount, () -> {
-                getIgtimiConnectionFactory().removeAccount(existingAccount);
+    public void removeIgtimiDataAccessWindow(long id) {
+        final RiotServer riotServer = getRiotServer();
+        final DataAccessWindow daw = riotServer.getDataAccessWindowById(id);
+        if (daw != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(daw, ()->getRiotServer().removeDataAccessWindow(id));
+        }
+    }
+
+    @Override
+    public void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(editedObject.getSerialNumber());
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+            riotServer.updateDeviceName(existingDevice.getId(), editedObject.getName());
+        }
+    }
+
+    @Override
+    public void removeIgtimiDevice(String serialNumber) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingDevice, () -> {
+                riotServer.removeDevice(existingDevice.getId());
             });
         }
+    }
+
+    @Override
+    public boolean sendGPSOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_OFF);
+    }
+
+    @Override
+    public boolean sendGPSOnCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_ON);
+    }
+
+    @Override
+    public boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_POWER_OFF);
+    }
+
+    @Override
+    public boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
     }
 
     @Override
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
@@ -2132,21 +2170,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             }
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
-        for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-            // filter account based on used permissions to read account:
-            if (getSecurityService().hasCurrentUserReadPermission(account)) {
-                IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-                Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces,
-                        correctByDeclination);
-                for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
-                    RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
-                    Integer i = numberOfWindFixesImportedPerRace.get(key);
-                    if (i == null) {
-                        i = 0;
-                    }
-                    numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
-                }
+        final IgtimiConnection conn = createIgtimiConnection();
+        // filter account based on used permissions to read account:
+        Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
+        for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
+            RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
+            Integer i = numberOfWindFixesImportedPerRace.get(key);
+            if (i == null) {
+                i = 0;
             }
+            numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
         }
         for (final TrackedRace trackedRace : trackedRaces) {
             // update polar sheets:
