@@ -76,27 +76,22 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             final RegattaStructureManagementPanelPO regattaStructurePanel = adminConsole.goToRegattaStructure();
             final RegattaDetailsCompositePO regattaDetails = regattaStructurePanel.getRegattaDetails(regattaDescriptor);
             regattaDetails.deleteSeries(SERIES_DEFAULT);
-            RegattaEditDialogPO editRegatta = regattaStructurePanel.getRegattaList().editRegatta(regattaDescriptor);
+            final RegattaEditDialogPO editRegatta = regattaStructurePanel.getRegattaList().editRegatta(regattaDescriptor);
             editRegatta.addSeries(SERIES_QUALIFICATION);
             editRegatta.addSeries(SERIES_MEDALS);
             editRegatta.pressOk();
-            
             final SeriesEditDialogPO editSeriesQualification = regattaDetails.editSeries(SERIES_QUALIFICATION);
             editSeriesQualification.addRaces(1, 11, "Q");
             editSeriesQualification.pressOk();
-            
             final SeriesEditDialogPO editSeriesMedals = regattaDetails.editSeries(SERIES_MEDALS);
             editSeriesMedals.setMedalSeries(true);
             editSeriesMedals.addSingleRace("M");
             editSeriesMedals.pressOk();
-    
             trackRacesFor49er(regattaDescriptor, adminConsole.goToTracTracEvents());
-    
             final LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
             leaderboard.refreshLeaderboard();
             final LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(REGATTA_49ER_WITH_SUFFIX);
-            
-            for(int i = 1; i<=11; i++) {
+            for (int i = 1; i<=11; i++) {
                 details.linkRace(new RaceDescriptor("Q" + i, DEFAULT_FLEET, false, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, String.format(RACE_N_49ER, i)));
             }
             details.linkRace(new RaceDescriptor("M", DEFAULT_FLEET, true, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
@@ -111,7 +106,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             IgtimiDevicesManagementPanelPO igtimiDevicesManagementPanel = adminConsole.goToIgtimi();
-            // TODO bug6059: where to get Igtimi wind from? Shall we add a data access window? Which data to use?
+            // TODO bug6059: can't use the Igtimi import anymore; will export from the race on sapsailing.com and implement an importer for our export format
             WindPanelPO windPanel = adminConsole.goToWind();
             windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
         }
