@@ -53,7 +53,8 @@ public class WindPanelPO extends PageArea {
     public void importWindFromRouteconverter(String filename, int timeoutInSeconds) throws InterruptedException {
         importWindFromRouteconverterFileUpload.sendKeys(filename);
         importWindFromRouteconverterSubmitButton.click();
-        FluentWait<String> wait = createFluentWait("The following number of fixes were imported for the listed races:", timeoutInSeconds, DEFAULT_POLLING_INTERVAL);
+        waitForAlertAndAccept(10);
+        FluentWait<String> wait = createFluentWait("Imported wind from: ", timeoutInSeconds, DEFAULT_POLLING_INTERVAL);
         wait.until(new Function<String, Object>() {
             @Override
             public Object apply(String message) {

@@ -121,8 +121,6 @@ public class RiotConnectionImpl implements RiotConnection {
     
     @Override
     public void sendCommand(String command) throws IOException {
-        // TODO the following line would set the connected device's serial number to "DC-GD-AAED"
-//        send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setUpdateDeviceInformation(DeviceInformation.newBuilder().setSerialNumber("DC-GD-AAED").build()).build()).build());
         send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
                 .setCommand(DeviceCommand.newBuilder().setText(command)))).build());
     }

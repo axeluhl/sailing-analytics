@@ -2141,6 +2141,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
+    }
+
+    @Override
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {

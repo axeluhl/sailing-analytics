@@ -258,6 +258,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
 
     boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException;
 
+    boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException;
+
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 
     boolean removeDeviceConfiguration(UUID deviceConfigurationId);

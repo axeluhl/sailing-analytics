@@ -73,4 +73,7 @@ public interface IconResources extends ClientBundle {
 
     @Source("images/no_gps_symbol.png")
     ImageResource noGpsSymbol();
+    
+    @Source("images/restart.png")
+    ImageResource restartSymbol();
 }

@@ -1,6 +1,10 @@
 package com.sap.sailing.selenium.test.raceboard;
 
-import java.io.UnsupportedEncodingException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,12 +13,10 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
-import com.sap.sailing.selenium.pages.adminconsole.igtimi.IgtimiDevicesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
@@ -32,7 +34,6 @@ import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
 import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-@Ignore("2021-03-30: Igtimi burnt down; re-enable when Igtimi is back up and running...")
 public class SimulatorOverlayTest extends AbstractSeleniumTest {
     private static final String JSON_URL = "http://event.tractrac.com/events/event_20150616_KielerWoch/jsonservice.php"; //$NON-NLS-1$
     private static final String EVENT = "Kieler Woche 2015"; //$NON-NLS-1$
@@ -65,7 +66,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
      * appears after successfully loading wind.
      */
     @Test
-    public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
+    public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, IOException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -106,7 +107,16 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             WindPanelPO windPanel = adminConsole.goToWind();
-            final String routeconverterWindFileName = "KW2015-49er-R1-WIND.gpx";
+            final InputStream gpxInputStream = getClass().getResourceAsStream("/KW2015-49er-R1-WIND.gpx");
+            final File tmpFile = File.createTempFile("KW2015-49er-R1-WIND", ".gpx");
+            final OutputStream fos = new FileOutputStream(tmpFile);
+            int read;
+            while ((read=gpxInputStream.read()) != -1) {
+                fos.write(read);
+            }
+            fos.close();
+            gpxInputStream.close();
+            final String routeconverterWindFileName = tmpFile.getAbsolutePath();
             windPanel.importWindFromRouteconverter(routeconverterWindFileName, /* waiting up to 10 min */ 15 * 60);
         }
         {

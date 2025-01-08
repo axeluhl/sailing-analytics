@@ -261,6 +261,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     private static class DevicesImagesBarCell extends DefaultActionsImagesBarCell {
         public static final String ACTION_GPS_OFF = "ACTION_GPS_OFF";
         public static final String ACTION_GPS_ON = "ACTION_GPS_ON";
+        public static final String ACTION_RESTART = "ACTION_RESTART";
         public static final String ACTION_POWER_OFF = "ACTION_POWER_OFF";
         private final StringMessages stringMessages;
 
@@ -274,6 +275,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
             return Arrays.asList(getUpdateImageSpec(),
                     new ImageSpec(ACTION_GPS_OFF, stringMessages.turnGPSOff(), IconResources.INSTANCE.noGpsSymbol()),
                     new ImageSpec(ACTION_GPS_ON, stringMessages.turnGPSOn(), IconResources.INSTANCE.gpsSymbol()),
+                    new ImageSpec(ACTION_RESTART, stringMessages.restart(), IconResources.INSTANCE.restartSymbol()),
                     new ImageSpec(ACTION_POWER_OFF, stringMessages.powerOff(), IconResources.INSTANCE.powerButton()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
@@ -347,6 +349,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         });
         actionColumn.addAction(DevicesImagesBarCell.ACTION_GPS_OFF, UPDATE, this::sendGPSOff);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_GPS_ON, UPDATE, this::sendGPSOn);
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_RESTART, UPDATE, this::sendRestart);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_POWER_OFF, UPDATE, this::sendPowerOff);
         actionColumn.addAction(ACTION_DELETE, DELETE, device -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
@@ -718,7 +721,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
 
     private void sendPowerOff(IgtimiDeviceWithSecurityDTO device) {
         if (Window.confirm(stringMessages.reallyPowerOffIgtimiDevice(device.getSerialNumber()))) {
-            sailingServiceWrite.sendGPSOffCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+            sailingServiceWrite.sendPowerOffCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Notification.notify(stringMessages.errorPoweringOffIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
@@ -728,6 +731,26 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 public void onSuccess(Boolean result) {
                     if (result) {
                         Notification.notify(stringMessages.successfullyPoweredOffIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
+                    } else {
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                    }
+                }
+            });
+        }
+    }
+
+    private void sendRestart(IgtimiDeviceWithSecurityDTO device) {
+        if (Window.confirm(stringMessages.reallyRestartIgtimiDevice(device.getSerialNumber()))) {
+            sailingServiceWrite.sendRestartCommandToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorRestartingIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Notification.notify(stringMessages.successfullyRestartedIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
                         Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
                     }
