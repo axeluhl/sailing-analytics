@@ -108,7 +108,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             WindPanelPO windPanel = adminConsole.goToWind();
             final InputStream gpxInputStream = getClass().getResourceAsStream("/KW2015-49er-R1-WIND.gpx");
-            final File tmpFile = new File("KW2015-49er-R1-WIND", ".gpx");
+            final File tmpFile = new File("KW2015-49er-R1-WIND.gpx");
             try {
                 final OutputStream fos = new FileOutputStream(tmpFile);
                 int read;
