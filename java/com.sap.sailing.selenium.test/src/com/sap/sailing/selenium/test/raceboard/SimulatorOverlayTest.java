@@ -108,16 +108,20 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             WindPanelPO windPanel = adminConsole.goToWind();
             final InputStream gpxInputStream = getClass().getResourceAsStream("/KW2015-49er-R1-WIND.gpx");
-            final File tmpFile = File.createTempFile("KW2015-49er-R1-WIND", ".gpx");
-            final OutputStream fos = new FileOutputStream(tmpFile);
-            int read;
-            while ((read=gpxInputStream.read()) != -1) {
-                fos.write(read);
+            final File tmpFile = new File("KW2015-49er-R1-WIND", ".gpx");
+            try {
+                final OutputStream fos = new FileOutputStream(tmpFile);
+                int read;
+                while ((read=gpxInputStream.read()) != -1) {
+                    fos.write(read);
+                }
+                fos.close();
+                gpxInputStream.close();
+                final String routeconverterWindFileName = tmpFile.getAbsolutePath();
+                windPanel.importWindFromRouteconverter(routeconverterWindFileName, /* waiting up to 10 min */ 15 * 60);
+            } finally {
+                tmpFile.delete();
             }
-            fos.close();
-            gpxInputStream.close();
-            final String routeconverterWindFileName = tmpFile.getAbsolutePath();
-            windPanel.importWindFromRouteconverter(routeconverterWindFileName, /* waiting up to 10 min */ 15 * 60);
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
