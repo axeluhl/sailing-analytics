@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.igtimiadapter.websocket;
+package com.sap.sailing.domain.igtimiadapter.websocket.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -10,8 +10,11 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -119,13 +122,16 @@ public class TestWebsocketServer {
     @Test
     public void testWebsocketServer() throws Exception {
         // Create Jetty server on a randomly allocated port
-        final Server server = new Server(0);
+        final Server server = new Server();
+        final ServerConnector connector = new ServerConnector(server);
+        connector.setPort(0);
         // Create a context handler for WebSocket connections
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
+        server.setConnectors(new Connector[] { connector });
         final String PATH = "/websocket";
         // Add WebSocket handler to the context
-        context.addServlet(MyWebSocketServlet.class, PATH+"/*");
+        context.addServlet(new ServletHolder(new MyWebSocketServlet()), PATH+"/*");
         server.setHandler(context);
         // Start the server
         server.start();
