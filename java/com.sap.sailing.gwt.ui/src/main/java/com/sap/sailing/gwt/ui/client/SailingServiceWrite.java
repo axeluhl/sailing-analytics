@@ -66,6 +66,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -242,9 +244,21 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
             boolean correctByDeclination)
             throws IllegalStateException, Exception;
 
-    void removeIgtimiAccount(String eMailOfAccountToRemove);
+    IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to);
 
-    boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
+    void removeIgtimiDataAccessWindow(long id);
+    
+    void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject);
+
+    void removeIgtimiDevice(String serialNumber);
+    
+    boolean sendGPSOffCommandToIgtimiDevice(String serialNumber) throws IOException;
+
+    boolean sendGPSOnCommandToIgtimiDevice(String serialNumber) throws IOException;
+
+    boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException;
+
+    boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException;
 
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 

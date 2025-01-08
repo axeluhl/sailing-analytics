@@ -23,8 +23,8 @@ import com.sap.sailing.gwt.ui.adminconsole.EventManagementPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanel;
 import com.sap.sailing.gwt.ui.adminconsole.ExpeditionDeviceConfigurationsPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.FileStoragePanelSupplier;
-import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanel;
-import com.sap.sailing.gwt.ui.adminconsole.IgtimiAccountsPanelSupplier;
+import com.sap.sailing.gwt.ui.adminconsole.IgtimiDevicesPanel;
+import com.sap.sailing.gwt.ui.adminconsole.IgtimiDevicesPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupConfigPanel;
@@ -78,7 +78,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.advanced.RolesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserGroupManagementPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserManagementPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.ExpeditionDeviceConfigurationsPlace;
-import com.sap.sailing.gwt.ui.adminconsole.places.connectors.IgtimiAccountsPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.connectors.IgtimiDevicesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.Manage2SailRegattaStructureImportPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.ResultImportUrlsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.SmartphoneTrackingPlace;
@@ -363,17 +363,17 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 }, stringMessages.smartphoneTracking(), new SmartphoneTrackingPlace((String) null /* no place token */),
                 SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE, DefaultActions.DELETE));
         /* Igtimi Accounts */
-        final IgtimiAccountsPanelSupplier accountsPanelSupplier = new IgtimiAccountsPanelSupplier(stringMessages, presenter);
+        final IgtimiDevicesPanelSupplier accountsPanelSupplier = new IgtimiDevicesPanelSupplier(stringMessages, presenter);
         adminConsolePanel.addToTabPanel(connectorsTabPanel,
-                new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(accountsPanelSupplier) {
+                new DefaultRefreshableAdminConsolePanel<IgtimiDevicesPanel>(accountsPanelSupplier) {
                     @Override
                     public void refreshAfterBecomingVisible() {
                         if (getWidget() != null) {
-                            getWidget().refresh();
+                            getWidget().refreshDevices();
                         }
                     }
-                }, stringMessages.igtimiAccounts(), new IgtimiAccountsPlace((String) null /* no place token */),
-                SecuredDomainType.IGTIMI_ACCOUNT.getPermission(DefaultActions.values()));
+                }, stringMessages.igtimiDevices(), new IgtimiDevicesPlace((String) null /* no place token */),
+                SecuredDomainType.IGTIMI_DEVICE.getPermission(DefaultActions.values()));
         /* Expedition Device Configurations */
         final ExpeditionDeviceConfigurationsPanelSupplier expeditionDeviceConfigurationsPanelSupplier =
                 new ExpeditionDeviceConfigurationsPanelSupplier(stringMessages, presenter);

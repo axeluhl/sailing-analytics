@@ -14,7 +14,7 @@ if [ -n "${AUTO_REPLICATE}" ]; then
     # for which to trigger replication. If you activate this make sure to
     # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
     # same channel the master is using in its REPLICATION_CHANNEL variable
-    REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl
+    REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener,com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl,com.sap.sailing.shared.server.impl.SharedSailingDataImpl,com.sap.sse.landscape.aws.impl.AwsLandscapeStateImpl,com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl
   fi
 fi
 # Message Queue hostname where to
@@ -116,11 +116,11 @@ fi
 if [ -n "${MANAGE2SAIL_ACCESS_TOKEN}" ]; then
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN}"
 fi
-if [ -n "${IGTIMI_CLIENT_ID}" ]; then
-  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.client.id=${IGTIMI_CLIENT_ID}"
+if [ -n "${IGTIMI_BASE_URL}" ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.base.url=${IGTIMI_BASE_URL}"
 fi
-if [ -n "${IGTIMI_CLIENT_SECRET}" ]; then
-  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.client.secret=${IGTIMI_CLIENT_SECRET}"
+if [ -n "${IGTIMI_BEARER_TOKEN}" ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Digtimi.bearer.token=${IGTIMI_BEARER_TOKEN}"
 fi
 if [ -n "${GOOGLE_MAPS_AUTHENTICATION_PARAMS}" ]; then
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS}"

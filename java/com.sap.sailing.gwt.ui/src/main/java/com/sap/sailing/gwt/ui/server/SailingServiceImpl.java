@@ -10,9 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -60,6 +60,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -251,8 +252,14 @@ import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointWithMarkConfiguration;
 import com.sap.sailing.domain.coursetemplate.impl.CommonMarkPropertiesImpl;
 import com.sap.sailing.domain.coursetemplate.impl.WaypointTemplateImpl;
-import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.datatypes.BatteryLevel;
+import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -326,7 +333,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.client.SailingService;
-import com.sap.sailing.gwt.ui.shared.AccountWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.BearingWithConfidenceDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -348,6 +354,8 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
@@ -545,7 +553,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     private final ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory> tractracAdapterTracker;
 
-    private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiAdapterTracker;
+    private final ServiceTracker<IgtimiConnectionFactory, IgtimiConnectionFactory> igtimiConnectionFactoryTracker;
+    
+    private final ServiceTracker<RiotServer, RiotServer> riotServerTracker;
 
     private final ServiceTracker<RaceLogTrackingAdapterFactory, RaceLogTrackingAdapterFactory> raceLogTrackingAdapterTracker;
 
@@ -607,7 +617,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         deviceIdentifierStringSerializationHandlerTracker = ServiceTrackerFactory.createAndOpen(context,
                 DeviceIdentifierStringSerializationHandler.class);
         securityServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, SecurityService.class);
-        igtimiAdapterTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
+        igtimiConnectionFactoryTracker = ServiceTrackerFactory.createAndOpen(context, IgtimiConnectionFactory.class);
+        riotServerTracker = ServiceTrackerFactory.createAndOpen(context, RiotServer.class);
         baseDomainFactory = getService().getBaseDomainFactory();
         mongoObjectFactory = getService().getMongoObjectFactory();
         domainObjectFactory = getService().getDomainObjectFactory();
@@ -767,7 +778,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public SerializationDummy serializationDummy(PersonDTO dummy,
             CountryCode ccDummy, PreciseCompactPosition preciseCompactPosition,
             TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, SecondsDurationImpl secondsDuration,
-            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions) {
+            KnotSpeedImpl knotSpeedImpl, KilometersPerHourSpeedImpl kmhSpeedImpl, HasPermissions hasPermissions,
+            IgtimiDeviceWithSecurityDTO igtimiDeviceWithSecurityDTO) {
         return null;
     }
 
@@ -4230,23 +4242,85 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public Iterable<AccountWithSecurityDTO> getAllIgtimiAccountsWithSecurity() {
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
-                getIgtimiConnectionFactory().getAllAccounts(), this::toSecuredIgtimiAccountDTO);
+    public Pair<String, Boolean> getIgtimiConnectionFactoryBaseUrl() {
+        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
+        return new Pair<>(igtimiConnectionFactory.getBaseUrl().toString(), igtimiConnectionFactory.hasCredentials());
+    }
+    
+    @Override
+    public ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity()
+            throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        final Map<String, TimePoint> lastHeartBeatsByDeviceSerialNumber = new HashMap<>();
+        final Map<String, SocketAddress> remoteAddressByDeviceSerialNumber = new HashMap<>();
+        final RiotServer riotServer = getRiotServer();
+        for (final RiotConnection connection : riotServer.getLiveConnections()) {
+            final String serialNumber = connection.getSerialNumber();
+            if (serialNumber != null) {
+                if (Util.compareToWithNull(connection.getLastHeartbeatReceivedAt(), lastHeartBeatsByDeviceSerialNumber.get(serialNumber), /* null is less */ true) > 0) {
+                    lastHeartBeatsByDeviceSerialNumber.put(serialNumber, connection.getLastHeartbeatReceivedAt());
+                }
+                remoteAddressByDeviceSerialNumber.put(serialNumber, connection.getSocketChannel().getRemoteAddress());
+            }
+        }
+        return new ArrayList<>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                riotServer.getDevices(),
+                device->{
+                    try {
+                        return toSecuredIgtimiDeviceDTO(
+                                    device,
+                                    lastHeartBeatsByDeviceSerialNumber.get(device.getSerialNumber()),
+                                    remoteAddressByDeviceSerialNumber.get(device.getSerialNumber()),
+                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class)),
+                                    getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class)));
+                    } catch (org.json.simple.parser.ParseException | IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })));
+    }
+    
+    private Position getPositionFromMessage(GpsLatLong fix) {
+        return fix == null ? null : fix.getPosition();
+    }
+    
+    private double getBatteryPercentFromMessage(BatteryLevel fix) {
+        return fix == null ? Double.NaN : fix.getPercentage();
     }
 
-    private AccountWithSecurityDTO toSecuredIgtimiAccountDTO(final Account igtimiAccount) {
-        final com.sap.sailing.domain.igtimiadapter.User user = igtimiAccount.getUser();
-        final String email = user.getEmail();
-        final String name = user.getFirstName() + " " + user.getSurname();
-        final AccountWithSecurityDTO securedAccount = new AccountWithSecurityDTO(email, name,
-                igtimiAccount.getCreatorName());
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedAccount);
-        return securedAccount;
+    @Override
+    public ArrayList<IgtimiDataAccessWindowWithSecurityDTO> getAllIgtimiDataAccessWindowsWithSecurity()
+            throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
+        return new ArrayList<IgtimiDataAccessWindowWithSecurityDTO>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                getRiotServer().getDataAccessWindows(), this::toSecuredIgtimiDataAccessWindowDTO)));
+    }
+
+    private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice,
+            final TimePoint lastHeartBeat, final SocketAddress remoteAddress, Position lastKnownPosition, double lastKnownBatteryPercent) {
+        final long id = igtimiDevice.getId();
+        final String serialNumber = igtimiDevice.getSerialNumber();
+        final String name = igtimiDevice.getName();
+        final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name,
+                lastHeartBeat, remoteAddress == null ? null : remoteAddress.toString(), lastKnownPosition,
+                lastKnownBatteryPercent);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDevice);
+        return securedDevice;
+    }
+
+    private IgtimiDataAccessWindowWithSecurityDTO toSecuredIgtimiDataAccessWindowDTO(final DataAccessWindow daw) {
+        final long id = daw.getId();
+        final String serialNumber = daw.getDeviceSerialNumber();
+        final Date from = daw.getStartTime() == null ? null : daw.getStartTime().asDate();
+        final Date to = daw.getEndTime() == null ? null : daw.getEndTime().asDate();
+        final IgtimiDataAccessWindowWithSecurityDTO securedDAW = new IgtimiDataAccessWindowWithSecurityDTO(id, serialNumber, from, to);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDAW);
+        return securedDAW;
     }
 
     protected IgtimiConnectionFactory getIgtimiConnectionFactory() {
-        return igtimiAdapterTracker.getService();
+        return igtimiConnectionFactoryTracker.getService();
+    }
+    
+    protected RiotServer getRiotServer() {
+        return riotServerTracker.getService();
     }
 
     protected RaceLogTrackingAdapterFactory getRaceLogTrackingAdapterFactory() {
@@ -4263,11 +4337,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     protected YellowBrickTrackingAdapter getYellowBrickTrackingAdapter() {
         return getYellowBrickTrackingAdapterFactory().getYellowBrickTrackingAdapter(getBaseDomainFactory());
-    }
-
-    @Override
-    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) throws MalformedURLException, UnsupportedEncodingException {
-        return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 
     protected Set<DynamicTrackedRace> getAllTrackedRaces() {
@@ -6020,5 +6089,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public String getGoogleMapsLoaderAuthenticationParams() {
         return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
+    }
+
+    protected IgtimiConnection createIgtimiConnection() {
+        return getIgtimiConnectionFactory().getOrCreateConnection(()->getSecurityService().getCurrentUser() != null ? getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()) : null);
     }
 }
