@@ -12,6 +12,7 @@ import com.sap.sailing.landscape.SailingAnalyticsProcess;
 import com.sap.sailing.landscape.SailingReleaseRepository;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.debranding.ClientConfigurationListener;
 import com.sap.sse.landscape.DefaultProcessConfigurationVariables;
 import com.sap.sse.landscape.ProcessConfigurationVariable;
 import com.sap.sse.landscape.Release;
@@ -174,10 +175,14 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
          *         {@link DefaultProcessConfigurationVariables#ADDITIONAL_JAVA_ARGS ${ADDITIONAL_JAVA_ARGS}} variable.
          *         An example string in the resulting sequence could be {@code "-Da=b"}. This implementation returns the
          *         system properties required to configure security shared across the
-         *         {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain.
+         *         {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME} domain, as well as the activation of SAP branding,
+         *         assuming that this runs under the {@link SharedLandscapeConstants#DEFAULT_DOMAIN_NAME default domain}.
          */
         protected Iterable<String> getAdditionalJavaArgs() {
-            return getAdditionalJavaArgsForSharedSecurity(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, SharedLandscapeConstants.DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME);
+            final List<String> result = new ArrayList<>();
+            Util.addAll(getAdditionalJavaArgsForSharedSecurity(SharedLandscapeConstants.DEFAULT_DOMAIN_NAME, SharedLandscapeConstants.DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME), result);
+            result.add("-D"+ClientConfigurationListener.DEBRANDING_PROPERTY_NAME+"=false"); // activate branding when running under default SAP domain
+            return result;
         }
 
         protected void addUserDataForPort(final Map<ProcessConfigurationVariable, String> result, ProcessConfigurationVariable variable, Integer port) {

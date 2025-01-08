@@ -1,4 +1,4 @@
-﻿﻿# Welcome to the SAP Sailing Wiki
+﻿# Welcome to the SAP Sailing Wiki
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
@@ -6,7 +6,7 @@ This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wik
 
 Like businesses, sailors need the latest information to make strategic decisions - but they need it even faster. One wrong tack, a false estimation of the current, or the slightest wind shift can cost the skipper the entire race. As premium sponsor of the Kieler Woche 2011, and co-sponsor of Sailing Team Germany (STG), SAP is showing how innovative IT solutions providing real time data analysis can give teams the competitive edge.
 
-SAP is at the center of today’s technology revolution, developing innovations that not only help businesses run like never before, but also improve the lives of people everywhere. As market leader in enterprise application software, SAP SE (NYSE: SAP) helps companies of all sizes and industries run better. From back office to boardroom, warehouse to storefront, desktop to mobile device – SAP empowers people and organizations to work together more efficiently and use business insight more effectively to stay ahead of the competition. SAP applications and services enable more than 258,000 customers to operate profitably, adapt continuously, and grow sustainably.
+SAP is at the center of today’s technology revolution, developing innovations that not only help businesses run like never before, but also improve the lives of people everywhere. As market leader in enterprise application software, SAP SE (NYSE: SAP) helps companies of all sizes and industries run better. From back office to boardroom, warehouse to storefront, desktop to mobile device – SAP empowers people and organizations to work together more efficiently and use business insight more effectively to stay ahead of the competition. SAP applications and services enable more than 400,000 customers to operate profitably, adapt continuously, and grow sustainably.
 
 # Table of Contents
 
@@ -105,7 +105,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
 * [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
-* [[Chargebee Payment Integration|wiki/howto/chargebee]]
+* [[Paywall|wiki/howto/paywall]]
+* [[Subscriptions|wiki/howto/subscriptions]]
 * [[Building and Using a Forked GWT Version|wiki/howto/development/gwt-fork]]
 
 ### Development
@@ -125,6 +126,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
 * [[Whitelabelling|wiki/howto/whitelabelling]]
 * [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
+* [[Secured Settings|wiki/howto/development/secured-settings]]
 
 ### For Event Managers
 

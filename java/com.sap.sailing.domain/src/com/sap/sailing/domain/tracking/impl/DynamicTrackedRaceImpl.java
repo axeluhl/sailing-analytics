@@ -167,7 +167,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
             getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
         }
-        listeners = new HashSet<RaceChangeListener>();
+        listeners = getListeners(); // force creation only if default read object or superclass constructor didn't create it yet
         logListener = new DynamicTrackedRaceLogListener(this);
         courseDesignChangedListeners = new HashSet<>();
         startTimeChangedListeners = new HashSet<>();

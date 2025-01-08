@@ -28,6 +28,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient SimpleTestSettings nested;
 
         public TestOuterSettings() {
+            super();
         }
         
         @Override
@@ -41,6 +42,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient SettingsList<SimpleTestSettings> l;
 
         public TestListSettings() {
+            super();
         }
         
         @Override
@@ -55,9 +57,11 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient DecimalSetting num;
 
         public SimpleTestSettings() {
+            super();
         }
 
         public SimpleTestSettings(String string, BigDecimal num) {
+            super();
             this.string.setValue(string);
             this.num.setValue(num);
         }
@@ -82,6 +86,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient DecimalListSetting l;
 
         public TestSettings() {
+            super();
         }
         
         @Override
@@ -142,6 +147,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         private transient EnumListSetting<TextOperator.Operators> l;
         
         public TestEnumListSettings() {
+            super();
         }
 
         @Override
@@ -157,6 +163,10 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
 
     private static class DuplicateFieldSettings extends AbstractGenericSerializableSettings {
+        public DuplicateFieldSettings() {
+            super();
+        }
+
         private static final long serialVersionUID = 4058775568295038177L;
         @SuppressWarnings("unused")
         private transient StringSetting humba;
@@ -171,6 +181,10 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
     
     private static class DisallowedKeySettings extends AbstractGenericSerializableSettings {
+        public DisallowedKeySettings() {
+            super();
+        }
+
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient StringSetting disallowedKey;

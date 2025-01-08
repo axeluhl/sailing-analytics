@@ -247,8 +247,8 @@ public class CompareServersTest {
     
     @Test
     public void testComparingLeaderboardGroupOutputWithEventOrderChangeOnly() throws IOException, ParseException {
-        final Object oldLg = new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup1_old.json")));
-        final Object newLg = new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup1_new.json")));
+        final JSONObject oldLg = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup1_old.json")));
+        final JSONObject newLg = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup1_new.json")));
         final Pair<Object, Object> result = resource.removeUnnecessaryAndDuplicateFields(oldLg, newLg);
         assertNull(result.getA());
         assertNull(result.getB());
@@ -256,8 +256,8 @@ public class CompareServersTest {
 
     @Test
     public void testComparingLeaderboardGroupOutputWithRaceHavingLostWindAndGPS() throws IOException, ParseException {
-        final Object oldLg = new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup2_old.json")));
-        final Object newLg = new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup2_new.json")));
+        final JSONObject oldLg = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup2_old.json")));
+        final JSONObject newLg = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream("/LeaderboardGroup2_new.json")));
         final Pair<Object, Object> result = resource.removeUnnecessaryAndDuplicateFields(oldLg, newLg);
         assertNotNull(result.getA());
         assertNotNull(result.getB());

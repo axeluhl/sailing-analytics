@@ -22,7 +22,6 @@ public class RegattaLogReplicationTest extends
         AbstractLogReplicationTest<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> {
     
     private RegattaLogEvent regattaLogEvent;
-//    private RegattaLogEvent anotherRegattaLogEvent;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     private TimePoint t(long millis) {
@@ -33,7 +32,6 @@ public class RegattaLogReplicationTest extends
     public void createEvent() throws Exception {
         final CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("Test Competitor");
         regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitor);
-//        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
     }
     
     @Test

@@ -20,7 +20,7 @@ public interface SharedLandscapeConstants {
      */
     String DEFAULT_SECURITY_SERVICE_REPLICA_SET_NAME = "security-service";
     
-    String RABBIT_IN_DEFAULT_REGION_HOSTNAME = "rabbit.internal.sapsailing.com";
+    String RABBIT_IN_DEFAULT_REGION_HOSTNAME = "rabbit.internal."+DEFAULT_DOMAIN_NAME;
 
     String DEFAULT_REGION = "eu-west-1";
     
@@ -97,4 +97,14 @@ public interface SharedLandscapeConstants {
     String DEFAULT_REVERSE_PROXY_INSTANCE_TYPE = "T3_MEDIUM";
 
     String DEFAULT_DISPOSABLE_REVERSE_PROXY_INSTANCE_NAME = "DisposableReverseProxy";
+
+    /**
+     * Hostname of failover archive. It is defined in {@code root@sapsailing.com:/etc/httpd/conf.d/001-events.conf} and
+     * points to the IP address defined as {@code ARCHIVE_FAILOVER_IP} in
+     * {@code root@sapsailing.com:/etc/httpd/conf.d/000-macros.conf}. Both files are maintained in the {@code httpdConf}
+     * Git repository that currently has its headless home under {@code httpdConf@sapsailing.com:repo.git} and is used
+     * in particular to synchronize configuration changes across central and disposable reverse proxies.
+     * See also <a href="...">the Wiki article about this.</a>
+     */
+    String ARCHIVE_FAILOVER_ADDRESS = "archive-failover." +DEFAULT_DOMAIN_NAME;
 }

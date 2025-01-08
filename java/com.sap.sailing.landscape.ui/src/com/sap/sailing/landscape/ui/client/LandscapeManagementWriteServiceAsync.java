@@ -204,7 +204,7 @@ public interface LandscapeManagementWriteServiceAsync {
             AsyncCallback<Boolean> callback);
 
     /**
-     * Updates the AMI to use in the launch configurations of those of the {@code replicaSets} that have an auto-scaling group.
+     * Updates the AMI to use in the launch template version of those of the {@code replicaSets} that have an auto-scaling group.
      * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
      * 
      * @param replicaSets
@@ -213,7 +213,7 @@ public interface LandscapeManagementWriteServiceAsync {
      *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
      * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
      *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
-     *         hence no launch configuration to update
+     *         hence no launch template to update
      */
     void updateImageForReplicaSets(String regionId,
             ArrayList<SailingApplicationReplicaSetDTO<String>> applicationReplicaSetsToUpdate,

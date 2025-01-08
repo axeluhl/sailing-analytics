@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -95,6 +96,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
+    private static final String URL_SAILINGSERVER_ROUTECONVERTER_IMPORT = "/../../sailingserver/routeconverter-wind-import";
     private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -129,6 +131,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private CaptionPanel nmeaImportPanel;
     private CaptionPanel bravoImportPanel;
     private CaptionPanel igtimiImportPanel;
+    private CaptionPanel routeconverterImportPanel;
     private CaptionPanel expeditionAllInOneImporterPanel;
     
     public WindPanel(final Presenter presenter, final StringMessages stringMessages) {
@@ -271,11 +274,13 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         expeditionImportPanel = createExpeditionWindImportPanel();
         gribImportPanel = createGribWindImportPanel();
         nmeaImportPanel = createNmeaWindImportPanel();
+        routeconverterImportPanel = createRouteconverterWindImportPanel();
         bravoImportPanel = createBravoWindImportPanel();
         igtimiImportPanel = igtimiImportPanel(mainPanel);
         mainPanel.add(expeditionImportPanel);
         mainPanel.add(gribImportPanel);
         mainPanel.add(nmeaImportPanel);
+        mainPanel.add(routeconverterImportPanel);
         mainPanel.add(bravoImportPanel);
         mainPanel.add(igtimiImportPanel);
         // Expedition all in one import
@@ -416,7 +421,9 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
      * The submit button is initially disabled. Callers can implement their own logic based, e.g., on event handlers they
      * add to the form panel or other elements that enable it.
      */
-    private WindImportFileUploadForm createWindImportFileUploadForm(String relativeUploadUrl, boolean multi) {
+    private WindImportFileUploadForm createWindImportFileUploadForm(String relativeUploadUrl, boolean multi,
+            Optional<String> submitButtonDebugId, Optional<String> uploadFormDebugId,
+            Optional<String> importResultPanelDebugId) {
         /*
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
@@ -426,6 +433,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         form.add(formContentPanel);
         final Panel importResultPanel = new VerticalPanel();
         formContentPanel.add(importResultPanel);
+        importResultPanelDebugId.map(id->{ importResultPanel.ensureDebugId(id); return null; });
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
         form.setAction(GWT.getHostPageBaseURL() + relativeUploadUrl);
@@ -437,8 +445,10 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
             }
         });
         submitButton.setEnabled(false);
+        submitButtonDebugId.map(id->{ submitButton.ensureDebugId(id); return null; });
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
+        uploadFormDebugId.map(id->{ fileUpload.ensureDebugId(id); return null; });
         if (multi) {
             fileUpload.getElement().setAttribute("multiple", "multiple");
         }
@@ -514,7 +524,8 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
          */
-        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_EXPEDITION_IMPORT, /* multi */ true);
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_EXPEDITION_IMPORT, /* multi */ true,
+                Optional.empty(), Optional.empty(), Optional.empty());
         CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
         VerticalPanel windImportContentPanel = new VerticalPanel();
         windImportRootPanel.add(windImportContentPanel);
@@ -563,19 +574,27 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private CaptionPanel createNmeaWindImportPanel() {
         final String importServletUrl = URL_SAILINGSERVER_NMEA_IMPORT;
         final String title = stringMessages.nmeaWindImport_Title();
-        return createWindImportPanel(title, importServletUrl);
+        return createWindImportPanel(title, importServletUrl, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
+    private CaptionPanel createRouteconverterWindImportPanel() {
+        final String importServletUrl = URL_SAILINGSERVER_ROUTECONVERTER_IMPORT;
+        final String title = stringMessages.routeconverterWindImport_Title();
+        return createWindImportPanel(title, importServletUrl, Optional.of("ImportWindFromRouteconverterSubmit"), Optional.of("ImportWindFromRouteconverterUpload"), Optional.of("ImportWindFromRouteconverterResults"));
+    }
+    
     private CaptionPanel createGribWindImportPanel() {
-        return createWindImportPanel(stringMessages.gribWindImport_Title(), URL_SAILINGSERVER_GRIB_IMPORT);
+        return createWindImportPanel(stringMessages.gribWindImport_Title(), URL_SAILINGSERVER_GRIB_IMPORT, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private CaptionPanel createBravoWindImportPanel() {
-        return createWindImportPanel(stringMessages.bravoWindImport_Title(), URL_SAILINGSERVER_BRAVO_IMPORT);
+        return createWindImportPanel(stringMessages.bravoWindImport_Title(), URL_SAILINGSERVER_BRAVO_IMPORT, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    private CaptionPanel createWindImportPanel(final String title, final String importServletUrl) {
-        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(importServletUrl, /* multi */ true);
+    private CaptionPanel createWindImportPanel(final String title, final String importServletUrl,
+            Optional<String> submitButtonDebugId, Optional<String> uploadFormDebugId,
+            Optional<String> importResultPanelDebugId) {
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(importServletUrl, /* multi */ true, submitButtonDebugId, uploadFormDebugId, importResultPanelDebugId);
         CaptionPanel windImportRootPanel = new CaptionPanel(title);
         VerticalPanel windImportContentPanel = new VerticalPanel();
         windImportRootPanel.add(windImportContentPanel);

@@ -19,8 +19,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -29,7 +29,7 @@ import org.junit.Assert;
 public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     private final Competitor competitor = new CompetitorImpl("comp", "Comp", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", "KYC", null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    private final DeviceIdentifier device = new SmartphoneImeiIdentifier("imei");
+    private final DeviceIdentifier device = new SmartphoneImeiIdentifierImpl("imei");
     
     private int time = 0;
     
@@ -288,7 +288,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         Assert.assertEquals(2, getMappings().size());
         
         //non-overlap with new device
-        addMapping(author, new SmartphoneImeiIdentifier("imei2"), 110L, 150L, competitor);
+        addMapping(author, new SmartphoneImeiIdentifierImpl("imei2"), 110L, 150L, competitor);
         Assert.assertEquals(3, getMappings().size());
     }
     

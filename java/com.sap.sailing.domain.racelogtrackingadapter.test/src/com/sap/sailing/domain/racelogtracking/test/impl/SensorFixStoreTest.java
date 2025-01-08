@@ -10,12 +10,14 @@ import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
@@ -27,12 +29,13 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixSt
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.mongodb.MongoDBService;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;
@@ -40,10 +43,16 @@ public class SensorFixStoreTest {
     private static final double FIX_RIDE_HEIGHT = 1337.0;
     private static final double FIX_RIDE_HEIGHT2 = 1338.0;
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
-    protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-    protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+    protected final DeviceIdentifier device = new SmartphoneImeiIdentifierImpl("a");
+    protected final DeviceIdentifier device2 = new SmartphoneImeiIdentifierImpl("b");
     protected SensorFixStore store;
+    private static ClientSession clientSession;
 
+    @BeforeClass
+    public static void setUpClass() {
+        clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
+    }
+    
     @Before
     public void setUp() throws UnknownHostException, MongoException {
         dropPersistedData();
@@ -53,7 +62,7 @@ public class SensorFixStoreTest {
     private void newStore() {
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), serviceFinderFactory, ReadConcern.MAJORITY,
-                WriteConcern.MAJORITY, /* clientSession */ null, /* metadataCollectionClientSession */ null);
+                WriteConcern.MAJORITY, clientSession, clientSession);
     }
 
     @After
@@ -63,8 +72,8 @@ public class SensorFixStoreTest {
 
     private void dropPersistedData() {
         MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
-        db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
-        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
+        db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
     }
 
     @Test
@@ -87,7 +96,6 @@ public class SensorFixStoreTest {
     @Test
     public void testFixDataIsPreservedOnStore() throws Exception {
         DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
-
         verifySingleFix(fix, 100, 200, device, true);
     }
     

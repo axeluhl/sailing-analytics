@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
@@ -69,7 +70,7 @@ public interface UserManagementService extends RemoteService {
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
-    SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions)
+    SerializationDummy serializationDummy(TypeRelativeObjectIdentifier typeRelativeObjectIdentifier, HasPermissions hasPermissions, SecuredAwsLandscapeType securedAwsLandscapeType)
             throws org.apache.shiro.authz.UnauthorizedException;
 
     RolesAndPermissionsForUserDTO getRolesAndPermissionsForUser(String username)

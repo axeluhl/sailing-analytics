@@ -298,6 +298,34 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.websocket.server"
+         download-size="0"
+         install-size="0"
+         version="9.4.54.v20240208"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.websocket.server.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.54.v20240208"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.websocket.servlet"
+         download-size="0"
+         install-size="0"
+         version="9.4.54.v20240208"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.websocket.servlet.source"
+         download-size="0"
+         install-size="0"
+         version="9.4.54.v20240208"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.jetty.xml"
          download-size="0"
          install-size="0"
@@ -1312,4 +1340,17 @@
          fragment="true"
          unpack="false"/>
 
+   <plugin
+         id="com.google.protobuf"
+         download-size="0"
+         install-size="0"
+         version="4.28.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.protobuf.source"
+         download-size="0"
+         install-size="0"
+         version="4.28.3"
+         unpack="false"/>
 </feature>

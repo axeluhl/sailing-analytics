@@ -7,6 +7,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnAddHandler;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -70,6 +72,17 @@ public class CourseAreaCircleOverlay extends CanvasOverlayV3 {
                 setCanvasPosition(courseAreaPositionInPx.getX() - courseAreaRadiusInPixel, courseAreaPositionInPx.getY() - courseAreaRadiusInPixel);
             }
         }
+    }
+
+    @Override
+    protected OverlayViewOnAddHandler getOnAddHandler() {
+        return new OverlayViewOnAddHandler() {
+            @Override
+            public void onAdd(OverlayViewMethods methods) {
+                methods.getPanes().getMapPane().appendChild(canvas.getElement());
+                CourseAreaCircleOverlay.this.onAttach();
+            }
+        };
     }
 
     private String getTitle() {

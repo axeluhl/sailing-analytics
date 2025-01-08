@@ -53,7 +53,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected Iterable<DetailType> availableDetailTypes;
     
     protected final PaywallResolver paywallResolver;
-    private final AbstractLeaderboardDTO leaderboardDTO;
+    protected final AbstractLeaderboardDTO leaderboardDTO;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
             Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail, PaywallResolver paywallResolver, AbstractLeaderboardDTO leaderboardDTO) {
@@ -293,10 +293,9 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     }
 
     protected PremiumCheckBox createPremiumCheckbox(DataEntryDialog<?> dialog, String label, boolean selected, String tooltip, Action premiumAction) {
-        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver, leaderboardDTO);
+        PremiumCheckBox premiumCheckBox = new SailingPremiumCheckBox(label, premiumAction, paywallResolver, leaderboardDTO, selected);
         dialog.registerCheckbox(premiumCheckBox.getCheckBox());
         premiumCheckBox.ensureDebugId(DebugIdHelper.createDebugId(label) + CHECK_BOX_DEBUGID_CONSTANT);
-        premiumCheckBox.setValue(selected);
         dialog.addTooltip(premiumCheckBox, tooltip);
         return premiumCheckBox;
     }

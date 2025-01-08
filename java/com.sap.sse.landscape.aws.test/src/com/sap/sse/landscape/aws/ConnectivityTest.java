@@ -49,7 +49,6 @@ import com.sap.sse.landscape.SecurityGroup;
 import com.sap.sse.landscape.application.ApplicationProcess;
 import com.sap.sse.landscape.aws.impl.AwsRegion;
 import com.sap.sse.landscape.aws.orchestration.CreateDNSBasedLoadBalancerMapping;
-import com.sap.sse.landscape.impl.ReleaseRepositoryImpl;
 import com.sap.sse.landscape.mongodb.MongoEndpoint;
 import com.sap.sse.landscape.mongodb.impl.DatabaseImpl;
 import com.sap.sse.landscape.rabbitmq.RabbitMQEndpoint;
@@ -121,6 +120,11 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
         region = new AwsRegion(Region.EU_WEST_2, landscape);
         AXELS_KEY_PASS = new String(Base64.getDecoder().decode(System.getProperty("axelskeypassphrase")));
         keyPass = "lkayrelakuesyrlasp8caorewyc".getBytes();
+    }
+    
+    @Test
+    public void testReverseDNSLookup() {
+        assertEquals("mongo0.internal.sapsailing.com", landscape.findHostnamesForIP("172.31.13.233"));
     }
     
     @Test
@@ -284,7 +288,7 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
             final String envSh = process.getEnvSh(optionalTimeout, Optional.empty(), keyPass);
             assertFalse(envSh.isEmpty());
             assertTrue(envSh.contains("SERVER_NAME="));
-            final Release release = process.getRelease(new ReleaseRepositoryImpl("http://releases.sapsailing.com", "build"), optionalTimeout, Optional.empty(), keyPass);
+            final Release release = process.getRelease(SailingReleaseRepository.INSTANCE, optionalTimeout, Optional.empty(), keyPass);
             assertNotNull(release);
             assertEquals(14888, process.getTelnetPortToOSGiConsole(optionalTimeout, Optional.empty(), keyPass));
             final AwsLandscape<String> castLandscape = (AwsLandscape<String>) landscape;

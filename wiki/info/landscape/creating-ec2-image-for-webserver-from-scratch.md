@@ -181,4 +181,4 @@ The script sets up nfs/nvme mounts, installs/updates httpd + software for script
 
 ## Read Also
 
-Check out the details in [amazon-ec2](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies) on the disposables and central: namely the target group healthcheck and shared httpd configuration Git repo. Also, look over the key_vault and the build_crontab_and_setup_files detailed there.
+Check out the details in [amazon-ec2](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_landscape-overview_apache-httpd-the-central-reverse-proxy-webserver-and-disposable-reverse-proxies) on the disposables and central: namely the target group healthcheck and shared httpd configuration Git repo. Also, look over the key_vault and the ``build_crontab_and_setup_files`` detailed there.
