@@ -105,10 +105,9 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
         }
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-            IgtimiDevicesManagementPanelPO igtimiDevicesManagementPanel = adminConsole.goToIgtimi();
-            // TODO bug6059: can't use the Igtimi import anymore; will export from the race on sapsailing.com and implement an importer for our export format
             WindPanelPO windPanel = adminConsole.goToWind();
-            windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 15 * 60);
+            final String routeconverterWindFileName = "KW2015-49er-R1-WIND.gpx";
+            windPanel.importWindFromRouteconverter(routeconverterWindFileName, /* waiting up to 10 min */ 15 * 60);
         }
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,

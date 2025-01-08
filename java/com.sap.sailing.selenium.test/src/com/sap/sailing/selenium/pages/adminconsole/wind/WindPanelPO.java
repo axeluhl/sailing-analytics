@@ -19,6 +19,16 @@ public class WindPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "IgtimiImportResultReport")
     private WebElement igtimiImportResultReport;
     
+    @FindBy(how = BySeleniumId.class, using = "ImportWindFromRouteconverterSubmit")
+    private WebElement importWindFromRouteconverterSubmitButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "ImportWindFromRouteconverterUpload")
+    private WebElement importWindFromRouteconverterFileUpload;
+    
+    @FindBy(how = BySeleniumId.class, using = "ImportWindFromRouteconverterResults")
+    private WebElement importWindFromRouteconverterResultPanel;
+    
+    
     public WindPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -38,5 +48,9 @@ public class WindPanelPO extends PageArea {
                 }
             }
         });
+    }
+    
+    public void importWindFromRouteconverter(String filename, int timeoutInSeconds) throws InterruptedException {
+        
     }
 }
