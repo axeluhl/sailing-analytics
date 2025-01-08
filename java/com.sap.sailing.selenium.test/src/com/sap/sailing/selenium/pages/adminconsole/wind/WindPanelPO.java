@@ -51,6 +51,19 @@ public class WindPanelPO extends PageArea {
     }
     
     public void importWindFromRouteconverter(String filename, int timeoutInSeconds) throws InterruptedException {
-        
+        importWindFromRouteconverterFileUpload.sendKeys(filename);
+        importWindFromRouteconverterSubmitButton.click();
+        FluentWait<String> wait = createFluentWait("The following number of fixes were imported for the listed races:", timeoutInSeconds, DEFAULT_POLLING_INTERVAL);
+        wait.until(new Function<String, Object>() {
+            @Override
+            public Object apply(String message) {
+                try {
+                    String statusText = importWindFromRouteconverterResultPanel.getText();
+                    return statusText.contains(message);
+                } catch (TimeoutException exception) {
+                    return Boolean.FALSE;
+                }
+            }
+        });
     }
 }

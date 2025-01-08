@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -39,8 +40,9 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         super(trackedRace);
         this.windTrackerFactory = windTrackerFactory;
         liveConnectionsAndDeviceSerialNumber = new HashMap<>();
-        new Thread("IgtimiWindTracker start-up thread for race " + trackedRace.getRace().getName()) {
-            public void run() {
+        final Subject currentSubject = SecurityUtils.getSubject();
+        new Thread(
+            currentSubject.associateWith(()->{
                 logger.info("Starting up Igtimi wind tracker for race "+trackedRace.getRace().getName());
                 // create the connection, preferring default credentials specified at bundle start-up over those we may
                 // extract here from the logged-on user or the tracked race's owner
@@ -63,8 +65,8 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                 + getTrackedRace().getRace().getName(), e);
                     }
                 }
-            }
-        }.start();
+            }), "IgtimiWindTracker start-up thread for race " + trackedRace.getRace().getName())
+        .start();
     }
 
     /**
@@ -84,7 +86,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         } else {
             user = optionalSecurityService.getCurrentUser();
         }
-        return optionalSecurityService.getAccessToken(user.getName());
+        return optionalSecurityService.getOrCreateAccessToken(user.getName());
     }
 
     public static TimePoint getReceivingEndTime(DynamicTrackedRace trackedRace) {

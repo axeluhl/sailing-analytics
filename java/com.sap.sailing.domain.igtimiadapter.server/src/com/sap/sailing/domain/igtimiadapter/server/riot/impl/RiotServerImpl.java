@@ -273,7 +273,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
             createDevice(deviceSerialNumber);
         } else {
             final byte[] messageAsBytes = message.toByteArray();
-            final SecurityService securityService = Activator.getInstance().getSecurityService();
+            final SecurityService securityService = getSecurityService();
             final TimeRange messageDataTimeRange = getTimeRange(message);
             final Iterable<DataAccessWindow> daws = getDataAccessWindows(Collections.singleton(deviceSerialNumber), messageDataTimeRange);
             for (final RiotWebsocketHandler webSocketClient : liveWebSocketConnections) {
@@ -298,6 +298,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                 }
             }
         }
+    }
+
+    private SecurityService getSecurityService() {
+        return Activator.getInstance().getSecurityService();
     }
 
     /**
@@ -507,7 +511,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private <T> T getFromPrimary(String deviceSerialNumber, Type[] types, MessageLoader<T> resultProvider) throws ParseException, IOException {
         final int masterPort = getMasterDescriptor().getServletPort();
         final String masterHostname = getMasterDescriptor().getHostname();
-        final SecurityService securityService = Activator.getInstance().getSecurityService();
+        final SecurityService securityService = getSecurityService();
         final String currentUserBearerToken = securityService == null ? null : securityService.getAccessToken(securityService.getCurrentUser().getName());
         try {
             final URL baseUrl = new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/");
