@@ -48,7 +48,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
     private static final String RACE = "Race %d"; //$NON-NLS-1$
     
     private static final String IDM_5O5_2013_JSON_URL =
-            "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
+            "https://event.tractrac.com/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
 
     private RegattaDescriptor regatta;
 
