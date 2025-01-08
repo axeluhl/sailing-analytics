@@ -23,7 +23,17 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
-          <h2 class="articleSubheadline">December 2024</h2>
+          <h2 class="articleSubheadline">January 2025</h2>
+          <ul class="bulletList">
+                <li>When exporting wind from the Admin Console's Tracked Races / Tracked Races panel,
+                    the wind data is represented as "fixes" where COG and SOG correspond to TWD and TWS,
+                    as usual. Now, however, not only the <tt>COMBINED</tt> wind track is exported, but
+                    all detailed tracks of type <tt>EXPEDITION</tt>, <tt>WEB</tt>, <tt>WINDFINDER</tt>,
+                    and <tt>RACECOMMITTEE</tt>. The respective object names are constructed from the
+                    wind source types and IDs, e.g., <tt>"EXPEDITION (DC-FE-AAHJ)"</tt> and can be
+                    imported again in the Tracked Races / Wind panel now (see "Routeconverter"-based
+                    wind import).</li>
+          </ul>          <h2 class="articleSubheadline">December 2024</h2>
           <ul class="bulletList">
                 <li>The Igtimi WindBot connector has been re-designed. This became necessary because
                     Riedel Communications GmbH deprecated and then stopped their "Riot" back-end

@@ -95,6 +95,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
     private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
     private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
+    private static final String URL_SAILINGSERVER_ROUTECONVERTER_IMPORT = "/../../sailingserver/routeconverter-wind-import";
     private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
     private final SailingServiceWriteAsync sailingServiceWrite;
@@ -129,6 +130,7 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
     private CaptionPanel nmeaImportPanel;
     private CaptionPanel bravoImportPanel;
     private CaptionPanel igtimiImportPanel;
+    private CaptionPanel routeconverterImportPanel;
     private CaptionPanel expeditionAllInOneImporterPanel;
     
     public WindPanel(final Presenter presenter, final StringMessages stringMessages) {
@@ -271,11 +273,13 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         expeditionImportPanel = createExpeditionWindImportPanel();
         gribImportPanel = createGribWindImportPanel();
         nmeaImportPanel = createNmeaWindImportPanel();
+        routeconverterImportPanel = createRouteconverterWindImportPanel();
         bravoImportPanel = createBravoWindImportPanel();
         igtimiImportPanel = igtimiImportPanel(mainPanel);
         mainPanel.add(expeditionImportPanel);
         mainPanel.add(gribImportPanel);
         mainPanel.add(nmeaImportPanel);
+        mainPanel.add(routeconverterImportPanel);
         mainPanel.add(bravoImportPanel);
         mainPanel.add(igtimiImportPanel);
         // Expedition all in one import
@@ -566,6 +570,12 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
         return createWindImportPanel(title, importServletUrl);
     }
 
+    private CaptionPanel createRouteconverterWindImportPanel() {
+        final String importServletUrl = URL_SAILINGSERVER_ROUTECONVERTER_IMPORT;
+        final String title = stringMessages.routeconverterWindImport_Title();
+        return createWindImportPanel(title, importServletUrl);
+    }
+    
     private CaptionPanel createGribWindImportPanel() {
         return createWindImportPanel(stringMessages.gribWindImport_Title(), URL_SAILINGSERVER_GRIB_IMPORT);
     }

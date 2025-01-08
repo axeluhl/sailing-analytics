@@ -30,11 +30,12 @@ public class WindDataRetriever extends AbstractDataRetriever {
         windSources.addAll(race.getWindSources(WindSourceType.RACECOMMITTEE));
         windSources.addAll(race.getWindSources(WindSourceType.WEB));
         windSources.addAll(race.getWindSources(WindSourceType.WINDFINDER));
+        windSources.addAll(race.getWindSources(WindSourceType.COMBINED));
         return getRoutes(race, dataBeforeAfter, rawFixes, WindToGpxPosition.INSTANCE, windSources,
                 new NameReader<WindSource>() {
                     @Override
                     public String getName(WindSource s) {
-                        return s.toString();
+                        return s.getTypeAndId();
                     }
                 }, retriever);
     }
