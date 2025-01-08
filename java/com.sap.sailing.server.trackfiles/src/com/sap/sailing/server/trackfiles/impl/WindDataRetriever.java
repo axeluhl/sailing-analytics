@@ -34,7 +34,7 @@ public class WindDataRetriever extends AbstractDataRetriever {
                 new NameReader<WindSource>() {
                     @Override
                     public String getName(WindSource s) {
-                        return s.name();
+                        return s.toString();
                     }
                 }, retriever);
     }
