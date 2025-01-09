@@ -53,6 +53,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -574,12 +576,24 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
-    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+    void addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to, AsyncCallback<IgtimiDataAccessWindowWithSecurityDTO> asyncCallback);
 
-    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+    void removeIgtimiDataAccessWindow(long id, AsyncCallback<Void> asyncCallback);
+
+    void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject, AsyncCallback<Void> asyncCallback);
+
+    void removeIgtimiDevice(String deviceSerialNumber, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+
+    void sendGPSOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    void sendGPSOnCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    void sendPowerOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    void sendRestartCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted

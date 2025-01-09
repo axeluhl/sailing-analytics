@@ -65,7 +65,6 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
                 for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
                     IgtimiConnectionInfo igtimiConnectionInfo = entry.getValue();
                     int deviceCount = Util.size(igtimiConnectionInfo.getDeviceIDs());
-                    out.println("<b>Account " + igtimiConnectionInfo.getAccountName() + "</b><br/>");
                     out.println(deviceCount + " devices " + igtimiConnectionInfo.getDeviceIDs().toString() + "<br/>");
                     final InetSocketAddress remoteAddress = igtimiConnectionInfo.getRemoteAddress();
                     out.println("Connection used is " + (remoteAddress == null ? "{null}" : remoteAddress.toString()) + "<br/><br/>");
