@@ -61,7 +61,6 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
                 : serialNumbers;
         final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(MultiTimeRange.of(TimeRange.create(null, null)), serialNumbersToUse);
         final Map<String, MultiTimeRange> multiTimeRangesPerDeviceSerialNumber = getTimeRangesByDeviceSerialNumber(daws);
-
         for (final String serialNumber : serialNumbersToUse) {
             final Device device = getRiotService().getDeviceBySerialNumber(serialNumber);
             if (device != null && subject.isPermitted(
