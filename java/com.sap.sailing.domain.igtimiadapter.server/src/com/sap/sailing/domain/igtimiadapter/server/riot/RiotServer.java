@@ -28,8 +28,8 @@ import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotSer
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.Replicable;
 
@@ -112,7 +112,7 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     /**
      * @param serialNumbers must not be {@link null}; if empty, no results will be delivered
      */
-    Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> serialNumbers, TimeRange timeRange);
+    Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> serialNumbers, MultiTimeRange timeRanges);
     
     DataAccessWindow createDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
     
@@ -123,7 +123,8 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * {@link IgtimiConnection} is established to the REST API end point of the primary/master instance of this replica
      * to obtain the content requested.
      */
-    Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws MalformedURLException, IllegalStateException, ClientProtocolException, IOException, ParseException;
+    Iterable<Msg> getMessages(String deviceSerialNumber, MultiTimeRange timeRanges, Set<DataCase> dataCases)
+            throws MalformedURLException, IllegalStateException, ClientProtocolException, IOException, ParseException;
 
     void addWebSocketClient(RiotWebsocketHandler riotWebsocketHandler);
 
@@ -138,10 +139,10 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * a {@link DataPoint} with {@link DataPoint#getDataCase() data case} {@code dataCase}; otherwise that last
      * message stripped down to the last data point with the requested data case.
      */
-    Msg getLastMessage(String serialNumber, DataCase dataCase) throws InvalidProtocolBufferException, ParseException, IOException;
+    Msg getLastMessage(String serialNumber, DataCase dataCase, MultiTimeRange timeRanges) throws InvalidProtocolBufferException, ParseException, IOException;
     
-    default <T extends Fix> T getLastFix(String serialNumber, Class<T> type) throws InvalidProtocolBufferException, ParseException, IOException {
-        final Msg lastMessage = getLastMessage(serialNumber, DataCase.forNumber(Type.getType(type).getCode()));
+    default <T extends Fix> T getLastFix(String serialNumber, Class<T> type, MultiTimeRange timeRanges) throws InvalidProtocolBufferException, ParseException, IOException {
+        final Msg lastMessage = getLastMessage(serialNumber, DataCase.forNumber(Type.getType(type).getCode()), timeRanges);
         final T result;
         if (lastMessage != null) {
             final Iterable<Fix> fixes = new FixFactory().createFixes(lastMessage);

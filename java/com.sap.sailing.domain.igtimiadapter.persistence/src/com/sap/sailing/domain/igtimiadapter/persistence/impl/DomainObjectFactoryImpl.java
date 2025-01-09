@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.Binary;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -26,6 +27,7 @@ import com.mongodb.client.model.Sorts;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -79,9 +81,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases, ClientSession clientSessionOrNull) {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, MultiTimeRange timeRanges, Set<DataCase> dataCases, ClientSession clientSessionOrNull) {
         final Document query = new Document();
-        appendTimeRangeQuery(query, timeRange);
+        appendMultiTimeRangeQuery(query, timeRanges);
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
         final Iterable<Document> queryResult = clientSessionOrNull == null ? messagesCollection.find(query)
                 : messagesCollection.find(clientSessionOrNull, query);
@@ -126,9 +128,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase, ClientSession clientSessionOrNull) throws InvalidProtocolBufferException {
+    public Msg getLatestMessage(String deviceSerialNumber, DataCase dataCase, MultiTimeRange timeRanges, ClientSession clientSessionOrNull) throws InvalidProtocolBufferException {
         final Document query = new Document();
         query.append(FieldNames.IGTIMI_MESSAGES_DEVICE_SERIAL_NUMBER.name(), deviceSerialNumber);
+        appendMultiTimeRangeQuery(query, timeRanges);
         final FindIterable<Document> documentsUnsorted = clientSessionOrNull == null ? messagesCollection.find(query)
                 : messagesCollection.find(clientSessionOrNull, query);
         final Iterable<Document> queryResult = documentsUnsorted.sort(Sorts.descending(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name()));
@@ -160,16 +163,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return null;
     }
     
-    private void appendTimeRangeQuery(Document query, TimeRange timeRange) {
-        final Document timeRangeQuery = new Document();
-        if (timeRange.from() != null) {
-            timeRangeQuery.append("$gte", timeRange.from().asDate());
+    private void appendMultiTimeRangeQuery(Document query, MultiTimeRange timeRanges) {
+        final List<Bson> or = new ArrayList<>();
+        for (final TimeRange timeRange : timeRanges) {
+            final Document timeRangeQuery = new Document();
+            if (timeRange.from() != null) {
+                timeRangeQuery.append("$gte", timeRange.from().asDate());
+            }
+            if (timeRange.to() != null) {
+                timeRangeQuery.append("$lt", timeRange.to().asDate());
+            }
+            if (!timeRangeQuery.isEmpty()) {
+                final Document clauseForOr = new Document();
+                clauseForOr.append(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name(), timeRangeQuery);
+                or.add(clauseForOr);
+            }
         }
-        if (timeRange.to() != null) {
-            timeRangeQuery.append("$lt", timeRange.to().asDate());
-        }
-        if (!timeRangeQuery.isEmpty()) {
-            query.append(FieldNames.IGTIMI_MESSAGES_TIMESTAMP.name(), timeRangeQuery);
-        }
+        query.append("$or", or);
     }
 }

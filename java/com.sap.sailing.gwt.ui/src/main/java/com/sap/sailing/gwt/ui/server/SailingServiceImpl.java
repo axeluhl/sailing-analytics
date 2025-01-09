@@ -4270,8 +4270,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     device,
                                     lastHeartBeatsByDeviceSerialNumber.get(device.getSerialNumber()),
                                     remoteAddressByDeviceSerialNumber.get(device.getSerialNumber()),
-                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class)),
-                                    getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class)));
+                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class, timeRanges)),
+                                    getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class, timeRanges)));
                     } catch (org.json.simple.parser.ParseException | IOException e) {
                         throw new RuntimeException(e);
                     }
