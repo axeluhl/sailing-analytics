@@ -84,7 +84,7 @@ if [ "$MONGODB_URI" = "" ]; then
 else
   APP_PARAMETERS="-Dmongo.uri=$MONGODB_URI"
 fi
-APP_PARAMETERS="$APP_PARAMETERS -Digtimi.riot.port=$IGTIMI_RIOT_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+APP_PARAMETERS="$APP_PARAMETERS -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangePort=$REPLICATION_PORT -Dreplication.exchangeName=$REPLICATION_CHANNEL"
 
 # Apply parameters for automatic replication start
 REPLICATION_PARAMETERS="-Dreplicate.on.start=$REPLICATE_ON_START -Dreplicate.master.servlet.host=$REPLICATE_MASTER_SERVLET_HOST -Dreplicate.master.servlet.port=$REPLICATE_MASTER_SERVLET_PORT -Dreplicate.master.queue.host=$REPLICATE_MASTER_QUEUE_HOST -Dreplicate.master.queue.port=$REPLICATE_MASTER_QUEUE_PORT -Dreplicate.master.exchange.name=$REPLICATE_MASTER_EXCHANGE_NAME -Dreplicate.master.username=$REPLICATE_MASTER_USERNAME -Dreplicate.master.password=$REPLICATE_MASTER_PASSWORD -Dreplicate.master.bearer_token=$REPLICATE_MASTER_BEARER_TOKEN"
