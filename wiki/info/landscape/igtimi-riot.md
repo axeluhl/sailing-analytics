@@ -20,6 +20,22 @@ Igtimi called the back-end to which the devices connect the "Riot" system. It ha
 
 The device-to-Riot connections as well as the web socket connections from API clients to the Riot server implement a heart beat mechanism to notice broken connections and issue a re-connect.
 
+The Riot back-end that receives data from devices can be configured regarding the port is listens on:
+
+- ``IGTIMI_RIOT_PORT``
+
+The Riot server is configured using the ``IGTIMI_RIOT_PORT`` environment variable which, if provided, is used to set the ``igtimi.riot.port`` system property. It defines the TCP port the devices connect to in order to reach the Riot server. If a Network Load Balancer (NLB) is used, this is the port the target group must use. If not provided, an arbitrary port that is available will be used for listening for incoming connections. The port can be discovered using the ``/igtimi/api/v1/server`` REST API end point. The "well-known" port for the Igtimi devices is 6000.
+
+The Igtimi wind receiver that is used when tracking races with live wind data, and the REST API client for wind import are both configured using two system properties, mapped to two corresponding environment variables.
+
+- ``IGTIMI_BASE_URL``
+
+Use this variable to override the default ``https://wind.sapsailing.com`` base URL for obtaining wind data from Igtimi devices. Authentication to this service by default will assume shared security and therefore shared user bases with shared access tokens. In particular, when starting the tracking of a race, the current user's credentials will be used. During a server re-start, live races will use their owner's credentials to authenticate to the remote Riot API. If you don't use shared security, consider using ``IGTIMI_BEARER_TOKEN`` in addition (see next section).
+    
+- ``IGTIMI_BEARER_TOKEN``
+
+Overrides the default authentication scheme for requests against the remote "Riot" service for Igtimi wind connectivity whose base URL may be overridden using ``IGTIMI_BASE_URL``. Specify a bearer token valid in the context of the security service of the remote Riot service.
+
 ## History of the Riot System at Igtimi and Riedel
 
 Around 2020, the German company *Riedel Communications GmbH* acquired Igtimi and used some of their technology for the America's Cup at the time. The Riot system continued to operate under the Igtimi brand, though owned by Riedel now. In the years that followed, Riedel decided to move out of the sailing domain again. In 2024 they announced they would end the Riot service by the end of the year. Effective January 6, 2025, the Riot system running at ``https://www.yacht-bot.com`` and ``https://www.igtimi.com`` was shut down.
@@ -50,14 +66,41 @@ The ``com.sap.sailing.gwt.ui`` bundle, in particular its AdminConsole entry poin
 
 ### Security Aspects
 
-Devices and data access windows are secured entities that support the usual group and user ownerships as well as access control lists and the default actions ``CREATE``, ``READ``, ``UPDATE``, and ``DELETE``. As usual, the GWT UI's server side, here in particular ``SailingService[Write]Impl``, and the REST API methods in the ``com.sap.sailing.domain.igtimiadapter.gateway`` bundle implement the necessary permission checks. Furthermore, 
+Devices and data access windows are secured entities that support the usual group and user ownerships as well as access control lists and the default actions ``CREATE``, ``READ``, ``UPDATE``, and ``DELETE``. As usual, the GWT UI's server side, here in particular ``SailingService[Write]Impl``, and the REST API methods in the ``com.sap.sailing.domain.igtimiadapter.gateway`` bundle implement the necessary permission checks for the ``Device`` and ``DataAccessWindow`` entities. Furthermore, access to device data---regardless of whether live or stored or "latest"---is controlled by the permissions as follows:
 
-TODO Device Auto-Creation/ownerships
+- the subject needs to have the ``READ`` permission for the ``Device`` from which the data originated
+- the subject needs to have ``READ`` permission on at least one ``DataAccessWindow`` for the device such that the data point's timestamp is within the data access window's time range
+
+When a device connects to the Riot server for the first time, a ``Device`` entity is created for it. The entity is assigned the default server group as its group owner, with no user owner being set. This way, users with ``READ`` and ``UPDATE`` permissions for objects owned by the server group can deal with the device accordingly.
+
+Enhancing security for device authentication is described in [bug 6074](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=6074).
+
+### Replication
+
+The ``RiotServerImpl`` class is a ``Replicable`` object. A Sailing Analytics replica will replicate this by default. The processes in the replica set shall be registered with the Network Load Balancer (NLB) target group to which the listener for the Riot port (usually 6000) forwards. The replicated state consists of the ``Device`` and ``DataAccessWindow`` entities. Creating, updating and deleting these entities happens through replicable operations, with the usual pattern of implementing these operations as lambda expressions that comply with the ``OperationWithResult`` interface and as such are serializable.
+
+Messages received from a device are turned into a replicable operation invoking the ``internalNotifyListeners`` method. This way, messages from the devices are replicated across the replica set. If a message is received by the primary/master process, it is stored in the replica set's database and propagated to all replicas. While replicas will also store the message received from the primary/master in their "phony" database, the key point on the replicas is that they, like the primary/master will also forward the message to any live web socket connection that is currently known to the replica.
+
+If a message is originally received by a replica, it will be stored in the replica's phony database and will be forwarded to the primary/master process for persistent storage in the replica set's "real" database, as well as for forwarding to all other replicas and the primary/master's live web socket connections.
+
+Taking this together with the connection handling that uses hand shakes and automatic re-connects in case of broken connections (both, for the devices, as well as for client-issues live data web socket connections), we get a highly available set up. Should the primary/master process become unavailable, devices and web socket clients will fail over to any remaining replica. The devices will re-connect to the NLB and will get connected to one of the replicas. Likewise, live web socket connections will fail over through the regular public target group of the ``wind`` replica set and re-connect to one of the replicas. If there is exactly one replica in the replica set, this will lead to quick recovery because devices will send to the one replica to which the live web socket clients have then also failed over to. In case of multiple replicas, in the worst case all devices send to one replica, and all live web socket connections use different replicas. The replication messages on the replica receiving data from the devices will be queued until the primary/master becomes available again; only then will the data be forwarded to the other replicas.
+
+The failure of one out of multiple replicas is less problematic. Devices and live web socket connection clients will fail over to another replica or the primary/master, and all replication will still succeed.
+
+With this in mind, a good configuration could be one that uses a primary/master with a single replica.
+
+### Configuration
+
+The Riot server is configured using the ``IGTIMI_RIOT_PORT`` environment variable which, if provided, is used to set the ``igtimi.riot.port`` system property. It defines the TCP port the devices connect to in order to reach the Riot server. If a Network Load Balancer (NLB) is used, this is the port the target group must use. If not provided, an arbitrary port that is available will be used for listening for incoming connections. The port can be discovered using the ``/igtimi/api/v1/server`` REST API end point. The "well-known" port for the Igtimi devices is 6000.
 
 ## New Riot REST API
 
+The REST API implemented in the ``com.sap.sailing.domain.igtimiadapter.gateway`` bundle offers GET, POST and DELETE methods for the ``Device`` and ``DataAccessWindow`` entities. Furthermore, there is a ``server_listers`` end point that tells clients the web socket connection URL, and a ``server`` end point for querying the Riot port number.
+
 ### Changes Compared to Original Riot REST API
 
-## Riot/Igtimi Client Connector
+Authentication of the new API works by the principles of the Sailing Analytics security infrastructure. REST and web socket requests are authenticated using the ``Authorization`` HTTP header field with a ``Bearer`` token, or basic authentication. There is no more OAuth callback because authentication works differently now. Furthermore, the API no longer supports the concept of ``Resource`` being an entity. Our application cares about devices and their data access windows only, and the API methods for requesting the data from devices for certain time ranges has not changed in its parameters. We don't need explicit resource entities for this.
 
-### Changes Compared to Original Riot/Igtimi Client Connector
+When requesting stored / latest data, instead of delivering JSON documents the API now returns Base64-encoded protobuf messages that the API client needs to decode. Accordingly, our ``FixFactory`` that turns the API responses into semantic "fix" objects for wind and GPS data has changed and parses the protobuf messages now after base64 decoding.
+
+Likewise, the web socket connections for live data will no longer see JSON text output but instead receive binary messages that contain the protobuf messages received and forwarded from the devices. The text message handling has been left in place to keep processing the heart beat messages as before. This also leaves the re-connect management unchanged.
