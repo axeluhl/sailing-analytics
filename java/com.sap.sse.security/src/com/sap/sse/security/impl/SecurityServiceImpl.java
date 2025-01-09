@@ -358,8 +358,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         SubscriptionPlan result = null;
         final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
         for (SubscriptionPlan plan : allSubscriptionPlans.values()) {
-            for(SubscriptionPrice price : plan.getPrices()) {
-                if(itemPriceId.equals(price.getPriceId())) {
+            for (SubscriptionPrice price : plan.getPrices()) {
+                if (itemPriceId.equals(price.getPriceId())) {
                     result = plan;
                 }
             }
