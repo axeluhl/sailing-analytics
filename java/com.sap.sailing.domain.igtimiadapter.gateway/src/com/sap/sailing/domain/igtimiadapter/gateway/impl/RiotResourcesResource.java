@@ -6,6 +6,7 @@ import java.util.Base64.Encoder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.GET;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -57,11 +59,13 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final Iterable<String> serialNumbersToUse = serialNumbers==null || serialNumbers.isEmpty()
                 ? Util.map(getRiotService().getDevices(), d->d.getSerialNumber())
                 : serialNumbers;
+        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(MultiTimeRange.of(TimeRange.create(null, null)), serialNumbersToUse);
+        final Map<String, MultiTimeRange> multiTimeRangesPerDeviceSerialNumber = getTimeRangesByDeviceSerialNumber(daws);
         for (final String serialNumber : serialNumbersToUse) {
             final Device device = getRiotService().getDeviceBySerialNumber(serialNumber);
             if (device != null && subject.isPermitted(
                         device.getIdentifier().getStringPermission(DefaultActions.READ))) {
-                final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type));
+                final Msg lastMessage = riot.getLastMessage(serialNumber, DataCase.forNumber(type), multiTimeRangesPerDeviceSerialNumber.get(serialNumber));
                 if (lastMessage != null) {
                     final JSONArray singleMessage = new JSONArray();
                     singleMessage.add(Base64.getEncoder().encodeToString(lastMessage.toByteArray()));
@@ -112,24 +116,38 @@ public class RiotResourcesResource extends AbstractRiotServerResource {
         final Iterable<String> serialNumbersOfDevicesUserCanRead =
                 Util.filter(serialNumbers, serialNumber->subject.isPermitted(
                         getRiotService().getDeviceBySerialNumber(serialNumber).getIdentifier().getStringPermission(DefaultActions.READ)));
-        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(requestedTimeRange, serialNumbersOfDevicesUserCanRead);
+        final Iterable<DataAccessWindow> daws = getDataAccessWindowsReadableBySubject(MultiTimeRange.of(requestedTimeRange), serialNumbersOfDevicesUserCanRead);
+        final Map<String, MultiTimeRange> multiTimeRangesPerDeviceSerialNumber = getTimeRangesByDeviceSerialNumber(daws);
         // assemble results from DAWs readable by the user:
         final JSONObject result = new JSONObject();
         final Encoder base64Encoder = Base64.getEncoder();
-        for (final DataAccessWindow daw : daws) {
-            final TimeRange timeRangeIntersectionBetweenRequestAndDAW = requestedTimeRange.intersection(daw.getTimeRange());
-            final Iterable<Msg> messagesForDAW = getRiotService().getMessages(daw.getDeviceSerialNumber(), timeRangeIntersectionBetweenRequestAndDAW, dataCases);
-            final JSONArray arrayForDevice = (JSONArray) result.computeIfAbsent(daw.getDeviceSerialNumber(), d->new JSONArray());
-            for (final Msg message : messagesForDAW) {
-                arrayForDevice.add(new String(base64Encoder.encode(message.toByteArray())));
+        for (final Entry<String, MultiTimeRange> deviceSerialNumberAndMultiTimeRange : multiTimeRangesPerDeviceSerialNumber.entrySet()) {
+            final MultiTimeRange timeRangeIntersectionBetweenRequestAndDAWs = deviceSerialNumberAndMultiTimeRange.getValue().intersection(requestedTimeRange);
+            if (!timeRangeIntersectionBetweenRequestAndDAWs.isEmpty()) {
+                final Iterable<Msg> messagesForDAW = getRiotService().getMessages(deviceSerialNumberAndMultiTimeRange.getKey(), timeRangeIntersectionBetweenRequestAndDAWs, dataCases);
+                final JSONArray arrayForDevice = (JSONArray) result.computeIfAbsent(deviceSerialNumberAndMultiTimeRange.getKey(), d->new JSONArray());
+                for (final Msg message : messagesForDAW) {
+                    arrayForDevice.add(new String(base64Encoder.encode(message.toByteArray())));
+                }
             }
         }
         return Response.ok(streamingOutput(result)).build();
     }
 
-    private Iterable<DataAccessWindow> getDataAccessWindowsReadableBySubject(TimeRange timeRange, Iterable<String> serialNumbers) {
+    private Map<String, MultiTimeRange> getTimeRangesByDeviceSerialNumber(Iterable<DataAccessWindow> daws) {
+        final Map<String, MultiTimeRange> result = new HashMap<>();
+        for (final DataAccessWindow daw : daws) {
+            result.compute(daw.getDeviceSerialNumber(),
+                    (serialNumber, multiTimeRange)->multiTimeRange == null
+                        ? MultiTimeRange.of(daw.getTimeRange())
+                        : multiTimeRange.union(daw.getTimeRange()));
+        }
+        return result;
+    }
+
+    private Iterable<DataAccessWindow> getDataAccessWindowsReadableBySubject(MultiTimeRange timeRanges, Iterable<String> serialNumbers) {
         final Subject subject = SecurityUtils.getSubject();
-        return Util.filter(getRiotService().getDataAccessWindows(serialNumbers, timeRange),
+        return Util.filter(getRiotService().getDataAccessWindows(serialNumbers, timeRanges),
                 daw->{
                     return subject.isPermitted(daw.getIdentifier().getStringPermission(DefaultActions.READ));
                 });

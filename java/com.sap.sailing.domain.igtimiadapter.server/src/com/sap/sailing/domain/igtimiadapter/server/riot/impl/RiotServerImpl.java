@@ -52,6 +52,7 @@ import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -277,7 +278,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
             final byte[] messageAsBytes = message.toByteArray();
             final SecurityService securityService = getSecurityService();
             final TimeRange messageDataTimeRange = getTimeRange(message);
-            final Iterable<DataAccessWindow> daws = getDataAccessWindows(Collections.singleton(deviceSerialNumber), messageDataTimeRange);
+            final Iterable<DataAccessWindow> daws = getDataAccessWindows(Collections.singleton(deviceSerialNumber), MultiTimeRange.of(messageDataTimeRange));
             for (final RiotWebsocketHandler webSocketClient : liveWebSocketConnections) {
                 final User user = webSocketClient.getAuthenticatedUser();
                 final OwnershipAnnotation deviceOwnership = securityService.getOwnership(device.getIdentifier());
@@ -413,12 +414,12 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> deviceSerialNumbers, TimeRange timeRange) {
+    public Iterable<DataAccessWindow> getDataAccessWindows(Iterable<String> deviceSerialNumbers, MultiTimeRange timeRanges) {
         final Set<DataAccessWindow> result = new HashSet<>();
         final Set<String> deviceSerialNumbersAsSet = Util.asSet(deviceSerialNumbers);
         // TODO provide a more efficient implementation if this turns out to become a performance bottleneck, e.g., by keeping the DataAccessWindows in a time-sorted TreeSet
         for (final DataAccessWindow daw : getDataAccessWindows()) {
-            if (deviceSerialNumbersAsSet.contains(daw.getDeviceSerialNumber()) && timeRange.intersects(daw.getTimeRange())) {
+            if (deviceSerialNumbersAsSet.contains(daw.getDeviceSerialNumber()) && timeRanges.intersects(daw.getTimeRange())) {
                 result.add(daw);
             }
         }
@@ -494,18 +495,23 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<Msg> getMessages(String deviceSerialNumber, TimeRange timeRange, Set<DataCase> dataCases) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
+    public Iterable<Msg> getMessages(String deviceSerialNumber, MultiTimeRange timeRanges, Set<DataCase> dataCases) throws IllegalStateException, ClientProtocolException, IOException, ParseException {
         final Iterable<Msg> result;
         if (getMasterDescriptor() == null) {
-            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRange, dataCases, /* clientSessionOrNull */ null);
+            result = domainObjectFactory.getMessages(deviceSerialNumber, timeRanges, dataCases, /* clientSessionOrNull */ null);
         } else {
             final Type[] types = new Type[dataCases.size()];
             int i=0;
             for (final DataCase dataCase : dataCases) {
                 types[i++] = Type.valueOf(dataCase.getNumber());
             }
-            result = getFromPrimary(deviceSerialNumber, types,
-                    (c, dsn, ts)->c.getMessages(timeRange.from(), timeRange.to(), Collections.singleton(dsn), ts));
+            result = Util.concat(Util.map(timeRanges, timeRange->{
+                try {
+                    return getFromPrimary(deviceSerialNumber, types, (c, dsn, ts)->c.getMessages(timeRange.from(), timeRange.to(), Collections.singleton(dsn), ts));
+                } catch (ParseException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
         }
         return result;
     }
@@ -542,10 +548,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Msg getLastMessage(String serialNumber, DataCase dataCase) throws ParseException, IOException {
+    public Msg getLastMessage(String serialNumber, DataCase dataCase, MultiTimeRange timeRanges) throws ParseException, IOException {
         final Msg result;
         if (getMasterDescriptor() == null) {
-            result = domainObjectFactory.getLatestMessage(serialNumber, dataCase, /* clientSessionOrNull */ null);
+            result = domainObjectFactory.getLatestMessage(serialNumber, dataCase, timeRanges, /* clientSessionOrNull */ null);
         } else {
             result = getFromPrimary(serialNumber, new Type[] { Type.valueOf(dataCase.getNumber()) },
                     (c, dsn, ts)->c.getLastMessage(dsn, ts[0]));
