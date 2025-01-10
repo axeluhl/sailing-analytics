@@ -5,6 +5,81 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">December 2024</h5>
+         <ul class="bulletList">
+            <li>Polar data in Data Mining can now be filtered and grouped by sailor profiles.</li>
+            <li>Added a new REST API method: <tt>/api/v1/regattas/{regattaname}/races/{racename}/competitordata</tt>
+                for requesting time series of values for one or more parameters such as rank or distance, for one or more competitors.
+                See <a href="/sailingserver/webservices/api/v1/raceDetailsGetCompetitorData.html">here</a> for more details on what it does.</li>
+            <li>Bug Fix: Accidentally, when hardening the data mining security, Competitor entities were only processed anymore if
+                the user had <tt>READ</tt> and not only <tt>READ_PUBLIC</tt> permission, often leading to empty results.
+                The bug had been introduced late November 2024. Apologies to all data mining users.</li>
+         </ul>
+         <h5 class="articleSubheadline">November 2024</h5>
+         <ul class="bulletList">
+            <li>Added a data mining dimension "tenth of leg" for competitor position fixes, such that, e.g.,
+                the first or last tenth of a leg (based on the windward distance) can be excluded during
+                data collection.</li>
+            <li>Introduced an extended data mining retriever chain that allows users to drill into ten
+                equal-duration sub-slices of each leg to, e.g., compare average performance across different
+                parts of legs.</li>
+            <li>Added metrics for a "relative" cross-track error (XTE) in the data mining environment, both,
+                signed and unsigned. To allow for a comparison of XTE values across legs of different lengths,
+                the distances from the course middle line are divided by half the leg's length at that point
+                in time. This way, e.g., a position on one far side of an upwind leg after having sailed half
+                the leg, in a boat class that has approximately a 90° tacking angle would result in a value
+                close to <tt>(+/-) 1.0</tt>, regardless the length of the leg.</li>
+            <li>Added cross-track error (XTE) metrics that don't project onto the course middle line ("rhumb line",
+                although instead of the "rhumb line" (see <a href="https://en.wikipedia.org/wiki/Rhumb_line">the Wikipedia definition</a>)
+                we use a great circle segment connecting the leg's waypoints), but onto the wind vector attached to the
+                leg's end waypoint (e.g., the windward mark for an upwind leg). The metrics are again
+                available in signed/unsigned as well as in absolute and relative (to half the leg distance)
+                variants.</li>
+            <li>Introduced a new Data Mining dimension "Sailor Profile Name." With this, if a user in their "User Details"
+                creates one or more "Sailor Profiles" to group multiple occurrences of what is to be considered "the same sailor"
+                into one profile, these profiles can be used for filtering and grouping in data mining.</li>
+            <li>Bug fix: data mining now correctly propagates the current user session to all data retrieval processes,
+                and all security checks for object readability by the current subject are now in place.</li>
+            <li>User e-mail and password changes were not always updated properly to the persistent storage
+                and may have gotten reset, e.g., during a software update. This is now fixed.</li>
+         </ul>
+         <h5 class="articleSubheadline">October 2024</h5>
+         <ul class="bulletList">
+            <li>Bug fix: for match racing tie breaks, under very special circumstances the tie breaking
+                algorithm (based on a topological ordering based on wins/losses) could have run into an
+                endless loop.</li>
+         </ul>
+         <h5 class="articleSubheadline">August 2024</h5>
+         <ul class="bulletList">
+            <li>Extended simulator timeouts to avoid failing to compute a path with "out-of-bounds"in
+                more situations and under high load scenarios.</li>
+            <li>No more tool tips for course area circles. They kept tool tips for lines (such as start/finish
+                lines or course middle lines) from showing when hovering the mouse over them.</li>
+            <li>In Data Mining, race results now have a new dimension "Discarded" for grouping and filtering.</li>
+            <li>Races of competitors now have a new statistic in Data Mining: duration since start to first tack.</li>
+            <li>New data mining dimension for races: type of first leg. This way, races can be filtered or results can
+                be grouped by whether a race's first leg is an upwind, reaching or downwind leg.</li>
+         </ul>
+         <h5 class="articleSubheadline">July 2024</h5>
+         <ul class="bulletList">
+            <li>Fixed a problem with the REST API, asked for maneuvers when a leg hasn't started yet.</li>
+            <li>Simulator overlay now remembers path selection across updates.</li>
+            <li>Adjusted Formula Kite dimensions.</li>
+         </ul>
+         <h5 class="articleSubheadline">June 2024</h5>
+         <ul class="bulletList">
+            <li>Added the <tt>timepoint-ms</tt> and <tt>lastScoringUpdate-ms</tt> fields to the
+                <tt>/sailingserver/api/v1/leaderboardgroups/{id|name}</tt>
+                response which reports the time point as the number of milliseconds since the epoch (1970-01-01T00:00:00Z, "Unix time").
+                The <tt>timepoint</tt> and <tt>lastScoringUpdate</tt> fields' format is not easily machine-readable,
+                but we're not changing the format for reasons of backward compatibility.</li>
+            <li>The REST API for <tt>/sailingserver/api/v1/events/{event-id}</tt> and <tt>/sailingserver/api/v1/leaderboardgroups/{leaderboardgroup-name-or-id}</tt>
+                now have the new <tt>overallLeaderboardName</tt> field for the leaderboard group(s), and the latter now also has
+                the <tt>hasOverallLeaderboard</tt> Boolean field. The <tt>overallLeaderboardName</tt> field is present if and only if
+                <tt>hasOverallLeaderboard</tt> is <tt>true</tt>.</li>
+            <li>Boat visualization for OK Dinghy for downwind legs now without spinnaker.</li>
+            <li>Boat visualization for RS Tera for downwind legs now without spinnaker.</li>
+         </ul>
          <h5 class="articleSubheadline">April 2024</h5>
          <ul class="bulletList">
             <li>Added the <tt>trueheading-deg</tt> field to the competitor GPS fix export if the tracker has provided it.</li>

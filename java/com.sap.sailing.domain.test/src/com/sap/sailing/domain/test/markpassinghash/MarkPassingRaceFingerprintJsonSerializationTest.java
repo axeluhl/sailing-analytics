@@ -102,8 +102,8 @@ public class MarkPassingRaceFingerprintJsonSerializationTest extends OnlineTracT
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("CR Start (1)", new DegreePosition(53.562944999999985, 10.010104000000046));
-        markPositions.put("CR Start (2)", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("CR Start - 1", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("CR Start - 2", new DegreePosition(53.562944999999985, 10.010104000000046));
         markPositions.put("Leeward mark", new DegreePosition(53.562145000000015, 10.009252));
         markPositions.put("Luvtonne", new DegreePosition(53.560581899999995, 10.005657));
         for (Waypoint w : trackedRace2.getRace().getCourse().getWaypoints()) {

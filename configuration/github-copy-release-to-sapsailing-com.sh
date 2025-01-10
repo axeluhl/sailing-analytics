@@ -15,11 +15,6 @@
 # clashes with releases whose name happens to start with "main" unlikely. This
 # also suggests you shouldn't name releases "main-abcde-xxxxxxxxxxxx" because they would
 # produce false matches for the "main-" prefix.
-# For the "main" branch/release a special step is added for backward compatibility with
-# java/target/refreshInstance.sh: the release is linked to from an additional folder
-# called "build-xxxxxxxxxx" (using the same timestamp in its name), with the tar ball
-# and the release notes being symbolic links to the corresponding files in the main-xxxxxxxxx
-# folder.
 BEARER_TOKEN="${1}"
 RELEASE_NAME_PREFIX="${2}"
 RELEASE_TAR_GZ_FILE_NAME=$( `dirname "${0}"`/github-download-release-assets.sh "${BEARER_TOKEN}" "${RELEASE_NAME_PREFIX}" )
@@ -32,9 +27,5 @@ if [ "${RELEASE_TAR_GZ_FILE_NAME}" != "" ]; then
   ssh trac@sapsailing.com mkdir -p ${FOLDER}
   scp ${RELEASE_FULL_NAME}.tar.gz trac@sapsailing.com:${FOLDER}
   scp release-notes.txt trac@sapsailing.com:${FOLDER}
-  if [ "${RELEASE_NAME}" = "main" ]; then
-    LINKING_FOLDER=releases/build-${RELEASE_TIMESTAMP}
-    ssh trac@sapsailing.com "mkdir -p ${LINKING_FOLDER}; ln -s ../${RELEASE_FULL_NAME}/${RELEASE_FULL_NAME}.tar.gz ${LINKING_FOLDER}/build-${RELEASE_TIMESTAMP}.tar.gz; ln -s ../${RELEASE_FULL_NAME}/release-notes.txt ${LINKING_FOLDER}"
-  fi
   rm ${RELEASE_TAR_GZ_FILE_NAME} release-notes.txt
 fi

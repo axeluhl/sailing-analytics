@@ -32,15 +32,12 @@ public class GPSFixImporterRegistration {
         for (String ext : importer.getSupportedFileExtensions()) {
             Dictionary<String, String> properties = getDict(importer.getType());
             properties.put(GPSFixImporter.FILE_EXTENSION_PROPERTY, ext);
-            
-            registrations.add(context.registerService(
-                    GPSFixImporter.class, importer, properties));
+            registrations.add(context.registerService(GPSFixImporter.class, importer, properties));
             registered = true;
         }
         
         if (! registered) {
-            registrations.add(context.registerService(
-                    GPSFixImporter.class, importer, getDict(importer.getType())));
+            registrations.add(context.registerService(GPSFixImporter.class, importer, getDict(importer.getType())));
         }
         return registrations;
     }

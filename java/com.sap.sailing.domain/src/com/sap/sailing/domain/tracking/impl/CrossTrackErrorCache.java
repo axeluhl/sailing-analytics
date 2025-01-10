@@ -251,7 +251,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = cachePerCompetitor.get(competitor, waitForLatest);
         double distanceInMeters = 0;
         int count = 0;
-        if (cacheForCompetitor != null) {
+        if (to != null && cacheForCompetitor != null) {
             owner.getRace().getCourse().lockForRead(); // make sure that course updates don't happen while we're computing
             try {
                 CrossTrackErrorSumAndNumberOfFixes startAggregate = null;

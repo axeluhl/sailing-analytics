@@ -6,22 +6,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
-import com.sap.sailing.domain.igtimiadapter.impl.IgtimiConnectionFactoryImpl;
 import com.sap.sse.common.Util;
 
 public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory {
     private static final Logger logger = Logger.getLogger(LiveDataConnectionFactoryImpl.class.getName());
-    private final IgtimiConnectionFactoryImpl connectionFactory;
-    private final Account account;
+    private final IgtimiConnection connection;
     private final Map<Set<String>, LiveDataConnection> dataConnectionsForDeviceSerialNumbers;
     private final Map<LiveDataConnection, Set<String>> deviceSerialNumersForDataConnections;
     private final Map<LiveDataConnection, Integer> usageCounts;
 
-    public LiveDataConnectionFactoryImpl(IgtimiConnectionFactoryImpl connectionFactory, Account account) {
-        this.connectionFactory = connectionFactory;
-        this.account = account;
+    public LiveDataConnectionFactoryImpl(IgtimiConnection connection) {
+        this.connection = connection;
         dataConnectionsForDeviceSerialNumbers = new HashMap<>();
         deviceSerialNumersForDataConnections = new HashMap<>();
         usageCounts = new HashMap<>();
@@ -34,7 +31,7 @@ public class LiveDataConnectionFactoryImpl implements LiveDataConnectionFactory 
         LiveDataConnection result = dataConnectionsForDeviceSerialNumbers.get(deviceSerialNumbersAsSet);
         if (result == null) {
             logger.info("Didn't find an existing Igtimi LiveDataConnection for devices "+deviceSerialNumbersAsSet+"; creating one...");
-            result = new WebSocketConnectionManager(connectionFactory, deviceSerialNumbers, account);
+            result = new WebSocketConnectionManager(connection, deviceSerialNumbers);
             dataConnectionsForDeviceSerialNumbers.put(deviceSerialNumbersAsSet, result);
             deviceSerialNumersForDataConnections.put(result, deviceSerialNumbersAsSet);
         } else {

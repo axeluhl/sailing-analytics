@@ -2,7 +2,9 @@
 BEARER_TOKEN="$1"
 BASE_URL="$2"
 LOGON_USER_HOME="$3"
-LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys
+# We append the user home to the LAST_CHANGE_FILE so that if the script is ran for multiple users, they each have their
+# own LAST_CHANGE_FILE. Note, that we have to replace the slash character.
+LAST_CHANGE_FILE=/var/run/last_change_aws_landscape_managers_ssh_keys_"$(echo "$LOGON_USER_HOME" | sed "s|/|_|g")"
 # Uncomment the following for production use, with no error output
 curl_output=$( curl -H 'X-SAPSSE-Forward-Request-To: master' -H 'Authorization: Bearer '${BEARER_TOKEN} "${BASE_URL}/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers" 2>/dev/null )
 curl_exit_code=$?

@@ -85,6 +85,12 @@ public class TrackFilesImporter {
                                 storeFix(fix, device);
                                 deviceIds.add(device);
                             }
+
+                            @Override
+                            public void addFixes(Iterable<GPSFix> fixes, TrackFileImportDeviceIdentifier device) {
+                                storeFixes(fixes, device);
+                                deviceIds.add(device);
+                            }
                         }, true, fileName);
                         if (ok) {
                             succeeded.set(ok);
@@ -125,6 +131,14 @@ public class TrackFilesImporter {
     void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         try {
             service.getSensorFixStore().storeFix(deviceIdentifier, fix);
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
+        }
+    }
+
+    void storeFixes(Iterable<GPSFix> fixes, DeviceIdentifier deviceIdentifier) {
+        try {
+            service.getSensorFixStore().storeFixes(deviceIdentifier, fixes, /* returnManeuverUpdate */ false, /* returnLiveDelay */ false);
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }

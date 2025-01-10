@@ -29,7 +29,7 @@ A web bundle that wants to use Shiro-based security and user management features
 	</listener>
 	<filter>
 		<filter-name>ShiroFilter</filter-name>
-		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+		<filter-class>com.sap.sse.security.shiro.ShiroFilterForAllButOptionsRequests</filter-class>
 	</filter>
 	<!--	Make sure any request you want accessible to Shiro is filtered. "/*" 
 		catches all requests. Usually this filter mapping is defined first (before all 

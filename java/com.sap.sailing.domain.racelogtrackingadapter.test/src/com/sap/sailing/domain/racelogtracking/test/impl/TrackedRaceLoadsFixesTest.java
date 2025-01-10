@@ -35,7 +35,7 @@ import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.AddResult;
@@ -75,7 +75,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
+        DeviceIdentifier markDevice = new SmartphoneImeiIdentifierImpl("imei2");
         defineMarksOnRegattaLog(mark, mark2);
         map(comp, device, 0, 10000);
         map(mark, markDevice, 0, 10000);
@@ -109,8 +109,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException,
             InterruptedException {
         defineMarksOnRegattaLog(mark, mark2);
-        DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
-        DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
+        DeviceIdentifier device2 = new SmartphoneImeiIdentifierImpl("imei2");
+        DeviceIdentifier device3 = new SmartphoneImeiIdentifierImpl("imei3");
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
         // reuse device for two marks
@@ -558,7 +558,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         assertEquals(1, lastFixes3.size());
         Timed lastFix3 = lastFixes3.get(device);
         assertEquals(2200, lastFix3.getTimePoint().asMillis());
-        final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+        final DeviceIdentifier device2 = new SmartphoneImeiIdentifierImpl("b");
         store.storeFix(device2, createFix(1200, 10, 20, 30, 40));
         store.storeFix(device2, createFix(1100, 10, 20, 30, 40));
         final Map<DeviceIdentifier, Timed> lastFixes4 = store.getFixLastReceived(Arrays.asList(device, device2));

@@ -34,7 +34,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     private static final String KIELER_WOCHE_2013_JSON_URL =
-            "http://secondary.traclive.dk/events/event_20130621_KielerWoch/jsonservice.php"; //$NON-NLS-1$
+            "https://event.tractrac.com/events/event_20130621_KielerWoch/jsonservice.php"; //$NON-NLS-1$
     private static final String REGATTA = "KW 2013 Offshore Kaiser-Pokal"; //$NON-NLS-1$
     private static final String LEADERBOARD = "KW 2013 Offshore Kaiser-Pokal (ORC)"; //$NON-NLS-1$
     private static final String EVENT = "Kieler Woche 2013"; //$NON-NLS-1$

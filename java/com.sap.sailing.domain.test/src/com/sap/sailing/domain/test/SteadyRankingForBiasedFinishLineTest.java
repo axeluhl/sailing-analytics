@@ -56,7 +56,7 @@ public class SteadyRankingForBiasedFinishLineTest extends OnlineTracTracBasedTes
         Competitor vadnai = getCompetitorByName("Benjamin Vadnai");
         Competitor lewis = getCompetitorByName("Andrew Lewis");
         Competitor lynch = getCompetitorByName("Finn Lynch");
-        Competitor blanco = getCompetitorByName("JoaquÃ­n Blanco");
+        Competitor blanco = getCompetitorByName("Joaquín Blanco");
         assertEquals(1, getTrackedRace().getRank(vadnai, TIME_14_30_00));
         assertEquals(2, getTrackedRace().getRank(lewis, TIME_14_30_00));
         assertEquals(3, getTrackedRace().getRank(lynch, TIME_14_30_00));

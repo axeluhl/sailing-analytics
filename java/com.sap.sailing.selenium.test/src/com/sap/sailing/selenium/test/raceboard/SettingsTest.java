@@ -96,8 +96,8 @@ public class SettingsTest extends AbstractSeleniumTest {
                 // Race details
                 DetailCheckboxInfo.RACE_GAP_TO_LEADER, DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
                 DetailCheckboxInfo.DISPLAY_LEGS,
-                // Leg Details
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Leg Details (DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND and DetailCheckboxInfo.DISTANCE are Premium settings now and therefore not selected by default!)
+                DetailCheckboxInfo.RANK_GAIN,
                 // Maneuvers
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
         };
@@ -123,8 +123,8 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.RACE_DISTANCE, DetailCheckboxInfo.RACE_TIME,
                 DetailCheckboxInfo.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR,
                 DetailCheckboxInfo.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR,
-                // Leg Details
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Leg Details (DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND and DetailCheckboxInfo.DISTANCE are Premium settings now and therefore not selected by default!)
+                DetailCheckboxInfo.RANK_GAIN,
                 // Maneuvers
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
         };
@@ -138,8 +138,8 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.RACE_CURRENT_SPEED_OVER_GROUND,
                 DetailCheckboxInfo.RACE_RATIO_BETWEEN_TIME_SINCE_LAST_POSITION_FIX_AND_AVERAGE_SAMPLING_INTERVAL,
                 DetailCheckboxInfo.DISPLAY_LEGS,
-                // Leg Details
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                // Leg Details (DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND and DetailCheckboxInfo.DISTANCE are Premium settings now and therefore not selected by default!)
+                DetailCheckboxInfo.RANK_GAIN,
                 // Maneuvers
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE
         };
@@ -186,7 +186,7 @@ public class SettingsTest extends AbstractSeleniumTest {
                 DetailCheckboxInfo.SPEED_OVER_GROUND_WHEN_STARTING, // start analysis mode
                 DetailCheckboxInfo.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_STARTING, // start analysis mode
                 DetailCheckboxInfo.START_TACK, // start analysis mode
-                DetailCheckboxInfo.AVERAGE_SPEED_OVER_GROUND, DetailCheckboxInfo.DISTANCE, DetailCheckboxInfo.RANK_GAIN,
+                DetailCheckboxInfo.RANK_GAIN,
                 DetailCheckboxInfo.TACK, DetailCheckboxInfo.JIBE, DetailCheckboxInfo.PENALTY_CIRCLE };
         Assert.assertArrayEquals(detailsToSelect, selectedDetails);
         leaderboardSettingsDialog.pressCancel();

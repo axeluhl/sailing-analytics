@@ -491,13 +491,13 @@ public class ImportMasterDataOperation extends
                 DummyTrackedRace trackedRaceWithNameAndId = new DummyTrackedRace(windMasterData.getRaceName(), windMasterData.getRaceId());
                 WindTrack windTrackToWriteTo = toState.getWindStore().getWindTrack(windMasterData.getRegattaName(), trackedRaceWithNameAndId, windMasterData.getWindSource(), 0, -1);
                 final WindTrack windTrackToReadFrom = windMasterData.getWindTrack();
+                final List<Wind> fixesToAdd = new ArrayList<>();
                 windTrackToReadFrom.lockForRead();
                 try {
                     for (Wind fix : windTrackToReadFrom.getRawFixes()) {
                         Wind existingFix = windTrackToWriteTo.getFirstRawFixAtOrAfter(fix.getTimePoint());
-                        if (existingFix == null || !(existingFix.equals(fix) && fix.getTimePoint().equals(existingFix.getTimePoint())
-                                && Util.equalsWithNull(fix.getPosition(), existingFix.getPosition()))) {
-                            windTrackToWriteTo.add(fix);
+                        if (existingFix == null || !existingFix.equals(fix)) {
+                            fixesToAdd.add(fix);
                         } else {
                             logger.fine("Didn't add wind fix in import, because equal fix was already there.");
                         }
@@ -505,6 +505,7 @@ public class ImportMasterDataOperation extends
                 } finally {
                     windTrackToReadFrom.unlockAfterRead();
                 }
+                windTrackToWriteTo.add(fixesToAdd);
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
                 progress.setOverAllProgressPct(0.5 + (0.3) * ((double) i / numOfWindTracks));

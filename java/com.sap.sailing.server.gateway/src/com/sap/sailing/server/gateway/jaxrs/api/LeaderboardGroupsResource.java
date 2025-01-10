@@ -139,15 +139,20 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
-                TimePoint timePoint = MillisecondsTimePoint.now();
-                JSONObject jsonLeaderboardGroup = new JSONObject();
+                final TimePoint timePoint = MillisecondsTimePoint.now();
+                final JSONObject jsonLeaderboardGroup = new JSONObject();
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.NAME, leaderboardGroup.getName());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.ID, leaderboardGroup.getId().toString());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.DISPLAYNAME, leaderboardGroup.getDisplayName());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.DESCRIPTION, leaderboardGroup.getDescription());
                 jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT, timePoint.toString());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.TIMEPOINT_MILLIS, timePoint.asMillis());
+                jsonLeaderboardGroup.put(LeaderboardGroupConstants.HAS_OVERALL_LEADERBOARD, leaderboardGroup.hasOverallLeaderboard());
+                if (leaderboardGroup.hasOverallLeaderboard()) {
+                    jsonLeaderboardGroup.put(LeaderboardGroupConstants.OVERALL_LEADERBOARD_NAME, leaderboardGroup.getOverallLeaderboardName());
+                }
                 final Set<Event> eventsReferencingLeaderboardGroup = new HashSet<>();
-                JSONArray idsOfEventsReferencingLeaderboardGroup = new JSONArray();
+                final JSONArray idsOfEventsReferencingLeaderboardGroup = new JSONArray();
                 for (final Event event : getService().getAllEvents()) {
                     if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
                         eventsReferencingLeaderboardGroup.add(event);
@@ -166,6 +171,10 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                         jsonLeaderboard.put(LeaderboardNameConstants.DISPLAYNAME, leaderboard.getDisplayName());
                         jsonLeaderboard.put(LeaderboardNameConstants.ISMETALEADERBOARD, isMetaLeaderboard);
                         jsonLeaderboard.put(LeaderboardNameConstants.ISREGATTALEADERBOARD, isRegattaLeaderboard);
+                        final JSONArray discardIndices = AbstractLeaderboardsResource.getDiscardingRuleAsJson(leaderboard);
+                        if (discardIndices != null) {
+                            jsonLeaderboard.put(LeaderboardNameConstants.DISCARDS, discardIndices);
+                        }
                         jsonLeaderboardEntries.add(jsonLeaderboard);
                         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
                         if (scoreCorrection != null) {
@@ -173,6 +182,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                             TimePoint lastUpdateTimepoint = scoreCorrection.getTimePointOfLastCorrectionsValidity();
                             jsonLeaderboard.put(LeaderboardNameConstants.LASTSCORINGUPDATE,
                                     lastUpdateTimepoint != null ? lastUpdateTimepoint.asDate().toString() : null);
+                            jsonLeaderboard.put(LeaderboardNameConstants.LASTSCORINGUPDATE_MILLIS,
+                                    lastUpdateTimepoint != null ? lastUpdateTimepoint.asMillis() : null);
                         } else {
                             jsonLeaderboard.put(LeaderboardNameConstants.SCORINGCOMMENT, null);
                             jsonLeaderboard.put(LeaderboardNameConstants.LASTSCORINGUPDATE, null);

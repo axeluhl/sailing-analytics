@@ -61,7 +61,7 @@ public class BearerTokenOrBasicOrFormAuthenticationFilter extends BasicHttpAuthe
 
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
-        String authzScheme = BEARER.toLowerCase(Locale.ENGLISH);
+        final String authzScheme = BEARER.toLowerCase(Locale.ENGLISH);
         final String authzHeader = getAuthzHeader(request);
         return (authzHeader != null && authzHeader.toLowerCase(Locale.ENGLISH).startsWith(authzScheme)) ||
                 super.isLoginAttempt(request, response) || formAuthenticationFilter.isLoginSubmission(request, response);

@@ -422,7 +422,9 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }),
                 applicationServerReplicaSet.getVersion(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase).getName(),
                 applicationServerReplicaSet.getHostname(), getLandscapeService().getDefaultRedirectPath(applicationServerReplicaSet.getDefaultRedirectRule()),
-                applicationServerReplicaSet.getAutoScalingGroup() == null ? null : applicationServerReplicaSet.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                applicationServerReplicaSet.getAutoScalingGroup() == null ? null :
+                    applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplateDefaultVersion() == null ? null :
+                        applicationServerReplicaSet.getAutoScalingGroup().getLaunchTemplateDefaultVersion().launchTemplateData().imageId());
     }
     
     private SailingAnalyticsProcessDTO convertToSailingAnalyticsProcessDTO(SailingAnalyticsProcess<String> sailingAnalyticsProcess,
@@ -653,7 +655,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(name, Optional.ofNullable(optionalDomainName)),
                 getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
-                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchTemplateDefaultVersion().launchTemplateData().imageId());
     }
 
     @Override
@@ -676,7 +678,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * Starts a first master process of a new replica set whose name is provided by the {@code replicaSetName}
      * parameter. The process is started on the host identified by the {@code hostToDeployTo} parameter. A set of
      * available ports is identified and chosen automatically. The target groups and load balancing set-up is created.
-     * The {@code replicaInstanceType} is used to configure the launch configuration used by the auto-scaling group
+     * The {@code replicaInstanceType} is used to configure the launch template used by the auto-scaling group
      * which is also created so that when dedicated replicas need to be provided during auto-scaling, their instance
      * type is known.
      * <p>
@@ -731,7 +733,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 }), release.getName(),
                 getLandscapeService().getFullyQualifiedHostname(replicaSetName, Optional.ofNullable(optionalDomainName)),
                 getLandscapeService().getDefaultRedirectPath(result.getDefaultRedirectRule()),
-                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchConfiguration().imageId());
+                result.getAutoScalingGroup()==null?null:result.getAutoScalingGroup().getLaunchTemplateDefaultVersion().launchTemplateData().imageId());
     }
 
     @Override

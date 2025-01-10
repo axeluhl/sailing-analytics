@@ -284,14 +284,8 @@ implements Procedure<ShardingKey> {
                     "sudo /usr/local/bin/cp_root_mail_properties "+applicationConfiguration.getServerName()+"; "+
                     "cd "+serverDirectory.replaceAll("\"", "\\\\\"")+"; "+
                     "echo '"+applicationConfiguration.getAsEnvironmentVariableAssignments().replaceAll("\"", "\\\\\"").replaceAll("\\$", "\\\\\\$")+
-                    "' | /home/sailing/code/java/target/refreshInstance.sh auto-install-from-stdin; ./start\";", // SAILING_USER ends here
+                    "' | /usr/local/bin/refreshInstance.sh auto-install-from-stdin; ./start\";", // SAILING_USER ends here
                     "stderr: ", Level.WARNING);
-            logger.info("stdout: "+stdout);
-        }
-        {
-            logger.info("Reloading/starting httpd on "+getHostToDeployTo()+" after application deployment");
-            final SshCommandChannel sshChannel = getHostToDeployTo().createRootSshChannel(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            final String stdout = sshChannel.runCommandAndReturnStdoutAndLogStderr("if [ \"$( service httpd status )\" = \"httpd is stopped\" ]; then service httpd start; else service httpd reload; fi", "stderr: ", Level.WARNING);
             logger.info("stdout: "+stdout);
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),

@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -222,9 +223,11 @@ import com.sap.sailing.domain.coursetemplate.MarkRole;
 import com.sap.sailing.domain.coursetemplate.MarkRolePair.MarkRolePairFactory;
 import com.sap.sailing.domain.coursetemplate.MarkTemplate;
 import com.sap.sailing.domain.coursetemplate.WaypointTemplate;
-import com.sap.sailing.domain.igtimiadapter.Account;
+import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
-import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -268,6 +271,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -556,6 +561,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throws Exception {
         logger.info("tracWithTracTrac for regatta " + regattaToAddTo + " for race records " + rrs + " with liveURI " + liveURIFromConfiguration
                 + " and storedURI " + storedURIFromConfiguration);
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         final TracTracConfiguration config = tractracDomainObjectFactory.getTracTracConfiguration(jsonUrlAsKey);
         for (TracTracRaceRecordDTO rr : rrs) {
             try {
@@ -608,6 +614,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String raceUrl) throws Exception {
         logger.info(
                 "trackWithYellowBrick for regatta " + regattaToAddTo + " for race records " + rrs );
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         for (YellowBrickRaceRecordDTO rr : rrs) {
             try {
                 getYellowBrickTrackingAdapter().addYellowBrickRace(getService(), regattaToAddTo, rr.getRaceUrl(),
@@ -1308,6 +1315,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         logger.info(
                 "tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port);
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         Map<String, RegattaResults> cachedRegattaEntriesLists = new HashMap<String, RegattaResults>();
         for (SwissTimingRaceRecordDTO rr : rrs) {
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(rr.boatClass);
@@ -1529,6 +1537,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 new Callable<EventDTO>() {
                     @Override
                     public EventDTO call() throws Exception {
+                        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is trying to create event "+eventName);
                         final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
                         final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
                                 final URL officialWebsiteURL = officialWebsiteURLAsString != null
@@ -1718,14 +1727,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, List<UUID> courseAreaIds, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, boolean autoRestartTrackingUponCompetitorSetChange, RankingMetrics rankingMetricType) {
+        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" is trying to create regatta "+regattaName);
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA, Regatta.getTypeRelativeObjectIdentifier(regattaName),
                 regattaName, new Callable<RegattaDTO>() {
                     @Override
                     public RegattaDTO call() throws Exception {
-                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
-                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
-                        Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
+                        final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                        final Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
                                 canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret,
                                 startTimePoint, endTimePoint, UUID.randomUUID(),
                                 seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,
@@ -2080,38 +2090,72 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
-        final Account account;
-        if (existingAccount == null) {
-            final String creatorName = getSecurityService().getCurrentUser().getName();
-            account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.IGTIMI_ACCOUNT,
-                    Account.getTypeRelativeObjectIdentifier(eMailAddress, creatorName), eMailAddress,
-                    () -> getIgtimiConnectionFactory().createAccountToAccessUserData(creatorName, eMailAddress,
-                            password));
-        } else {
-            logger.warning("Igtimi account " + eMailAddress + " already exists.");
-            account = null; // account with that e-mail already exists
-        }
-        return account != null;
+    public IgtimiDataAccessWindowWithSecurityDTO addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to) {
+        final DataAccessWindow result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.IGTIMI_DATA_ACCESS_WINDOW,
+                new TypeRelativeObjectIdentifier(deviceSerialNumber, ""+from.getTime(), ""+to.getTime()),
+                "Data Access Window for device "+deviceSerialNumber+" from "+from+" to "+to,
+                ()->getRiotServer().createDataAccessWindow(deviceSerialNumber, TimePoint.of(from), TimePoint.of(to)));
+        final IgtimiDataAccessWindowWithSecurityDTO resultWithSecurity = new IgtimiDataAccessWindowWithSecurityDTO(result.getId(), result.getDeviceSerialNumber(),
+                result.getStartTime().asDate(), result.getEndTime().asDate());
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), resultWithSecurity);
+        return resultWithSecurity;
     }
 
     @Override
-    public void removeIgtimiAccount(String eMailOfAccountToRemove) {
-        final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailOfAccountToRemove);
-        if (existingAccount != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingAccount, () -> {
-                getIgtimiConnectionFactory().removeAccount(existingAccount);
+    public void removeIgtimiDataAccessWindow(long id) {
+        final RiotServer riotServer = getRiotServer();
+        final DataAccessWindow daw = riotServer.getDataAccessWindowById(id);
+        if (daw != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(daw, ()->getRiotServer().removeDataAccessWindow(id));
+        }
+    }
+
+    @Override
+    public void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(editedObject.getSerialNumber());
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+            riotServer.updateDeviceName(existingDevice.getId(), editedObject.getName());
+        }
+    }
+
+    @Override
+    public void removeIgtimiDevice(String serialNumber) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(existingDevice, () -> {
+                riotServer.removeDevice(existingDevice.getId());
             });
         }
+    }
+
+    @Override
+    public boolean sendGPSOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_OFF);
+    }
+
+    @Override
+    public boolean sendGPSOnCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_ON);
+    }
+
+    @Override
+    public boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_POWER_OFF);
+    }
+
+    @Override
+    public boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException {
+        return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
     }
 
     @Override
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        final IgtimiConnectionFactory igtimiConnectionFactory = getIgtimiConnectionFactory();
         final List<DynamicTrackedRace> trackedRaces = new ArrayList<>();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             for (RaceDTO raceDTO : selectedRaces) {
@@ -2133,21 +2177,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             }
         }
         Map<RegattaAndRaceIdentifier, Integer> numberOfWindFixesImportedPerRace = new HashMap<RegattaAndRaceIdentifier, Integer>();
-        for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-            // filter account based on used permissions to read account:
-            if (getSecurityService().hasCurrentUserReadPermission(account)) {
-                IgtimiConnection conn = igtimiConnectionFactory.connect(account);
-                Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces,
-                        correctByDeclination);
-                for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
-                    RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
-                    Integer i = numberOfWindFixesImportedPerRace.get(key);
-                    if (i == null) {
-                        i = 0;
-                    }
-                    numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
-                }
+        final IgtimiConnection conn = createIgtimiConnection();
+        // filter account based on used permissions to read account:
+        Map<TrackedRace, Integer> resultsForAccounts = conn.importWindIntoRace(trackedRaces, correctByDeclination);
+        for (Entry<TrackedRace, Integer> resultForAccount : resultsForAccounts.entrySet()) {
+            RegattaAndRaceIdentifier key = resultForAccount.getKey().getRaceIdentifier();
+            Integer i = numberOfWindFixesImportedPerRace.get(key);
+            if (i == null) {
+                i = 0;
             }
+            numberOfWindFixesImportedPerRace.put(key, i + resultForAccount.getValue());
         }
         for (final TrackedRace trackedRace : trackedRaces) {
             // update polar sheets:
@@ -2169,10 +2208,16 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public void removeDenotationForRaceLogTracking(String leaderboardName, String raceColumnName, String fleetName)
-            throws NotFoundException {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+            throws Exception {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        final TrackedRace trackedRace = raceColumn.getTrackedRace(raceColumn.getFleetByName(fleetName));
+        if (trackedRace != null) {
+            getSecurityService().checkCurrentUserDeletePermission(trackedRace);
+            removeAndUntrackRaces(Arrays.asList(trackedRace.getRaceIdentifier()));
+        }
         getRaceLogTrackingAdapter().removeDenotationForRaceLogTracking(getService(), raceLog);
     }
 
@@ -2593,6 +2638,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throws NotDenotedForRaceLogTrackingException, Exception {
         // no permission checks needed here, since they already exist in PermissionAwareRaceTrackingHandler
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
@@ -2603,6 +2649,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void startRaceLogTracking(List<Triple<String, String, String>> leaderboardRaceColumnFleetNames,
             final boolean trackWind, final boolean correctWindByDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception {
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CREATE_OBJECT);
         for (final Triple<String, String, String> leaderboardRaceColumnFleetName : leaderboardRaceColumnFleetNames) {
             startRaceLogTracking(leaderboardRaceColumnFleetName.getA(), leaderboardRaceColumnFleetName.getB(),
                     leaderboardRaceColumnFleetName.getC(), trackWind, correctWindByDeclination);

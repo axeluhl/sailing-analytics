@@ -121,11 +121,27 @@ public class RaceContext {
     }
 
     public String getRegattaName() {
-        if (leaderboard instanceof RegattaLeaderboard) {
-            Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
-            return regatta.getName();
+        final String result;
+        final Regatta regatta = getRegatta();
+        if (regatta != null) {
+            result = regatta.getName();
+        } else {
+            result = leaderboard.getName();
         }
-        return leaderboard.getName();
+        return result;
+    }
+    
+    /**
+     * Returns {@code null} if the {@link #leaderboard};s type does not conform to {@link RegattaLeaderboard}
+     */
+    public Regatta getRegatta() {
+        final Regatta result;
+        if (leaderboard instanceof RegattaLeaderboard) {
+            result = ((RegattaLeaderboard) leaderboard).getRegatta();
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     private String getRegattaDisplayName() {
@@ -402,7 +418,7 @@ public class RaceContext {
         return 0;
     }
 
-    private TimePoint getLiveTimePoint() {
+    TimePoint getLiveTimePoint() {
         final TimePoint liveTimePoint;
         if (trackedRace != null) {
             liveTimePoint = MillisecondsTimePoint.now().minus(

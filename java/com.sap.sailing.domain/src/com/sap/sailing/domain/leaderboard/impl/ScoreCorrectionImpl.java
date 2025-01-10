@@ -458,15 +458,15 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             final RaceColumn raceColumn, Leaderboard leaderboard, final TimePoint timePoint,
             final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             final ScoringScheme scoringScheme, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
-        Double result;
+        final Double correctedScore;
         final AnnotatedMaxPointsReason maxPointsReason = getAnnotatedMaxPointsReason(competitor, raceColumn, timePoint);
         if (maxPointsReason.getMaxPointsReason() == MaxPointsReason.NONE) {
             // could be that there is a MaxPointsReason that just doesn't apply yet at timePoint; in this
             // case ignore the score correction and deliver the uncorrected result
             if (maxPointsReason.isMaxPointsReasonExistsButIsNotApplicableForTimePoint()) {
-                result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
+                correctedScore = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
             } else {
-                result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
+                correctedScore = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint, cache);
             }
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
@@ -478,17 +478,16 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 final Double incrementalScoreCorrectionForCompetitorInColumn = incrementalScoreCorrection.get(raceColumn.getKey(competitor));
                 if (incrementalScoreCorrectionForCompetitorInColumn != null) {
                     final Double uncorrectedScore = uncorrectedScoreProvider.get();
-                    result = uncorrectedScore == null ? null : (uncorrectedScore + incrementalScoreCorrectionForCompetitorInColumn);
+                    correctedScore = uncorrectedScore == null ? null : (uncorrectedScore + incrementalScoreCorrectionForCompetitorInColumn);
                 } else {
-                    result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
+                    correctedScore = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
                             getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
                             numberOfCompetitorsInLeaderboardFetcher, timePoint, leaderboard, uncorrectedScoreProvider);
                 }
             } else {
-                result = correctedNonMaxedScore;
+                correctedScore = correctedNonMaxedScore;
             }
         }
-        final Double correctedScore = result;
         return new Result() {
             @Override
             public MaxPointsReason getMaxPointsReason() {

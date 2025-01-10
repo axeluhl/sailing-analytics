@@ -9,7 +9,8 @@ package com.tractrac.subscription.app.tracapi;
 
 import com.tractrac.model.lib.api.data.*;
 import com.tractrac.model.lib.api.event.*;
-import com.tractrac.model.lib.api.route.IControl;
+import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 import com.tractrac.model.lib.api.route.IControlRoute;
 import com.tractrac.model.lib.api.sensor.ISensorData;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
@@ -27,9 +28,12 @@ import java.util.UUID;
  */
 public class EventListener extends AbstractListener {
 
+    private IRace race;
+
     private static void show(Object obj) {
         System.out.println(TimeUtils.formatDateInMillis(new Date().getTime()) + ": " + obj);
     }
+
 
     private static Map<UUID, Integer> controlPos = new HashMap<>();
     private static Map<UUID, Integer> compPos = new HashMap<>();
@@ -38,8 +42,10 @@ public class EventListener extends AbstractListener {
     public void gotStoredDataEvent(IStoredDataEvent storedDataEvent) {
         show(storedDataEvent);
         if (storedDataEvent.getType() == IStoredDataEvent.Type.End) {
-            System.out.println("CONTROLS: " + controlPos);
-            System.out.println("COMPETITORS: " + compPos);
+            synchronized (this) {
+                System.out.println("CONTROLS: " + controlPos);
+                System.out.println("COMPETITORS: " + compPos);
+            }
         }
     }
 
@@ -66,16 +72,23 @@ public class EventListener extends AbstractListener {
     }
 
     @Override
-    public void gotControlPointPosition(IControl control, IPosition position, int markNumber) {
-        String message = "COTRLPOS " + control.getName() + " - " + markNumber +
-                "\t" + control.getShortName() + "\t" +
+    public void gotPositionedItemPosition(IPositionedItem control, IPosition position) {
+        if (this.race != null) {
+            String markCourseArea = control.getCourseArea();
+            String raceCourseArea = this.race.getCourseArea();
+            if (markCourseArea != null && raceCourseArea != null && !markCourseArea.equals(raceCourseArea)) {
+                //show("Discarding position because control course area " + markCourseArea + "(" + control.getName() + ") is not like " + race.getCourseArea());
+                return;
+            }
+        }
+        String message = "COTRLPOS " + control.getName() +
                 position.toString();
         int posNumber = increasePos(controlPos, control.getId());
         message += (", TOTAL POS: " + posNumber);
         show(message);
     }
 
-    private int increasePos(Map<UUID, Integer> map, UUID id) {
+    private synchronized int increasePos(Map<UUID, Integer> map, UUID id) {
         map.merge(id, 1, Integer::sum);
         return map.get(id);
     }
@@ -157,18 +170,18 @@ public class EventListener extends AbstractListener {
     }
 
     @Override
-    public void updateControl(long timestamp, IControl control) {
-        show("UPDATE CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void updateMapItem(long timestamp, IMapItem mapItem) {
+        show("UPDATE CONTROL " + mapItem.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override
-    public void addControl(long timestamp, IControl control) {
-        show("ADD CONTROL " + control.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void addMapItem(long timestamp, IMapItem mapItem) {
+        show("ADD CONTROL " + mapItem.toString() + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override
-    public void deleteControl(long timestamp, UUID controlId) {
-        show("DELETE CONTROL " + controlId + " at " + TimeUtils.formatDateInMillis(timestamp));
+    public void deleteMapItem(long timestamp, UUID mapItemId) {
+        show("DELETE CONTROL " + mapItemId + " at " + TimeUtils.formatDateInMillis(timestamp));
     }
 
     @Override
@@ -250,5 +263,13 @@ public class EventListener extends AbstractListener {
         show("DATA SOURCE CHANGE " + race + ":\n" +
                 "\tLIVE URI: " + race.getLiveURI() + "\n" +
                 "\tSTORED URI: " + race.getStoredURI());
+    }
+
+    public IRace getRace() {
+        return race;
+    }
+
+    public void setRace(IRace race) {
+        this.race = race;
     }
 }

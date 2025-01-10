@@ -809,4 +809,26 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     Role getOrThrowRoleFromIDsAndCheckMetaPermissions(UUID roleDefinitionId, UUID qualifyingGroupId, String userQualifierName,
             boolean transitive) throws UserManagementException;
+
+    /**
+     * When updating a user's {@link User#getSubscriptions() subscriptions}, use this method to obtain a write lock. For
+     * complex operations, such as first reading the current subscriptions, then manipulating them and writing them back
+     * to the user object, ensure the lock is held throughout the complex operation sequence.
+     * <p>
+     * 
+     * Unlock again using {@ink #unlockSubscriptionsForUser(User)}, always in a {@code finally} clause, to avoid hanging
+     * locks.
+     * <p>
+     * 
+     * The lock will also be obtained upon processing a replication operation (see, e.g.,
+     * {@link ReplicableSecurityService#internalUpdateSubscription(String, Subscription)}) internally. This way,
+     * compound operations are also protected against concurrent manipulation through replicated transactions.
+     */
+    void lockSubscriptionsForUser(User user);
+
+    /**
+     * Releases the lock obtained with {@link #lockSubscriptionsForUser(User)}. Always call this in a {@code finally} clause
+     * that follows the {@link #lockSubscriptionsForUser(User)} call, so a lock can never hang.
+     */
+    void unlockSubscriptionsForUser(User user);
 }

@@ -1,29 +1,20 @@
 package com.sap.sailing.domain.igtimiadapter;
 
-import java.io.IOException;
+import com.sap.sailing.domain.igtimiadapter.impl.DeviceImpl;
+import com.sap.sse.common.Renamable;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-import org.apache.http.client.ClientProtocolException;
-import org.json.simple.parser.ParseException;
-
-public interface Device extends HasId {
+public interface Device extends HasId, WithQualifiedObjectIdentifier, Renamable {
     /**
      * @return a string identifying the device, such as "AA-AA-AAAA"
      */
     String getSerialNumber();
 
-    String getServiceTag();
+    static Device create(long id, String serialNumber, String name) {
+        return new DeviceImpl(id, serialNumber, name);
+    }
 
-    Long getOwnerId();
-
-    Long getDeviceUserGroupId();
-
-    Long getAdminDeviceUserGroupId();
-
-    Iterable<Permission> getPermissions();
-
-    Boolean getBlob();
-
-    String getName();
-
-    User getOwner() throws IllegalStateException, ClientProtocolException, IOException, ParseException;
+    static Device create(long id, String deviceSerialNumber) {
+        return new DeviceImpl(id, deviceSerialNumber);
+    }
 }

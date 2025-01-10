@@ -482,7 +482,7 @@ public class UserService {
         userManagementService.addSecurityInformation(secureDTO, new AsyncCallback<SecuredDTO>() {
             @Override
             public void onSuccess(SecuredDTO result) {
-                callback.onSuccess(secureDTO);
+                callback.onSuccess(result);
             }
             
             @Override

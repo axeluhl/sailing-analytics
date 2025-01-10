@@ -50,7 +50,7 @@ public class TestComplexUserAndGroupMerge extends AbstractStoreMergeTest {
         assertNull(targetUserStore.getUserGroupByName("test-server"));
         assertEquals(1, Util.size(targetUserStore.getUserGroupByName("uhl-tenant").getUsers()));
         assertSame(targetUserStore.getUserByName("uhl"), targetUserStore.getUserGroupByName("uhl-tenant").getUsers().iterator().next());
-        final Pair<UserStore, AccessControlStore> sourceStores = merger.importStores(cfgForSource, defaultCreationGroupNameForSource);
+        final Pair<UserStore, AccessControlStore> sourceStores = merger.importStores(causallyConsistentSessionForSource, cfgForSource, sourceService, defaultCreationGroupNameForSource);
         final UserStore sourceUserStore = sourceStores.getA();
         // Should we need the source access control store, here it is:
         // final AccessControlStore sourceAccessControlStore = sourceStores.getB();

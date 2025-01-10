@@ -36,10 +36,12 @@ public class MongoUriParserTest {
         final AwsInstance<String> host1 = mock(AwsInstance.class);
         when(host1.getPublicAddress()).thenReturn(wwwExampleCom);
         when(host1.getPrivateAddress()).thenReturn(wwwExampleCom);
+        when(host1.getHostname()).thenReturn(WWW_EXAMPLE_COM);
         when(landscape.getHostByPrivateIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(wwwExampleCom.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host1);
         final InetAddress loopback = InetAddress.getLoopbackAddress();
         final AwsInstance<String> host2 = mock(AwsInstance.class);
         when(host2.getPrivateAddress()).thenReturn(loopback);
+        when(host2.getHostname()).thenReturn(loopback.getHostAddress());
         when(landscape.getHostByPrivateIpAddress(ArgumentMatchers.any(Region.class), ArgumentMatchers.contains(loopback.getHostAddress()), ArgumentMatchers.any(HostSupplier.class))).thenReturn(host2);
         parser = new MongoUriParser<String>(landscape, new AwsRegion("eu-west-2", landscape));
     }
