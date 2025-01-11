@@ -29,5 +29,17 @@ public enum SailingProcessConfigurationVariables implements ProcessConfiguration
      * wind connectivity whose base URL may be overridden using {@link #IGTIMI_BASE_URL}. Specify a bearer token
      * valid in the context of the security service of the remote Riot service.
      */
-    IGTIMI_BEARER_TOKEN;
+    IGTIMI_BEARER_TOKEN,
+    
+    /**
+     * Provides a Google Maps JavaScript API key, typically in the format "key=..." or "client=...&channel=...".
+     * You can obtain one from your <a href="https://console.cloud.google.com">Google Cloud Console</a>
+     */
+    GOOGLE_MAPS_AUTHENTICATION_PARAMS,
+    
+    /**
+     * A Google / YouTube API key, just as the token itself, without any "key=..." prefix. Used, e.g., for
+     * accessing the metadata of a YouTube video during upload and linking to races.
+     */
+    YOUTUBE_API_KEY;
 }
