@@ -457,8 +457,8 @@ EOF
 # Copies the /root/secrets and /root/mail.properties file to the local instance, ensuring only root can read it
 install_secrets() {
     # Install secrets
-    scp root@sapsailing.com:secrets /tmp
-    scp root@sapsailing.com:mail.properties /tmp
+    scp -o StrictHostKeyChecking=no root@sapsailing.com:secrets /tmp
+    scp -o StrictHostKeyChecking=no root@sapsailing.com:mail.properties /tmp
     sudo mv /tmp/secrets /root
     sudo mv /tmp/mail.properties /root
     sudo chown root /root/secrets
