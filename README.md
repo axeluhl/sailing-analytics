@@ -115,6 +115,7 @@ In addition to the necessary ``MONGODB_URI`` variable you may need to inject a f
 - ``MANAGE2SAIL_ACCESS_TOKEN`` access token for result and regatta structure import from the Manage2Sail regatta management system
 - ``IGTIMI_CLIENT_ID`` / ``IGTIMI_CLIENT_SECRET`` credentials for ``igtimi.com`` in case you have one or more WindBot devices that you would like to integrate with
 - ``GOOGLE_MAPS_AUTHENTICATION_PARAMS`` as in ``"key=..."`` or ``"client=..."``, required to display the Google Map in the race viewer. Obtain a Google Maps key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
+- ``YOUTUBE_API_KEY`` as in ``"key=..."``, required to analyze time stamps and durations of YouTube videos when linking to races. Obtain a YouTube API key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
 
 In the ``configuration/mail.properties`` file make the necessary adjustments in case you would like to enable the application to send out e-mails, e.g., for user notifications or invitations.
 

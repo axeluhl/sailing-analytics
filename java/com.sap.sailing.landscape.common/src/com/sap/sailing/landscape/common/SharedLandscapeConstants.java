@@ -1,5 +1,10 @@
 package com.sap.sailing.landscape.common;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+import com.sap.sse.common.Util;
+
 public interface SharedLandscapeConstants {
     /**
      * If no specific domain name is provided, e.g., when creating a new application replica set, this will be
@@ -7,6 +12,29 @@ public interface SharedLandscapeConstants {
      * replica set's name.
      */
     String DEFAULT_DOMAIN_NAME = "sapsailing.com";
+
+    /**
+     * Servers in any of these domains we want to trust. This can and shall be used, e.g., to guard server-side requests
+     * to URLs that may have been provided through an API or UI by some potentially untrusted client or user.
+     */
+    Iterable<String> TRUSTED_DOMAINS = Collections.unmodifiableCollection(Arrays.asList(new String[] {
+        DEFAULT_DOMAIN_NAME, "sailing.omegatiming.com", "localhost", "127.0.0.1"
+    }));
+    
+    /**
+     * Checks that {@code domain} equals one of {@link #TRUSTED_DOMAINS} or is a sub-domain of any of these
+     */
+    static boolean isTrustedDomain(String domain) {
+        while (Util.hasLength(domain)) {
+            if (Util.contains(TRUSTED_DOMAINS, domain)) {
+                return true;
+            } else {
+                final int indexOfSubdomainSeparator = domain.indexOf('.');
+                domain = indexOfSubdomainSeparator >= 0 ? domain.substring(indexOfSubdomainSeparator+1) : "";
+            }
+        }
+        return false;
+    }
     
     /**
      * If a shared security realm is to be used for a domain then this constant tells the name of the application
