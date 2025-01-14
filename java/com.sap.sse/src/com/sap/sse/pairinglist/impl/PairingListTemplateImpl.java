@@ -826,7 +826,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         // expression in Math.sqrt() is equal to variance / n
-        standardDev = Math.sqrt((exp2 - exp*exp / n) / n);
+        standardDev = Math.sqrt((exp2 - (double) (exp*exp) / n) / n);
         return standardDev;
     }
 
