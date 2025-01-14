@@ -5,10 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
@@ -44,11 +50,19 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public RegattaResults parse() throws JAXBException {
+    public RegattaResults parse() throws JAXBException, SAXException, ParserConfigurationException {
+        final SAXParserFactory spf = SAXParserFactory.newInstance();
+        // This to defend against XXE:
+        spf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        spf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        spf.setXIncludeAware(false);
+        // Do unmarshall operation
+        javax.xml.transform.Source xmlSource = new javax.xml.transform.sax.SAXSource(spf.newSAXParser().getXMLReader(),
+                                      new InputSource(inputStream));
         JAXBContext jc = JAXBContext.newInstance(TRResult.class.getPackage().getName(), ParserImpl.class.getClassLoader());
         Unmarshaller um = jc.createUnmarshaller();
         @SuppressWarnings("unchecked")
-        RegattaResults regattaResults = ((JAXBElement<RegattaResults>) um.unmarshal(inputStream)).getValue();
+        RegattaResults regattaResults = ((JAXBElement<RegattaResults>) um.unmarshal(xmlSource)).getValue();
         for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
             if (o instanceof Person) {
                 Person person = (Person) o;
