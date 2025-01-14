@@ -244,4 +244,10 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     public boolean isQueryChangedSinceLastRun() {
         return queryChangedSinceLastRun;
     }
+    
+    @Override
+    public String toString() {
+        return getAggregatorDefinition().toString() + " over " + getStatisticToCalculate() + ", grouped by "
+                + getDimensionsToGroupBy() + " and filtered by " + getFilterSelection();
+    }
 }
