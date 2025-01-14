@@ -66,7 +66,7 @@ public class KeyWestRaceWeek2016_ParserTest extends AbstractYachtScoringEventRes
     }
 
     @Test
-    public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException {
+    public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(KEYWESTRACEWEEEK2016_TESTFILE_XRR), KEYWESTRACEWEEEK2016_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }

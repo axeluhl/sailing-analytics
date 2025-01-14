@@ -1,20 +1,18 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.util.logging.Logger;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 
 public class Activator implements BundleActivator {
-    private static final Logger logger = Logger.getLogger(Activator.class.getName());
-
     private static BundleContext context;
     private SailingServiceImpl sailingServiceToStopWhenStopping;
     private static Activator INSTANCE;
     
     private final static String GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME = "google.maps.authenticationparams";
+    
+    private final static String YOUTUBE_V3_API_KEY_PROPERTY_NAME = "youtube.api.key";
     
     /**
      * Required by {@link GoogleMapsLoader#load(Runnable, String)} and to be provided through a system property named
@@ -22,6 +20,12 @@ public class Activator implements BundleActivator {
      * {@code client=abcde&channel=fghij}.
      */
     private String googleMapsLoaderAuthenticationParams;
+    
+    /**
+     * A secret for accessing the YouTube V3 API; provided through the system property named as specified by
+     * {@link #YOUTUBE_V3_API_KEY_PROPERTY_NAME}.
+     */
+    private String youtubeApiKey;
 
     public Activator() {
         INSTANCE = this;
@@ -31,11 +35,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
         googleMapsLoaderAuthenticationParams = context.getProperty(GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME);
-        if (googleMapsLoaderAuthenticationParams == null) {
-            googleMapsLoaderAuthenticationParams = "key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
-            logger.warning("Did not find a value for the "+GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME+
-                    " system property. Using a test key for the Google Maps API instead. Your mileage may vary.");
-        }
+        youtubeApiKey = context.getProperty(YOUTUBE_V3_API_KEY_PROPERTY_NAME);
     }
     
     @Override
@@ -63,6 +63,10 @@ public class Activator implements BundleActivator {
      */
     public String getGoogleMapsLoaderAuthenticationParams() {
         return googleMapsLoaderAuthenticationParams;
+    }
+    
+    public String getYoutubeApiKey() {
+        return youtubeApiKey;
     }
 
     public void setSailingService(SailingServiceImpl sailingServiceImpl) {

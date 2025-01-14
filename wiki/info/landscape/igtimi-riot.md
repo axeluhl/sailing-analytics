@@ -36,6 +36,10 @@ Use this variable to override the default ``https://wind.sapsailing.com`` base U
 
 Overrides the default authentication scheme for requests against the remote "Riot" service for Igtimi wind connectivity whose base URL may be overridden using ``IGTIMI_BASE_URL``. Specify a bearer token valid in the context of the security service of the remote Riot service.
 
+We plan to deploy a replica set called ``wind`` so it is reachable at ``https://wind.sapsailing.com`` which is also the default for the Igtimi connection factory unless overridden with the ``IGTIMI_BASE_URL`` variable (see above). This replica set should consist of two nodes only. This way, in case the primary/master process becomes unavailable, devices and clients will "find" to each other on the replica where messages are enqueued for transmission to the primary/master once it becomes available again.
+
+The management of the NLB target group for listening on the Riot port 6000 shall be automated. See also [bug6083](https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=6083).
+
 ## History of the Riot System at Igtimi and Riedel
 
 Around 2020, the German company *Riedel Communications GmbH* acquired Igtimi and used some of their technology for the America's Cup at the time. The Riot system continued to operate under the Igtimi brand, though owned by Riedel now. In the years that followed, Riedel decided to move out of the sailing domain again. In 2024 they announced they would end the Riot service by the end of the year. Effective January 6, 2025, the Riot system running at ``https://www.yacht-bot.com`` and ``https://www.igtimi.com`` was shut down.

@@ -91,7 +91,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testSimpleParsingSomeManage2SailDocuments() throws JAXBException, IOException {
+    public void testSimpleParsingSomeManage2SailDocuments() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults r1 = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_29er), YES_EVENT_NAME).parse();
         assertNotNull(r1);
 
