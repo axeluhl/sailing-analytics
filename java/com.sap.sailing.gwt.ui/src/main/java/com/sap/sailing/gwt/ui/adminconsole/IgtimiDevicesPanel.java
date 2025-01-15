@@ -164,7 +164,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
 
             @Override
             public AbstractCellTable<IgtimiDeviceWithSecurityDTO> getCellTable() {
-                return null;
+                return devicesTable;
             }
         };
         createIgtimiDevicesTable(devicesTable, tableRes, presenter.getUserService(), filteredDevices, filterDevicesPanel);
@@ -211,7 +211,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
 
             @Override
             public AbstractCellTable<IgtimiDataAccessWindowWithSecurityDTO> getCellTable() {
-                return null;
+                return dawTable;
             }
         };
         createIgtimiDataAccessWindowsTable(dawTable, tableRes, presenter.getUserService(), filteredDAWs, filterDataAccessWindowPanel);
