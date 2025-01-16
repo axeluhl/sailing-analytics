@@ -291,7 +291,8 @@ implements Procedure<ShardingKey> {
         }
         process = new SailingAnalyticsProcessImpl<>(applicationConfiguration.getPort(), getHostToDeployTo(),
                 serverDirectory, applicationConfiguration.getTelnetPort(),
-                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort(), getLandscape());
+                applicationConfiguration.getServerName(), applicationConfiguration.getExpeditionPort(),
+                applicationConfiguration.getIgtimiRiotPort(), getLandscape());
     }
     
     public SailingAnalyticsProcess<ShardingKey> getProcess() {

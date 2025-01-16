@@ -18,7 +18,8 @@ public class SailingAnalyticsHostSupplier<ShardingKey> implements HostSupplier<S
                 launchTimePoint, landscape, (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
                         return new SailingAnalyticsProcessImpl<ShardingKey>(port, host, serverDirectory, telnetPort, serverName,
-                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(), landscape);
+                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name())).intValue(),
+                                ((Number) additionalProperties.get(SailingProcessConfigurationVariables.IGTIMI_RIOT_PORT.name())).intValue(), landscape);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

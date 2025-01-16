@@ -224,6 +224,7 @@ implements ProcedureCreatingLoadBalancerMapping<ShardingKey> {
                     Level.INFO, "Waiting for instance "+getHost().getId()+" to be in state RUNNING");
             getLandscape().addTargetsToTargetGroup(masterTargetGroupCreated, Collections.singleton(getHost()));
             getLandscape().addTargetsToTargetGroup(publicTargetGroupCreated, Collections.singleton(getHost()));
+            // TODO bug6083: if the host is believed to be/become part of a replica set that would list additional target groups (we wouldo discover those during establishState), check if the "process" needs to become part of one of them based on its additional ports such as the Igtimi Riot port, and then add the host to that target group, too
             getLoadBalancerUsed().addRulesAssigningUnusedPriorities(/* forceContiguous */ true,
                     Optional.empty(), createRules(getLoadBalancerUsed(), getHostName(), masterTargetGroupCreated, publicTargetGroupCreated));
         } catch (Exception e) {

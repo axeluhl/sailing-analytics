@@ -436,6 +436,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                 sailingAnalyticsProcess.getServerName(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getServerDirectory(Landscape.WAIT_FOR_PROCESS_TIMEOUT),
                 sailingAnalyticsProcess.getExpeditionUdpPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
+                sailingAnalyticsProcess.getIgtimiRiotPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase),
                 sailingAnalyticsProcess.getStartTimePoint(Landscape.WAIT_FOR_PROCESS_TIMEOUT));
     }
 
@@ -810,7 +811,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
     private SailingAnalyticsProcess<String> getSailingAnalyticsProcessFromDTO(SailingAnalyticsProcessDTO processDTO) throws UnknownHostException {
         return new SailingAnalyticsProcessImpl<String>(processDTO.getPort(),
                 getHostFromInstanceDTO(processDTO.getHost()), processDTO.getServerDirectory(),
-                processDTO.getExpeditionUdpPort(), getLandscape());
+                processDTO.getExpeditionUdpPort(), processDTO.getIgtimiRiotPort(), getLandscape());
     }
 
     private SailingAnalyticsHost<String> getHostFromInstanceDTO(AwsInstanceDTO hostDTO) throws UnknownHostException {

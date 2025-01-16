@@ -24,8 +24,8 @@ import com.jcraft.jsch.JSchException;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
-import com.sap.sailing.landscape.SailingAnalyticsProcessConfigurationVariable;
 import com.sap.sailing.landscape.SailingReleaseRepository;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sailing.landscape.procedures.StartSailingAnalyticsHost;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -53,19 +53,22 @@ implements SailingAnalyticsProcess<ShardingKey> {
     private static final String STATUS_RELEASE_PROPERTY_NAME = "release";
     private static final String MONGODB_CONFIGURATION_PROPERTY_NAME = "mongoDbConfiguration";
     private Integer expeditionUdpPort;
+    private Integer igtimiRiotPort;
     private Release release;
     private TimePoint startTimePoint;
     
-    public SailingAnalyticsProcessImpl(int port, SailingAnalyticsHost<ShardingKey> host, String serverDirectory, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
+    public SailingAnalyticsProcessImpl(int port, SailingAnalyticsHost<ShardingKey> host, String serverDirectory, Integer expeditionUdpPort, Integer igtimiRiotPort, AwsLandscape<ShardingKey> landscape) {
         super(port, host, serverDirectory, landscape);
         this.expeditionUdpPort = expeditionUdpPort;
+        this.igtimiRiotPort = igtimiRiotPort;
     }
 
     public SailingAnalyticsProcessImpl(int port,
             SailingAnalyticsHost<ShardingKey> host,
-            String serverDirectory, Integer telnetPort, String serverName, Integer expeditionUdpPort, AwsLandscape<ShardingKey> landscape) {
+            String serverDirectory, Integer telnetPort, String serverName, Integer expeditionUdpPort, Integer igtimiRiotPort, AwsLandscape<ShardingKey> landscape) {
         super(port, host, serverDirectory, telnetPort, serverName, landscape);
         this.expeditionUdpPort = expeditionUdpPort;
+        this.igtimiRiotPort = igtimiRiotPort;
     }
 
     @Override
@@ -221,10 +224,19 @@ implements SailingAnalyticsProcess<ShardingKey> {
     public int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase)
             throws Exception {
         if (expeditionUdpPort == null) {
-            expeditionUdpPort = Integer.parseInt(getEnvShValueFor(SailingAnalyticsProcessConfigurationVariable.EXPEDITION_PORT.name(),
+            expeditionUdpPort = Integer.parseInt(getEnvShValueFor(SailingProcessConfigurationVariables.EXPEDITION_PORT.name(),
                 optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
         }
         return expeditionUdpPort;
+    }
+    
+    @Override
+    public int getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        if (igtimiRiotPort == null) {
+            igtimiRiotPort = Integer.parseInt(getEnvShValueFor(SailingProcessConfigurationVariables.IGTIMI_RIOT_PORT.name(),
+                    optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
+        }
+        return igtimiRiotPort;
     }
 
     @Override

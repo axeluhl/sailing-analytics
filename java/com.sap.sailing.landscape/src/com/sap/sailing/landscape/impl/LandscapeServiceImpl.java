@@ -154,8 +154,10 @@ public class LandscapeServiceImpl implements LandscapeService {
                 (host, port, serverDirectory, telnetPort, serverName, additionalProperties)->{
                     try {
                         final Number expeditionUdpPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.EXPEDITION_PORT.name());
+                        final Number igtimiRiotPort = (Number) additionalProperties.get(SailingProcessConfigurationVariables.IGTIMI_RIOT_PORT.name());
                         return new SailingAnalyticsProcessImpl<String>(port, host, serverDirectory, telnetPort, serverName,
-                                expeditionUdpPort == null ? null : expeditionUdpPort.intValue(), getLandscape());
+                                expeditionUdpPort == null ? null : expeditionUdpPort.intValue(),
+                                igtimiRiotPort == null ? null : igtimiRiotPort.intValue(), getLandscape());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1282,6 +1284,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 replicaSet.getPublicTargetGroup()+" and "+replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().removeTarget(replicaSet.getMaster().getHost());
         replicaSet.getMasterTargetGroup().removeTarget(replicaSet.getMaster().getHost());
+        // TODO bug6083: if the replica set lists additional target groups (we need to discover those during establishState), check if the master is part of one of them based on its additional ports such as the Igtimi Riot port, and then remove the host from that target group, too
         sendMailAboutMasterUnavailable(replicaSet);
         return additionalReplicaStarted;
     }
@@ -1376,6 +1379,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         if (replicaSet.getPublicTargetGroup() != null) {
             replicaSet.getPublicTargetGroup().addTarget(sailingAnalyticsProcess.getHost());
         }
+        // TODO bug6083: if the replica set lists additional target groups (we need to discover those during establishState), check if the process needs to be part of one of them based on its additional ports such as the Igtimi Riot port, and then add the host to that target group, too
     }
 
     private SailingAnalyticsProcess<String> spinUpReplicaByIncreasingAutoScalingGroupMinSize(
@@ -1581,6 +1585,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         logger.info("Adding new master "+newMaster+" to target groups");
         replicaSet.getPublicTargetGroup().addTarget(hostToDeployTo);
         replicaSet.getMasterTargetGroup().addTarget(hostToDeployTo);
+        // TODO bug6083: if the replica set lists additional target groups (we need to discover those during establishState), check if the master was part of one of them and add the new host to that target group again
         sendMailAboutMasterAvailable(replicaSet);
         if (newTemporaryReplica != null) {
             newTemporaryReplica.stopAndTerminateIfLast(Landscape.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
@@ -1948,6 +1953,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                                 + "; removing old replica " + replica
                                 + " from public target group of application replica set " + replicaSet.getName());
                         replicaSet.getPublicTargetGroup().removeTarget(replica.getHost());
+                        // TODO bug6083: if the replica set lists additional target groups (we need to discover those during establishState), check if the replica was part of one of them based on its additional ports such as the Igtimi Riot port, and then remove the host from that target group, too
                         logger.info("Stopping old replica "+replica);
                         replica.stopAndTerminateIfLast(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                     }

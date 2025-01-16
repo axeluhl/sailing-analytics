@@ -13,6 +13,8 @@ public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProc
     static Logger logger = Logger.getLogger(SailingAnalyticsProcess.class.getName());
 
     int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+
+    int getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     @Override
     SailingAnalyticsHost<ShardingKey> getHost();

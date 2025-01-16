@@ -241,6 +241,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
     private final Integer port;
     private final Integer telnetPort;
     private final Integer expeditionPort;
+    private final Integer igtimiRiotPort;
     private final String serverDirectory;
     
     public static <BuilderT extends Builder<BuilderT, T, ShardingKey>,
@@ -256,6 +257,7 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
         this.port = builder.getPort();
         this.telnetPort = builder.getTelnetPort();
         this.expeditionPort = builder.getExpeditionPort();
+        this.igtimiRiotPort = builder.getIgtimiRiotPort();
         this.serverDirectory = builder.getServerDirectory();
     }
 
@@ -269,6 +271,10 @@ extends AwsApplicationConfiguration<ShardingKey, SailingAnalyticsMetrics, Sailin
 
     protected Integer getExpeditionPort() {
         return expeditionPort;
+    }
+    
+    protected Integer getIgtimiRiotPort() {
+        return igtimiRiotPort;
     }
 
     protected String getServerDirectory() {
