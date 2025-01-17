@@ -229,7 +229,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         // if an unmanaged replica process was launched, return a replica set that contains it; otherwise use the one we already have (without any replica)
         return unmanagedReplica.map(ur->{
                 try {
-                    return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur));
+                    return getLandscape().getApplicationReplicaSet(region, name, master, Collections.singleton(ur), Landscape.WAIT_FOR_PROCESS_TIMEOUT,
+                            Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
                     throw new RuntimeException(e);
                 }
@@ -357,7 +358,8 @@ public class LandscapeServiceImpl implements LandscapeService {
             replicas = Collections.emptySet();
         }
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSetWithReplica =
-                landscape.getApplicationReplicaSet(region, replicaSet.getServerName(), master, replicas);
+                landscape.getApplicationReplicaSet(region, replicaSet.getServerName(), master, replicas,
+                        Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return replicaSetWithReplica;
     }
 
@@ -980,7 +982,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         final AwsApplicationReplicaSet<String,SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> applicationReplicaSet =
                 new AwsApplicationReplicaSetImpl<>(replicaSetName, masterHostname, master, /* no replicas yet */ Optional.empty(),
                         allLoadBalancersInRegion, allTargetGroupsInRegion, allLoadBalancerRulesInRegion,
-                        autoScalingGroups, launchTemplates, launchTemplateDefaultVersions, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey);
+                        autoScalingGroups, launchTemplates, launchTemplateDefaultVersions, dnsCache, RemoteServiceMappingConstants.pathPrefixForShardingKey,
+                        Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         return applicationReplicaSet;
     }
 
@@ -1131,7 +1134,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         }
         return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), master,
                 // don't use those temporary upgrade replicas that just got terminated:
-                Util.filter(newUpgradedReplicas, newUpgradedReplica->!Util.contains(temporaryUpgradeReplicas, newUpgradedReplica)));
+                Util.filter(newUpgradedReplicas, newUpgradedReplica->!Util.contains(temporaryUpgradeReplicas, newUpgradedReplica)),
+                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
 
     /**
@@ -1436,7 +1440,8 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
             Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
-            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException, TimeoutException {
+            Optional<AmazonMachineImage<String>> optionalAmi, Optional<Duration> optionalTimeout,
+            Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, ExecutionException, TimeoutException {
         final Set<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> result = new HashSet<>();
         for (final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet : replicaSets) {
             if (replicaSet.getAutoScalingGroup() != null) {
@@ -1444,7 +1449,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                         ()->getLandscape().getLatestImageWithType(region, SharedLandscapeConstants.IMAGE_TYPE_TAG_VALUE_SAILING));
                 logger.info("Upgrading AMI in auto-scaling groups "+Util.join(", ", replicaSet.getAllAutoScalingGroups())+" of replica set "+replicaSet.getName()+" to "+ami.getId());
                 getLandscape().updateImageInAutoScalingGroups(region, replicaSet.getAllAutoScalingGroups(), replicaSet.getName(), ami);
-                result.add(getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), replicaSet.getMaster(), replicaSet.getReplicas()));
+                result.add(getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), replicaSet.getMaster(), replicaSet.getReplicas(),
+                        optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
             } else {
                 logger.info("No auto-scaling group found for replica set "+replicaSet.getName()+" to update AMI in");
             }
@@ -1477,7 +1483,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     }
                 }
                 result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(), replicaSet.getMaster(),
-                        Collections.singleton(replica));
+                        Collections.singleton(replica), Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
             }
         } else {
             logger.warning("No auto-scaling group found for replica set "+replicaSet+"; not terminating any replicas.");
@@ -1521,7 +1527,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         } else {
             logger.info("No auto-scaling group found for replica set "+replicaSet.getName()+"; nothing to scale down.");
         }
-        return getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(), replicaSet.getMaster(), nonAutoScalingReplica);
+        return getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(), replicaSet.getServerName(),
+                replicaSet.getMaster(), nonAutoScalingReplica, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
     
     @Override
@@ -1593,7 +1600,8 @@ public class LandscapeServiceImpl implements LandscapeService {
         // here, although we're waiting for a process to become healthy, that process may need to fetch a large
         // initial load before reaching the healthy state, so we'll use the longer HOST timeout here:
         replicaSet.restartAllReplicas(Landscape.WAIT_FOR_HOST_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
-        return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas());
+        return getLandscape().getApplicationReplicaSet(region, replicaSet.getServerName(), newMaster, replicaSet.getReplicas(),
+                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
     }
 
     private void sendMailAboutMasterUnavailable(
@@ -1662,7 +1670,7 @@ public class LandscapeServiceImpl implements LandscapeService {
     @Override
     public AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
             final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
-            InstanceType instanceType) throws Exception {
+            InstanceType instanceType, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result;
         final Iterable<AwsAutoScalingGroup> autoScalingGroups = replicaSet.getAllAutoScalingGroups();
         if (!Util.isEmpty(autoScalingGroups)) {
@@ -1692,7 +1700,7 @@ public class LandscapeServiceImpl implements LandscapeService {
             result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(),
                     replicaSet.getServerName(), replicaSet.getMaster(),
                     // remove terminated replicas:
-                    Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r)));
+                    Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r)), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         } else {
             logger.info("Replica set "+replicaSet.getName()+
                     " does not have an auto-scaling group configured, so no changes can be made to its launch template.");

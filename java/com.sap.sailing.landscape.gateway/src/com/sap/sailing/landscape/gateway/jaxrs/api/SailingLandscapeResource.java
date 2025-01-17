@@ -627,7 +627,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
                 final AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> result = getLandscapeService()
-                        .changeAutoScalingReplicasInstanceType(replicaSet, InstanceType.valueOf(instanceType));
+                        .changeAutoScalingReplicasInstanceType(replicaSet, InstanceType.valueOf(instanceType),
+                                Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption);
                 response = Response.ok()
                         .entity(streamingOutput(new AwsApplicationReplicaSetJsonSerializer(result.getVersion(
                                 Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption).getName()).serialize(result)))

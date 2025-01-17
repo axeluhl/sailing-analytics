@@ -353,7 +353,11 @@ public class LandscapeManagementPanel extends SimplePanel {
                         regionsTable.getSelectionModel().getSelectedObject(),
                         Collections.singleton(applicationReplicaSetToUpgrade)));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_OPEN_SHARD_MANAGEMENT,
-                selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet));
+                selectedReplicaSet -> openShardManagementPanel(stringMessages, regionsTable.getSelectionModel().getSelectedObject(), selectedReplicaSet,
+                        sshKeyManagementPanel.getSelectedKeyPair().getName(),
+                        sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption() != null
+                                ? sshKeyManagementPanel.getPassphraseForPrivateKeyDecryption().getBytes()
+                                : null));
         applicationReplicaSetsActionColumn.addAction(ApplicationReplicaSetsImagesBarCell.ACTION_MOVE_ALL_APPLICATION_PROCESSES_AWAY_FROM,
                 applicationReplicaSetWhoseMastersHostToDecommission -> moveAllApplicationProcessesAwayFrom(stringMessages,
                         applicationReplicaSetWhoseMastersHostToDecommission));
@@ -601,8 +605,9 @@ public class LandscapeManagementPanel extends SimplePanel {
        // TODO upon region selection show RabbitMQ, and Central Reverse Proxy clusters in region
    }
 
-    private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset) {
-        new ShardManagementDialog(landscapeManagementService, replicaset, region, errorReporter, stringMessages, new DialogCallback<Boolean>() {
+    private void openShardManagementPanel(StringMessages stringMessages, String region, SailingApplicationReplicaSetDTO<String> replicaset, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) {
+        new ShardManagementDialog(landscapeManagementService, replicaset, region, errorReporter, stringMessages,
+                optionalKeyName, privateKeyEncryptionPassphrase, new DialogCallback<Boolean>() {
             @Override
             public void ok(Boolean hasAnythingChanged) {
                 if (hasAnythingChanged) {

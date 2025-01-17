@@ -49,6 +49,8 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     
     TargetGroup<ShardingKey> getPublicTargetGroup() throws InterruptedException, ExecutionException;
     
+    Iterable<TargetGroup<ShardingKey>> getOtherTargetGroups() throws InterruptedException, ExecutionException;
+    
     /**
      * Identifies the DNS hosted zone that hosts the DNS record for {@link #getHostname()}. The resource record set name
      * may either be a wildcard record such as {@code *.sapsailing.com} or the fully-qualified hostname which then is expected

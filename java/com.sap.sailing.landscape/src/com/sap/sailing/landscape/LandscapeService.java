@@ -305,18 +305,21 @@ public interface LandscapeService {
     /**
      * Updates the AMI to use in the launch template version of those of the {@code replicaSets} that have an auto-scaling group.
      * Any running replica will not be affected by this. Only new replicas will be launched based on the AMI specified.
-     * 
      * @param replicaSets
      *            those without an auto-scaling group won't be affected
      * @param optionalAmi
      *            defaults to the latest image of type {@link SharedLandscapeConstants#IMAGE_TYPE_TAG_VALUE_SAILING}
+     * @param optionalTimeout TODO
+     * @param optionalKeyName TODO
+     * @param privateKeyEncryptionPassphrase TODO
+     * 
      * @return those replica sets that were updated according to this request; those from {@code replicaSets} not part
      *         of this result have not had their AMI upgraded, probably because we didn't find an auto-scaling group and
      *         hence no launch template version to update
      */
     Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> updateImageForReplicaSets(AwsRegion region,
             Iterable<AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>> replicaSets,
-            Optional<AmazonMachineImage<String>> optionalAmi) throws InterruptedException, ExecutionException, TimeoutException;
+            Optional<AmazonMachineImage<String>> optionalAmi, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws InterruptedException, ExecutionException, TimeoutException;
 
     /**
      * For an existing replica set with an {@link AwsApplicationReplicaSet#getAutoScalingGroup() auto-scaling group}
@@ -406,10 +409,13 @@ public interface LandscapeService {
      * group managed replicas, again waiting for the one next new replica to become ready, and so on, until the last old
      * auto-scaling replica has been stopped/terminated. Then, the auto-scaling group's minimum size is reset to what it
      * was when this method was called.
+     * @param optionalTimeout TODO
+     * @param optionalKeyName TODO
+     * @param privateKeyEncryptionPassphrase TODO
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
-            InstanceType instanceType) throws Exception;
+            InstanceType instanceType, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;

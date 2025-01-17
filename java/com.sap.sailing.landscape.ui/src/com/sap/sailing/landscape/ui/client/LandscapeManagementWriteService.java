@@ -168,15 +168,15 @@ public interface LandscapeManagementWriteService extends RemoteService {
     ArrayList<LeaderboardNameDTO> getLeaderboardNames(SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
     
     void addShard(String shardName, ArrayList<LeaderboardNameDTO> selectedLeaderBoardNames, SailingApplicationReplicaSetDTO<String> replicaSet,
-            String bearerToken, String region) throws Exception;
+            String bearerToken, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSet, String region, String bearerToken) throws Exception;
+    public Map<AwsShardDTO, Iterable<String>> getShards(SailingApplicationReplicaSetDTO<String> replicaSet, String region, String bearerToken, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region) throws Exception;
+    public void removeShard(AwsShardDTO shard, SailingApplicationReplicaSetDTO<String> replicaSet, String region, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> shardingKeysToAppend, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
+    void appendShardingKeysToShard(Iterable<LeaderboardNameDTO> shardingKeysToAppend, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
-    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> shardingKeysToRemove, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken) throws Exception;
+    void removeShardingKeysFromShard(Iterable<LeaderboardNameDTO> shardingKeysToRemove, String region, String shardName, SailingApplicationReplicaSetDTO<String> replicaSet, String bearerToken, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     void moveAllApplicationProcessesAwayFrom(AwsInstanceDTO host, String optionalInstanceTypeForNewInstance,
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
