@@ -231,10 +231,11 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
     
     @Override
-    public int getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public Integer getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         if (igtimiRiotPort == null) {
-            igtimiRiotPort = Integer.parseInt(getEnvShValueFor(SailingProcessConfigurationVariables.IGTIMI_RIOT_PORT.name(),
-                    optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase));
+            final String igtimiRiotPortEnvVar = getEnvShValueFor(SailingProcessConfigurationVariables.IGTIMI_RIOT_PORT.name(),
+                    optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            igtimiRiotPort = Util.hasLength(igtimiRiotPortEnvVar) ? Integer.parseInt(igtimiRiotPortEnvVar) : null;
         }
         return igtimiRiotPort;
     }

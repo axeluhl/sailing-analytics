@@ -5,13 +5,13 @@ import com.sap.sse.common.TimePoint;
 
 public class SailingAnalyticsProcessDTO extends ApplicationProcessDTO implements IsSerializable {
     private int expeditionUdpPort;
-    private int igtimiRiotPort;
+    private Integer igtimiRiotPort;
     
     @Deprecated
     SailingAnalyticsProcessDTO() {} // for GWT RPC serialization only
 
     public SailingAnalyticsProcessDTO(AwsInstanceDTO host, int port, String hostname, String releaseName,
-            int telnetPortToOSGiConsole, String serverName, String serverDirectory, int expeditionUdpPort, int igtimiRiotPort, TimePoint startTimePoint) {
+            int telnetPortToOSGiConsole, String serverName, String serverDirectory, int expeditionUdpPort, Integer igtimiRiotPort, TimePoint startTimePoint) {
         super(host, port, hostname, releaseName, telnetPortToOSGiConsole, serverName, serverDirectory, startTimePoint);
         this.expeditionUdpPort = expeditionUdpPort;
         this.igtimiRiotPort = igtimiRiotPort;
@@ -21,7 +21,7 @@ public class SailingAnalyticsProcessDTO extends ApplicationProcessDTO implements
         return expeditionUdpPort;
     }
     
-    public int getIgtimiRiotPort() {
+    public Integer getIgtimiRiotPort() {
         return igtimiRiotPort;
     }
 }
