@@ -4254,7 +4254,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         final Map<String, TimePoint> lastHeartBeatsByDeviceSerialNumber = new HashMap<>();
         final Map<String, SocketAddress> remoteAddressByDeviceSerialNumber = new HashMap<>();
         final RiotServer riotServer = getRiotServer();
-        for (final RiotConnection connection : riotServer.getLiveConnections()) {
+        for (final RiotConnection connection : riotServer.getLiveConnections()) { // FIXME this ignores replication; we would also want to get this data from all replicas
             final String serialNumber = connection.getSerialNumber();
             if (serialNumber != null) {
                 if (Util.compareToWithNull(connection.getLastHeartbeatReceivedAt(), lastHeartBeatsByDeviceSerialNumber.get(serialNumber), /* null is less */ true) > 0) {
