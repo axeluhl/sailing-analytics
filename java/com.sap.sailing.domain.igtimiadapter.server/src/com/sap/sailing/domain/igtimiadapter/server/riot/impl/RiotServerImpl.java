@@ -561,6 +561,11 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+        return apply(s->s.internalSendStandardCommand(deviceSerialNumber, command));
+    }
+
+    @Override
+    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
