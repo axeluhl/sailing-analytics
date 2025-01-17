@@ -240,6 +240,25 @@ implements SailingAnalyticsProcess<ShardingKey> {
     }
 
     @Override
+    public int[] getAllTCPPorts(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final int[] superTCPPorts = super.getAllTCPPorts(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        final int[] result = new int[superTCPPorts.length + 1];
+        System.arraycopy(superTCPPorts, 0, result, 0, superTCPPorts.length);
+        result[result.length-1] = getIgtimiRiotPort(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return result;
+    }
+
+    @Override
+    public int[] getAllUDPPorts(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+        final int[] superUDPPorts = super.getAllUDPPorts(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        final int[] result = new int[superUDPPorts.length + 1];
+        System.arraycopy(superUDPPorts, 0, result, 0, superUDPPorts.length);
+        result[result.length-1] = getExpeditionUdpPort(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        return result;
+    }
+
+
+    @Override
     public void stopAndTerminateIfLast(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) {
         try {
