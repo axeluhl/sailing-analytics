@@ -2124,24 +2124,36 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             });
         }
     }
+    
+    private void checkCurrentUserUpdatePermissionForIgtimiDevice(String serialNumber) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+        }
+    }
 
     @Override
     public boolean sendGPSOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_OFF);
     }
 
     @Override
     public boolean sendGPSOnCommandToIgtimiDevice(String serialNumber) throws IOException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_GPS_ON);
     }
 
     @Override
     public boolean sendPowerOffCommandToIgtimiDevice(String serialNumber) throws IOException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_POWER_OFF);
     }
 
     @Override
     public boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
     }
 

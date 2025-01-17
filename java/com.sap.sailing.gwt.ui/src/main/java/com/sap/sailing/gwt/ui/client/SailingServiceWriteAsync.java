@@ -587,12 +587,32 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
 
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
     void sendGPSOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
     void sendGPSOnCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
     void sendPowerOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
     void sendRestartCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
     /**
