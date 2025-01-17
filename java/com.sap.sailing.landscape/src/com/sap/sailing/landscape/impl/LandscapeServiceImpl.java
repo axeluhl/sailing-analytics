@@ -268,6 +268,14 @@ public class LandscapeServiceImpl implements LandscapeService {
                     } else if (optionalMemoryTotalSizeFactorOrNull != null) {
                         replicaConfigurationBuilder.setMemoryTotalSizeFactor(optionalMemoryTotalSizeFactorOrNull);
                     }
+                    try {
+                        Integer igtimiRiotPort = replicaSet.getMaster().getIgtimiRiotPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                        if (igtimiRiotPort != null) {
+                            replicaConfigurationBuilder.setIgtimiRiotPort(igtimiRiotPort);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                     // the process launcher uses the DeployProcessOnMultiServer procedure to launch the process based on the replica config 
                     final DeployProcessOnMultiServer.Builder<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> replicaDeploymentProcessBuilder =
                             DeployProcessOnMultiServer.<MultiServerDeployerBuilderT, String, SailingAnalyticsHost<String>, SailingAnalyticsReplicaConfiguration<String>, AppConfigBuilderT> builder(replicaConfigurationBuilder, hostToDeployTo);
@@ -1318,6 +1326,8 @@ public class LandscapeServiceImpl implements LandscapeService {
             spunUpReplica = spinUpReplicaAndRegisterInPublicTargetGroup(replicaSet, optionalKeyName,
                     privateKeyEncryptionPassphrase, replicationBearerToken);
         }
+        // bug6083 comment #6: Note that the following won't happen when the auto-scaling group automatically reacts to scaling events
+        replicaSet.getOtherTargetGroups().forEach(tg->tg.addTarget(spunUpReplica.getHost()));
         return spunUpReplica;
     }
 
@@ -1473,6 +1483,8 @@ public class LandscapeServiceImpl implements LandscapeService {
                 result = replicaSet;
             } else {
                 final SailingAnalyticsProcess<String> replica = spinUpReplicaByIncreasingAutoScalingGroupMinSize(replicaSet.getAutoScalingGroup(), replicaSet.getMaster());
+                // bug6083 comment #6: this registration with other target groups won't happen when another scaling event triggers the launch
+                replicaSet.getOtherTargetGroups().forEach(tg->tg.addTarget(replica.getHost()));
                 assert replica.isReady(Landscape.WAIT_FOR_PROCESS_TIMEOUT);
                 for (final SailingAnalyticsProcess<String> nonAutoScalingReplica : replicaSet.getReplicas()) {
                     if (!nonAutoScalingReplica.getHost().isManagedByAutoScalingGroup()) {
@@ -1542,6 +1554,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                     Integer optionalMemoryTotalSizeFactorOrNull)
                     throws MalformedURLException,
                     IOException, TimeoutException, InterruptedException, ExecutionException, Exception {
+        final Integer igtimiRiotPort = replicaSet.getMaster().getIgtimiRiotPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
         if (replicaSet.isLocalReplicaSet()) {
             throw new IllegalArgumentException("A replica set cannot move its own master process. Current replica set: "+ServerInfo.getName());
         }
@@ -1565,6 +1578,9 @@ public class LandscapeServiceImpl implements LandscapeService {
                 optionalMasterReplicationBearerTokenOrNull, optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull,
                 region, release);
         masterConfigurationBuilder.setPort(replicaSet.getPort()); // master must run on same port as the rest of the replica set
+        if (igtimiRiotPort != null) {
+            masterConfigurationBuilder.setIgtimiRiotPort(igtimiRiotPort);
+        }
         final SailingAnalyticsProcess<String> newMaster;
         if (useSharedInstance) {
             assert hostToDeployTo != null;
@@ -1698,10 +1714,20 @@ public class LandscapeServiceImpl implements LandscapeService {
                 }
                 getLandscape().updateAutoScalingGroupMinSize(autoScalingGroup, oldMinSize);
             }
+            // determine new replicas, without the terminated ones...
+            final Iterable<SailingAnalyticsProcess<String>> newReplicasWithoutTerminated =  
+                    Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r));
+            // ...and add them to any other target groups the instances of the replica set have to be added to
+            newReplicasWithoutTerminated.forEach(replica->{
+                try {
+                    replicaSet.getOtherTargetGroups().forEach(tg->tg.addTarget(replica.getHost()));
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             result = getLandscape().getApplicationReplicaSet(replicaSet.getMaster().getHost().getRegion(),
-                    replicaSet.getServerName(), replicaSet.getMaster(),
-                    // remove terminated replicas:
-                    Util.filter(newSetOfAllReplicas, r->!Util.contains(terminatedReplicas, r)), optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+                    replicaSet.getServerName(), replicaSet.getMaster(), newReplicasWithoutTerminated,
+                    optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
         } else {
             logger.info("Replica set "+replicaSet.getName()+
                     " does not have an auto-scaling group configured, so no changes can be made to its launch template.");

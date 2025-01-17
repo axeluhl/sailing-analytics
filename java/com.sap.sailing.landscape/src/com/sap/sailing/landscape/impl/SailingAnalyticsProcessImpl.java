@@ -242,10 +242,16 @@ implements SailingAnalyticsProcess<ShardingKey> {
 
     @Override
     public int[] getAllTCPPorts(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        final int[] superTCPPorts = super.getAllTCPPorts(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-        final int[] result = new int[superTCPPorts.length + 1];
-        System.arraycopy(superTCPPorts, 0, result, 0, superTCPPorts.length);
-        result[result.length-1] = getIgtimiRiotPort(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        final Integer igtimiRiotPort = getIgtimiRiotPort(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        final int[] result;
+        if (igtimiRiotPort == null) {
+            result = super.getAllTCPPorts(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+        } else {
+            final int[] superTCPPorts = super.getAllTCPPorts(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
+            result = new int[superTCPPorts.length + 1];
+            System.arraycopy(superTCPPorts, 0, result, 0, superTCPPorts.length);
+            result[result.length-1] = igtimiRiotPort;
+        }
         return result;
     }
 
