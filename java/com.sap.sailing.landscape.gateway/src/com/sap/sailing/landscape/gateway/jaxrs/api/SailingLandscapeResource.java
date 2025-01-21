@@ -98,6 +98,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
     private static final String REPLICA_PROCESSES_MOVED = "replicaProcessesMoved";
     private static final String REPLICA_SET_NAME = "replicaSetName";
     private static final String PORT = "port";
+    private static final String IGTIMI_RIOT_PORT = "igtimiRiotPort";
 
     @Context
     UriInfo uriInfo;
@@ -199,7 +200,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
             @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull,
             @FormParam(MINIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMinimumAutoScalingGroupSize,
-            @FormParam(MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMaximumAutoScalingGroupSize) {
+            @FormParam(MAXIMUM_AUTO_SCALING_GROUP_SIZE_FORM_PARAM) Integer optionalMaximumAutoScalingGroupSize,
+            @FormParam(IGTIMI_RIOT_PORT) Integer optionalIgtimiRiotPort) {
         checkLandscapeManageAwsPermission();
         Response response;
         try {
@@ -209,7 +211,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                             dedicatedInstanceType, dynamicLoadBalancerMapping, release.getName(),
                             optionalKeyName, privateKeyEncryptionPassphrase == null ? null : privateKeyEncryptionPassphrase.getBytes(), masterReplicationBearerToken,
                             replicaReplicationBearerToken, domainName, optionalMemoryInMegabytesOrNull,
-                            optionalMemoryTotalSizeFactorOrNull, Optional.ofNullable(optionalMinimumAutoScalingGroupSize), Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
+                            optionalMemoryTotalSizeFactorOrNull, optionalIgtimiRiotPort, Optional.ofNullable(optionalMinimumAutoScalingGroupSize),
+                            Optional.ofNullable(optionalMaximumAutoScalingGroupSize));
             final JSONObject result = new AwsApplicationReplicaSetJsonSerializer(release.getName()).serialize(replicaSet);
             response = Response.ok(streamingOutput(result)).build();
         } catch (Exception e) {
@@ -401,7 +404,8 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             @FormParam(PRIVATE_KEY_ENCRYPTION_PASSPHRASE_FORM_PARAM) String privateKeyEncryptionPassphrase,
             @FormParam(REPLICA_REPLICATION_BEARER_TOKEN_FORM_PARAM) String replicaReplicationBearerToken,
             @FormParam(MEMORY_IN_MEGABYTES_FORM_PARAM) Integer optionalMemoryInMegabytesOrNull,
-            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull) {
+            @FormParam(MEMORY_TOTAL_SIZE_FACTOR_FORM_PARAM) Integer optionalMemoryTotalSizeFactorOrNull,
+            @FormParam(IGTIMI_RIOT_PORT) Integer optionalIgtimiRiotPort) {
         checkLandscapeManageAwsPermission();
         Response response;
         final AwsRegion region = new AwsRegion(regionId, getLandscapeService().getLandscape());
@@ -420,7 +424,7 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
                         Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption)) {
                     final SailingAnalyticsProcess<String> process = getLandscapeService().deployReplicaToExistingHost(replicaSet, hostToDeployTo, optionalKeyName,
                             passphraseForPrivateKeyDecryption, replicaReplicationBearerToken,
-                            optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull);
+                            optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull, optionalIgtimiRiotPort);
                     response = Response.ok().entity(streamingOutput(
                             new AwsApplicationProcessJsonSerializer<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>>()
                                     .serialize(process)))

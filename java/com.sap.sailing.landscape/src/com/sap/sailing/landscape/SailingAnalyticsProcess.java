@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.jcraft.jsch.JSchException;
+import com.sap.sailing.landscape.procedures.SailingProcessConfigurationVariables;
 import com.sap.sse.common.Duration;
 import com.sap.sse.landscape.Release;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
@@ -14,6 +15,10 @@ public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProc
 
     int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
+    /**
+     * The Igtimi Riot port as obtained from the {@link SailingProcessConfigurationVariables#IGTIMI_RIOT_PORT} variable, or {@code null}
+     * if that variable is not configured in this process.
+     */
     Integer getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     
     @Override

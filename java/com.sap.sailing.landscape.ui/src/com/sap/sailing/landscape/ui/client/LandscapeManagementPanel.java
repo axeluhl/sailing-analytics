@@ -989,6 +989,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                         /* maximum auto-scaling group size remains at default: */ null,
                         instructions.getOptionalMemoryInMegabytesOrNull(),
                         instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                        instructions.getOptionalIgtimiRiotPort(),
                         new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                          @Override
                          public void onFailure(Throwable caught) {
@@ -1072,6 +1073,7 @@ public class LandscapeManagementPanel extends SimplePanel {
                                                 /* minimum auto-scaling group size: */ instructions.isFirstReplicaOnSharedInstance() ? 0 : null,
                                                 /* maximum auto-scaling group size (use default) */ null,
                                                 instructions.getOptionalMemoryInMegabytesOrNull(), instructions.getOptionalMemoryTotalSizeFactorOrNull(),
+                                                instructions.getOptionalIgtimiRiotPort(),
                                                 getMasterHostFromFirstSelectedApplicationReplicaSetThatIsNot(applicationReplicaSetOnWhichToDeployMaster),
                                                 new AsyncCallback<SailingApplicationReplicaSetDTO<String>>() {
                                  @Override

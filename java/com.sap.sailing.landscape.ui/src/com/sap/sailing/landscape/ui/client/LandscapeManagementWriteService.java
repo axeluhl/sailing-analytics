@@ -100,7 +100,8 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String masterInstanceType, String optionalReplicaInstanceTypeOrNull, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String securityReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer minimumAutoScalingGroupSizeOrNull,
-            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull) throws Exception;
+            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer optionalIgtimiRiotPort) throws Exception;
 
     void defineDefaultRedirect(String regionId, String hostname, RedirectDTO redirect, String keyName, String passphraseForPrivateKeyDecryption);
 
@@ -133,7 +134,7 @@ public interface LandscapeManagementWriteService extends RemoteService {
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
+            Integer optionalIgtimiRiotPort, AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception;
 
 
     Boolean ensureAtLeastOneReplicaExistsStopReplicatingAndRemoveMasterFromTargetGroups(String regionId,

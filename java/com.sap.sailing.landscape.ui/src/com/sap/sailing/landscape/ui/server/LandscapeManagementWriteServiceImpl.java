@@ -633,7 +633,8 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String sharedInstanceType, String dedicatedInstanceType, boolean dynamicLoadBalancerMapping,
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName, Integer minimumAutoScalingGroupSizeOrNull,
-            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull)
+            Integer maximumAutoScalingGroupSizeOrNull, Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer optionalIgtimiRiotPort)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
@@ -643,7 +644,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                         privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
                         optionalDomainName, optionalMemoryInMegabytesOrNull,
                         optionalMemoryTotalSizeFactorOrNull,
-                        Optional.ofNullable(minimumAutoScalingGroupSizeOrNull), Optional.ofNullable(maximumAutoScalingGroupSizeOrNull));
+                        optionalIgtimiRiotPort, Optional.ofNullable(minimumAutoScalingGroupSizeOrNull), Optional.ofNullable(maximumAutoScalingGroupSizeOrNull));
         return new SailingApplicationReplicaSetDTO<String>(result.getName(), convertToSailingAnalyticsProcessDTO(result
                 .getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 Util.map(result.getReplicas(), r->{
@@ -666,13 +667,13 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception {
+            Integer optionalIgtimiRiotPort, AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo) throws Exception {
         return deployApplicationToExistingHostInternal(replicaSetName, hostToDeployTo, replicaInstanceType,
                 dynamicLoadBalancerMapping, releaseNameOrNullForLatestMaster, optionalKeyName,
                 privateKeyEncryptionPassphrase, masterReplicationBearerToken, replicaReplicationBearerToken,
                 optionalDomainName, optionalMinimumAutoScalingGroupSizeOrNull,
                 optionalMaximumAutoScalingGroupSizeOrNull, optionalMemoryInMegabytesOrNull,
-                optionalMemoryTotalSizeFactorOrNull, optionalPreferredInstanceToDeployUnmanagedReplicaTo);
+                optionalMemoryTotalSizeFactorOrNull, optionalIgtimiRiotPort, optionalPreferredInstanceToDeployUnmanagedReplicaTo);
     }
     
     /**
@@ -686,6 +687,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
      * 
      * The "internal" method exists in order to declare a few type parameters which wouldn't be possible on the GWT RPC
      * interface method as some of these types are not seen by clients.
+     * @param optionalIgtimiRiotPort TODO
      * @param optionalMinimumAutoScalingGroupSize
      *            defaults to 1; if 0, a replica process will be launched on an eligible shared instance in an
      *            availability zone different from that of the instance hosting the master process. Otherwise,
@@ -709,7 +711,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
             byte[] privateKeyEncryptionPassphrase,
             String masterReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName, Integer optionalMinimumAutoScalingGroupSizeOrNull,
             Integer optionalMaximumAutoScalingGroupSizeOrNull,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull, AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo)
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull, Integer optionalIgtimiRiotPort, AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo)
             throws Exception {
         checkLandscapeManageAwsPermission();
         final Release release = getLandscapeService().getRelease(releaseNameOrNullForLatestMaster);
@@ -722,7 +724,7 @@ public class LandscapeManagementWriteServiceImpl extends ResultCachingProxiedRem
                     optionalKeyName, privateKeyEncryptionPassphrase, masterReplicationBearerToken,
                     replicaReplicationBearerToken, optionalDomainName, Optional.ofNullable(optionalMinimumAutoScalingGroupSizeOrNull),
                     Optional.ofNullable(optionalMaximumAutoScalingGroupSizeOrNull), optionalMemoryInMegabytesOrNull,
-                    optionalMemoryTotalSizeFactorOrNull, Optional.of(hostToDeployTo.getInstance().instanceType()), Optional.ofNullable(hostToDeployReplicaTo));
+                    optionalMemoryTotalSizeFactorOrNull, optionalIgtimiRiotPort, Optional.of(hostToDeployTo.getInstance().instanceType()), Optional.ofNullable(hostToDeployReplicaTo));
         return new SailingApplicationReplicaSetDTO<String>(result.getName(),
                 convertToSailingAnalyticsProcessDTO(result.getMaster(), Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
                 Util.map(result.getReplicas(), r->{

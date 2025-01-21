@@ -148,7 +148,7 @@ public interface LandscapeManagementWriteServiceAsync {
             String releaseNameOrNullForLatestMaster, String optionalKeyName, byte[] privateKeyEncryptionPassphrase,
             String securityReplicationBearerToken, String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
-            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull,
+            Integer minimumAutoScalingGroupSizeOrNull, Integer maximumAutoScalingGroupSizeOrNull, Integer optionalIgtimiRiotPort,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
     void serializationDummy(ProcessDTO mongoProcessDTO, AwsInstanceDTO awsInstanceDTO, AwsShardDTO shardDTO,
@@ -186,7 +186,7 @@ public interface LandscapeManagementWriteServiceAsync {
             String optionalKeyName, byte[] privateKeyEncryptionPassphrase, String masterReplicationBearerToken,
             String replicaReplicationBearerToken, String optionalDomainName,
             Integer optionalMinimumAutoScalingGroupSizeOrNull, Integer optionalMaximumAutoScalingGroupSizeOrNull,
-            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull,
+            Integer optionalMemoryInMegabytesOrNull, Integer optionalMemoryTotalSizeFactorOrNull, Integer optionalIgtimiRiotPort,
             AwsInstanceDTO optionalPreferredInstanceToDeployUnmanagedReplicaTo,
             AsyncCallback<SailingApplicationReplicaSetDTO<String>> callback);
 
