@@ -37,6 +37,35 @@ public interface SharedLandscapeConstants {
     }
     
     /**
+     * The default name of the replica set in the landscape we use to receive data from Igtimi WindBot devices.
+     */
+    String IGTIMI_DEFAULT_RIOT_REPLICA_SET_NAME = "wind";
+    
+    /**
+     * The default host name under which at port {@link #IGTIMI_DEFAULT_RIOT_PORT} the Riot server can be reached by the
+     * Igtimi WindBot devices. Constructed from the {@link #IGTIMI_DEFAULT_RIOT_REPLICA_SET_NAME default Riot replica
+     * set name} and the {@link #DEFAULT_DOMAIN_NAME default domain name}.
+     */
+    String IGTIMI_DEFAULT_RIOT_HOSTNAME = IGTIMI_DEFAULT_RIOT_REPLICA_SET_NAME + "." + DEFAULT_DOMAIN_NAME;
+    
+    /**
+     * The default value for the property whose name is given by {@link #IGTIMI_BASE_URL_PROPERTY_NAME}; ends with a
+     * slash (/)
+     */
+    String IGTIMI_BASE_URL_DEFAULT = "https://" + IGTIMI_DEFAULT_RIOT_REPLICA_SET_NAME + "." + DEFAULT_DOMAIN_NAME + "/";
+    
+    /**
+     * The port of our default Igtimi "Riot" server implementation that WindBot devices may send their data to.
+     * WindBots can be configured in their {@code config.ini} file with a line like
+     * <pre>
+     *   riot server_address &lt;hostname&gt; &lt;port&gt;
+     * </pre>
+     * Where the hostname should by default be the one used in the {@link #IGTIMI_BASE_URL_DEFAULT}, and the
+     * port should be the value of this constant.
+     */
+    int IGTIMI_DEFAULT_RIOT_PORT = 6000;
+    
+    /**
      * If a shared security realm is to be used for a domain then this constant tells the name of the application
      * replica set that by default manages the shared security information. Other replicables that are to be shared
      * through the same realm, such as landscape management data or shared sailing data such as course templates or mark
