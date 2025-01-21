@@ -144,7 +144,7 @@ public class WebSocketTest extends AbstractSeleniumTest {
     public void testWebSocketConnect() throws Exception {
         final List<Fix> allFixesReceived = new ArrayList<>();
         final IgtimiConnectionFactory igtimiConnectionFactory = IgtimiConnectionFactory.create(new URL(getContextRoot()),
-                /* defaultBearerToken */ null); // TODO bug6059: connect to the riotServer launched above
+                /* defaultBearerToken */ null);
         // the following is an access token for an account allowing axel.uhl@gmx.de to access
         // the data from baur@stg-academy.org, particularly containing the Berlin test data
         IgtimiConnection conn = igtimiConnectionFactory.getOrCreateConnection();
