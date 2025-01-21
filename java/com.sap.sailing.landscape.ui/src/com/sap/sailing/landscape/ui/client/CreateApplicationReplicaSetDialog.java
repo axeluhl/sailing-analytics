@@ -211,8 +211,8 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
             memoryTotalSizeFactorBox.setValue(SharedLandscapeConstants.DEFAULT_NUMBER_OF_PROCESSES_IN_MEMORY);
         }
         memoryInMegabytesBox.addValueChangeHandler(e->memoryTotalSizeFactorBox.setEnabled(e.getValue() == null));
-        igtimiRiotPortBox = createIntegerBox(null, 5);
-        igtimiRiotPortBox.getElement().setAttribute("placeholder", ""+SharedLandscapeConstants.IGTIMI_DEFAULT_RIOT_PORT);
+        igtimiRiotPortBox = createIntegerBox(null, 10);
+        igtimiRiotPortBox.getElement().setAttribute("placeholder", stringMessages.examplePort(SharedLandscapeConstants.IGTIMI_DEFAULT_RIOT_PORT));
         startWithReplicaOnSharedInstanceBox = createCheckbox(stringMessages.firstReplicaOnSharedInstance());
         startWithReplicaOnSharedInstanceBox.addValueChangeHandler(e->updateInstanceTypesBasedOnSharedMasterInstanceBox());
         startWithReplicaOnSharedInstanceBox.setValue(useExistingSharedMasterInstance);
@@ -274,7 +274,7 @@ public class CreateApplicationReplicaSetDialog extends AbstractApplicationReplic
 
     @Override
     protected Widget getAdditionalWidget() {
-        final Grid result = new Grid(12, 2);
+        final Grid result = new Grid(13, 2);
         int row=0;
         result.setWidget(row, 0, new Label(stringMessages.name()));
         result.setWidget(row++, 1, nameBox);
