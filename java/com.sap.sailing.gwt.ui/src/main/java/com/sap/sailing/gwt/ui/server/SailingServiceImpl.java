@@ -456,6 +456,7 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.RepeatablePart;
@@ -4262,6 +4263,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 remoteAddressByDeviceSerialNumber.put(serialNumber, connection.getSocketChannel().getRemoteAddress());
             }
         }
+        final MultiTimeRange infiniteTimeRange = MultiTimeRange.of(TimeRange.create(null, null));
         return new ArrayList<>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 riotServer.getDevices(),
                 device->{
@@ -4270,8 +4272,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                                     device,
                                     lastHeartBeatsByDeviceSerialNumber.get(device.getSerialNumber()),
                                     remoteAddressByDeviceSerialNumber.get(device.getSerialNumber()),
-                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class)),
-                                    getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class)));
+                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class,
+                                            infiniteTimeRange)),
+                                    getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class, infiniteTimeRange)));
                     } catch (org.json.simple.parser.ParseException | IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -6051,7 +6054,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public Integer getAdminConsoleChangeLogSize() {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            // FIXME this will break for any reverse proxy or port-mapping container between the client and this server!
             final int localPort = getThreadLocalRequest().getLocalPort();
             final URIBuilder url = new URIBuilder("http://127.0.0.1:"+localPort+"/release_notes_admin.html");
             final HttpGet request = new HttpGet(url.build());

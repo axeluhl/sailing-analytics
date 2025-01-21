@@ -236,7 +236,9 @@ public class ConnectivityTest<ProcessT extends AwsApplicationProcess<String, Sai
                         host.getInstanceId(), host.getAvailabilityZone(), host.getPrivateAddress(), host.getLaunchTimePoint(),
                         landscape, new SailingAnalyticsProcessFactory(()->landscape));
         @SuppressWarnings("unchecked")
-        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, sailingAnalyticsHost, ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+serverName, 2010, landscape);
+        final ProcessT process = (ProcessT) new SailingAnalyticsProcessImpl<String>(8888, sailingAnalyticsHost, ApplicationProcessHost.DEFAULT_SERVERS_PATH+"/"+serverName,
+                /* expedition UDP port */2010,
+                /* igtimiRiotPort */ 6000, landscape);
         return process;
     }
     

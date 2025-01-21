@@ -162,6 +162,64 @@ public class RiotConnectionImpl implements RiotConnection {
         }
     }
 
+    /**
+     * Here is the code in the firmware handling the authentication response:
+     * 
+     * <pre>
+     * 
+    UT_PL_Statusv2Payload* status = (UT_PL_Statusv2Payload*) payload;
+      if (status->payloadType == UT_PL_STATUS_AUTH)
+      {
+        if (status->data.auth.response)
+        {
+          if (status->data.auth.success)
+          {
+            LOG(LINF, LG_RIOT, "Authentication successful (%s)", status->data.auth.authType == UT_PL_STATUS_AUTH_USER ? "user" : "device");
+            
+            utConnectionManager_SendDeviceData();
+            
+            if (status->data.auth.authType == UT_PL_STATUS_AUTH_DEVICE)
+            {
+              if (ut_StringsEqualIgnoreCase(status->data.auth.token, DEFAULT_DGT))
+              {
+                uTrackConfig.usingDefaultDgt = true;
+                forward = false;
+              }
+              else if (deviceAuthState == DeviceAuthState_Authenticating)
+              {
+                uTrackConfig.usingDefaultDgt = false;
+                forward = false;
+                if (!ut_StringsEqualIgnoreCase(status->data.auth.token, uTrackConfig.core.body.deviceGroupToken))
+                {
+                  bool success = false;
+                  strcpy(uTrackConfig.core.body.deviceGroupToken, status->data.auth.token);
+                  success = utEEPROM_setNewDeviceGroupToken(uTrackConfig.core.body.deviceGroupToken);
+                  LOG(LINF, LG_RIOT, "Loaded new device group token: %s", success ? "YES" : "NO");
+                }
+              }
+              else
+              {
+                uTrackConfig.usingDefaultDgt = false;
+              }
+            }
+            deviceAuthState = DeviceAuthState_Authenticated;
+          } 
+          else 
+          {
+            LOG(LWRN, LG_RIOT, "Authentication failed with code: %d (%s)", status->data.auth.code, status->data.auth.authType == UT_PL_STATUS_AUTH_USER ? "user" : "device");
+            deviceAuthState = DeviceAuthState_Error;
+          }
+        }
+        checkDeviceAuth();
+      }
+     * </pre>
+     * 
+     * This suggests that sending a device group token back in the response may instruct the device to update its device
+     * group token in its EEPROM.<p>
+     * 
+     * We received additional instructions that say that when {@code uTrackConfig.usingDefaultDgt} is set to {@code false} then this
+     * makes the device stop sending its serial number in messages.
+     */
     private void sendPositiveAuthResponse() throws IOException {
         final AuthResponse response = AuthResponse.newBuilder()
             .setTimestamp(System.currentTimeMillis())

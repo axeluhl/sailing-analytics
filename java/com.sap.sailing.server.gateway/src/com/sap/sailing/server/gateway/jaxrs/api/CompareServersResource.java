@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -33,6 +34,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
 import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.Util;
@@ -153,12 +155,18 @@ public class CompareServersResource extends AbstractSailingServerResource {
             @FormParam(PASSWORD1_FORM_PARAM) String password1,
             @FormParam(PASSWORD2_FORM_PARAM) String password2,
             @FormParam(BEARER1_FORM_PARAM) String bearer1,
-            @FormParam(BEARER2_FORM_PARAM) String bearer2) {
+            @FormParam(BEARER2_FORM_PARAM) String bearer2) throws MalformedURLException {
         final Map<String, Set<Object>> result = new HashMap<>();
         Response response = null;
         final String effectiveServer1 = !Util.hasLength(server1) ? uriInfo.getBaseUri().getAuthority() : server1;
-        if (!validateParameters(server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
-            response = badRequest("Specify two server names and optionally a set of valid leaderboardgroup UUIDs.");
+        final URL url1 = RemoteServerUtil.createBaseUrl(effectiveServer1);
+        final URL url2 = RemoteServerUtil.createBaseUrl(server2);
+        if (!SharedLandscapeConstants.isTrustedDomain(url1.getHost())) {
+            response = badRequest("Untrusted domain for "+url1);
+        } else if (!SharedLandscapeConstants.isTrustedDomain(url2.getHost())) {
+            response = badRequest("Untrusted domain for "+url2);
+        } else if (!validateParameters(server2, uuidset, user1, user2, password1, password2, bearer1, bearer2)) {
+            response = badRequest("Specify two trusted server names and optionally a set of valid leaderboardgroup UUIDs.");
         } else {
             final String token1 = getSecurityService().getOrCreateTargetServerBearerToken(effectiveServer1, user1, password1, bearer1);
             final String token2 = getSecurityService().getOrCreateTargetServerBearerToken(server2, user2, password2, bearer2);

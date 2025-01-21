@@ -29,7 +29,7 @@ import com.sap.sse.common.Util;
 
 public class CharlstonRaceWeek2015_ParserTest extends AbstractCharlstonRaceWeek2015Test {
     @Test
-    public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException {
+    public void testSimpleParsingSomeYachtscoringDocuments() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(CHARLSTONRACEWEEK2015_TESTFILE_XRR), CHARLSTONRACEWEEK2015_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }

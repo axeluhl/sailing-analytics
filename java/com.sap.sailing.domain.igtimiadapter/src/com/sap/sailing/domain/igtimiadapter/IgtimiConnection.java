@@ -72,12 +72,13 @@ public interface IgtimiConnection {
             IOException, ParseException;
 
     /**
-     * For the devices specified by <code>deviceSerialNumbers</code>, creates a live data connection. The <code>account</code>
-     * needs to be authorized to access the devices' data for the current time window. Fixes received through this connection
-     * are forwarded in the batches in which they are received to the listeners that can be added to the live connection
-     * using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
+     * For the devices specified by <code>deviceSerialNumbers</code>, creates a live data connection. The
+     * <code>account</code> needs to be authorized to access the devices' data for the current time window. Fixes
+     * received through this connection are forwarded in the batches in which they are received to the listeners that
+     * can be added to the live connection using {@link LiveDataConnection#addListener(BulkFixReceiver)}.
      * 
-     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()}.
+     * @return a connection that the caller can use to stop the live feed by calling {@link LiveDataConnection#stop()},
+     *         or {@code null} if the collection of device serial numbers is empty or {@code null}.
      */
     LiveDataConnection getOrCreateLiveConnection(Iterable<String> deviceSerialNumbers) throws Exception;
     
