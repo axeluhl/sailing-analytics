@@ -53,7 +53,9 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     private TargetState targetState;
     private WebSocketClient client;
     private final JSONObject configurationMessage;
-    private final Timer timer;
+    private static final Timer timer = new Timer("Timer for WebSocketConnectionManager", /* isDaemon */ true);
+    private final TimerTask heartbeatTask;
+    private final TimerTask serverHeartbeatTask;
     private final Iterable<String> deviceIds;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
@@ -73,15 +75,14 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
     
     public WebSocketConnectionManager(IgtimiConnection connection, Iterable<String> deviceSerialNumbers) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers, /* isDaemon */ true);
         this.deviceIds = deviceSerialNumbers;
         this.fixFactory = new FixFactory();
         this.connection = connection;
         this.listeners = new ConcurrentHashMap<>();
         configurationMessage = connection.getWebSocketConfigurationMessage(deviceSerialNumbers);
         reconnect();
-        startClientHeartbeat();
-        startListeningForServerHeartbeat();
+        heartbeatTask = startClientHeartbeat();
+        serverHeartbeatTask = startListeningForServerHeartbeat();
     }
     
     private Session getSession() {
@@ -116,7 +117,8 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     public void stop() throws Exception {
         logger.info("Stopping connection mananager "+this);
         targetState = TargetState.CLOSED;
-        timer.cancel();
+        heartbeatTask.cancel();
+        serverHeartbeatTask.cancel();
         final Session session = getSession();
         if (session != null) {
             session.disconnect();
@@ -271,8 +273,8 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         return "Web Socket Connection Manager for devices "+deviceIds+" with web socket session "+getSession();
     }
 
-    private void startListeningForServerHeartbeat() {
-        timer.scheduleAtFixedRate(new TimerTask() {
+    private TimerTask startListeningForServerHeartbeat() {
+        final TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -286,11 +288,13 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.log(Level.WARNING, "Error with server heartbeat in "+this, e);
                 }
             }
-        }, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS);
+        };
+        timer.scheduleAtFixedRate(task, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS, TIMEOUT_AFTER_NOT_RECEIVING_HEARTBEAT_IN_MILLIS);
+        return task;
     }
 
-    private void startClientHeartbeat() {
-        timer.scheduleAtFixedRate(new TimerTask() {
+    private TimerTask startClientHeartbeat() {
+        final TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -302,7 +306,9 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.log(Level.WARNING, "Couldn't send heartbeat to Igtimi web socket session in "+WebSocketConnectionManager.this+". Will continue to try...", e);
                 }
             }
-        }, /* delay */ 0, DURATION_BETWEEN_HEARTBEAT_SENDS_IN_MILLIS);
+        };
+        timer.scheduleAtFixedRate(task, /* delay */ 0, DURATION_BETWEEN_HEARTBEAT_SENDS_IN_MILLIS);
+        return task;
     }
 
     private synchronized void reconnect() throws Exception {
