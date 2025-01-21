@@ -420,16 +420,13 @@ public interface LandscapeService {
      * group managed replicas, again waiting for the one next new replica to become ready, and so on, until the last old
      * auto-scaling replica has been stopped/terminated. Then, the auto-scaling group's minimum size is reset to what it
      * was when this method was called.
-     * @param optionalTimeout TODO
-     * @param optionalKeyName TODO
-     * @param privateKeyEncryptionPassphrase TODO
      */
     AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> changeAutoScalingReplicasInstanceType(
             AwsApplicationReplicaSet<String, SailingAnalyticsMetrics, SailingAnalyticsProcess<String>> replicaSet,
             InstanceType instanceType, Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
-    <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> waitForProcessTimeout,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
+    <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Integer optionalIgtimiRiotPort,
+            Optional<Duration> waitForProcessTimeout, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     SailingServer getSailingServer(String hostname, String username, String password, Optional<Integer> port)
             throws MalformedURLException;

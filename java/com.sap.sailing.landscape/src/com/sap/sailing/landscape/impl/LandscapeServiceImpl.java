@@ -1257,7 +1257,9 @@ public class LandscapeServiceImpl implements LandscapeService {
                 SharedLandscapeConstants.SAILING_ANALYTICS_APPLICATION_HOST_TAG, SharedLandscapeConstants.MULTI_PROCESS_INSTANCE_TAG_VALUE,
                 new SailingAnalyticsHostSupplier<String>()), h->{
                     try {
-                        return replicaSet.isEligibleForDeployment(h, Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
+                        return isEligibleForDeployment(h, replicaSet.getServerName(), replicaSet.getPort(),
+                                replicaSet.getMaster().getIgtimiRiotPort(Landscape.WAIT_FOR_PROCESS_TIMEOUT, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase),
+                                Landscape.WAIT_FOR_PROCESS_TIMEOUT, optionalKeyName, privateKeyEncryptionPassphrase);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1799,12 +1801,13 @@ public class LandscapeServiceImpl implements LandscapeService {
     }
 
     /**
-     * Checks whether the {@code host} is eligbile for deploying a process of an application replica set named
-     * as defined by {@code serverName}, listening on the application port specified by {@code port}.
+     * Checks whether the {@code host} is eligible for deploying a process of an application replica set named as
+     * defined by {@code serverName}, listening on the {@link SailingAnalyticsProcess#getPort() application port}
+     * specified by {@code port}.
      */
     @Override
-    public <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Optional<Duration> optionalTimeout,
-            String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
+    public <ShardingKey> boolean isEligibleForDeployment(SailingAnalyticsHost<ShardingKey> host, String serverName, int port, Integer optionalIgtimiRiotPort,
+            Optional<Duration> optionalTimeout, String optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
         boolean result;
         if (host.isManagedByAutoScalingGroup()) {
             result = false;
@@ -1813,7 +1816,9 @@ public class LandscapeServiceImpl implements LandscapeService {
             final Iterable<SailingAnalyticsProcess<ShardingKey>> applicationProcesses = host.getApplicationProcesses(optionalTimeout,
                     Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
             for (final SailingAnalyticsProcess<ShardingKey> applicationProcess : applicationProcesses) {
-                if (applicationProcess.getPort() == port || applicationProcess.getServerName(optionalTimeout, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase).equals(serverName)) {
+                if (applicationProcess.getPort() == port || applicationProcess.getServerName(optionalTimeout, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase).equals(serverName)
+                        // also, if an Igtimi Riot port is specified, it must not be used as some other process's Riot port:
+                        || (optionalIgtimiRiotPort != null && Util.equalsWithNull(optionalIgtimiRiotPort, applicationProcess.getIgtimiRiotPort(optionalTimeout, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase)))) {
                     result = false;
                     break;
                 }

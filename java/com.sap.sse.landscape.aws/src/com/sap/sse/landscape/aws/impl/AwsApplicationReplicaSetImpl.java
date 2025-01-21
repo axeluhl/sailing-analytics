@@ -24,7 +24,6 @@ import com.sap.sse.landscape.application.ApplicationProcessMetrics;
 import com.sap.sse.landscape.application.ApplicationReplicaSet;
 import com.sap.sse.landscape.application.impl.ApplicationReplicaSetImpl;
 import com.sap.sse.landscape.aws.ApplicationLoadBalancer;
-import com.sap.sse.landscape.aws.ApplicationProcessHost;
 import com.sap.sse.landscape.aws.AwsApplicationProcess;
 import com.sap.sse.landscape.aws.AwsApplicationReplicaSet;
 import com.sap.sse.landscape.aws.AwsAutoScalingGroup;
@@ -406,25 +405,6 @@ implements AwsApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
         return ShardTargetGroupName.create(getName(), shardName, targetGroupNamePrefix);
     }
     
-    @Override
-    public boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
-            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception {
-        boolean result;
-        if (host.isManagedByAutoScalingGroup()) {
-            result = false;
-        } else {
-            result = true;
-            final Iterable<ProcessT> applicationProcesses = host.getApplicationProcesses(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase);
-            for (final ProcessT applicationProcess : applicationProcesses) {
-                if (applicationProcess.getPort() == getPort() || applicationProcess.getServerName(optionalTimeout, optionalKeyName, privateKeyEncryptionPassphrase).equals(getServerName())) {
-                    result = false;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
     @Override
     public void stopAllUnmanagedReplicas(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName,
             byte[] privateKeyEncryptionPassphrase) throws Exception {

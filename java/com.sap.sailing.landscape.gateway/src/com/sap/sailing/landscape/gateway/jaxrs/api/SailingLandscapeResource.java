@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.landscape.AwsSessionCredentialsWithExpiry;
+import com.sap.sailing.landscape.LandscapeService;
 import com.sap.sailing.landscape.SailingAnalyticsHost;
 import com.sap.sailing.landscape.SailingAnalyticsMetrics;
 import com.sap.sailing.landscape.SailingAnalyticsProcess;
@@ -417,11 +418,12 @@ public class SailingLandscapeResource extends AbstractLandscapeResource {
             if (replicaSet == null) {
                 response = badRequest("Application replica set with name "+replicaSetName+" not found in region "+regionId);
             } else {
-                final SailingAnalyticsHost<String> hostToDeployTo = getLandscapeService().getLandscape().getHostByInstanceId(region, hostId, new SailingAnalyticsHostSupplier<>());
-                if (replicaSet.isEligibleForDeployment(hostToDeployTo,
-                        optionalTimeoutInMilliseconds == null ? Optional.empty()
-                                : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
-                        Optional.ofNullable(optionalKeyName), passphraseForPrivateKeyDecryption)) {
+                final LandscapeService landscapeService = getLandscapeService();
+                final SailingAnalyticsHost<String> hostToDeployTo = landscapeService.getLandscape().getHostByInstanceId(region, hostId, new SailingAnalyticsHostSupplier<>());
+                if (landscapeService.isEligibleForDeployment(hostToDeployTo, replicaSet.getServerName(), replicaSet.getPort(),
+                        optionalIgtimiRiotPort,
+                        optionalTimeoutInMilliseconds == null ? Optional.empty() : Optional.of(Duration.ofMillis(optionalTimeoutInMilliseconds)),
+                        optionalKeyName, passphraseForPrivateKeyDecryption)) {
                     final SailingAnalyticsProcess<String> process = getLandscapeService().deployReplicaToExistingHost(replicaSet, hostToDeployTo, optionalKeyName,
                             passphraseForPrivateKeyDecryption, replicaReplicationBearerToken,
                             optionalMemoryInMegabytesOrNull, optionalMemoryTotalSizeFactorOrNull, optionalIgtimiRiotPort);

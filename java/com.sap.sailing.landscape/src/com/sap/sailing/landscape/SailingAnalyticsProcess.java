@@ -16,8 +16,12 @@ public interface SailingAnalyticsProcess<ShardingKey> extends AwsApplicationProc
     int getExpeditionUdpPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
 
     /**
-     * The Igtimi Riot port as obtained from the {@link SailingProcessConfigurationVariables#IGTIMI_RIOT_PORT} variable, or {@code null}
-     * if that variable is not configured in this process.
+     * The Igtimi Riot port as obtained from the {@link SailingProcessConfigurationVariables#IGTIMI_RIOT_PORT} variable,
+     * or {@code null} if that variable is not configured in this process. Note: even if the
+     * {@link SailingProcessConfigurationVariables#IGTIMI_RIOT_PORT IGTIMI_RIOT_PORT} variable is not set, the
+     * application server will still listen on some randomly-selected port that was available upon start-up. But this
+     * port will not be returned by this method. This method is only about the explicit configuration through the
+     * environment variables.
      */
     Integer getIgtimiRiotPort(Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
     

@@ -106,18 +106,6 @@ extends ApplicationReplicaSet<ShardingKey, MetricsT, ProcessT> {
     }
 
     /**
-     * Checks whether the {@code host} is eligible for accepting a deployment of a process that belongs to this
-     * application replica set, either its master or a replica. In order to be eligible, the host must
-     * <ul>
-     * <li>not run any other application process on the {@link #getPort() HTTP port} used by this application replica set</li>
-     * <li>not have a process already deployed under the same {@link #getServerName() server name} used by this replica set</li>
-     * <li>not be managed by an auto-scaling group</li>
-     * </ul>
-     */
-    boolean isEligibleForDeployment(ApplicationProcessHost<ShardingKey, MetricsT, ProcessT> host,
-            Optional<Duration> optionalTimeout, Optional<String> optionalKeyName, byte[] privateKeyEncryptionPassphrase) throws Exception;
-    
-    /**
      * Any {@link #getReplicas() replica in this replica set} that is not running on a host
      * {@link AwsInstance#isManagedByAutoScalingGroup(AwsAutoScalingGroup) managed} by this replica set's
      * {@link #getAutoScalingGroup() auto-scaling group} (in case there is no auto-scaling group defined for this
