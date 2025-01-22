@@ -313,9 +313,9 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 device -> device.getSerialNumber(), columnSortHandler);
         final TextColumn<IgtimiDeviceWithSecurityDTO> lastHeartBeatColumn = new AbstractSortableTextColumn<>(
                 device -> device.getLastHeartBeat()==null?"":device.getLastHeartBeat().toString(), columnSortHandler,
-                (a,b)->Util.compareToWithNull(a.getLastHeartBeat(), b.getLastHeartBeat(), /* null is less */ true));
+                (a,b)->Util.compareToWithNull(a.getLastHeartBeat()==null?null:a.getLastHeartBeat().getA(), b.getLastHeartBeat()==null?null:b.getLastHeartBeat().getA(), /* null is less */ true));
         final TextColumn<IgtimiDeviceWithSecurityDTO> remoteAddressColumn = new AbstractSortableTextColumn<>(
-                device -> device.getRemoteAddress(), columnSortHandler);
+                device -> device.getLastHeartBeat() == null ? null : device.getLastHeartBeat().getB(), columnSortHandler);
         final SafeHtmlCell lastKnownPositionCell = new SafeHtmlCell();
         final Column<IgtimiDeviceWithSecurityDTO, SafeHtml> lastKnownPositionColumn = new Column<IgtimiDeviceWithSecurityDTO, SafeHtml>(lastKnownPositionCell) {
             @Override
@@ -427,7 +427,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 final IgtimiDeviceWithSecurityDTO result = new IgtimiDeviceWithSecurityDTO(
                         device.getId(), device.getSerialNumber(),
                         nameField.getText(), device.getLastHeartBeat(),
-                        device.getRemoteAddress(), device.getLastKnownPosition(), device.getLastKnownBatteryPercent());
+                        device.getLastKnownPosition(), device.getLastKnownBatteryPercent());
                 result.setAccessControlList(device.getAccessControlList());
                 result.setOwnership(device.getOwnership());
                 return result;

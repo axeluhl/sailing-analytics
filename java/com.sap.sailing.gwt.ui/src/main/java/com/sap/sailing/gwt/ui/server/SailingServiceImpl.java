@@ -258,7 +258,6 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.datatypes.BatteryLevel;
 import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
-import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -4251,29 +4250,18 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     @Override
     public ArrayList<IgtimiDeviceWithSecurityDTO> getAllIgtimiDevicesWithSecurity()
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
-        final Map<String, TimePoint> lastHeartBeatsByDeviceSerialNumber = new HashMap<>();
         final Map<String, SocketAddress> remoteAddressByDeviceSerialNumber = new HashMap<>();
         final RiotServer riotServer = getRiotServer();
-        for (final RiotConnection connection : riotServer.getLiveConnections()) { // FIXME this ignores replication; we would also want to get this data from all replicas
-            final String serialNumber = connection.getSerialNumber();
-            if (serialNumber != null) {
-                if (Util.compareToWithNull(connection.getLastHeartbeatReceivedAt(), lastHeartBeatsByDeviceSerialNumber.get(serialNumber), /* null is less */ true) > 0) {
-                    lastHeartBeatsByDeviceSerialNumber.put(serialNumber, connection.getLastHeartbeatReceivedAt());
-                }
-                remoteAddressByDeviceSerialNumber.put(serialNumber, connection.getSocketChannel().getRemoteAddress());
-            }
-        }
         final MultiTimeRange infiniteTimeRange = MultiTimeRange.of(TimeRange.create(null, null));
         return new ArrayList<>(Util.asList(getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
                 riotServer.getDevices(),
                 device->{
+                    final SocketAddress remoteAddress = remoteAddressByDeviceSerialNumber.get(device.getSerialNumber());
                     try {
                         return toSecuredIgtimiDeviceDTO(
                                     device,
-                                    lastHeartBeatsByDeviceSerialNumber.get(device.getSerialNumber()),
-                                    remoteAddressByDeviceSerialNumber.get(device.getSerialNumber()),
-                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class,
-                                            infiniteTimeRange)),
+                                    remoteAddress == null ? null : remoteAddress.toString(),
+                                    getPositionFromMessage(riotServer.getLastFix(device.getSerialNumber(), GpsLatLong.class, infiniteTimeRange)),
                                     getBatteryPercentFromMessage(riotServer.getLastFix(device.getSerialNumber(), BatteryLevel.class, infiniteTimeRange)));
                     } catch (org.json.simple.parser.ParseException | IOException e) {
                         throw new RuntimeException(e);
@@ -4297,12 +4285,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private IgtimiDeviceWithSecurityDTO toSecuredIgtimiDeviceDTO(final Device igtimiDevice,
-            final TimePoint lastHeartBeat, final SocketAddress remoteAddress, Position lastKnownPosition, double lastKnownBatteryPercent) {
+            final String remoteAddress, Position lastKnownPosition, double lastKnownBatteryPercent) {
         final long id = igtimiDevice.getId();
         final String serialNumber = igtimiDevice.getSerialNumber();
         final String name = igtimiDevice.getName();
+        final Pair<TimePoint, String> lastHeartBeat = igtimiDevice.getLastHeartbeat();
         final IgtimiDeviceWithSecurityDTO securedDevice = new IgtimiDeviceWithSecurityDTO(id, serialNumber, name,
-                lastHeartBeat, remoteAddress == null ? null : remoteAddress.toString(), lastKnownPosition,
+                lastHeartBeat, lastKnownPosition,
                 lastKnownBatteryPercent);
         SecurityDTOUtil.addSecurityInformation(getSecurityService(), securedDevice);
         return securedDevice;
