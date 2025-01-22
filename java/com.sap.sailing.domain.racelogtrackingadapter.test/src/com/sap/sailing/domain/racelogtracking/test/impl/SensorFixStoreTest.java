@@ -2,10 +2,11 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -14,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.ClientSession;
@@ -30,12 +30,15 @@ import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TransformationException;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.shared.util.Wait;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;
@@ -54,7 +57,7 @@ public class SensorFixStoreTest {
     }
     
     @Before
-    public void setUp() throws UnknownHostException, MongoException {
+    public void setUp() throws Exception {
         dropPersistedData();
         newStore();
     }
@@ -66,14 +69,17 @@ public class SensorFixStoreTest {
     }
 
     @After
-    public void after() {
+    public void after() throws Exception {
         dropPersistedData();
     }
 
-    private void dropPersistedData() {
+    private void dropPersistedData() throws Exception {
         MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
         db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
         db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+        Wait.wait(()->!Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES.name())
+                   && !Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES_METADATA.name()), Optional.of(Duration.ONE_MINUTE), Duration.ONE_SECOND,
+                   Level.INFO, "Waiting for dropped collections to disappear");
     }
 
     @Test
