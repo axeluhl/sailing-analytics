@@ -27,6 +27,7 @@ import com.igtimi.IgtimiStream.ChannelManagement;
 import com.igtimi.IgtimiStream.Msg;
 import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
+import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sse.common.TimePoint;
@@ -253,16 +254,13 @@ public class RiotConnectionImpl implements RiotConnection {
         MsgVisitor.accept(message, new MsgVisitor() {
             @Override
             public void handleDeviceManagement(DeviceManagement deviceManagement) {
-                serialNumber = deviceManagement.getSerialNumber();
+                updateSerialNumber(deviceManagement.getSerialNumber());
             }
             
             @Override
             public void handleData(Data data) {
                 for (final DataMsg dataMsg : data.getDataList()) {
-                    final String messageSerialNumber = dataMsg.getSerialNumber();
-                    if (Util.hasLength(messageSerialNumber)) {
-                        serialNumber = dataMsg.getSerialNumber();
-                    }
+                    updateSerialNumber(dataMsg.getSerialNumber());
                 }
             }
             
@@ -288,6 +286,7 @@ public class RiotConnectionImpl implements RiotConnection {
                     @Override
                     public void handleHeartbeat(long heartbeat) {
                         lastHeartbeatReceivedAt = TimePoint.now();
+                        updateDeviceHeartbeatIfSerialNumberKnown();
                     }
                 });
             }
@@ -296,7 +295,32 @@ public class RiotConnectionImpl implements RiotConnection {
             public void handleAckResponse(AckResponse ackResponse) {
                 logger.info("Received AckResponse from device "+getSerialNumber()+": "+ackResponse);
             }
+
+            private void updateSerialNumber(String serialNumber) {
+                if (Util.hasLength(serialNumber)) {
+                    final boolean serialNumberWasUnknown = RiotConnectionImpl.this.serialNumber == null;
+                    RiotConnectionImpl.this.serialNumber = serialNumber;
+                    if (serialNumberWasUnknown && lastHeartbeatReceivedAt != null) {
+                        // we see the serial number for the first time although we already have received a heartbeat; update
+                        updateDeviceHeartbeatIfSerialNumberKnown();
+                    }
+                }
+            }
         });
+    }
+
+
+    private void updateDeviceHeartbeatIfSerialNumberKnown() {
+        if (serialNumber != null) {
+            final Device device = riotServer.getDeviceBySerialNumber(serialNumber);
+            if (device != null) {
+                try {
+                    riotServer.updateDeviceLastHeartbeat(device.getId(), lastHeartbeatReceivedAt, getSocketChannel().getRemoteAddress().toString());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     private void sendHeartbeat() {
