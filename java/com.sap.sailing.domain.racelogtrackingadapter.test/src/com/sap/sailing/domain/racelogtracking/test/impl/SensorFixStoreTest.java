@@ -79,7 +79,7 @@ public class SensorFixStoreTest {
         db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
         Wait.wait(()->!Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES.name())
                    && !Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES_METADATA.name()), Optional.of(Duration.ONE_MINUTE), Duration.ONE_SECOND,
-                   Level.INFO, "Waiting for dropped collections to disappear");
+                   Level.INFO, "Waiting for dropped collections to disappear"); // TODO maybe we need to keep dropping; there as build 7532 where waiting timed out... https://hudson.sapsailing.com/job/SAPSailingAnalytics-master/7532/
     }
 
     @Test
