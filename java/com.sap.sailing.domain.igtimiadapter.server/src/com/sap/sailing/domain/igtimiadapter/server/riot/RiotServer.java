@@ -105,6 +105,8 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     
     void updateDeviceName(long deviceId, String name);
     
+    void updateDeviceLastHeartbeat(long deviceId, TimePoint timePointOfLastHeartbeat, String remoteAddress);
+    
     Iterable<DataAccessWindow> getDataAccessWindows();
     
     DataAccessWindow getDataAccessWindowById(long id);

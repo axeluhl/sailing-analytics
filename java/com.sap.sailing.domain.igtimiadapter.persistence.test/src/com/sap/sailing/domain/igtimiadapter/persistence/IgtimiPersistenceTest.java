@@ -2,8 +2,10 @@ package com.sap.sailing.domain.igtimiadapter.persistence;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,11 +62,27 @@ public class IgtimiPersistenceTest {
     @Test
     public void testStoringAndLoadingSimpleDevice() {
         final Device device = Device.create(123, "DE-AC-AAHJ", "The tricky one");
+        final String remoteAddress = new InetSocketAddress("127.0.0.1", 1234).toString();
+        final TimePoint heartbeat = TimePoint.now();
+        device.setLastHeartbeat(heartbeat, remoteAddress);
         mongoObjectFactory.storeDevice(device, clientSession);
         final Device loadedDevice = domainObjectFactory.getDevices(clientSession).iterator().next();
         assertEquals(device.getId(), loadedDevice.getId());
         assertEquals(device.getName(), loadedDevice.getName());
         assertEquals(device.getSerialNumber(), loadedDevice.getSerialNumber());
+        assertEquals(new Util.Pair<>(heartbeat, remoteAddress), loadedDevice.getLastHeartbeat());
+    }
+
+    @Test
+    public void testStoringAndLoadingSimpleDeviceWithEmptyHeartbeat() {
+        final Device device = Device.create(123, "DE-AC-AAHJ", "The empty heartbeat");
+        assertNull(device.getLastHeartbeat());
+        mongoObjectFactory.storeDevice(device, clientSession);
+        final Device loadedDevice = domainObjectFactory.getDevices(clientSession).iterator().next();
+        assertEquals(device.getId(), loadedDevice.getId());
+        assertEquals(device.getName(), loadedDevice.getName());
+        assertEquals(device.getSerialNumber(), loadedDevice.getSerialNumber());
+        assertNull(loadedDevice.getLastHeartbeat());
     }
 
     @Test
