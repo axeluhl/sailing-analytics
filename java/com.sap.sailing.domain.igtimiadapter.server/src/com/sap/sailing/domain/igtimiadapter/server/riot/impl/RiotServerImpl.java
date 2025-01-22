@@ -402,6 +402,21 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         }
         return null;
     }
+    
+    @Override
+    public void updateDeviceLastHeartbeat(long deviceId, TimePoint timePointOfLastHeartbeat, String remoteAddress) {
+        apply(s->s.internalUpdateDeviceLastHeartbeat(deviceId, timePointOfLastHeartbeat, remoteAddress));
+    }
+    
+    @Override
+    public Void internalUpdateDeviceLastHeartbeat(long deviceId, TimePoint timePointOfLastHeartbeat, String remoteAddress) {
+        final Device existingDevice = devices.get(deviceId);
+        if (existingDevice != null) {
+            existingDevice.setLastHeartbeat(timePointOfLastHeartbeat, remoteAddress);
+            mongoObjectFactory.storeDevice(existingDevice, /* clientSessionOrNull */ null);
+        }
+        return null;
+    }
 
     @Override
     public Iterable<DataAccessWindow> getDataAccessWindows() {

@@ -151,7 +151,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                             logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                             logger.log(Level.SEVERE, "doGet", e);
                             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            e.printStackTrace(resp.getWriter());
+                            resp.getWriter().append(e.getMessage());
                         }
                     }
                     logger.info("Done serializing initial loads for remote host "+req.getRemoteHost());
@@ -169,7 +169,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     logger.info("Error obtaining replication status: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    e.printStackTrace(resp.getWriter());
+                    resp.getWriter().append(e.getMessage());
                 }
                 break;
             case STOP_REPLICATING:

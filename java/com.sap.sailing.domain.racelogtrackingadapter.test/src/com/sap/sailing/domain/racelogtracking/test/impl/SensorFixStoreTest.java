@@ -74,12 +74,19 @@ public class SensorFixStoreTest {
     }
 
     private void dropPersistedData() throws Exception {
-        MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
-        db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
-        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
-        Wait.wait(()->!Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES.name())
-                   && !Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES_METADATA.name()), Optional.of(Duration.ONE_MINUTE), Duration.ONE_SECOND,
-                   Level.INFO, "Waiting for dropped collections to disappear");
+        final MongoDatabase db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
+        // keep trying to drop the collections until the drop is finally visible when listing the collections again;
+        // this seems particularly important in non-replica-set / standalone configurations of MongoDB...
+        Wait.wait(()->{
+            db.getCollection(CollectionNames.GPS_FIXES.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+            db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).withWriteConcern(WriteConcern.MAJORITY).drop(clientSession);
+            return null;
+        },
+                v->!Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES.name())
+                   && !Util.contains(db.listCollectionNames(clientSession), CollectionNames.GPS_FIXES_METADATA.name()),
+                /* retry on exception */ true,
+                Optional.of(Duration.ONE_MINUTE), Duration.ONE_SECOND,
+                Level.INFO, "Waiting for dropped collections to disappear");
     }
 
     @Test

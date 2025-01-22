@@ -10,10 +10,11 @@ import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sse.common.TimePoint;
 
 public interface ReplicableRiotServer extends RiotServer {
-
     Void internalRemoveDevice(long deviceId);
 
     Void internalUpdateDeviceName(long deviceId, String name);
+    
+    Void internalUpdateDeviceLastHeartbeat(long deviceId, TimePoint timePointOfLastHeartbeat, String remoteAddress);
     
     DataAccessWindow internalCreateDataAccessWindow(String deviceSerialNumber, TimePoint startTime, TimePoint endTime);
 
@@ -24,5 +25,4 @@ public interface ReplicableRiotServer extends RiotServer {
     Device internalCreateDevice(String deviceSerialNumber);
 
     boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException;
-
 }

@@ -76,7 +76,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Number id = ((Number) ((Document) o).get(FieldNames.IGTIMI_DEVICES_ID.name()));
             final String serialNumber = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_SERIAL_NUMBER.name());
             final String name = (String) ((Document) o).get(FieldNames.IGTIMI_DEVICES_NAME.name());
-            result.add(Device.create(id.longValue(), serialNumber, name));
+            final Device device = Device.create(id.longValue(), serialNumber, name);
+            final Long lastHeartbeatMillis = ((Document) o).getLong(FieldNames.IGTIMI_DEVICES_LAST_HEARTBEAT_MILLIS.name());
+            if (lastHeartbeatMillis != null) {
+                final String remoteAddress = ((Document) o).getString(FieldNames.IGTIMI_DEVICES_REMOTE_ADDRESS.name());
+                device.setLastHeartbeat(lastHeartbeatMillis == null ? null : TimePoint.of(lastHeartbeatMillis), remoteAddress);
+            }
+            result.add(device);
         }
         return result;
     }
