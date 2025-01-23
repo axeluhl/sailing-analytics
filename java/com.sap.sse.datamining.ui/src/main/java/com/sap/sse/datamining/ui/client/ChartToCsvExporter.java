@@ -46,13 +46,19 @@ public class ChartToCsvExporter {
                 final List<String> columnNames = new ArrayList<>();
                 // collect column names across all series; some may not have points for all columns
                 for (final Series series : chartToExport.getSeries()) {
+                    int minX = Integer.MAX_VALUE;
+                    for (final Point p : series.getPoints()) {
+                        if (p.getX().intValue() < minX) {
+                            minX = p.getX().intValue();
+                        }
+                    }
                     for (Point point : series.getPoints()) {
                         final String pointName = point.getName();
                         final String columnName = pointName != null && !pointName.isEmpty() ? pointName : point.getX().toString();
-                        while (columnNames.size() <= point.getX().intValue()) {
+                        while (columnNames.size() <= point.getX().intValue()-minX) {
                             columnNames.add(columnNames.size(), null);
                         }
-                        columnNames.set(point.getX().intValue(), columnName);
+                        columnNames.set(point.getX().intValue()-minX, columnName);
                     }
                 }
                 for (final String columnName : columnNames) {

@@ -140,7 +140,7 @@ public class RemoteServerReferenceResource extends AbstractSailingServerResource
             } catch (UnauthorizedException e) {
                 response = returnUnauthorized(e);
             } catch (MalformedURLException e) {
-                response = badRequest(e.getMessage());
+                response = badRequest("Malformed URL. See server logs for details.");
                 logger.warning(e.getMessage() + " for URL: " + remoteServerUrlAsString);
             } catch (Throwable e) {
                 response = returnInternalServerError(e);
