@@ -2498,4 +2498,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorRestartingIgtimiDevice(String serialNumber, String message);
     String successfullyRestartedIgtimiDevice(String serialNumber);
     String restart();
+    String desktop();
+    String mobile();
 }
