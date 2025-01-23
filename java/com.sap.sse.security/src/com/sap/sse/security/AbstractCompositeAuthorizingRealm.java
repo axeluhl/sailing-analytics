@@ -20,6 +20,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.impl.PermissionConverter;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -169,7 +170,7 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
         String username = (String) principals.getPrimaryPrincipal();
         final User user = getUserStore().getUserByName(username);
-        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""));
+        final WildcardPermission wildcardPermission = new PermissionConverter().getWildcardPermission(perm);
         List<Set<String>> parts = wildcardPermission.getParts();
         final boolean result;
         if (parts.size() > 2 && !parts.get(2).isEmpty()) {
