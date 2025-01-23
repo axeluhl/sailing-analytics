@@ -151,7 +151,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                             logger.info("Error trying to serialize initial load for replication: " + e.getMessage());
                             logger.log(Level.SEVERE, "doGet", e);
                             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                            resp.getWriter().append(e.getMessage());
+                            resp.getWriter().append("Error obtaining status; see server logs for details.");
                         }
                     }
                     logger.info("Done serializing initial loads for remote host "+req.getRemoteHost());
@@ -169,7 +169,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     logger.info("Error obtaining replication status: " + e.getMessage());
                     logger.log(Level.SEVERE, "doGet", e);
                     resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    resp.getWriter().append(e.getMessage());
+                    resp.getWriter().append("Error obtaining status; see server logs for details.");
                 }
                 break;
             case STOP_REPLICATING:
@@ -187,7 +187,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             }
         } catch (AuthorizationException e) {
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "The user is not authenticated or not permitted to manage replication. Details: " + e.getMessage());
+                    "The user is not authenticated or not permitted to manage replication. See server log for details.");
         }
     }
     
