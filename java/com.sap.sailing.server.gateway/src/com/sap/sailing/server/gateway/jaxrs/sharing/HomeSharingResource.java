@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.jaxrs.sharing;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -81,13 +80,13 @@ public class HomeSharingResource extends AbstractSailingServerResource {
             if (leaderboardByName != null) {
                 securityService.checkCurrentUserReadPermission(leaderboardByName);
                 title = HomeSharingUtils.findTitle(leaderboardByName);
-                placeUrl = baseUrl.asRegattaPlaceLink(eventId, URLEncoder.encode(decodedRegattaId, "UTF-8"));
+                placeUrl = baseUrl.asRegattaPlaceLink(eventId, decodedRegattaId);
             } else {
                 Regatta regattaByName = eventService.getRegattaByName(decodedRegattaId);
                 if (regattaByName != null) {
                     securityService.checkCurrentUserReadPermission(regattaByName);
                     title = HomeSharingUtils.findTitle(leaderboardByName);
-                    placeUrl = baseUrl.asRegattaPlaceLink(eventId, URLEncoder.encode(decodedRegattaId, "UTF-8"));
+                    placeUrl = baseUrl.asRegattaPlaceLink(eventId, decodedRegattaId);
                 } else {
                     throw new IllegalArgumentException();
                 }

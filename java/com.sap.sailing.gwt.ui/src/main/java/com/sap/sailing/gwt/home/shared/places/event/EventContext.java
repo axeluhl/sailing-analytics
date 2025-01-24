@@ -56,7 +56,7 @@ public class EventContext implements ShareablePlaceContext {
         if (eventId != null) {
             String path = "/events/" + eventId;
             if (regattaId != null) {
-                path += "/regattas/" + URLEncoder.encode(regattaId);
+                path += "/regattas/" + URLEncoder.encodeQueryString(regattaId);
             }
             return path;
         } else {

@@ -482,7 +482,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = "/gwt/Spectator.html?leaderboardGroupId=" + group.getId()+"&showRaceDetails=true&"
                         + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES + "=true"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + URLEncoder.encode(debugParam) : "");
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + URLEncoder.encodeQueryString(debugParam) : "");
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
