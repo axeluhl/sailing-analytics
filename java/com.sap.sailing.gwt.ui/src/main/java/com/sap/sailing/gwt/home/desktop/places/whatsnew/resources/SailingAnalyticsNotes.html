@@ -8,6 +8,11 @@
          <h5 class="articleSubheadline">January 2025</h5>
          <ul class="bulletList">
             <li>Export of Polar data as CSV has been fixed now in Data Mining.</li>
+            <li>The link format for <tt>/gwt/Home.html</tt> has changed. We're now using a Base64-encoded version
+                of the regatta name instead of the URL-encoded regatta name. We're trying to remain backward-compatible
+                by assuming that if you're link doesn't parse as a Base64-encoded regatta name, it may have been the
+                simply URL-encoded regatta name; so except for very strange corner cases, you're old links and
+                bookmarks should still work.</li>
          </ul>
          <h5 class="articleSubheadline">December 2024</h5>
          <ul class="bulletList">
