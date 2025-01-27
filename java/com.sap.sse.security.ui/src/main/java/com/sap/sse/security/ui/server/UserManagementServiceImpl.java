@@ -381,6 +381,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
         cookie.setMaxAge(0);
         cookie.setPath("/");
+        cookie.setSecure(true);
         getThreadLocalResponse().addCookie(cookie);
         logger.info("Invalidated HTTP session");
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
