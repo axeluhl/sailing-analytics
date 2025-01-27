@@ -5552,13 +5552,13 @@ Replicator {
                         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(tp, cache);
                         final Duration nextGapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
                         if (gapToLeaderInOwnTime != null && nextGapToLeaderInOwnTime != null) {
-                            gapDifferenceSum = gapDifferenceSum.plus(nextGapToLeaderInOwnTime.minus(gapToLeaderInOwnTime));
+                            gapDifferenceSum = gapDifferenceSum.plus(gapToLeaderInOwnTime.minus(nextGapToLeaderInOwnTime));
                             count++;
                         }
                         gapToLeaderInOwnTime = nextGapToLeaderInOwnTime;
                         tp = tp.minus(samplingRate);
                     }
-                    result = count==0 ? null : gapDifferenceSum.times(1.0 / (double) count).asSeconds();
+                    result = count==0 ? null : gapDifferenceSum.times(1.0 / (double) count).asSeconds() / samplingRate.times(5).asSeconds();
                 }
                 break;
             case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
@@ -5581,13 +5581,13 @@ Replicator {
                         final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(tp, cache);
                         final Distance nextDistanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(tp, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                         if (distanceToLeader != null && nextDistanceToLeader != null) {
-                            distanceDifferenceSum = distanceDifferenceSum.add(nextDistanceToLeader.add(distanceToLeader.scale(-1)));
+                            distanceDifferenceSum = distanceDifferenceSum.add(distanceToLeader.add(nextDistanceToLeader.scale(-1)));
                             count++;
                         }
                         distanceToLeader = nextDistanceToLeader;
                         tp = tp.minus(samplingRate);
                     }
-                    result = count==0 ? null : distanceDifferenceSum.scale(1.0 / (double) count).getMeters();
+                    result = count==0 ? null : distanceDifferenceSum.scale(1.0 / (double) count).getMeters() / samplingRate.times(5).asSeconds();
                 }
                 break;
             case RACE_IMPLIED_WIND:

@@ -415,8 +415,9 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_PERCENTAGE:
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_BOATSPEED_PERCENTAGE:
             return stringMessages.percent();
-        case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
+            return stringMessages.metersPerSecondUnit();
+        case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
         case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case LEG_DISTANCE_TRAVELED:
         case LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START:
@@ -474,8 +475,9 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_LOAD:
         case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_PRESSURE:
             return stringMessages.tonsUnit();
-        case LEG_GAP_TO_LEADER_IN_SECONDS:
         case LEG_GAP_TO_LEADER_IN_SECONDS_CHANGE:
+            return stringMessages.secondsPerSecondsUnit();
+        case LEG_GAP_TO_LEADER_IN_SECONDS:
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:

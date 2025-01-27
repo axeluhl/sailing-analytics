@@ -180,6 +180,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String metersUnit();
     String millimetersUnit();
     String degreesUnit();
+    String metersPerSecondUnit();
+    String secondsPerSecondsUnit();
     String compareCompetitors();
     String description();
     String sailNumber();
