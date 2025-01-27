@@ -106,6 +106,8 @@ public class DetailTypeFormatter {
             return stringMessages.velocityMadeGoodInKnots();
         case LEG_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
+        case LEG_GAP_TO_LEADER_IN_SECONDS_CHANGE:
+            return stringMessages.gapToLeaderInSecondsChange();
         case LEG_CORRECTED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveled();
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
@@ -132,6 +134,8 @@ public class DetailTypeFormatter {
             return stringMessages.startTack();
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMeters();
+        case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersChange();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStart();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
@@ -412,6 +416,7 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_BOATSPEED_PERCENTAGE:
             return stringMessages.percent();
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
+        case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
         case LEG_WINDWARD_DISTANCE_TO_GO_IN_METERS:
         case LEG_DISTANCE_TRAVELED:
         case LEG_DISTANCE_TRAVELED_INCLUDING_GATE_START:
@@ -470,6 +475,7 @@ public class DetailTypeFormatter {
         case BRAVOEXTENDED_RACE_CURRENT_FORESTAY_PRESSURE:
             return stringMessages.tonsUnit();
         case LEG_GAP_TO_LEADER_IN_SECONDS:
+        case LEG_GAP_TO_LEADER_IN_SECONDS_CHANGE:
         case LEG_GAP_CHANGE_SINCE_LEG_START_IN_SECONDS:
         case RACE_GAP_TO_LEADER_IN_SECONDS:
         case LEG_ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
@@ -653,6 +659,8 @@ public class DetailTypeFormatter {
             return stringMessages.estimatedTimeToNextWaypointInSecondsTooltip();
         case LEG_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSecondsTooltip();
+        case LEG_GAP_TO_LEADER_IN_SECONDS_CHANGE:
+            return stringMessages.gapToLeaderInSecondsChangeTooltip();
         case LEG_CORRECTED_TIME_TRAVELED:
             return stringMessages.calculatedTimeTraveledTooltip();
         case JIBE:
@@ -731,6 +739,8 @@ public class DetailTypeFormatter {
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
+        case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
+            return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersChangeTooltip();
         case DISTANCE_TO_START_AT_RACE_START:
             return stringMessages.distanceToLineAtRaceStartTooltip();
         case TIME_BETWEEN_RACE_START_AND_COMPETITOR_START:
