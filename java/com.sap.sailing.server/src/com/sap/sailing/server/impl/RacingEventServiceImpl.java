@@ -5539,11 +5539,55 @@ Replicator {
                     result = gapToLeaderInOwnTime == null ? null : gapToLeaderInOwnTime.asSeconds();
                 }
                 break;
+            case LEG_GAP_TO_LEADER_IN_SECONDS_CHANGE:
+                // compute the average over the last five sampling intervals
+                result = null;
+                if (trackedLeg != null) {
+                    int count=0;
+                    Duration gapDifferenceSum = Duration.NULL;
+                    Duration gapToLeaderInOwnTime = null;
+                    TimePoint tp = timePoint;
+                    final Duration samplingRate = trackedRace.getTrack(competitor).getAverageIntervalBetweenRawFixes();
+                    for (int i=0; i<5; i++) {
+                        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(tp, cache);
+                        final Duration nextGapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getGapToLeaderInOwnTime(rankingInfo, competitor, cache);
+                        if (gapToLeaderInOwnTime != null && nextGapToLeaderInOwnTime != null) {
+                            gapDifferenceSum = gapDifferenceSum.plus(gapToLeaderInOwnTime.minus(nextGapToLeaderInOwnTime));
+                            count++;
+                        }
+                        gapToLeaderInOwnTime = nextGapToLeaderInOwnTime;
+                        tp = tp.minus(samplingRate);
+                    }
+                    result = count==0 ? null : gapDifferenceSum.times(1.0 / (double) count).asSeconds() / samplingRate.times(5).asSeconds();
+                }
+                break;
             case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
                 if (trackedLeg != null) {
                     final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(timePoint, cache);
                     Distance distanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
                     result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                }
+                break;
+            case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
+                // compute the average over the last five sampling intervals
+                result = null;
+                if (trackedLeg != null) {
+                    int count=0;
+                    Distance distanceDifferenceSum = Distance.NULL;
+                    Distance distanceToLeader = null;
+                    TimePoint tp = timePoint;
+                    final Duration samplingRate = trackedRace.getTrack(competitor).getAverageIntervalBetweenRawFixes();
+                    for (int i=0; i<5; i++) {
+                        final RankingInfo rankingInfo = trackedRace.getRankingMetric().getRankingInfo(tp, cache);
+                        final Distance nextDistanceToLeader = trackedLeg.getWindwardDistanceToCompetitorFarthestAhead(tp, WindPositionMode.LEG_MIDDLE, rankingInfo, cache);
+                        if (distanceToLeader != null && nextDistanceToLeader != null) {
+                            distanceDifferenceSum = distanceDifferenceSum.add(distanceToLeader.add(nextDistanceToLeader.scale(-1)));
+                            count++;
+                        }
+                        distanceToLeader = nextDistanceToLeader;
+                        tp = tp.minus(samplingRate);
+                    }
+                    result = count==0 ? null : distanceDifferenceSum.scale(1.0 / (double) count).getMeters() / samplingRate.times(5).asSeconds();
                 }
                 break;
             case RACE_IMPLIED_WIND:
