@@ -16,6 +16,11 @@
             <li>We introduced two new metrics for tail color and competitor chart: Change of Gap, and Change of Gap to Leader.
                 These represent an average of the respective gap value change over the last approximately five position fixes,
                 e.g., 5s for a 1Hz sampling rate.</li>
+            <li>When using tail colors to visualize metrics, so far we spread the value range across the colors available
+                in a "linear" way. This made outliers and maneuvers waste a lot of the color space. Instead, we now use a
+                cubic root function that reserves most of the available color space to the values in the middle of the
+                value range to be visualized, whereas the values closer to the boundaries of the range are assigned less
+                space of the color range. See how the color key displayed at the top of the map changed.</li>
          </ul>
          <h5 class="articleSubheadline">December 2024</h5>
          <ul class="bulletList">
