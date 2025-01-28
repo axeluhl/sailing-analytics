@@ -1,7 +1,9 @@
 package com.sap.sse.common.test;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ColorMapper.ValueSpreader;
 import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 
@@ -24,7 +27,7 @@ public class ColorMapperTest {
     @Before
     public void setUp() {
         valueRange = new ValueRangeFlexibleBoundaries(-5.0, 5.0, 0.0, 0.0);
-        colorMapper = new ColorMapper(valueRange, false);
+        colorMapper = new ColorMapper(valueRange, false, ValueSpreader.LINEAR);
         listener = mock(ColorMapperChangedListener.class);
         colorMapper.addListener(listener);
         valueSet = new HashSet<>();
