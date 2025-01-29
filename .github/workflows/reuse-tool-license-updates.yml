@@ -5,7 +5,7 @@ on:
 jobs:
   create_metadata_proposal:
     permissions:
-      content: write
+      contents: write
     runs-on: ubuntu-latest
     name: "Metadata Creation Tool"
     steps:
