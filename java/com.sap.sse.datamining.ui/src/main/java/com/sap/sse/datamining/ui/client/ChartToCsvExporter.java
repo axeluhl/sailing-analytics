@@ -42,11 +42,11 @@ public class ChartToCsvExporter {
     private static String createCsvExportContentForStatisticsCurve(Chart chartToExport) {
         if (chartToExport != null && chartToExport.getSeries().length > 0) {
             final StringBuilder csvStr = new StringBuilder("Series name");
+            int minX = Integer.MAX_VALUE;
             {
                 final List<String> columnNames = new ArrayList<>();
                 // collect column names across all series; some may not have points for all columns
                 for (final Series series : chartToExport.getSeries()) {
-                    int minX = Integer.MAX_VALUE;
                     for (final Point p : series.getPoints()) {
                         if (p.getX().intValue() < minX) {
                             minX = p.getX().intValue();
@@ -73,7 +73,7 @@ public class ChartToCsvExporter {
                 csvStr.append(series.getName());
                 int lastXIndex = -1;
                 for (Point point : series.getPoints()) {
-                    while (lastXIndex < point.getX().intValue()) {
+                    while (lastXIndex < point.getX().intValue()-minX) {
                         csvStr.append(';');
                         lastXIndex++;
                     }
