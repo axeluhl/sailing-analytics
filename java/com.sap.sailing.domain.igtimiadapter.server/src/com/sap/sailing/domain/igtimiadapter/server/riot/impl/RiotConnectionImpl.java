@@ -38,6 +38,11 @@ public class RiotConnectionImpl implements RiotConnection {
     private static final Logger logger = Logger.getLogger(RiotConnectionImpl.class.getName());
 
     private final static ExtensionRegistry protobufExtensionRegistry = ExtensionRegistry.newInstance();
+    
+    /**
+     * May be {@code null} while unknown; when set to a non-{@code null} value the first time, waiters
+     * on this object are {@link #notifyAll() notified}.
+     */
     private String serialNumber;
 
     private String deviceGroupToken;
@@ -164,6 +169,10 @@ public class RiotConnectionImpl implements RiotConnection {
     }
 
     /**
+     * Sends the authentication response including the {@link #deviceGroupToken}, but not before the device serial number
+     * has been received at least once; this is because the device may stop sending the device serial number once it considers
+     * authentication having completed successfully.<p>
+     * 
      * Here is the code in the firmware handling the authentication response:
      * 
      * <pre>
@@ -221,14 +230,33 @@ public class RiotConnectionImpl implements RiotConnection {
      * We received additional instructions that say that when {@code uTrackConfig.usingDefaultDgt} is set to {@code false} then this
      * makes the device stop sending its serial number in messages.
      */
-    private void sendPositiveAuthResponse() throws IOException {
-        final AuthResponse response = AuthResponse.newBuilder()
-            .setTimestamp(System.currentTimeMillis())
-            .setAck(true)
-            .setCode(200)
-            .setReason("Authenticated")
-            .build();
-        send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setAuth(Authentication.newBuilder().setAuthResponse(response))).build());
+    private void sendPositiveAuthResponse() {
+        new Thread(()->{
+            synchronized (RiotConnectionImpl.this) {
+                while (serialNumber == null) {
+                    try {
+                        logger.info("Waiting for serial number before returning successful auth response with device group token");
+                        RiotConnectionImpl.this.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            final AuthResponse response = AuthResponse.newBuilder()
+                .setTimestamp(System.currentTimeMillis())
+                .setAck(true)
+                // .setToken(Token.newBuilder().setDeviceGroupToken(deviceGroupToken).build()) // This is considered harmful because upon broken connection the device doesn't send the serial number anymore
+                .setCode(200)
+                .setReason("Authenticated")
+                .build();
+            logger.info("Sending auth response for device "+serialNumber);
+            try {
+                send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setAuth(Authentication.newBuilder().setAuthResponse(response))).build());
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Couldn't send authentication response to device "+getSerialNumber(), e);
+            }
+        }, "sending positive Igtimi auth response when device serial number is known")
+        .start();
     }
     
     /**
@@ -274,11 +302,7 @@ public class RiotConnectionImpl implements RiotConnection {
                             if (token.hasDeviceGroupToken()) {
                                 deviceGroupToken = token.getDeviceGroupToken();
                                 logger.info("Received auth request from device "+serialNumber+" with device group token "+deviceGroupToken);
-                                try {
-                                    sendPositiveAuthResponse();
-                                } catch (IOException e) {
-                                    logger.log(Level.SEVERE, "Couldn't send authentication response to device "+getSerialNumber(), e);
-                                }
+                                sendPositiveAuthResponse();
                             }
                         }
                     }
@@ -295,20 +319,25 @@ public class RiotConnectionImpl implements RiotConnection {
             public void handleAckResponse(AckResponse ackResponse) {
                 logger.info("Received AckResponse from device "+getSerialNumber()+": "+ackResponse);
             }
-
-            private void updateSerialNumber(String serialNumber) {
-                if (Util.hasLength(serialNumber)) {
-                    final boolean serialNumberWasUnknown = RiotConnectionImpl.this.serialNumber == null;
-                    RiotConnectionImpl.this.serialNumber = serialNumber;
-                    if (serialNumberWasUnknown && lastHeartbeatReceivedAt != null) {
-                        // we see the serial number for the first time although we already have received a heartbeat; update
-                        updateDeviceHeartbeatIfSerialNumberKnown();
-                    }
-                }
-            }
         });
     }
-
+    
+    private void updateSerialNumber(String serialNumber) {
+        if (Util.hasLength(serialNumber)) {
+            final boolean serialNumberWasUnknown;
+            synchronized (this) {
+                serialNumberWasUnknown = RiotConnectionImpl.this.serialNumber == null;
+                RiotConnectionImpl.this.serialNumber = serialNumber;
+                if (serialNumberWasUnknown) {
+                    notifyAll();
+                }
+            }
+            if (serialNumberWasUnknown && lastHeartbeatReceivedAt != null) {
+                // we see the serial number for the first time although we already have received a heartbeat; update
+                updateDeviceHeartbeatIfSerialNumberKnown();
+            }
+        }
+    }
 
     private void updateDeviceHeartbeatIfSerialNumberKnown() {
         if (serialNumber != null) {
