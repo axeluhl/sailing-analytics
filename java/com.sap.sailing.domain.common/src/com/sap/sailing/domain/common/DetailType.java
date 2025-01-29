@@ -215,7 +215,8 @@ public enum DetailType implements Serializable, SecuredEnum {
     EXPEDITION_LEG_JIB_CAR_STBD(2, ASCENDING, null, ValueSpreader.CUBIC_ROOT),
     EXPEDITION_LEG_MAST_BUTT(2, ASCENDING, null, ValueSpreader.CUBIC_ROOT),
     BRAVO_RACE_HEEL_IN_DEGREES(2, DESCENDING, null, ValueSpreader.CUBIC_ROOT),
-    BRAVO_RACE_PITCH_IN_DEGREES(2, DESCENDING, null, ValueSpreader.CUBIC_ROOT);
+    BRAVO_RACE_PITCH_IN_DEGREES(2, DESCENDING, null, ValueSpreader.CUBIC_ROOT),
+    PERCENT_TARGET_BOAT_SPEED(2, DESCENDING, PREMIUM_LEADERBOARD_INFORMATION, ValueSpreader.CUBIC_ROOT);
 
     private int precision;
 
@@ -323,6 +324,7 @@ public enum DetailType implements Serializable, SecuredEnum {
         availableDetailsTypes.add(DetailType.BRAVO_RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         availableDetailsTypes.add(DetailType.BRAVO_RACE_HEEL_IN_DEGREES);
         availableDetailsTypes.add(DetailType.BRAVO_RACE_PITCH_IN_DEGREES);
+        availableDetailsTypes.add(DetailType.PERCENT_TARGET_BOAT_SPEED);
         return availableDetailsTypes;
     }
 

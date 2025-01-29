@@ -386,6 +386,8 @@ public class DetailTypeFormatter {
             return stringMessages.currentHeelInDegree();
         case BRAVO_RACE_PITCH_IN_DEGREES:
             return stringMessages.currentPitchInDegree();
+        case PERCENT_TARGET_BOAT_SPEED:
+            return stringMessages.percentTargetBoatSpeed();
         }
         return detailType.name();
     }
@@ -414,6 +416,7 @@ public class DetailTypeFormatter {
             return stringMessages.knotsUnit();
         case BRAVOEXTENDED_RACE_CURRENT_DEFLECTOR_PERCENTAGE:
         case BRAVOEXTENDED_RACE_CURRENT_TARGET_BOATSPEED_PERCENTAGE:
+        case PERCENT_TARGET_BOAT_SPEED:
             return stringMessages.percent();
         case CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_CHANGE:
             return stringMessages.metersPerSecondUnit();
@@ -914,6 +917,8 @@ public class DetailTypeFormatter {
             return "";
         case LEG_TACKTYPE_LONGTACK_SHORTTACK:
             return stringMessages.tackTypeTooltip();
+        case PERCENT_TARGET_BOAT_SPEED:
+            return stringMessages.percentTargetBoatSpeedTooltip();
         }
         return "";
     }

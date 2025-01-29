@@ -2605,7 +2605,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
                     @Override
-                    public CompetitorRaceDataDTO call() throws NoWindException {
+                    public CompetitorRaceDataDTO call() throws NoWindException, NotEnoughDataHasBeenAddedException {
                         Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                 competitorDTO.getIdAsString());
                         ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
@@ -2678,7 +2678,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public Double getCompetitorRaceDataEntry(DetailType detailType, TrackedRace trackedRace,
             Competitor competitor, TimePoint timePoint, String leaderboardGroupName,
             UUID leaderboardGroupId, String leaderboardName,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException {
         return getService().getCompetitorRaceDataEntry(detailType, trackedRace, competitor, timePoint,
                 getLeaderboardGroupByIdOrName(leaderboardGroupId, leaderboardGroupName), leaderboardName, cache);
     }
