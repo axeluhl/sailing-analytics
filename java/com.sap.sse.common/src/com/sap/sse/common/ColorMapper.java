@@ -13,6 +13,7 @@ import java.util.Set;
  *
  */
 public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener {
+    public static final int MAX_HUE = 315;
     private final ValueRangeFlexibleBoundaries valueRange;
     private double minValue;
     private double maxValue;
@@ -59,7 +60,6 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
      */
     public String getColor(double value) {
         final String result;
-        final int MAX_HUE = 315;
         if (isGrey) {
             if (value < minValue) {
                 result = "rgba(255,255,255,0.0)";
