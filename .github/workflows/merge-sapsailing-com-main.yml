@@ -9,6 +9,8 @@ on:
   workflow_dispatch: {}
 jobs:
   merge-master-from-sapsailing-com:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
