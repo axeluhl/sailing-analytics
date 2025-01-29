@@ -2506,4 +2506,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String gapToLeaderInSecondsChangeTooltip();
     String windwardDistanceToCompetitorFarthestAheadInMetersChange();
     String windwardDistanceToCompetitorFarthestAheadInMetersChangeTooltip();
+    String percentTargetBoatSpeed();
+    String percentTargetBoatSpeedTooltip();
 }
