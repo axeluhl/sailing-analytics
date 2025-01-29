@@ -2926,7 +2926,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // Causes an overwrite of what are now wrong detailValues
                     if (selectedDetailType != null) {
                         // start with fresh value boundaries
-                        setTailVisualizer();
+                        setTailVisualizer(selectedDetailType);
                     }
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
@@ -3584,14 +3584,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return result;
     }
 
-    protected void setTailVisualizer() {
+    protected void setTailVisualizer(DetailType detailType) {
         ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.1, 0.25);
-        createTailColorMapper(boundaries);
+        createTailColorMapper(boundaries, detailType);
         fixesAndTails.setDetailValueBoundaries(boundaries);
     }
     
-    protected void createTailColorMapper(ValueRangeFlexibleBoundaries valueRange) {
-        tailColorMapper = new ColorMapper(valueRange, /*isGrey*/ false, ValueSpreader.CUBIC_ROOT);
+    protected void createTailColorMapper(ValueRangeFlexibleBoundaries valueRange, DetailType detailType) {
+        tailColorMapper = new ColorMapper(valueRange, /*isGrey*/ false, detailType.getValueSpreader());
         tailColorMapper.addListener(this);
     }
 
