@@ -151,7 +151,6 @@ import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.ColorMapper;
-import com.sap.sse.common.ColorMapper.ValueSpreader;
 import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
