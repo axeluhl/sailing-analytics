@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -278,7 +279,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
                     try {
                         detailValue = sailingService.getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
                                 fix.getTimePoint(), leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
-                    } catch (NoWindException nwe) {
+                    } catch (NoWindException | NotEnoughDataHasBeenAddedException nwe) {
                         detailValue = null;
                     }
                 }

@@ -116,6 +116,8 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickFlagDataValuesProvider;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoatOverlay.DisplayMode;
+import com.sap.sailing.gwt.ui.client.shared.racemap.Colorline.MouseOverLineEvent;
+import com.sap.sailing.gwt.ui.client.shared.racemap.Colorline.MouseOverLineHandler;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixesAndTails.PositionRequest;
 import com.sap.sailing.gwt.ui.client.shared.racemap.QuickFlagDataProvider.QuickFlagDataListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
@@ -529,6 +531,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * The currently selected {@link DetailType}. {@code null} if no {@link DetailType} is selected.
      */
     private DetailType selectedDetailType;
+    
+    /**
+     * The number format that matches the {@link DetailType#getPrecision() precision} of the {@link #selectedDetailType}
+     */
+    private NumberFormat numberFormatterForSelectedDetailType;
+    
     /**
      * Indicates if {@link #selectedDetailType} has changed. If that is the case {@link FixesAndTails} needs to
      * overwrite its cache with new data and needs to reset its internal {@link ValueRangeFlexibleBoundaries} which is
@@ -2915,6 +2923,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     selectedDetailTypeChanged = previous != null;
                 } else {
                     selectedDetailType = DetailType.valueOfString(value);
+                    numberFormatterForSelectedDetailType = NumberFormatterFactory.getDecimalFormat(selectedDetailType.getPrecision());
                     selectedDetailTypeChanged = selectedDetailType != previous;
                     metricOverlay.setVisible(true);
                     if (!competitorSelection.isSelected(competitor)) {
@@ -2925,7 +2934,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     // Causes an overwrite of what are now wrong detailValues
                     if (selectedDetailType != null) {
                         // start with fresh value boundaries
-                        setTailVisualizer();
+                        setTailVisualizer(selectedDetailType);
                     }
                     // In case the new values don't make it through this will make the tails visible
                     tailColorMapper.notifyListeners();
@@ -3568,10 +3577,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         };
         result.addClickHandler(clickHandler);
         resultHoverline.addClickHandler(clickHandler);
-        result.addMouseOverHandler(new MouseOverMapHandler() {
+        result.addMouseOverLineHandler(new MouseOverLineHandler() {
             @Override
-            public void onEvent(MouseOverMapEvent event) {
-                map.setTitle(boat.getSailId() + ", " + competitor.getName());
+            public void onEvent(MouseOverLineEvent event) {
+                final Double detailValue;
+                map.setTitle(boat.getSailId() + ", " + competitor.getName() +
+                        ((selectedDetailType != null && event.getFixIndexInTail() != -1
+                        && (detailValue = fixesAndTails.getDetailValueAt(competitor, event.getFixIndexInTail())) != null)
+                            ? "\n" + DetailTypeFormatter.format(selectedDetailType)
+                             + ": " + numberFormatterForSelectedDetailType.format(detailValue)
+                             + DetailTypeFormatter.getUnit(selectedDetailType)
+                            : ""));
+                
             }
         });
         resultHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
@@ -3583,14 +3600,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return result;
     }
 
-    protected void setTailVisualizer() {
+    protected void setTailVisualizer(DetailType detailType) {
         ValueRangeFlexibleBoundaries boundaries = new ValueRangeFlexibleBoundaries(0, 10, 0.1, 0.25);
-        createTailColorMapper(boundaries);
+        createTailColorMapper(boundaries, detailType);
         fixesAndTails.setDetailValueBoundaries(boundaries);
     }
     
-    protected void createTailColorMapper(ValueRangeFlexibleBoundaries valueRange) {
-        tailColorMapper = new ColorMapper(valueRange, /*isGrey*/ false);
+    protected void createTailColorMapper(ValueRangeFlexibleBoundaries valueRange, DetailType detailType) {
+        tailColorMapper = new ColorMapper(valueRange, /*isGrey*/ false, detailType.getValueSpreader());
         tailColorMapper.addListener(this);
     }
 

@@ -312,7 +312,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         final TextColumn<IgtimiDeviceWithSecurityDTO> deviceSerialNumberColumn = new AbstractSortableTextColumn<>(
                 device -> device.getSerialNumber(), columnSortHandler);
         final TextColumn<IgtimiDeviceWithSecurityDTO> lastHeartBeatColumn = new AbstractSortableTextColumn<>(
-                device -> device.getLastHeartBeat()==null?"":device.getLastHeartBeat().toString(), columnSortHandler,
+                device -> device.getLastHeartBeat()==null||device.getLastHeartBeat().getA()==null?"":device.getLastHeartBeat().getA().toString(), columnSortHandler,
                 (a,b)->Util.compareToWithNull(a.getLastHeartBeat()==null?null:a.getLastHeartBeat().getA(), b.getLastHeartBeat()==null?null:b.getLastHeartBeat().getA(), /* null is less */ true));
         final TextColumn<IgtimiDeviceWithSecurityDTO> remoteAddressColumn = new AbstractSortableTextColumn<>(
                 device -> device.getLastHeartBeat() == null ? null : device.getLastHeartBeat().getB(), columnSortHandler);
