@@ -180,6 +180,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String metersUnit();
     String millimetersUnit();
     String degreesUnit();
+    String metersPerSecondUnit();
+    String secondsPerSecondsUnit();
     String compareCompetitors();
     String description();
     String sailNumber();
@@ -2500,4 +2502,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String restart();
     String desktop();
     String mobile();
+    String gapToLeaderInSecondsChange();
+    String gapToLeaderInSecondsChangeTooltip();
+    String windwardDistanceToCompetitorFarthestAheadInMetersChange();
+    String windwardDistanceToCompetitorFarthestAheadInMetersChangeTooltip();
+    String percentTargetBoatSpeed();
+    String percentTargetBoatSpeedTooltip();
 }

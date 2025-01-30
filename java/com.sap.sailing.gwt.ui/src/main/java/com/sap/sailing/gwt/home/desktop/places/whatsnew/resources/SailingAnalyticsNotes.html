@@ -13,6 +13,23 @@
                 by assuming that if you're link doesn't parse as a Base64-encoded regatta name, it may have been the
                 simply URL-encoded regatta name; so except for very strange corner cases, you're old links and
                 bookmarks should still work.</li>
+            <li>We introduced two new metrics for tail color and competitor chart: Change of Gap, and Change of Gap to Leader.
+                These represent an average of the respective gap value change over the last approximately five position fixes,
+                e.g., 5s for a 1Hz sampling rate.</li>
+            <li>When using tail colors to visualize metrics, so far we spread the value range across the colors available
+                in a "linear" way. This made outliers and maneuvers waste a lot of the color space. Instead, for all
+                metrics except  over ground (COG) we now use a cubic root function that reserves most of
+                the available color space to the values in the middle of the range to be visualized, whereas
+                the values closer to the boundaries of the range are assigned less space of the color range.
+                See how the color key displayed at the top of the map changed.</li>
+            <li>Introduced a new metric for visualization in the competitor chart and as a tail color: percent
+                target boat speed. This is computed from the polar data and the local wind conditions (TWS, TWA)
+                at the position of the competitor at the given time point.</li>
+            <li>Hovering over a colored tail on the map where the color represents a detail value as selected by the user,
+                the tool tip that pops up will now display the detail value at the point over which the mouse pointer
+                is hovering.</li>
+            <li>Another fix to the polar data CSV export from the Data Mining module; the ";" separators were missing
+                for the negative (port tack) angles.</li>
          </ul>
          <h5 class="articleSubheadline">December 2024</h5>
          <ul class="bulletList">

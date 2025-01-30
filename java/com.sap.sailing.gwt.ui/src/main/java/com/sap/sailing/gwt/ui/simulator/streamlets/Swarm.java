@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ColorMapper.ValueSpreader;
 import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.gwt.client.player.TimeListener;
 
@@ -92,7 +93,7 @@ public class Swarm implements TimeListener {
         diffPx = new Vector(0, 0);
         valueRange = new ValueRangeFlexibleBoundaries(/* wind speed in knots */ 0.0, /* wind speed in knots */ 60.0,
                 /* percentage */ 0.15, /* minimumHalfBoundaryWidthInKnots */ 0.35);
-        colorMapper = new ColorMapper(valueRange, !colored);
+        colorMapper = new ColorMapper(valueRange, !colored, ValueSpreader.LINEAR);
     }
 
     public void start(final int animationIntervalMillis) {

@@ -2214,7 +2214,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final FutureTask<Iterable<Pair<TimePoint, Map<DetailType, Double>>>> future =new FutureTask<Iterable<Pair<TimePoint, Map<DetailType, Double>>>>(
                         new Callable<Iterable<Pair<TimePoint, Map<DetailType, Double>>>>() {
                     @Override
-                    public Iterable<Pair<TimePoint, Map<DetailType, Double>>> call() throws NoWindException {
+                    public Iterable<Pair<TimePoint, Map<DetailType, Double>>> call() throws NoWindException, NotEnoughDataHasBeenAddedException {
                         final List<Pair<TimePoint, Map<DetailType, Double>>> raceData = new ArrayList<>();
                         if (startTime != null && endTime != null) {
                             for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {

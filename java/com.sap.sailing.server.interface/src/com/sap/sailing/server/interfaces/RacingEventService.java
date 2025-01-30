@@ -68,6 +68,7 @@ import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider
 import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.MarkAlreadyUsedInRaceException;
@@ -1101,5 +1102,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, LeaderboardGroup leaderboardGroup, String leaderboardName,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException;
 }
