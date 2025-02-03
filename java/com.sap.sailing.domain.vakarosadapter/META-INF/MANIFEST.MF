@@ -7,7 +7,10 @@ Bundle-Activator: com.sap.sailing.domain.vakarosadapter.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.domain.vakarosadapter
-Import-Package: com.sap.sailing.domain.common,
+Import-Package: com.sap.sailing.domain.abstractlog,
+ com.sap.sailing.domain.abstractlog.regatta.events,
+ com.sap.sailing.domain.base,
+ com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.sensordata,
  com.sap.sailing.domain.common.tracking,
