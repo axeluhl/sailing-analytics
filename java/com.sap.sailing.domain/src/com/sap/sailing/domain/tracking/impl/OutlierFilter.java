@@ -116,7 +116,7 @@ public class OutlierFilter {
      */
     private Pair<GPSFixMoving, Double> isLikelyOutlierWithCorrectableTimepoint(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
             GPSFixMoving previous, GPSFixMoving fix, GPSFixMoving next) {
-        final int HOW_MANY_CRITERIA_TO_FULFILL = 3;
+        final int HOW_MANY_CRITERIA_TO_FULFILL = 2;
         final double DISTANCE_RATIO_TOLERANCE = 0.5; // ratio between cross-track distance and length of closest segment
         final Pair<GPSFixMoving, Double> adjustedFixAndDistance;
         int criteriaFulfilled = 0;
@@ -129,7 +129,7 @@ public class OutlierFilter {
         if (hasInconsistentCogSog(previous, fix, next, /* speed ratio tolerance */ 0.1, /* course degree tolerance */ 10)) {
             criteriaFulfilled++;
         }
-        if (criteriaFulfilled >= HOW_MANY_CRITERIA_TO_FULFILL-1) {
+        if (criteriaFulfilled >= HOW_MANY_CRITERIA_TO_FULFILL) {
             final Pair<GPSFixMoving, Double> adjusted = adjust(previous, fix, track);
             if (adjusted.getB() > DISTANCE_RATIO_TOLERANCE) {
                 adjustedFixAndDistance = null;
@@ -140,7 +140,7 @@ public class OutlierFilter {
         } else {
             adjustedFixAndDistance = null;
         }
-        assert criteriaFulfilled >= 3 || adjustedFixAndDistance == null;
+        assert criteriaFulfilled >= HOW_MANY_CRITERIA_TO_FULFILL || adjustedFixAndDistance == null;
         return adjustedFixAndDistance;
     }
     
@@ -225,10 +225,11 @@ public class OutlierFilter {
                         final Distance alongTrackDistanceFromLastFix = fixPosition.alongTrackDistance(lastFix.getPosition(), bearingFromLastToCurrent);
                         // interpolate the time between the adjacent fixes to whose connection "fix" is closest, splitting the duration
                         // between the adjacent fixes proportionately based on "fix"'s distances to each of the two adjacent fixes:
+                        final Distance distanceFromLastFixToCurrentFix = lastFix.getPosition().getDistance(currentFix.getPosition());
                         final TimePoint inferredTimePointForFix = lastFix.getTimePoint().plus(lastFix.getTimePoint().until(currentFix.getTimePoint()).times(
-                                alongTrackDistanceFromLastFix.divide(lastFix.getPosition().getDistance(currentFix.getPosition()))));
+                                distanceFromLastFixToCurrentFix.equals(Distance.NULL) ? 0.5 : alongTrackDistanceFromLastFix.divide(distanceFromLastFixToCurrentFix)));
                         result = new GPSFixMovingImpl(fixPosition, inferredTimePointForFix, fix.getSpeed(), fix.getOptionalTrueHeading());
-                        distanceRatio = distanceFromSegment.divide(lastFix.getPosition().getDistance(currentFix.getPosition()));
+                        distanceRatio = distanceFromSegment.divide(distanceFromLastFixToCurrentFix);
                     } else { // we found a minimum after fix:
                         foundMinimum = true;
                     }

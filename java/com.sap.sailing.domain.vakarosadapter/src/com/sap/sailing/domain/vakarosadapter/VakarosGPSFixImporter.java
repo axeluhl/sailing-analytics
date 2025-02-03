@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,6 +35,8 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class VakarosGPSFixImporter implements GPSFixImporter {
 
     private static final Logger logger = Logger.getLogger(VakarosGPSFixImporter.class.getName());
+
+    private static final List<String> supportedExpeditionLogFileExtensions = Arrays.asList("csv", "vak", "zip", "gz");
 
     static final String TIMESTAMP_COLUMN_HEADING = "timestamp";
     private static final String LAT_COLUMN_HEADING = "latitude";
@@ -129,7 +132,7 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
 
     @Override
     public Iterable<String> getSupportedFileExtensions() {
-        return ExpeditionImportFileHandler.supportedExpeditionLogFileExtensions;
+        return supportedExpeditionLogFileExtensions;
     }
 
     @Override
