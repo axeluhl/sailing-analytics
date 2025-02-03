@@ -413,6 +413,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getExpeditionJibCarPortIfAvailable(TimePoint at);
     Double getExpeditionJibCarStbdIfAvailable(TimePoint at);
     Double getExpeditionMastButtIfAvailable(TimePoint at);
+    Double getExpeditionKickerTensionIfAvailable(TimePoint at);
     Double getAverageExpeditionAWA(TimePoint at);
     Double getAverageExpeditionAWS(TimePoint at);
     Double getAverageExpeditionTWA(TimePoint at);
@@ -452,4 +453,5 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Double getAverageExpeditionJibCarPortIfAvailable(TimePoint at);
     Double getAverageExpeditionJibCarStbdIfAvailable(TimePoint at);
     Double getAverageExpeditionMastButtIfAvailable(TimePoint at);
+    Double getAverageExpeditionKickerTensionIfAvailable(TimePoint at);
 }

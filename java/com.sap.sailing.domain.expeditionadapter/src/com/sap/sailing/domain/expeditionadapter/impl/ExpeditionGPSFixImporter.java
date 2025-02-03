@@ -49,12 +49,12 @@ public class ExpeditionGPSFixImporter implements GPSFixImporter {
                     protected void handleExpeditionFile(String fileName, InputStream stream, Charset charset) throws IOException {
                         final BufferedReader br = new BufferedReader(new InputStreamReader(stream, charset));
                         final String headerLine = br.readLine();
-                        final Map<String, Integer> columnDefinitions = ExpeditionExtendedDataImporterImpl
-                                .parseHeader(headerLine);
+                        final ExpeditionExtendedDataImporterImpl importer = new ExpeditionExtendedDataImporterImpl();
+                        final Map<String, Integer> columnDefinitions = importer.parseHeader(headerLine);
                         final AtomicInteger lineNr = new AtomicInteger(0);
                         br.lines().forEach(line -> {
                             if (!line.trim().isEmpty()) {
-                                ExpeditionExtendedDataImporterImpl.parseLine(lineNr.incrementAndGet(), fileName, line,
+                                importer.parseLine(lineNr.incrementAndGet(), fileName, line,
                                         columnDefinitions, (timePoint, columnValues, columns) -> {
                                             final double latDeg = Double
                                                     .parseDouble(columnValues[columns.get(LAT_COLUMN_HEADING)]);

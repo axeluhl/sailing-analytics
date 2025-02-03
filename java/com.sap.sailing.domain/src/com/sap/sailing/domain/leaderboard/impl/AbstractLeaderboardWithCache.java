@@ -1165,6 +1165,7 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
             result.setExpeditionJibCarPortIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarPortIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarPortIfAvailable));
             result.setExpeditionJibCarStbdIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionJibCarStbdIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionJibCarStbdIfAvailable));
             result.setExpeditionMastButtIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionMastButtIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionMastButtIfAvailable));
+            result.setExpeditionKickerTensionIfAvailable(extractDoubleValue.apply(TrackedLegOfCompetitor::getExpeditionKickerTensionIfAvailable, TrackedLegOfCompetitor::getAverageExpeditionKickerTensionIfAvailable));
         }
         return result;
     }

@@ -1030,6 +1030,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
+    public Double getExpeditionKickerTensionIfAvailable(TimePoint at) {
+        return getExpeditionValueFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getExpeditionKickerTensionIfAvailable);
+    }
+
+    @Override
     public Double getAverageExpeditionAWA(TimePoint at) {
         return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionAWAIfAvailable);
     }
@@ -1222,6 +1227,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Double getAverageExpeditionMastButtIfAvailable(TimePoint at) {
         return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionMastButtIfAvailable);
+    }
+    
+    @Override
+    public Double getAverageExpeditionKickerTensionIfAvailable(TimePoint at) {
+        return getAverageExpeditionValueWithTimeRangeFromBravoFixTrackIfLegIsStarted(at, BravoFixTrack::getAverageExpeditionKickerTensionIfAvailable);
     }
     
     private <R> R getExpeditionValueFromBravoFixTrackIfLegIsStarted(TimePoint at, BiFunction<BravoFixTrack<Competitor>, TimePoint, R> valueExtractor) {
