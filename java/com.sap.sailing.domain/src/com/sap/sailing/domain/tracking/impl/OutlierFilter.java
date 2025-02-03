@@ -198,10 +198,10 @@ public class OutlierFilter {
      * 
      * Should {@code fix} be consistent with the fixes from {@code iterator} then
      * the minimum distance is expected to be found right for the first pair of fixes, and that distance would then be the
-     * typical distance traveled between to fixes at the COG/SOG reported. The offset computed should then be pretty close
+     * typical distance traveled between two fixes at the COG/SOG reported. The offset computed should then be pretty close
      * to zero.<p>
      * 
-     * Otherwise, a minimum would be found some number of fixes away. The distance of {@code fix}'s position two the two
+     * Otherwise, a minimum would be found some number of fixes away. The distance of {@code fix}'s position to the two
      * other fixes will then be determined, and the duration between those fixes will be split proportionately based on the
      * respective distances of {@code fix}'s position to each of them to obtain a good estimate of its actual time point.
      * The difference between this inferred time point and the time point that {@code fix} reports is then used as the

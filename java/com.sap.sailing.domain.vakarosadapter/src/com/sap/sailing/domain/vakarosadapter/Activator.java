@@ -14,10 +14,9 @@ public class Activator implements BundleActivator {
     }
 
     public void start(BundleContext bundleContext) throws Exception {
-        GPSFixImporterRegistration.register(new VakarosGPSFixImporter(), context);
-        SensorDataImporterRegistration.register(new VakarosExtendedDataImporterImpl(), context);
-
-
+        context = bundleContext;
+        GPSFixImporterRegistration.register(new VakarosGPSFixImporter(), bundleContext);
+        SensorDataImporterRegistration.register(new VakarosExtendedDataImporterImpl(), bundleContext);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
