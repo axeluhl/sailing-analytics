@@ -7,7 +7,5 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sap.sailing.domain.vakarosadapter
 Automatic-Module-Name: com.sap.sailing.domain.vakarosadapter.test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.domain.common,
- com.sap.sse.common,
- org.junit;version="[4.13.0,5.0.0)"
+Import-Package: org.junit;version="[4.13.0,5.0.0)"
 Require-Bundle: org.hamcrest;bundle-version="2.2.0"
