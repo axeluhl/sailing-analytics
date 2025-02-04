@@ -1,6 +1,7 @@
 package com.sap.sse.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -64,5 +65,15 @@ public class RegexTest {
         final String escaped = "\""+value.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'")+"\"";
         logger.info("Escaped value: "+escaped);
         assertEquals("\"abc\\\\\\'\\\"\\\\\\\"\"", escaped);
+    }
+
+    @Test
+    public void testNonExponentialExpeditionPattern() {
+        final Pattern completeLinePattern = Pattern
+                .compile("#([0-9]*)((,([0-9][0-9]*),(-?[0-9]*(\\.[0-9]*)?))*)\\*X?([0-9a-fA-F][0-9a-fA-F]*)");
+        final Matcher m1 = completeLinePattern.matcher("#,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,X");
+        assertFalse(m1.matches());
+        final Matcher m2 = completeLinePattern.matcher("#,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,*35");
+        assertTrue(m2.matches());
     }
 }
