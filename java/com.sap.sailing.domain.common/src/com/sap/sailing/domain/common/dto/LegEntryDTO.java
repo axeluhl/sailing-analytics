@@ -694,6 +694,10 @@ public class LegEntryDTO implements Serializable {
         return expeditionHolder == null ? null : expeditionHolder.expeditionMastButt;
     }
     
+    public Double getExpeditionKickerTension() {
+        return expeditionHolder == null ? null : expeditionHolder.expeditionKickerTension;
+    }
+    
     public static class ExpeditionLegHolder implements Serializable {
         private static final long serialVersionUID = -2507536984016949734L;
         

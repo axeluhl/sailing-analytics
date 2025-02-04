@@ -20,19 +20,23 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter.Callback;
+import com.sap.sailing.domain.vakarosadapter.VakarosExtendedDataImporterImpl;
 import com.sap.sailing.domain.vakarosadapter.VakarosGPSFixImporter;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public class TestReadingVakarosFiles {
     private final static double EPSILON = 0.000000001;
-    private VakarosGPSFixImporter importer;
+    private VakarosGPSFixImporter gpsFixImporter;
+    private VakarosExtendedDataImporterImpl sensorFixImporter;
 
     @Before
     public void setUp() {
-        importer = new VakarosGPSFixImporter();
+        gpsFixImporter = new VakarosGPSFixImporter();
+        sensorFixImporter = new VakarosExtendedDataImporterImpl();
     }
     
     @Test
@@ -40,7 +44,8 @@ public class TestReadingVakarosFiles {
         final String sourceName = "/GDF-8-11-2024.csv.gz";
         final Map<TrackFileImportDeviceIdentifier, List<GPSFix>> gpsFixes = new HashMap<>();
         final Map<TrackFileImportDeviceIdentifier, List<DoubleVectorFix>> sensorFixes = new HashMap<>();
-        readAndAssertNotEmpty(sourceName, gpsFixes, sensorFixes);
+        readGPSFixesAndAssertNotEmpty(sourceName, gpsFixes);
+        readSensorFixesAndAssertNotEmpty(sourceName, sensorFixes);
         // check for presence of fixes corresponding to line:
         //   timestamp,latitude,longitude,sog_kts,cog,hdg_true,roll,pitch,load_GDF2,load_GDF1
         //   2024-11-08T08:38:56.077,41.7387700,12.2457483,0.000,113.1,125.4,-1.7,4.6,1.40,141.20
@@ -73,27 +78,33 @@ public class TestReadingVakarosFiles {
         assertTrue(foundSensorFix);
     }
 
-    private void readAndAssertNotEmpty(final String sourceName,
-            final Map<TrackFileImportDeviceIdentifier, List<GPSFix>> gpsFixes,
-            final Map<TrackFileImportDeviceIdentifier, List<DoubleVectorFix>> sensorFixes)
+    private void readGPSFixesAndAssertNotEmpty(final String sourceName,
+            final Map<TrackFileImportDeviceIdentifier, List<GPSFix>> gpsFixes)
             throws FormatNotSupportedException, IOException {
         final Callback callback = new Callback() {
             @Override
             public void addFix(GPSFix newFix, TrackFileImportDeviceIdentifier device) {
                 gpsFixes.computeIfAbsent(device, d->new ArrayList<>()).add(newFix);
             }
-            
-            @Override
-            public void addSensorFixes(Iterable<DoubleVectorFix> newSensorFixes, TrackFileImportDeviceIdentifier device) {
-                Util.addAll(newSensorFixes, sensorFixes.computeIfAbsent(device, d->new ArrayList<>()));
-            }
         };
-        importer.importFixes(getClass().getResourceAsStream(sourceName), Charset.forName("UTF-8"), callback, /* inferSpeedAndBearing */ false, sourceName);
+        gpsFixImporter.importFixes(getClass().getResourceAsStream(sourceName), Charset.forName("UTF-8"), callback, /* inferSpeedAndBearing */ false, sourceName);
         assertFalse(gpsFixes.isEmpty());
-        assertFalse(sensorFixes.isEmpty());
         for (final List<GPSFix> gpsFixList : gpsFixes.values()) {
             assertFalse(gpsFixList.isEmpty());
         }
+    }
+    
+    private void readSensorFixesAndAssertNotEmpty(final String sourceName,
+            final Map<TrackFileImportDeviceIdentifier, List<DoubleVectorFix>> sensorFixes)
+            throws FormatNotSupportedException, IOException {
+        final com.sap.sailing.domain.trackimport.BaseDoubleVectorFixImporter.Callback callback = new BaseDoubleVectorFixImporter.Callback() {
+            @Override
+            public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
+                Util.addAll(fixes, sensorFixes.computeIfAbsent(device, d->new ArrayList<>()));
+            }
+        };
+        sensorFixImporter.importFixes(getClass().getResourceAsStream(sourceName), Charset.forName("UTF-8"), callback, /* filename */ sourceName, sourceName, /* downsample */ false);
+        assertFalse(sensorFixes.isEmpty());
         for (final List<DoubleVectorFix> sensorFixList : sensorFixes.values()) {
             assertFalse(sensorFixList.isEmpty());
         }
@@ -104,6 +115,7 @@ public class TestReadingVakarosFiles {
         final String sourceName = "/GDF-13-12-2024.csv.zip";
         final Map<TrackFileImportDeviceIdentifier, List<GPSFix>> gpsFixes = new HashMap<>();
         final Map<TrackFileImportDeviceIdentifier, List<DoubleVectorFix>> sensorFixes = new HashMap<>();
-        readAndAssertNotEmpty(sourceName, gpsFixes, sensorFixes);
+        readGPSFixesAndAssertNotEmpty(sourceName, gpsFixes);
+        readSensorFixesAndAssertNotEmpty(sourceName, sensorFixes);
     }
 }

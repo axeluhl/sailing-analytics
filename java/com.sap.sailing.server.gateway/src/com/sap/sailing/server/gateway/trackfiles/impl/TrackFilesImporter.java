@@ -20,7 +20,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
@@ -91,13 +90,6 @@ public class TrackFilesImporter {
                             @Override
                             public void addFixes(Iterable<GPSFix> fixes, TrackFileImportDeviceIdentifier device) {
                                 storeFixes(fixes, device);
-                                deviceIds.add(device);
-                            }
-
-                            @Override
-                            public void addSensorFixes(Iterable<DoubleVectorFix> sensorFixes,
-                                    TrackFileImportDeviceIdentifier device) {
-                                storeFixes(sensorFixes, device);
                                 deviceIds.add(device);
                             }
                         }, true, fileName);

@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 
@@ -50,8 +49,6 @@ public interface GPSFixImporter {
         default void addFixes(Iterable<GPSFix> fixes, TrackFileImportDeviceIdentifier device) {
             fixes.forEach(fix->addFix(fix, device));
         }
-        
-        default void addSensorFixes(Iterable<DoubleVectorFix> sensorFixes, TrackFileImportDeviceIdentifier device) {}
     }
 
     /**

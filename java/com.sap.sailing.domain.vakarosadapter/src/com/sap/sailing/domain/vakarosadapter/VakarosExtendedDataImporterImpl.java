@@ -4,21 +4,46 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class VakarosExtendedDataImporterImpl extends ExpeditionExtendedDataImporterImpl {
     private static final Logger logger = Logger.getLogger(VakarosExtendedDataImporterImpl.class.getName());
 
     private static final DateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
     private static final String VAKAROS_EXTENDED = "VAKAROS_EXTENDED";
+    private static final String HEEL_COLUMN_HEADING = "roll";
+    private static final String PITCH_COLUMN_HEADING = "pitch";
+    private static final String LOAD_GDF1_COLUMN_HEADING = "load_gdf1";
+    private static final String LOAD_GDF2_COLUMN_HEADING = "load_gdf2";
 
     public VakarosExtendedDataImporterImpl() {
-        super(VAKAROS_EXTENDED);
+        super(VAKAROS_EXTENDED); // FIXME the ExpeditionImportFileHandler has a hard-coded set of file name extensions; we want our own!
+    }
+
+    @Override
+    protected Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
+        return Util.<String, Integer> mapBuilder()
+                .put(HEEL_COLUMN_HEADING, ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex())
+                .put(PITCH_COLUMN_HEADING, ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex())
+                .put(LOAD_GDF1_COLUMN_HEADING, ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex())
+                .put(LOAD_GDF2_COLUMN_HEADING, ExpeditionExtendedSensorDataMetadata.EXPEDITION_KICKER_TENSION.getColumnIndex())
+            .build();
+    }
+
+    @Override
+    protected TrackFileImportDeviceIdentifierImpl getTrackIdentifier(String filename, String sourceName) {
+        return new TrackFileImportDeviceIdentifierImpl(
+                UUID.randomUUID(), filename+"-SENSORS", sourceName, MillisecondsTimePoint.now());
     }
 
     @Override

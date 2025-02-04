@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +16,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
-import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
@@ -29,7 +25,6 @@ import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.server.trackfiles.impl.CompressedStreamsUtil;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
 import com.sap.sse.common.Bearing;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class VakarosGPSFixImporter implements GPSFixImporter {
@@ -44,17 +39,7 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
     private static final String SOG_COLUMN_HEADING = "sog_kts";
     private static final String COG_COLUMN_HEADING = "cog";
     private static final String HDG_COLUMN_HEADING = "hdg_true";
-    private static final String HEEL_COLUMN_HEADING = "roll";
-    private static final String PITCH_COLUMN_HEADING = "pitch";
-    private static final String LOAD_GDF1_COLUMN_HEADING = "load_gdf1";
-    private static final String LOAD_GDF2_COLUMN_HEADING = "load_gdf2";
     
-    private static final int MAX_EXPEDITION_COLUMN_INDEX = Collections.max(Arrays.asList(
-            ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex(),
-            ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex(),
-            ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex(),
-            ExpeditionExtendedSensorDataMetadata.EXPEDITION_KICKER_TENSION.getColumnIndex()))+1;
-
     private static final String VAKAROS_TYPE = "Vakaros";
 
     @Override
@@ -62,7 +47,6 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
             boolean inferSpeedAndBearing, final String sourceName)
             throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier gpsDevice = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
-        final TrackFileImportDeviceIdentifier sensorDevice = new TrackFileImportDeviceIdentifierImpl(sourceName+"-SENSORS", getType() + "@" + new Date());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
                 charset, new ExpeditionImportFileHandler() {
@@ -102,13 +86,6 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
                                                     new KnotSpeedWithBearingImpl(sogKnots,
                                                             new DegreeBearingImpl(cogDeg)), optionalTrueHeading);
                                             callback.addFix(fix, gpsDevice);
-                                            final Double[] fixData = new Double[MAX_EXPEDITION_COLUMN_INDEX];
-                                            fixData[ExpeditionExtendedSensorDataMetadata.HEEL.getColumnIndex()] = parseOptionalValue(HEEL_COLUMN_HEADING, columnValues, columns);
-                                            fixData[ExpeditionExtendedSensorDataMetadata.TRIM.getColumnIndex()] = parseOptionalValue(PITCH_COLUMN_HEADING, columnValues, columns);
-                                            fixData[ExpeditionExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex()] = parseOptionalValue(LOAD_GDF1_COLUMN_HEADING, columnValues, columns);
-                                            fixData[ExpeditionExtendedSensorDataMetadata.EXPEDITION_KICKER_TENSION.getColumnIndex()] = parseOptionalValue(LOAD_GDF2_COLUMN_HEADING, columnValues, columns);
-                                            final DoubleVectorFix sensorFix = new DoubleVectorFixImpl(timePoint, fixData);
-                                            callback.addSensorFixes(Collections.singleton(sensorFix), sensorDevice);
                                             importedFixes.set(true);
                                         });
                             }
@@ -118,18 +95,6 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
         return importedFixes.get();
     }
     
-    private Double parseOptionalValue(final String columnName, String[] columns, Map<String, Integer> header) {
-        final Integer columnIndex = header.get(columnName);
-        final Double result;
-        if (columnIndex != null && columns.length > columnIndex) {
-            final String columnContent = columns[columnIndex];
-            result = Util.hasLength(columnContent) ? Double.parseDouble(columnContent) : null;
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
     @Override
     public Iterable<String> getSupportedFileExtensions() {
         return supportedExpeditionLogFileExtensions;

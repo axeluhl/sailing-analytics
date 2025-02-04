@@ -76,10 +76,13 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     
     protected ExpeditionExtendedDataImporterImpl(String fixType) {
         super(fixType);
-        columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = ExpeditionExtendedSensorDataMetadata
-                .getColumnNamesToIndexInDoubleFix();
+        columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix = getColumnNamesToIndexInDoubleFix();
         trackColumnCount = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.values().stream()
                 .max((x, y) -> Integer.compare(x, y)).get() + 1;
+    }
+
+    protected Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
+        return ExpeditionExtendedSensorDataMetadata.getColumnNamesToIndexInDoubleFix();
     }
 
     @Override
@@ -101,47 +104,49 @@ public class ExpeditionExtendedDataImporterImpl extends AbstractDoubleVectorFixI
     @Override
     public boolean importFixes(InputStream inputStream, Charset charset, final Callback callback, String filename,
             String sourceName, boolean downsample) throws FormatNotSupportedException, IOException {
-        final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
-                UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
+        final TrackFileImportDeviceIdentifier trackIdentifier = getTrackIdentifier(filename, sourceName);
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(filename, inputStream, charset, new ExpeditionImportFileHandler() {
             @Override
             protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
                 logger.fine("Start parsing Expedition file");
                 final AtomicLong lineNr = new AtomicLong();
-                try (BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String headerLine = buffer.readLine();
+                final BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+                String headerLine = buffer.readLine();
+                lineNr.incrementAndGet();
+                logger.fine("Validate and parse header columns");
+                final Map<String, Integer> colIndices = parseHeader(headerLine);
+                validateHeader(colIndices);
+                buffer.lines().forEach(line -> {
                     lineNr.incrementAndGet();
-                    logger.fine("Validate and parse header columns");
-                    final Map<String, Integer> colIndices = parseHeader(headerLine);
-                    validateHeader(colIndices);
-                    buffer.lines().forEach(line -> {
-                        lineNr.incrementAndGet();
-                        if (!line.trim().isEmpty()) {
-                            parseLine(lineNr.get(), filename, line, colIndices,
-                                    (timePoint, lineContentTokens, columnsInFileFromHeader) -> {
-                                        final Double[] trackFixData = new Double[trackColumnCount];
-                                        for (final Entry<String, Integer> columnFromFile : columnsInFileFromHeader.entrySet()) {
+                    if (!line.trim().isEmpty()) {
+                        parseLine(lineNr.get(), filename, line, colIndices,
+                                (timePoint, lineContentTokens, columnsInFileFromHeader) -> {
+                                    final Double[] trackFixData = new Double[trackColumnCount];
+                                    for (final Entry<String, Integer> columnFromFile : columnsInFileFromHeader.entrySet()) {
+                                        final Integer indexInDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.get(columnFromFile.getKey());
+                                        if (indexInDoubleVectorFix != null) {
                                             final Double value = columnFromFile.getValue() >= lineContentTokens.length ? null
                                                     : lineContentTokens[columnFromFile.getValue()].trim().isEmpty() ? null
                                                             : Double.parseDouble(lineContentTokens[columnFromFile.getValue()]);
-                                            final Integer indexInDoubleVectorFix = columnNamesInFileAndTheirValueIndexInResultingDoubleVectorFix.get(columnFromFile.getKey());
-                                            if (indexInDoubleVectorFix != null) {
-                                                trackFixData[indexInDoubleVectorFix] = value;
-                                            }
+                                            trackFixData[indexInDoubleVectorFix] = value;
                                         }
-                                        importedFixes.set(true);
-                                        callback.addFixes(
-                                                Collections.singleton(new DoubleVectorFixImpl(timePoint, trackFixData)),
-                                                trackIdentifier);
-                                    });
-                        }
-                    });
-                    buffer.close();
-                }
+                                    }
+                                    importedFixes.set(true);
+                                    callback.addFixes(
+                                            Collections.singleton(new DoubleVectorFixImpl(timePoint, trackFixData)),
+                                            trackIdentifier);
+                                });
+                    }
+                });
             }
         });
         return importedFixes.get();
+    }
+
+    protected TrackFileImportDeviceIdentifierImpl getTrackIdentifier(String filename, String sourceName) {
+        return new TrackFileImportDeviceIdentifierImpl(
+                UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
     }
 
     /**

@@ -370,6 +370,7 @@ public enum DetailType implements Serializable, SecuredEnum {
         allowed.add(EXPEDITION_RACE_JIB_CAR_PORT);
         allowed.add(EXPEDITION_RACE_JIB_CAR_STBD);
         allowed.add(EXPEDITION_RACE_MAST_BUTT);
+        allowed.add(EXPEDITION_RACE_KICKER_TENSION);
         return allowed;
     }
 
