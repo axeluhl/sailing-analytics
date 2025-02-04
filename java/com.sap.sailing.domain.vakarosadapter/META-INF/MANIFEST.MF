@@ -21,6 +21,7 @@ Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.server.trackfiles.impl,
  com.sap.sse.common,
  com.sap.sse.common.impl,
+ com.sap.sse.common.util,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.domain.vakarosadapter
