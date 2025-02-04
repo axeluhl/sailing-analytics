@@ -19,9 +19,7 @@ jobs:
     permissions:
       contents: write
       checks: write
-    #runs-on: ubuntu-latest-64cpu
     runs-on: ubuntu-latest-4cpu
-    #runs-on: ubuntu-latest
     steps:
       - name: Allocate swap space
         shell: bash
