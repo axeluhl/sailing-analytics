@@ -49,7 +49,7 @@ public class VakarosGPSFixImporter implements GPSFixImporter {
         final TrackFileImportDeviceIdentifier gpsDevice = new TrackFileImportDeviceIdentifierImpl(sourceName, getType() + "@" + new Date());
         final AtomicBoolean importedFixes = new AtomicBoolean(false);
         CompressedStreamsUtil.handlePotentiallyCompressedFiles(sourceName, inputStream,
-                charset, new ExpeditionImportFileHandler() {
+                charset, new ExpeditionImportFileHandler(Arrays.asList("vak", "csv", "log", "txt")) {
                     @Override
                     protected void handleExpeditionFile(String fileName, InputStream stream, Charset charset) throws IOException {
                         final BufferedReader br = new BufferedReader(new InputStreamReader(stream, charset));

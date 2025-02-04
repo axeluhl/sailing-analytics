@@ -1,17 +1,26 @@
 package com.sap.sailing.domain.vakarosadapter;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.sensordata.ExpeditionExtendedSensorDataMetadata;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.ExpeditionExtendedDataImporterImpl;
+import com.sap.sailing.server.trackfiles.impl.ExpeditionImportFileHandler;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -24,10 +33,44 @@ public class VakarosExtendedDataImporterImpl extends ExpeditionExtendedDataImpor
     private static final String HEEL_COLUMN_HEADING = "roll";
     private static final String PITCH_COLUMN_HEADING = "pitch";
     private static final String LOAD_GDF1_COLUMN_HEADING = "load_gdf1";
+    private static final double LOAD_GDF1_CONVERSION_FACTOR_TO_FORESTAY_LOAD_IN_TONS = 1./1000.;
     private static final String LOAD_GDF2_COLUMN_HEADING = "load_gdf2";
 
     public VakarosExtendedDataImporterImpl() {
-        super(VAKAROS_EXTENDED); // FIXME the ExpeditionImportFileHandler has a hard-coded set of file name extensions; we want our own!
+        super(VAKAROS_EXTENDED);
+    }
+
+    /**
+     * The file handler returned by this method uses a special {@link Callback} implementation that inspects the
+     * {@link DoubleVectorFix} parsed from the stream, and if it finds a value for {@link #LOAD_GDF1_COLUMN_HEADING}, it
+     * applies the conversion factor {@link #LOAD_GDF1_CONVERSION_FACTOR_TO_FORESTAY_LOAD_IN_TONS} to this metric before
+     * passing the fix on to the actual {@code callback}.
+     */
+    @Override
+    protected ExpeditionImportFileHandler getFileHandler(TrackFileImportDeviceIdentifier trackIdentifier, AtomicBoolean importedFixes, Callback callback) {
+        final Map<String, Integer> columnNamesToIndexInDoubleFix = getColumnNamesToIndexInDoubleFix();
+        return new ExpeditionImportFileHandler(Arrays.asList("vak", "csv", "log", "txt")) {
+            @Override
+            protected void handleExpeditionFile(String fileName, InputStream inputStream, Charset charset) throws IOException, FormatNotSupportedException {
+                final Callback unitConvertingCallback = new Callback() {
+                    @Override
+                    public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
+                        callback.addFixes(Util.map(fixes, fix->{
+                            final DoubleVectorFix newFix;
+                            if (fix.get(columnNamesToIndexInDoubleFix.get(LOAD_GDF1_COLUMN_HEADING)) != null) {
+                                final Double[] values = fix.get();
+                                values[columnNamesToIndexInDoubleFix.get(LOAD_GDF1_COLUMN_HEADING)] = values[columnNamesToIndexInDoubleFix.get(LOAD_GDF1_COLUMN_HEADING)] * LOAD_GDF1_CONVERSION_FACTOR_TO_FORESTAY_LOAD_IN_TONS;
+                                newFix = new DoubleVectorFixImpl(fix.getTimePoint(), values);
+                            } else {
+                                newFix = fix; // LOAD_GDF1 was not set, so no conversion necessary, use fix as-is
+                            }
+                            return newFix;
+                        }), device);
+                    }
+                };
+                VakarosExtendedDataImporterImpl.this.handleExpeditionFile(fileName, inputStream, charset, trackIdentifier, importedFixes, unitConvertingCallback);
+            }
+        };
     }
 
     @Override

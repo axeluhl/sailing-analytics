@@ -70,7 +70,7 @@ public class TestReadingVakarosFiles {
                 Math.abs(sensorFix.get(BravoExtendedSensorDataMetadata.HEEL.getColumnIndex()) - -1.7) < EPSILON &&
                 Math.abs(sensorFix.get(BravoExtendedSensorDataMetadata.PITCH.getColumnIndex()) - 4.6) < EPSILON &&
                 Math.abs(sensorFix.get(BravoExtendedSensorDataMetadata.EXPEDITION_KICKER_TENSION.getColumnIndex()) - 1.4) < EPSILON &&
-                Math.abs(sensorFix.get(BravoExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex()) - 141.2) < EPSILON) {
+                Math.abs(sensorFix.get(BravoExtendedSensorDataMetadata.FORESTAY_LOAD.getColumnIndex()) - 0.1412) < EPSILON) {
                 foundSensorFix = true;
                 break;
             }
