@@ -5885,6 +5885,10 @@ Replicator {
                 result = getBravoDoubleValue(BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
+            case EXPEDITION_RACE_KICKER_TENSION: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionKickerTensionIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
             case PERCENT_TARGET_BOAT_SPEED: {
                 final PolarDataService polarDataService = getPolarDataService();
                 final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);

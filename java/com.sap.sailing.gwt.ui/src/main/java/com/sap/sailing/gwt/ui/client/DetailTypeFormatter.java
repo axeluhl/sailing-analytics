@@ -382,6 +382,8 @@ public class DetailTypeFormatter {
             return AVERAGE_SYMBOL + stringMessages.expeditionRaceJibCarStbd();
         case EXPEDITION_LEG_MAST_BUTT:
             return AVERAGE_SYMBOL + stringMessages.expeditionRaceMastButt();
+        case EXPEDITION_RACE_KICKER_TENSION:
+            return stringMessages.expeditionRaceKickerTension();
         case BRAVO_RACE_HEEL_IN_DEGREES:
             return stringMessages.currentHeelInDegree();
         case BRAVO_RACE_PITCH_IN_DEGREES:
@@ -609,6 +611,7 @@ public class DetailTypeFormatter {
         case EXPEDITION_LEG_JIB_CAR_PORT:
         case EXPEDITION_LEG_JIB_CAR_STBD:
         case EXPEDITION_LEG_MAST_BUTT:
+        case EXPEDITION_RACE_KICKER_TENSION:
             return "";
         }
         // Throwing an exception to get notified if an implementation of
@@ -914,6 +917,7 @@ public class DetailTypeFormatter {
         case EXPEDITION_RACE_LOAD_P:
         case EXPEDITION_RACE_LOAD_S:
         case EXPEDITION_RACE_MAST_BUTT:
+        case EXPEDITION_RACE_KICKER_TENSION:
             return "";
         case LEG_TACKTYPE_LONGTACK_SHORTTACK:
             return stringMessages.tackTypeTooltip();

@@ -2020,6 +2020,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String expeditionRaceJibCarPort();
     String expeditionRaceJibCarStbd();
     String expeditionRaceMastButt();
+    String expeditionRaceKickerTension();
     String milliBarUnits();
     String newExpeditionRace();
     String newExpeditionCompetitor();
