@@ -2551,6 +2551,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         regattaLog.add(event);
     }
 
+    /**
+     * Uses the device mapping's {@link TypedDeviceMappingDTO#dataType dataType} to
+     * {@link #getRegisteredImporter(Class, String) determine} a matching {@link DoubleVectorFixImporter} for sensor
+     * data. This importer is then used to create the {@link RegattaLogEvent} for the device mapping which is then added
+     * to the {@link RegattaLog} for the {@link Leaderboard} identified by the {@code leaderboardName}.
+     */
     @Override
     public void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException,
@@ -2562,12 +2568,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         RegattaLogEvent event = null;
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
+        final DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
         if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
             event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
                     getCompetitor((CompetitorWithBoatDTO) dto.mappedTo), mapping.getDevice(), from, to);
         } else if (dto.mappedTo instanceof BoatDTO) {
-            DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
             event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
                     getBoat((BoatDTO) dto.mappedTo), mapping.getDevice(), from, to);
         } else {

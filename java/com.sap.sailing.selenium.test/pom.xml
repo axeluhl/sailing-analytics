@@ -101,6 +101,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.domain.vakarosadapter</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.domain.windfinderadapter</id>
                   <level>4</level>
                   <autoStart>true</autoStart>

@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 
 import javax.security.auth.Subject;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.sap.sailing.competitorimport.CompetitorProvider;
@@ -1102,5 +1104,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, LeaderboardGroup leaderboardGroup, String leaderboardName,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException;
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException,
+            NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException;
 }

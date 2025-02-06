@@ -123,7 +123,6 @@ import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -5466,7 +5465,7 @@ Replicator {
     @Override
     public Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, LeaderboardGroup leaderboardGroup, String leaderboardName,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException {
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException {
         Double result = null;
         final Course course = trackedRace.getRace().getCourse();
         course.lockForRead(); // make sure the tracked leg survives this call even if a course update is pending
@@ -5885,14 +5884,12 @@ Replicator {
                 result = getBravoDoubleValue(BravoFixTrack::getExpeditionVMGTargVMGDeltaIfAvailable, trackedRace, competitor, timePoint);
                 break;
             }
+            case EXPEDITION_RACE_KICKER_TENSION: {
+                result = getBravoDoubleValue(BravoFixTrack::getExpeditionKickerTensionIfAvailable, trackedRace, competitor, timePoint);
+                break;
+            }
             case PERCENT_TARGET_BOAT_SPEED: {
-                final PolarDataService polarDataService = getPolarDataService();
-                final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(competitor);
-                final Wind wind = trackedRace.getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
-                final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(trackedRace.getBoatOfCompetitor(competitor).getBoatClass(),
-                                                                  wind, trackedRace.getTWA(competitor, timePoint, cache));
-                final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
-                result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                result = trackedRace.getPercentTargetBoatSpeed(competitor, timePoint, cache);
                 break;
             }
             default:

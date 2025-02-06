@@ -1076,6 +1076,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 + replicaSet.getPublicTargetGroup() + " and " + replicaSet.getMasterTargetGroup());
         replicaSet.getPublicTargetGroup().addTarget(master.getHost());
         replicaSet.getMasterTargetGroup().addTarget(master.getHost());
+        replicaSet.getOtherTargetGroups().forEach(tg->tg.addTarget(master.getHost()));
         sendMailAboutMasterAvailable(replicaSet);
         // the following map stores the assignment of the temporary upgrade replicas to the public / shard target groups
         // for later removal as the final auto-scaling replicas start to replace them:
@@ -1095,7 +1096,10 @@ public class LandscapeServiceImpl implements LandscapeService {
         // add all other temporary upgrade replicas not used for shards to the public target group:
         replicaSet.getPublicTargetGroup().addTargets(Util.map(temporaryUpgradeReplicasMutable,
                 temporaryUpgradeReplica -> temporaryUpgradeReplica.getHost()));
+        replicaSet.getOtherTargetGroups().forEach(tg->tg.addTargets(Util.map(temporaryUpgradeReplicasMutable,
+                temporaryUpgradeReplica -> temporaryUpgradeReplica.getHost())));
         tempUpgradeReplicasByTargetGroup.put(replicaSet.getPublicTargetGroup(), Util.map(temporaryUpgradeReplicasMutable, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost()));
+        replicaSet.getOtherTargetGroups().forEach(tg->tempUpgradeReplicasByTargetGroup.put(tg, Util.map(temporaryUpgradeReplicasMutable, temporaryUpgradeReplica->temporaryUpgradeReplica.getHost())));
         // if a replica was spun up (additionalReplicaStarted), remove from public target group and terminate:
         if (additionalReplicaStarted != null) {
             replicasToStopAfterUpgradingMaster.add(additionalReplicaStarted);
@@ -1114,6 +1118,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         final Set<SailingAnalyticsProcess<String>> newUpgradedUnmanagedReplicas = new HashSet<>();
         logger.info("Removing old replicas from public target group "+replicaSet.getPublicTargetGroup());
         replicaSet.getPublicTargetGroup().removeTargets(Util.map(replicasToStopAfterUpgradingMaster, replica->replica.getHost()));
+        replicaSet.getOtherTargetGroups().forEach(tg->tg.removeTargets(Util.map(replicasToStopAfterUpgradingMaster, replica->replica.getHost())));
         for (final SailingAnalyticsProcess<String> replica : replicasToStopAfterUpgradingMaster) {
             // if managed by auto-scaling group or if it's an "unmanaged" / "explicit" replica and it's the one launched in order to have at least one, stop/terminate;
             final boolean managedByAutoScalingGroup = replica.getHost().isManagedByAutoScalingGroup(affectedAutoScalingGroups);
@@ -1126,6 +1131,7 @@ public class LandscapeServiceImpl implements LandscapeService {
                 replica.refreshToRelease(release, Optional.ofNullable(optionalKeyName), privateKeyEncryptionPassphrase);
                 replica.waitUntilReady(Optional.of(Duration.ONE_DAY));
                 replicaSet.getPublicTargetGroup().addTarget(replica.getHost());
+                replicaSet.getOtherTargetGroups().forEach(tg->tg.addTarget(replica.getHost()));
                 newUpgradedUnmanagedReplicas.add(replica);
             }
         }
