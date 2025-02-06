@@ -193,6 +193,7 @@ implements com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric {
         });
     }
     
+    @Override
     public ORCCertificate getCertificate(Boat boat) {
         return certificates.get(boat);
     }

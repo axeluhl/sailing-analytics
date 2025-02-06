@@ -1219,6 +1219,10 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                             new RaceGapToLeaderInSeconds(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                             LeaderboardPanel.this));
+            result.put(DetailType.PERCENT_TARGET_BOAT_SPEED,
+                    new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.PERCENT_TARGET_BOAT_SPEED,
+                            new PercentTargetBoatSpeed(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
+                            LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                     new FormattedDoubleLeaderboardRowDTODetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                             new RaceCurrentSpeedOverGroundInKnots(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
@@ -1942,6 +1946,18 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 if (fieldsForRace != null) {
                     result = fieldsForRace.gapToLeaderInOwnTime == null ? null
                             : fieldsForRace.gapToLeaderInOwnTime.asSeconds();
+                }
+                return result;
+            }
+        }
+        
+        private class PercentTargetBoatSpeed implements DataExtractor<Double, LeaderboardRowDTO> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                final LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.percentTargetBoatSpeed == null ? null : fieldsForRace.percentTargetBoatSpeed;
                 }
                 return result;
             }

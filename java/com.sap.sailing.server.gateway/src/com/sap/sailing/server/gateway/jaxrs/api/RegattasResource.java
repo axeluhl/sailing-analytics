@@ -40,6 +40,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
@@ -2214,8 +2216,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final FutureTask<Iterable<Pair<TimePoint, Map<DetailType, Double>>>> future =new FutureTask<Iterable<Pair<TimePoint, Map<DetailType, Double>>>>(
                         new Callable<Iterable<Pair<TimePoint, Map<DetailType, Double>>>>() {
                     @Override
-                    public Iterable<Pair<TimePoint, Map<DetailType, Double>>> call() throws NoWindException, NotEnoughDataHasBeenAddedException {
-                        final List<Pair<TimePoint, Map<DetailType, Double>>> raceData = new ArrayList<>();
+                            public Iterable<Pair<TimePoint, Map<DetailType, Double>>> call()
+                                    throws NoWindException, NotEnoughDataHasBeenAddedException,
+                                    MaxIterationsExceededException, FunctionEvaluationException {
+                                final List<Pair<TimePoint, Map<DetailType, Double>>> raceData = new ArrayList<>();
                         if (startTime != null && endTime != null) {
                             for (long i = startTime.asMillis(); i <= endTime.asMillis(); i += adjustedStepSizeInMillis) {
                                 final TimePoint time = TimePoint.of(i);

@@ -420,6 +420,7 @@ public enum DetailType implements Serializable, SecuredEnum {
     public static Collection<DetailType> getAllRaceDetailTypes() {
         final Collection<DetailType> allowed = new LinkedHashSet<>();
         allowed.add(RACE_GAP_TO_LEADER_IN_SECONDS);
+        allowed.add(PERCENT_TARGET_BOAT_SPEED);
         allowed.add(RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         allowed.add(RACE_DISTANCE_TRAVELED);
         allowed.add(RACE_DISTANCE_TRAVELED_INCLUDING_GATE_START);

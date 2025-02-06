@@ -1410,4 +1410,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public UUID getCourseAreaId() {
         return null;
     }
+
+    @Override
+    public Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
 }

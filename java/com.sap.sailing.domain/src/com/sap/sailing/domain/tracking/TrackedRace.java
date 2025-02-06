@@ -13,6 +13,9 @@ import java.util.SortedSet;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
@@ -1482,4 +1485,15 @@ public interface TrackedRace
      * {@link SharedDomainFactory#getExistingCourseAreaById(Serializable)} method.
      */
     UUID getCourseAreaId();
+
+    /**
+     * Computes the {@code competitor}'s current boat speed's percentage of the target boat speed at time point
+     * {@code timePoint}. For one-design classes with a one-design ranking metric, the {@link PolarDataService} is used
+     * to tell the target boat speed. For an ORC Performance Curve Scoring ranking metric we can assume that
+     * boat-specific measurement {@link ORCCertificate}s exist from which we can obtain a target boat speed for the
+     * current conditions and point of sail.
+     */
+    Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
+            throws NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException;
 }
