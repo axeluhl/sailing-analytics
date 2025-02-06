@@ -60,6 +60,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -2605,7 +2607,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             for (final CompetitorDTO competitorDTO : competitors) {
                 FutureTask<CompetitorRaceDataDTO> future = new FutureTask<CompetitorRaceDataDTO>(new Callable<CompetitorRaceDataDTO>() {
                     @Override
-                    public CompetitorRaceDataDTO call() throws NoWindException, NotEnoughDataHasBeenAddedException {
+                    public CompetitorRaceDataDTO call() throws NoWindException, NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException {
                         Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(),
                                 competitorDTO.getIdAsString());
                         ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>> markPassingsData = new ArrayList<com.sap.sse.common.Util.Triple<String, Date, Double>>();
@@ -2677,9 +2679,11 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
 
     public Double getCompetitorRaceDataEntry(DetailType detailType, TrackedRace trackedRace,
             Competitor competitor, TimePoint timePoint, String leaderboardGroupName,
-            UUID leaderboardGroupId, String leaderboardName,
-            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) throws NoWindException, NotEnoughDataHasBeenAddedException {
-        return getService().getCompetitorRaceDataEntry(detailType, trackedRace, competitor, timePoint,
+            UUID leaderboardGroupId, String leaderboardName, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
+            throws NoWindException, NotEnoughDataHasBeenAddedException, MaxIterationsExceededException,
+            FunctionEvaluationException {
+        return getService().getCompetitorRaceDataEntry(
+                detailType, trackedRace, competitor, timePoint,
                 getLeaderboardGroupByIdOrName(leaderboardGroupId, leaderboardGroupName), leaderboardName, cache);
     }
 

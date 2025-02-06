@@ -41,6 +41,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -86,6 +89,7 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceTimesCalculationUtil;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -131,6 +135,7 @@ import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.maneuverdetection.impl.IncrementalManeuverDetectorImpl;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
+import com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -4388,5 +4393,30 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return trackingConnectorInfo;
+    }
+    
+    @Override
+    public Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
+            throws NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException {
+        final Double result;
+        if (getRankingMetric().getType() == RankingMetrics.ONE_DESIGN) {
+            final PolarDataService polarDataService = getPolarDataService();
+            final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
+            final Wind wind = getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+            final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(),
+                    wind, getTWA(competitor, timePoint, cache));
+            final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
+            result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+        } else if (getRankingMetric() instanceof ORCPerformanceCurveRankingMetric) {
+            final ORCPerformanceCurveRankingMetric orcRankingMetric = (ORCPerformanceCurveRankingMetric) getRankingMetric();
+            final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
+            final Wind wind = getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
+            final Speed impliedWind = orcRankingMetric.getImpliedWind(competitor, timePoint, cache);
+            result = impliedWind == null || wind == null ? null : impliedWind.divide(wind)*100.0;
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

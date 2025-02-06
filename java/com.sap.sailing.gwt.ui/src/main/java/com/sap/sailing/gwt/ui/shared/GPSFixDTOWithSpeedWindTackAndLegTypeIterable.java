@@ -13,6 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.rpc.core.com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegTypeIterable_CustomFieldSerializer;
@@ -279,7 +282,7 @@ public class GPSFixDTOWithSpeedWindTackAndLegTypeIterable implements IsSerializa
                     try {
                         detailValue = sailingService.getCompetitorRaceDataEntry(detailType, trackedRace, competitor,
                                 fix.getTimePoint(), leaderboardGroupName, leaderboardGroupId, leaderboardName, cache);
-                    } catch (NoWindException | NotEnoughDataHasBeenAddedException nwe) {
+                    } catch (NoWindException | NotEnoughDataHasBeenAddedException | MaxIterationsExceededException | FunctionEvaluationException nwe) {
                         detailValue = null;
                     }
                 }
