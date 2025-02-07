@@ -1360,4 +1360,32 @@
          install-size="0"
          version="4.28.3"
          unpack="false"/>
+
+   <plugin
+         id="com.sun.jna"
+         download-size="0"
+         install-size="0"
+         version="5.12.1.v20221103-2317"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jna.source"
+         download-size="0"
+         install-size="0"
+         version="5.12.1.v20221103-2317"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jna.platform"
+         download-size="0"
+         install-size="0"
+         version="5.12.1.v20221103-2317"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jna.platform.source"
+         download-size="0"
+         install-size="0"
+         version="5.12.1.v20221103-2317"
+         unpack="false"/>
 </feature>
