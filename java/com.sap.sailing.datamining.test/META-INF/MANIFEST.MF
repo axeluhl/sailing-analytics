@@ -24,5 +24,7 @@ Require-Bundle: org.mockito.mockito-core;bundle-version="4.8.1",
  org.objenesis;bundle-version="2.1.0",
  net.bytebuddy.byte-buddy;bundle-version="1.12.18",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18",
- com.sap.sailing.domain.test
+ com.sap.sailing.domain.test,
+ com.sun.jna;bundle-version="5.12.1",
+ com.sun.jna.platform;bundle-version="5.12.1"
 Automatic-Module-Name: com.sap.sailing.datamining.test
