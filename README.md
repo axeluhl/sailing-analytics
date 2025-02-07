@@ -1,4 +1,4 @@
-# SAP Sailing Analytics
+# Sailing Analytics
 
 ## About this Project
 
