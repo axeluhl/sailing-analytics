@@ -19,8 +19,8 @@ import net.bytebuddy.agent.VirtualMachine;
 public class TestAttachToVM {
     @Test
     public void testInjectAgentToRunningVM() throws IOException {
-        final VirtualMachine vm = VirtualMachine.ForHotSpot.attach("414179");
-        vm.loadAgent("/path/to/jmx_prometheus_javaagent-1.1.0.jar", "9000:/path/to/java/jmxPrometheusConfig.yaml");
+        final VirtualMachine vm = VirtualMachine.ForHotSpot.attach("520922");
+        vm.loadAgent("/path/to/jmx_prometheus_javaagent-1.1.0.jar", "127.0.0.1:9000:/path/to/java/jmxPrometheusConfig.yaml");
         assertNotNull(vm);
         vm.detach();
     }
