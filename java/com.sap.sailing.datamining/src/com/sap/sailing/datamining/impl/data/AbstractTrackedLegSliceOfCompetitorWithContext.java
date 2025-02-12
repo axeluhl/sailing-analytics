@@ -20,8 +20,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -46,8 +44,6 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
  * windward distance in the leg.
  */
 public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements AbstractHasTrackedLegSliceOfCompetitorContext {
-    private static final long serialVersionUID = 5944904146286262768L;
-
     private static final long DEFAULT_NUMBER_OF_SLICES = 10;
 
     private final HasTrackedLegContext trackedLegContext;
@@ -60,7 +56,6 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
     private boolean isRankAtSliceStartInitialized;
     private Integer rankAtSliceFinish;
     private boolean isRankAtSliceFinishInitialized;
-    private Wind wind;
     private int sliceNumber;
 
     public AbstractTrackedLegSliceOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor, TackTypeSegmentsDataMiningSettings settings, int sliceNumber) {
@@ -97,6 +92,17 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
         } else if (!trackedLegOfCompetitor.equals(other.trackedLegOfCompetitor))
             return false;
         return true;
+    }
+    
+    /**
+     * Picks the time point that is in the middle between the time point when the competitor entered
+     * the leg and the time point the competitor finished the leg. If no leg start/finish time exists
+     * for the competitor, start/end of race and then start/end of tracking are used as fall-back values.
+     */
+    public TimePoint getTimePoint() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        return getTimePointBetweenLegSliceStartAndLegFinish(trackedRace);
     }
 
     @Override
@@ -359,31 +365,7 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
         return result;
     }
 
-    @Override
-    public Wind getWindInternal() {
-        return wind;
-    }
-
-    @Override
-    public void setWindInternal(Wind wind) {
-        this.wind = wind;
-    }
-
-    @Override
-    public Position getPosition() {
-        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
-        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
-        final TimePoint timepoint = getTimePointBetweenLegSliceStartAndLegFinish(trackedRace);
-        final Position result;
-        if (timepoint == null) {
-            result = null;
-        } else {
-            result = trackedLeg.getMiddleOfLeg(timepoint);
-        }
-        return result;
-    }
-
-    private TimePoint getTimePointBetweenLegSliceStartAndLegFinish(final TrackedRace trackedRace) {
+    protected TimePoint getTimePointBetweenLegSliceStartAndLegFinish(final TrackedRace trackedRace) {
         final TimePoint competitorLegSliceStartTime = getSliceStartTime();
         final TimePoint competitorLegSliceEndTime =  getSliceFinishTime();
         final TimePoint startTime = competitorLegSliceStartTime != null ? competitorLegSliceStartTime :
@@ -394,23 +376,6 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
         return timepoint;
     }
 
-    /**
-     * Picks the time point that is in the middle between the time point when the competitor entered
-     * the leg and the time point the competitor finished the leg. If no leg start/finish time exists
-     * for the competitor, start/end of race and then start/end of tracking are used as fall-back values.
-     */
-    @Override
-    public TimePoint getTimePoint() {
-        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
-        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
-        return getTimePointBetweenLegSliceStartAndLegFinish(trackedRace);
-    }
-
-    @Override
-    public AbstractHasTrackedLegSliceOfCompetitorContext getTrackedLegOfCompetitorContext() {
-        return this;
-    }
-    
     @Override
     public Integer getNumberOfManeuvers() {
         return getNumberOfJibes() + getNumberOfTacks();

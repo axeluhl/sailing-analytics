@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
@@ -18,9 +19,13 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
  * @author Axel Uhl (d043530)
  *
  */
-public interface AbstractHasTrackedLegSliceOfCompetitorContext extends HasWindOnTrackedLeg, HasSomethingOfCompetitorContextWithTrackedRaceContext {
+public interface AbstractHasTrackedLegSliceOfCompetitorContext extends HasSomethingOfCompetitorContextWithTrackedRaceContext {
     @Connector(scanForStatistics=false)
     HasTrackedLegContext getTrackedLegContext();
+    
+    default TrackedRace getTrackedRace() {
+        return getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+    }
     
     TrackedLegOfCompetitor getTrackedLegOfCompetitor();
     
