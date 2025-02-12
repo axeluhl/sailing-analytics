@@ -12,9 +12,14 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public interface TerminalHasTrackedLegSliceOfCompetitorContext
-        extends AbstractHasTrackedLegSliceOfCompetitorContext, HasWindOnTrackedLegOfCompetitor {
+        extends HasTrackedLegOfCompetitorContext, HasWindOnTrackedLegOfCompetitor {
     @Override
     default TrackedRace getTrackedRace() {
-        return AbstractHasTrackedLegSliceOfCompetitorContext.super.getTrackedRace();
+        return HasTrackedLegOfCompetitorContext.super.getTrackedRace();
+    }
+
+    @Override
+    default HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
+        return this;
     }
 }

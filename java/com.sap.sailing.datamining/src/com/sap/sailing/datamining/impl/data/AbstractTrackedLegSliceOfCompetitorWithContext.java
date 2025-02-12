@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
-import com.sap.sailing.datamining.data.AbstractHasTrackedLegSliceOfCompetitorContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTackTypeSegmentContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.impl.components.TackTypeSegmentRetrievalProcessor;
@@ -20,6 +20,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Positioned;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -43,7 +45,8 @@ import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
  * harder to implement because we would need to find out iteratively, between which fixes the competitor sailed, say, one tenth of the
  * windward distance in the leg.
  */
-public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements AbstractHasTrackedLegSliceOfCompetitorContext {
+public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext, Positioned {
+    private static final long serialVersionUID = 7748860191111327007L;
     private static final long DEFAULT_NUMBER_OF_SLICES = 10;
 
     private final HasTrackedLegContext trackedLegContext;
@@ -586,6 +589,21 @@ public abstract class AbstractTrackedLegSliceOfCompetitorWithContext implements 
         return Util.stream(tackTypeSegmentRetriever.retrieveData(
                 new RaceOfCompetitorWithContext(getTrackedLegContext().getTrackedRaceContext(), competitor, settings)))
                 .filter(tt->tt.getLegNumber() == getTrackedLegContext().getLegNumber()).collect(resultProcessor);
+    }
+
+    
+    @Override
+    public Position getPosition() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        final TimePoint timepoint = getTimePointBetweenLegSliceStartAndLegFinish(trackedRace);
+        final Position result;
+        if (timepoint == null) {
+            result = null;
+        } else {
+            result = trackedLeg.getMiddleOfLeg(timepoint);
+        }
+        return result;
     }
 
     protected Integer getTheSliceNumber() {
