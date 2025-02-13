@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.annotations.Dimension;
 
-public interface HasWindOnTrackedLeg extends HasTrackedLegOfCompetitor, HasWind {
+public interface HasWindOnTrackedLegOfCompetitor extends HasTrackedLegOfCompetitor, HasWind {
     default Wind getWind() {
         if (getWindInternal() == null) {
             setWindInternal(getTrackedRace().getWind(getPosition(), getTimePoint()));
