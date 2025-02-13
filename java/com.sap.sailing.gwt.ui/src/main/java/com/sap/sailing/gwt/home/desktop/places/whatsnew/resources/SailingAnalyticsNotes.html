@@ -15,6 +15,10 @@
             <li>Percent Target Boat Speed for ORC Performance Curve Scoring (PCS) is now calculated based
                 on each boat's measurement certificate, using the ratio between the implied wind at the
                 current time point and the actual wind speed for the boat's position at that time.</li>
+            <li>Fixed Data Mining issue: maneuvers, GPS, and Bravo fixes were filtered by average leg wind
+                conditions instead of the maneuvers/GPS/Bravo fix's specific wind conditions. However,
+                when reporting the results respect the specific wind conditions, potentially leading to
+                inconsistencies.</li>
          </ul>
          <h5 class="articleSubheadline">January 2025</h5>
          <ul class="bulletList">
