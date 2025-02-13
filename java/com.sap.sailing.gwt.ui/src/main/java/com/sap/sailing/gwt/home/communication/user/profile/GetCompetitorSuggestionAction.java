@@ -32,15 +32,13 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     private final AbstractListFilter<Competitor> competitorFilter = new AbstractListFilter<Competitor>() {
         @Override
         public Iterable<String> getStrings(Competitor competitor) {
+            // This shall return those strings rendered into the competitor display by
+            // class SuggestedMultiSelectionCompetitorItemDescription and what it shows
             final List<String> result = new ArrayList<>();
             if (competitor.hasBoat()) {
                 final String sailID = ((CompetitorWithBoat) competitor).getBoat().getSailID();
                 if (Util.hasLength(sailID)) {
                     result.add(sailID);
-                }
-                final String boatName = ((CompetitorWithBoat) competitor).getBoat().getName();
-                if (Util.hasLength(boatName)) {
-                    result.add(boatName);
                 }
             }
             result.add(competitor.getName());
