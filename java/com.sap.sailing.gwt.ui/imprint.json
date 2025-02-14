@@ -231,7 +231,7 @@
         },
         {
             "name": "GWT Highcharts",
-            "version": "1.6.0",
+            "version": "12.1.2",
             "owner": "Moxie Group",
             "homepage": "http://www.moxiegroup.com/moxieapps/gwt-highcharts/",
             "acknowledgements": [
@@ -522,7 +522,7 @@
         },
         {
             "name": "video-js",
-            "version": "5.20.3",
+            "version": "7.8.4",
             "owner": "Brightcove, Inc.",
             "homepage": "https://github.com/videojs/video.js",
             "acknowledgements": [
