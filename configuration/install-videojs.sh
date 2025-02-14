@@ -24,6 +24,6 @@ echo "Now in directory $(pwd)"
 for i in $( find * -prune -type f \( -name '*.js' -o -name '*.css' \) ); do
     cp "${VIDEOJS}/video.js/dist/${i}" "${i}"
 done
-cp "${VIDEOJS}/video.js/dist/lang/*" ./lang
-cp "${VIDEOJS}/video.js/dist/font/*" ./font
+cp "${VIDEOJS}/video.js/dist/lang/"* ./lang
+cp "${VIDEOJS}/video.js/dist/font/"* ./font
 rm -rf "${VIDEOJS}"
