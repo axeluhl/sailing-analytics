@@ -4405,10 +4405,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (polarDataService != null) {
                 final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
                 final Wind wind = getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
-                final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(),
-                        wind, getTWA(competitor, timePoint, cache));
-                final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
-                result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                final Bearing twa = getTWA(competitor, timePoint, cache);
+                if (twa != null) {
+                    final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(), wind, twa);
+                    final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
+                    result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                } else {
+                    result = null;
+                }
             } else {
                 result = null;
             }
