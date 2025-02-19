@@ -7,5 +7,6 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sap.sse.aicore
 Automatic-Module-Name: com.sap.sse.aicore.test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.junit;version="[4.13.0,5.0.0)"
+Import-Package: com.sap.sse.common,
+ org.junit;version="[4.13.0,5.0.0)"
 Require-Bundle: org.hamcrest;bundle-version="2.2.0"

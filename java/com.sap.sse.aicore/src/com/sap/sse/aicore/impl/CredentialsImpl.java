@@ -15,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
@@ -31,6 +32,8 @@ public class CredentialsImpl implements Credentials {
     private final static String CLIENT_ID = "client_id";
     private final static String CLIENT_SECRET = "client_secret";
     private final static String ACCESS_TOKEN = "access_token";
+    private final static String AI_RESOURCE_GROUP_HEADER_NAME = "AI-Resource-Group";
+    private final static String AI_DEFAULT_RESOURCE_GROUP = "default";
     
     private final String clientId;
     private final String clientSecret;
@@ -58,11 +61,44 @@ public class CredentialsImpl implements Credentials {
         this.aiApiUrl = new URL(aiApiUrl);
     }
     
-    public HttpGet getHttpGetRequest(final String pathSuffix, final String resourceGroup) {
-        // TODO
-        return null;
+    @Override
+    public HttpGet getHttpGetRequest(final String pathSuffix) throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        final HttpGet httpGet = new HttpGet(new URL(aiApiUrl, pathSuffix).toString());
+        httpGet.addHeader(AI_RESOURCE_GROUP_HEADER_NAME, AI_DEFAULT_RESOURCE_GROUP);
+        httpGet.addHeader("Authorization", "Bearer "+getToken());
+        return httpGet;
     }
     
+    @Override
+    public JSONObject getJSONResponse(final String pathSuffix) throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        final HttpGet getRequest = getHttpGetRequest(pathSuffix);
+        final CloseableHttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
+        final JSONParser jsonParser = new JSONParser();
+        final HttpResponse response = client.execute(getRequest);
+        final JSONObject configurationsJson = (JSONObject) jsonParser.parse(new InputStreamReader(response.getEntity().getContent()));
+        return configurationsJson;
+    }
+
+    @Override
+    public String getIdentityZone() {
+        return identityZone;
+    }
+
+    @Override
+    public String getIdentityZoneId() {
+        return identityZoneId;
+    }
+
+    @Override
+    public String getAppName() {
+        return appName;
+    }
+
+    @Override
+    public URL getAiApiUrl() {
+        return aiApiUrl;
+    }
+
     String getToken() throws URISyntaxException, UnsupportedOperationException, ClientProtocolException, IOException, ParseException {
         if (token == null) {
             token = fetchToken();
@@ -72,7 +108,7 @@ public class CredentialsImpl implements Credentials {
 
     String fetchToken() throws URISyntaxException, UnsupportedOperationException, ClientProtocolException, IOException, ParseException {
         final HttpPost postRequest = new HttpPost(new URI(xsuaaUrl.toString() + CLIENT_CREDENTIALS_PATH));
-        postRequest.setHeader("Content-Type", "application/x-www-form-urlenoded");
+        postRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");
         final List<BasicNameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair(GRANT_TYPE_NAME, GRANT_TYPE_VALUE));
         params.add(new BasicNameValuePair(CLIENT_ID, clientId));
