@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.impl.data;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -230,6 +231,26 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Speed getSpeedWhenStarting() {
         return getTrackedRace().getSpeedWhenCrossingStartLine(getCompetitor());
+    }
+    
+    @Override
+    public Duration getStartDelay() {
+        final NavigableSet<MarkPassing> competitorMarkPassings = getTrackedRace().getMarkPassings(competitor);
+        getTrackedRace().lockForRead(competitorMarkPassings);
+        try {
+            final Duration result;
+            final TimePoint startOfRace;
+            if (!competitorMarkPassings.isEmpty() && (startOfRace = getTrackedRace().getStartOfRace()) != null) {
+                final MarkPassing firstMarkPassing = competitorMarkPassings.iterator().next();
+                TimePoint competitorStartTime = firstMarkPassing.getTimePoint();
+                result = startOfRace.until(competitorStartTime);
+            } else {
+                result = null;
+            }
+            return result;
+        } finally {
+            getTrackedRace().unlockAfterRead(competitorMarkPassings);
+        }
     }
     
     @Override
