@@ -7,7 +7,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
 public interface ChatSession {
-    void addSystemPrompt(String prompt);
-    void addPrompt(String prompt);
+    ChatSession addSystemPrompt(String prompt);
+    ChatSession addPrompt(String prompt);
     String submit() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException;
 }

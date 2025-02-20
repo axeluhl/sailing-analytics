@@ -43,13 +43,15 @@ public class ChatSessionImpl implements ChatSession {
     }
     
     @Override
-    public void addSystemPrompt(String prompt) {
+    public ChatSession addSystemPrompt(String prompt) {
         systemPrompts.add(prompt);
+        return this;
     }
 
     @Override
-    public void addPrompt(String prompt) {
+    public ChatSession addPrompt(String prompt) {
         userPrompts.add(prompt);
+        return this;
     }
     
     private String getChatPath() {
