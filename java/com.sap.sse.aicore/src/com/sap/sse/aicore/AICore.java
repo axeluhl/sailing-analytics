@@ -15,6 +15,14 @@ import com.sap.sse.aicore.impl.AICoreImpl;
 import com.sap.sse.aicore.impl.ChatSessionImpl;
 import com.sap.sse.common.Util;
 
+/**
+ * Provides connectivity and a facade to SAP AI Core and large language models hosted by it. To start with, create an
+ * instance using the static {@link #create(Credentials)} factory method on this interface. It needs {@link Credentials}
+ * which can be obtained, e.g., from your BTP Cockpit's "View Credentials" link in the top right corner.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface AICore {
     static AICore create(final Credentials credentials) {
         return new AICoreImpl(credentials);
