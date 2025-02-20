@@ -9,13 +9,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
@@ -62,23 +61,12 @@ public class CredentialsImpl implements Credentials {
     }
     
     @Override
-    public HttpGet getHttpGetRequest(final String pathSuffix) throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
-        final HttpGet httpGet = new HttpGet(new URL(aiApiUrl, pathSuffix).toString());
+    public void authorize(final HttpRequest httpGet) throws URISyntaxException, UnsupportedOperationException,
+            ClientProtocolException, IOException, ParseException {
         httpGet.addHeader(AI_RESOURCE_GROUP_HEADER_NAME, AI_DEFAULT_RESOURCE_GROUP);
         httpGet.addHeader("Authorization", "Bearer "+getToken());
-        return httpGet;
     }
     
-    @Override
-    public JSONObject getJSONResponse(final String pathSuffix) throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
-        final HttpGet getRequest = getHttpGetRequest(pathSuffix);
-        final CloseableHttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
-        final JSONParser jsonParser = new JSONParser();
-        final HttpResponse response = client.execute(getRequest);
-        final JSONObject configurationsJson = (JSONObject) jsonParser.parse(new InputStreamReader(response.getEntity().getContent()));
-        return configurationsJson;
-    }
-
     @Override
     public String getIdentityZone() {
         return identityZone;

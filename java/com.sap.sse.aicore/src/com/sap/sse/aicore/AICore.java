@@ -5,19 +5,41 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sse.aicore.impl.AICoreImpl;
+import com.sap.sse.aicore.impl.ChatSessionImpl;
 import com.sap.sse.common.Util;
 
 public interface AICore {
     static AICore create(final Credentials credentials) {
         return new AICoreImpl(credentials);
     }
-    
-    Iterable<Deployment> getDeployments() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException;
-    
-    default Optional<Deployment> getDeploymentByModelName(String modelName) throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
-        return Util.stream(getDeployments()).filter(d->d.getModelName().equals(modelName)).findAny();
+
+    Iterable<Deployment> getDeployments() throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException;
+
+    default Optional<Deployment> getDeploymentByModelName(String modelName) throws UnsupportedOperationException,
+            ClientProtocolException, URISyntaxException, IOException, ParseException {
+        return Util.stream(getDeployments()).filter(d -> d.getModelName().equals(modelName)).findAny();
     }
+
+    default Optional<ChatSession> createChatSession(String modelName) throws UnsupportedOperationException,
+            ClientProtocolException, URISyntaxException, IOException, ParseException {
+        return getDeploymentByModelName(modelName).map(d -> new ChatSessionImpl(this, d));
+    }
+
+    HttpGet getHttpGetRequest(String pathSuffix) throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException;
+
+    HttpPost getHttpPostRequest(String pathSuffix) throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException;
+
+    JSONObject getJSONResponse(HttpUriRequest request) throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException;
+
 }
