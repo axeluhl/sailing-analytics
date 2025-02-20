@@ -21,7 +21,7 @@ import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.Util;
 
-//@Ignore("Requires system property sap.aicore.credentials to be set and contain a JSON credentials string")
+@Ignore("Requires system property sap.aicore.credentials to be set and contain a JSON credentials string")
 public class TestWithSecretCredentials {
     private Credentials credentials;
 
