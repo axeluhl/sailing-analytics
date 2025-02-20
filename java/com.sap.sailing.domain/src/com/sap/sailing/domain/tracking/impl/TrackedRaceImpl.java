@@ -4399,7 +4399,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
             throws NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException {
-        final Double result;
+        Double result;
         if (getRankingMetric().getType() == RankingMetrics.ONE_DESIGN) {
             final PolarDataService polarDataService = getPolarDataService();
             if (polarDataService != null) {
@@ -4407,9 +4407,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 final Wind wind = getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
                 final Bearing twa = getTWA(competitor, timePoint, cache);
                 if (twa != null) {
-                    final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(), wind, twa);
-                    final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
-                    result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                    try {
+                        final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(), wind, twa);
+                        final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
+                        result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        result = null;
+                    }
                 } else {
                     result = null;
                 }
