@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +16,8 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
@@ -70,7 +71,7 @@ public class SailwaveHtmlParser {
         return tableRows;
     }
 
-    public List<String> getTagContents(String s, String tag) throws UnsupportedEncodingException {
+    public List<String> getTagContents(String s, String tag) {
         Pattern tagPattern = Pattern.compile("<("+tag.toLowerCase()+"|"+tag.toUpperCase()+")([^<>]*)>");
         Pattern slashTag = Pattern.compile("</("+tag.toLowerCase()+"|"+tag.toUpperCase()+")([^<>]*)>");
         boolean inTag = false;
@@ -94,9 +95,9 @@ public class SailwaveHtmlParser {
                 if (foundSlashTag) {
                     end = slashTagMatcher.start();
                     inTag = false;
-                    result.add(URLDecoder.decode(s.substring(start, end).trim(), "UTF-8"));
+                    result.add(StringEscapeUtils.unescapeHtml(s.substring(start, end).trim()));
                 } else {
-                    result.add(URLDecoder.decode(s.substring(start).trim(), "UTF-8"));
+                    result.add(StringEscapeUtils.unescapeHtml(s.substring(start).trim()));
                     finished = true;
                     logger.warning("unclosed "+tag+" tag in string \""+s+"\"");
                 }
@@ -114,12 +115,12 @@ public class SailwaveHtmlParser {
             final List<CompetitorRow> result = new ArrayList<CompetitorRow>();
             final BufferedReader br = new BufferedReader(new InputStreamReader(is));
             final Map<String, String> metadata = readMetadataBeforeTable(br);
-            final LinkedHashMap<String, String> columnStylesAndNames = readTableHeader(br);
+            final LinkedHashMap<String, String> columnNamesAndStyles = readTableHeader(br);
             findTableBody(br);
             final List<String> rowContents = getRowContents(br);
             for (final String row : rowContents) {
                 final List<String> tdContent = getTagContents(row, "td");
-                result.add(createCompetitorRow(tdContent, columnStylesAndNames, classesCounts));
+                result.add(createCompetitorRow(tdContent, columnNamesAndStyles, classesCounts));
             }
             return new RegattaResults() {
                 @Override
@@ -145,7 +146,7 @@ public class SailwaveHtmlParser {
     private LinkedHashMap<String, String> readTableHeader(BufferedReader br) throws IOException {
         final LinkedHashMap<String, String> result = new LinkedHashMap<>();
         final List<String> classes = new ArrayList<>();
-        final Pattern colClassPattern = Pattern.compile("<col class=\"([^\"]*)\" */>");
+        final Pattern colClassPattern = Pattern.compile("<col class=\"([^\"]*)\" */?>");
         final Pattern colTitlePattern = Pattern.compile("<th>([^<]*)</th>");
         String line;
         while ((line=br.readLine()) != null && !line.contains("<colgroup"))
@@ -155,28 +156,29 @@ public class SailwaveHtmlParser {
             if (colMatcher.matches()) {
                 classes.add(colMatcher.group(1));
             }
+            line = br.readLine();
         }
         while ((line=br.readLine()) != null && !line.contains("<tr class=\"titlerow\">"))
             ;
         final Iterator<String> classIter = classes.iterator();
-        while (line != null && !line.contains("</colgroup")) {
+        while (line != null && !line.contains("</tr")) {
             final Matcher colTitleMatcher = colTitlePattern.matcher(line);
             if (colTitleMatcher.matches()) {
-                result.put(classIter.next(), colTitleMatcher.group(1));
+                result.put(colTitleMatcher.group(1), classIter.next());
             }
+            line = br.readLine();
         }
         return result;
     }
 
     private Map<String, String> readMetadataBeforeTable(BufferedReader br) throws IOException {
-        final Pattern h3MetadataElementPattern = Pattern.compile("<h3 class=\"([^\"]*)\">([^<]*)</h3>");
-        final Pattern divMetadataElementPattern = Pattern.compile("<div class=\"([^\"]*)\">([^<]*)</div>");
+        final Pattern h3MetadataElementPattern = Pattern.compile("<h3 class=\"([^\"]*)\"[^>]*>([^<]*)</h3>");
+        final Pattern divMetadataElementPattern = Pattern.compile("<div class=\"([^\"]*)\"[^>]*>([^<]*)</div>");
         final Map<String, String> result = new HashMap<>();
         String line;
         while ((line=br.readLine()) != null && !line.contains("<h3"))
             ;
         while (line != null && !line.contains("<table")) {
-            assert line.contains("<h3>");
             final Matcher h3Matcher = h3MetadataElementPattern.matcher(line);
             if (h3Matcher.matches()) {
                 result.put(h3Matcher.group(1), h3Matcher.group(2));
@@ -190,9 +192,10 @@ public class SailwaveHtmlParser {
         return result;
     }
 
-    private CompetitorRow createCompetitorRow(List<String> trContent, LinkedHashMap<String, String> columnStylesAndNames, Map<String, Integer> classesCounts) throws UnsupportedEncodingException {
-        final List<String> columnValues = getTagContents(trContent.get(0), "td");
-        final Iterator<String> columnValueIterator = columnValues.iterator();
+    private CompetitorRow createCompetitorRow(List<String> trContent, LinkedHashMap<String, String> columnNamesAndStyles, Map<String, Integer> classesCounts) throws UnsupportedEncodingException {
+        final Pattern rankPattern = Pattern.compile("([0-9]+)[A-Za-z]*"); // captures the 3 in "3rd"
+        final Pattern nationalityPattern = Pattern.compile("^(<img .*\\btitle=\")?([A-Za-z][A-Za-z][A-Za-z])(\".*>)?$"); // captures the 3 in "3rd"
+        final Iterator<String> columnValueIterator = trContent.iterator();
         String nationality = null;
         String sailNumber = null;
         Integer totalRank = null;
@@ -200,11 +203,14 @@ public class SailwaveHtmlParser {
         List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<CompetitorEntry>();
         Double scoreAfterDiscarding = null;
         Double totalPointsBeforeDiscarding = null;
-        for (final Entry<String, String> columnStyleAndName : columnStylesAndNames.entrySet()) {
+        for (final Entry<String, String> columnNameAndStyle : columnNamesAndStyles.entrySet()) {
             final String columnValue = columnValueIterator.next();
-            switch (columnStyleAndName.getKey()) {
+            switch (columnNameAndStyle.getValue()) {
             case "rank":
-                totalRank = Integer.parseInt(columnValue);
+                final Matcher rankMatcher = rankPattern.matcher(columnValue);
+                if (rankMatcher.matches()) {
+                    totalRank = Integer.parseInt(rankMatcher.group(1));
+                }
                 break;
             case "class":
                 if (classesCounts.containsKey(columnValue)) {
@@ -214,7 +220,14 @@ public class SailwaveHtmlParser {
                 }
                 break;
             case "nat":
-                nationality = columnValue;
+                // example value: <img class="natflag" title="HKG" src="ILCA6_files/HKG.jpg">
+                // but we should also be prepared for just the nationality string, such as "HKG"
+                final Matcher natMatcher = nationalityPattern.matcher(columnValue);
+                if (natMatcher.matches()) {
+                    nationality = natMatcher.group(2);
+                } else {
+                    nationality = columnValue;
+                }
                 break;
             case "sailno":
                 sailNumber = columnValue;
@@ -227,10 +240,10 @@ public class SailwaveHtmlParser {
                 rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
                 break;
             case "total":
-                scoreAfterDiscarding = Double.parseDouble(columnValue);
+                totalPointsBeforeDiscarding = Double.parseDouble(columnValue);
                 break;
             case "nett":
-                totalPointsBeforeDiscarding = Double.parseDouble(columnValue);
+                scoreAfterDiscarding = Double.parseDouble(columnValue);
             }
         }
         return new CompetitorRowImpl(totalRank, nationality+" "+sailNumber, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
