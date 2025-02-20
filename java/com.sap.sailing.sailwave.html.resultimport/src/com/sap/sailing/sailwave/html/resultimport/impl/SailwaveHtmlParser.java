@@ -26,6 +26,8 @@ import com.sap.sailing.resultimport.impl.CompetitorRowImpl;
 import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 
 public class SailwaveHtmlParser {
+    static final String CLASS_METADATA = "class";
+    
     private static final Logger logger = Logger.getLogger(SailwaveHtmlParser.class.getName());
     
     public List<String> getRowContents(BufferedReader br) throws IOException {
@@ -122,6 +124,7 @@ public class SailwaveHtmlParser {
                 final List<String> tdContent = getTagContents(row, "td");
                 result.add(createCompetitorRow(tdContent, columnNamesAndStyles, classesCounts));
             }
+            addMostLikelyClassToMetadata(classesCounts, metadata);
             return new RegattaResults() {
                 @Override
                 public Map<String, String> getMetadata() {
@@ -134,6 +137,13 @@ public class SailwaveHtmlParser {
             };
         } finally {
             is.close();
+        }
+    }
+
+    private void addMostLikelyClassToMetadata(Map<String, Integer> classesCounts, Map<String, String> metadata) {
+        if (!classesCounts.isEmpty()) {
+            // sort descending and pick first:
+            metadata.put(CLASS_METADATA, classesCounts.entrySet().stream().sorted((e1, e2)->Integer.compare(e2.getValue(), e1.getValue())).findFirst().get().getKey());
         }
     }
 

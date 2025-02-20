@@ -58,12 +58,16 @@ public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider imple
      */
     private String getBoatClassName(RegattaResults regattaResult) {
         Map<String, String> metadata = regattaResult.getMetadata();
-        for (String metadatum : metadata.values()) {
-            if (metadatum != null && metadatum.length() > 0) {
-                return metadatum;
+        if (metadata.containsKey(SailwaveHtmlParser.CLASS_METADATA)) {
+            return metadata.get(SailwaveHtmlParser.CLASS_METADATA);
+        } else {
+            for (String metadatum : metadata.values()) {
+                if (metadatum != null && metadatum.length() > 0) {
+                    return metadatum;
+                }
             }
+            return null;
         }
-        return null;
     }
 
     @Override
