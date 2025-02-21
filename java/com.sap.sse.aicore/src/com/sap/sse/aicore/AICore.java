@@ -28,10 +28,10 @@ import com.sap.sse.common.Util;
  * Example:
  * <pre>
  *   final AICore aiCore = AICore.create(CredentialsParser.create().parse(System.getProperty("sap.ai.core.credentials")));
- *   final ChatSession chatSession = aiCore.createChatSession("gpt-4o-mini");
+ *   final ChatSession chatSession = aiCore.createChatSession("gpt-4o-mini").get();
  *   final String response = chatSession
  *                             .addSystemPrompt("You are a teacher.")
- *                             .addPrompt("Expain quantum mechanics in easy terms!")
+ *                             .addPrompt("Explain quantum mechanics in easy terms!")
  *                             .submit();
  * </pre>
  * 

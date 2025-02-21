@@ -24,7 +24,7 @@ import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.Util;
 
-@Ignore("Requires  with system property sap.aicore.credentials to be set and contain a JSON credentials string; for format, see resources/sample_credentials.json")
+@Ignore("Requires system property sap.aicore.credentials to be set and contain a JSON credentials string; for format, see resources/sample_credentials.json")
 public class TestWithSecretCredentials {
     private Credentials credentials;
     private AICore aiCore;
@@ -97,5 +97,15 @@ public class TestWithSecretCredentials {
         final String response2 = chatSession.submit();
         assertTrue(Util.hasLength(response2));
         assertThat("Answer requested to be more concise was longer than the original answer", response2.length(), lessThan(response.length()));
+    }
+    
+    @Test
+    public void explainQuantumMechanics() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        final ChatSession chatSession = aiCore.createChatSession("gpt-4o-mini").get();
+        final String response = chatSession
+                .addSystemPrompt("You are a teacher.")
+                .addPrompt("Explain quantum mechanics in easy terms!").submit();
+        assertTrue(Util.hasLength(response));
+        assertTrue(response.contains("atoms"));
     }
 }
