@@ -181,6 +181,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.sailwave.html.resultimport</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.manage2sail.resultimport</id>
                   <level>4</level>
                   <autoStart>true</autoStart>

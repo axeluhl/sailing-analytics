@@ -68,6 +68,7 @@
       <plugin id="com.sap.sailing.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.sailti.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.sailwave.resultimport" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.sailwave.html.resultimport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.shared.server" autoStart="true" startLevel="5" />
