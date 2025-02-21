@@ -23,7 +23,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ScoreCorrectionProviderImpl extends AbstractResultUrlProvider implements ScoreCorrectionProvider, ResultUrlProvider {
     private static final long serialVersionUID = 5853404150107387702L;
-    public static final String PROVIDER_NAME = "SailWave HTML Score Importer";
+    public static final String PROVIDER_NAME = "Sailwave HTML Score Importer";
     
     public ScoreCorrectionProviderImpl(ResultUrlRegistry resultUrlRegistry) {
         super(resultUrlRegistry);
