@@ -1101,7 +1101,9 @@ public class Util {
     }
     
     /**
-     * Checks whether a given String is <code>null</code> or empty.
+     * Checks whether a given String is <code>null</code> or empty. Note that the string is not trimmed
+     * before performing the "empty" check, so for example "   " (three spaces) <em>will</em> be considered
+     * having a length and <tt>true</tt> would be returned in this case.
      * 
      * @param str
      *            String to check

@@ -134,6 +134,10 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          version="0.0.0"/>
 
    <plugin
+         id="com.sap.sailing.sailwave.html.resultimport"
+         version="0.0.0"/>
+
+   <plugin
          id="com.sap.sailing.manage2sail.resultimport"
          version="0.0.0"/>
 
