@@ -2,7 +2,6 @@ package com.sap.sailing.news.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,11 +52,5 @@ public class LeaderboardUpdateEventNewsProvider implements EventNewsProvider {
         }
         Collections.sort(result);
         return result.subList(0, Math.min(LIMIT, result.size()));
-    }
-    
-    @Override
-    public Collection<? extends EventNewsItem> getNews(Event event, Date startingFrom) {
-        // TODO correct implementation
-        return getNews(event);
     }
 }
