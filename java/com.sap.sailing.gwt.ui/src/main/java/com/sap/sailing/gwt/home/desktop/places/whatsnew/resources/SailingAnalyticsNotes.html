@@ -15,6 +15,25 @@
             <li>Percent Target Boat Speed for ORC Performance Curve Scoring (PCS) is now calculated based
                 on each boat's measurement certificate, using the ratio between the implied wind at the
                 current time point and the actual wind speed for the boat's position at that time.</li>
+            <li>Fixed Data Mining issue: maneuvers, GPS, and Bravo fixes were filtered by average leg wind
+                conditions instead of the maneuvers/GPS/Bravo fix's specific wind conditions. However,
+                when reporting the results respect the specific wind conditions, potentially leading to
+                inconsistencies.</li>
+            <li>Assembling a "Sailor Profile" (see
+                <a href="https://www.sapsailing.com/gwt/Home.html#/user/profile/sailorprofile/:">https://www.sapsailing.com/gwt/Home.html#/user/profile/sailorprofile/:</a>)
+                now has an improved competitor search facility. The search keywords will be split along
+                whitespace characters, so you can use multiple keywords in your search and split them by
+                spaces. Sail numbers of competitors with fixed boat assignments will now be considered in
+                the search, making this consistent with the display of the suggested items which also
+                contain the sail numbers where available. Furthermore, the suggest box no longer suggests
+                items that are already contained in the sailor profile's competitor selection. This makes
+                assembling the competitor set of a sailor profile easier for larger numbers of items.</li>
+            <li>Event seasons such as historic Extreme Sailing Series events or some league events were
+                troubled by a data migration issue in connection with a new TracAPI major release 4.0.0
+                and did not load correct course mark positions anymore. This problem has now been fixed
+                on TracTrac's side, and after loading all content again, all events should now have their mark
+                positions back.</li>
+            <li>Added "Start Delay" as a statistic to the "Race of Competitor" data mining category.</li>
          </ul>
          <h5 class="articleSubheadline">January 2025</h5>
          <ul class="bulletList">

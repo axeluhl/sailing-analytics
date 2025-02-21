@@ -4399,16 +4399,24 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
             WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache)
             throws NotEnoughDataHasBeenAddedException, MaxIterationsExceededException, FunctionEvaluationException {
-        final Double result;
+        Double result;
         if (getRankingMetric().getType() == RankingMetrics.ONE_DESIGN) {
             final PolarDataService polarDataService = getPolarDataService();
             if (polarDataService != null) {
                 final GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrack(competitor);
                 final Wind wind = getWind(competitorTrack.getEstimatedPosition(timePoint, /* extrapolate */ true), timePoint);
-                final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(),
-                        wind, getTWA(competitor, timePoint, cache));
-                final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
-                result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                final Bearing twa = getTWA(competitor, timePoint, cache);
+                if (twa != null) {
+                    try {
+                        final SpeedWithConfidence<Void> targetSpeed = polarDataService.getSpeed(getBoatOfCompetitor(competitor).getBoatClass(), wind, twa);
+                        final Speed sog = competitorTrack.getEstimatedSpeed(timePoint);
+                        result = targetSpeed != null && targetSpeed.getObject() != null && sog != null ? 100.0 * sog.getKnots() / targetSpeed.getObject().getKnots() : null;
+                    } catch (NotEnoughDataHasBeenAddedException e) {
+                        result = null;
+                    }
+                } else {
+                    result = null;
+                }
             } else {
                 result = null;
             }
