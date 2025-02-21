@@ -13,6 +13,7 @@ import com.sap.sailing.news.EventNewsProviderRegistry;
 import com.sap.sailing.news.EventNewsService;
 
 public class EventNewsServiceImpl implements EventNewsService {
+    private final static int LIMIT = 25;
     private final EventNewsProviderRegistry providerRegistry;
     
     public EventNewsServiceImpl(EventNewsProviderRegistry providerRegistry) {
@@ -21,13 +22,13 @@ public class EventNewsServiceImpl implements EventNewsService {
 
     @Override
     public List<EventNewsItem> getNews(Event event) {
-        List<EventNewsItem> result = new ArrayList<>();
-        for(EventNewsProvider provider: providerRegistry.getEventNewsProvider()) {
+        final List<EventNewsItem> result = new ArrayList<>();
+        for (EventNewsProvider provider : providerRegistry.getEventNewsProvider()) {
             Collection<? extends EventNewsItem> news = provider.getNews(event);
             result.addAll(news);
         }
         Collections.sort(result);
-        if(result.size() <= 25) {
+        if (result.size() <= 25) {
             return result;
         }
         return result.subList(0, 25);
@@ -40,11 +41,8 @@ public class EventNewsServiceImpl implements EventNewsService {
             Collection<? extends EventNewsItem> news = provider.getNews(event, startingFrom);
             result.addAll(news);
         }
-        Collections.sort(result);
-        if(result.size() <= 25) {
-            return result;
-        }
-        return result.subList(0, 25);
+        Collections.sort(result); // sorts by the NewsItem natural order, based on creation date
+        return result.subList(0, Math.min(result.size(), LIMIT));
     }
 
     @Override

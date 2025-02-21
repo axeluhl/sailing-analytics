@@ -9,8 +9,4 @@ public interface EventNewsProvider {
     Collection<? extends EventNewsItem> getNews(Event event);
     
     Collection<? extends EventNewsItem> getNews(Event event, Date startingFrom);
-
-    boolean hasNews(Event event, Date startingFrom);
-
-    boolean hasNews(Event event);
 }

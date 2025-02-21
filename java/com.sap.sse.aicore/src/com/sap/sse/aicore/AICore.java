@@ -1,6 +1,7 @@
 package com.sap.sse.aicore;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ import com.sap.sse.common.Util;
  * 
  * Example:
  * <pre>
- *   final AICore aiCore = AICore.create(CredentialsParser.create().parse(System.getProperty("sap.ai.core.credentials")));
+ *   final AICore aiCore = AICore.create(CredentialsParser.create().parse(System.getProperty(CREDENTIALS_SYSTEM_PROPERTY_NAME)));
  *   final ChatSession chatSession = aiCore.createChatSession("gpt-4o-mini").get();
  *   final String response = chatSession
  *                             .addSystemPrompt("You are a teacher.")
@@ -39,6 +40,22 @@ import com.sap.sse.common.Util;
  *
  */
 public interface AICore {
+    /**
+     * Name of the system property in which we look for default credentials that will be used by the
+     * {@link #getDefault} method to obtain valid credentials.
+     */
+    String CREDENTIALS_SYSTEM_PROPERTY_NAME = "sap.aicore.credentials";
+    
+    /**
+     * Produces a default {@link AICore} instance using credentials from the system property whose name
+     * is specified by {@link #CREDENTIALS_SYSTEM_PROPERTY_NAME}. If that property is not set, {@code null}
+     * is returned.
+     */
+    static AICore getDefault() throws MalformedURLException, ParseException {
+        final String systemProperty = System.getProperty(CREDENTIALS_SYSTEM_PROPERTY_NAME);
+        return systemProperty == null ? null : AICore.create(CredentialsParser.create().parse(systemProperty));
+    }
+    
     static AICore create(final Credentials credentials) {
         return new AICoreImpl(credentials);
     }

@@ -31,7 +31,7 @@ public class TestWithSecretCredentials {
 
     @Before
     public void setUp() throws MalformedURLException, ParseException {
-        final String credentialsJsonString = System.getProperty("sap.aicore.credentials");
+        final String credentialsJsonString = System.getProperty(AICore.CREDENTIALS_SYSTEM_PROPERTY_NAME);
         credentials = CredentialsParser.create().parse(credentialsJsonString);
         aiCore = AICore.create(credentials);
     }

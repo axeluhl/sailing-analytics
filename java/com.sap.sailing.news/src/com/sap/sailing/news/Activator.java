@@ -17,7 +17,6 @@ public class Activator implements BundleActivator {
         EventNewsService newsService = new EventNewsServiceImpl(providerRegistry);
         context.registerService(EventNewsService.class, newsService, null);
         context.registerService(EventNewsProviderRegistry.class, providerRegistry, null);
-        
         // The json event news provider is only a fallback and should not be activated per default 
         // providerRegistry.registerNewsProvider(new JsonEventNewsProvider());
         providerRegistry.registerNewsProvider(new LeaderboardUpdateEventNewsProvider());

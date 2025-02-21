@@ -337,4 +337,8 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          id="com.sap.sailing.domain.queclinkadapter"
          version="0.0.0"/>
 
+   <plugin
+         id="com.sap.sailing.aiagent"
+         version="0.0.0"/>
+
 </feature>

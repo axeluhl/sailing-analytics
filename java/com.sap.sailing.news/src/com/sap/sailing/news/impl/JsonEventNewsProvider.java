@@ -79,7 +79,7 @@ public class JsonEventNewsProvider implements EventNewsProvider {
                     Map<Locale, String> messages = readI18nText(eventAsJson, "messages");
                     String newsURL = (String) eventAsJson.get("url");
                     UUID eventId = UUID.fromString(eventIdAsString);
-                    InfoEventNewsItem newsItem = new InfoEventNewsItem(eventId, title, message, new Date(timestamp.longValue()), null, newsURL == null ? null : new URL(newsURL), titles, messages);
+                    InfoEventNewsItem newsItem = new InfoEventNewsItem(eventId, title, message, new Date(timestamp.longValue()), newsURL == null ? null : new URL(newsURL), titles, messages);
                     newNews.add(newsItem);
                 }
                 news = newNews;
@@ -128,15 +128,4 @@ public class JsonEventNewsProvider implements EventNewsProvider {
     public Collection<? extends EventNewsItem> getNews(Event event, Date startingFrom) {
         return getNews(event);
     }
-
-    @Override
-    public boolean hasNews(Event event, Date startingFrom) {
-        return news.size() > 0;
-    }
-
-    @Override
-    public boolean hasNews(Event event) {
-        return news.size() > 0;
-    }
-
 }
