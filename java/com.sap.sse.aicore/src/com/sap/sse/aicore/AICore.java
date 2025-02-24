@@ -62,6 +62,11 @@ public interface AICore {
 
     Iterable<Deployment> getDeployments() throws UnsupportedOperationException, ClientProtocolException,
             URISyntaxException, IOException, ParseException;
+    
+    default Iterable<String> getModelNames() throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException {
+        return Util.map(getDeployments(), d -> d.getModelName());
+    }
 
     default Optional<Deployment> getDeploymentByModelName(String modelName) throws UnsupportedOperationException,
             ClientProtocolException, URISyntaxException, IOException, ParseException {

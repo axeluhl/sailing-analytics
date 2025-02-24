@@ -58,6 +58,11 @@ public class TestWithSecretCredentials {
     }
     
     @Test
+    public void testFetchModelNames() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        assertTrue(Util.contains(aiCore.getModelNames(), "gpt-4o-mini"));
+    }
+    
+    @Test
     public void testFindingGpt4oMiniModel() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
         final Optional<Deployment> gpt4oMini = aiCore.getDeploymentByModelName("gpt-4o-mini");
         assertTrue(gpt4oMini.isPresent());
