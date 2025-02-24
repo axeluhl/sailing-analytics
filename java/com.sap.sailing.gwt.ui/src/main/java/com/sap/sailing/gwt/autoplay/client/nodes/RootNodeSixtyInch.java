@@ -31,7 +31,6 @@ public class RootNodeSixtyInch extends RootNodeBase {
         this.liveRaceLoop = new LiveRaceWithRacemapNode(cf);
         this.afterLiveRaceLoop = new AutoPlaySequenceNode("AfterLiveRaceLoop", 30,
                 new RaceEndWithCompetitorsBoatsNode(cf), new RaceEndWithCompetitorsFlagsNode(cf));
-
         afterLiveRaceLoop.setOnSequenceEnd(new Command() {
             @Override
             public void execute() {
