@@ -326,6 +326,11 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.aiagent.gateway</id>
+                  <level>5</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sse.security.ui</id>
                   <level>6</level>
                   <autoStart>true</autoStart>

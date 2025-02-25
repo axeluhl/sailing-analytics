@@ -12,7 +12,7 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.aiagent.AIAgent;
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;

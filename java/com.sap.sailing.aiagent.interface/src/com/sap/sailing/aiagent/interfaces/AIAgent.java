@@ -1,4 +1,4 @@
-package com.sap.sailing.aiagent;
+package com.sap.sailing.aiagent.interfaces;
 
 import com.sap.sailing.domain.base.Event;
 

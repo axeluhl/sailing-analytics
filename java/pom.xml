@@ -163,7 +163,9 @@
         <module>com.sap.sailing.domain.swisstimingadapter</module>
         <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
         <module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+        <module>com.sap.sailing.aiagent.interfaces</module>
         <module>com.sap.sailing.aiagent</module>
+        <module>com.sap.sailing.aiagent.gateway</module>
         <module>com.sap.sailing.news</module>
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>

@@ -6,9 +6,9 @@ import java.net.URISyntaxException;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.aiagent.AIAgent;
 import com.sap.sailing.aiagent.impl.AIAgentImpl;
 import com.sap.sailing.aiagent.impl.RaceListener;
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
