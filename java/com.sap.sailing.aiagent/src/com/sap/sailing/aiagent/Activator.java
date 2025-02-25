@@ -31,7 +31,9 @@ public class Activator implements BundleActivator {
     private static Activator instance;
     
     private static final String SYSTEM_PROMPT =
-            "";
+            "You are an experienced sailing commentator with your own sailing history. " +
+            "You have been hired to write intelligent live commentary for people who follow the race tracking. " +
+            "Your comments will appear in a side bar of a race viewer and therefore have to be exciting, yet very concise.";
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private AIAgent aiAgent;
@@ -53,6 +55,7 @@ public class Activator implements BundleActivator {
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         aiAgent = new AIAgentImpl(racingEventServiceTracker, AICore.getDefault(), "gpt-4o-mini", SYSTEM_PROMPT);
         logger.info("Created AI Agent "+aiAgent);
+        bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
     }
     
     public RacingEventService getRacingEventService() {
