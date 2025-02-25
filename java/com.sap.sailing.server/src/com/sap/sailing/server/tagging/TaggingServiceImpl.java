@@ -64,7 +64,6 @@ public class TaggingServiceImpl implements TaggingService {
     private void addPublicTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, String resizedImageURL, TimePoint raceTimepoint)
             throws RaceLogNotFoundException, TagAlreadyExistsException {
-        getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -250,7 +249,6 @@ public class TaggingServiceImpl implements TaggingService {
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince) {
         Leaderboard leaderBoard = racingService.getLeaderboardByName(raceIdentifier.getRegattaName());
         getSecurityService().checkCurrentUserReadPermission(leaderBoard);
-
         final List<TagDTO> result = new ArrayList<TagDTO>();
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();

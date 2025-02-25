@@ -42,7 +42,7 @@
     </filter-mapping>
 
 	<servlet>
-		<servlet-name>Igtimi Riot REST API</servlet-name>
+		<servlet-name>SAP Sailing AI Agent REST API</servlet-name>
 		<servlet-class>com.sap.sailing.aiagent.gateway.impl.RestServletContainer</servlet-class>
 		<init-param>
 			<param-name>javax.ws.rs.Application</param-name>

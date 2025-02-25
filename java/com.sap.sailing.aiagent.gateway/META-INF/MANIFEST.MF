@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Gateway
 Bundle-SymbolicName: com.sap.sailing.aiagent.gateway
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.sap.sailing.aiagent.gateway.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent.gateway
@@ -24,5 +23,7 @@ Require-Bundle: com.sap.sse.security,
  com.sap.sse.security.common,
  org.apache.shiro.web;bundle-version="1.7.1",
  org.apache.shiro.core;bundle-version="1.7.1",
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ com.sap.sailing.shared.server
 Bundle-ActivationPolicy: lazy
+Web-ContextPath: /aiagent

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -40,6 +41,8 @@ import com.sap.sse.common.Util;
  *
  */
 public interface AICore {
+    Logger logger = Logger.getLogger(AICore.class.getName());
+
     /**
      * Name of the system property in which we look for default credentials that will be used by the
      * {@link #getDefault} method to obtain valid credentials.
@@ -53,7 +56,15 @@ public interface AICore {
      */
     static AICore getDefault() throws MalformedURLException, ParseException {
         final String systemProperty = System.getProperty(CREDENTIALS_SYSTEM_PROPERTY_NAME);
-        return systemProperty == null ? null : AICore.create(CredentialsParser.create().parse(systemProperty));
+        final AICore result;
+        if (systemProperty == null) {
+            logger.warning("No credentials provided for AICore service through system property "+CREDENTIALS_SYSTEM_PROPERTY_NAME+
+                    "; cannot produce an authenticated default service instance");
+            result = null;
+        } else {
+            result = AICore.create(CredentialsParser.create().parse(systemProperty));
+        }
+        return result;
     }
     
     static AICore create(final Credentials credentials) {

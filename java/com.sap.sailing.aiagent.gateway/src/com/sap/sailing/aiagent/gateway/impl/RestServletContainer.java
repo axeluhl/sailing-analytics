@@ -10,7 +10,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sse.util.ServiceTrackerFactory;
 
-public class RestServletContainer extends com.sap.sse.security.jaxrs.RestServletContainer {
+public class RestServletContainer extends com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer {
     private static final long serialVersionUID = -8877374150158641006L;
 
     public static final String AI_AGENT_TRACKER_NAME = "aiAgentServiceTracker";

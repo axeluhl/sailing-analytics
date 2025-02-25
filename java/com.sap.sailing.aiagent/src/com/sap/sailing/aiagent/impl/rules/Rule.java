@@ -47,9 +47,9 @@ public abstract class Rule extends AbstractRaceChangeListener {
         this.trackedRace = trackedRace;
     }
     
-    protected void produceComment(String prompt, TimePoint raceTimepoint) throws UnsupportedOperationException,
+    protected void produceComment(String topic, String prompt, TimePoint raceTimepoint) throws UnsupportedOperationException,
             ClientProtocolException, URISyntaxException, IOException, ParseException {
-        aiAgent.produceCommentFromPrompt(prompt, leaderboard.getName(), raceColumn.getName(), fleet.getName(), raceTimepoint);
+        aiAgent.produceCommentFromPrompt(topic, prompt, leaderboard.getName(), raceColumn.getName(), fleet.getName(), raceTimepoint);
     }
 
     protected AIAgentImpl getAiAgent() {

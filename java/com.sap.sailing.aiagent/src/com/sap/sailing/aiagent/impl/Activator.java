@@ -25,6 +25,8 @@ import com.sap.sse.util.ServiceTrackerFactory;
  *
  */
 public class Activator implements BundleActivator {
+    private static final String MODEL_NAME = "gpt-4o";
+
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static BundleContext context;
@@ -53,9 +55,15 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-        aiAgent = new AIAgentImpl(racingEventServiceTracker, AICore.getDefault(), "gpt-4o-mini", SYSTEM_PROMPT);
-        logger.info("Created AI Agent "+aiAgent);
-        bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
+        final AICore aiCore = AICore.getDefault();
+        if (aiCore != null) { // otherwise, credentials may be missing
+            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, MODEL_NAME, SYSTEM_PROMPT);
+            logger.info("Created AI Agent "+aiAgent);
+            bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
+        } else {
+            logger.warning("Didn't find any AICore service; probably no credentials provided through the "
+                    + AICore.CREDENTIALS_SYSTEM_PROPERTY_NAME + " system property");
+        }
     }
     
     public RacingEventService getRacingEventService() {

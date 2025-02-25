@@ -3396,6 +3396,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
+            if (visibleForPublic) {
+                getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+            }
             getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
                     resizedImageURL, visibleForPublic, raceTimepoint);
         } catch (AuthorizationException e) {
@@ -3449,6 +3452,9 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
+            if (visibleForPublic) {
+                getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+            }
             getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
                     comment, imageURL, resizedImageURL, visibleForPublic);
         } catch (AuthorizationException e) {

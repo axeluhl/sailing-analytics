@@ -27,7 +27,7 @@ import com.sap.sse.aicore.ChatSession;
 import com.sap.sse.common.TimePoint;
 
 public class AIAgentImpl implements AIAgent {
-    private static final String SAP_AI_CORE_TAG = "SAP AI Core Says:";
+    private static final String SAP_AI_CORE_TAG = "SAP AI Core on %s";
     
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
@@ -54,8 +54,8 @@ public class AIAgentImpl implements AIAgent {
         return racingEventServiceTracker.getService();
     }
     
-    public void produceCommentFromPrompt(final String prompt, final String leaderboardName, String raceColumnName,
-            String fleetName, TimePoint raceTimepoint) throws UnsupportedOperationException, ClientProtocolException,
+    public void produceCommentFromPrompt(String tag, final String prompt, final String leaderboardName,
+            String raceColumnName, String fleetName, TimePoint raceTimepoint) throws UnsupportedOperationException, ClientProtocolException,
             URISyntaxException, IOException, ParseException {
         final Optional<ChatSession> optionalChatSession = aiCore.createChatSession(modelName);
         optionalChatSession.map(chatSession->{
@@ -66,7 +66,7 @@ public class AIAgentImpl implements AIAgent {
                     .addPrompt(prompt)
                     .submit();
                 getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
-                        SAP_AI_CORE_TAG, response, "https://www.sapsailing.com/gwt/images/home/logo-small@2x.png",
+                        String.format(SAP_AI_CORE_TAG, tag), response, "https://www.sapsailing.com/gwt/images/home/logo-small@2x.png",
                         /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
                 return null;
             } catch (AuthorizationException | IllegalArgumentException | RaceLogNotFoundException

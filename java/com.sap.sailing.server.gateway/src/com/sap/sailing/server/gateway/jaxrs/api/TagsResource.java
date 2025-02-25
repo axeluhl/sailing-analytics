@@ -125,6 +125,9 @@ public class TagsResource extends AbstractSailingServerResource {
         Response response;
         final TaggingService taggingService = getService().getTaggingService();
         try {
+            if (visibleForPublic) {
+                getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+            }
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, resizedImageURL,
                     visibleForPublic, new MillisecondsTimePoint(raceTimepoint)); // FIXME what about replication???
             response = Response.created(uriInfo.getRequestUri()).build();
@@ -207,6 +210,9 @@ public class TagsResource extends AbstractSailingServerResource {
             boolean visibleForPublic = (visibleForPublicParam == null ? tagToUpdate.isVisibleForPublic()
                     : visibleForPublicParam.equalsIgnoreCase("true") ? true : false);
             try {
+                if (visibleForPublic) {
+                    getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+                }
                 taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag, comment,
                         imageURL, resizedImageURL, visibleForPublic); // FIXME what about replication???
                 response = Response.noContent().build();
