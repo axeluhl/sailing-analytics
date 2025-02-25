@@ -381,8 +381,8 @@ public class EventsResource extends AbstractSailingServerResource {
             officialWebsiteURL = officialWebsiteURLParam != null ? new URL(officialWebsiteURLParam) : event.getOfficialWebsiteURL();
             baseURL = baseURLParam != null ? new URL(baseURLParam) : event.getBaseURL();
             getService().updateEvent(id, eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                    leaderboardGroupIds, officialWebsiteURL, baseURL, event.getSailorsInfoWebsiteURLs(),
-                    event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
+                    generateAIComments, leaderboardGroupIds, officialWebsiteURL, baseURL,
+                    event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
             response = Response.ok().build();
         }
         return response;
@@ -761,9 +761,9 @@ public class EventsResource extends AbstractSailingServerResource {
                 .forEach(lg -> newLeaderboardGroupIds.add(lg.getId()));
         newLeaderboardGroupIds.add(leaderboardGroup.getId());
         getService().updateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
-                event.getEndDate(), event.getVenue().getName(), event.isPublic(), newLeaderboardGroupIds,
-                event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
-                event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
+                event.getEndDate(), event.getVenue().getName(), event.isPublic(), generateAIComments,
+                newLeaderboardGroupIds, event.getOfficialWebsiteURL(), event.getBaseURL(), event.getSailorsInfoWebsiteURLs(),
+                event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds());
     }
 
     private CourseArea addCourseArea(Event event, String courseAreaName) {

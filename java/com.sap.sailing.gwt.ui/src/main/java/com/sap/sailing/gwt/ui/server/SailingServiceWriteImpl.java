@@ -1520,8 +1520,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             throw new UnauthorizedException("You are not permitted to edit event " + eventId);
         }
         getService().apply(new UpdateEvent(eventId, eventName, eventDescription, startTimePoint, endTimePoint,
-                venue.getName(), isPublic, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
-                eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
+                venue.getName(), isPublic, generateAIComments, leaderboardGroupIds, officialWebsiteURL, baseURL,
+                sailorsInfoWebsiteURLs, eventImages, eventVideos, windFinderReviewedSpotCollectionIds));
         return getEventById(eventId, false);
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.aiagent;
+package com.sap.sailing.aiagent.impl;
 
 import java.util.logging.Logger;
 
@@ -6,7 +6,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.aiagent.impl.AIAgentImpl;
+import com.sap.sailing.aiagent.AIAgent;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.RaceChangeListener;

@@ -17,6 +17,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final TimePoint startDate;
     private final TimePoint endDate;
     private final boolean isPublic;
+    private final boolean generateAIComments;
     private final Iterable<UUID> leaderboardGroupIds;
     private final String eventName;
     private final String eventDescription;
@@ -28,8 +29,10 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final Iterable<String> windFinderReviewedSpotCollectionIds;
 
     public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
-            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, Iterable<String> windFinderReviewedSpotCollectionIds) {
+            String venueName, boolean isPublic, boolean generateAIComments, Iterable<UUID> leaderboardGroupIds,
+            URL officialWebsiteURL, URL baseURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -37,6 +40,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
         this.endDate = endDate;
         this.venueName = venueName;
         this.isPublic = isPublic;
+        this.generateAIComments = generateAIComments;
         this.leaderboardGroupIds = leaderboardGroupIds;
         this.officialWebsiteURL = officialWebsiteURL;
         this.baseURL = baseURL;
@@ -61,8 +65,8 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos,
-                windFinderReviewedSpotCollectionIds);
+                generateAIComments, leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images,
+                videos, windFinderReviewedSpotCollectionIds);
         return null;
     }
 }
