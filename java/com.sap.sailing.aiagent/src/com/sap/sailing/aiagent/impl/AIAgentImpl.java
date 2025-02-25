@@ -66,7 +66,7 @@ public class AIAgentImpl implements AIAgent {
                     .addPrompt(prompt)
                     .submit();
                 getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
-                        String.format(SAP_AI_CORE_TAG, tag), response, "https://www.sapsailing.com/gwt/images/home/logo-small@2x.png",
+                        String.format(SAP_AI_CORE_TAG, tag), response, "https://static.sapsailing.com/AI_generated_R_blk.png",
                         /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
                 return null;
             } catch (AuthorizationException | IllegalArgumentException | RaceLogNotFoundException
