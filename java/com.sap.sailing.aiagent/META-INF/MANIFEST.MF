@@ -9,8 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent
 Import-Package: com.sap.sailing.domain.abstractlog.race,
  com.sap.sailing.domain.abstractlog.regatta,
- com.sap.sailing.domain.base,
- com.sap.sailing.domain.base.impl,
+ com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.leaderboard,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl,
@@ -24,5 +23,6 @@ Import-Package: com.sap.sailing.domain.abstractlog.race,
  org.osgi.util.tracker;version="[1.5.0,2.0.0)"
 Require-Bundle: com.sap.sse.aicore,
  com.sap.sailing.server.interface,
- com.sap.sailing.domain.common
+ com.sap.sailing.domain.common,
+ com.sap.sailing.domain
 Bundle-ActivationPolicy: lazy
