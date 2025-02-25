@@ -23,6 +23,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
@@ -165,7 +166,6 @@ public class TagCell extends AbstractCell<TagDTO> {
         if (tag == null) {
             return;
         }
-
         SafeHtml safeTag = SafeHtmlUtils.fromString(tag.getTag());
         SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(),
                 DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
@@ -178,9 +178,7 @@ public class TagCell extends AbstractCell<TagDTO> {
         } else */ if (tag.getImageURL() != null && !tag.getImageURL().isEmpty()){
             trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
         }
-
         SafeUri safeIsPrivateImageUri = resources.privateIcon().getSafeUri();
-
         SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
         if (!tag.getComment().isEmpty() && trustedImageURL == null) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
@@ -190,12 +188,10 @@ public class TagCell extends AbstractCell<TagDTO> {
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
                     trustedImageURL, safeComment);
         }
-
         SafeHtml icon = SafeHtmlUtils.EMPTY_SAFE_HTML;
         if (!tag.isVisibleForPublic()) {
             icon = tagCellTemplate.icon(safeIsPrivateImageUri);
         }
-
         SafeHtml shareButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
         SafeHtml editButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
         SafeHtml deleteButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
@@ -223,9 +219,7 @@ public class TagCell extends AbstractCell<TagDTO> {
                 }
             }
         }
-        SafeHtml headingButtons = tagCellTemplate.headerButtons(style.tagCellHeadingButtons(), shareButton, editButton,
-                deleteButton);
-
+        SafeHtml headingButtons = tagCellTemplate.headerButtons(style.tagCellHeadingButtons(), shareButton, editButton, deleteButton);
         String cellStyle = style.tagCell();
         if (tag.equals(taggingComponent.getSelectedTag())) {
             cellStyle = style.tagCell() + " " + style.tagCellActive();
@@ -334,6 +328,8 @@ public class TagCell extends AbstractCell<TagDTO> {
      */
     private void appendTagParam(StringBuilder urlBuilder, TagDTO tag) {
         urlBuilder.append('&');
+        urlBuilder.append(RaceBoardPerspectiveOwnSettings.PARAM_VIEW_SHOW_TAGS);
+        urlBuilder.append("=true&");
         urlBuilder.append(TagDTO.TAG_URL_PARAMETER);
         urlBuilder.append('=');
         urlBuilder.append(tag.getRaceTimepoint().asMillis());
