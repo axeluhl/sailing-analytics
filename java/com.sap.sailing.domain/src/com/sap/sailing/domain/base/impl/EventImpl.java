@@ -2,7 +2,6 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,10 +78,8 @@ public class EventImpl extends EventBaseImpl implements Event {
     
     @Override
     public void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups) {
-        for (final LeaderboardGroup lg : new ArrayList<>(this.leaderboardGroups)) {
-            removeLeaderboardGroup(lg);
-        }
-        leaderboardGroups.forEach(lg->addLeaderboardGroup(lg));
+        this.leaderboardGroups.clear();
+        Util.addAll(leaderboardGroups, this.leaderboardGroups);
     }
 
     @Override

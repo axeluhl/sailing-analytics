@@ -69,7 +69,7 @@ import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import com.sap.sailing.aiagent.AIAgent;
+
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
@@ -593,8 +593,6 @@ Replicator {
 
     private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
 
-    private final ServiceTracker<AIAgent, AIAgent> aiAgentTracker;
-
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -661,8 +659,7 @@ Replicator {
                 /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
                 restoreTrackedRaces, /* securityServiceTracker */ null, /* sharedSailingDataTracker */ null,
                 /* replicationServiceTracker */ null, /* scoreCorrectionProviderServiceTracker */ null,
-                /* competitorProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null,
-                /* aiAgentServiceTracker */ null);
+                /* competitorProviderServiceTracker */ null, /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -691,9 +688,7 @@ Replicator {
             boolean restoreTrackedRaces,
             FullyInitializedReplicableTracker<SecurityService> securityServiceTracker, FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker,
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
-            ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
-            ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker,
-            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker, ServiceTracker<AIAgent, AIAgent> aiAgentServiceTracker) {
+            ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker, ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker, ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -725,7 +720,7 @@ Replicator {
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, sensorFixStore, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
                 securityServiceTracker, sharedSailingDataTracker, /* replicationServiceTracker */ null,
-                scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker, aiAgentServiceTracker);
+                scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -763,7 +758,7 @@ Replicator {
                 sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces,
                 /* security service tracker */ null, /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
-                /* resultUrlRegistryServiceTracker */ null, /* aiAgentServiceTracker */ null);
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -795,7 +790,7 @@ Replicator {
                 /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, /* security service tracker */ null,
                 /* sharedSailingDataTracker */ null, /* replicationServiceTracker */ null,
                 /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
-                /* resultUrlRegistryServiceTracker */ null, /* aiAgentServiceTracker */ null);
+                /* resultUrlRegistryServiceTracker */ null);
     }
 
     /**
@@ -836,8 +831,7 @@ Replicator {
             ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker,
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
             ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker,
-            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker,
-            ServiceTracker<AIAgent, AIAgent> aiAgentTracker) {
+            ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker) {
         logger.info("Created " + this);
         this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
@@ -846,7 +840,6 @@ Replicator {
         this.resultUrlRegistryServiceTracker = resultUrlRegistryServiceTracker;
         this.scoreCorrectionProviderServiceTracker = scoreCorrectionProviderServiceTracker;
         this.competitorProviderServiceTracker = competitorProviderServiceTracker;
-        this.aiAgentTracker = aiAgentTracker;
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -3839,9 +3832,9 @@ Replicator {
 
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, boolean generateAIComments, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL,
-            URL baseURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images,
-            Iterable<VideoDescriptor> videos, Iterable<String> windFinderReviewedSpotCollectionIds) {
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL,
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -3871,15 +3864,6 @@ Replicator {
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
         // to keep changes minimial
         mongoObjectFactory.storeEvent(event);
-        if (generateAIComments) {
-            getAIAgent().startCommentingOnEvent(event);
-        } else {
-            getAIAgent().stopCommentingOnEvent(event);
-        }
-    }
-    
-    private AIAgent getAIAgent() {
-        return aiAgentTracker.getService();
     }
 
     @Override

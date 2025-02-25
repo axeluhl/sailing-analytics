@@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Aiagent
 Bundle-SymbolicName: com.sap.sailing.aiagent
 Bundle-Version: 1.0.0.qualifier
-Export-Package: com.sap.sailing.aiagent
-Bundle-Activator: com.sap.sailing.aiagent.impl.Activator
+Bundle-Activator: com.sap.sailing.aiagent.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent

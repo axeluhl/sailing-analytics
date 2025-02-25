@@ -460,6 +460,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
      * the names in <code>regattaNames</code> and updates it in the database.
+     * 
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -473,13 +474,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param windFinderReviewedSpotCollectionIds
      *            IDs of WindFinder spot collections, reviewed by www.windfinder.com, to use by the WindFinder wind
      *            tracker and to expose on the event's UI
-     * 
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, boolean generateAIComments, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, 
-            URL baseURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images,
-            Iterable<VideoDescriptor> videos, Iterable<String> windFinderReviewedSpotCollectionIds);
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},

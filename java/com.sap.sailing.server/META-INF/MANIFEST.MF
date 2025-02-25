@@ -7,8 +7,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.aiagent,
- com.sap.sailing.server.gateway.deserialization,
+Import-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.interfaces,
  javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",

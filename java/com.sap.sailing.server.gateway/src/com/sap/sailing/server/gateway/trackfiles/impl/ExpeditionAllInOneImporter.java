@@ -605,8 +605,8 @@ public class ExpeditionAllInOneImporter {
         Iterable<UUID> leaderboardGroups = StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false).map(t -> t.getId()).collect(Collectors.toList());
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), startDate,
                 endDate, event.getVenue().getName(), event.isPublic(),
-                generateAIComments, leaderboardGroups, event.getOfficialWebsiteURL(),
-                event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+                leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private Pair<Event, LeaderboardGroup> findEventAndLeaderboardGroupForExistingLeaderboard(final Leaderboard leaderboard) {
@@ -735,9 +735,9 @@ public class ExpeditionAllInOneImporter {
                                         .collect(Collectors.toList());
                                 service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(),
                                         event.getStartDate(), event.getEndDate(), newVenueName, event.isPublic(),
-                                        generateAIComments, leaderboardGroups, event.getOfficialWebsiteURL(),
-                                        event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
-                                        event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+                                        leaderboardGroups, event.getOfficialWebsiteURL(), event.getBaseURL(),
+                                        event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                                        event.getWindFinderReviewedSpotsCollectionIds()));
                                 break;
                             }
                         } catch (IOException | ParseException e) {
@@ -807,9 +807,9 @@ public class ExpeditionAllInOneImporter {
                         });
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),
-                /* generateAIComments */ false, Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(),
-                event.getBaseURL(), event.getSailorsInfoWebsiteURLs(), event.getImages(),
-                event.getVideos(), event.getWindFinderReviewedSpotsCollectionIds()));
+                Collections.singleton(leaderboardGroup.getId()), event.getOfficialWebsiteURL(), event.getBaseURL(),
+                event.getSailorsInfoWebsiteURLs(), event.getImages(), event.getVideos(),
+                event.getWindFinderReviewedSpotsCollectionIds()));
     }
 
     private DynamicTrackedRace createTrackedRaceAndSetupRaceTimes(final List<ErrorImportDTO> errors,
