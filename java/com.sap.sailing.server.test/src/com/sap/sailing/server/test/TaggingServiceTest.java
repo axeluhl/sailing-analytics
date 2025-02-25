@@ -181,17 +181,8 @@ public class TaggingServiceTest {
         List<TagDTO> privateTags = serializer.deserializeTags(preference);
         assertTrue("Create private tag", privateTags.size() == 1 && privateTags.get(0).equals(tag, comment, imageURL,
                 imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
-        try {
-            logger.info("Trying to add public tag with missing permissions which should be catched by this test.");
-            securityService.removePermissionFromUser(username, readAndEditLeaderboardPermission);
-            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                    raceTimepoint);
-            fail("Tag should not be added because user is missing permissions!");
-        } catch (AuthorizationException e) {
-            assertTrue("Missing permissions were caught correctly!", true);
-        } finally {
-            securityService.addPermissionForUser(username, readAndEditLeaderboardPermission);
-        }
+        // we used to test for permission checking here, but it was wrong in the first place to check permissions
+        // in TaggingService; permission checks shall happen in the REST API layer and in the GWT RPC service layer
         try {
             logger.info(
                     "Trying to add public tag with wrong racelog identifiers which should be catched by this test.");
