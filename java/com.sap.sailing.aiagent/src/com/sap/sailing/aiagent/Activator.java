@@ -1,9 +1,12 @@
 package com.sap.sailing.aiagent;
 
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.aiagent.impl.AIAgentImpl;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -22,11 +25,16 @@ import com.sap.sse.util.ServiceTrackerFactory;
  *
  */
 public class Activator implements BundleActivator {
+    private static final Logger logger = Logger.getLogger(Activator.class.getName());
+
     private static BundleContext context;
     private static Activator instance;
     
+    private static final String SYSTEM_PROMPT =
+            "";
+    
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
-    private AICore aiCore;
+    private AIAgent aiAgent;
 
     public Activator() {
         instance = this;
@@ -43,17 +51,14 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
-        aiCore = AICore.getDefault();
+        aiAgent = new AIAgentImpl(racingEventServiceTracker, AICore.getDefault(), "gpt-4o-mini", SYSTEM_PROMPT);
+        logger.info("Created AI Agent "+aiAgent);
     }
     
     public RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }
     
-    public AICore getAICore() {
-        return aiCore;
-    }
-
     public void stop(BundleContext bundleContext) throws Exception {
         Activator.context = null;
     }

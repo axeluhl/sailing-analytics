@@ -9,7 +9,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent
 Import-Package: com.sap.sailing.domain.abstractlog.race,
  com.sap.sailing.domain.abstractlog.regatta,
- com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.leaderboard,
  com.sap.sailing.domain.tracking,
  com.sap.sailing.domain.tracking.impl,
