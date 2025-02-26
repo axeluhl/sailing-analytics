@@ -13,6 +13,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -47,9 +49,9 @@ public abstract class Rule extends AbstractRaceChangeListener {
         this.trackedRace = trackedRace;
     }
     
-    protected void produceComment(String topic, String prompt, TimePoint raceTimepoint) throws UnsupportedOperationException,
-            ClientProtocolException, URISyntaxException, IOException, ParseException {
-        aiAgent.produceCommentFromPrompt(topic, prompt, leaderboard.getName(), raceColumn.getName(), fleet.getName(), raceTimepoint);
+    protected void produceComment(String topic, String prompt, TimePoint raceTimepoint, String tagIdentifier) throws UnsupportedOperationException,
+            ClientProtocolException, URISyntaxException, IOException, ParseException, RaceLogNotFoundException, ServiceNotFoundException {
+        aiAgent.produceCommentFromPrompt(topic, prompt, leaderboard.getName(), raceColumn.getName(), fleet.getName(), raceTimepoint, tagIdentifier);
     }
 
     protected AIAgentImpl getAiAgent() {

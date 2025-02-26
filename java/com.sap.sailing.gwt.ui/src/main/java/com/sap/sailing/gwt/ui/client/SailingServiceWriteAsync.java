@@ -127,8 +127,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException/*, Exception*/;
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
-            AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
+            String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            TimePoint raceTimepoint, AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
 
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorWithBoatDTO>> callback)
             throws UnauthorizedException;
@@ -649,7 +649,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             AsyncCallback<Void> callback);
 
     void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+            String comment, String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
 
     void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
             AsyncCallback<SuccessInfo> asyncCallback);

@@ -11,6 +11,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -76,8 +78,9 @@ public class GoodStartRule extends Rule {
                     }
                     promptBuilder
                         .append("Also, consider in your concise comment the typical start performance of this competitor in previous regattas at other events.");
-                    produceComment(TOPIC, promptBuilder.toString(), firstStart.getTimePoint());
-                } catch (UnsupportedOperationException | URISyntaxException | IOException | ParseException e) {
+                    produceComment(TOPIC, promptBuilder.toString(), firstStart.getTimePoint(),
+                            getClass().getName()); // there is only one start analysis per race, so the class name is sufficient for identification
+                } catch (UnsupportedOperationException | URISyntaxException | IOException | ParseException | RaceLogNotFoundException | ServiceNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             }

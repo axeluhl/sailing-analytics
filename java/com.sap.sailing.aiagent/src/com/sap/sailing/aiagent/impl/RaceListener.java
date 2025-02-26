@@ -38,7 +38,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * <p>
  * 
  * The constructor defines the set of rules to evaluate; those will then
- * {@link AIAgentImpl#produceCommentFromPrompt(String, String, String, String, String, TimePoint) produce comments} that are
+ * {@link AIAgentImpl#produceCommentFromPrompt(String, String, String, String, String, TimePoint, String) produce comments} that are
  * inserted as tags / comments for the race.
  * 
  * @author Axel Uhl (d043530)

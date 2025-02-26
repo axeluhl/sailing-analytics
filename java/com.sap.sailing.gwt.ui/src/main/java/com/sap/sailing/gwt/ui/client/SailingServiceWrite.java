@@ -547,18 +547,24 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      *            title of tag, must <b>NOT</b> be <code>null</code>
      * @param comment
      *            optional comment of tag
-     * @param imageURLs
-     *            optional image URLs of tag
+     * @param hiddenInfo
+     *            Data that will not be displayed to the end user; it may be visible, e.g., when viewing the technical
+     *            race log entries or user preference objects, so don't use this to store secrets. But it can be used,
+     *            e.g., to store information that identifies the tag in some unique way, for example, when the tag was
+     *            automatically produced by some rule or agent, and that rule or agent later needs to decide whether or
+     *            not there already is a tag produced by that rule/agent for the race to which the tag pertains.
      * @param visibleForPublic
      *            when set to <code>true</code> tag will be saved as public tag (visible for every user), when set to
      *            <code>false</code> tag will be saved as private tag (visible only for creator)
      * @param raceTimepoint
      *            timepoint in race where user created tag, must <b>NOT</b> be <code>null</code>
+     * @param imageURLs
+     *            optional image URLs of tag
      * @return <code>successful</code> {@link SuccessInfo} if tag was added successfully, otherwise
      *         <code>non-successful</code> {@link SuccessInfo}
      */
     SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint)
+            String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint)
             throws UnauthorizedException;
 
     void allowBoatResetToDefaults(List<BoatDTO> boats) throws UnauthorizedException;
@@ -627,6 +633,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      *            new tag title
      * @param comment
      *            new comment
+     * @param hiddenInfo TODO
      * @param imageURL
      *            new image url
      * @param visibleForPublic
@@ -635,7 +642,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      *         <code>non-successful</code> {@link SuccessInfo}
      */
     SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
-            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic)
+            String tag, String comment, String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic)
             throws UnauthorizedException;
 
     /**
