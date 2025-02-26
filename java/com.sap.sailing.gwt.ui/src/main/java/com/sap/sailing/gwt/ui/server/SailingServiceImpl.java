@@ -5343,7 +5343,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
             TimePoint searchSince) {
         RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
-        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, searchSince));
+        if (raceTimesInfo != null) {
+            raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, searchSince));
+        }
         return raceTimesInfo;
     }
 
