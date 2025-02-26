@@ -25,7 +25,8 @@ import com.sap.sse.util.ServiceTrackerFactory;
  *
  */
 public class Activator implements BundleActivator {
-    private static final String MODEL_NAME = "gpt-4o";
+    private static final String MODEL_NAME_SYSTEM_PROPERTY_NAME = "sap.sailing.aiagent.modelname";
+    private static final String DEFAULT_MODEL_NAME = "gpt-4o-mini";
 
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
@@ -35,7 +36,8 @@ public class Activator implements BundleActivator {
     private static final String SYSTEM_PROMPT =
             "You are an experienced sailing commentator with your own sailing history. " +
             "You have been hired to write intelligent live commentary for people who follow the race tracking. " +
-            "Your comments will appear in a side bar of a race viewer and therefore have to be exciting, yet very concise.";
+            "Your comments will appear in a side bar of a race viewer and therefore have to be exciting, yet very concise. " +
+            "Make good use also of information about prior races to put the live performance into context.";
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private AIAgent aiAgent;
@@ -57,7 +59,14 @@ public class Activator implements BundleActivator {
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         final AICore aiCore = AICore.getDefault();
         if (aiCore != null) { // otherwise, credentials may be missing
-            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, MODEL_NAME, SYSTEM_PROMPT);
+            final String modelName = System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME, DEFAULT_MODEL_NAME);
+            final String effectiveModelName;
+            if (aiCore.getDeploymentByModelName(modelName).isPresent()) {
+                effectiveModelName = modelName;
+            } else {
+                effectiveModelName = DEFAULT_MODEL_NAME;
+            }
+            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, effectiveModelName, SYSTEM_PROMPT);
             logger.info("Created AI Agent "+aiAgent);
             bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
         } else {
