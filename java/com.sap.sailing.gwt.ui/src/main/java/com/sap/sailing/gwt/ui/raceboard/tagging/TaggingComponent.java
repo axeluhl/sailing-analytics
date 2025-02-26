@@ -343,6 +343,7 @@ public class TaggingComponent extends ComponentWithoutSettings
         getResizedImageURLForImageURL(imageURL, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
+                saveTag(tag, comment, imageURL, /* resizedImageURL */ null, visibleForPublic, null);
                 GWT.log(caught.getMessage());
             }
 
@@ -381,7 +382,7 @@ public class TaggingComponent extends ComponentWithoutSettings
                         int imageHeight = result.getB();
                         if (imageWidth < MediaTagConstants.TAGGING_IMAGE.getMinWidth()
                                 || imageHeight < MediaTagConstants.TAGGING_IMAGE.getMinHeight()) {
-                            callback.onFailure(new IllegalArgumentException("Image is to small for resizing!"));
+                            callback.onFailure(new IllegalArgumentException("Image is too small for resizing!"));
                         } else {
                             if (imageWidth > MediaTagConstants.TAGGING_IMAGE.getMaxWidth()
                                     || imageHeight > MediaTagConstants.TAGGING_IMAGE.getMaxHeight()) {
@@ -518,49 +519,54 @@ public class TaggingComponent extends ComponentWithoutSettings
      * 
      * @see TagDTO
      */
-    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL,
-            boolean visibleForPublic) {
+    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL, boolean visibleForPublic) {
         // A new resized image gets created every time a tag is updated (if tag shall contain an image)
         getResizedImageURLForImageURL(imageURL, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()), NotificationType.ERROR);
+                Notification.notify(caught.getMessage(), NotificationType.WARNING);
+                updateTag(tagToUpdate, tag, comment, imageURL, visibleForPublic, /* resizedImageURL */ null);
                 GWT.log(caught.getMessage());
             }
 
             @Override
             public void onSuccess(String resizedImageURL) {
-                sailingServiceWrite.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag,
-                        comment, imageURL, resizedImageURL, visibleForPublic, new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()),
-                                        NotificationType.ERROR);
-                                GWT.log(caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (result.isSuccessful()) {
-                                    tagListProvider.remove(tagToUpdate);
-                                    // If old tag was or new tag is private, reload all private tags. Otherwise just
-                                    // refresh UI.
-                                    if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
-                                        reloadPrivateTags();
-                                        firePrivateTagUpdateEvent(userService.getStorage());
-                                    } else {
-                                        updateContent();
-                                    }
-                                    Notification.notify(stringMessages.tagSavedSuccessfully(),
-                                            NotificationType.SUCCESS);
-                                } else {
-                                    Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
-                                            NotificationType.ERROR);
-                                }
-                            }
-                        });
+                updateTag(tagToUpdate, tag, comment, imageURL, visibleForPublic, resizedImageURL);
             }
         });
+    }
+
+    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL, boolean visibleForPublic,
+            String resizedImageURL) {
+        sailingServiceWrite.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag,
+                comment, imageURL, resizedImageURL, visibleForPublic, new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()),
+                                NotificationType.ERROR);
+                        GWT.log(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+                            tagListProvider.remove(tagToUpdate);
+                            // If old tag was or new tag is private, reload all private tags. Otherwise just
+                            // refresh UI.
+                            if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
+                                reloadPrivateTags();
+                                firePrivateTagUpdateEvent(userService.getStorage());
+                            } else {
+                                updateContent();
+                            }
+                            Notification.notify(stringMessages.tagSavedSuccessfully(),
+                                    NotificationType.SUCCESS);
+                        } else {
+                            Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
+                                    NotificationType.ERROR);
+                        }
+                    }
+                });
     }
 
     /**
