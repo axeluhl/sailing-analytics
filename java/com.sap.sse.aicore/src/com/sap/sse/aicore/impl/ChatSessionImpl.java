@@ -20,7 +20,7 @@ import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.Util;
 
 public class ChatSessionImpl implements ChatSession {
-    private final static String CHAT_PATH_TEMPLATE = "/v2/inference/deployments/%s/chat/completions?api-version=2024-06-01";
+    private final static String CHAT_PATH_TEMPLATE = "/v2/inference/deployments/%s/chat/completions?api-version=2024-10-21";
     private final List<String> systemPrompts;
     private final List<String> userPrompts;
     private final AICore aiCore;
