@@ -99,6 +99,9 @@ public class AICoreImpl implements AICore {
         final CloseableHttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategyForAllRedirectResponseCodes()).build();
         final JSONParser jsonParser = new JSONParser();
         final HttpResponse response = client.execute(request);
+        if (response.getStatusLine().getStatusCode() >= 400) {
+            throw new IOException("Error fetching "+request.getRequestLine()+": ("+response.getStatusLine().getStatusCode()+") "+response.getStatusLine().getReasonPhrase());
+        }
         final JSONObject configurationsJson = (JSONObject) jsonParser.parse(new InputStreamReader(response.getEntity().getContent()));
         return configurationsJson;
     }
