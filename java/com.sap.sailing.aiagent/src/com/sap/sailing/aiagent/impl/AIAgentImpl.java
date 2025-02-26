@@ -98,7 +98,7 @@ public class AIAgentImpl implements AIAgent {
                             .submit();
                         getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
                                 String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
-                                "/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
+                                "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
                         return null;
                     } catch (AuthorizationException | IllegalArgumentException | RaceLogNotFoundException
                             | ServiceNotFoundException | TagAlreadyExistsException | UnsupportedOperationException
