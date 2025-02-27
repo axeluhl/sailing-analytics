@@ -11,6 +11,8 @@ import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.security.SecuredDomainType.TrackedRaceActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.ui.adminconsole.AIAgentConfigurationPanel;
+import com.sap.sailing.gwt.ui.adminconsole.AIAgentConfigurationPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.BoatPanel;
 import com.sap.sailing.gwt.ui.adminconsole.BoatPanelSupplier;
 import com.sap.sailing.gwt.ui.adminconsole.CompetitorPanel;
@@ -77,6 +79,7 @@ import com.sap.sailing.gwt.ui.adminconsole.places.advanced.ReplicationPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.RolesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserGroupManagementPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserManagementPlace;
+import com.sap.sailing.gwt.ui.adminconsole.places.aiagent.AIAgentConfigurationPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.ExpeditionDeviceConfigurationsPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.IgtimiDevicesPlace;
 import com.sap.sailing.gwt.ui.adminconsole.places.connectors.Manage2SailRegattaStructureImportPlace;
@@ -144,6 +147,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     private static final String LEADERBOARDS = "LeaderboardPanel";
     private static final String RACES = "RacesPanel";
     private static final String RACE_COMMITEE = "RaceCommiteeAppPanel";
+    private static final String AI_AGENT = "AIAgentPanel";
 
     @UiField
     HeaderPanel headerPanel;
@@ -550,6 +554,15 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                     }
                 }, stringMessages.markRoles(), new MarkRolesPlace((String) null /* no place token */),
                 SecuredDomainType.MARK_ROLE.getPermission(DefaultActions.MUTATION_ACTIONS));
+        /* AI Agent */
+        final HorizontalTabLayoutPanel aiAgentTabPanel = adminConsolePanel.addVerticalTab(stringMessages.aiAgent(), AI_AGENT);
+        /* Device Configuration User */
+        final AIAgentConfigurationPanelSupplier aiAgentConfigurationUserPanelSupplier = new AIAgentConfigurationPanelSupplier(stringMessages, presenter);
+        adminConsolePanel.addToTabPanel(aiAgentTabPanel,
+                new DefaultRefreshableAdminConsolePanel<AIAgentConfigurationPanel>(aiAgentConfigurationUserPanelSupplier),
+                stringMessages.aiAgentConfiguration(), new AIAgentConfigurationPlace((String) null /* no place token */),
+                SecuredDomainType.AI_AGENT.getPermission(DefaultActions.MUTATION_ACTIONS));
+
         adminConsolePanel.initUI(defaultPlace);
         return adminConsolePanel;
     }

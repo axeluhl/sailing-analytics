@@ -2509,4 +2509,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windwardDistanceToCompetitorFarthestAheadInMetersChangeTooltip();
     String percentTargetBoatSpeed();
     String percentTargetBoatSpeedTooltip();
+    String aiAgent();
+    String aiAgentConfiguration();
 }

@@ -125,4 +125,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions MARK_TEMPLATE = new SecuredDomainType("MARK_TEMPLATE");
     public static final HasPermissions COURSE_TEMPLATE = new SecuredDomainType("COURSE_TEMPLATE");
     public static final HasPermissions MARK_ROLE = new SecuredDomainType("MARK_ROLE");
+    
+    /**
+     * Its object ID equals that of the {@link SecuredSecurityTypes#SERVER} it is deployed on.
+     */
+    public static final HasPermissions AI_AGENT = new SecuredDomainType("AI_AGENT");
 }
