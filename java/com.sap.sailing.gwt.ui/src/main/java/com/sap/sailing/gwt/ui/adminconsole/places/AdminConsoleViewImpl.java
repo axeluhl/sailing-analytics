@@ -562,7 +562,6 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                 new DefaultRefreshableAdminConsolePanel<AIAgentConfigurationPanel>(aiAgentConfigurationUserPanelSupplier),
                 stringMessages.aiAgentConfiguration(), new AIAgentConfigurationPlace((String) null /* no place token */),
                 SecuredDomainType.AI_AGENT.getPermission(DefaultActions.MUTATION_ACTIONS));
-
         adminConsolePanel.initUI(defaultPlace);
         return adminConsolePanel;
     }
@@ -571,5 +570,4 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
     public void setRedirectToPlace(AbstractAdminConsolePlace redirectoPlace) {
         this.defaultPlace = redirectoPlace;
     }
-
 }

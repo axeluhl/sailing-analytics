@@ -9,5 +9,7 @@ public interface AIAgent {
     void stopCommentingOnEvent(Event event);
 
     void stopCommentingOnAllEvents();
+    
+    Iterable<Event> getCommentingOnEvents();
 
 }

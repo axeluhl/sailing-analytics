@@ -3,6 +3,7 @@ package com.sap.sailing.aiagent.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -216,5 +217,10 @@ public class AIAgentImpl implements AIAgent {
         for (final Event event : new HashSet<>(eventListeners.keySet())) {
             stopCommentingOnEvent(event);
         }
+    }
+
+    @Override
+    public Iterable<Event> getCommentingOnEvents() {
+        return Collections.unmodifiableCollection(eventListeners.keySet());
     }
 }

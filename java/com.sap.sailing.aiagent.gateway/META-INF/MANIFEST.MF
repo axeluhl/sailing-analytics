@@ -8,8 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent.gateway
 Import-Package: com.sap.sailing.aiagent.interfaces,
  com.sap.sailing.domain.common,
+ com.sap.sailing.domain.common.security,
  com.sap.sailing.server.interfaces,
  com.sap.sailing.shared.server.gateway.jaxrs,
+ com.sap.sse,
  com.sap.sse.common,
  com.sap.sse.util,
  com.sun.jersey.spi.container.servlet;version="[1.17.0,2.0.0)",
