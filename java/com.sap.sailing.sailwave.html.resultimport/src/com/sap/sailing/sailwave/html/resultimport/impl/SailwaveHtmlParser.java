@@ -204,7 +204,7 @@ public class SailwaveHtmlParser {
 
     private CompetitorRow createCompetitorRow(List<String> trContent, LinkedHashMap<String, String> columnNamesAndStyles, Map<String, Integer> classesCounts) throws UnsupportedEncodingException {
         final Pattern rankPattern = Pattern.compile("([0-9]+)[A-Za-z]*"); // captures the 3 in "3rd"
-        final Pattern nationalityPattern = Pattern.compile("^(<img .*\\btitle=\")?([A-Za-z][A-Za-z][A-Za-z])(\".*>)?$"); // captures the 3 in "3rd"
+        final Pattern nationalityPattern = Pattern.compile("^(<img .*\\btitle=\")?([A-Za-z][A-Za-z][A-Za-z])(\".*>)?$");
         final Iterator<String> columnValueIterator = trContent.iterator();
         String nationality = null;
         String sailNumber = null;
