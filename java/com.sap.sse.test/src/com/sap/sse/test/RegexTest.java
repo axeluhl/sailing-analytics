@@ -76,4 +76,22 @@ public class RegexTest {
         final Matcher m2 = completeLinePattern.matcher("#,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,,0,*35");
         assertTrue(m2.matches());
     }
+    
+    @Test
+    public void testPolynomialSailwaveRaceScorePattern() {
+        final Pattern oneRaceScorePattern = Pattern.compile("^\\(?([0-9]+\\.[0-9]+)( ([A-Z][A-Z][A-Z]))?.*$");
+        final Matcher m1 = oneRaceScorePattern.matcher("0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_ OCS");
+        assertTrue(m1.matches());
+    }
+    
+    @Test
+    public void testPolynomialSailwaveNationalityPattern() {
+        final Pattern nationalityPattern = Pattern.compile("^(<img .*\\btitle=\")?([A-Za-z][A-Za-z][A-Za-z])(\".*>)?$");
+        final StringBuilder sb = new StringBuilder().append("AAA\" ");
+        for (int i=0; i<1000; i++) {
+            sb.append("btitle=\"aaa\" ");
+        }
+        final Matcher m1 = nationalityPattern.matcher(sb.toString());
+        assertFalse(m1.matches());
+    }
 }
