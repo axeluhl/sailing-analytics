@@ -2062,12 +2062,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
                     BoatDTO boat = competitorSelection.getBoat(visibleLeaderInfo.getB());
-                    Distance distanceFromBoatPositionInKm = boat.getBoatClass().getHullLength(); // one hull length
+                    Distance distanceFromBoatPosition = boat.getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition,
-                            coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPositionInKm);
+                            coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPosition);
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
                     double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
