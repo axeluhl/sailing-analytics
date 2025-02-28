@@ -1,8 +1,6 @@
 package com.sap.sailing.aiagent.persistence.impl;
 
 import java.util.UUID;
-import java.util.logging.Logger;
-
 
 import org.bson.Document;
 
