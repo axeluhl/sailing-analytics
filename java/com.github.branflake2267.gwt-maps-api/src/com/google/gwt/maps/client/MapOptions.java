@@ -497,6 +497,34 @@ public class MapOptions extends JavaScriptObject {
   }-*/;
 
   /**
+   * The initial Map {@link MapTypeId}. Required.
+   * 
+   * @param mapTypeId {@link MapTypeId}
+   */
+  public final void setRenderingType(RenderingType renderingType) {
+    setRenderingTypeJs(renderingType.name());
+  }
+
+  /**
+   * Native Use. Use setMapTypeId(MapTypeId mapTypeId). The initial Map {@link MapTypeId}. Required.
+   */
+  private final native void setRenderingTypeJs(String renderingType) /*-{
+    this.renderingType = $wnd.google.maps.RenderingType[renderingType];
+  }-*/;
+
+  /**
+   * Get {@link RenderingType}
+   */
+  public final RenderingType getRenderingType() {
+    final String type = getRenderingTypeJs();
+    return RenderingType.valueOf(type);
+  }
+
+  private final native String getRenderingTypeJs() /*-{
+    return this.mapTypeId;
+  }-*/;
+  
+  /**
    * set The enabled/disabled state of the Rotate control.
    * 
    * @param rotateControl
