@@ -321,7 +321,7 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
-                  <id>com.sap.sailing.aiagent</id>
+                  <id>com.sap.sailing.aiagent.persistence</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
