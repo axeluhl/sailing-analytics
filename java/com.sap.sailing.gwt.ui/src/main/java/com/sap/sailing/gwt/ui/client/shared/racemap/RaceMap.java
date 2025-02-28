@@ -32,7 +32,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.RenderingType;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
@@ -2063,12 +2062,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
                     BoatDTO boat = competitorSelection.getBoat(visibleLeaderInfo.getB());
-                    Distance distanceFromBoatPositionInKm = boat.getBoatClass().getHullLength(); // one hull length
+                    Distance distanceFromBoatPosition = boat.getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
                     LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition,
-                            coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPositionInKm);
+                            coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPosition);
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
                     double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
                     double rotatedBearingDeg1 = 0.0;
