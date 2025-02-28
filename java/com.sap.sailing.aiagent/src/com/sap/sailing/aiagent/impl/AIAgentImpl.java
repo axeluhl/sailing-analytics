@@ -12,8 +12,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
@@ -38,6 +40,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 public class AIAgentImpl implements AIAgent {
+    private static final Logger logger = Logger.getLogger(AIAgentImpl.class.getName());
+
     private static final String SAP_AI_CORE_TAG = "SAP AI Core on %s";
     
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
@@ -201,6 +205,7 @@ public class AIAgentImpl implements AIAgent {
         for (final Leaderboard leaderboard : event.getLeaderboards()) {
             addNewRaceColumnListenerToLeaderboard(leaderboard);
         }
+        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" activated AI comments for event "+event.getName()+" with ID "+event.getId());
         listeners.forEach(l->l.startedCommentingOnEvent(event));
     }
 
@@ -229,6 +234,7 @@ public class AIAgentImpl implements AIAgent {
                 }
             }
         }
+        logger.info("User "+SecurityUtils.getSubject().getPrincipal()+" de-activated AI comments for event "+event.getName()+" with ID "+event.getId());
         listeners.forEach(l->l.stoppedCommentingOnEvent(event));
     }
     

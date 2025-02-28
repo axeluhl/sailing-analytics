@@ -20,6 +20,7 @@ public class AIAgentConfigurationPanelSupplier extends AdminConsolePanelSupplier
     public AIAgentConfigurationPanel init() {
         final AIAgentConfigurationPanel aiAgentConfigurationUserPanel = new AIAgentConfigurationPanel(presenter, stringMessages);
         aiAgentConfigurationUserPanel.ensureDebugId("aiAgentConfigurationUserPanel");
+        presenter.getEventsRefresher().addDisplayerAndCallFillOnInit(aiAgentConfigurationUserPanel.getEventsDisplayer());
         return aiAgentConfigurationUserPanel;
     }
 

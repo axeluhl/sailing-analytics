@@ -26,6 +26,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else {
             documents = eventsToCommentCollection.find(clientSessionOrNull);
         }
-        return Util.map(documents, d->(UUID) d.get(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name()));
+        return Util.map(documents, d->UUID.fromString(d.getString(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name())));
     }
 }

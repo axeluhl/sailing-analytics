@@ -271,10 +271,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
 
     private boolean isAnyOfTheCourseAreasInEvent(EventDTO event, Iterable<CourseAreaDTO> courseAreas) {
         final boolean result;
-        if (event.venue == null) {
+        if (event.getVenue() == null) {
             result = false;
         } else {
-            result = Util.containsAny(event.venue.getCourseAreas(), courseAreas);
+            result = Util.containsAny(event.getVenue().getCourseAreas(), courseAreas);
         }
         return result;
     }
@@ -290,9 +290,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                 if (defaultEvent.getId().equals(event.getId())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
-                    if (event.venue.getCourseAreas().size() == 1) {
+                    if (event.getVenue().getCourseAreas().size() == 1) {
                         // select the single course area as the default:
-                        courseAreaSelection.setSelected(event.venue.getCourseAreas().iterator().next(), true);
+                        courseAreaSelection.setSelected(event.getVenue().getCourseAreas().iterator().next(), true);
                     }
                 }
             } else {
@@ -324,7 +324,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     }
 
     protected void fillCourseAreaListBox(EventDTO selectedEvent) {
-        for (final CourseAreaDTO courseAreaInEvent : selectedEvent.venue.getCourseAreas()) {
+        for (final CourseAreaDTO courseAreaInEvent : selectedEvent.getVenue().getCourseAreas()) {
             courseAreaSelection.addCourseArea(courseAreaInEvent);
         }
         for (final CourseAreaDTO courseAreaForRegatta : regatta.courseAreas) {

@@ -2,7 +2,6 @@ package com.sap.sailing.aiagent.gateway.impl;
 
 import java.util.Collections;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -26,8 +25,6 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + AIAgentResource.AI_AGENT)
 public class AIAgentResource extends SharedAbstractSailingServerResource {
-    private static final Logger logger = Logger.getLogger(AIAgentResource.class.getName());
-
     protected static final String AI_AGENT = "/aiagent";
 
     private AIAgent getAIAgent() {
@@ -56,7 +53,6 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
         final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
         if (event != null) {
             getSecurityService().checkCurrentUserUpdatePermission(event);
-            logger.info("User "+getSecurityService().getCurrentUser().getName()+" activated AI comments for event "+event.getName()+" with ID "+event.getId());
             aiAgent.startCommentingOnEvent(event);
             response = Response.ok().build();
         } else {
@@ -87,7 +83,6 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
         final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
         if (event != null) {
             getSecurityService().checkCurrentUserUpdatePermission(event);
-            logger.info("User "+getSecurityService().getCurrentUser().getName()+" de-activated AI comments for event "+event.getName()+" with ID "+event.getId());
             aiAgent.stopCommentingOnEvent(event);
             response = Response.ok().build();
         } else {

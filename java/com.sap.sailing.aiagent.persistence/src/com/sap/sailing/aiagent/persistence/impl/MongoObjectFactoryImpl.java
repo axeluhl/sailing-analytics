@@ -34,7 +34,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     
     @Override
     public void addEventToComment(UUID eventId, ClientSession clientSessionOrNull) {
-        final Document document = new Document(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name(), eventId);
+        final Document document = new Document(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name(), eventId.toString());
         if (clientSessionOrNull == null) {
             eventsToCommentCollection.insertOne(document);
         } else {
@@ -44,7 +44,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void removeEventToComment(UUID eventId, ClientSession clientSessionOrNull) {
-        final Document filter = new Document(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name(), eventId);
+        final Document filter = new Document(FieldNames.AIAGENT_EVENTS_TO_COMMENT_EVENT_ID.name(), eventId.toString());
         if (clientSessionOrNull == null) {
             eventsToCommentCollection.deleteOne(filter);
         } else {

@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -358,6 +359,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -1446,7 +1448,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
-        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
+        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.getVenue(),
                 newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(),
                 newEvent.getWindFinderReviewedSpotsCollectionIds());
@@ -1459,7 +1461,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         String eventDescription = eventDTO.getDescription();
         Date startDate = eventDTO.startDate;
         Date endDate = eventDTO.endDate;
-        VenueDTO venue = eventDTO.venue;
+        VenueDTO venue = eventDTO.getVenue();
         boolean isPublic = eventDTO.isPublic;
         List<UUID> leaderboardGroupIds = eventDTO.getLeaderboardGroupIds();
         String officialWebsiteURLString = eventDTO.getOfficialWebsiteURL();
@@ -1498,7 +1500,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
              || !Util.equalsWithNull(officialWebsiteURLString, currentEventState.getOfficialWebsiteURL())
              || !Util.equalsWithNull(baseURLAsString, currentEventState.getBaseURL())
              || !Util.equalsWithNull(sailorsInfoWebsiteURLsByLocaleName, currentEventState.getSailorsInfoWebsiteURLs())
-             || !Util.equalsWithNull(venue.getName(), currentEventState.venue.getName())
+             || !Util.equalsWithNull(venue.getName(), currentEventState.getVenue().getName())
              || !Util.equalsWithNull(eventName, currentEventState.getName())
              || !Util.equalsWithNull(windFinderReviewedSpotCollectionIds, currentEventState.getWindFinderReviewedSpotsCollectionIds())
              || !Util.equalsWithNull(leaderboardGroupIds, currentEventState.getLeaderboardGroupIds())
@@ -4033,5 +4035,40 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getYellowBrickTrackingAdapter().updateYellowBrickConfiguration(editedObject.getName(),
                 editedObject.getRaceUrl(), editedObject.getUsername(), editedObject.getPassword(),
                 editedObject.getCreatorName());
+    }
+
+    @Override
+    public void startAICommentingOnEvent(UUID eventId) {
+        changeAICommentingForEvent(eventId, getAIAgent()::startCommentingOnEvent);
+    }
+    
+    private void changeAICommentingForEvent(UUID eventId, Consumer<Event> changeFunction) {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        final Event event = getService().getEvent(eventId);
+        if (event != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(event);
+            changeFunction.accept(event);
+        } else {
+            logger.warning("User "+subject.getPrincipal()+" was trying to change AI commenting for event with ID "+eventId+", but that event wasn't found");
+        }
+    }
+    
+    @Override
+    public void stopAICommentingOnEvent(UUID eventId) {
+        changeAICommentingForEvent(eventId, getAIAgent()::stopCommentingOnEvent);
+    }
+    
+    /**
+     * Event though this is a reading API method, we place it on {@link SailingServiceWrite} because it is available
+     * and makes sense only on the primary/master process of a replica set. There is no replication of the {@link AIAgent}
+     * itself; only its actions will be replicated. Therefore, AI agent configuration and introspection will work only
+     * on the primary/master.
+     */
+    @Override
+    public List<EventDTO> getIdsOfEventsWithAICommenting() {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getAIAgent().getCommentingOnEvents(), event->convertToEventDTO(event, /* withStatisticalData */ false));
     }
 }

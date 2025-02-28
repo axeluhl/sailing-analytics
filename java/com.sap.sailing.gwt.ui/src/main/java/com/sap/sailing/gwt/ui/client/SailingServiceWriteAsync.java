@@ -728,4 +728,10 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            configuration object is {@code null}, this means that the original password is to be left unchanged.
      */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
+    
+    void startAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void stopAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void getIdsOfEventsWithAICommenting(AsyncCallback<List<EventDTO>> callback);
 }

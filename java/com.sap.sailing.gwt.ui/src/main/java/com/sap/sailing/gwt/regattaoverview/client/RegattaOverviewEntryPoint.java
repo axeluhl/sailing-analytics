@@ -100,7 +100,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
             @Override
             public void onEventDTOLoaded(EventDTOLoadedEvent e) {
                 siteHeader.setHeaderTitle(e.getCurrentEvent().getName());
-                siteHeader.setHeaderSubTitle(e.getCurrentEvent().venue.getName());
+                siteHeader.setHeaderSubTitle(e.getCurrentEvent().getVenue().getName());
             }
         }, EventDTOLoadedEvent.TYPE);
 

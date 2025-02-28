@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.apache.shiro.authz.UnauthorizedException;
 
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -730,4 +731,16 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     void deleteYellowBrickConfigurations(Collection<YellowBrickConfigurationWithSecurityDTO> singletonList);
 
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject);
+
+    void startAICommentingOnEvent(UUID eventId);
+
+    void stopAICommentingOnEvent(UUID eventId);
+
+    /**
+     * Event though this is a reading API method, we place it on {@link SailingServiceWrite} because it is available
+     * and makes sense only on the primary/master process of a replica set. There is no replication of the {@link AIAgent}
+     * itself; only its actions will be replicated. Therefore, AI agent configuration and introspection will work only
+     * on the primary/master.
+     */
+    List<EventDTO> getIdsOfEventsWithAICommenting();
 }

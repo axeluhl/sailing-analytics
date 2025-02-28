@@ -2511,4 +2511,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String percentTargetBoatSpeedTooltip();
     String aiAgent();
     String aiAgentConfiguration();
+    String successfullyActivatedAICommentingForEvent(String name);
+    String errorActivatingAICommentingForEvent(String name, String message);
+    String successfullyStoppedAICommentingForEvent(String name);
+    String errorStoppingAICommentingForEvent(String name, String message);
+    String errorTryingToFetchEventsWithAICommentingActive(String message);
+    String selectEventsForWhichToUseAICommenting();
 }

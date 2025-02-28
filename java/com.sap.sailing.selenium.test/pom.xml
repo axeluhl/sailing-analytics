@@ -321,13 +321,18 @@
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
+                  <id>com.sap.sailing.aiagent</id>
+                  <level>4</level>
+                  <autoStart>true</autoStart>
+                </bundle>
+                <bundle>
                   <id>com.sap.sailing.aiagent.persistence</id>
                   <level>5</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>
                   <id>com.sap.sailing.aiagent.gateway</id>
-                  <level>5</level>
+                  <level>6</level>
                   <autoStart>true</autoStart>
                 </bundle>
                 <bundle>

@@ -78,7 +78,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -568,6 +568,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private final FullyInitializedReplicableTracker<SecurityService> securityServiceTracker;
 
     private final FullyInitializedReplicableTracker<SharedSailingData> sharedSailingDataTracker;
+    
+    private final ServiceTracker<AIAgent, AIAgent> aiAgentTracker;
 
     protected final com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory tractracMongoObjectFactory;
 
@@ -610,6 +612,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
+        aiAgentTracker = ServiceTrackerFactory.createAndOpen(context,  AIAgent.class);
         sharedSailingDataTracker = FullyInitializedReplicableTracker.createAndOpen(context, SharedSailingData.class);
         windFinderTrackerFactoryServiceTracker = ServiceTrackerFactory.createAndOpen(context, WindFinderTrackerFactory.class);
         swissTimingAdapterTracker = ServiceTrackerFactory.createAndOpen(context, SwissTimingAdapterFactory.class);
@@ -829,7 +832,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     public List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName) {
         final List<CourseAreaDTO> result = new ArrayList<>();
         for (final EventDTO event : getEventsForLeaderboard(leaderboardName)) {
-            Util.addAll(event.venue.getCourseAreas(), result);
+            Util.addAll(event.getVenue().getCourseAreas(), result);
         }
         return result;
     }
@@ -2288,6 +2291,14 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             throw new RuntimeException(e);
         } // grab the service
     }
+    
+    protected AIAgent getAIAgent() {
+        try {
+            return aiAgentTracker.waitForService(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     protected SharedSailingData getSharedSailingData() {
         try {
@@ -3187,7 +3198,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
-        eventDTO.venue = new VenueDTO(event.getVenue() != null ? event.getVenue().getName() : null);
+        eventDTO.setVenue(new VenueDTO(event.getVenue() != null ? event.getVenue().getName() : null));
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
@@ -3332,10 +3343,10 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     protected EventDTO convertToEventDTO(Event event, boolean withStatisticalData) {
         EventDTO eventDTO = new EventDTO(event.getName());
         copyEventBaseFieldsToDTO(event, eventDTO);
-        eventDTO.venue.setCourseAreas(new ArrayList<CourseAreaDTO>());
+        eventDTO.getVenue().setCourseAreas(new ArrayList<CourseAreaDTO>());
         for (CourseArea courseArea : event.getVenue().getCourseAreas()) {
             CourseAreaDTO courseAreaDTO = convertToCourseAreaDTO(courseArea);
-            eventDTO.venue.getCourseAreas().add(courseAreaDTO);
+            eventDTO.getVenue().getCourseAreas().add(courseAreaDTO);
         }
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
             eventDTO.addLeaderboardGroup(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */ false, withStatisticalData));

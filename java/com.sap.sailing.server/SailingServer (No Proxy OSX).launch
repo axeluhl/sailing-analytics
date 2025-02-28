@@ -327,9 +327,9 @@
 <setEntry value="com.sap.sailing.hanaexport@5:true"/>
 <setEntry value="com.sap.sailing.domain.queclinkadapter@5:true"/>
 <setEntry value="com.sap.sailing.aiagent.interfaces@default:default"/>
-<setEntry value="com.sap.sailing.aiagent@default:default"/>
+<setEntry value="com.sap.sailing.aiagent@4:true"/>
 <setEntry value="com.sap.sailing.aiagent.persistence@5:true"/>
-<setEntry value="com.sap.sailing.aiagent.gateway@5:true"/>
+<setEntry value="com.sap.sailing.aiagent.gateway@6:true"/>
 <setEntry value="com.tractrac.clientmodule@default:default"/>
 <setEntry value="com.sap.sse.gwt@default:default"/>
 <setEntry value="com.google.gwt.servlet@default:default"/>
