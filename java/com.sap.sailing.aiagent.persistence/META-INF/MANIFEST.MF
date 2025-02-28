@@ -9,7 +9,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent.persistence
 Import-Package: com.mongodb;version="[4.11.0,5.0.0)",
  com.mongodb.client;version="[4.11.0,5.0.0)",
- com.sap.sailing.domain.base,
  com.sap.sailing.server.interfaces,
  com.sap.sse.common,
  com.sap.sse.mongodb,

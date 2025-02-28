@@ -14,6 +14,9 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.util.ServiceTrackerFactory;
 
+import com.sap.sailing.aiagent.persistence.impl.CollectionNames;
+import com.sap.sse.mongodb.MongoDBService;
+
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
@@ -45,6 +48,8 @@ public class Activator implements BundleActivator {
                     public void stoppedCommentingOnEvent(Event e) {
                         mof.removeEventToComment(e.getId(), /* clientSessionOrNull */ null);
                     }
+        Activator.context = bundleContext;
+    }
 
                     @Override
                     public void startedCommentingOnEvent(Event e) {
