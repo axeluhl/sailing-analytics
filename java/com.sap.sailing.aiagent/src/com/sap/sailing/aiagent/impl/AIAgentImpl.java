@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,6 +19,7 @@ import org.json.simple.parser.ParseException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.aiagent.interfaces.AIAgent;
+import com.sap.sailing.aiagent.interfaces.AIAgentListener;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.common.dto.TagDTO;
@@ -51,6 +53,11 @@ public class AIAgentImpl implements AIAgent {
     private final ConcurrentMap<Event, EventListener> eventListeners;
     
     /**
+     * A concurrent set to be backed by a {@link ConcurrentHashMap}.
+     */
+    private final Set<AIAgentListener> listeners;
+    
+    /**
      * To be accessed only through the {@code synchronized} methods {@link #lockRaceForCommenting(String, String, String)} and
      * {@link #unlockRaceAfterCommenting(String, String, String)}.
      */
@@ -65,12 +72,23 @@ public class AIAgentImpl implements AIAgent {
         this.racingEventServiceTracker = racingEventServiceTracker;
         this.aiCore = aiCore;
         this.locks = new HashMap<>();
+        this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
     
     private RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }
     
+    @Override
+    public void addListener(AIAgentListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(AIAgentListener listener) {
+        listeners.remove(listener);
+    }
+
     /**
      * Checks if a tag with the {@code tagIdentifier} is already found on the race identified by
      * {@code leaderboardName}, {@code raceColumnName} and {@code fleetName}; if not, the prompt is sent to a new chat
@@ -183,6 +201,7 @@ public class AIAgentImpl implements AIAgent {
         for (final Leaderboard leaderboard : event.getLeaderboards()) {
             addNewRaceColumnListenerToLeaderboard(leaderboard);
         }
+        listeners.forEach(l->l.startedCommentingOnEvent(event));
     }
 
     private void addNewRaceColumnListenerToLeaderboard(final Leaderboard leaderboard) {
@@ -210,6 +229,7 @@ public class AIAgentImpl implements AIAgent {
                 }
             }
         }
+        listeners.forEach(l->l.stoppedCommentingOnEvent(event));
     }
     
     @Override

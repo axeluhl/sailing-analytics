@@ -10,6 +10,10 @@ public interface AIAgent {
 
     void stopCommentingOnAllEvents();
     
+    void addListener(AIAgentListener listener);
+    
+    void removeListener(AIAgentListener listener);
+    
     Iterable<Event> getCommentingOnEvents();
 
 }
