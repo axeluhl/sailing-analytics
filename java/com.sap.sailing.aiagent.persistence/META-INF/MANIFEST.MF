@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Persistence
 Bundle-SymbolicName: com.sap.sailing.aiagent.persistence
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.sap.sailing.aiagent.persistence.Activator
+Bundle-Activator: com.sap.sailing.aiagent.persistence.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sailing.aiagent.persistence
