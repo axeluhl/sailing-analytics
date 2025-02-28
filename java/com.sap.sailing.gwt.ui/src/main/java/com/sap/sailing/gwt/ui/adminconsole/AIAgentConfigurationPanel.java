@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -47,6 +51,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         final VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setWidth("100%");
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
+        final AdminConsoleTableResources adminConsoleTableResources = GWT.create(AdminConsoleTableResources.class);
         eventsTableWrapper = new TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources>(stringMessages, this.errorReporter,
                 /* enablePager */ true, Optional.of(new EntityIdentityComparator<EventDTO>() {
                     @Override
@@ -58,7 +63,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
                     public int hashCode(EventDTO t) {
                         return t.getId().hashCode();
                     }
-                }), GWT.create(AdminConsoleTableResources.class),
+                }), adminConsoleTableResources,
                 userService, Optional.of(stringMessages.filterEventsByName())) {
             @Override
             protected Iterable<String> getSearchableStrings(EventDTO t) {
@@ -66,7 +71,17 @@ public class AIAgentConfigurationPanel extends SimplePanel {
             }
         };
         eventsTableWrapper.addColumn(EventDTO::getName, stringMessages.name());
-        eventsTableWrapper.addColumn(EventDTO::getDescription, stringMessages.description());
+        SafeHtmlCell descriptionCell = new SafeHtmlCell();
+        Column<EventDTO, SafeHtml> descriptionColumn = new Column<EventDTO, SafeHtml>(descriptionCell) {
+            @Override
+            public SafeHtml getValue(EventDTO event) {
+                final SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendEscaped(event.getDescription());
+                return builder.toSafeHtml();
+            }
+        };
+        descriptionColumn.setCellStyleNames(adminConsoleTableResources.cellTableStyle().cellTableWrapText());
+        eventsTableWrapper.addColumn(descriptionColumn, stringMessages.description());
         eventsTableWrapper.addColumn(e->e.getVenue().getName(), stringMessages.venue());
         eventsTableWrapper.addColumn(e->e.getId().toString(), stringMessages.id());
         eventsTableWrapper.getSelectionModel().addSelectionChangeHandler(selectionChangeEvent->{
@@ -105,8 +120,11 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> presenter.getEventsRefresher().reloadAndCallFillAll());
         refresh.ensureDebugId("RefreshEventsButton");
         final CaptionPanel captionPanel = new CaptionPanel(stringMessages.selectEventsForWhichToUseAICommenting());
+        captionPanel.setWidth("100%");
         final VerticalPanel contents = new VerticalPanel();
+        contents.setWidth("100%");
         contents.add(buttonPanel);
+        eventsTableWrapper.getTable().setWidth("100%");
         contents.add(eventsTableWrapper);
         captionPanel.setContentWidget(contents);
         mainPanel.add(captionPanel);
