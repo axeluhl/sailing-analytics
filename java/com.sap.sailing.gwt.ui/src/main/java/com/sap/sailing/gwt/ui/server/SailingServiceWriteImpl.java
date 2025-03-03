@@ -393,6 +393,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
@@ -4044,7 +4045,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     
     private void changeAICommentingForEvent(UUID eventId, Consumer<Event> changeFunction) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         final Event event = getService().getEvent(eventId);
         if (event != null) {
             getSecurityService().checkCurrentUserUpdatePermission(event);
@@ -4068,7 +4069,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public List<EventDTO> getIdsOfEventsWithAICommenting() {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.READ, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getAIAgent().getCommentingOnEvents(), event->convertToEventDTO(event, /* withStatisticalData */ false));
     }
 }

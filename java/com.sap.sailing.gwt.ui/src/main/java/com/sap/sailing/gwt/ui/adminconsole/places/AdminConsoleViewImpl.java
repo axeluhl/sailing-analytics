@@ -120,6 +120,7 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.landscape.common.shared.SecuredLandscapeTypes;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -561,7 +562,7 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
         adminConsolePanel.addToTabPanel(aiAgentTabPanel,
                 new DefaultRefreshableAdminConsolePanel<AIAgentConfigurationPanel>(aiAgentConfigurationUserPanelSupplier),
                 stringMessages.aiAgentConfiguration(), new AIAgentConfigurationPlace((String) null /* no place token */),
-                SecuredDomainType.AI_AGENT.getPermission(DefaultActions.MUTATION_ACTIONS));
+                SecuredSecurityTypes.SERVER.getPermissionsForTypeRelativeIdentifier(new Action[] { SecuredSecurityTypes.ServerActions.CONFIGURE_AI_AGENT }, serverInfo.getTypeRelativeObjectIdentifier()));
         adminConsolePanel.initUI(defaultPlace);
         return adminConsolePanel;
     }

@@ -22,6 +22,8 @@ import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 
 @Path(RestApiApplication.API + RestApiApplication.V1 + AIAgentResource.AI_AGENT)
 public class AIAgentResource extends SharedAbstractSailingServerResource {
@@ -46,7 +48,7 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
     public Response startCommentingEvent(@PathParam("eventUUID") String eventUUID) {
         final Response response;
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         final AIAgent aiAgent = getAIAgent();
         final RacingEventService racingEventService = getService();
@@ -76,7 +78,7 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
     public Response stopCommentingEvent(@PathParam("eventUUID") String eventUUID) {
         final Response response;
         SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.AI_AGENT.getStringPermissionForTypeRelativeIdentifier(DefaultActions.UPDATE,
+                SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         final AIAgent aiAgent = getAIAgent();
         final RacingEventService racingEventService = getService();
