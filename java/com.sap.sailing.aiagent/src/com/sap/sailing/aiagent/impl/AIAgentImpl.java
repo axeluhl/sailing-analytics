@@ -249,4 +249,9 @@ public class AIAgentImpl implements AIAgent {
     public Iterable<Event> getCommentingOnEvents() {
         return Collections.unmodifiableCollection(eventListeners.keySet());
     }
+    
+    @Override
+    public String getModelName() {
+        return modelName;
+    }
 }

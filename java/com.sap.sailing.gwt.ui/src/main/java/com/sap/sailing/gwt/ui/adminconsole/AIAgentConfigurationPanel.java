@@ -10,12 +10,14 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -52,6 +54,19 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         final AdminConsoleTableResources adminConsoleTableResources = GWT.create(AdminConsoleTableResources.class);
+        final Label languageModelNameLabel = new Label();
+        sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingAIAgentLanguageModelName(caught.getMessage()), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
+            }
+            
+        });
         eventsTableWrapper = new TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources>(stringMessages, this.errorReporter,
                 /* enablePager */ true, Optional.of(new EntityIdentityComparator<EventDTO>() {
                     @Override
@@ -127,6 +142,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         eventsTableWrapper.getTable().setWidth("100%");
         contents.add(eventsTableWrapper);
         captionPanel.setContentWidget(contents);
+        mainPanel.add(languageModelNameLabel);
         mainPanel.add(captionPanel);
         setWidget(mainPanel);
     }
@@ -135,6 +151,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         return new Displayer<EventDTO>() {
             @Override
             public void fill(Iterable<EventDTO> result) {
+                handleSelectionChangeEvents = false;
                 eventsTableWrapper.getFilterPanel().updateAll(result);
                 if (!selectionUpdatedAfterEventsHaveLoaded) {
                     selectionUpdatedAfterEventsHaveLoaded = true;
@@ -142,17 +159,19 @@ public class AIAgentConfigurationPanel extends SimplePanel {
                         @Override
                         public void onFailure(Throwable caught) {
                             Notification.notify(stringMessages.errorTryingToFetchEventsWithAICommentingActive(caught.getMessage()), NotificationType.ERROR);
+                            handleSelectionChangeEvents = true;
                         }
 
                         @Override
                         public void onSuccess(List<EventDTO> result) {
                             selectedEvents.clear();
                             selectedEvents.addAll(result);
-                            handleSelectionChangeEvents = false;
                             result.forEach(e->eventsTableWrapper.getSelectionModel().setSelected(e, true));
-                            handleSelectionChangeEvents = true;
+                            Scheduler.get().scheduleDeferred(()->handleSelectionChangeEvents = true);
                         }
                     });
+                } else {
+                    Scheduler.get().scheduleDeferred(()->handleSelectionChangeEvents = true);
                 }
             }
         };

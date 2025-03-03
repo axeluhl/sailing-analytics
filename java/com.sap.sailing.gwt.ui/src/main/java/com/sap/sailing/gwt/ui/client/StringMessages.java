@@ -2517,4 +2517,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorStoppingAICommentingForEvent(String name, String message);
     String errorTryingToFetchEventsWithAICommentingActive(String message);
     String selectEventsForWhichToUseAICommenting();
+    String errorObtainingAIAgentLanguageModelName(String message);
+    String languageModelUsedForAICommenting(String modelName);
 }

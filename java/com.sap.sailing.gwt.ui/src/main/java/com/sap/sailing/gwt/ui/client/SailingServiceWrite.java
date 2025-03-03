@@ -743,4 +743,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
      * on the primary/master.
      */
     List<EventDTO> getIdsOfEventsWithAICommenting();
+
+    String getAIAgentLanguageModelName();
 }

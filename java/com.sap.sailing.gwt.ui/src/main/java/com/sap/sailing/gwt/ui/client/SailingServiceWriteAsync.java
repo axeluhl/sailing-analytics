@@ -734,4 +734,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void stopAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
     
     void getIdsOfEventsWithAICommenting(AsyncCallback<List<EventDTO>> callback);
+    
+    void getAIAgentLanguageModelName(AsyncCallback<String> callback);
 }

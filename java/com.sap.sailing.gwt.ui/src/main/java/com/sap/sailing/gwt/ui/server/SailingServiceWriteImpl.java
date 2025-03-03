@@ -4072,4 +4072,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getAIAgent().getCommentingOnEvents(), event->convertToEventDTO(event, /* withStatisticalData */ false));
     }
+    
+    @Override
+    public String getAIAgentLanguageModelName() {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        return getAIAgent().getModelName();
+    }
 }
