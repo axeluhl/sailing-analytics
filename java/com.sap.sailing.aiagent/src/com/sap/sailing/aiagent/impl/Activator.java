@@ -6,6 +6,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.aiagent.impl.rules.Rule;
 import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Regatta;
@@ -16,10 +17,15 @@ import com.sap.sse.aicore.ChatSession;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
- * When activated, starts to track the {@link RacingEventService} using an OSGi {@link ServiceTracker} and maintains
- * an {@link AICore} instance to obtain {@link ChatSession}s from. It creates and registers an {@link AIAgent} with
- * the service registry. The agent can then be told to monitor one or more {@link Event}(s) or {@link Regatta}s and
- * will then attach itself as a {@link RaceChangeListener} to the races contained.
+ * When activated, starts to track the {@link RacingEventService} using an OSGi {@link ServiceTracker} and maintains an
+ * {@link AICore} instance to obtain {@link ChatSession}s from. It creates and registers an {@link AIAgent} with the
+ * service registry. The agent can then be told to monitor one or more {@link Event}(s) or {@link Regatta}s and will
+ * then attach itself as a {@link RaceChangeListener} to the races contained.
+ * <p>
+ * 
+ * Note: {@link Rule} "registrations" currently happen through code in the
+ * {@link RaceListener#RaceListener(AIAgentImpl, com.sap.sailing.domain.leaderboard.Leaderboard, com.sap.sailing.domain.base.RaceColumn, com.sap.sailing.domain.base.Fleet, com.sap.sailing.domain.tracking.TrackedRace)}
+ * constructor.
  * 
  * @author Axel Uhl (d043530)
  *

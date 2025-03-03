@@ -9,6 +9,7 @@ import org.apache.shiro.subject.Subject;
 
 import com.sap.sailing.aiagent.impl.rules.GoodStartRule;
 import com.sap.sailing.aiagent.impl.rules.Rule;
+import com.sap.sailing.aiagent.impl.rules.TopThreeMarkRoundingRule;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
@@ -53,6 +54,7 @@ public class RaceListener implements RaceChangeListener {
         backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         final List<Rule> myRules = new ArrayList<>();
         myRules.add(new GoodStartRule(aiAgent, leaderboard, raceColumn, fleet, trackedRace));
+        myRules.add(new TopThreeMarkRoundingRule(aiAgent, leaderboard, raceColumn, fleet, trackedRace));
         this.rules = myRules;
     }
     

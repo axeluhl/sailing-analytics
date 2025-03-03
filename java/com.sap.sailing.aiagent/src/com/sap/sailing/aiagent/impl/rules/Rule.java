@@ -22,12 +22,14 @@ import com.sap.sse.common.TimePoint;
 
 /**
  * A rule that is registered with a {@link RaceListener} so it is informed about updates from the races observed by the
- * {@link RaceListener} (a "composite listener" pattern). It analyzes the changes and then may decide to emit a prompt
- * to be sent to a large language model to produce a comment. The prompt is delivered to the {@link AIAgent} passed
- * to the rule's constructor.<p>
+ * {@link RaceListener} (a "composite listener" pattern). This "registration" currently happens in the
+ * {@link RaceListener#RaceListener(AIAgentImpl, Leaderboard, RaceColumn, Fleet, TrackedRace)} constructor. The rule
+ * analyzes the changes and then may decide to emit a prompt to be sent to a large language model to produce a comment.
+ * The prompt is delivered to the {@link AIAgent} passed to the rule's constructor.
+ * <p>
  * 
- * Rules can maintain state, e.g., as an aggregate of various events received, because each rule is specific to a
- * single {@link TrackedRace} and receives its change notifications from only that {@link #trackedRace}.
+ * Rules can maintain state, e.g., as an aggregate of various events received, because each rule is specific to a single
+ * {@link TrackedRace} and receives its change notifications from only that {@link #trackedRace}.
  * 
  * @author Axel Uhl (d043530)
  *
