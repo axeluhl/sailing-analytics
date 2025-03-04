@@ -2,6 +2,8 @@ package com.sap.sailing.aiagent.impl.rules;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.json.simple.parser.ParseException;
@@ -11,11 +13,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
@@ -27,6 +31,8 @@ import com.sap.sse.common.Util;
  */
 public class GoodStartRule extends Rule {
     private final static String TOPIC = "The Start";
+    
+    private final static Iterable<MaxPointsReason> EARLY_START_CODES = new HashSet<>(Arrays.asList(MaxPointsReason.OCS, MaxPointsReason.UFD, MaxPointsReason.BFD));
     
     private boolean hasFired;
     
@@ -75,6 +81,14 @@ public class GoodStartRule extends Rule {
                                 }
                             }
                         }
+                    }
+                    final MaxPointsReason maxPointsReason = getLeaderboard().getMaxPointsReason(firstStart.getCompetitor(), getRaceColumn(), TimePoint.now());
+                    if (Util.contains(EARLY_START_CODES, maxPointsReason)) {
+                        promptBuilder.append("Consider that ");
+                        appendCompetitorToPromptBuilder(firstStart.getCompetitor(), promptBuilder);
+                        promptBuilder.append(" was called over early with penalty code ");
+                        promptBuilder.append(maxPointsReason.name());
+                        promptBuilder.append(".");
                     }
                     promptBuilder
                         .append("Also, consider in your concise comment the typical start performance of this competitor in previous regattas at other events.");
