@@ -2292,9 +2292,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         } // grab the service
     }
     
+    /**
+     * @return {@code null} if the agent is not found in the OSGi registry within 100ms; this then indicates that most
+     *         likely the agent wasn't initialized because of missing credentials
+     */
     protected AIAgent getAIAgent() {
         try {
-            return aiAgentTracker.waitForService(0);
+            return aiAgentTracker.waitForService(100);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

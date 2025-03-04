@@ -41,6 +41,7 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -4077,6 +4078,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public String getAIAgentLanguageModelName() {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
-        return getAIAgent().getModelName();
+        final AIAgent aiAgent = getAIAgent();
+        return aiAgent == null ? null : aiAgent.getModelName();
     }
 }

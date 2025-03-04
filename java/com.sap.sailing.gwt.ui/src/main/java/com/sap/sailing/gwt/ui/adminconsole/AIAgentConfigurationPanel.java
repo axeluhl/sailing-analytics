@@ -43,6 +43,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
     private final Set<EventDTO> selectedEvents;
     private boolean selectionUpdatedAfterEventsHaveLoaded;
     private boolean handleSelectionChangeEvents;
+    private String languageModelName;
 
     public AIAgentConfigurationPanel(final Presenter presenter, final StringMessages stringMessages) {
         this.sailingServiceWrite = presenter.getSailingService();
@@ -55,18 +56,6 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         final AdminConsoleTableResources adminConsoleTableResources = GWT.create(AdminConsoleTableResources.class);
         final Label languageModelNameLabel = new Label();
-        sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorObtainingAIAgentLanguageModelName(caught.getMessage()), NotificationType.ERROR);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
-            }
-            
-        });
         eventsTableWrapper = new TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources>(stringMessages, this.errorReporter,
                 /* enablePager */ true, Optional.of(new EntityIdentityComparator<EventDTO>() {
                     @Override
@@ -86,8 +75,8 @@ public class AIAgentConfigurationPanel extends SimplePanel {
             }
         };
         eventsTableWrapper.addColumn(EventDTO::getName, stringMessages.name());
-        SafeHtmlCell descriptionCell = new SafeHtmlCell();
-        Column<EventDTO, SafeHtml> descriptionColumn = new Column<EventDTO, SafeHtml>(descriptionCell) {
+        final SafeHtmlCell descriptionCell = new SafeHtmlCell();
+        final Column<EventDTO, SafeHtml> descriptionColumn = new Column<EventDTO, SafeHtml>(descriptionCell) {
             @Override
             public SafeHtml getValue(EventDTO event) {
                 final SafeHtmlBuilder builder = new SafeHtmlBuilder();
@@ -140,8 +129,27 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         contents.setWidth("100%");
         contents.add(buttonPanel);
         eventsTableWrapper.getTable().setWidth("100%");
-        contents.add(eventsTableWrapper);
-        captionPanel.setContentWidget(contents);
+        sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.errorObtainingAIAgentLanguageModelName(caught.getMessage()), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                if (result != null) {
+                    languageModelName = result;
+                    languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
+                    contents.add(eventsTableWrapper);
+                    captionPanel.setContentWidget(contents);
+                    if (!selectionUpdatedAfterEventsHaveLoaded) {
+                        presenter.getEventsRefresher().reloadAndCallFillAll();
+                    }
+                } else {
+                    languageModelNameLabel.setText(stringMessages.noValidAICoreConfiguration());
+                }
+            }
+        });
         mainPanel.add(languageModelNameLabel);
         mainPanel.add(captionPanel);
         setWidget(mainPanel);
@@ -153,7 +161,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
             public void fill(Iterable<EventDTO> result) {
                 handleSelectionChangeEvents = false;
                 eventsTableWrapper.getFilterPanel().updateAll(result);
-                if (!selectionUpdatedAfterEventsHaveLoaded) {
+                if (!selectionUpdatedAfterEventsHaveLoaded && languageModelName != null) {
                     selectionUpdatedAfterEventsHaveLoaded = true;
                     sailingServiceWrite.getIdsOfEventsWithAICommenting(new AsyncCallback<List<EventDTO>>() {
                         @Override
