@@ -1,5 +1,9 @@
 package com.sap.sailing.aiagent.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -14,6 +18,8 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.aicore.AICore;
 import com.sap.sse.aicore.ChatSession;
+import com.sap.sse.aicore.Deployment;
+import com.sap.sse.common.Util;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -67,12 +73,18 @@ public class Activator implements BundleActivator {
         if (aiCore != null) { // otherwise, credentials may be missing
             final String modelName = System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME, DEFAULT_MODEL_NAME);
             final String effectiveModelName;
-            if (aiCore.getDeploymentByModelName(modelName).isPresent()) {
-                effectiveModelName = modelName;
-            } else {
+            final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
+            aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d, HashSet::new));
+            if (deploymentsByModelName.get(modelName) == null || deploymentsByModelName.get(modelName).isEmpty()) {
+                logger.warning("Couldn't find model "+modelName+"; defaulting to "+DEFAULT_MODEL_NAME);
                 effectiveModelName = DEFAULT_MODEL_NAME;
+            } else {
+                logger.info("Found model "+modelName);
+                effectiveModelName = modelName;
             }
-            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, effectiveModelName, SYSTEM_PROMPT);
+            final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
+            final Deployment deployment = deployments.iterator().next();
+            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, deployment, SYSTEM_PROMPT);
             logger.info("Created AI Agent "+aiAgent);
             bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
         } else {

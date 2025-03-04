@@ -1,17 +1,15 @@
 package com.sap.sailing.aiagent.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
@@ -35,9 +33,13 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.aicore.AICore;
 import com.sap.sse.aicore.ChatSession;
+import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.shared.util.WeakValueCache;
 
 public class AIAgentImpl implements AIAgent {
     private static final Logger logger = Logger.getLogger(AIAgentImpl.class.getName());
@@ -46,11 +48,11 @@ public class AIAgentImpl implements AIAgent {
     
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private final AICore aiCore;
-    
     private final String modelName;
     
     private final String systemPrompt;
+    
+    private final ChatSession chatSession;
     
     private final ConcurrentMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
@@ -65,17 +67,19 @@ public class AIAgentImpl implements AIAgent {
      * To be accessed only through the {@code synchronized} methods {@link #lockRaceForCommenting(String, String, String)} and
      * {@link #unlockRaceAfterCommenting(String, String, String)}.
      */
-    private final Map<Triple<String, String, String>, ReentrantLock> locks;
+    private final WeakValueCache<Triple<String, String, String>, NamedReentrantReadWriteLock> locks;
 
-    public AIAgentImpl(ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker, AICore aiCore, String modelName, String systemPrompt) {
+    public AIAgentImpl(ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker, AICore aiCore,
+            Deployment modelDeployment, String systemPrompt) throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException {
         super();
-        this.modelName = modelName;
+        this.modelName = modelDeployment.getModelName();
         this.systemPrompt = systemPrompt;
         this.raceColumnListeners = new ConcurrentHashMap<>();
         this.eventListeners = new ConcurrentHashMap<>();
         this.racingEventServiceTracker = racingEventServiceTracker;
-        this.aiCore = aiCore;
-        this.locks = new HashMap<>();
+        this.chatSession = aiCore.createChatSession(modelDeployment);
+        this.locks = new WeakValueCache<>(new HashMap<>());
         this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
     
@@ -107,31 +111,31 @@ public class AIAgentImpl implements AIAgent {
             String raceColumnName, String fleetName, TimePoint raceTimepoint, String tagIdentifier)
             throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException,
             ParseException, RaceLogNotFoundException, ServiceNotFoundException {
-        lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
-        try {
-            if (!getRacingEventService().getTaggingService().getTags(leaderboardName, raceColumnName, fleetName, /* searchSince */ null, /* returnRevokedTags */ false)
-                    .stream().anyMatch(existingTag->Util.equalsWithNull(existingTag.getHiddenInfo(), tagIdentifier))) {
-                final Optional<ChatSession> optionalChatSession = aiCore.createChatSession(modelName);
-                optionalChatSession.map(chatSession->{
-                    String response;
-                    try {
-                        response = chatSession
-                            .addSystemPrompt(systemPrompt)
-                            .addPrompt(prompt)
-                            .submit();
-                        getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
-                                String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
-                                "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
-                        return null;
-                    } catch (AuthorizationException | IllegalArgumentException | RaceLogNotFoundException
-                            | ServiceNotFoundException | TagAlreadyExistsException | UnsupportedOperationException
-                            | URISyntaxException | IOException | ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).orElseThrow(()->new FileNotFoundException("Language model named "+modelName+" not found"));
-            }
-        } finally {
-            unlockRaceAfterCommenting(leaderboardName, raceColumnName, fleetName);
+        final NamedReentrantReadWriteLock lock = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+        if (!getRacingEventService().getTaggingService().getTags(leaderboardName, raceColumnName, fleetName, /* searchSince */ null, /* returnRevokedTags */ false)
+                .stream().anyMatch(existingTag->Util.equalsWithNull(existingTag.getHiddenInfo(), tagIdentifier))) {
+            chatSession
+                .addSystemPrompt(systemPrompt)
+                .addPrompt(prompt)
+                .submit(response->{
+                        try {
+                            getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
+                                    String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
+                                    "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
+                        } catch (AuthorizationException | IllegalArgumentException
+                                | RaceLogNotFoundException | ServiceNotFoundException
+                                | TagAlreadyExistsException e) {
+                            logger.log(Level.SEVERE, "Error trying to add AI comment to leaderboard "+leaderboardName+", race column "+raceColumnName+", fleet "+fleetName, e);
+                        } finally {
+                            unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
+                        }
+                    },
+                    /* exception handler */ Optional.of(ex->{
+                        unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
+                        logger.log(Level.SEVERE, "Error trying to generate AI comment", ex);
+                    }));
+        } else {
+            unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
         }
     }
     
@@ -149,11 +153,23 @@ public class AIAgentImpl implements AIAgent {
      * {@code raceColumnName}, and {@code fleetName}, this method will block; when the other thread then
      * {@link #unlockRaceAfterCommenting(String, String, String) releases its lock}, one other thread
      * waiting for the lock will be unblocked, etc.
+     * @return 
      */
-    private synchronized void lockRaceForCommenting(final String leaderboardName, String raceColumnName, String fleetName) {
+    private NamedReentrantReadWriteLock lockRaceForCommenting(final String leaderboardName, String raceColumnName, String fleetName) {
+        final NamedReentrantReadWriteLock lock;
         final Triple<String, String, String> lockKey = getLockKey(leaderboardName, raceColumnName, fleetName);
-        final ReentrantLock lock = locks.computeIfAbsent(lockKey, k->new ReentrantLock());
-        lock.lock();
+        synchronized (this) {
+            final NamedReentrantReadWriteLock existingLock = locks.get(lockKey);
+            if (existingLock == null) {
+                lock = new NamedReentrantReadWriteLock("AI comments for "+leaderboardName+"/"+raceColumnName+"/"+fleetName, /* fair */ false);
+                locks.put(lockKey, lock);
+            } else {
+                lock = existingLock;
+            }
+            logger.fine(()->"Locking "+lock.writeLock()+" in thread "+Thread.currentThread()+" for key "+lockKey);
+        }
+        LockUtil.lockForWrite(lock);
+        return lock;
     }
 
     private Triple<String, String, String> getLockKey(final String leaderboardName, String raceColumnName,
@@ -161,9 +177,10 @@ public class AIAgentImpl implements AIAgent {
         return new Triple<>(leaderboardName, raceColumnName, fleetName);
     }
     
-    private synchronized void unlockRaceAfterCommenting(final String leaderboardName, String raceColumnName, String fleetName) {
-        final ReentrantLock lock = locks.remove(getLockKey(leaderboardName, raceColumnName, fleetName));
-        lock.unlock();
+    private synchronized void unlockRaceAfterCommenting(NamedReentrantReadWriteLock lock, final String leaderboardName, String raceColumnName, String fleetName) {
+        final Triple<String, String, String> lockKey = getLockKey(leaderboardName, raceColumnName, fleetName);
+        logger.fine(()->"Unlocking "+lock.writeLock()+" in thread "+Thread.currentThread()+" for key "+lockKey);
+        LockUtil.unlockAfterWrite(lock);
     }
     
     @Override

@@ -2,9 +2,15 @@ package com.sap.sailing.aiagent.impl.rules;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.simple.parser.ParseException;
 
@@ -16,19 +22,27 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 /**
- * After the start mark passings of at least half the number of competitors of the {@link #getTrackedRace() tracked race}
- * have been received, a comment is requested on the start of the best starter.
+ * After having seen mark passings of at least three (or the number of competitors if fewer than three) competitors of
+ * the {@link #getTrackedRace() tracked race}, a comment is produced about how the top competitors did in the leg they
+ * finished.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class TopThreeMarkRoundingRule extends Rule {
-    private final static String TOPIC = "Leg Winners";
+    private static final Logger logger = Logger.getLogger(TopThreeMarkRoundingRule.class.getName());
+
+    private final static String TOPIC_TEMPLATE = "Rounding waypoint #%d";
     
     private final ConcurrentMap<Waypoint, Boolean> hasFired;
     
@@ -41,34 +55,76 @@ public class TopThreeMarkRoundingRule extends Rule {
     @Override
     public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
             Iterable<MarkPassing> markPassings) {
+        final int numberOfCompetitors = Util.size(getTrackedRace().getRace().getCompetitors());
         for (final MarkPassing markPassing : markPassings) {
-            // TODO record the first three mark passings for each waypoint (or fewer if there are fewer competitors in the race) and fire when the third has been found and the rule hasn't fired for that waypoint yet...
-            if (!hasFired.get(markPassing.getWaypoint()) == Boolean.TRUE) {
-                final Iterable<MarkPassing> startMarkPassings = getTrackedRace().getMarkPassingsInOrder(getTrackedRace().getRace().getCourse().getFirstWaypoint());
-                if (Util.size(startMarkPassings) >= Util.size(getTrackedRace().getRace().getCompetitors()) / 2) {
+            // this rule does not fire on the start; there are separate rules analyzing the start performance
+            final int waypointIndex = getTrackedRace().getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint());
+            if (waypointIndex > 0 && !(hasFired.get(markPassing.getWaypoint()) == Boolean.TRUE)) {
+                final RankingInfo rankingInfo = getTrackedRace().getRankingMetric().getRankingInfo(markPassing.getTimePoint());
+                final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(markPassing.getTimePoint());
+                final Iterable<MarkPassing> waypointMarkPassingsCopy;
+                final Iterable<MarkPassing> waypointMarkPassings = getTrackedRace().getMarkPassingsInOrder(markPassing.getWaypoint());
+                getTrackedRace().lockForRead(waypointMarkPassings);
+                try {
+                    waypointMarkPassingsCopy = Util.asList(waypointMarkPassings);
+                } finally {
+                    getTrackedRace().unlockAfterRead(waypointMarkPassings);
+                }
+                if (Util.size(waypointMarkPassingsCopy) >= Math.min(numberOfCompetitors, 3)) {
+                    final TrackedLeg previousTrackedLeg = waypointIndex > 1 ? getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLeg(waypointIndex-2)) : null;
+                    final LinkedHashMap<Competitor, Integer> ranksAfterPreviousLeg = waypointIndex > 1 ? previousTrackedLeg.getRanks(markPassing.getTimePoint()) : null;
+                    // this rule hasn't fired yet for the markPassing's waypoint, but now we have three (or the number of
+                    // competitors, whichever is less) mark passings for that waypoint and hence will fire the rule:
                     hasFired.put(markPassing.getWaypoint(), Boolean.TRUE);
-                    // TODO
                     final StringBuilder promptBuilder = new StringBuilder();
-                    promptBuilder
-                        .append("Describe, very consisely, the fact that "); // TODO ...a rounded waypoint x in first, b in second, and c in third position;
-                    // TODO talk about gap changes and the gap to the followers in the field (if any) and how they got there; on which course side did they sail?
-                    // TODO was there a wind shift that supported the gap / rank changes?
-//                        appendCompetitorToPromptBuilder(firstStart.getCompetitor(), promptBuilder)
-//                            .append(" started first in race "+getTrackedRace().getRace().getName())
-//                            .append(". Consider the competitor's start delays in comparison to all other competitors' start delays in previous races of this regatta ")
-//                            .append(getLeaderboard().getName())
-//                            .append(" in class "+getLeaderboard().getBoatClass().getName())
-//                            .append(" that are given below in table form:\n");
-                    for (final RaceColumn previousRaceColumn : getLeaderboard().getRaceColumns()) {
-                        if (previousRaceColumn == getRaceColumn()) {
-                            break;
+                    promptBuilder.append("Describe, very consisely, the fact that ");
+                    int i=0;
+                    final Iterator<MarkPassing> markPassingsIterator = waypointMarkPassingsCopy.iterator();
+                    final List<Duration> gaps = new ArrayList<>();
+                    boolean first = true;
+                    TimePoint lastOfTheThreeMarkPassingTime = null;
+                    while (i++ < 3 && markPassingsIterator.hasNext()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            promptBuilder.append(" and ");
+                        }
+                        final MarkPassing waypointMarkPassing = markPassingsIterator.next();
+                        appendCompetitorToPromptBuilder(waypointMarkPassing.getCompetitor(), promptBuilder);
+                        if (waypointIndex == getTrackedRace().getRace().getCourse().getNumberOfWaypoints()-1) {
+                            promptBuilder.append(" finished the race");
+                        } else {
+                            promptBuilder.append(" rounded waypoint \"");
+                            promptBuilder.append(waypointMarkPassing.getWaypoint().getName());
+                            promptBuilder.append("\"");
+                        }
+                        promptBuilder.append(" in position #");
+                        promptBuilder.append(i);
+                        promptBuilder.append(" at ");
+                        lastOfTheThreeMarkPassingTime = waypointMarkPassing.getTimePoint();
+                        promptBuilder.append(lastOfTheThreeMarkPassingTime);
+                        if (waypointIndex > 1) {
+                            promptBuilder.append(" after starting into the leg at position #");
+                            promptBuilder.append(ranksAfterPreviousLeg.get(waypointMarkPassing.getCompetitor()));
+                            gaps.add(getTrackedRace().getRankingMetric()
+                                    .getLegGapToLegLeaderInOwnTime(
+                                            getTrackedRace().getTrackedLeg(waypointMarkPassing.getCompetitor(),
+                                                    previousTrackedLeg.getLeg()),
+                                            markPassing.getTimePoint(), rankingInfo, cache));
                         }
                     }
-                    promptBuilder
-                        .append("Also, consider in your concise comment the typical start performance of this competitor in previous regattas at other events.");
-                    // TODO build the prompt
-//                        produceComment(TOPIC, promptBuilder.toString(), firstStart.getTimePoint(),
-//                                getClass().getName()); // there is only one start analysis per race, so the class name is sufficient for identification
+                    if (waypointIndex > 1) {
+                        promptBuilder.append(", where their gaps to the race leader at the previous waypoint were ");
+                        promptBuilder.append(Util.joinStrings(", ", gaps));
+                        promptBuilder.append(", respectively.");
+                    }
+                    try {
+                        produceComment(String.format(TOPIC_TEMPLATE, waypointIndex), promptBuilder.toString(), lastOfTheThreeMarkPassingTime,
+                                getClass().getName());
+                    } catch (UnsupportedOperationException | RaceLogNotFoundException | URISyntaxException | IOException
+                            | ParseException | ServiceNotFoundException e) {
+                        logger.log(Level.WARNING, "Problem trying to produce an AI comment", e);
+                    }
                 }
             }
         }

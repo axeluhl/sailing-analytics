@@ -2,6 +2,9 @@ package com.sap.sse.aicore;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -11,7 +14,24 @@ public interface ChatSession {
 
     ChatSession addPrompt(String prompt);
 
+    /**
+     * Submits the prompt synchronously and waits for the response which is then returned. This may run into API rate limits;
+     * you're on your own regarding re-try and back-off.
+     */
     String submit() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException;
+    
+    /**
+     * Submits the prompt asynchronously in a background thread, trying to respect API rate limits and re-trying with an
+     * exponential back-off strategy when having exceeded the limit.
+     * 
+     * @param callback
+     *            invoked with the response {@link String} when submitting the prompt succeeded
+     * @param exceptionHandler
+     *            can contain an exception handler; this won't be invoked when an issue with rate limiting is detected
+     *            and a back-off strategy is used; unrecoverable exceptions will be passed to the exception handler if
+     *            present; otherwise they will simply be logged with level {@link Level#SEVERE SEVERE}.
+     */
+    void submit(Consumer<String> callback, Optional<Consumer<Exception>> exceptionHandler);
 
     /**
      * @param frequencyPenalty

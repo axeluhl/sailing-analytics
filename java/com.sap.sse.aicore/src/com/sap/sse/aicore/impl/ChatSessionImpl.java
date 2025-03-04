@@ -2,8 +2,13 @@ package com.sap.sse.aicore.impl;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
@@ -20,6 +25,8 @@ import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.Util;
 
 public class ChatSessionImpl implements ChatSession {
+    private static final Logger logger = Logger.getLogger(ChatSessionImpl.class.getName());
+
     private static final String TEMPERATURE = "temperature";
     private static final String TOP_P = "top_p";
     private static final String MAX_TOKENS = "max_tokens";
@@ -184,7 +191,46 @@ public class ChatSessionImpl implements ChatSession {
     }
     
     @Override
+    public void submit(Consumer<String> callback, Optional<Consumer<Exception>> exceptionHandler) {
+        try {
+            final HttpPost postRequest = createAndParameterizePostRequest();
+            aiCore.getJSONResponse(postRequest, chatResponse->{
+                try {
+                    callback.accept(getChoicesFromResponse(chatResponse));
+                } catch (Exception e) {
+                    forwardToExceptionHandlerOrLog(exceptionHandler, e);
+                }
+            }, exceptionHandler);
+        } catch (Exception e) {
+            forwardToExceptionHandlerOrLog(exceptionHandler, e);
+        }
+    }
+
+    private Object forwardToExceptionHandlerOrLog(Optional<Consumer<Exception>> exceptionHandler, Exception e) {
+        return exceptionHandler.map(handler->{ handler.accept(e); return null; })
+            .orElseGet(()->{ logger.log(Level.SEVERE, "Exception trying to submit prompt", e); return null; });
+    }
+
+    @Override
     public String submit() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        final HttpPost postRequest = createAndParameterizePostRequest();
+        final JSONObject chatResponse = aiCore.getJSONResponse(postRequest);
+        return getChoicesFromResponse(chatResponse);
+    }
+
+    private String getChoicesFromResponse(final JSONObject chatResponse) {
+        final List<String> results = new ArrayList<>();
+        for (final Object choice : ((JSONArray) chatResponse.get(CHOICES))) {
+            final JSONObject choiseJson = (JSONObject) choice;
+            final JSONObject message = (JSONObject) choiseJson.get(MESSAGE);
+            final String content = message.get(CONTENT).toString();
+            results.add(content);
+        }
+        return Util.joinStrings("\n", results);
+    }
+
+    private HttpPost createAndParameterizePostRequest() throws UnsupportedOperationException, ClientProtocolException,
+            URISyntaxException, IOException, ParseException, UnsupportedCharsetException {
         final HttpPost postRequest = aiCore.getHttpPostRequest(getChatPath());
         final JSONObject toSubmit = new JSONObject();
         final JSONArray messages = new JSONArray();
@@ -210,14 +256,6 @@ public class ChatSessionImpl implements ChatSession {
             toSubmit.put(PRESENCE_PENALTY, getPresencePenalty());
         }
         postRequest.setEntity(new StringEntity(toSubmit.toJSONString(), ContentType.APPLICATION_JSON));
-        final JSONObject chatResponse = aiCore.getJSONResponse(postRequest);
-        final List<String> results = new ArrayList<>();
-        for (final Object choice : ((JSONArray) chatResponse.get(CHOICES))) {
-            final JSONObject choiseJson = (JSONObject) choice;
-            final JSONObject message = (JSONObject) choiseJson.get(MESSAGE);
-            final String content = message.get(CONTENT).toString();
-            results.add(content);
-        }
-        return Util.joinStrings("\n", results);
+        return postRequest;
     }
 }

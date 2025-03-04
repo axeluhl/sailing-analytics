@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
@@ -16,6 +18,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sse.aicore.impl.AICoreImpl;
 import com.sap.sse.aicore.impl.ChatSessionImpl;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Provides connectivity and a facade to SAP AI Core and large language models hosted by it. To start with, create an
@@ -68,7 +71,7 @@ public interface AICore {
     }
     
     static AICore create(final Credentials credentials) {
-        return new AICoreImpl(credentials);
+        return new AICoreImpl(credentials, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
     }
 
     Iterable<Deployment> getDeployments() throws UnsupportedOperationException, ClientProtocolException,
@@ -101,4 +104,17 @@ public interface AICore {
 
     JSONObject getJSONResponse(HttpUriRequest request) throws UnsupportedOperationException, ClientProtocolException,
             URISyntaxException, IOException, ParseException;
+
+    /**
+     * Submits the request asynchronously in a background executor, trying to respect API rate limits and re-trying with an
+     * exponential back-off strategy when having exceeded the limit.
+     * 
+     * @param callback
+     *            invoked with the response {@link JSONObject} when submitting the request succeeded
+     * @param exceptionHandler
+     *            can contain an exception handler; this won't be invoked when an issue with rate limiting is detected
+     *            and a back-off strategy is used; unrecoverable exceptions will be passed to the exception handler if
+     *            present; otherwise they will simply be logged with level {@link Level#SEVERE SEVERE}.
+     */
+    void getJSONResponse(HttpUriRequest request, Consumer<JSONObject> resultCallback, Optional<Consumer<Exception>> exceptionHandler);
 }
