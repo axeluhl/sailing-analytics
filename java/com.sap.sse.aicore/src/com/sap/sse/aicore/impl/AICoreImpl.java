@@ -47,7 +47,7 @@ public class AICoreImpl implements AICore {
     private TimePoint timePointOfLastRequest;
     private final int maximumNumberOfRetries = 10;
     private static final Duration MAX_DURATION_BETWEEN_RETRIES = Duration.ONE_MINUTE;
-    private static final Duration minimumDurationBetweenRequests = Duration.ONE_SECOND.divide(3); // limit request rate to three requests per second
+    private static final Duration minimumDurationBetweenRequests = Duration.ONE_SECOND.divide(10); // limit request rate to three requests per second
 
     public AICoreImpl(Credentials credentials, ScheduledExecutorService executor) {
         super();
