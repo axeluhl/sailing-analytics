@@ -111,8 +111,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setTemperature(Double temperature) {
+    public ChatSession setTemperature(Double temperature) {
         this.temperature = temperature;
+        return this;
     }
 
     @Override
@@ -121,8 +122,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setTop_p(Double top_p) {
+    public ChatSession setTop_p(Double top_p) {
         this.top_p = top_p;
+        return this;
     }
 
     @Override
@@ -131,8 +133,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setMaxTokens(Integer maxTokens) {
+    public ChatSession setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
+        return this;
     }
 
     @Override
@@ -141,8 +144,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setMaxCompletionTokens(Integer maxCompletionTokens) {
+    public ChatSession setMaxCompletionTokens(Integer maxCompletionTokens) {
         this.maxCompletionTokens = maxCompletionTokens;
+        return this;
     }
 
     @Override
@@ -151,8 +155,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setPresencePenalty(Double presencePenalty) {
+    public ChatSession setPresencePenalty(Double presencePenalty) {
         this.presencePenalty = presencePenalty;
+        return this;
     }
 
     @Override
@@ -161,8 +166,9 @@ public class ChatSessionImpl implements ChatSession {
     }
 
     @Override
-    public void setFrequencyPenalty(Double frequencyPenalty) {
+    public ChatSession setFrequencyPenalty(Double frequencyPenalty) {
         this.frequencyPenalty = frequencyPenalty;
+        return this;
     }
 
     @Override

@@ -38,7 +38,7 @@ public interface ChatSession {
      *            Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in
      *            the text so far, decreasing the model's likelihood to repeat the same line verbatim.
      */
-    void setFrequencyPenalty(Double frequencyPenalty);
+    ChatSession setFrequencyPenalty(Double frequencyPenalty);
 
     Double getFrequencyPenalty();
 
@@ -47,7 +47,7 @@ public interface ChatSession {
      *            Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the
      *            text so far, increasing the model's likelihood to talk about new topics.
      */
-    void setPresencePenalty(Double presencePenalty);
+    ChatSession setPresencePenalty(Double presencePenalty);
 
     Double getPresencePenalty();
 
@@ -56,7 +56,7 @@ public interface ChatSession {
      *            An upper bound for the number of tokens that can be generated for a completion, including visible
      *            output tokens and reasoning tokens.
      */
-    void setMaxCompletionTokens(Integer maxCompletionTokens);
+    ChatSession setMaxCompletionTokens(Integer maxCompletionTokens);
 
     Integer getMaxCompletionTokens();
 
@@ -67,7 +67,7 @@ public interface ChatSession {
      * 
      *            The total length of input tokens and generated tokens is limited by the model's context length.
      */
-    void setMaxTokens(Integer maxTokens);
+    ChatSession setMaxTokens(Integer maxTokens);
 
     Integer getMaxTokens();
 
@@ -80,7 +80,7 @@ public interface ChatSession {
      * 
      *            We generally recommend altering this or temperature but not both.
      */
-    void setTop_p(Double top_p);
+    ChatSession setTop_p(Double top_p);
 
     Double getTop_p();
 
@@ -92,7 +92,7 @@ public interface ChatSession {
      * 
      *            We generally recommend altering this or top_p but not both.
      */
-    void setTemperature(Double temperature);
+    ChatSession setTemperature(Double temperature);
 
     Double getTemperature();
 }

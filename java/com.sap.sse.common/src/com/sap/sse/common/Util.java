@@ -587,12 +587,7 @@ public class Util {
      * made. This is the caller's obligation.
      */
     public static <K, V> boolean addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        return addToValueSet(map, key, value, new ValueCollectionConstructor<V, Set<V>>() {
-            @Override
-            public Set<V> createValueCollection() {
-                return new HashSet<V>();
-            }
-        });
+        return addToValueSet(map, key, value, HashSet::new);
     }
 
     public static interface ValueCollectionConstructor<T, C extends Collection<T>> {

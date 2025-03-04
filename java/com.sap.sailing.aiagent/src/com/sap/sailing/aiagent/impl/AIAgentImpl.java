@@ -63,6 +63,8 @@ public class AIAgentImpl implements AIAgent {
      */
     private final Set<AIAgentListener> listeners;
     
+    private final ConcurrentMap<Triple<String, String, String>, Set<String>> tagIdentifiersCurrentlyBeingAddedToRace;
+    
     /**
      * To be accessed only through the {@code synchronized} methods {@link #lockRaceForCommenting(String, String, String)} and
      * {@link #unlockRaceAfterCommenting(String, String, String)}.
@@ -75,6 +77,7 @@ public class AIAgentImpl implements AIAgent {
         super();
         this.modelName = modelDeployment.getModelName();
         this.systemPrompt = systemPrompt;
+        this.tagIdentifiersCurrentlyBeingAddedToRace = new ConcurrentHashMap<>();
         this.raceColumnListeners = new ConcurrentHashMap<>();
         this.eventListeners = new ConcurrentHashMap<>();
         this.racingEventServiceTracker = racingEventServiceTracker;
@@ -112,31 +115,62 @@ public class AIAgentImpl implements AIAgent {
             throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException,
             ParseException, RaceLogNotFoundException, ServiceNotFoundException {
         final NamedReentrantReadWriteLock lock = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
-        if (!getRacingEventService().getTaggingService().getTags(leaderboardName, raceColumnName, fleetName, /* searchSince */ null, /* returnRevokedTags */ false)
-                .stream().anyMatch(existingTag->Util.equalsWithNull(existingTag.getHiddenInfo(), tagIdentifier))) {
-            chatSession
-                .addSystemPrompt(systemPrompt)
-                .addPrompt(prompt)
-                .submit(response->{
-                        try {
-                            getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
-                                    String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
-                                    "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
-                        } catch (AuthorizationException | IllegalArgumentException
-                                | RaceLogNotFoundException | ServiceNotFoundException
-                                | TagAlreadyExistsException e) {
-                            logger.log(Level.SEVERE, "Error trying to add AI comment to leaderboard "+leaderboardName+", race column "+raceColumnName+", fleet "+fleetName, e);
-                        } finally {
-                            unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
-                        }
-                    },
-                    /* exception handler */ Optional.of(ex->{
-                        unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
-                        logger.log(Level.SEVERE, "Error trying to generate AI comment", ex);
-                    }));
-        } else {
+        try {
+            if (!raceHasOrIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier)) {
+                raceIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
+                chatSession
+                    .addSystemPrompt(systemPrompt)
+                    .addPrompt(prompt)
+                    .setTemperature(0.2)
+                    .submit(response->{
+                            try {
+                                getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
+                                        String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
+                                        "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
+                            } catch (AuthorizationException | IllegalArgumentException
+                                    | RaceLogNotFoundException | ServiceNotFoundException
+                                    | TagAlreadyExistsException e) {
+                                logger.log(Level.SEVERE, "Error trying to add AI comment to leaderboard "+leaderboardName+", race column "+raceColumnName+", fleet "+fleetName, e);
+                            } finally {
+                                final NamedReentrantReadWriteLock lock2 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+                                try {
+                                    raceIsNoLongerAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
+                                } finally {
+                                    unlockRaceAfterCommenting(lock2, leaderboardName, raceColumnName, fleetName);
+                                }
+                            }
+                        },
+                        /* exception handler */ Optional.of(ex->{
+                            final NamedReentrantReadWriteLock lock3 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+                            try {
+                                raceIsNoLongerAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
+                            } finally {
+                                unlockRaceAfterCommenting(lock3, leaderboardName, raceColumnName, fleetName);
+                            }
+                            logger.log(Level.SEVERE, "Error trying to generate AI comment", ex);
+                        }));
+            }
+        } finally {
             unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
         }
+    }
+
+    private void raceIsAboutToGetTag(String leaderboardName, String raceColumnName, String fleetName, String tagIdentifier) {
+        Util.addToValueSet(tagIdentifiersCurrentlyBeingAddedToRace, new Triple<>(leaderboardName, raceColumnName, fleetName), tagIdentifier);
+    }   
+    
+    private void raceIsNoLongerAboutToGetTag(String leaderboardName, String raceColumnName, String fleetName, String tagIdentifier) {
+        Util.removeFromValueSet(tagIdentifiersCurrentlyBeingAddedToRace, new Triple<>(leaderboardName, raceColumnName, fleetName), tagIdentifier);
+    }
+
+    private boolean raceHasOrIsAboutToGetTag(final String leaderboardName, String raceColumnName, String fleetName,
+            String tagIdentifier) throws RaceLogNotFoundException, ServiceNotFoundException {
+        final Triple<String, String, String> key = new Triple<>(leaderboardName, raceColumnName, fleetName);
+        return (tagIdentifiersCurrentlyBeingAddedToRace.containsKey(key) &&
+                tagIdentifiersCurrentlyBeingAddedToRace.get(key).contains(tagIdentifier))
+                ||
+                getRacingEventService().getTaggingService().getTags(leaderboardName, raceColumnName, fleetName, /* searchSince */ null, /* returnRevokedTags */ false)
+                .stream().anyMatch(existingTag->Util.equalsWithNull(existingTag.getHiddenInfo(), tagIdentifier));
     }
     
     /**

@@ -75,7 +75,6 @@ public class TopThreeMarkRoundingRule extends Rule {
                     final LinkedHashMap<Competitor, Integer> ranksAfterPreviousLeg = waypointIndex > 1 ? previousTrackedLeg.getRanks(markPassing.getTimePoint()) : null;
                     // this rule hasn't fired yet for the markPassing's waypoint, but now we have three (or the number of
                     // competitors, whichever is less) mark passings for that waypoint and hence will fire the rule:
-                    hasFired.put(markPassing.getWaypoint(), Boolean.TRUE);
                     final StringBuilder promptBuilder = new StringBuilder();
                     promptBuilder.append("Describe, very consisely, the fact that ");
                     int i=0;
@@ -94,9 +93,11 @@ public class TopThreeMarkRoundingRule extends Rule {
                         if (waypointIndex == getTrackedRace().getRace().getCourse().getNumberOfWaypoints()-1) {
                             promptBuilder.append(" finished the race");
                         } else {
-                            promptBuilder.append(" rounded waypoint \"");
+                            promptBuilder.append(" rounded waypoint #");
+                            promptBuilder.append(waypointIndex);
+                            promptBuilder.append(" (\"");
                             promptBuilder.append(waypointMarkPassing.getWaypoint().getName());
-                            promptBuilder.append("\"");
+                            promptBuilder.append("\")");
                         }
                         promptBuilder.append(" in position #");
                         promptBuilder.append(i);
@@ -120,7 +121,8 @@ public class TopThreeMarkRoundingRule extends Rule {
                     }
                     try {
                         produceComment(String.format(TOPIC_TEMPLATE, waypointIndex), promptBuilder.toString(), lastOfTheThreeMarkPassingTime,
-                                getClass().getName());
+                                getClass().getName()+"/"+waypointIndex);
+                        hasFired.put(markPassing.getWaypoint(), Boolean.TRUE);
                     } catch (UnsupportedOperationException | RaceLogNotFoundException | URISyntaxException | IOException
                             | ParseException | ServiceNotFoundException e) {
                         logger.log(Level.WARNING, "Problem trying to produce an AI comment", e);

@@ -1,7 +1,6 @@
 package com.sap.sailing.aiagent.impl;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -74,7 +73,8 @@ public class Activator implements BundleActivator {
             final String modelName = System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME, DEFAULT_MODEL_NAME);
             final String effectiveModelName;
             final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
-            aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d, HashSet::new));
+            aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
+            logger.info("Found AI models "+deploymentsByModelName.keySet());
             if (deploymentsByModelName.get(modelName) == null || deploymentsByModelName.get(modelName).isEmpty()) {
                 logger.warning("Couldn't find model "+modelName+"; defaulting to "+DEFAULT_MODEL_NAME);
                 effectiveModelName = DEFAULT_MODEL_NAME;
