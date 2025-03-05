@@ -734,6 +734,15 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void stopAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
     
     void getIdsOfEventsWithAICommenting(AsyncCallback<List<EventDTO>> callback);
-    
+
+    /**
+     * If {@code null} is returned to the callback's {@link AsyncCallback#onSuccess(Object) onSuccess} method, this
+     * means that the AI agent hasn't been initialized properly. The typical reason for this will be missing AI Core
+     * credentials but may also be issues with finding a valid deployment of a language model to use. In any case, if
+     * this method has delivered a {@code null} model name then the
+     * {@link #startAICommentingOnEvent(UUID, AsyncCallback)}, {@link #stopAICommentingOnEvent(UUID, AsyncCallback)} and
+     * {@link #getIdsOfEventsWithAICommenting(AsyncCallback)} methods must not be called, or you may see exceptions
+     * being thrown.
+     */
     void getAIAgentLanguageModelName(AsyncCallback<String> callback);
 }

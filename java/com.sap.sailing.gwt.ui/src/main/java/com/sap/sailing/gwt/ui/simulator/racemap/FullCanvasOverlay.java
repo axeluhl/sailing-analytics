@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
 
 /**
- * This class extends @CanvasOverlayV3 to provide the functionality that the canvas always covers the
+ * This class extends {@link CanvasOverlayV3} to provide the functionality that the canvas always covers the
  * full viewable area of the map
  * 
  * @author Nidhi Sawhney(D054070)
@@ -143,16 +143,13 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         Context2d context2d = canvas.getContext2d();
         drawPoint(x, y);
         if (getMap().getZoom() >= 11) {
-        	context2d.setFillStyle(textColor);
-        	context2d.fillText(text, x, y);
+            context2d.setFillStyle(textColor);
+            context2d.fillText(text, x, y);
         }
     }
     
     /**
      * Draw a circle centred at x,y with given radius
-     * @param x
-     * @param y
-     * @param radius
      */
     protected void drawCircle(double x, double y, double radius, String color) {
         Context2d context2d = canvas.getContext2d();

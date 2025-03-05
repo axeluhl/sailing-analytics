@@ -51,16 +51,23 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
                 SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         final AIAgent aiAgent = getAIAgent();
-        final RacingEventService racingEventService = getService();
-        final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
-        if (event != null) {
-            getSecurityService().checkCurrentUserUpdatePermission(event);
-            aiAgent.startCommentingOnEvent(event);
-            response = Response.ok().build();
+        if (aiAgent != null) {
+            final RacingEventService racingEventService = getService();
+            final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
+            if (event != null) {
+                getSecurityService().checkCurrentUserUpdatePermission(event);
+                aiAgent.startCommentingOnEvent(event);
+                response = Response.ok().build();
+            } else {
+                response = Response
+                        .status(Status.NOT_FOUND)
+                        .entity("Event with the requested ID not found")
+                        .build();
+            }
         } else {
             response = Response
                     .status(Status.NOT_FOUND)
-                    .entity("Event with the requested ID not found")
+                    .entity("AI Agent not found; perhaps no credentials provided?")
                     .build();
         }
         return response;
@@ -81,16 +88,23 @@ public class AIAgentResource extends SharedAbstractSailingServerResource {
                 SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT,
                         new TypeRelativeObjectIdentifier(ServerInfo.getName())));
         final AIAgent aiAgent = getAIAgent();
-        final RacingEventService racingEventService = getService();
-        final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
-        if (event != null) {
-            getSecurityService().checkCurrentUserUpdatePermission(event);
-            aiAgent.stopCommentingOnEvent(event);
-            response = Response.ok().build();
+        if (aiAgent != null) {
+            final RacingEventService racingEventService = getService();
+            final Event event = Util.first(racingEventService.getEventsSelectively(/* include */ true, Collections.singleton(UUID.fromString(eventUUID))));
+            if (event != null) {
+                getSecurityService().checkCurrentUserUpdatePermission(event);
+                aiAgent.stopCommentingOnEvent(event);
+                response = Response.ok().build();
+            } else {
+                response = Response
+                        .status(Status.NOT_FOUND)
+                        .entity("Event with the requested ID not found")
+                        .build();
+            }
         } else {
             response = Response
                     .status(Status.NOT_FOUND)
-                    .entity("Event with the requested ID not found")
+                    .entity("AI Agent not found; perhaps no credentials provided?")
                     .build();
         }
         return response;

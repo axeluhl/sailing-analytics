@@ -7,11 +7,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.aiagent.impl.AIAgentImpl;
@@ -19,6 +22,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -26,10 +30,13 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.shared.util.Wait;
 
 /**
  * After having seen mark passings of at least three (or the number of competitors if fewer than three) competitors of
@@ -70,7 +77,8 @@ public class TopThreeMarkRoundingRule extends Rule {
                 } finally {
                     getTrackedRace().unlockAfterRead(waypointMarkPassings);
                 }
-                if (Util.size(waypointMarkPassingsCopy) >= Math.min(numberOfCompetitors, 3)) {
+                if (Util.size(waypointMarkPassingsCopy) >= Math.min(numberOfCompetitors, 3)) { // TODO bug6095: during loading, mark passings are fired at us in stray orders; the third one received may not be the third competitor rounding the mark...
+                    hasFired.put(markPassing.getWaypoint(), Boolean.TRUE);
                     final TrackedLeg previousTrackedLeg = waypointIndex > 1 ? getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLeg(waypointIndex-2)) : null;
                     final LinkedHashMap<Competitor, Integer> ranksAfterPreviousLeg = waypointIndex > 1 ? previousTrackedLeg.getRanks(markPassing.getTimePoint()) : null;
                     // this rule hasn't fired yet for the markPassing's waypoint, but now we have three (or the number of
@@ -114,21 +122,54 @@ public class TopThreeMarkRoundingRule extends Rule {
                                             markPassing.getTimePoint(), rankingInfo, cache));
                         }
                     }
+                    final TimePoint finalLastOfTheThreeMarkPassingTime = lastOfTheThreeMarkPassingTime;
                     if (waypointIndex > 1) {
                         promptBuilder.append(", where their gaps to the race leader at the previous waypoint were ");
                         promptBuilder.append(Util.joinStrings(", ", gaps));
                         promptBuilder.append(", respectively.");
                     }
-                    try {
-                        produceComment(String.format(TOPIC_TEMPLATE, waypointIndex), promptBuilder.toString(), lastOfTheThreeMarkPassingTime,
-                                getClass().getName()+"/"+waypointIndex);
-                        hasFired.put(markPassing.getWaypoint(), Boolean.TRUE);
-                    } catch (UnsupportedOperationException | RaceLogNotFoundException | URISyntaxException | IOException
-                            | ParseException | ServiceNotFoundException e) {
-                        logger.log(Level.WARNING, "Problem trying to produce an AI comment", e);
-                    }
+                    new Thread(SecurityUtils.getSubject().associateWith(()->{
+                        promptBuilder.append("Here are the average distances the competitors were left (negative values) or right (positive values) of the course middle line"+
+                                             " where the competitors are sorted from best to worst at the end of the leg:\n");
+                        final TrackedLeg trackedLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLeg(waypointIndex-1));
+                        for (final Competitor c : getTrackedRace().getCompetitorsFromBestToWorst(markPassing.getTimePoint())) {
+                            final TrackedLegOfCompetitor trackedLegOfCompetitor = getTrackedRace().getTrackedLeg(c, trackedLeg.getLeg());
+                            // Wait for the race to stop loading because otherwise we would not be able to obtain useful XTE values
+                            waitForRaceToStopLoading();
+                            final Distance xte = trackedLegOfCompetitor.getAverageSignedCrossTrackError(markPassing.getTimePoint(), /* waitForLatestAnalysis */ true);
+                            promptBuilder.append("  ");
+                            appendCompetitorToPromptBuilder(c, promptBuilder);
+                            promptBuilder.append(": ");
+                            promptBuilder.append(xte);
+                            promptBuilder.append("\n");
+                        }
+                        promptBuilder.append("Mention, if you see any pattern for which course side worked out better on this leg and relate this to the top three finishers of this leg: left or right!");
+                        try {
+                            produceComment(String.format(TOPIC_TEMPLATE, waypointIndex), promptBuilder.toString(), finalLastOfTheThreeMarkPassingTime,
+                                    getClass().getName()+"/"+waypointIndex);
+                        } catch (UnsupportedOperationException | RaceLogNotFoundException | URISyntaxException | IOException
+                                | ParseException | ServiceNotFoundException e) {
+                            hasFired.put(markPassing.getWaypoint(), Boolean.FALSE);
+                            logger.log(Level.WARNING, "Problem trying to produce an AI comment", e);
+                        }
+                    }), "Background prompt completer for race "+getTrackedRace().getTrackedRegatta().getRegatta().getName() + " / " +
+                            getTrackedRace().getRace()+", waiting for XTE calculations to finish").start();
                 }
             }
+        }
+    }
+
+    private void waitForRaceToStopLoading() throws RuntimeException {
+        try {
+            Wait.wait(()->{
+                TrackedRaceStatusEnum status=getTrackedRace().getStatus().getStatus();
+                return status != TrackedRaceStatusEnum.LOADING && status != TrackedRaceStatusEnum.PREPARED;
+            }, Optional.empty(), Duration.ONE_SECOND, Level.INFO, "Race "+getTrackedRace().getRace().getName()+" to finish loading");
+        } catch (TimeoutException e) {
+            logger.warning("This shouldn't have happened because we should have been waiting indefinitely");
+        } catch (Exception e) {
+            assert false;
+            throw new RuntimeException(); // there is nothing in the callable of the Wait.wait invocation that may throw an exception, so this should never happen
         }
     }
 }

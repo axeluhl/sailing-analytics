@@ -2297,11 +2297,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
      *         likely the agent wasn't initialized because of missing credentials
      */
     protected AIAgent getAIAgent() {
-        try {
-            return aiAgentTracker.waitForService(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return aiAgentTracker.getService();
     }
 
     protected SharedSailingData getSharedSailingData() {
