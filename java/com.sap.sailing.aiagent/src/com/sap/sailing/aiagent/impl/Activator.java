@@ -69,7 +69,7 @@ public class Activator implements BundleActivator {
         Activator.context = bundleContext;
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         final AICore aiCore = AICore.getDefault();
-        if (aiCore != null) { // otherwise, credentials may be missing
+        if (aiCore != null) { // since we now also support AICore instances without Credentials, this case is the most likely
             final String modelName = System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME, DEFAULT_MODEL_NAME);
             final String effectiveModelName;
             final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
@@ -88,8 +88,7 @@ public class Activator implements BundleActivator {
             logger.info("Created AI Agent "+aiAgent);
             bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
         } else {
-            logger.warning("Didn't find any AICore service; probably no credentials provided through the "
-                    + AICore.CREDENTIALS_SYSTEM_PROPERTY_NAME + " system property");
+            logger.warning("Didn't find any AICore service; is the com.sap.sse.aicore bundle missing?");
         }
     }
     

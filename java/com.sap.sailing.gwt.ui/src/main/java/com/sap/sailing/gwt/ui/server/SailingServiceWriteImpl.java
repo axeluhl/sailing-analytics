@@ -361,6 +361,7 @@ import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -4039,20 +4040,24 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 editedObject.getCreatorName());
     }
 
+    private void checkAIAgentConfigPermission() throws AuthorizationException {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+    }
+    
     @Override
     public void startAICommentingOnEvent(UUID eventId) {
         changeAICommentingForEvent(eventId, getAIAgent()::startCommentingOnEvent);
     }
     
     private void changeAICommentingForEvent(UUID eventId, Consumer<Event> changeFunction) {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        checkAIAgentConfigPermission();
         final Event event = getService().getEvent(eventId);
         if (event != null) {
             getSecurityService().checkCurrentUserUpdatePermission(event);
             changeFunction.accept(event);
         } else {
-            logger.warning("User "+subject.getPrincipal()+" was trying to change AI commenting for event with ID "+eventId+", but that event wasn't found");
+            logger.warning("User "+SecurityUtils.getSubject().getPrincipal()+" was trying to change AI commenting for event with ID "+eventId+", but that event wasn't found");
         }
     }
     
@@ -4069,16 +4074,32 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
      */
     @Override
     public List<EventDTO> getIdsOfEventsWithAICommenting() {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        checkAIAgentConfigPermission();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getAIAgent().getCommentingOnEvents(), event->convertToEventDTO(event, /* withStatisticalData */ false));
     }
-    
+
     @Override
     public String getAIAgentLanguageModelName() {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+        checkAIAgentConfigPermission();
         final AIAgent aiAgent = getAIAgent();
         return aiAgent == null ? null : aiAgent.getModelName();
+    }
+
+    @Override
+    public boolean hasAIAgentCredentials() {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        return aiAgent == null ? false : aiAgent.hasCredentials();
+    }
+
+    @Override
+    public void setAIAgentCredentials(String credentials) throws MalformedURLException, org.json.simple.parser.ParseException {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        if (aiAgent != null) {
+            aiAgent.setCredentials(Util.hasLength(credentials)
+                    ? CredentialsParser.create().parse(credentials)
+                    : null);
+        }
     }
 }

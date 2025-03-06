@@ -33,6 +33,7 @@ import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sailing.server.interfaces.TaggingService;
 import com.sap.sse.aicore.AICore;
 import com.sap.sse.aicore.ChatSession;
+import com.sap.sse.aicore.Credentials;
 import com.sap.sse.aicore.Deployment;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -71,10 +72,13 @@ public class AIAgentImpl implements AIAgent {
      */
     private final WeakValueCache<Triple<String, String, String>, NamedReentrantReadWriteLock> locks;
 
+    private final AICore aiCore;
+
     public AIAgentImpl(ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker, AICore aiCore,
             Deployment modelDeployment, String systemPrompt) throws UnsupportedOperationException, ClientProtocolException,
             URISyntaxException, IOException, ParseException {
         super();
+        this.aiCore = aiCore;
         this.modelName = modelDeployment.getModelName();
         this.systemPrompt = systemPrompt;
         this.tagIdentifiersCurrentlyBeingAddedToRace = new ConcurrentHashMap<>();
@@ -86,6 +90,16 @@ public class AIAgentImpl implements AIAgent {
         this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
     
+    @Override
+    public boolean hasCredentials() {
+        return aiCore.hasCredentials();
+    }
+    
+    @Override
+    public void setCredentials(Credentials credentials) {
+        aiCore.setCredentials(credentials);
+    }
+
     private RacingEventService getRacingEventService() {
         return racingEventServiceTracker.getService();
     }

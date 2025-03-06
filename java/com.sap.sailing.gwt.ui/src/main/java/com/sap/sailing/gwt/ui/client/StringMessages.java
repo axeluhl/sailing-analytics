@@ -2520,4 +2520,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorObtainingAIAgentLanguageModelName(String message);
     String languageModelUsedForAICommenting(String modelName);
     String noValidAICoreConfiguration();
+    String errorTryingToCheckForAIAgentCredentials(String message);
+    String hasAIAgentCredentials();
+    String hasNoAIAgentCredentials();
+    String placeholderAICoreCredentialsAsJSON();
+    String credentials();
+    String updateCredentials();
+    String successfullyUpdatedAIAgentCredentials();
+    String errorUpdatingAIAgentCredentials(String message);
 }

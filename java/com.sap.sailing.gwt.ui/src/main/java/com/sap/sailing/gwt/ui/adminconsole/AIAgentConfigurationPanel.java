@@ -17,8 +17,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.Displayer;
@@ -41,6 +43,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
     private final ErrorReporter errorReporter;
     private final TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources> eventsTableWrapper;
     private final Set<EventDTO> selectedEvents;
+    private final Label hasCredentialsLabel;
     private boolean selectionUpdatedAfterEventsHaveLoaded;
     private boolean handleSelectionChangeEvents;
     private String languageModelName;
@@ -55,6 +58,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
         final AdminConsoleTableResources adminConsoleTableResources = GWT.create(AdminConsoleTableResources.class);
+        hasCredentialsLabel = new Label();
         final Label languageModelNameLabel = new Label();
         eventsTableWrapper = new TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources>(stringMessages, this.errorReporter,
                 /* enablePager */ true, Optional.of(new EntityIdentityComparator<EventDTO>() {
@@ -128,28 +132,74 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         final VerticalPanel contents = new VerticalPanel();
         contents.setWidth("100%");
         contents.add(buttonPanel);
+        final TextArea credentialsTextArea = new TextArea();
+        credentialsTextArea.getElement().setAttribute("placeholder", stringMessages.placeholderAICoreCredentialsAsJSON());
+        credentialsTextArea.setSize("60em", "15em");
+        final CaptionPanel credentialsCaptionPanel = new CaptionPanel(stringMessages.credentials());
+        final VerticalPanel credentialsVP = new VerticalPanel();
+        credentialsVP.setSpacing(5);
+        final HorizontalPanel credentialsHP = new HorizontalPanel();
+        credentialsHP.setSpacing(5);
+        credentialsCaptionPanel.setContentWidget(credentialsVP);
+        credentialsHP.add(credentialsTextArea);
+        final Button credentialsUpdateButton = new Button(stringMessages.updateCredentials());
         eventsTableWrapper.getTable().setWidth("100%");
-        sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
+        final AsyncCallback<Boolean> hasAIAgentCredentialsCallback = new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.errorObtainingAIAgentLanguageModelName(caught.getMessage()), NotificationType.ERROR);
+                updateHasCredentialsLabel(false);
+                Notification.notify(stringMessages.errorTryingToCheckForAIAgentCredentials(caught.getMessage()), NotificationType.ERROR);
             }
 
             @Override
-            public void onSuccess(String result) {
-                if (result != null) {
-                    languageModelName = result;
-                    languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
-                    contents.add(eventsTableWrapper);
-                    captionPanel.setContentWidget(contents);
-                    if (!selectionUpdatedAfterEventsHaveLoaded) {
-                        presenter.getEventsRefresher().reloadAndCallFillAll();
-                    }
-                } else {
-                    languageModelNameLabel.setText(stringMessages.noValidAICoreConfiguration());
+            public void onSuccess(Boolean result) {
+                updateHasCredentialsLabel(result);
+                if (result) {
+                    sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Notification.notify(stringMessages.errorObtainingAIAgentLanguageModelName(caught.getMessage()), NotificationType.ERROR);
+                        }
+                        
+                        @Override
+                        public void onSuccess(String result) {
+                            if (result != null) {
+                                languageModelName = result;
+                                languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
+                                contents.add(eventsTableWrapper);
+                                captionPanel.setContentWidget(contents);
+                                if (!selectionUpdatedAfterEventsHaveLoaded) {
+                                    presenter.getEventsRefresher().reloadAndCallFillAll();
+                                }
+                            } else {
+                                languageModelNameLabel.setText(stringMessages.noValidAICoreConfiguration());
+                            }
+                        }
+                    });
                 }
             }
-        });
+        };
+        sailingServiceWrite.hasAIAgentCredentials(hasAIAgentCredentialsCallback);
+        credentialsUpdateButton.addClickHandler(e->sailingServiceWrite.setAIAgentCredentials(
+                credentialsTextArea.getText(), new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        credentialsTextArea.setText("");
+                        sailingServiceWrite.hasAIAgentCredentials(hasAIAgentCredentialsCallback);
+                        Notification.notify(stringMessages.successfullyUpdatedAIAgentCredentials(), NotificationType.INFO);
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        credentialsTextArea.setText("");
+                        sailingServiceWrite.hasAIAgentCredentials(hasAIAgentCredentialsCallback);
+                        Notification.notify(stringMessages.errorUpdatingAIAgentCredentials(caught.getMessage()), NotificationType.ERROR);
+                    }
+                }));
+        credentialsHP.add(credentialsUpdateButton);
+        credentialsVP.add(hasCredentialsLabel);
+        credentialsVP.add(credentialsHP);
+        mainPanel.add(credentialsCaptionPanel);
         mainPanel.add(languageModelNameLabel);
         mainPanel.add(captionPanel);
         setWidget(mainPanel);
@@ -183,5 +233,9 @@ public class AIAgentConfigurationPanel extends SimplePanel {
                 }
             }
         };
+    }
+
+    private void updateHasCredentialsLabel(final boolean hasCredentials) {
+        hasCredentialsLabel.setText(hasCredentials ? stringMessages.hasAIAgentCredentials() : stringMessages.hasNoAIAgentCredentials());
     }
 }

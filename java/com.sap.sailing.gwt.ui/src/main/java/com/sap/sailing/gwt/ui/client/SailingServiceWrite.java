@@ -745,4 +745,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     List<EventDTO> getIdsOfEventsWithAICommenting();
 
     String getAIAgentLanguageModelName();
+    
+    boolean hasAIAgentCredentials();
+    
+    void setAIAgentCredentials(String credentials) throws Exception;
 }

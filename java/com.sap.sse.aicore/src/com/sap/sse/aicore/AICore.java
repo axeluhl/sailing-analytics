@@ -54,22 +54,27 @@ public interface AICore {
     
     /**
      * Produces a default {@link AICore} instance using credentials from the system property whose name
-     * is specified by {@link #CREDENTIALS_SYSTEM_PROPERTY_NAME}. If that property is not set, {@code null}
-     * is returned.
+     * is specified by {@link #CREDENTIALS_SYSTEM_PROPERTY_NAME}. If that property is not set, an instance
+     * without credentials ({@link #hasCredentials()} will return {@code false}) will be returned, and
+     * prior to any requests can be made, {@link #setCredentials(Credentials)} will have to be used with
+     * valid credentials.
      */
     static AICore getDefault() throws MalformedURLException, ParseException {
         final String systemProperty = System.getProperty(CREDENTIALS_SYSTEM_PROPERTY_NAME);
-        final AICore result;
+        final Credentials credentials;
         if (systemProperty == null) {
             logger.warning("No credentials provided for AICore service through system property "+CREDENTIALS_SYSTEM_PROPERTY_NAME+
                     "; cannot produce an authenticated default service instance");
-            result = null;
+            credentials = null;
         } else {
-            result = AICore.create(CredentialsParser.create().parse(systemProperty));
+            credentials = CredentialsParser.create().parse(systemProperty);
         }
-        return result;
+        return AICore.create(credentials);
     }
     
+    /**
+     * @param credentials may be {@code null} in which case {@link #hasCredentials()} will return {@code false}
+     */
     static AICore create(final Credentials credentials) {
         return new AICoreImpl(credentials, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
     }
@@ -117,4 +122,21 @@ public interface AICore {
      *            present; otherwise they will simply be logged with level {@link Level#SEVERE SEVERE}.
      */
     void getJSONResponse(HttpUriRequest request, Consumer<JSONObject> resultCallback, Optional<Consumer<Exception>> exceptionHandler);
+
+    /**
+     * Since an instance of this type may be created without {@link Credentials}, clients can use this method
+     * to find out whether {@link Credentials} have been {@link #setCredentials(Credentials)} in the meantime or
+     * have been provided during object creation. Note that this says nothing about the actual <em>validity</em> of
+     * any non-{@code null} credentials. In other words: even if non-{@code null} {@link Credentials} were provided
+     * during object creation or later using a {@link #setCredentials(Credentials)} call, authentication with those
+     * credentials may still fail.
+     */
+    boolean hasCredentials();
+
+    /**
+     * Set {@code credentials} to use to authenticate requests made through this {@link AICore} object. If set to
+     * {@code null}, {@link #hasCredentials()} will return {@code false}, and any attempt to make requests through this
+     * {@link AICore} object will most probably fail with authentication problems.
+     */
+    void setCredentials(Credentials credentials);
 }

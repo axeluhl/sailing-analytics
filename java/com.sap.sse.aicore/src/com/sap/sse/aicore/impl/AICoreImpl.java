@@ -41,7 +41,7 @@ public class AICoreImpl implements AICore {
     private static final String DEPLOYMENT_DETAILS_RESOURCES_BACKEND_DETAILS_MODEL = "model";
     private static final String DEPLOYMENT_DETAILS_RESOURCES_BACKEND_DETAILS_MODEL_NAME = "name";
     
-    private final Credentials credentials;
+    private Credentials credentials;
     
     private final ScheduledExecutorService executor;
     private TimePoint timePointOfLastRequest;
@@ -93,6 +93,16 @@ public class AICoreImpl implements AICore {
             }
         }
         return result;
+    }
+    
+    @Override
+    public boolean hasCredentials() {
+        return credentials != null;
+    }
+    
+    @Override
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
     }
     
     @Override
