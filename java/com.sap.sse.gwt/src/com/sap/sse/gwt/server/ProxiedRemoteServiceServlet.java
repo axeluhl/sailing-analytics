@@ -204,7 +204,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
      * A parameter name is considered security-sensitive if it has any of "secret", "pass", "pw", "token", or "code" in
      * its name, regardless the case and where in the parameter name any of these sub-strings appear.
      */
-    private static final String[] SENSITIVE_PARAMETER_NAME_SUBSTRINGS = {"secret", "pass", "pw", "token", "code"};
+    private static final String[] SENSITIVE_PARAMETER_NAME_SUBSTRINGS = {"secret", "pass", "pw", "token", "code", "credentials"};
     private boolean isSecuritySensitiveParameterName(String name) {
         for (final String sensitiveSubstring : SENSITIVE_PARAMETER_NAME_SUBSTRINGS) {
             if (name.toLowerCase().contains(sensitiveSubstring)) {
