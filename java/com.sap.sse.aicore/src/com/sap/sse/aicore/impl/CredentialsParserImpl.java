@@ -70,7 +70,7 @@ public class CredentialsParserImpl implements CredentialsParser {
         final JSONObject serviceURLs = new JSONObject();
         jsonCredentials.put(SERVICE_URLS, serviceURLs);
         serviceURLs.put(AI_API_URL, aiApiUrl);
-        final String salt = createRandomSalt();
+        final String salt = createRandomAESKeyLength16();
         SecretKeySpec secretKey = new SecretKeySpec(salt.getBytes(), "AES"); // 16-byte key for AES
         try {
             Cipher cipher = Cipher.getInstance("AES");
@@ -82,7 +82,7 @@ public class CredentialsParserImpl implements CredentialsParser {
         }
     }
 
-    private String createRandomSalt() {
+    private String createRandomAESKeyLength16() {
         final Random random = new Random();
         final int numberOfCharacters = 16;
         final char[] chars = new char[numberOfCharacters];
@@ -93,9 +93,9 @@ public class CredentialsParserImpl implements CredentialsParser {
     }
 
     @Override
-    public Credentials parseFromEncoded(CharSequence encoded, String salt) {
+    public Credentials parseFromEncoded(CharSequence encoded, String Key) {
         final byte[] decodedBytes = Base64.getDecoder().decode(encoded.toString().getBytes());
-        final SecretKeySpec secretKey = new SecretKeySpec(salt.getBytes(), "AES"); // 16-byte key for AES
+        final SecretKeySpec secretKey = new SecretKeySpec(Key.getBytes(), "AES"); // 16-byte key for AES
         try {
             final Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);

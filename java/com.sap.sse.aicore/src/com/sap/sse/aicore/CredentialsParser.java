@@ -20,7 +20,7 @@ public interface CredentialsParser {
 
     /**
      * @return a pair of which the {@link Pair#getA() first} component represents the encoded credentials, using a
-     *         random "salt" returned as the {@link Pair#getB() second} component of the pair returned. These can be
+     *         random "key" returned as the {@link Pair#getB() second} component of the pair returned. These can be
      *         used as the two arguments to {@link #parseFromEncoded(CharSequence)} to obtain {@link Credentials}
      *         equivalent to the {@code credentials} passed to this method again.
      */
@@ -29,5 +29,5 @@ public interface CredentialsParser {
     /**
      * The inverse for {@link #getAsEncodedString(Credentials)}
      */
-    Credentials parseFromEncoded(CharSequence encoded, String salt);
+    Credentials parseFromEncoded(CharSequence encoded, String key);
 }
