@@ -1,6 +1,8 @@
 package com.sap.sailing.aiagent.interfaces;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sse.aicore.AICore;
+import com.sap.sse.aicore.ChatSession;
 import com.sap.sse.aicore.Credentials;
 
 public interface AIAgent {
@@ -30,7 +32,12 @@ public interface AIAgent {
      * creating the underlying chat session used to generate AI comments for races. Using {@code null}
      * will "unset" the credentials, most likely disallowing the use of the service due to
      * authentication problems. Also, setting the credentials to {@code null} will let
-     * {@link #hasCredentials()} return {@code false}.
+     * {@link #hasCredentials()} return {@code false}.<p>
+     * 
+     * If non-{@code null} {@code credentials} are provided, a new {@link ChatSession} is created using
+     * {@link AICore#createChatSession(com.sap.sse.aicore.Deployment)} after resolving the desired model
+     * name again, defaulting to a model with a default name if with the new credentials the desired
+     * model cannot be found.
      */
     void setCredentials(Credentials credentials);
 }

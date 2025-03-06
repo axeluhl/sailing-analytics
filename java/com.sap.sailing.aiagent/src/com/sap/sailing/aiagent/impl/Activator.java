@@ -1,8 +1,5 @@
 package com.sap.sailing.aiagent.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -17,8 +14,6 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.aicore.AICore;
 import com.sap.sse.aicore.ChatSession;
-import com.sap.sse.aicore.Deployment;
-import com.sap.sse.common.Util;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
@@ -37,7 +32,6 @@ import com.sap.sse.util.ServiceTrackerFactory;
  */
 public class Activator implements BundleActivator {
     private static final String MODEL_NAME_SYSTEM_PROPERTY_NAME = "sap.sailing.aiagent.modelname";
-    private static final String DEFAULT_MODEL_NAME = "gpt-4o-mini";
 
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
@@ -70,21 +64,7 @@ public class Activator implements BundleActivator {
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         final AICore aiCore = AICore.getDefault();
         if (aiCore != null) { // since we now also support AICore instances without Credentials, this case is the most likely
-            final String modelName = System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME, DEFAULT_MODEL_NAME);
-            final String effectiveModelName;
-            final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
-            aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
-            logger.info("Found AI models "+deploymentsByModelName.keySet());
-            if (deploymentsByModelName.get(modelName) == null || deploymentsByModelName.get(modelName).isEmpty()) {
-                logger.warning("Couldn't find model "+modelName+"; defaulting to "+DEFAULT_MODEL_NAME);
-                effectiveModelName = DEFAULT_MODEL_NAME;
-            } else {
-                logger.info("Found model "+modelName);
-                effectiveModelName = modelName;
-            }
-            final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
-            final Deployment deployment = deployments.iterator().next();
-            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, deployment, SYSTEM_PROMPT);
+            aiAgent = new AIAgentImpl(racingEventServiceTracker, aiCore, System.getProperty(MODEL_NAME_SYSTEM_PROPERTY_NAME), SYSTEM_PROMPT);
             logger.info("Created AI Agent "+aiAgent);
             bundleContext.registerService(AIAgent.class, aiAgent, /* properties */ null);
         } else {

@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,16 +45,18 @@ import com.sap.sse.shared.util.WeakValueCache;
 
 public class AIAgentImpl implements AIAgent {
     private static final Logger logger = Logger.getLogger(AIAgentImpl.class.getName());
+    
+    private static final String DEFAULT_MODEL_NAME = "gpt-4o-mini";
 
     private static final String SAP_AI_CORE_TAG = "SAP AI Core on %s";
     
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private final String modelName;
+    private final String desiredModelName;
     
     private final String systemPrompt;
     
-    private final ChatSession chatSession;
+    private ChatSession chatSession;
     
     private final ConcurrentMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
@@ -74,20 +77,45 @@ public class AIAgentImpl implements AIAgent {
 
     private final AICore aiCore;
 
+    /**
+     * @param desiredModelName may be {@code null}, leading to the use of a model named according to {@link #DEFAULT_MODEL_NAME}.
+     */
     public AIAgentImpl(ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker, AICore aiCore,
-            Deployment modelDeployment, String systemPrompt) throws UnsupportedOperationException, ClientProtocolException,
+            String desiredModelName, String systemPrompt) throws UnsupportedOperationException, ClientProtocolException,
             URISyntaxException, IOException, ParseException {
         super();
         this.aiCore = aiCore;
-        this.modelName = modelDeployment.getModelName();
+        this.desiredModelName = desiredModelName;
         this.systemPrompt = systemPrompt;
         this.tagIdentifiersCurrentlyBeingAddedToRace = new ConcurrentHashMap<>();
         this.raceColumnListeners = new ConcurrentHashMap<>();
         this.eventListeners = new ConcurrentHashMap<>();
         this.racingEventServiceTracker = racingEventServiceTracker;
-        this.chatSession = aiCore.createChatSession(modelDeployment);
+        this.chatSession = createChatSession();
         this.locks = new WeakValueCache<>(new HashMap<>());
         this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    }
+    
+    /**
+     * Using the {@link #aiCore} facade to SAP AI Core, obtains the {@link Deployment}s available and tries to find
+     * one that has the {@link #desiredModelName}. If not, it defaults to a model named according to {@link #DEFAULT_MODEL_NAME}.
+     * This deployment is then used to create a new {@link ChatSession} which is then returned.
+     */
+    private ChatSession createChatSession() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
+        final String effectiveModelName;
+        final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
+        aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
+        logger.info("Found AI models "+deploymentsByModelName.keySet());
+        if (desiredModelName == null || deploymentsByModelName.get(desiredModelName) == null || deploymentsByModelName.get(desiredModelName).isEmpty()) {
+            logger.warning("Couldn't find model "+desiredModelName+"; defaulting to "+DEFAULT_MODEL_NAME);
+            effectiveModelName = DEFAULT_MODEL_NAME;
+        } else {
+            logger.info("Found model "+desiredModelName);
+            effectiveModelName = desiredModelName;
+        }
+        final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
+        final Deployment deployment = deployments.iterator().next();
+        return aiCore.createChatSession(deployment);
     }
     
     @Override
@@ -98,6 +126,11 @@ public class AIAgentImpl implements AIAgent {
     @Override
     public void setCredentials(Credentials credentials) {
         aiCore.setCredentials(credentials);
+        try {
+            chatSession = createChatSession();
+        } catch (UnsupportedOperationException | URISyntaxException | IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
         listeners.forEach(l->l.credentialsUpdated(credentials));
     }
 
@@ -118,7 +151,7 @@ public class AIAgentImpl implements AIAgent {
     /**
      * Checks if a tag with the {@code tagIdentifier} is already found on the race identified by
      * {@code leaderboardName}, {@code raceColumnName} and {@code fleetName}; if not, the prompt is sent to a new chat
-     * session created with the LLM identified by {@link #modelName}, and a new tag is added to that race using the
+     * session created with the LLM identified by {@link #desiredModelName}, and a new tag is added to that race using the
      * response received.
      * 
      * @param tagIdentifier
@@ -318,6 +351,6 @@ public class AIAgentImpl implements AIAgent {
     
     @Override
     public String getModelName() {
-        return modelName;
+        return desiredModelName;
     }
 }

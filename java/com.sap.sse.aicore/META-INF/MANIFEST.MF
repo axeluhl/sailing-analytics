@@ -4,7 +4,6 @@ Bundle-Name: Aicore
 Bundle-SymbolicName: com.sap.sse.aicore
 Bundle-Version: 1.0.0.qualifier
 Export-Package: com.sap.sse.aicore
-Bundle-Activator: com.sap.sse.aicore.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.sap.sse.aicore

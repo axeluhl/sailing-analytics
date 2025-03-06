@@ -28,6 +28,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Internationalization (i18n)|wiki/howto/development/i18n]]
+  * [[AI Agent|wiki/info/landscape/ai-agent]]
   * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 * [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
   * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
