@@ -3,7 +3,10 @@ package com.sap.sailing.aiagent.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Logger;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 
@@ -17,6 +20,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -35,7 +39,10 @@ import com.sap.sse.util.ThreadPoolUtil;
 /**
  * Used to observe one or more races, usually of the same event, for changes that may be relevant for one or more
  * {@link Rule}s. Any change event received in this object's role of a {@link RaceChangeListener} is forwarded to the
- * {@link #rules} it knows.
+ * {@link #rules} it knows, unless the {@link TrackedRace} is in {@link TrackedRaceStatusEnum#LOADING} or
+ * {@link TrackedRaceStatusEnum#PREPARED} mode in which case the forwarding-to-rules action is enqueued, and those
+ * enqueued actions will then be triggered by a call to {@link #statusChanged(TrackedRaceStatus, TrackedRaceStatus)}
+ * when the race changes to any other than these two statuses.
  * <p>
  * 
  * The constructor defines the set of rules to evaluate; those will then
@@ -46,21 +53,43 @@ import com.sap.sse.util.ThreadPoolUtil;
  *
  */
 public class RaceListener implements RaceChangeListener {
+    private static final Logger logger = Logger.getLogger(RaceListener.class.getName());
+
+    private final TrackedRace trackedRace;
     private final Iterable<Rule> rules;
     private final ScheduledExecutorService backgroundExecutor;
+    private final ConcurrentLinkedDeque<Runnable> tasksEnqueuedWhileRaceStillLoading;
     
     public RaceListener(AIAgentImpl aiAgent, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         super();
-        backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        this.trackedRace = trackedRace;
+        this.tasksEnqueuedWhileRaceStillLoading = new ConcurrentLinkedDeque<>();
+        this.backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         final List<Rule> myRules = new ArrayList<>();
         myRules.add(new GoodStartRule(aiAgent, leaderboard, raceColumn, fleet, trackedRace));
         myRules.add(new TopThreeMarkRoundingRule(aiAgent, leaderboard, raceColumn, fleet, trackedRace));
         this.rules = myRules;
     }
     
-    private void executeInBackgroundWithCurrentSubject(Runnable runnable) {
+    private boolean isTaskExecutionToBeSuspendedBasedOnRaceStatus(TrackedRaceStatusEnum status) {
+        return status == TrackedRaceStatusEnum.PREPARED || status == TrackedRaceStatusEnum.LOADING;
+    }
+    
+    private synchronized void executeInBackgroundWithCurrentSubject(Runnable runnable) {
         final Subject subject = SecurityUtils.getSubject();
-        backgroundExecutor.execute(subject.associateWith(runnable));
+        final Runnable taskWithSubject = subject.associateWith(runnable);
+        if (isTaskExecutionToBeSuspendedBasedOnRaceStatus(trackedRace.getStatus().getStatus())) {
+            enqueue(taskWithSubject);
+        } else {
+            backgroundExecutor.execute(taskWithSubject);
+        }
+    }
+
+    private synchronized void enqueue(Runnable taskWithSubject) {
+        logger.fine(()->"Enqueuing task because tracked race "
+                +trackedRace.getRaceIdentifier()
+                +" is in status "+trackedRace.getStatus().getStatus());
+        tasksEnqueuedWhileRaceStillLoading.add(taskWithSubject);
     }
 
     @Override
@@ -171,8 +200,21 @@ public class RaceListener implements RaceChangeListener {
             rules.forEach(r->r.windSourcesToExcludeChanged(windSourcesToExclude)));
     }
 
+    /**
+     * If the status changes away from a {@link TrackedRaceStatusEnum#LOADING} or {@link TrackedRaceStatusEnum#PREPARED}
+     * status then any {@link #tasksEnqueuedWhileRaceStillLoading enqueued} tasks will first be submitted for execution
+     * before submitting the task to pass the status change itself on to all rules.
+     */
     @Override
     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+        synchronized (this) {
+            if (isTaskExecutionToBeSuspendedBasedOnRaceStatus(oldStatus.getStatus()) && !isTaskExecutionToBeSuspendedBasedOnRaceStatus(newStatus.getStatus())) {
+                logger.info("Executing "+tasksEnqueuedWhileRaceStillLoading.size()+" enqueued tasks for "+trackedRace.getRaceIdentifier());
+                while (!tasksEnqueuedWhileRaceStillLoading.isEmpty()) {
+                    backgroundExecutor.submit(tasksEnqueuedWhileRaceStillLoading.pop());
+                }
+            }
+        }
         executeInBackgroundWithCurrentSubject(()->
             rules.forEach(r->r.statusChanged(newStatus, oldStatus)));
     }
