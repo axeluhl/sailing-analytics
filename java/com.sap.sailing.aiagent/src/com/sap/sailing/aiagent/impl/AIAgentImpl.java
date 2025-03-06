@@ -102,20 +102,26 @@ public class AIAgentImpl implements AIAgent {
      * This deployment is then used to create a new {@link ChatSession} which is then returned.
      */
     private ChatSession createChatSession() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
-        final String effectiveModelName;
-        final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
-        aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
-        logger.info("Found AI models "+deploymentsByModelName.keySet());
-        if (desiredModelName == null || deploymentsByModelName.get(desiredModelName) == null || deploymentsByModelName.get(desiredModelName).isEmpty()) {
-            logger.warning("Couldn't find model "+desiredModelName+"; defaulting to "+DEFAULT_MODEL_NAME);
-            effectiveModelName = DEFAULT_MODEL_NAME;
+        final ChatSession result;
+        if (aiCore.hasCredentials()) {
+            final String effectiveModelName;
+            final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
+            aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
+            logger.info("Found AI models "+deploymentsByModelName.keySet());
+            if (desiredModelName == null || deploymentsByModelName.get(desiredModelName) == null || deploymentsByModelName.get(desiredModelName).isEmpty()) {
+                logger.warning("Couldn't find model "+desiredModelName+"; defaulting to "+DEFAULT_MODEL_NAME);
+                effectiveModelName = DEFAULT_MODEL_NAME;
+            } else {
+                logger.info("Found model "+desiredModelName);
+                effectiveModelName = desiredModelName;
+            }
+            final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
+            final Deployment deployment = deployments.iterator().next();
+            result = aiCore.createChatSession(deployment);
         } else {
-            logger.info("Found model "+desiredModelName);
-            effectiveModelName = desiredModelName;
+            result = null;
         }
-        final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
-        final Deployment deployment = deployments.iterator().next();
-        return aiCore.createChatSession(deployment);
+        return result;
     }
     
     @Override
@@ -162,44 +168,48 @@ public class AIAgentImpl implements AIAgent {
             String raceColumnName, String fleetName, TimePoint raceTimepoint, String tagIdentifier)
             throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException,
             ParseException, RaceLogNotFoundException, ServiceNotFoundException {
-        final NamedReentrantReadWriteLock lock = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
-        try {
-            if (!raceHasOrIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier)) {
-                raceIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
-                chatSession
-                    .addSystemPrompt(systemPrompt)
-                    .addPrompt(prompt)
-                    .setTemperature(0.2)
-                    .submit(response->{
-                            try {
-                                getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
-                                        String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
-                                        "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
-                            } catch (AuthorizationException | IllegalArgumentException
-                                    | RaceLogNotFoundException | ServiceNotFoundException
-                                    | TagAlreadyExistsException e) {
-                                logger.log(Level.SEVERE, "Error trying to add AI comment to leaderboard "+leaderboardName+", race column "+raceColumnName+", fleet "+fleetName, e);
-                            } finally {
-                                final NamedReentrantReadWriteLock lock2 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+        if (chatSession != null && hasCredentials()) {
+            final NamedReentrantReadWriteLock lock = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+            try {
+                if (!raceHasOrIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier)) {
+                    raceIsAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
+                    chatSession
+                        .addSystemPrompt(systemPrompt)
+                        .addPrompt(prompt)
+                        .setTemperature(0.2)
+                        .submit(response->{
+                                try {
+                                    getRacingEventService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName,
+                                            String.format(SAP_AI_CORE_TAG, tag), response, tagIdentifier,
+                                            "/images/AI_generated_R_blk.png", /* resizedImageURL */ null, /* visibleForPublic */ true, raceTimepoint);
+                                } catch (AuthorizationException | IllegalArgumentException
+                                        | RaceLogNotFoundException | ServiceNotFoundException
+                                        | TagAlreadyExistsException e) {
+                                    logger.log(Level.SEVERE, "Error trying to add AI comment to leaderboard "+leaderboardName+", race column "+raceColumnName+", fleet "+fleetName, e);
+                                } finally {
+                                    final NamedReentrantReadWriteLock lock2 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
+                                    try {
+                                        raceIsNoLongerAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
+                                    } finally {
+                                        unlockRaceAfterCommenting(lock2, leaderboardName, raceColumnName, fleetName);
+                                    }
+                                }
+                            },
+                            /* exception handler */ Optional.of(ex->{
+                                final NamedReentrantReadWriteLock lock3 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
                                 try {
                                     raceIsNoLongerAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
                                 } finally {
-                                    unlockRaceAfterCommenting(lock2, leaderboardName, raceColumnName, fleetName);
+                                    unlockRaceAfterCommenting(lock3, leaderboardName, raceColumnName, fleetName);
                                 }
-                            }
-                        },
-                        /* exception handler */ Optional.of(ex->{
-                            final NamedReentrantReadWriteLock lock3 = lockRaceForCommenting(leaderboardName, raceColumnName, fleetName);
-                            try {
-                                raceIsNoLongerAboutToGetTag(leaderboardName, raceColumnName, fleetName, tagIdentifier);
-                            } finally {
-                                unlockRaceAfterCommenting(lock3, leaderboardName, raceColumnName, fleetName);
-                            }
-                            logger.log(Level.SEVERE, "Error trying to generate AI comment", ex);
-                        }));
+                                logger.log(Level.SEVERE, "Error trying to generate AI comment", ex);
+                            }));
+                }
+            } finally {
+                unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
             }
-        } finally {
-            unlockRaceAfterCommenting(lock, leaderboardName, raceColumnName, fleetName);
+        } else {
+            logger.fine(()->"Trying to produce a comment skipped due to missing AI Core credentials");
         }
     }
 
