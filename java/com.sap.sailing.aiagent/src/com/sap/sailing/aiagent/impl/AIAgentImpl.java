@@ -98,6 +98,7 @@ public class AIAgentImpl implements AIAgent {
     @Override
     public void setCredentials(Credentials credentials) {
         aiCore.setCredentials(credentials);
+        listeners.forEach(l->l.credentialsUpdated(credentials));
     }
 
     private RacingEventService getRacingEventService() {

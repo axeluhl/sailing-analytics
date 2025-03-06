@@ -94,6 +94,18 @@ public class CredentialsImpl implements Credentials {
         return token;
     }
 
+    String getClientId() {
+        return clientId;
+    }
+
+    String getClientSecret() {
+        return clientSecret;
+    }
+
+    URL getXsuaaUrl() {
+        return xsuaaUrl;
+    }
+
     String fetchToken() throws URISyntaxException, UnsupportedOperationException, ClientProtocolException, IOException, ParseException {
         final HttpPost postRequest = new HttpPost(new URI(xsuaaUrl.toString() + CLIENT_CREDENTIALS_PATH));
         postRequest.setHeader("Content-Type", "application/x-www-form-urlencoded");

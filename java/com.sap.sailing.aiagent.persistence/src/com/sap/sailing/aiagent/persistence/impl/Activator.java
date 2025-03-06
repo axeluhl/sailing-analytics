@@ -13,6 +13,7 @@ import com.sap.sailing.aiagent.persistence.MongoObjectFactory;
 import com.sap.sailing.aiagent.persistence.PersistenceFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.aicore.Credentials;
 import com.sap.sse.common.Duration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.util.ServiceTrackerFactory;
@@ -43,6 +44,11 @@ public class Activator implements BundleActivator {
                     aiAgent.stopCommentingOnAllEvents();
                     final DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
                     final MongoObjectFactory mof = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
+                    final Credentials credentials = dof.getCredentials(/* clientSession */ null);
+                    if (credentials != null) {
+                        logger.info("Found AI Core credentials in persistent store; applying to AI Agent");
+                        aiAgent.setCredentials(credentials);
+                    }
                     for (final Event eventToCommentOn : racingEventService.getEventsSelectively(/* include */ true, dof.getEventsToComment(/* clientSessionOrNull */ null))) {
                         aiAgent.startCommentingOnEvent(eventToCommentOn);
                     }
@@ -55,6 +61,11 @@ public class Activator implements BundleActivator {
                         @Override
                         public void startedCommentingOnEvent(Event e) {
                             mof.addEventToComment(e.getId(), /* clientSessionOrNull */ null);
+                        }
+                        
+                        @Override
+                        public void credentialsUpdated(Credentials credentials) {
+                            mof.updateCredentials(credentials, /* clientSessionOrNull */ null);
                         }
                     });
                 } else {

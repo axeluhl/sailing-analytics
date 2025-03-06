@@ -44,6 +44,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
     private final TableWrapperWithMultiSelectionAndFilterForSecuredDTO<EventDTO, StringMessages, AdminConsoleTableResources> eventsTableWrapper;
     private final Set<EventDTO> selectedEvents;
     private final Label hasCredentialsLabel;
+    private final CaptionPanel eventsCaptionPanel;
     private boolean selectionUpdatedAfterEventsHaveLoaded;
     private boolean handleSelectionChangeEvents;
     private String languageModelName;
@@ -127,8 +128,8 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         });
         final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> presenter.getEventsRefresher().reloadAndCallFillAll());
         refresh.ensureDebugId("RefreshEventsButton");
-        final CaptionPanel captionPanel = new CaptionPanel(stringMessages.selectEventsForWhichToUseAICommenting());
-        captionPanel.setWidth("100%");
+        eventsCaptionPanel = new CaptionPanel(stringMessages.selectEventsForWhichToUseAICommenting());
+        eventsCaptionPanel.setWidth("100%");
         final VerticalPanel contents = new VerticalPanel();
         contents.setWidth("100%");
         contents.add(buttonPanel);
@@ -147,13 +148,13 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         final AsyncCallback<Boolean> hasAIAgentCredentialsCallback = new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
-                updateHasCredentialsLabel(false);
+                updateHasCredentialsLabelAndSetEventsCaptionVisibility(false);
                 Notification.notify(stringMessages.errorTryingToCheckForAIAgentCredentials(caught.getMessage()), NotificationType.ERROR);
             }
 
             @Override
             public void onSuccess(Boolean result) {
-                updateHasCredentialsLabel(result);
+                updateHasCredentialsLabelAndSetEventsCaptionVisibility(result);
                 if (result) {
                     sailingServiceWrite.getAIAgentLanguageModelName(new AsyncCallback<String>() {
                         @Override
@@ -167,7 +168,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
                                 languageModelName = result;
                                 languageModelNameLabel.setText(stringMessages.languageModelUsedForAICommenting(result));
                                 contents.add(eventsTableWrapper);
-                                captionPanel.setContentWidget(contents);
+                                eventsCaptionPanel.setContentWidget(contents);
                                 if (!selectionUpdatedAfterEventsHaveLoaded) {
                                     presenter.getEventsRefresher().reloadAndCallFillAll();
                                 }
@@ -201,7 +202,7 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         credentialsVP.add(credentialsHP);
         mainPanel.add(credentialsCaptionPanel);
         mainPanel.add(languageModelNameLabel);
-        mainPanel.add(captionPanel);
+        mainPanel.add(eventsCaptionPanel);
         setWidget(mainPanel);
     }
     
@@ -235,7 +236,8 @@ public class AIAgentConfigurationPanel extends SimplePanel {
         };
     }
 
-    private void updateHasCredentialsLabel(final boolean hasCredentials) {
+    private void updateHasCredentialsLabelAndSetEventsCaptionVisibility(final boolean hasCredentials) {
         hasCredentialsLabel.setText(hasCredentials ? stringMessages.hasAIAgentCredentials() : stringMessages.hasNoAIAgentCredentials());
+        eventsCaptionPanel.setVisible(hasCredentials);
     }
 }
