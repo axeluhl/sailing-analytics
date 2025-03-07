@@ -54,6 +54,8 @@ public class AIAgentImpl implements AIAgent {
     
     private final String desiredModelName;
     
+    private String modelName;
+    
     private final String systemPrompt;
     
     private ChatSession chatSession;
@@ -104,18 +106,17 @@ public class AIAgentImpl implements AIAgent {
     private ChatSession createChatSession() throws UnsupportedOperationException, ClientProtocolException, URISyntaxException, IOException, ParseException {
         final ChatSession result;
         if (aiCore.hasCredentials()) {
-            final String effectiveModelName;
             final Map<String, Set<Deployment>> deploymentsByModelName = new HashMap<>();
             aiCore.getDeployments().forEach(d->Util.addToValueSet(deploymentsByModelName, d.getModelName(), d));
             logger.info("Found AI models "+deploymentsByModelName.keySet());
             if (desiredModelName == null || deploymentsByModelName.get(desiredModelName) == null || deploymentsByModelName.get(desiredModelName).isEmpty()) {
                 logger.warning("Couldn't find model "+desiredModelName+"; defaulting to "+DEFAULT_MODEL_NAME);
-                effectiveModelName = DEFAULT_MODEL_NAME;
+                modelName = DEFAULT_MODEL_NAME;
             } else {
                 logger.info("Found model "+desiredModelName);
-                effectiveModelName = desiredModelName;
+                modelName = desiredModelName;
             }
-            final Set<Deployment> deployments = deploymentsByModelName.get(effectiveModelName);
+            final Set<Deployment> deployments = deploymentsByModelName.get(modelName);
             final Deployment deployment = deployments.iterator().next();
             result = aiCore.createChatSession(deployment);
         } else {
@@ -132,10 +133,15 @@ public class AIAgentImpl implements AIAgent {
     @Override
     public void setCredentials(Credentials credentials) {
         aiCore.setCredentials(credentials);
-        try {
-            chatSession = createChatSession();
-        } catch (UnsupportedOperationException | URISyntaxException | IOException | ParseException e) {
-            throw new RuntimeException(e);
+        if (credentials != null) {
+            try {
+                chatSession = createChatSession();
+            } catch (UnsupportedOperationException | URISyntaxException | IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            chatSession = null;
+            modelName = null;
         }
         listeners.forEach(l->l.credentialsUpdated(credentials));
     }
@@ -361,6 +367,6 @@ public class AIAgentImpl implements AIAgent {
     
     @Override
     public String getModelName() {
-        return desiredModelName;
+        return modelName;
     }
 }
