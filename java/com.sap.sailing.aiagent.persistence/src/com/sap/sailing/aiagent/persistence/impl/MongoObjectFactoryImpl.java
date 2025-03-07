@@ -64,16 +64,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void updateCredentials(Credentials credentials, ClientSession clientSessionOrNull) {
-        final Pair<String, String> credentialsAsEncodedStringAndSalt = CredentialsParser.create().getAsEncodedString(credentials);
-        final Document credentialsDocument = new Document()
-                .append(FieldNames.AIAGENT_CREDENTIALS_ENCODED_AS_STRING.name(), credentialsAsEncodedStringAndSalt.getA())
-                .append(FieldNames.AIAGENT_CRETENTIALS_SALT.name(), credentialsAsEncodedStringAndSalt.getB());
         if (clientSessionOrNull == null) {
             credentialsCollection.drop();
-            credentialsCollection.insertOne(credentialsDocument);
         } else {
             credentialsCollection.drop(clientSessionOrNull);
-            credentialsCollection.insertOne(clientSessionOrNull, credentialsDocument);
+        }
+        if (credentials != null) {
+            final Pair<String, String> credentialsAsEncodedStringAndSalt = CredentialsParser.create().getAsEncodedString(credentials);
+            final Document credentialsDocument = new Document()
+                    .append(FieldNames.AIAGENT_CREDENTIALS_ENCODED_AS_STRING.name(), credentialsAsEncodedStringAndSalt.getA())
+                    .append(FieldNames.AIAGENT_CRETENTIALS_SALT.name(), credentialsAsEncodedStringAndSalt.getB());
+            if (clientSessionOrNull == null) {
+                credentialsCollection.insertOne(credentialsDocument);
+            } else {
+                credentialsCollection.insertOne(clientSessionOrNull, credentialsDocument);
+            }
         }
     }
 }
