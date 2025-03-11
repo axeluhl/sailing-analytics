@@ -8,7 +8,10 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.sap.sse.impl.Activator;
 
 public class CORSFilter implements Filter {
 
@@ -20,7 +23,22 @@ public class CORSFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
-        httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        final CORSFilterConfiguration corsFilterConfiguration = Activator.getInstance().getCORSFilterConfiguration();
+        final String allowOrigin;
+        if (corsFilterConfiguration.isWildcard()) {
+            allowOrigin = "*";
+        } else {
+            final String origin = ((HttpServletRequest) request).getHeader("Origin");
+            if (corsFilterConfiguration.contains(origin)) {
+                allowOrigin = origin;
+            } else {
+                allowOrigin = null;
+            }
+        }
+        if (allowOrigin != null) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", allowOrigin);
+            httpResponse.setHeader("Vary", "Origin"); // don't cache this; it may vary depending on origin
+        }
         httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
         httpResponse.setHeader("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type");
         httpResponse.setHeader("Access-Control-Expose-Headers", "Location, Content-Disposition");
