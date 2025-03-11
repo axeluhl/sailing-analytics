@@ -596,6 +596,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is clearing ACL of object with ID "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
         return null;
@@ -631,7 +632,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject);
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject+" with actions "+actions);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
         return null;
