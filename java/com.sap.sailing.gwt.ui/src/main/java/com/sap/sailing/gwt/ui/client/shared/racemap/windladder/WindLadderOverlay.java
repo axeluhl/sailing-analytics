@@ -48,10 +48,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
     }
 
     /**
-     * 
-     * @param windBearing
-     * @param fixPosition
-     * @param timeForPositionTransitionMillis
      * @return {@code true} if this canvas can perform the requested update
      */
     public boolean update(Double windBearing, Position fixPosition, long timeForPositionTransitionMillis, boolean redraw) {
@@ -65,7 +61,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         if (mapProjection != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
             // Rotation
             updateDrawingAngleAndSetCanvasRotation(Math.toDegrees(this.windBearing));
-
             // Offset from centered position
             Point fixPointInMap = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
             Point windUnitVector = Point.newInstance(-Math.sin(-this.windBearing), -Math.cos(-this.windBearing));
@@ -83,7 +78,6 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             }
             previousOnAxisOffset = onAxisOffset;
             Point offsetVector = Point.newInstance(onAxisOffset * windUnitVector.getX(), onAxisOffset * windUnitVector.getY());
-
             canAnimate = isInBounds(this.windBearing, offsetVector);
             setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
             if (transitionDisableCountdown > 0) {

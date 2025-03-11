@@ -23,6 +23,33 @@
             <div class="mainContent">
                 <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
                 <div class="innerContent">
+          <h2 class="articleSubheadline">March 2025</h2>
+          <ul class="bulletList">
+                <li>We included a new AI Agent, based on <a href="https://help.sap.com/docs/sap-ai-core/sap-ai-core-service-guide/what-is-sap-ai-core">SAP AI Core</a>,
+                    that helps commenting races, live and replay. To configure the agent,
+                    the administration console has a new "AI Agent" tab. It shows whether credentials for the
+                    underlying AI Core service have been provided, allows users to provide these,
+                    shows which language model is currently selected for producing the comments
+                    and displays the list of events, allowing the user to select for which of those
+                    the AI Agent shall be activated to produce comments. The comments will be produced
+                    when certain events in those races are discovered, such as a start or a certain
+                    share of competitors having rounded a mark. This also means that races already
+                    loaded will not have their existing data commented on. But (re-)loading races
+                    as well as live races into selected events will add those comments, visible in
+                    the "Tags" side bar in the race viewer.<p>
+                    Two optional system properties can be used to control the AI Agent:
+                    <ul>
+                    <li><tt>sap.aicore.credentials</tt>: if provided, its value is expected to be a JSON document with AI Core
+                        credentials, as you would get from viewing your credentials of you AI Core instance in SAP BTP Cockpit;
+                        if not provided, credentials may still be provided through the Admin Console later.</li>
+                    <li><tt>sap.sailing.aiagent.modelname</tt>: if provided, selected a language model name to use; a model
+                        deployment by that name must be available in the AI Core account for which the credentials are valid.
+                        If not provided, or if no model deployment by that name can be found, a default model is used
+                        (currently gpt-4o-mini). Note that the model you choose this way needs to comply with the <tt>openai</tt>
+                        API for <tt>chat-completions</tt> in order to be used in this context.</li>
+                    </ul>
+                    </li>
+          </ul>
           <h2 class="articleSubheadline">February 2025</h2>
           <ul class="bulletList">
                 <li>In the <a href="/gwt/AdminConsole.html#SmartphoneTrackingPlace:">admin console's</a>

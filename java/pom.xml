@@ -89,6 +89,8 @@
         <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+        <module>com.sap.sse.aicore</module>
+        <module>com.sap.sse.aicore.test</module>
         <module>com.sap.sse.landscape.common</module>
         <module>com.sap.sse.landscape</module>
         <module>com.sap.sse.landscape.aws</module>
@@ -162,6 +164,10 @@
         <module>com.sap.sailing.domain.swisstimingadapter</module>
         <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
         <module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+        <module>com.sap.sailing.aiagent.interfaces</module>
+        <module>com.sap.sailing.aiagent</module>
+        <module>com.sap.sailing.aiagent.persistence</module>
+        <module>com.sap.sailing.aiagent.gateway</module>
         <module>com.sap.sailing.news</module>
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>

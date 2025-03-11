@@ -164,52 +164,44 @@ public class TaggingServiceTest {
         logger.entering(getClass().getName(), "testAddTag");
         final String tag = "TagToCreate";
         final String comment = "Comment To Create";
+        final String hiddenInfo = "Hidden Info To Create";
         final String imageURL = "";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1);
         try {
             logger.info("Trying to add public tag with missing title which should be catched by this test.");
-            taggingService.addTag(leaderboardName, raceColumnName, fleetName, null, comment, imageURL, imageURL, true,
-                    raceTimepoint);
+            taggingService.addTag(leaderboardName, raceColumnName, fleetName, null, comment, hiddenInfo, imageURL, imageURL,
+                    true, raceTimepoint);
             fail("Tag should not be added because the tag title is missing!");
         } catch (IllegalArgumentException e) {
             assertTrue("Invalid arguments were caught correctly!", true);
         }
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, false,
-                raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                false, raceTimepoint);
         String preference = securityService.getPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
         List<TagDTO> privateTags = serializer.deserializeTags(preference);
-        assertTrue("Create private tag", privateTags.size() == 1 && privateTags.get(0).equals(tag, comment, imageURL,
-                imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
-        try {
-            logger.info("Trying to add public tag with missing permissions which should be catched by this test.");
-            securityService.removePermissionFromUser(username, readAndEditLeaderboardPermission);
-            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                    raceTimepoint);
-            fail("Tag should not be added because user is missing permissions!");
-        } catch (AuthorizationException e) {
-            assertTrue("Missing permissions were caught correctly!", true);
-        } finally {
-            securityService.addPermissionForUser(username, readAndEditLeaderboardPermission);
-        }
+        assertTrue("Create private tag", privateTags.size() == 1 && privateTags.get(0).equals(tag, comment, hiddenInfo,
+                imageURL, imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
+        // we used to test for permission checking here, but it was wrong in the first place to check permissions
+        // in TaggingService; permission checks shall happen in the REST API layer and in the GWT RPC service layer
         try {
             logger.info(
                     "Trying to add public tag with wrong racelog identifiers which should be catched by this test.");
-            taggingService.addTag(leaderboardName, "bla", fleetName, tag, comment, imageURL, imageURL, true, raceTimepoint);
+            taggingService.addTag(leaderboardName, "bla", fleetName, tag, comment, hiddenInfo, imageURL, imageURL, true, raceTimepoint);
             fail("Tag should not be added because racelog does not exist!");
         } catch (RaceLogNotFoundException e) {
             assertTrue("Missing racelog was caught correctly!", true);
         }
         logger.info("Trying to add public tag, should succeed");
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                true, raceTimepoint);
         List<TagDTO> publicTags = taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, null, false);
-        assertTrue("", publicTags.size() == 1 && publicTags.get(0).equals(tag, comment, imageURL, imageURL, true,
-                subject.getPrincipal().toString(), raceTimepoint));
+        assertTrue("", publicTags.size() == 1 && publicTags.get(0).equals(tag, comment, hiddenInfo, imageURL, imageURL,
+                true, subject.getPrincipal().toString(), raceTimepoint));
         try {
             logger.info("Trying to add already existing public tag which should be catched by this test.");
-            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                    raceTimepoint);
+            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                    true, raceTimepoint);
             fail("Tag should not be added because it already exists!");
         } catch (TagAlreadyExistsException e) {
             assertTrue("Tag already exists was caught correctly!", true);
@@ -222,19 +214,20 @@ public class TaggingServiceTest {
         logger.entering(getClass().getName(), "testGetTags");
         final String tag = "TagToLoad";
         final String comment = "Comment To Load";
+        final String hiddenInfo = "Hidden info To Load";
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1000);
         logger.info("Adding tags which should be loaded via getTags() afterwards.");
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, false,
-                raceTimepoint);
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                false, raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                true, raceTimepoint);
         assertTrue("Private tags contain added tag",
                 taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName).get(0).equals(tag, comment,
-                        imageURL, imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
+                        hiddenInfo, imageURL, imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
         assertTrue("Public tags contain added tag",
                 taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, null, false).get(0).equals(tag,
-                        comment, imageURL, imageURL, true, subject.getPrincipal().toString(), raceTimepoint));
+                        comment, hiddenInfo, imageURL, imageURL, true, subject.getPrincipal().toString(), raceTimepoint));
         assertEquals("Public tags contain added tag with matching creation date filter", 1,
                 taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, raceTimepoint, false).size());
         assertEquals("Public tags do not contain added tag with non-matching creation date filter", 0, taggingService
@@ -248,38 +241,45 @@ public class TaggingServiceTest {
         logger.entering(getClass().getName(), "testUpdateTag");
         final String tag = "TagToUpdate";
         final String comment = "Comment To Update";
+        final String hiddenInfo = "Hidden info To Update";
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1000);
         final String updatedTag = "Upd/ated %Ta!g!���";
         final String updatedComment = "New comment...";
+        final String updatedHiddenInfo = "New hidden info...";
         final String updatedImageURL = "";
         // add tag
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, false,
-                raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo, imageURL, imageURL,
+                false, raceTimepoint);
         TagDTO tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         // update tag title
-        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, updatedTag, comment, imageURL,
-                imageURL, false);
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, updatedTag, comment, hiddenInfo,
+                imageURL, imageURL, false);
         tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         assertEquals("Updated tag title", updatedTag, tagObject.getTag());
         // update comment
-        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, updatedComment, imageURL,
-                imageURL, false);
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, updatedComment, hiddenInfo,
+                imageURL, imageURL, false);
         tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         assertEquals("Updated comment", updatedComment, tagObject.getComment());
+        // update hidden info
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, updatedComment, updatedHiddenInfo,
+                imageURL, imageURL, false);
+        tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
+        assertEquals("Updated hidden info", updatedHiddenInfo, tagObject.getHiddenInfo());
         // update image URL
-        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, updatedImageURL,
-                updatedImageURL, false);
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, hiddenInfo,
+                updatedImageURL, updatedImageURL, false);
         tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         assertEquals("Updated image URL", updatedImageURL, tagObject.getImageURL());
         // update visibility (private -> public)
-        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, imageURL,
-                imageURL, true);
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, hiddenInfo,
+                imageURL, imageURL, true);
         tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         assertEquals("Updated visibility (private -> public)", true, tagObject.isVisibleForPublic());
         // update visibility (public -> private)
-        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, imageURL,
-                imageURL, false);
+        taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, hiddenInfo,
+                imageURL, imageURL, false);
         tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
         assertEquals("Updated visibility (public -> private)", false, tagObject.isVisibleForPublic());
         logger.exiting(getClass().getName(), "testUpdateTag");
@@ -293,10 +293,10 @@ public class TaggingServiceTest {
         final String comment = " Comment To Remove";
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1);
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, false,
-                raceTimepoint);
-        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, true,
-                raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, /* hiddenInfo */ null, imageURL, imageURL,
+                false, raceTimepoint);
+        taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, /* hiddenInfo */ null, imageURL, imageURL,
+                true, raceTimepoint);
         final List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
         assertEquals("Tags were added successfully so they can be removed afterwards", 2, tags.size());
         for (TagDTO tagObject : tags) {

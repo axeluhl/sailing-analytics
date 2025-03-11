@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 
+import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -358,6 +360,8 @@ import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.ServerInfo;
+import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -391,6 +395,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
@@ -1446,7 +1451,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         for (LeaderboardGroupDTO lg : newEvent.getLeaderboardGroups()) {
             eventLeaderboardGroupUUIDs.add(lg.getId());
         }
-        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.venue,
+        updateEvent(newEvent.id, newEvent.getName(), description, newEvent.startDate, newEvent.endDate, newEvent.getVenue(),
                 newEvent.isPublic, eventLeaderboardGroupUUIDs, newEvent.getOfficialWebsiteURL(), newEvent.getBaseURL(),
                 newEvent.getSailorsInfoWebsiteURLs(), newEvent.getImages(), newEvent.getVideos(),
                 newEvent.getWindFinderReviewedSpotsCollectionIds());
@@ -1459,7 +1464,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         String eventDescription = eventDTO.getDescription();
         Date startDate = eventDTO.startDate;
         Date endDate = eventDTO.endDate;
-        VenueDTO venue = eventDTO.venue;
+        VenueDTO venue = eventDTO.getVenue();
         boolean isPublic = eventDTO.isPublic;
         List<UUID> leaderboardGroupIds = eventDTO.getLeaderboardGroupIds();
         String officialWebsiteURLString = eventDTO.getOfficialWebsiteURL();
@@ -1498,7 +1503,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
              || !Util.equalsWithNull(officialWebsiteURLString, currentEventState.getOfficialWebsiteURL())
              || !Util.equalsWithNull(baseURLAsString, currentEventState.getBaseURL())
              || !Util.equalsWithNull(sailorsInfoWebsiteURLsByLocaleName, currentEventState.getSailorsInfoWebsiteURLs())
-             || !Util.equalsWithNull(venue.getName(), currentEventState.venue.getName())
+             || !Util.equalsWithNull(venue.getName(), currentEventState.getVenue().getName())
              || !Util.equalsWithNull(eventName, currentEventState.getName())
              || !Util.equalsWithNull(windFinderReviewedSpotCollectionIds, currentEventState.getWindFinderReviewedSpotsCollectionIds())
              || !Util.equalsWithNull(leaderboardGroupIds, currentEventState.getLeaderboardGroupIds())
@@ -3392,12 +3397,15 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
-            TimePoint raceTimepoint) {
+            String comment, String hiddenInfo, String imageURL, String resizedImageURL,
+            boolean visibleForPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
-            getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
-                    resizedImageURL, visibleForPublic, raceTimepoint);
+            if (visibleForPublic) {
+                getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+            }
+            getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, hiddenInfo,
+                    imageURL, resizedImageURL, visibleForPublic, raceTimepoint);
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
                     null, null);
@@ -3446,11 +3454,14 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
 
     @Override
     public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
-            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic) {
+            String tag, String comment, String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
+            if (visibleForPublic) {
+                getSecurityService().checkCurrentUserUpdatePermission(getService().getLeaderboardByName(leaderboardName));
+            }
             getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
-                    comment, imageURL, resizedImageURL, visibleForPublic);
+                    comment, hiddenInfo, imageURL, resizedImageURL, visibleForPublic);
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
                     null, null);
@@ -4027,5 +4038,68 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         getYellowBrickTrackingAdapter().updateYellowBrickConfiguration(editedObject.getName(),
                 editedObject.getRaceUrl(), editedObject.getUsername(), editedObject.getPassword(),
                 editedObject.getCreatorName());
+    }
+
+    private void checkAIAgentConfigPermission() throws AuthorizationException {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(ServerActions.CONFIGURE_AI_AGENT, new TypeRelativeObjectIdentifier(ServerInfo.getName())));
+    }
+    
+    @Override
+    public void startAICommentingOnEvent(UUID eventId) {
+        changeAICommentingForEvent(eventId, getAIAgent()::startCommentingOnEvent);
+    }
+    
+    private void changeAICommentingForEvent(UUID eventId, Consumer<Event> changeFunction) {
+        checkAIAgentConfigPermission();
+        final Event event = getService().getEvent(eventId);
+        if (event != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(event);
+            changeFunction.accept(event);
+        } else {
+            logger.warning("User "+SecurityUtils.getSubject().getPrincipal()+" was trying to change AI commenting for event with ID "+eventId+", but that event wasn't found");
+        }
+    }
+    
+    @Override
+    public void stopAICommentingOnEvent(UUID eventId) {
+        changeAICommentingForEvent(eventId, getAIAgent()::stopCommentingOnEvent);
+    }
+    
+    /**
+     * Event though this is a reading API method, we place it on {@link SailingServiceWrite} because it is available
+     * and makes sense only on the primary/master process of a replica set. There is no replication of the {@link AIAgent}
+     * itself; only its actions will be replicated. Therefore, AI agent configuration and introspection will work only
+     * on the primary/master.
+     */
+    @Override
+    public List<EventDTO> getIdsOfEventsWithAICommenting() {
+        checkAIAgentConfigPermission();
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(getAIAgent().getCommentingOnEvents(), event->convertToEventDTO(event, /* withStatisticalData */ false));
+    }
+
+    @Override
+    public String getAIAgentLanguageModelName() {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        return aiAgent == null ? null : aiAgent.getModelName();
+    }
+
+    @Override
+    public boolean hasAIAgentCredentials() {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        return aiAgent == null ? false : aiAgent.hasCredentials();
+    }
+
+    @Override
+    public void setAIAgentCredentials(String credentials) throws MalformedURLException, org.json.simple.parser.ParseException {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        if (aiAgent != null) {
+            aiAgent.setCredentials(Util.hasLength(credentials)
+                    ? CredentialsParser.create().parse(credentials)
+                    : null);
+        }
     }
 }

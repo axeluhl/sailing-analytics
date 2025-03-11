@@ -73,12 +73,12 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             String errorMessage = null;
             boolean emptyName = eventToValidate.getName() == null
                     || eventToValidate.getName().isEmpty();
-            boolean emptyVenue = eventToValidate.venue.getName() == null
-                    || eventToValidate.venue.getName().isEmpty();
-            boolean emptyCourseArea = eventToValidate.venue.getCourseAreas() == null
-                    || eventToValidate.venue.getCourseAreas().isEmpty();
+            boolean emptyVenue = eventToValidate.getVenue().getName() == null
+                    || eventToValidate.getVenue().getName().isEmpty();
+            boolean emptyCourseArea = eventToValidate.getVenue().getCourseAreas() == null
+                    || eventToValidate.getVenue().getCourseAreas().isEmpty();
             if (!emptyCourseArea) {
-                for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
+                for (CourseAreaDTO courseArea : eventToValidate.getVenue().getCourseAreas()) {
                     emptyCourseArea = courseArea.getName() == null || courseArea.getName().isEmpty();
                     if (emptyCourseArea) {
                         break;
@@ -197,7 +197,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         for (VideoDTO video : videosListComposite.getAllVideos()) {
             result.addVideo(video);
         }
-        result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
+        result.setVenue(new VenueDTO(venueEntryField.getText(), courseAreas));
         result.setWindFinderReviewedSpotsCollection(windFinderSpotCollectionIdsComposite.getValue());
         return result;
     }

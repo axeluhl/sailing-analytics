@@ -49,6 +49,10 @@ public interface Event extends EventBase {
      */
     void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
     
+    void addEventListener(EventListener eventListener);
+    
+    void removeEventListener(EventListener eventListener);
+    
     /**
      * An event may happen in the vicinity of one or more WindFinder (https://www.windfinder.com) weather stations.
      * Which ones those are can be defined using {@link #setWindFinderReviewedSpotsCollection(Iterable)}, and this

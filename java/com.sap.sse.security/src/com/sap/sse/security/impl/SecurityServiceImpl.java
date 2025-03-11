@@ -502,6 +502,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalResetPassword(String username, String passwordResetSecret) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is starting password reset for user "+username);
         getUserByName(username).startPasswordReset(passwordResetSecret);
         return null;
     }
@@ -630,6 +631,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
         return null;
@@ -651,6 +653,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permission+" for group with ID "+groupId+" to the ACL for "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
@@ -675,6 +678,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permission+" for group with ID "+groupId+" from the ACL for "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.removeAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
@@ -1345,6 +1349,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permissionToRemove+" from user "+username);
         permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToRemove);
         store.removePermissionFromUser(username, permissionToRemove);
         return null;
@@ -1357,6 +1362,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permissionToAdd+" to user "+username);
         permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToAdd);
         store.addPermissionForUser(username, permissionToAdd);
         return null;
@@ -1373,6 +1379,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalDeleteUser(String username) throws UserManagementException {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting user "+username);
         User userToDelete = store.getUserByName(username);
         if (userToDelete != null) {
             permissionChangeListeners.userDeleted(userToDelete);

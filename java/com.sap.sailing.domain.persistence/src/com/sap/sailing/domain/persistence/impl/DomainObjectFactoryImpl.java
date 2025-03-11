@@ -1945,9 +1945,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             Document dbObject) {
         String tag = (String) dbObject.get(FieldNames.RACE_LOG_TAG.name());
         String comment = (String) dbObject.get(FieldNames.RACE_LOG_COMMENT.name());
+        String hiddenInfo = (String) dbObject.get(FieldNames.RACE_LOG_HIDDEN_INFO.name());
         String imageUrl = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
         String resizedImageURL = (String) dbObject.get(FieldNames.RACE_LOG_RESIZED_IMAGE_URL.name());
-        return new RaceLogTagEventImpl(tag, comment, imageUrl, resizedImageURL, createdAt, logicalTimePoint, author, id, passId);
+        return new RaceLogTagEventImpl(tag, comment, hiddenInfo, imageUrl, resizedImageURL, createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,

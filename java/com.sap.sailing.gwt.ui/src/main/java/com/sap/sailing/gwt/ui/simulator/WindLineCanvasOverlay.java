@@ -150,10 +150,8 @@ public class WindLineCanvasOverlay extends FullCanvasOverlay implements TimeList
         if (numPoints < 1) {
             return;
         }
-
         final String title = "Wind line at " + numPoints + " points.";
         getCanvas().setTitle(title);
-
         final Iterator<Position> positionDTOIter = positionList.iterator();
         Position prevPosition = null;
         while (positionDTOIter.hasNext()) {

@@ -16,6 +16,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 4.0.2
+********************************************
+This is a final version. It keeps the backward compatibility.
+
+  Release date: 10/03/2025
+
+ 1) Feature
+
+ - Some entry status codes use a three-character abbreviation. For example, use ABD instead of ABANDONED. The API has
+ not been updated yet, but internally, it is possible to use either the old abbreviation or the new one. This is the
+ first step toward using the new abbreviation for all entry statuses. (Reported by Jorge Piera, 10/03/2025)
+
+********************************************
         TracAPI 4.0.1
 ********************************************
 This is a final version. It keeps the backward compatibility.

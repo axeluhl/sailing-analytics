@@ -127,8 +127,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException/*, Exception*/;
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
-            AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
+            String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            TimePoint raceTimepoint, AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
 
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorWithBoatDTO>> callback)
             throws UnauthorizedException;
@@ -649,7 +649,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             AsyncCallback<Void> callback);
 
     void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+            String comment, String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
 
     void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
             AsyncCallback<SuccessInfo> asyncCallback);
@@ -728,4 +728,25 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            configuration object is {@code null}, this means that the original password is to be left unchanged.
      */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
+    
+    void startAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void stopAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void getIdsOfEventsWithAICommenting(AsyncCallback<List<EventDTO>> callback);
+
+    /**
+     * If {@code null} is returned to the callback's {@link AsyncCallback#onSuccess(Object) onSuccess} method, this
+     * means that the AI agent hasn't been initialized properly. The typical reason for this will be missing AI Core
+     * credentials but may also be issues with finding a valid deployment of a language model to use. In any case, if
+     * this method has delivered a {@code null} model name then the
+     * {@link #startAICommentingOnEvent(UUID, AsyncCallback)}, {@link #stopAICommentingOnEvent(UUID, AsyncCallback)} and
+     * {@link #getIdsOfEventsWithAICommenting(AsyncCallback)} methods must not be called, or you may see exceptions
+     * being thrown.
+     */
+    void getAIAgentLanguageModelName(AsyncCallback<String> callback);
+    
+    void hasAIAgentCredentials(AsyncCallback<Boolean> callback);
+    
+    void setAIAgentCredentials(String credentials, AsyncCallback<Void> callback);
 }
