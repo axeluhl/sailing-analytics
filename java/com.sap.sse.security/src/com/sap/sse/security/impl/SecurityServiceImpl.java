@@ -473,6 +473,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.createRandomSecret();
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is starting password reset for user "+username);
         apply(new ResetPasswordOperation(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
@@ -502,7 +503,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalResetPassword(String username, String passwordResetSecret) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is starting password reset for user "+username);
         getUserByName(username).startPasswordReset(passwordResetSecret);
         return null;
     }
@@ -590,13 +590,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * @param id Has to be globally unique
      */
     private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is clearing ACL of object with ID "+idOfAccessControlledObjectAsString);
         apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
 
     @Override
     public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is clearing ACL of object with ID "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
         return null;
@@ -625,6 +625,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             }
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject+" with actions "+actionsToSet);
             apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
@@ -632,7 +633,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject+" with actions "+actions);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.setAclPermissions(idOfAccessControlledObject, getUserGroup(groupId), actions);
         return null;
@@ -648,15 +648,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group == null ? null : group.getId();
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+action+" for group with ID "+groupId+" to the ACL for "+idOfAccessControlledObject);
         apply(new AclAddPermissionOperation(idOfAccessControlledObject, groupId, action));
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
 
     @Override
-    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permission+" for group with ID "+groupId+" to the ACL for "+idOfAccessControlledObject);
+    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action) {
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
-        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
+        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), action);
         return null;
     }
 
@@ -669,6 +669,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObject) != null) {
             final UUID groupId = group == null ? null : group.getId();
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permission+" for group with ID "+groupId+" from the ACL for "+idOfAccessControlledObject);
             apply(new AclRemovePermissionOperation(idOfAccessControlledObject, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
         } else {
@@ -679,7 +680,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permission+" for group with ID "+groupId+" from the ACL for "+idOfAccessControlledObject);
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
         accessControlStore.removeAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
         return null;
@@ -688,6 +688,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
         if (getAccessControlList(idOfAccessControlledObject) != null) {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting the ACL of object "+idOfAccessControlledObject);
             apply(new DeleteAclOperation(idOfAccessControlledObject));
         }
     }
@@ -735,6 +736,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             && existingTenantOwner == tenantOwner) {
             result = existingOwnership.getAnnotation();
         } else {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting ownership of object "+objectId+" to group with ID "+tenantId+" and user "+userOwnerName);
             result = apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
                     displayNameOfOwnedObject));
         }
@@ -751,6 +753,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void deleteOwnership(QualifiedObjectIdentifier objectId) {
         if (getOwnership(objectId) != null) {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting ownership information from object with ID "+objectId);
             apply(new DeleteOwnershipOperation(objectId));
         }
     }
@@ -793,7 +796,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
-        logger.info("Creating user group " + name + " with ID " + id);
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is creating user group " + name + " with ID " + id);
         apply(new CreateUserGroupOperation(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
         if (initialUser != null) {
@@ -1126,7 +1129,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
-        return Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
+        final boolean result = Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
+        if (!result) {
+            logger.info("Failed password check for user "+username);
+        }
+        return result;
     }
     
     @Override
@@ -1144,7 +1151,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        logger.info("Changing e-mail address of user " + username + " to " + newEmail);
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is changing e-mail address of user " + username + " to " + newEmail);
         final String validationSecret = user.createRandomSecret();
         apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
@@ -1241,6 +1248,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleId, String name) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" created role "+name+" with ID "+roleId);
         return apply(new CreateRoleDefinitionOperation(roleId, name));
     }
 
@@ -1251,6 +1259,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void deleteRoleDefinition(RoleDefinition roleDefinition) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" deleted role "+roleDefinition);
         final UUID roleId = roleDefinition.getId();
         apply(new DeleteRoleDefinitionOperation(roleId));
     }
@@ -1265,6 +1274,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" updated role "+roleDefinitionWithNewProperties);
         apply(new UpdateRoleDefinitionOperation(roleDefinitionWithNewProperties));
     }
 
@@ -1302,6 +1312,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void addRoleForUser(String username, Role role) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" added role "+role+" to user "+username);
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
@@ -1326,6 +1337,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void removeRoleFromUser(String username, Role role) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" removed role "+role+" to user "+username);
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
@@ -1345,12 +1357,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permissionToRemove+" from user "+username);
         apply(new RemovePermissionForUserOperation(username, permissionToRemove));
     }
 
     @Override
     public Void internalRemovePermissionForUser(String username, WildcardPermission permissionToRemove) throws UserManagementException {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permissionToRemove+" from user "+username);
         permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToRemove);
         store.removePermissionFromUser(username, permissionToRemove);
         return null;
@@ -1358,12 +1370,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permissionToAdd) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permissionToAdd+" to user "+username);
         apply(new AddPermissionForUserOperation(username, permissionToAdd));
     }
 
     @Override
     public Void internalAddPermissionForUser(String username, WildcardPermission permissionToAdd) throws UserManagementException {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permissionToAdd+" to user "+username);
         permissionChangeListeners.permissionAddedToOrRemovedFromUser(getUserByName(username), permissionToAdd);
         store.addPermissionForUser(username, permissionToAdd);
         return null;
@@ -1371,6 +1383,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting user "+username);
         final User userToDelete = store.getUserByName(username);
         if (userToDelete == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -1380,7 +1393,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalDeleteUser(String username) throws UserManagementException {
-        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting user "+username);
         User userToDelete = store.getUserByName(username);
         if (userToDelete != null) {
             permissionChangeListeners.userDeleted(userToDelete);
@@ -1801,6 +1813,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public String createAccessToken(String username) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is requesting a new access token for user "+username);
         User user = getUserByName(username);
         final String token;
         if (user != null) {
@@ -1816,8 +1829,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void removeAccessToken(String username) {
-        Subject subject = SecurityUtils.getSubject();
+        final Subject subject = SecurityUtils.getSubject();
         if (hasCurrentUserUpdatePermission(getUserByName(username))) {
+            logger.info("Subject "+subject.getPrincipal()+" is removing the access token for user "+username);
             apply(new RemoveAccessTokenOperation(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
@@ -2032,9 +2046,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier) {
-        logger.info("Deleting ownerships for " + identifier);
         deleteOwnership(identifier);
-        logger.info("Deleting acls for " + identifier);
         deleteAccessControlList(identifier);
     }
 
