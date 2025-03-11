@@ -30,7 +30,7 @@ public class CORSFilterConfigurationImpl implements CORSFilterConfiguration {
 
     @Override
     public boolean contains(String origin) {
-        return allowedOrigins.contains(origin.toLowerCase());
+        return origin != null && allowedOrigins.contains(origin.toLowerCase());
     }
 
     @Override
