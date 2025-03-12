@@ -41,4 +41,8 @@ public class CORSFilterConfigurationImpl implements CORSFilterConfiguration {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Access-Control-Allow-Origin: "+(isWildcard()?"*":allowedOrigins);
+    }
 }
