@@ -20,6 +20,7 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -33,13 +34,14 @@ import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.BasicUserStore;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -851,4 +853,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            coming from that browser origin are to be permitted; {@code null} is handled like an empty array
      */
     void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
+
+    Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 }

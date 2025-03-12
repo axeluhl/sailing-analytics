@@ -2248,12 +2248,18 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins);
         return null;
     }
+    
+    @Override
+    public Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName) {
+        return corsFilterConfigurationsByReplicaSetName.get(serverName);
+    }
 
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         store.clear();
         accessControlStore.clear();
+        corsFilterConfigurationsByReplicaSetName.clear();
     }
 
     @Override
@@ -2331,6 +2337,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         logger.info("Reading baseUrlForCrossDomainStorage...");
         baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+baseUrlForCrossDomainStorage);
+        logger.info("Reading CORS filter configurations");
+        @SuppressWarnings("unchecked")
+        final ConcurrentMap<String, Pair<Boolean, Set<String>>> newCORSFilterConfigurations = (ConcurrentMap<String, Pair<Boolean, Set<String>>>) is.readObject();
+        corsFilterConfigurationsByReplicaSetName.putAll(newCORSFilterConfigurations);
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
@@ -2343,6 +2353,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(accessControlStore);
         objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
         objectOutputStream.writeObject(baseUrlForCrossDomainStorage);
+        objectOutputStream.writeObject(corsFilterConfigurationsByReplicaSetName);
     }
 
     @Override

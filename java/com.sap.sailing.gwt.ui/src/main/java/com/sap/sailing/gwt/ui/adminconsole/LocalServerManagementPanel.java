@@ -3,16 +3,21 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_ACL;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -24,11 +29,15 @@ import com.sap.sailing.gwt.ui.adminconsole.places.advanced.UserManagementPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -49,6 +58,8 @@ public class LocalServerManagementPanel extends SimplePanel {
     private Label serverNameInfo, buildVersionInfo;
     private Anchor groupOwnerInfo, userOwnerInfo;
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
+    private CheckBox isCORSWildcardCheckbox;
+    private StringListEditorComposite corsAllowedOriginsTextArea;
 
     private ServerInfoDTO currentServerInfo;
     private final UserService userService;
@@ -71,7 +82,9 @@ public class LocalServerManagementPanel extends SimplePanel {
         mainPanel.add(this.buttonPanel = createServerActionsUi(userService));
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
+        mainPanel.add(createCORSFilterConfigurationUI());
         refreshServerConfiguration();
+        refreshCORSConfiguration();
     }
 
     @Override
@@ -115,15 +128,48 @@ public class LocalServerManagementPanel extends SimplePanel {
     private Widget createServerConfigurationUI() {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverConfiguration(), 3);
         final Command callback = this::serverConfigurationChanged;
-        isStandaloneServerCheckbox = captionPanel.addChekBox(stringMessages.standaloneServer() + ":", callback);
+        isStandaloneServerCheckbox = captionPanel.addCheckBox(stringMessages.standaloneServer() + ":", callback);
         isStandaloneServerCheckbox.ensureDebugId("isStandaloneServerCheckbox");
-        isPublicServerCheckbox = captionPanel.addChekBox(stringMessages.publicServer() + ":", callback);
+        isPublicServerCheckbox = captionPanel.addCheckBox(stringMessages.publicServer() + ":", callback);
         isPublicServerCheckbox.ensureDebugId("isPublicServerCheckbox");
-        isSelfServiceServerCheckbox = captionPanel.addChekBox(stringMessages.selfServiceServer() + ":", callback);
+        isSelfServiceServerCheckbox = captionPanel.addCheckBox(stringMessages.selfServiceServer() + ":", callback);
         isSelfServiceServerCheckbox.ensureDebugId("isSelfServiceServerCheckbox");
         return captionPanel;
     }
 
+    private Widget createCORSFilterConfigurationUI() {
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.corsFilterConfiguration(), 3);
+        final HorizontalPanel buttonPanel = captionPanel.addWidget("", new HorizontalPanel());
+        final Button refreshButton = new Button(stringMessages.refresh());
+        buttonPanel.add(refreshButton);
+        refreshButton.addClickHandler(e->refreshCORSConfiguration());
+        isCORSWildcardCheckbox = captionPanel.addCheckBox(stringMessages.isCORSWildcard(), ()->{
+            if (isCORSWildcardCheckbox.getValue()) {
+                userService.getUserManagementWriteService().setCORSFilterConfigurationToWildcard(new RefreshAsyncCallback<Void>(v->{
+                    corsAllowedOriginsTextArea.setEnabled(false);
+                    Notification.notify(stringMessages.successfullyUpdatedCORSAllowedOrigins(), NotificationType.SUCCESS);
+                }));
+            } else {
+                userService.getUserManagementWriteService().setCORSFilterConfigurationAllowedOrigins(new ArrayList<>(corsAllowedOriginsTextArea.getValue()),
+                        new RefreshAsyncCallback<Void>(v->{
+                            corsAllowedOriginsTextArea.setEnabled(true);
+                            Notification.notify(stringMessages.successfullyUpdatedCORSAllowedOrigins(), NotificationType.SUCCESS);
+                        }));
+            }
+        });
+        isCORSWildcardCheckbox.setEnabled(true);
+        final IconResources iconResources = GWT.create(IconResources.class);
+        corsAllowedOriginsTextArea = captionPanel.addWidget(
+                stringMessages.corsAllowedOrigins(),
+                new StringListEditorComposite(Collections.emptyList(), stringMessages, iconResources.removeIcon(), Collections.emptySet()));
+        corsAllowedOriginsTextArea.addValueChangeHandler(e->{
+            isCORSWildcardCheckbox.setValue(false, /* fireEvents */ true);
+            userService.getUserManagementWriteService().setCORSFilterConfigurationAllowedOrigins(new ArrayList<>(Util.asList(e.getValue())),
+                    new RefreshAsyncCallback<Void>(v->Notification.notify(stringMessages.successfullyUpdatedCORSAllowedOrigins(), NotificationType.SUCCESS)));
+        });
+        return captionPanel;
+    }
+    
     private void serverConfigurationChanged() {
         final Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
         final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
@@ -152,6 +198,10 @@ public class LocalServerManagementPanel extends SimplePanel {
 
     public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
+    }
+    
+    private void refreshCORSConfiguration() {
+        userService.getUserManagementService().getCORSFilterConfiguration(new RefreshAsyncCallback<>(this::updateCORSFilterConfiguration));
     }
 
     private void updateServerInfo(ServerInfoDTO serverInfo) {
@@ -189,6 +239,18 @@ public class LocalServerManagementPanel extends SimplePanel {
         isStandaloneServerCheckbox.setEnabled(true);
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
+    }
+    
+    private void updateCORSFilterConfiguration(Pair<Boolean, ArrayList<String>> corsFilterConfiguration) {
+        if (corsFilterConfiguration == null) {
+            isCORSWildcardCheckbox.setValue(false);
+            corsAllowedOriginsTextArea.setValue(Collections.emptyList(), /* fireEvents */ false);
+            corsAllowedOriginsTextArea.setEnabled(true);
+        } else {
+            isCORSWildcardCheckbox.setValue(corsFilterConfiguration.getA());
+            corsAllowedOriginsTextArea.setValue(corsFilterConfiguration.getB(), /* fireEvents */ false);
+            corsAllowedOriginsTextArea.setEnabled(!isCORSWildcardCheckbox.getValue());
+        }
     }
 
     private class RefreshAsyncCallback<T> implements AsyncCallback<T> {
@@ -230,7 +292,7 @@ public class LocalServerManagementPanel extends SimplePanel {
             return addWidget(labelText, new Anchor());
         }
 
-        private CheckBox addChekBox(final String labelText, final Command callback) {
+        private CheckBox addCheckBox(final String labelText, final Command callback) {
             final CheckBox checkBox = new CheckBox();
             checkBox.addValueChangeHandler(event -> callback.execute());
             checkBox.setEnabled(false);

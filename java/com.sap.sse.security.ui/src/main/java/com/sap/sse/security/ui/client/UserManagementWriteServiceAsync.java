@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -104,4 +105,17 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
     void removePermissionFromUser(String username, WildcardPermissionWithSecurityDTO permission,
             AsyncCallback<SuccessInfo> callback);
 
+    
+    /**
+     * For the application replica set to which this request is sent, configure its CORS filter such that
+     * REST requests are allowed from <em>any</em> origin (*).
+     */
+    void setCORSFilterConfigurationToWildcard(AsyncCallback<Void> callback);
+    
+    /**
+     * For the application replica set to which this request is sent, configure its CORS filter such that
+     * REST requests are allowed from the origins listed in {@code allowedOrigins}. The list may be empty
+     * but must not be {@code null}.
+     */
+    void setCORSFilterConfigurationAllowedOrigins(ArrayList<String> allowedOrigins, AsyncCallback<Void> callback);
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -24,6 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
@@ -49,6 +51,7 @@ import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.WildcardPermissionWithSecurityDTO;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.client.SerializationDummy;
@@ -402,5 +405,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private HttpSession getHttpSession() {
         return getThreadLocalRequest().getSession();
+    }
+
+    @Override
+    public Pair<Boolean, ArrayList<String>> getCORSFilterConfiguration() {
+        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_CORS_FILTER);
+        final Pair<Boolean, Set<String>> preResult = getSecurityService().getCORSFilterConfiguration(ServerInfo.getName());
+        return preResult == null ? null : new Pair<>(preResult.getA(), new ArrayList<>(preResult.getB()));
     }
 }
