@@ -90,6 +90,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.rest.CORSFilterConfiguration;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
@@ -209,6 +210,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      */
     private final ReplicatingCacheManager cacheManager;
     
+    /**
+     * Keys are the replica set's server names. Values are {@link Pair}s whose {@link Pair#getA() first} component is a
+     * boolean telling whether the CORS filter for the replica set identified by the key uses the "wildcard" (*) to
+     * allow REST requests from all possible origins, and the {@link Pair#getB() second} component lists the allowed
+     * origins in case it's not a wildcard configuration. For wildcard configurations, the second component is ignored.
+     */
+    private final ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName;
+    
     private final UserStore store;
     private final AccessControlStore accessControlStore;
     
@@ -216,6 +225,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
+    
+    private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
@@ -255,7 +266,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
      * domain through which its services are requested for {@code Document.domain} and hence for the browser local
      * storage, session storage and the Shiro {@code JSESSIONID} cookie's domain.
-     * 
      * @param setAsActivatorSecurityService
      *            when <code>true</code>, the {@link Activator#setSecurityService(com.sap.sse.security.SecurityService)}
      *            will be called with this new instance as argument so that the cache manager can already be accessed
@@ -263,10 +273,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            activator's security service and passes it to the cache entries created. They need it, in turn, for
      *            replication.
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, subscriptionPlanProvider,
-                /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker,
+            ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
+            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            SubscriptionPlanProvider subscriptionPlanProvider) {
+        this(mailServiceTracker, corsFilterConfigurationTracker, userStore, accessControlStore, hasPermissionsProvider,
+                subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -275,9 +287,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * the browser local and session store shall be shared and for which sessions identified by the {@code JSESSIONID} cookie shall
      * be shared as well.
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
-            String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
+            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
@@ -290,8 +302,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.store = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
+        this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
-        cacheManager = loadReplicationCacheManagerContents();
+        this.cacheManager = loadReplicationCacheManagerContents();
+        this.corsFilterConfigurationsByReplicaSetName = loadCORSFilterConfigurations();
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         final StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -335,6 +349,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             }
         }
         logger.info("Loaded "+count+" sessions");
+        return result;
+    }
+    
+    private ConcurrentMap<String, Pair<Boolean, Set<String>>> loadCORSFilterConfigurations() {
+        logger.info("Loading CORS filter configurations");
+        final ConcurrentMap<String, Pair<Boolean, Set<String>>> result = new ConcurrentHashMap<>();
+        result.putAll(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadCORSFilterConfigurationsForReplicaSetNames());
         return result;
     }
     
@@ -445,6 +466,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private MailService getMailService() {
         return mailServiceTracker == null ? null : mailServiceTracker.getService();
+    }
+
+    private CORSFilterConfiguration getCORSFilterConfiguration() {
+        return corsFilterConfigurationTracker == null ? null : corsFilterConfigurationTracker.getService();
     }
 
     @Override
@@ -2184,6 +2209,37 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return result;
     }
+    
+    @Override
+    public void setCORSFilterConfigurationToWildcard(String serverName) {
+        apply(s->s.internalSetCORSFilterConfigurationToWildcard(serverName));
+    }
+    
+    @Override
+    public Void internalSetCORSFilterConfigurationToWildcard(String serverName) {
+        if (Util.equalsWithNull(serverName, ServerInfo.getName())) {
+            getCORSFilterConfiguration().setWildcard();
+        }
+        corsFilterConfigurationsByReplicaSetName.put(serverName, new Pair<>(true, Collections.emptySet()));
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeCORSFilterConfigurationIsWildcard(serverName);
+        return null;
+    }
+    
+    @Override
+    public void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) {
+        apply(s->s.internalSetCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins));
+    }
+
+    @Override
+    public Void internalSetCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) {
+        final Iterable<String> allowedOriginsAsList = allowedOrigins == null ? Collections.emptyList() : Arrays.asList(allowedOrigins);
+        if (Util.equalsWithNull(serverName, ServerInfo.getName())) {
+            getCORSFilterConfiguration().setOrigins(allowedOriginsAsList);
+        }
+        corsFilterConfigurationsByReplicaSetName.put(serverName, new Pair<>(false, Util.asNewSet(allowedOriginsAsList)));
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins);
+        return null;
+    }
 
     // ----------------- Replication -------------
     @Override
@@ -3022,7 +3078,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans.values()) {
             for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
                 final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
-                if(updatedPrice != null) {
+                if (updatedPrice != null) {
                     logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
                     subscriptionPrice.setPrice(updatedPrice);
                 }

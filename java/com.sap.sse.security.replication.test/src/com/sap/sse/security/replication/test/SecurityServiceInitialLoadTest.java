@@ -41,8 +41,8 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
-                final SecurityServiceImpl newMaster = new SecurityServiceImpl(null, userStore, accessControlStore,
-                        SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+                final SecurityServiceImpl newMaster = new SecurityServiceImpl(null, /* corsFilterConfigurationTracker */ null, userStore,
+                        accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
                 newMaster.createSimpleUser(username, email, password, fullName, company,
                         /* validationBaseURL */ Locale.ENGLISH, null, null);
                 accessToken = newMaster.createAccessToken(username);

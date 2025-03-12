@@ -29,6 +29,7 @@ import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
+import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.BasicUserStore;
 import com.sap.sse.security.shared.HasPermissions;
@@ -831,4 +832,23 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * that follows the {@link #lockSubscriptionsForUser(User)} call, so a lock can never hang.
      */
     void unlockSubscriptionsForUser(User user);
+
+    /**
+     * For the application replica set identified by {@code serverName} sets the CORS filter to allow REST requests from
+     * all origins (*). The change is made persistent through the {@link PersistenceFactory} and will hence be restored
+     * when this process instance is a primary/master node upon initialization.
+     */
+    void setCORSFilterConfigurationToWildcard(String serverName);
+
+    /**
+     * For the application replica set identified by {@code serverName} sets the CORS filter to allow REST requests from
+     * the origins named in {@code allowedOrigins}. Passing {@code null} for {@code allowedOrigins} is equivalent to
+     * passing an empty array. The change is made persistent through the {@link PersistenceFactory} and will hence be
+     * restored when this process instance is a primary/master node upon initialization.
+     * 
+     * @param allowedOrigins
+     *            the origins, including their scheme (e.g., {@code https://www.example.com}) from which REST requests
+     *            coming from that browser origin are to be permitted; {@code null} is handled like an empty array
+     */
+    void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
 }
