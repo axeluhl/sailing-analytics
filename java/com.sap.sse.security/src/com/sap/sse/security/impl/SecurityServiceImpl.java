@@ -356,6 +356,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         logger.info("Loading CORS filter configurations");
         final ConcurrentMap<String, Pair<Boolean, Set<String>>> result = new ConcurrentHashMap<>();
         result.putAll(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadCORSFilterConfigurationsForReplicaSetNames());
+        if (result.containsKey(ServerInfo.getName())) {
+            final Pair<Boolean, Set<String>> thisServersCORSFilterConfig = result.get(ServerInfo.getName());
+            if (thisServersCORSFilterConfig.getA()) {
+                getCORSFilterConfiguration().setWildcard();
+            } else {
+                getCORSFilterConfiguration().setOrigins(thisServersCORSFilterConfig.getB());
+            }
+        }
         return result;
     }
     
