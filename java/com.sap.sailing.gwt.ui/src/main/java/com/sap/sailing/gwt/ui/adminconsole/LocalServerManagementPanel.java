@@ -147,6 +147,7 @@ public class LocalServerManagementPanel extends SimplePanel {
             if (isCORSWildcardCheckbox.getValue()) {
                 userService.getUserManagementWriteService().setCORSFilterConfigurationToWildcard(new RefreshAsyncCallback<Void>(v->{
                     corsAllowedOriginsTextArea.setEnabled(false);
+                    corsAllowedOriginsTextArea.setValue(Collections.emptyList(), /* fireEvents */ false);
                     Notification.notify(stringMessages.successfullyUpdatedCORSAllowedOrigins(), NotificationType.SUCCESS);
                 }));
             } else {
