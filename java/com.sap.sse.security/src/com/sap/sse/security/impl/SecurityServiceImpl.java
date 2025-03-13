@@ -84,6 +84,7 @@ import org.scribe.oauth.OAuthService;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -2234,7 +2235,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) {
+    public void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) throws IllegalArgumentException {
+        for (final String allowedOrigin : allowedOrigins) {
+            if (!HttpHeaderUtil.isValidOriginHeaderValue(allowedOrigin)) {
+                throw new IllegalArgumentException("\""+allowedOrigin+"\" is not a valid format for a CORS origin");
+            }
+        }
         apply(s->s.internalSetCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins));
     }
 

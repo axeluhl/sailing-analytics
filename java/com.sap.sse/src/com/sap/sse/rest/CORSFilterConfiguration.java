@@ -1,5 +1,7 @@
 package com.sap.sse.rest;
 
+import com.sap.sse.common.http.HttpHeaderUtil;
+
 /**
  * Defines how to set the {@code Access-Control-Allow-Origin} response header in the
  * {@link CORSFilter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)}
@@ -53,6 +55,12 @@ public interface CORSFilterConfiguration {
      *            the corresponding {@link CORSFilter} will accept requests, by setting an
      *            {@code Access-Control-Allow-Origin} header to the requesting origin if that origin string is contained
      *            in the {@code allowedOrigins} iterable.
+     * @throws IllegalArgumentException
+     *             in case any of the {@code allowedOrigins} doesn't pass the
+     *             {@link HttpHeaderUtil#isValidOriginHeaderValue(String)} check; in this case, no change is performed
+     *             to this configuration.
      */
-    void setOrigins(Iterable<String> allowedOrigins);
+    void setOrigins(Iterable<String> allowedOrigins) throws IllegalArgumentException;
+    
+    Iterable<String> getOrigins();
 }

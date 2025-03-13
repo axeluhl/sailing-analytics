@@ -42,12 +42,12 @@ import com.sun.jersey.spi.container.ContainerResponseFilter;
  * @author Axel Uhl (d043530)
  *
  */
-public class AccessControlAndEncodingResponseFilter implements CORSHeaderProvider, ContainerResponseFilter {
+public class AccessControlAndEncodingResponseFilter implements CORSAndCSPHeaderProvider, ContainerResponseFilter {
     @Override
     public ContainerResponse filter(ContainerRequest request, ContainerResponse response) {
         MultivaluedMap<String, Object> httpHeaders = response.getHttpHeaders();
         final String origin = request.getHeaderValue("Origin");
-        for (final Entry<String, String> headerNameAndValue : getCORSHeaders(origin).entrySet()) {
+        for (final Entry<String, String> headerNameAndValue : getCORSAndCSPHeaders(origin).entrySet()) {
             httpHeaders.add(headerNameAndValue.getKey(), headerNameAndValue.getValue());
         }
         return response;

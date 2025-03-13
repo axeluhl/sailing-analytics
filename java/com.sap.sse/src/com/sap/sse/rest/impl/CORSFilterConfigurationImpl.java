@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.rest.CORSFilterConfiguration;
 
 public class CORSFilterConfigurationImpl implements CORSFilterConfiguration {
@@ -34,12 +35,22 @@ public class CORSFilterConfigurationImpl implements CORSFilterConfiguration {
     }
 
     @Override
-    public void setOrigins(Iterable<String> allowedOrigins) {
+    public void setOrigins(Iterable<String> allowedOrigins) throws IllegalArgumentException {
+        for (final String allowedOrigin : allowedOrigins) {
+            if (!HttpHeaderUtil.isValidOriginHeaderValue(allowedOrigin)) {
+                throw new IllegalArgumentException("\""+allowedOrigin+"\" is not a valid CORS origin");
+            }
+        }
         this.wildcard = false;
         this.allowedOrigins.clear();
         for (final String allowedOrigin : allowedOrigins) {
             this.allowedOrigins.add(allowedOrigin.toLowerCase());
         }
+    }
+
+    @Override
+    public Iterable<String> getOrigins() {
+        return Collections.unmodifiableSet(allowedOrigins);
     }
 
     @Override

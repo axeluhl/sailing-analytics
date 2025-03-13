@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
@@ -31,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.gwt.adminconsole.AbstractFilterablePlace;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
@@ -38,6 +40,7 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite.ExpandedUi;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
@@ -141,7 +144,8 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
 
     private Widget createCORSFilterConfigurationUI() {
-        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.corsFilterConfiguration(), 3);
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.corsAndCSPFilterConfiguration(), 4);
+        captionPanel.addWidget("", new Label(stringMessages.corsAndCSPFilterConfigurationHint()));
         final HorizontalPanel buttonPanel = captionPanel.addWidget("", new HorizontalPanel());
         final Button refreshButton = new Button(stringMessages.refresh());
         buttonPanel.add(refreshButton);
@@ -165,7 +169,34 @@ public class LocalServerManagementPanel extends SimplePanel {
         final IconResources iconResources = GWT.create(IconResources.class);
         corsAllowedOriginsTextArea = captionPanel.addWidget(
                 stringMessages.corsAllowedOrigins(),
-                new StringListEditorComposite(Collections.emptyList(), stringMessages, iconResources.removeIcon(), Collections.emptySet()));
+                new StringListEditorComposite(/* initial values */ Collections.emptyList(),
+                        new ExpandedUi<String>(stringMessages, iconResources.removeIcon(), /* suggestValues */ Collections.emptySet()) {
+                            /**
+                             * Create a {@link SuggestBox} that validates the input, turns the text red if invalid and
+                             * disables the {@link #addButton} in this case. Conversely, if the text is considered valid,
+                             * it stays in the default color and the {@link #addButton} is enabled.
+                             */
+                            @Override
+                            protected SuggestBox createSuggestBox() {
+                                final SuggestBox result = super.createSuggestBox();
+                                return result;
+                            }
+                            
+                            @Override
+                            protected void enableAddButtonBasedOnInputBoxText(SuggestBox inputBox) {
+                                super.enableAddButtonBasedOnInputBoxText(inputBox);
+                                if (addButton.isEnabled()) {
+                                    suggestBox.removeStyleName("serverResponseLabelError");
+                                } else {
+                                    suggestBox.addStyleName("serverResponseLabelError");
+                                }
+                            }
+                            
+                            @Override
+                            protected boolean isToEnableAddButtonBasedOnValueOfInputBoxText(SuggestBox inputBox) {
+                                return super.isToEnableAddButtonBasedOnValueOfInputBoxText(inputBox) && HttpHeaderUtil.isValidOriginHeaderValue(inputBox.getText());
+                            }
+                }));
         corsAllowedOriginsTextArea.addValueChangeHandler(e->{
             isCORSWildcardCheckbox.setValue(false, /* fireEvents */ true);
             userService.getUserManagementWriteService().setCORSFilterConfigurationAllowedOrigins(new ArrayList<>(Util.asList(e.getValue())),

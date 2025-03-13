@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Axel Uhl (d043530)
  *
  */
-public class CORSFilter implements CORSHeaderProvider, Filter {
+public class CORSFilter implements CORSAndCSPHeaderProvider, Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -47,7 +47,7 @@ public class CORSFilter implements CORSHeaderProvider, Filter {
             throws IOException, ServletException {
         final String origin = ((HttpServletRequest) request).getHeader("Origin");
         final HttpServletResponse httpResponse = (HttpServletResponse) response;
-        for (final Entry<String, String> headerNameAndValue : getCORSHeaders(origin).entrySet()) {
+        for (final Entry<String, String> headerNameAndValue : getCORSAndCSPHeaders(origin).entrySet()) {
             httpResponse.setHeader(headerNameAndValue.getKey(), headerNameAndValue.getValue());
         }
         chain.doFilter(request, response);

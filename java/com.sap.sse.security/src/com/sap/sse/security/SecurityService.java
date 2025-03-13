@@ -21,6 +21,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -851,8 +852,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param allowedOrigins
      *            the origins, including their scheme (e.g., {@code https://www.example.com}) from which REST requests
      *            coming from that browser origin are to be permitted; {@code null} is handled like an empty array
+     * @throws IllegalArgumentException
+     *             in case any of the {@code allowedOrigins} does not fulfill the criteria of
+     *             {@link HttpHeaderUtil#isValidOriginHeaderValue(String)}.
      */
-    void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
+    void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) throws IllegalArgumentException;
 
     Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 }
