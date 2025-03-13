@@ -43,6 +43,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
@@ -82,9 +83,11 @@ public class LocalServerManagementPanel extends SimplePanel {
         mainPanel.add(this.buttonPanel = createServerActionsUi(userService));
         mainPanel.add(createServerInfoUI());
         mainPanel.add(createServerConfigurationUI());
-        mainPanel.add(createCORSFilterConfigurationUI());
         refreshServerConfiguration();
-        refreshCORSConfiguration();
+        if (userService.hasServerPermission(ServerActions.CONFIGURE_CORS_FILTER)) {
+            mainPanel.add(createCORSFilterConfigurationUI());
+            refreshCORSConfiguration();
+        }
     }
 
     @Override
@@ -202,7 +205,9 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
     
     private void refreshCORSConfiguration() {
-        userService.getUserManagementService().getCORSFilterConfiguration(new RefreshAsyncCallback<>(this::updateCORSFilterConfiguration));
+        if (userService.hasServerPermission(ServerActions.CONFIGURE_CORS_FILTER)) {
+            userService.getUserManagementService().getCORSFilterConfiguration(new RefreshAsyncCallback<>(this::updateCORSFilterConfiguration));
+        }
     }
 
     private void updateServerInfo(ServerInfoDTO serverInfo) {
