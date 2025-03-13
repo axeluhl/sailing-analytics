@@ -35,6 +35,7 @@ public class CORSFilterConfigurationImpl implements CORSFilterConfiguration {
 
     @Override
     public void setOrigins(Iterable<String> allowedOrigins) {
+        this.wildcard = false;
         this.allowedOrigins.clear();
         for (final String allowedOrigin : allowedOrigins) {
             this.allowedOrigins.add(allowedOrigin.toLowerCase());

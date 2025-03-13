@@ -1,5 +1,6 @@
 package com.sap.sse.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -109,5 +110,14 @@ public class CORSFilterConfigurationTest {
         when(request.getHeader("Origin")).thenReturn("https://www.yetsomeotherexample.com");
         new CORSFilter().doFilter(request, response, chain);
         verify(response, VerificationModeFactory.atMost(0)).setHeader("Access-Control-Allow-Origin", "https://www.yetsomeotherexample.com");
+    }
+
+    @Test
+    public void testChangingFilterConfigFromWildcardToExplicit() throws IOException, ServletException {
+        final com.sap.sse.impl.Activator activator = new com.sap.sse.impl.Activator();
+        final CORSFilterConfiguration corsConfig = activator.getCORSFilterConfiguration();
+        corsConfig.setWildcard();
+        corsConfig.setOrigins(Arrays.asList("https://www.example.com", "https://www.someotherexample.com"));
+        assertFalse(corsConfig.isWildcard());
     }
 }
