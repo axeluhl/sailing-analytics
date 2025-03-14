@@ -31,12 +31,8 @@ public interface CORSAndCSPHeaderProvider {
             allowOrigin = "*";
         } else {
             final Iterable<String> origins = corsFilterConfiguration.getOrigins();
-            if (Util.isEmpty(origins)) {
-                responseCORSHeaders.put("Content-Security-Policy", "frame-ancestors 'none';");
-            } else {
-                responseCORSHeaders.put("Content-Security-Policy", "frame-ancestors "+
+            responseCORSHeaders.put("Content-Security-Policy", "frame-ancestors 'self' "+
                     Util.joinStrings(" ", origins)+";");
-            }
             if (corsFilterConfiguration.contains(origin)) {
                 allowOrigin = origin;
             } else {
