@@ -54,6 +54,7 @@ public class ClearStateServlet extends HttpServlet {
                 for (ClearStateTestSupport service : services) {
                     service.clearState();
                 }
+                configuration.getService().getMongoClient().getDatabase(TEST_DB_NAME).drop();
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             } catch (Exception exception) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error trying to clear state. See erver log for details.");
