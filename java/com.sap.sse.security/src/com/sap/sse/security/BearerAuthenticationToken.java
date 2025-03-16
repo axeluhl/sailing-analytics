@@ -1,5 +1,7 @@
 package com.sap.sse.security;
 
+import java.util.logging.Logger;
+
 import org.apache.shiro.authc.AuthenticationToken;
 
 import com.sap.sse.security.impl.Activator;
@@ -14,6 +16,8 @@ import com.sap.sse.security.shared.impl.User;
  */
 public class BearerAuthenticationToken implements AuthenticationToken {
     private static final long serialVersionUID = 8528031991813216585L;
+    private static final Logger logger = Logger.getLogger(BearerAuthenticationToken.class.getName());
+
     private final String token;
     
     public BearerAuthenticationToken(String token) {
@@ -25,6 +29,9 @@ public class BearerAuthenticationToken implements AuthenticationToken {
     public Object getPrincipal() {
         SecurityService securityService = Activator.getSecurityService();
         User user = securityService.getUserByAccessToken(token);
+        if (user == null) {
+            logger.warning("Invalid bearer token did not authenticate an existing user");
+        }
         return user == null ? null : user.getName();
     }
 

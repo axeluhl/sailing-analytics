@@ -52,6 +52,14 @@ public class RaceColumnListener implements RaceColumnListenerWithDefaultAction {
             addNewRaceListenerToTrackedRace(leaderboard, aiAgent, raceColumn, fleet, trackedRace))));
     }
 
+    /**
+     * Marks this listener as "transient" (not to be serialized, e.g., during replication)
+     */
+    @Override
+    public boolean isTransient() {
+        return true;
+    }
+
     private void addNewRaceListenerToTrackedRace(Leaderboard leaderboard, final AIAgentImpl aiAgent,
             RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         final RaceListener raceListener = new RaceListener(aiAgent, leaderboard, raceColumn, fleet, trackedRace);

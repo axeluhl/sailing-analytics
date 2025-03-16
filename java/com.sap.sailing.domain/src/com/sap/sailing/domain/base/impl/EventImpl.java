@@ -34,11 +34,11 @@ public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
     private static final Logger logger = Logger.getLogger(EventImpl.class.getName());
 
-    private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
+    private final ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
-    private ConcurrentMap<String, Boolean> windFinderReviewedSpotsCollectionIds;
+    private final ConcurrentMap<String, Boolean> windFinderReviewedSpotsCollectionIds;
     
-    private ConcurrentMap<EventListener, Boolean> eventListeners;
+    private transient ConcurrentMap<EventListener, Boolean> eventListeners;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
@@ -56,12 +56,6 @@ public class EventImpl extends EventBaseImpl implements Event {
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        if (leaderboardGroups == null) {
-            leaderboardGroups = new ConcurrentLinkedQueue<>();
-        }
-        if (windFinderReviewedSpotsCollectionIds == null) {
-            windFinderReviewedSpotsCollectionIds = new ConcurrentHashMap<>();
-        }
         if (eventListeners == null) {
             eventListeners = new ConcurrentHashMap<>();
         }

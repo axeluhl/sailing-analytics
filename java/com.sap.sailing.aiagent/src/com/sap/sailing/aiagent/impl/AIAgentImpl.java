@@ -283,19 +283,7 @@ public class AIAgentImpl implements AIAgent {
     
     @Override
     public void startCommentingOnEvent(final Event event) {
-        final LeaderboardGroupListener lgListener = new LeaderboardGroupListener() {
-            private static final long serialVersionUID = -8928697982534761135L;
-
-            @Override
-            public void leaderboardAdded(LeaderboardGroup group, Leaderboard leaderboard) {
-                addNewRaceColumnListenerToLeaderboard(leaderboard);
-            }
-
-            @Override
-            public void leaderboardRemoved(LeaderboardGroup group, Leaderboard leaderboard) {
-                removeRaceColumnListenerFromLeaderboard(leaderboard);
-            }
-        };
+        final LeaderboardGroupListener lgListener = new LeaderboardGroupListenerImpl(this);
         final EventListener eventListener = new EventListener() {
             @Override
             public void leaderboardGroupAdded(Event event, LeaderboardGroup leaderboardGroup) {
@@ -324,13 +312,13 @@ public class AIAgentImpl implements AIAgent {
         listeners.forEach(l->l.startedCommentingOnEvent(event));
     }
 
-    private void addNewRaceColumnListenerToLeaderboard(final Leaderboard leaderboard) {
+    void addNewRaceColumnListenerToLeaderboard(final Leaderboard leaderboard) {
         final RaceColumnListener raceColumnListenerForLeaderboard = new RaceColumnListener(leaderboard, this);
         raceColumnListeners.put(leaderboard, raceColumnListenerForLeaderboard);
         leaderboard.addRaceColumnListener(raceColumnListenerForLeaderboard);
     }
     
-    private void removeRaceColumnListenerFromLeaderboard(final Leaderboard leaderboard) {
+    void removeRaceColumnListenerFromLeaderboard(final Leaderboard leaderboard) {
         final RaceColumnListener listener = raceColumnListeners.remove(leaderboard);
         if (listener != null) {
             listener.removeListener();

@@ -81,8 +81,8 @@ public class LoginTest {
         Activator.setTestStores(userStore, accessControlStore);
         // enables shiro to find classes from com.sap.sse.security
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
-                SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+        securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null, userStore,
+                accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         Activator.setSecurityService(securityService);
     }
 

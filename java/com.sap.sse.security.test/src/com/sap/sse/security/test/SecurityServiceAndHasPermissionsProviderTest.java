@@ -51,15 +51,15 @@ public class SecurityServiceAndHasPermissionsProviderTest {
     }
 
     private SecurityService createSecurityServiceWithoutHasPermissionsProvider() {
-        SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore,
-                accessControlStore, /* HasPermissionsProvider */ null, SSESubscriptionPlan::getAllInstances);
+        SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null,
+                userStore, accessControlStore, /* HasPermissionsProvider */ null, SSESubscriptionPlan::getAllInstances);
         securityService.initialize();
         return securityService;
     }
 
     private SecurityService createSecurityServiceWithHasPermissionsProvider() {
-        final SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, userStore,
-                accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+        final SecurityService securityService = new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null,
+                userStore, accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         securityService.initialize();
         return securityService;
     }

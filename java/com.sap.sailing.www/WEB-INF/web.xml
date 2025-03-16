@@ -19,10 +19,10 @@
     	<filter-name>CORSFilter</filter-name>
     	<filter-class>com.sap.sse.rest.CORSFilter</filter-class>
     </filter>
-          <servlet-mapping>
-              <servlet-name>jsp</servlet-name>
-              <url-pattern>*.html</url-pattern>
-          </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>jsp</servlet-name>
+        <url-pattern>*.html</url-pattern>
+    </servlet-mapping>
     <filter-mapping>
     	<filter-name>CORSFilter</filter-name>
     	<url-pattern>/fonts/*</url-pattern>

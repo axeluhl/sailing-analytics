@@ -117,4 +117,7 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalUpdateSubscriptionPlanPrices(Map<String, BigDecimal> updatedItemPrices);
 
+    Void internalSetCORSFilterConfigurationToWildcard(String serverName);
+
+    Void internalSetCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
 }

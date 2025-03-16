@@ -20,6 +20,8 @@ import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
@@ -29,16 +31,18 @@ import com.sap.sse.security.interfaces.PreferenceConverter;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.operations.SecurityOperation;
+import com.sap.sse.security.persistence.PersistenceFactory;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.BasicUserStore;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RolePrototype;
+import com.sap.sse.security.shared.SubscriptionPlanProvider;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -831,4 +835,28 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * that follows the {@link #lockSubscriptionsForUser(User)} call, so a lock can never hang.
      */
     void unlockSubscriptionsForUser(User user);
+
+    /**
+     * For the application replica set identified by {@code serverName} sets the CORS filter to allow REST requests from
+     * all origins (*). The change is made persistent through the {@link PersistenceFactory} and will hence be restored
+     * when this process instance is a primary/master node upon initialization.
+     */
+    void setCORSFilterConfigurationToWildcard(String serverName);
+
+    /**
+     * For the application replica set identified by {@code serverName} sets the CORS filter to allow REST requests from
+     * the origins named in {@code allowedOrigins}. Passing {@code null} for {@code allowedOrigins} is equivalent to
+     * passing an empty array. The change is made persistent through the {@link PersistenceFactory} and will hence be
+     * restored when this process instance is a primary/master node upon initialization.
+     * 
+     * @param allowedOrigins
+     *            the origins, including their scheme (e.g., {@code https://www.example.com}) from which REST requests
+     *            coming from that browser origin are to be permitted; {@code null} is handled like an empty array
+     * @throws IllegalArgumentException
+     *             in case any of the {@code allowedOrigins} does not fulfill the criteria of
+     *             {@link HttpHeaderUtil#isValidOriginHeaderValue(String)}.
+     */
+    void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) throws IllegalArgumentException;
+
+    Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 }

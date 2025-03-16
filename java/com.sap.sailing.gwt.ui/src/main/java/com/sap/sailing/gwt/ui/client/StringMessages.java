@@ -2528,4 +2528,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String updateCredentials();
     String successfullyUpdatedAIAgentCredentials();
     String errorUpdatingAIAgentCredentials(String message);
+    String corsAndCSPFilterConfiguration();
+    String corsAndCSPFilterConfigurationHint();
+    String isCORSWildcard();
+    String corsAllowedOrigins();
+    String successfullyUpdatedCORSAllowedOrigins();
 }

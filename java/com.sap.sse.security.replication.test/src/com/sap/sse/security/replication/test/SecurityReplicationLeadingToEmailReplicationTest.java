@@ -63,8 +63,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             result.initialize();
             return result;
         }
@@ -77,8 +77,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             userStore.ensureDefaultRolesExist();
             userStore.ensureServerGroupExists();
             result.initialize();
