@@ -12,6 +12,7 @@ import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserStoreManagementException;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
@@ -36,7 +37,7 @@ public class RoleDefinitionsTest {
     @Before
     public void doBefore() throws UserStoreManagementException {
         userStore.clear();
-        user = userStore.createUser(username, email);
+        user = userStore.createUser(username, email, new LockingAndBanningImpl());
         roleDefinition = userStore.createRoleDefinition(testRoleUUID, TEST_ROLE, Collections.emptySet());
         userGroup = userStore.createUserGroup(testGroupUUID, groupName);
     }

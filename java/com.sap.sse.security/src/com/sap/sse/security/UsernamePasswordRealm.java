@@ -3,6 +3,7 @@ package com.sap.sse.security;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
@@ -12,7 +13,6 @@ import com.sap.sse.security.interfaces.SimpleSaltedAuthenticationInfo;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
 public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
-    
     public UsernamePasswordRealm() {
         super();
         setAuthenticationTokenClass(UsernamePasswordToken.class);
@@ -45,6 +45,9 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
         if (user == null) {
             return null;
         }
+        if (user.getLockingAndBanning().isPasswordAuthenticationLocked()) {
+            throw new LockedAccountException("Password authentication for user "+username+" is currently locked");
+        }
         UsernamePasswordAccount upa = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         if (upa == null){
             return null;
@@ -61,6 +64,4 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
         SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(username, saltedPassword, salt);
         return sai;
     }
-
-
 }

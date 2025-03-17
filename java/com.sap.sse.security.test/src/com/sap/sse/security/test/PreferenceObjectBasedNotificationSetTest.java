@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,12 +25,11 @@ import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
-
-import org.junit.Assert;
 
 public class PreferenceObjectBasedNotificationSetTest {
     
@@ -191,7 +191,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, new LockingAndBanningImpl());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -238,7 +238,7 @@ public class PreferenceObjectBasedNotificationSetTest {
      */
     @Test
     public void deleteUserWithMappingTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, new LockingAndBanningImpl());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -250,7 +250,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void removePreferenceConverterTest() throws UserManagementException, UserGroupManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, new LockingAndBanningImpl());
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -272,9 +272,9 @@ public class PreferenceObjectBasedNotificationSetTest {
         UserGroup defaultTenantForSingleServer = store.createUserGroup(UUID.randomUUID(), username + "-tenant");
         Map<String, UserGroup> defaultTenantForServer = new ConcurrentHashMap<>();
         defaultTenantForServer.put(serverName, defaultTenantForSingleServer);
-        store.createUser(username, email);
+        store.createUser(username, email, new LockingAndBanningImpl());
         store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenantForServer,
-                Collections.emptySet(), /* userGroupProvider */ null));
+                Collections.emptySet(), /* userGroupProvider */ null, new LockingAndBanningImpl()));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {

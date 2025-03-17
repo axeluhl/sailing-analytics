@@ -1,12 +1,12 @@
 package com.sap.sse.security.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -34,16 +34,17 @@ import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.interfaces.AccessControlStore;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
@@ -241,7 +242,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserStoreManagementException {
-        userStore.createUser("me", "me@sap.com");
+        userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
                 Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, true);
@@ -253,7 +254,7 @@ public class LoginTest {
     @Test
     public void roleWithQualifiersTest() throws UserStoreManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
-        User meUser = userStore.createUser("me", "me@sap.com");
+        User meUser = userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
                 Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser, true);
@@ -267,7 +268,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserStoreManagementException {
-        userStore.createUser("me", "me@sap.com");
+        userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = createAndLoadUserStore();
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);

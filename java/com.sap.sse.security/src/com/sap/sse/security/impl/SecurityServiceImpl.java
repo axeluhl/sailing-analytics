@@ -171,6 +171,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -1097,7 +1098,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
-        final User result = store.createUser(username, email, accounts); // TODO: get the principal as owner
+        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts); // TODO: get the principal as owner
         return result;
     }
 
@@ -1161,11 +1162,17 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        if (user.getLockingAndBanning().isPasswordAuthenticationLocked()) {
+            throw new UserManagementException("Password authentication is locked for user "+username);
+        }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
         final boolean result = Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
         if (!result) {
             logger.info("Failed password check for user "+username);
+            user.getLockingAndBanning().failedPasswordAuthentication();
+        } else {
+            user.getLockingAndBanning().successfulPasswordAuthentication();
         }
         return result;
     }
