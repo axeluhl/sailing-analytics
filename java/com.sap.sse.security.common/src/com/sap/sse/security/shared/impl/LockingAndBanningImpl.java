@@ -53,6 +53,7 @@ public class LockingAndBanningImpl implements LockingAndBanning {
         return TimePoint.now().before(lockedUntil);
     }
 
+    @Override
     public TimePoint getLockedUntil() {
         return lockedUntil;
     }

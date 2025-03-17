@@ -2,6 +2,8 @@ package com.sap.sse.security.shared.impl;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.TimePoint;
+
 /**
  * Holds information about a user's log-on history which is then used to decide whether the user account should be
  * locked temporarily or permanently for certain forms of authentication.
@@ -23,4 +25,5 @@ public interface LockingAndBanning extends Serializable {
     void failedPasswordAuthentication();
     void successfulPasswordAuthentication();
     boolean isPasswordAuthenticationLocked();
+    TimePoint getLockedUntil();
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.common.client;
+package com.sap.sse.gwt.client;
 
 import java.util.Date;
 
@@ -32,6 +32,10 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat("m"), timeZoneWithoutOffset);
     public static DateTimeFormatRenderer hoursAndMinutesTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer isoDateTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.ISO_8601));
+    public static DateTimeFormatRenderer dateTimeMedium = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM));
 
     private static DateTimeFormatRenderer secondsTimeFormatterUTC = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"), timeZoneWithoutOffset);

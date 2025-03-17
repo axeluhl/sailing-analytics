@@ -124,7 +124,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.Competitor
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.windladder.WindLadder;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.RaceboardDropdownResources;
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
@@ -168,6 +167,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.DOMUtils;
+import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
