@@ -1170,13 +1170,43 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final boolean result = Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
         if (!result) {
             logger.info("Failed password check for user "+username);
-            user.getLockingAndBanning().failedPasswordAuthentication();
+            apply(s->s.internalFailedPasswordAuthentication(username));
         } else {
-            user.getLockingAndBanning().successfulPasswordAuthentication();
+            apply(s->s.internalSuccessfulPasswordAuthentication(username));
         }
         return result;
     }
     
+    @Override
+    public void failedPasswordAuthentication(User user) {
+        apply(s->s.internalFailedPasswordAuthentication(user.getName()));
+    }
+
+    @Override
+    public Void internalFailedPasswordAuthentication(String username) {
+        final User user = getUserByName(username);
+        if (user != null) {
+            user.getLockingAndBanning().failedPasswordAuthentication();
+            store.updateUser(user);
+        }
+        return null;
+    }
+
+    @Override
+    public void successfulPasswordAuthentication(User user) {
+        apply(s->s.internalSuccessfulPasswordAuthentication(user.getName()));
+    }
+    
+    @Override
+    public Void internalSuccessfulPasswordAuthentication(String username) {
+        final User user = getUserByName(username);
+        if (user != null) {
+            user.getLockingAndBanning().successfulPasswordAuthentication();
+            store.updateUser(user);
+        }
+        return null;
+    }
+
     @Override
     public boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException {
         final User user = store.getUserByName(username);

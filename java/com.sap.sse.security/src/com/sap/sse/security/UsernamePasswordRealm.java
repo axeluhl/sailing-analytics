@@ -33,7 +33,7 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
+        final UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
         final String username = userPassToken.getUsername();
         if (username == null) {
             return null;
@@ -41,14 +41,14 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
         // read password hash and salt from db
         String saltedPassword = null;
         byte[] salt = null;
-        User user = getUserStore().getUserByName(username);
+        final User user = getUserStore().getUserByName(username);
         if (user == null) {
             return null;
         }
         if (user.getLockingAndBanning().isPasswordAuthenticationLocked()) {
             throw new LockedAccountException("Password authentication for user "+username+" is currently locked");
         }
-        UsernamePasswordAccount upa = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
+        final UsernamePasswordAccount upa = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         if (upa == null){
             return null;
         }

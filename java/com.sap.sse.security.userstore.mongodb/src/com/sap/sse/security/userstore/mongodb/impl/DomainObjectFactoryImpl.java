@@ -288,7 +288,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         final String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
         final Long lockedUntilMillis = userDBObject.getLong(FieldNames.User.LOCKED_UNTIL_MILLIS.name());
-        final Long nextLockingDurationMillis = userDBObject.getLong(FieldNames.User.LOCKED_UNTIL_MILLIS.name());
+        final Long nextLockingDurationMillis = userDBObject.getLong(FieldNames.User.NEXT_LOCKING_DURATION_MILLIS.name());
         final LockingAndBanning lockingAndBanning = new LockingAndBanningImpl(
                 lockedUntilMillis == null ? TimePoint.BeginningOfTime : TimePoint.of(lockedUntilMillis),
                 nextLockingDurationMillis == null ? LockingAndBanningImpl.DEFAULT_INITIAL_LOCKING_DELAY : Duration.ofMillis(nextLockingDurationMillis));

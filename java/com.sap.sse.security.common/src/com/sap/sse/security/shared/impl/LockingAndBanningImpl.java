@@ -57,7 +57,7 @@ public class LockingAndBanningImpl implements LockingAndBanning {
         return lockedUntil;
     }
 
-    public Duration getLastLockingDelay() {
+    public Duration getNextLockingDelay() {
         return nextLockingDelay;
     }
 }
