@@ -2343,9 +2343,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         logger.info("Reading baseUrlForCrossDomainStorage...");
         baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+baseUrlForCrossDomainStorage);
-        logger.info("Reading CORS filter configurations");
-        @SuppressWarnings("unchecked")
-        final ConcurrentMap<String, Pair<Boolean, Set<String>>> newCORSFilterConfigurations = (ConcurrentMap<String, Pair<Boolean, Set<String>>>) is.readObject();
+        logger.info("Reading CORS filter configurations and possibly more...");
+        final SecurityServiceInitialLoadExtensionsDTO initialLoadExtensions = (SecurityServiceInitialLoadExtensionsDTO) is.readObject();
+        final ConcurrentMap<String, Pair<Boolean, Set<String>>> newCORSFilterConfigurations = initialLoadExtensions.getCorsFilterConfigurationsByReplicaSetName();
         corsFilterConfigurationsByReplicaSetName.putAll(newCORSFilterConfigurations);
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
@@ -2359,7 +2359,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(accessControlStore);
         objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
         objectOutputStream.writeObject(baseUrlForCrossDomainStorage);
-        objectOutputStream.writeObject(corsFilterConfigurationsByReplicaSetName);
+        objectOutputStream.writeObject(new SecurityServiceInitialLoadExtensionsDTO(corsFilterConfigurationsByReplicaSetName));
     }
 
     @Override
