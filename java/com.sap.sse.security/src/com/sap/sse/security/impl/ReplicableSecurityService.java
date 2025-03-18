@@ -120,4 +120,8 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalSetCORSFilterConfigurationToWildcard(String serverName);
 
     Void internalSetCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
+
+    Void internalFailedPasswordAuthentication(String username);
+
+    Void internalSuccessfulPasswordAuthentication(String username);
 }

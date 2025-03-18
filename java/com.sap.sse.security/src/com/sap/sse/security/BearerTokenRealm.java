@@ -24,13 +24,16 @@ public class BearerTokenRealm extends AbstractCompositeAuthorizingRealm {
     
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        final AuthenticationInfo result;
         BearerAuthenticationToken accessToken = (BearerAuthenticationToken) token;
         final User user = getUserStore().getUserByAccessToken(accessToken.getCredentials());
         if (user == null) {
-            return null;
+            result = null;
+        } else {
+            // return salted credentials
+            SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(user.getName(), accessToken.getCredentials(), /* salt */ null);
+            result = sai;
         }
-        // return salted credentials
-        SaltedAuthenticationInfo sai = new SimpleSaltedAuthenticationInfo(user.getName(), accessToken.getCredentials(), /* salt */ null);
-        return sai;
+        return result;
     }
 }

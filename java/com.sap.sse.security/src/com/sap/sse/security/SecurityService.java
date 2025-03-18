@@ -859,4 +859,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) throws IllegalArgumentException;
 
     Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
+
+    void failedPasswordAuthentication(User user);
+
+    void successfulPasswordAuthentication(User user);
 }

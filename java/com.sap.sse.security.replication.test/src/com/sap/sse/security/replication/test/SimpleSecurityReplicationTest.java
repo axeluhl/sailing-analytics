@@ -18,6 +18,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.junit.Test;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -97,6 +98,9 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertNotNull(replicatedErnie);
         assertEquals(ERNIE, replicatedErnie.getName());
         assertFalse(replica.checkPassword(ERNIE, BERT_MY_FRIEND));
+        // checking with incorrect password locks user for some time; wait long enough before retrying with correct password
+        final TimePoint lockedUntil = replicatedErnie.getLockingAndBanning().getLockedUntil();
+        Thread.sleep(Math.max(0, TimePoint.now().until(lockedUntil).asMillis()+10));
         assertTrue(replica.checkPassword(ERNIE, newPassword));
     }
 
