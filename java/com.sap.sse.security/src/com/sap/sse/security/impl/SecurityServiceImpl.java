@@ -253,7 +253,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
     
-    private final ConcurrentMap<Pair<String, String>, LockingAndBanning> clientIPAndUserAgentBasedLockingAndBanning;
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanning;
 
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -302,7 +302,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
-        this.clientIPAndUserAgentBasedLockingAndBanning = new ConcurrentHashMap<>();
+        this.clientIPBasedLockingAndBanning = new ConcurrentHashMap<>();
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.subscriptionPlanProvider = subscriptionPlanProvider;
@@ -1215,14 +1215,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public void failedBearerTokenAuthentication(String clientIP, String userAgent) {
-        apply(s->s.internalFailedBearerTokenAuthentication(clientIP, userAgent));
+    public void failedBearerTokenAuthentication(String clientIP) {
+        apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
     }
     
     @Override
-    public Void internalFailedBearerTokenAuthentication(String clientIP, String userAgent) {
-        final Pair<String, String> k = new Pair<>(clientIP, userAgent);
-        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.computeIfAbsent(k, key->new LockingAndBanningImpl());
+    public Void internalFailedBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.computeIfAbsent(clientIP, key->new LockingAndBanningImpl());
         lockingAndBanning.failedPasswordAuthentication();
         // schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects;
         // schedule it in two times the locking expiry because if no authentication failure occurs for that IP/user agent
@@ -1235,39 +1234,38 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (millisUntilLockingExpiry > 0) {
             ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
                     ()->{
-                        final LockingAndBanning lab = clientIPAndUserAgentBasedLockingAndBanning.get(k);
+                        final LockingAndBanning lab = clientIPBasedLockingAndBanning.get(clientIP);
                         if (lab != null && !lab.isAuthenticationLocked()) {
-                            clientIPAndUserAgentBasedLockingAndBanning.remove(k);
-                            logger.info("Removed client IP/user agent authentication lock for "+k+"; "
-                                    +clientIPAndUserAgentBasedLockingAndBanning.size()
+                            clientIPBasedLockingAndBanning.remove(clientIP);
+                            logger.info("Removed client IP/user agent authentication lock for "+clientIP+"; "
+                                    +clientIPBasedLockingAndBanning.size()
                                     +" locked client IP/user agent combinations remaining");
                         }
                     },
                     millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
         } else {
-            clientIPAndUserAgentBasedLockingAndBanning.remove(k);
+            clientIPBasedLockingAndBanning.remove(clientIP);
         }
         return null;
     }
 
     @Override
-    public void successfulBearerTokenAuthentication(String clientIP, String userAgent) {
-        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP, userAgent));
+    public void successfulBearerTokenAuthentication(String clientIP) {
+        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP));
     }
     
     @Override
-    public Void internalSuccessfulBearerTokenAuthentication(String clientIP, String userAgent) {
-        final Pair<String, String> key = new Pair<>(clientIP, userAgent);
-        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.remove(key);
+    public Void internalSuccessfulBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.remove(clientIP);
         if (lockingAndBanning != null) {
-            logger.info("Unlocked bearer token authentication from "+key+"; last locking state was "+lockingAndBanning);
+            logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
         }
         return null;
     }
 
     @Override
-    public boolean isClientIPAndUserAgentLocked(String clientIP, String userAgent) {
-        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.get(new Pair<>(clientIP, userAgent));
+    public boolean isClientIPAndUserAgentLocked(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.get(clientIP);
         return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
     }
 

@@ -40,7 +40,7 @@ public class BearerTokenRealm extends AbstractCompositeAuthorizingRealm {
         try {
             final SecurityService mySecurityService = securityService == null ? null : securityService.get();
             if (mySecurityService != null) {
-                if (mySecurityService.isClientIPAndUserAgentLocked(accessToken.getClientIP(), accessToken.getUserAgent())) {
+                if (mySecurityService.isClientIPAndUserAgentLocked(accessToken.getClientIP())) {
                     throw new LockedAccountException("Authentication for client IP "+accessToken.getClientIP()
                         +" with user agent "+accessToken.getUserAgent()
                         +" is currently locked");

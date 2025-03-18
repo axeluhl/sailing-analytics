@@ -77,7 +77,7 @@ public class AtLeastOneSuccessfulStrategyWithLockingAndBanning extends AtLeastOn
                     logger.info("failed bearer token authentication for client IP "+bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent());
                     final SecurityService mySecurityService = getSecurityService();
                     if (mySecurityService != null) {
-                        mySecurityService.failedBearerTokenAuthentication(bearerToken.getClientIP(), bearerToken.getUserAgent());
+                        mySecurityService.failedBearerTokenAuthentication(bearerToken.getClientIP());
                     } else {
                         logger.warning("Client IP/User-Agent locking due to failed bearer token authentication for client IP "
                                 +bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent()
@@ -87,7 +87,7 @@ public class AtLeastOneSuccessfulStrategyWithLockingAndBanning extends AtLeastOn
             } else { // valid authentication info means authentication was successful
                 final SecurityService mySecurityService = getSecurityService();
                 if (mySecurityService != null) {
-                    mySecurityService.successfulBearerTokenAuthentication(bearerToken.getClientIP(), bearerToken.getUserAgent());
+                    mySecurityService.successfulBearerTokenAuthentication(bearerToken.getClientIP());
                 }
             }
         }
