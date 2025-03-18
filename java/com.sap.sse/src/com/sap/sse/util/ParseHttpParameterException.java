@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway;
+package com.sap.sse.util;
 
 public class ParseHttpParameterException extends Exception {
     private static final long serialVersionUID = 7040169741090353200L;

@@ -9,6 +9,7 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.realm.Realm;
 
@@ -64,6 +65,29 @@ public class AtLeastOneSuccessfulStrategyWithLockingAndBanning extends AtLeastOn
                     if (mySecurityService != null) {
                         mySecurityService.successfulPasswordAuthentication(user);
                     }
+                }
+            }
+        } else if (token != null && realm instanceof BearerTokenRealm) {
+            final BearerAuthenticationToken bearerToken = (BearerAuthenticationToken) token;
+            if (singleRealmInfo == null || singleRealmInfo.getPrincipals().isEmpty()) {
+                if (t != null && t instanceof LockedAccountException) {
+                    logger.fine(()->"Bearer token authentication from client IP "+bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent()+" currently locked");
+                } else {
+                    // authentication failed
+                    logger.info("failed bearer token authentication for client IP "+bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent());
+                    final SecurityService mySecurityService = getSecurityService();
+                    if (mySecurityService != null) {
+                        mySecurityService.failedBearerTokenAuthentication(bearerToken.getClientIP(), bearerToken.getUserAgent());
+                    } else {
+                        logger.warning("Client IP/User-Agent locking due to failed bearer token authentication for client IP "
+                                +bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent()
+                                +" not possible; security service not found");
+                    }
+                }
+            } else { // valid authentication info means authentication was successful
+                final SecurityService mySecurityService = getSecurityService();
+                if (mySecurityService != null) {
+                    mySecurityService.successfulBearerTokenAuthentication(bearerToken.getClientIP(), bearerToken.getUserAgent());
                 }
             }
         }

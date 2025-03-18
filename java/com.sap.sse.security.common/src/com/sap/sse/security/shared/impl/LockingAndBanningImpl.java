@@ -10,7 +10,7 @@ public class LockingAndBanningImpl implements LockingAndBanning {
     
     /**
      * An always valid time point which may be in the past. If it is in the future,
-     * {@link #isPasswordAuthenticationLocked()} will return {@code true}.
+     * {@link #isAuthenticationLocked()} will return {@code true}.
      */
     private TimePoint lockedUntil;
     
@@ -49,7 +49,7 @@ public class LockingAndBanningImpl implements LockingAndBanning {
     }
 
     @Override
-    public boolean isPasswordAuthenticationLocked() {
+    public boolean isAuthenticationLocked() {
         return TimePoint.now().before(lockedUntil);
     }
 
@@ -60,5 +60,19 @@ public class LockingAndBanningImpl implements LockingAndBanning {
 
     public Duration getNextLockingDelay() {
         return nextLockingDelay;
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        if (isAuthenticationLocked()) {
+            result.append("locked until ");
+            result.append(getLockedUntil());
+        } else {
+            result.append("unlocked");
+        }
+        result.append(", next locking duration: ");
+        result.append(getNextLockingDelay());
+        return result.toString();
     }
 }

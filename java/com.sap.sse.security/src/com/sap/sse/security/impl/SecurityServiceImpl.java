@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -171,6 +172,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -185,6 +187,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -249,6 +252,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final PermissionChangeListeners permissionChangeListeners;
     
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
+    
+    private final ConcurrentMap<Pair<String, String>, LockingAndBanning> clientIPAndUserAgentBasedLockingAndBanning;
 
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -297,6 +302,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
+        this.clientIPAndUserAgentBasedLockingAndBanning = new ConcurrentHashMap<>();
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.subscriptionPlanProvider = subscriptionPlanProvider;
@@ -1162,7 +1168,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        if (user.getLockingAndBanning().isPasswordAuthenticationLocked()) {
+        if (user.getLockingAndBanning().isAuthenticationLocked()) {
             throw new UserManagementException("Password authentication is locked for user "+username);
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
@@ -1205,6 +1211,63 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             store.updateUser(user);
         }
         return null;
+    }
+
+    @Override
+    public void failedBearerTokenAuthentication(String clientIP, String userAgent) {
+        apply(s->s.internalFailedBearerTokenAuthentication(clientIP, userAgent));
+    }
+    
+    @Override
+    public Void internalFailedBearerTokenAuthentication(String clientIP, String userAgent) {
+        final Pair<String, String> k = new Pair<>(clientIP, userAgent);
+        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.computeIfAbsent(k, key->new LockingAndBanningImpl());
+        lockingAndBanning.failedPasswordAuthentication();
+        // schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects;
+        // schedule it in two times the locking expiry because if no authentication failure occurs for that IP/user agent
+        // combination, we will entirely remove the LockingAndBanning from the map, resetting that IP/user agent combination
+        // to a short default locking duration again; this way, if during the double expiration time another failed authentication
+        // attempt is registered, we can still grow the locking duration because we have kept the LockingAndBanning
+        // object available for a bit longer. Furthermore, the BearerTokenRealm will let authentication requests get to here
+        // only if not locked, so if we were to expunge entries immediately as they unlock, the locking duration could never grow.
+        final long millisUntilLockingExpiry = 2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis();
+        if (millisUntilLockingExpiry > 0) {
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                    ()->{
+                        final LockingAndBanning lab = clientIPAndUserAgentBasedLockingAndBanning.get(k);
+                        if (lab != null && !lab.isAuthenticationLocked()) {
+                            clientIPAndUserAgentBasedLockingAndBanning.remove(k);
+                            logger.info("Removed client IP/user agent authentication lock for "+k+"; "
+                                    +clientIPAndUserAgentBasedLockingAndBanning.size()
+                                    +" locked client IP/user agent combinations remaining");
+                        }
+                    },
+                    millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
+        } else {
+            clientIPAndUserAgentBasedLockingAndBanning.remove(k);
+        }
+        return null;
+    }
+
+    @Override
+    public void successfulBearerTokenAuthentication(String clientIP, String userAgent) {
+        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP, userAgent));
+    }
+    
+    @Override
+    public Void internalSuccessfulBearerTokenAuthentication(String clientIP, String userAgent) {
+        final Pair<String, String> key = new Pair<>(clientIP, userAgent);
+        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.remove(key);
+        if (lockingAndBanning != null) {
+            logger.info("Unlocked bearer token authentication from "+key+"; last locking state was "+lockingAndBanning);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isClientIPAndUserAgentLocked(String clientIP, String userAgent) {
+        final LockingAndBanning lockingAndBanning = clientIPAndUserAgentBasedLockingAndBanning.get(new Pair<>(clientIP, userAgent));
+        return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
     }
 
     @Override

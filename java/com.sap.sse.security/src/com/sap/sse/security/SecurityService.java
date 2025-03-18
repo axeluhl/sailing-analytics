@@ -49,6 +49,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -863,4 +864,21 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void failedPasswordAuthentication(User user);
 
     void successfulPasswordAuthentication(User user);
+
+    void failedBearerTokenAuthentication(String clientIP, String userAgent);
+
+    void successfulBearerTokenAuthentication(String clientIP, String userAgent);
+
+    /**
+     * Used in conjunction with {@link #failedBearerTokenAuthentication(String, String)} and {@link #successfulBearerTokenAuthentication(String, String)}.
+     * The object returned may have been created lazily on the fly if the combination of client IP and user agent is not currently locked.
+     * {@link LockingAndBanning} records are expunged from this security service when their locking effect has expired.
+     * 
+     * TODO but now we may have a different problem; if an attacker simply keeps inventing new unique user agent identifiers, we'll waste lots of memory
+     * and still won't have a good way of throttling those requests; at some point we should probably also block based on the client IP only...
+     * 
+     * TODO and how useful is it to check for the client <em>port</em>? Wouldn't new requests use different client-side ports unless a keep-alive
+     * recycles the HTTP connection?
+     */
+    boolean isClientIPAndUserAgentLocked(String clientIP, String userAgent);
 }

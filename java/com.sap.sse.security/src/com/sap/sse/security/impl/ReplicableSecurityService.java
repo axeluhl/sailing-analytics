@@ -124,4 +124,8 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalFailedPasswordAuthentication(String username);
 
     Void internalSuccessfulPasswordAuthentication(String username);
+
+    Void internalSuccessfulBearerTokenAuthentication(String clientIP, String userAgent);
+
+    Void internalFailedBearerTokenAuthentication(String clientIP, String userAgent);
 }

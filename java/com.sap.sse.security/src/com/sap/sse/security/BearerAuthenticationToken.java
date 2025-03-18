@@ -19,10 +19,14 @@ public class BearerAuthenticationToken implements AuthenticationToken {
     private static final Logger logger = Logger.getLogger(BearerAuthenticationToken.class.getName());
 
     private final String token;
+    private final String clientIP;
+    private final String userAgent;
     
-    public BearerAuthenticationToken(String token) {
+    public BearerAuthenticationToken(String token, String clientIP, String userAgent) {
         super();
         this.token = token;
+        this.clientIP = clientIP;
+        this.userAgent = userAgent;
     }
 
     @Override
@@ -30,7 +34,7 @@ public class BearerAuthenticationToken implements AuthenticationToken {
         SecurityService securityService = Activator.getSecurityService();
         User user = securityService.getUserByAccessToken(token);
         if (user == null) {
-            logger.warning("Invalid bearer token did not authenticate an existing user");
+            logger.fine("Invalid bearer token did not authenticate an existing user");
         }
         return user == null ? null : user.getName();
     }
@@ -40,4 +44,11 @@ public class BearerAuthenticationToken implements AuthenticationToken {
         return token;
     }
 
+    public String getClientIP() {
+        return clientIP;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
 }

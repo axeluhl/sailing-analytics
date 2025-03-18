@@ -269,7 +269,7 @@ public class SecurityResourceTest {
         assertNotNull(user);
         assertEquals(USERNAME, user.getName());
         final Subject subject = SecurityUtils.getSubject();
-        subject.login(new BearerAuthenticationToken(accessToken));
+        subject.login(new BearerAuthenticationToken(accessToken, /* clientIP */ null, /* userAgent */ null));
         assertTrue(subject.isAuthenticated());
         assertEquals(USERNAME, subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));
