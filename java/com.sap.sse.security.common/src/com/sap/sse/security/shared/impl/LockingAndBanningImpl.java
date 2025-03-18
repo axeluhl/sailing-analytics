@@ -2,6 +2,7 @@ package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class LockingAndBanningImpl implements LockingAndBanning {
     private static final long serialVersionUID = 3547356744366236677L;
@@ -43,9 +44,12 @@ public class LockingAndBanningImpl implements LockingAndBanning {
     }
 
     @Override
-    public void successfulPasswordAuthentication() {
+    public boolean successfulPasswordAuthentication() {
+        final Duration oldLockingDelay = nextLockingDelay;
         nextLockingDelay = DEFAULT_INITIAL_LOCKING_DELAY;
+        final TimePoint oldLockedUntil = lockedUntil;
         lockedUntil = TimePoint.BeginningOfTime;
+        return !Util.equalsWithNull(oldLockingDelay, nextLockingDelay) || !Util.equalsWithNull(oldLockedUntil, lockedUntil);
     }
 
     @Override

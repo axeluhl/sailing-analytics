@@ -1207,8 +1207,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public Void internalSuccessfulPasswordAuthentication(String username) {
         final User user = getUserByName(username);
         if (user != null) {
-            user.getLockingAndBanning().successfulPasswordAuthentication();
-            store.updateUser(user);
+            if (user.getLockingAndBanning().successfulPasswordAuthentication()) {
+                store.updateUser(user);
+            }
         }
         return null;
     }
