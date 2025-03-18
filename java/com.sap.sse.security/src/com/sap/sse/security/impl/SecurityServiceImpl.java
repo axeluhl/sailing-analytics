@@ -254,6 +254,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
     
     private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanning;
+    private final static String CLIENT_IP_NULL_ESCAPE = UUID.randomUUID().toString();
 
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -1221,7 +1222,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Void internalFailedBearerTokenAuthentication(String clientIP) {
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.computeIfAbsent(clientIP, key->new LockingAndBanningImpl());
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
         lockingAndBanning.failedPasswordAuthentication();
         // schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects;
         // schedule it in two times the locking expiry because if no authentication failure occurs for that IP/user agent
@@ -1234,9 +1235,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (millisUntilLockingExpiry > 0) {
             ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
                     ()->{
-                        final LockingAndBanning lab = clientIPBasedLockingAndBanning.get(clientIP);
+                        final LockingAndBanning lab = clientIPBasedLockingAndBanning.get(escapeNullClientIP(clientIP));
                         if (lab != null && !lab.isAuthenticationLocked()) {
-                            clientIPBasedLockingAndBanning.remove(clientIP);
+                            clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
                             logger.info("Removed client IP/user agent authentication lock for "+clientIP+"; "
                                     +clientIPBasedLockingAndBanning.size()
                                     +" locked client IP/user agent combinations remaining");
@@ -1244,9 +1245,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                     },
                     millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
         } else {
-            clientIPBasedLockingAndBanning.remove(clientIP);
+            clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
         }
         return null;
+    }
+
+    private String escapeNullClientIP(String clientIP) {
+        return clientIP==null?CLIENT_IP_NULL_ESCAPE:clientIP;
     }
 
     @Override
@@ -1256,7 +1261,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public Void internalSuccessfulBearerTokenAuthentication(String clientIP) {
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.remove(clientIP);
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
         if (lockingAndBanning != null) {
             logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
         }
@@ -1265,7 +1270,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public boolean isClientIPAndUserAgentLocked(String clientIP) {
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.get(clientIP);
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.get(escapeNullClientIP(clientIP));
         return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
     }
 
