@@ -29,7 +29,7 @@ public abstract class HttpRequestUtils {
         final String xForwardedFor = req.getHeader(X_FORWARDED_FOR_HEADER);
         final String result;
         if (Util.hasLength(xForwardedFor)) {
-            final String[] ips = xForwardedFor.split(", +");
+            final String[] ips = xForwardedFor.split(", *");
             result = ips[ips.length-1];
         } else {
             result = req.getRemoteAddr();
