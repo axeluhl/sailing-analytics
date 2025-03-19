@@ -84,7 +84,6 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.ServerInfo;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -192,7 +191,6 @@ import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
 import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ClearStateTestSupport;
-import com.sap.sse.util.HttpRequestUtils;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class SecurityServiceImpl
@@ -283,13 +281,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      */
     private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
     
-    /**
-     * The default locking duration per client IP address for user creation.
-     * 
-     * @see HttpRequestUtils#getClientIP(HttpServletRequest)
-     */
-    private final static Duration DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION = Duration.ONE_MINUTE;
-
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
      * based on what was read, a user-specific write lock must be obtained to ensure that no writes can cut in between.
@@ -2867,6 +2858,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
     // permission-vertical
     public void clearState() throws Exception {
+        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
+        clientIPBasedLockingAndBanningForUserCreation.clear();
     }
 
     @Override
