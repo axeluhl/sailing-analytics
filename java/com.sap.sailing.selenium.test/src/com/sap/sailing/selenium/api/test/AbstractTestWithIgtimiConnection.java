@@ -36,7 +36,7 @@ import com.sun.jersey.core.util.Base64;
  * @author Axel Uhl (d043530)
  *
  */
-public class AbstractTestWithIgtimiConnection extends AbstractSeleniumTest {
+public abstract class AbstractTestWithIgtimiConnection extends AbstractSeleniumTest {
     protected IgtimiConnection connection;
     
     @Rule public Timeout AbstractTestWithIgtimiConnectionTimeout = Timeout.millis(2 * 60 * 1000);
