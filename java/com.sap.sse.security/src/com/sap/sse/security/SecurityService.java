@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
@@ -19,6 +20,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.http.HttpHeaderUtil;
@@ -59,6 +61,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.util.HttpRequestUtils;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -78,6 +81,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String ALL_USERNAME = "<all>";
     String TENANT_SUFFIX = "-tenant";
     String REPLICABLE_FULLY_QUALIFIED_CLASSNAME = SecurityServiceImpl.class.getName();
+    /**
+     * The default locking duration per client IP address for user creation.
+     * 
+     * @see HttpRequestUtils#getClientIP(HttpServletRequest)
+     */
+    Duration DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION = Duration.ONE_MINUTE;
 
     SecurityManager getSecurityManager();
 
