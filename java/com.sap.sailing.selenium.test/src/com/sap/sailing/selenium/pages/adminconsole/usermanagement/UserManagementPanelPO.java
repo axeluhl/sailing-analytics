@@ -15,6 +15,8 @@ import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.SecurityService;
 
 public class UserManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "UsersTable")
@@ -31,7 +33,7 @@ public class UserManagementPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "EditRolesAndPermissionsForUserButton")
     private WebElement editRolesAndPermissionsForUserButton;
     
-    
+    private TimePoint lastCreateUser;
 
     public UserManagementPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -88,6 +90,15 @@ public class UserManagementPanelPO extends PageArea {
     }
     
     public void createUserWithEqualUsernameAndPassword(String usernameAndPassword) {
+        final TimePoint now = TimePoint.now();
+        if (lastCreateUser != null && now.minus(SecurityService.DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION).before(lastCreateUser)) {
+            try {
+                Thread.sleep(now.until(lastCreateUser.plus(SecurityService.DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION)).asMillis());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        lastCreateUser = now;
         final CreateUserDialogPO createUserDialog = getCreateUserDialog();
         createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword, usernameAndPassword);
         createUserDialog.clickOkButtonOrThrow();
