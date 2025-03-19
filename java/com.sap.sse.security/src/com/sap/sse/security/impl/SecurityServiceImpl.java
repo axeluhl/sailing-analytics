@@ -1185,18 +1185,22 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public void failedPasswordAuthentication(User user) {
-        apply(s->s.internalFailedPasswordAuthentication(user.getName()));
+    public LockingAndBanning failedPasswordAuthentication(User user) {
+        return apply(s->s.internalFailedPasswordAuthentication(user.getName()));
     }
 
     @Override
-    public Void internalFailedPasswordAuthentication(String username) {
+    public LockingAndBanning internalFailedPasswordAuthentication(String username) {
         final User user = getUserByName(username);
+        final LockingAndBanning lockingAndBanning;
         if (user != null) {
-            user.getLockingAndBanning().failedPasswordAuthentication();
+            lockingAndBanning = user.getLockingAndBanning();
+            lockingAndBanning.failedPasswordAuthentication();
             store.updateUser(user);
+        } else {
+            lockingAndBanning = null;
         }
-        return null;
+        return lockingAndBanning;
     }
 
     @Override
@@ -1216,12 +1220,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public void failedBearerTokenAuthentication(String clientIP) {
-        apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+    public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
+        return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
     }
     
     @Override
-    public Void internalFailedBearerTokenAuthentication(String clientIP) {
+    public LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP) {
         final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
         lockingAndBanning.failedPasswordAuthentication();
         // schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects;
@@ -1238,16 +1242,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                         final LockingAndBanning lab = clientIPBasedLockingAndBanning.get(escapeNullClientIP(clientIP));
                         if (lab != null && !lab.isAuthenticationLocked()) {
                             clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
-                            logger.info("Removed client IP/user agent authentication lock for "+clientIP+"; "
+                            logger.info("Removed client IP authentication lock for "+clientIP+"; "
                                     +clientIPBasedLockingAndBanning.size()
-                                    +" locked client IP/user agent combinations remaining");
+                                    +" locked client IPs remaining");
                         }
                     },
                     millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
-        } else {
+        } else { // a bit weird because we just locked it; suggests very slow execution; yet, let's clean up...
             clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
         }
-        return null;
+        return lockingAndBanning;
     }
 
     private String escapeNullClientIP(String clientIP) {

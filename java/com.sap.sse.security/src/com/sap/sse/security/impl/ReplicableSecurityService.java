@@ -15,6 +15,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.subscription.Subscription;
@@ -121,11 +122,11 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalSetCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins);
 
-    Void internalFailedPasswordAuthentication(String username);
+    LockingAndBanning internalFailedPasswordAuthentication(String username);
 
     Void internalSuccessfulPasswordAuthentication(String username);
 
     Void internalSuccessfulBearerTokenAuthentication(String clientIP);
 
-    Void internalFailedBearerTokenAuthentication(String clientIP);
+    LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP);
 }

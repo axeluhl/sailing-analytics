@@ -49,6 +49,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -860,7 +861,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 
-    void failedPasswordAuthentication(User user);
+    LockingAndBanning failedPasswordAuthentication(User user);
 
     void successfulPasswordAuthentication(User user);
 
@@ -876,8 +877,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * If two locking durations have expired without this method being invoked for equal {@cod eclientIP} and
      * {@code userAgent}, the locking record including its last locking duration is expunged from the internal data
      * structures, avoiding garbage piling up.
+     * @return TODO
      */
-    void failedBearerTokenAuthentication(String clientIP);
+    LockingAndBanning failedBearerTokenAuthentication(String clientIP);
 
     /**
      * Call this when the combination of {@code clientIP} and {@code userAgent} was not

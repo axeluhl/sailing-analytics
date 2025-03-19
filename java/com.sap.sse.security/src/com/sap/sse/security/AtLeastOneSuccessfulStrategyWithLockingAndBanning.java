@@ -14,6 +14,7 @@ import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.realm.Realm;
 
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -54,7 +55,10 @@ public class AtLeastOneSuccessfulStrategyWithLockingAndBanning extends AtLeastOn
                         logger.info("failed password authentication for user "+username);
                         final SecurityService mySecurityService = getSecurityService();
                         if (mySecurityService != null) {
-                            mySecurityService.failedPasswordAuthentication(user);
+                            final LockingAndBanning lockingAndBanning = mySecurityService.failedPasswordAuthentication(user);
+                            if (lockingAndBanning != null) {
+                                logger.info("User "+username+" locked for password authentication: "+lockingAndBanning);
+                            }
                         } else {
                             logger.warning("Account locking due to failed password authentication for user "+username+" not possible; security service not found");
                         }
@@ -77,9 +81,12 @@ public class AtLeastOneSuccessfulStrategyWithLockingAndBanning extends AtLeastOn
                     logger.info("failed bearer token authentication for client IP "+bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent());
                     final SecurityService mySecurityService = getSecurityService();
                     if (mySecurityService != null) {
-                        mySecurityService.failedBearerTokenAuthentication(bearerToken.getClientIP());
+                        final LockingAndBanning lockingAndBanning = mySecurityService.failedBearerTokenAuthentication(bearerToken.getClientIP());
+                        if (lockingAndBanning != null) {
+                            logger.info("Client IP "+bearerToken.getClientIP()+" locked for bearer token authentication: "+lockingAndBanning);
+                        }
                     } else {
-                        logger.warning("Client IP/User-Agent locking due to failed bearer token authentication for client IP "
+                        logger.warning("Client IP locking due to failed bearer token authentication for client IP "
                                 +bearerToken.getClientIP()+" with user agent "+bearerToken.getUserAgent()
                                 +" not possible; security service not found");
                     }
