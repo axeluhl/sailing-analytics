@@ -2867,6 +2867,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
     // permission-vertical
     public void clearState() throws Exception {
+        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
+        clientIPBasedLockingAndBanningForUserCreation.clear();
     }
 
     @Override
