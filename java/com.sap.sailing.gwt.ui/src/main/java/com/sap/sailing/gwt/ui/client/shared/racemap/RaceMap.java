@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import com.google.gwt.ajaxloader.client.ArrayHelper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -32,6 +33,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.RenderingType;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
@@ -51,6 +53,8 @@ import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
 import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
+import com.google.gwt.maps.client.maptypes.StyledMapType;
+import com.google.gwt.maps.client.maptypes.StyledMapTypeOptions;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
@@ -191,6 +195,8 @@ import com.sap.sse.security.ui.client.premium.PaywallResolver;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, ColorMapperChangedListener, RequiresDataInitialization, RequiresResize, QuickFlagDataValuesProvider {
+    static final private String SAILING_ANALYTICS_MAP_TYPE_ID = "sailing_analytics";
+
     /* Line colors */
     static private final RGBColor COURSE_MIDDLE_LINE_COLOR = new RGBColor("#0eed1d");
     static final Color ADVANTAGE_LINE_COLOR = new RGBColor("#ff9900"); // orange
@@ -779,8 +785,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(/* wind-up */ true,
-                                settings.isShowSatelliteLayer());
+                        mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer());
                     } else {
                         mapOptions = null;
                     }
@@ -797,8 +802,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(/* wind-up */ false,
-                        settings.isShowSatelliteLayer());
+                mapOptions = getMapOptions(/* wind-up */ false, settings.isShowSatelliteLayer());
             } else {
                 mapOptions = null;
             }
@@ -855,12 +859,28 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             @Override
             public void run() {
                 MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer);
+                mapOptions.setRenderingType(RenderingType.VECTOR);
                 map = new MapWidget(mapOptions);
                 map.getElement().setId("googleMapsArea");
                 rootPanel.add(map, 0, 0);
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
                 adjustLeftControlsIndent();
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
+                final StyledMapTypeOptions styledMapTypeOptions = StyledMapTypeOptions.newInstance();
+                styledMapTypeOptions.setName(SAILING_ANALYTICS_MAP_TYPE_ID);
+                MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
+                // hide all transit lines including ferry lines
+                mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
+                // hide points of interest
+                mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
+                // simplify road display
+                mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
+                // set water color
+                mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
+                final StyledMapType styledMapType = StyledMapType.newInstance(ArrayHelper.toJsArray(mapTypeStyles), styledMapTypeOptions);
+                map.setCustomMapType(SAILING_ANALYTICS_MAP_TYPE_ID, styledMapType);
+                map.getMapTypeRegistry().set(SAILING_ANALYTICS_MAP_TYPE_ID, styledMapType);
+                map.setMapTypeId(getMapTypeId(/* wind up */ false, showSatelliteLayer));
                 map.setSize("100%", "100%");
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                     @Override
@@ -3648,11 +3668,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private LatLngBounds getDefaultZoomBounds() {
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
-
+    
     private MapOptions getMapOptions(boolean windUp, boolean showSatelliteLayer) {
         MapOptions mapOptions = MapOptions.newInstance();
         // Google Maps API does not support rotated satellite images
-        mapOptions.setMapTypeId(showSatelliteLayer && !windUp ? MapTypeId.SATELLITE : MapTypeId.ROADMAP);
+        mapOptions.setMapTypeId(getMapTypeId(windUp, showSatelliteLayer));
         mapOptions.setScrollWheel(true);
         mapOptions.setMapTypeControl(false);
         mapOptions.setPanControl(false);
@@ -3665,20 +3685,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             mapOptions.setMinZoom(0);
         }
-        MapTypeStyle[] mapTypeStyles = new MapTypeStyle[4];
-
-        // hide all transit lines including ferry lines
-        mapTypeStyles[0] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.TRANSIT);
-        // hide points of interest
-        mapTypeStyles[1] = GoogleMapStyleHelper.createHiddenStyle(MapTypeStyleFeatureType.POI);
-        // simplify road display
-        mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
-        // set water color
-        mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
-        mapOptions.setMapTypeStyles(mapTypeStyles);
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
         return mapOptions;
+    }
+
+    private String getMapTypeId(boolean windUp, boolean showSatelliteLayer) {
+        return showSatelliteLayer && !windUp ? MapTypeId.SATELLITE.toString() : SAILING_ANALYTICS_MAP_TYPE_ID;
     }
 
     /**
