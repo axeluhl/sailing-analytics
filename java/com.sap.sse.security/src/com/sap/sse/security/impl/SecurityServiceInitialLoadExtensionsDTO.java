@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 
 /**
  * Starting with the CORS filter configurations, this and future extensions of the {@link SecurityService}'s
@@ -29,12 +30,28 @@ public class SecurityServiceInitialLoadExtensionsDTO implements Serializable {
 
     private final ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName;
     
-    public SecurityServiceInitialLoadExtensionsDTO(ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName) {
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+    
+    public SecurityServiceInitialLoadExtensionsDTO(ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName,
+            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication,
+            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation) {
         super();
         this.corsFilterConfigurationsByReplicaSetName = corsFilterConfigurationsByReplicaSetName;
+        this.clientIPBasedLockingAndBanningForBearerTokenAuthentication = clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+        this.clientIPBasedLockingAndBanningForUserCreation = clientIPBasedLockingAndBanningForUserCreation;
     }
     
     ConcurrentMap<String, Pair<Boolean, Set<String>>> getCorsFilterConfigurationsByReplicaSetName() {
         return corsFilterConfigurationsByReplicaSetName;
+    }
+
+    ConcurrentMap<String, LockingAndBanning> getClientIPBasedLockingAndBanningForBearerTokenAuthentication() {
+        return clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    }
+
+    ConcurrentMap<String, LockingAndBanning> getClientIPBasedLockingAndBanningForUserCreation() {
+        return clientIPBasedLockingAndBanningForUserCreation;
     }
 }

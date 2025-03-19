@@ -129,4 +129,6 @@ public interface ReplicableSecurityService extends SecurityService {
     Void internalSuccessfulBearerTokenAuthentication(String clientIP);
 
     LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP);
+
+    LockingAndBanning internalRecordUserCreationFromClientIP(String clientIP);
 }
