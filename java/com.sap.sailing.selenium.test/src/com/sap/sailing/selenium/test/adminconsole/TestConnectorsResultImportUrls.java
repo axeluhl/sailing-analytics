@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestConnectorsResultImportUrls extends AbstractSeleniumTest {
 
-    private final static String TEST_URL = "http://test.test.de";
+    private final static String TEST_URL = "https://www.example.org";
     private final static String TEST_URL_PROVIDER_LABEL = "FREG HTML Score Importer";
 
     @Override
