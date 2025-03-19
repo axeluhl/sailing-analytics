@@ -1,11 +1,13 @@
-package com.sap.sailing.server.gateway;
+package com.sap.sse.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sap.sse.common.Util;
+
 /**
  * A utility class for parsing the request parameters of a HTTP request in a type safe way.
- * @author Frank
- *
+ * 
+ * @author Frank Mittag
  */
 public abstract class HttpRequestUtils {
     private static final IntParser INT_PARSER = new IntParser();
@@ -14,7 +16,34 @@ public abstract class HttpRequestUtils {
     private static final DoubleParser DOUBLE_PARSER = new DoubleParser();
     private static final BooleanParser BOOLEAN_PARSER = new BooleanParser();
     private static final StringParser STRING_PARSER = new StringParser();
+    private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
+    private static final String USER_AGENT_HEADER = "User-Agent";
 
+    /**
+     * From an {@link HttpServletRequest} get the client IP address. This is determined in one of two ways:
+     * If an {@code X-Forwarded-For} HTTP header is found, its value's first element is returned which
+     * represents the IP of the original client (and not that of a proxy in between). If no such header is
+     * found or the header is empty, the {@link HttpServletRequest#getRemoteAddr()} is returned.
+     */
+    public static String getClientIP(HttpServletRequest req) {
+        final String xForwardedFor = req.getHeader(X_FORWARDED_FOR_HEADER);
+        final String result;
+        if (Util.hasLength(xForwardedFor)) {
+            final String[] ips = xForwardedFor.split(", *");
+            result = ips[ips.length-1];
+        } else {
+            result = req.getRemoteAddr();
+        }
+        return result;
+    }
+    
+    /**
+     * @return the value of the "User-Agent" header; may be {@code null} or an empty string
+     */
+    public static String getUserAgent(HttpServletRequest req) {
+        return req.getHeader(USER_AGENT_HEADER);
+    }
+    
     /**
      * Get an Integer parameter, or <code>null</code> if not present. Throws an exception if it the parameter value
      * isn't a number.
@@ -632,5 +661,4 @@ public abstract class HttpRequestUtils {
             return parameters;
         }
     }
-
 }

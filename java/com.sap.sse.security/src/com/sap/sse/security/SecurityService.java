@@ -49,6 +49,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -860,7 +861,42 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 
-    void failedPasswordAuthentication(User user);
+    LockingAndBanning failedPasswordAuthentication(User user);
 
     void successfulPasswordAuthentication(User user);
+
+    /**
+     * Records failure to authenticate with a bearer token, with the request coming from {@code clientIP} and the user
+     * agent as provided by argument {@code userAgent}. The locking will start with a minimum locking/banning duration
+     * (typically one second). After the locking duration expires, the record of the {@code clientIP/userAgent}
+     * combination is kept around for another locking duration, so that if another call to this method with an equal
+     * combination of {@code clientIP} and {@code userAgent} is made, that combination will remain
+     * {@link #isClientIPAndUserAgentLocked(String) locked}, and the locking duration is increased.
+     * <p>
+     * 
+     * If two locking durations have expired without this method being invoked for equal {@cod eclientIP} and
+     * {@code userAgent}, the locking record including its last locking duration is expunged from the internal data
+     * structures, avoiding garbage piling up.
+     * @return TODO
+     */
+    LockingAndBanning failedBearerTokenAuthentication(String clientIP);
+
+    /**
+     * Call this when the combination of {@code clientIP} and {@code userAgent} was not
+     * {@link #isClientIPAndUserAgentLocked(String) locked} and a successful bearer token-based
+     * authentication attempt was made. This will remove the locking record for the combination,
+     * and in case of an unsuccessful future attempt the locking duration will start at
+     * the low default.
+     */
+    void successfulBearerTokenAuthentication(String clientIP);
+
+    /**
+     * Used in conjunction with {@link #failedBearerTokenAuthentication(String)} and
+     * {@link #successfulBearerTokenAuthentication(String)}. If and only if a locking state for the combination
+     * of {@code clientIP} and {@code userAgent} is known and still locked, {@code true} is returned. Unlocking
+     * will bappen by calling {@link #successfulBearerTokenAuthentication(String)} with an equal combination
+     * of {@code clientIP} and {@code userAgent}. Invoking {@link #failedBearerTokenAuthentication(String)}
+     * will establish (if not yet locked) or extend the locking duration for the combination.
+     */
+    boolean isClientIPAndUserAgentLocked(String clientIP);
 }

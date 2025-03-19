@@ -93,6 +93,15 @@ public class SecurityResourceTest {
     }
     
     @Test
+    public void testNullClientIP() {
+        assertFalse(service.isClientIPAndUserAgentLocked(null)); // ensure there is no exception being thrown
+        service.failedBearerTokenAuthentication(null);
+        assertTrue(service.isClientIPAndUserAgentLocked(null));
+        service.successfulBearerTokenAuthentication(null);
+        assertFalse(service.isClientIPAndUserAgentLocked(null));
+    }
+    
+    @Test
     public void testCheckCurrentUserAnyExplicitPermissionsForNullObject() {
         assertTrue(authenticatedAdmin.execute(()->service.hasCurrentUserOneOfExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ)));
         authenticatedAdmin.execute(()->service.checkCurrentUserHasOneOfExplicitPermissions(/* object */ null, HasPermissions.DefaultActions.READ));
@@ -269,7 +278,7 @@ public class SecurityResourceTest {
         assertNotNull(user);
         assertEquals(USERNAME, user.getName());
         final Subject subject = SecurityUtils.getSubject();
-        subject.login(new BearerAuthenticationToken(accessToken));
+        subject.login(new BearerAuthenticationToken(accessToken, /* clientIP */ null, /* userAgent */ null));
         assertTrue(subject.isAuthenticated());
         assertEquals(USERNAME, subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));

@@ -2,6 +2,7 @@ package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class LockingAndBanningImpl implements LockingAndBanning {
     private static final long serialVersionUID = 3547356744366236677L;
@@ -10,7 +11,7 @@ public class LockingAndBanningImpl implements LockingAndBanning {
     
     /**
      * An always valid time point which may be in the past. If it is in the future,
-     * {@link #isPasswordAuthenticationLocked()} will return {@code true}.
+     * {@link #isAuthenticationLocked()} will return {@code true}.
      */
     private TimePoint lockedUntil;
     
@@ -43,13 +44,16 @@ public class LockingAndBanningImpl implements LockingAndBanning {
     }
 
     @Override
-    public void successfulPasswordAuthentication() {
+    public boolean successfulPasswordAuthentication() {
+        final Duration oldLockingDelay = nextLockingDelay;
         nextLockingDelay = DEFAULT_INITIAL_LOCKING_DELAY;
+        final TimePoint oldLockedUntil = lockedUntil;
         lockedUntil = TimePoint.BeginningOfTime;
+        return !Util.equalsWithNull(oldLockingDelay, nextLockingDelay) || !Util.equalsWithNull(oldLockedUntil, lockedUntil);
     }
 
     @Override
-    public boolean isPasswordAuthenticationLocked() {
+    public boolean isAuthenticationLocked() {
         return TimePoint.now().before(lockedUntil);
     }
 
@@ -60,5 +64,19 @@ public class LockingAndBanningImpl implements LockingAndBanning {
 
     public Duration getNextLockingDelay() {
         return nextLockingDelay;
+    }
+    
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        if (isAuthenticationLocked()) {
+            result.append("locked until ");
+            result.append(getLockedUntil());
+        } else {
+            result.append("unlocked");
+        }
+        result.append(", next locking duration: ");
+        result.append(getNextLockingDelay());
+        return result.toString();
     }
 }

@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -171,6 +172,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
 import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
@@ -185,6 +187,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -249,6 +252,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final PermissionChangeListeners permissionChangeListeners;
     
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
+    
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanning;
+    private final static String CLIENT_IP_NULL_ESCAPE = UUID.randomUUID().toString();
 
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -297,6 +303,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
+        this.clientIPBasedLockingAndBanning = new ConcurrentHashMap<>();
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.subscriptionPlanProvider = subscriptionPlanProvider;
@@ -1162,7 +1169,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        if (user.getLockingAndBanning().isPasswordAuthenticationLocked()) {
+        if (user.getLockingAndBanning().isAuthenticationLocked()) {
             throw new UserManagementException("Password authentication is locked for user "+username);
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
@@ -1178,18 +1185,22 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public void failedPasswordAuthentication(User user) {
-        apply(s->s.internalFailedPasswordAuthentication(user.getName()));
+    public LockingAndBanning failedPasswordAuthentication(User user) {
+        return apply(s->s.internalFailedPasswordAuthentication(user.getName()));
     }
 
     @Override
-    public Void internalFailedPasswordAuthentication(String username) {
+    public LockingAndBanning internalFailedPasswordAuthentication(String username) {
         final User user = getUserByName(username);
+        final LockingAndBanning lockingAndBanning;
         if (user != null) {
-            user.getLockingAndBanning().failedPasswordAuthentication();
+            lockingAndBanning = user.getLockingAndBanning();
+            lockingAndBanning.failedPasswordAuthentication();
             store.updateUser(user);
+        } else {
+            lockingAndBanning = null;
         }
-        return null;
+        return lockingAndBanning;
     }
 
     @Override
@@ -1201,10 +1212,70 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public Void internalSuccessfulPasswordAuthentication(String username) {
         final User user = getUserByName(username);
         if (user != null) {
-            user.getLockingAndBanning().successfulPasswordAuthentication();
-            store.updateUser(user);
+            if (user.getLockingAndBanning().successfulPasswordAuthentication()) {
+                store.updateUser(user);
+            }
         }
         return null;
+    }
+
+    @Override
+    public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
+        return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+    }
+    
+    @Override
+    public LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
+        lockingAndBanning.failedPasswordAuthentication();
+        // schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects;
+        // schedule it in two times the locking expiry because if no authentication failure occurs for that IP/user agent
+        // combination, we will entirely remove the LockingAndBanning from the map, resetting that IP/user agent combination
+        // to a short default locking duration again; this way, if during the double expiration time another failed authentication
+        // attempt is registered, we can still grow the locking duration because we have kept the LockingAndBanning
+        // object available for a bit longer. Furthermore, the BearerTokenRealm will let authentication requests get to here
+        // only if not locked, so if we were to expunge entries immediately as they unlock, the locking duration could never grow.
+        final long millisUntilLockingExpiry = 2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis();
+        if (millisUntilLockingExpiry > 0) {
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                    ()->{
+                        final LockingAndBanning lab = clientIPBasedLockingAndBanning.get(escapeNullClientIP(clientIP));
+                        if (lab != null && !lab.isAuthenticationLocked()) {
+                            clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
+                            logger.info("Removed client IP authentication lock for "+clientIP+"; "
+                                    +clientIPBasedLockingAndBanning.size()
+                                    +" locked client IPs remaining");
+                        }
+                    },
+                    millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
+        } else { // a bit weird because we just locked it; suggests very slow execution; yet, let's clean up...
+            clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
+        }
+        return lockingAndBanning;
+    }
+
+    private String escapeNullClientIP(String clientIP) {
+        return clientIP==null?CLIENT_IP_NULL_ESCAPE:clientIP;
+    }
+
+    @Override
+    public void successfulBearerTokenAuthentication(String clientIP) {
+        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP));
+    }
+    
+    @Override
+    public Void internalSuccessfulBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.remove(escapeNullClientIP(clientIP));
+        if (lockingAndBanning != null) {
+            logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isClientIPAndUserAgentLocked(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanning.get(escapeNullClientIP(clientIP));
+        return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
     }
 
     @Override
