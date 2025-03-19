@@ -37,7 +37,7 @@ public class SecurityApi {
         queryParams.put("company", company);
         // queryParams.put("email", email); //if email is provided a validation mail would be sent
         queryParams.put("password", password);
-        lastCreateUser = now;
+        lastCreateUser = TimePoint.now();
         return new AccessToken(ctx.post(CREATE_USER_URL, queryParams));
     }
 

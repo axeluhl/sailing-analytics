@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.pages.adminconsole.usermanagement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.ElementNotSelectableException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -19,6 +20,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.security.SecurityService;
 
 public class UserManagementPanelPO extends PageArea {
+    private static final Logger logger = Logger.getLogger(UserManagementPanelPO.class.getName());
+
     @FindBy(how = BySeleniumId.class, using = "UsersTable")
     private WebElement userTable;
     @FindBy(how = BySeleniumId.class, using = "CreateUserButton")
@@ -84,21 +87,31 @@ public class UserManagementPanelPO extends PageArea {
     }
     
     public CreateUserDialogPO getCreateUserDialog() {
-        createUserButton.click();
-        final WebElement dialog = findElementBySeleniumId(this.driver, "CreateUserDialog");
-        return new CreateUserDialogPO(this.driver, dialog);
-    }
-    
-    public void createUserWithEqualUsernameAndPassword(String usernameAndPassword) {
         final TimePoint now = TimePoint.now();
         if (lastCreateUser != null && now.minus(SecurityService.DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION).before(lastCreateUser)) {
             try {
-                Thread.sleep(now.until(lastCreateUser.plus(SecurityService.DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION)).asMillis());
+                final long sleepTimeMillis = now.until(lastCreateUser.plus(SecurityService.DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION)).asMillis();
+                logger.info("Waiting "+sleepTimeMillis+"ms to create next user in "+this);
+                Thread.sleep(sleepTimeMillis);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            logger.info("No wait required in dialog "+this);
         }
-        lastCreateUser = now;
+        createUserButton.click();
+        final WebElement dialog = findElementBySeleniumId(this.driver, "CreateUserDialog");
+        return new CreateUserDialogPO(this.driver, dialog) {
+            @Override
+            public void clickOkButtonOrThrow() {
+                super.clickOkButtonOrThrow();
+                lastCreateUser = TimePoint.now();
+            }
+        };
+    }
+    
+    public void createUserWithEqualUsernameAndPassword(String usernameAndPassword) {
+        logger.info("Starting process to create user "+usernameAndPassword);
         final CreateUserDialogPO createUserDialog = getCreateUserDialog();
         createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword, usernameAndPassword);
         createUserDialog.clickOkButtonOrThrow();
