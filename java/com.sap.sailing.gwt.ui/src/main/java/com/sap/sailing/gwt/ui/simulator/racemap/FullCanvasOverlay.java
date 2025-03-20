@@ -73,7 +73,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-        Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
+        Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest()); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
         Point ne = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()));

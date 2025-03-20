@@ -76,14 +76,14 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
         LatLngBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
             for (ZoomTypes type : typesToConsiderOnZoom.getValues()) {
-                //Calculate the new bounds and extend the result
-                LatLngBounds calculatedBounds = type.calculateNewBounds(forMap);
+                // Calculate the new bounds and extend the result
+                LatLngBounds calculatedBounds = type.calculateNewBounds(forMap); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
                 if (calculatedBounds != null) {
                     if (newBounds == null) {
                         newBounds = calculatedBounds;
                     } else {
-                        newBounds.extend(calculatedBounds.getNorthEast());
-                        newBounds.extend(calculatedBounds.getSouthWest());
+                        newBounds.extend(calculatedBounds.getNorthEast()); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                        newBounds.extend(calculatedBounds.getSouthWest()); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
                     }
                 }
             }

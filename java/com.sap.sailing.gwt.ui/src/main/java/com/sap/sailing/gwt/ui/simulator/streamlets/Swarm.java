@@ -106,7 +106,6 @@ public class Swarm implements TimeListener {
                 }
             };
         }
-
         // the map already exists, ensure swam is started
         if (map.getBounds() != null) {
             startSwarmIfNecessaryAndUpdateProjection();
@@ -256,7 +255,7 @@ public class Swarm implements TimeListener {
 
     private void updateBounds() {
         LatLngBounds fieldBounds = this.field.getFieldCorners();
-        final LatLngBounds mapBounds = map.getBounds();
+        final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
         swarmOffScreen = !fieldBounds.intersects(mapBounds);
         visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
         Vector boundsSWpx = this.projection.latlng2pixel(visibleBoundsOfField.getSouthWest());

@@ -28,7 +28,7 @@ public class Mercator {
         Vector pointSW;
         Vector pointNE;
         int canvasHeight = canvas.getCanvas().getOffsetHeight();
-        LatLng mapSW = this.map.getBounds().getSouthWest();
+        LatLng mapSW = this.map.getBounds().getSouthWest(); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
         LatLng mapNE = this.map.getBounds().getNorthEast();
         pointSW = this.sphere2plane(mapSW);
         pointNE = this.sphere2plane(mapNE);
