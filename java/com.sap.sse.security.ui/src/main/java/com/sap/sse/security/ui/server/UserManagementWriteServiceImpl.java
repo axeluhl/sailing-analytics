@@ -281,8 +281,11 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                                     company, getLocaleFromLocaleName(localeName), validationBaseURL,
                                     getSecurityService().getDefaultTenantForCurrentUser(), clientIP);
                             return newUser;
-                        } catch (UserManagementException | UserGroupManagementException e) {
-                            logger.log(Level.SEVERE, "Error creating user " + username, e);
+                        } catch (UserManagementException e) {
+                            logger.severe("Error creating user " + username+": "+e.getMessage());
+                            throw e;
+                        } catch (UserGroupManagementException e) {
+                            logger.severe("Error creating user " + username+": "+e.getMessage());
                             throw new UserManagementException(e.getMessage());
                         }
                     }
