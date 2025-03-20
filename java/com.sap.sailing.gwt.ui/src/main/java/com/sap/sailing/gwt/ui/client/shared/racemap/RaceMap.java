@@ -782,10 +782,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 final Bearing lastCombinedTrueWindFromDirection = getLastCombinedTrueWindFromDirection();
                 if (lastCombinedTrueWindFromDirection != null) {
                     // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
-                    coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
+                    coordinateSystem.setCoordinateSystem(new RotatedCoordinateSystem(
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
                         mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer());
+                        mapOptions.setHeading((int) lastCombinedTrueWindFromDirection.getDegrees());
                     } else {
                         mapOptions = null;
                     }
@@ -803,6 +804,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             if (map != null) {
                 mapOptions = getMapOptions(/* wind-up */ false, settings.isShowSatelliteLayer());
+                mapOptions.setHeading(0);
             } else {
                 mapOptions = null;
             }
@@ -2084,14 +2086,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     BoatDTO boat = competitorSelection.getBoat(visibleLeaderInfo.getB());
                     Distance distanceFromBoatPosition = boat.getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
-                    double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
-                    LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
-                    LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition,
-                            coordinateSystem.mapDegreeBearing(bearingOfBoatInDeg), distanceFromBoatPosition);
+                    final Position boatPosition = lastBoatFix.position;
+                    final Position posAheadOfFirstBoat = boatPosition.translateRhumb(new DegreeBearingImpl(lastBoatFix.speedWithBearing.bearingInDegrees), distanceFromBoatPosition);
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
-                    double bearingOfCombinedWindInDeg = windFix.trueWindBearingDeg;
-                    double rotatedBearingDeg1 = 0.0;
-                    double rotatedBearingDeg2 = 0.0;
+                    final Bearing bearingOfCombinedWind = new DegreeBearingImpl(windFix.trueWindBearingDeg);
+                    Bearing rotatedBearing1 = Bearing.NORTH;
+                    Bearing rotatedBearing2 = Bearing.NORTH;
                     if (lastBoatFix.legType == null) {
                         GWT.log("no legType to display advantage line; competitor was "+visibleLeaderInfo.getB().getName()+
                                 ", fix from "+lastBoatFix.timepoint);
@@ -2099,31 +2099,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         switch (lastBoatFix.legType) {
                         case UPWIND:
                         case DOWNWIND:
-                            rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                            if (rotatedBearingDeg1 >= 360.0) {
-                                rotatedBearingDeg1 -= 360.0;
-                            }
-                            rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                            if (rotatedBearingDeg2 < 0.0) {
-                                rotatedBearingDeg2 += 360.0;
-                            }
+                            rotatedBearing1 = bearingOfCombinedWind.add(Bearing.EAST);
+                            rotatedBearing2 = bearingOfCombinedWind.add(Bearing.WEST);
                             break;
                         case REACHING:
-                            rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                            if (rotatedBearingDeg1 >= 360.0) {
-                                rotatedBearingDeg1 -= 360.0;
-                            }
-                            rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                            if (rotatedBearingDeg2 < 0.0) {
-                                rotatedBearingDeg2 += 360.0;
-                            }
+                            final Bearing legBearing = new DegreeBearingImpl(legInfoDTO.legBearingInDegrees);
+                            rotatedBearing1 = legBearing.add(Bearing.EAST);
+                            rotatedBearing2 = legBearing.add(Bearing.WEST);
                             break;
                         }
                         MVCArray<LatLng> nextPath = MVCArray.newInstance();
-                        LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                                coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLength.scale(0.5));
-                        LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                                coordinateSystem.mapDegreeBearing(rotatedBearingDeg2), advantageLineLength.scale(0.5));
+                        final Position advantageLinePos1 = posAheadOfFirstBoat.translateRhumb(rotatedBearing1, advantageLineLength.scale(0.5));
+                        final Position advantageLinePos2 = posAheadOfFirstBoat.translateRhumb(rotatedBearing2, advantageLineLength.scale(0.5));
                         if (advantageLine == null) {
                             PolylineOptions options = PolylineOptions.newInstance();
                             options.setClickable(true);
@@ -2135,13 +2122,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             advantageLine = Polyline.newInstance(options);
                             advantageTimer = new AdvantageLineAnimator(advantageLine);
                             MVCArray<LatLng> pointsAsArray = MVCArray.newInstance();
-                            pointsAsArray.insertAt(0, advantageLinePos1);
-                            pointsAsArray.insertAt(1, advantageLinePos2);
+                            pointsAsArray.insertAt(0, coordinateSystem.toLatLng(advantageLinePos1));
+                            pointsAsArray.insertAt(1, coordinateSystem.toLatLng(advantageLinePos2));
                             advantageLine.setPath(pointsAsArray);
                             advantageLine.setMap(map);
                             Hoverline advantageHoverline = new Hoverline(advantageLine, options, this);
                             advantageLineMouseOverHandler = new AdvantageLineMouseOverMapHandler(
-                                    bearingOfCombinedWindInDeg, new Date(windFix.measureTimepoint));
+                                    bearingOfCombinedWind.getDegrees(), new Date(windFix.measureTimepoint));
                             advantageLine.addMouseOverHandler(advantageLineMouseOverHandler);
                             advantageHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
                                 @Override
@@ -2150,11 +2137,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 }
                             });
                         } else {
-                            nextPath.push(advantageLinePos1);
-                            nextPath.push(advantageLinePos2);
+                            nextPath.push(coordinateSystem.toLatLng(advantageLinePos1));
+                            nextPath.push(coordinateSystem.toLatLng(advantageLinePos2));
                             advantageTimer.setNextPositionAndTransitionMillis(nextPath, timeForPositionTransitionMillis);
                             if (advantageLineMouseOverHandler != null) {
-                                advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWindInDeg);
+                                advantageLineMouseOverHandler.setTrueWindBearing(bearingOfCombinedWind.getDegrees());
                                 advantageLineMouseOverHandler.setDate(new Date(windFix.measureTimepoint));
                             }
                         }
@@ -3680,11 +3667,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapOptions.setScaleControl(true);
         mapOptions.setDisableDefaultUi(true);
         mapOptions.setFullscreenControl(false);
-        if (windUp) {
-            mapOptions.setMinZoom(8);
-        } else {
-            mapOptions.setMinZoom(0);
-        }
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
         return mapOptions;
