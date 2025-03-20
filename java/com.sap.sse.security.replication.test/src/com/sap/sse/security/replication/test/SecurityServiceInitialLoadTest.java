@@ -44,7 +44,7 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(null, /* corsFilterConfigurationTracker */ null, userStore,
                         accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
                 newMaster.createSimpleUser(username, email, password, fullName, company,
-                        /* validationBaseURL */ Locale.ENGLISH, null, null);
+                        /* validationBaseURL */ Locale.ENGLISH, null, null, /* clientIP */ null);
                 accessToken = newMaster.createAccessToken(username);
                 return newMaster;
             }

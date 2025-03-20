@@ -92,7 +92,7 @@ public class LoginTest {
         final String username = "TheNewUser";
         final String specialUserGroupName1 = "TheSpecialUserGroup1";
         final String specialUserGroupName2 = "TheSpecialUserGroup2";
-        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null, /* clientIP */ null);
         final TypeRelativeObjectIdentifier myServerTypeRelativeObjectIdentifier = new TypeRelativeObjectIdentifier("myserver");
         final WildcardPermission createObjectPermissionOnMyserver = SecuredSecurityTypes.SERVER.getPermissionForTypeRelativeIdentifier(ServerActions.CREATE_OBJECT,
                 myServerTypeRelativeObjectIdentifier);
@@ -123,7 +123,7 @@ public class LoginTest {
         final String username = "TheNewUser";
         final String specialUserGroupName1 = "TheSpecialUserGroup1";
         final String specialUserGroupName2 = "TheSpecialUserGroup2";
-        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+        final User user = securityService.createSimpleUser(username, "u@a.b", "Humba", "The New User", /* company */ null, /* locale */ null, /* validationBaseURL */ null, /* owning group */ null, /* clientIP */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username+SecurityService.TENANT_SUFFIX);
         final UserGroup specialUserGroup1 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName1);
         final UserGroup specialUserGroup2 = securityService.createUserGroup(UUID.randomUUID(), specialUserGroupName2);
@@ -141,7 +141,7 @@ public class LoginTest {
     public void testAclAnonUserGroup() throws UserManagementException, MailException, UserGroupManagementException {
         final String username = "TheNewUser";
         securityService.createSimpleUser(username, "u@a.b", "Humba", username, /* company */ null,
-                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null, /* clientIP */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         permissionMap.put(defaultUserGroup, new HashSet<>(Arrays.asList(new String[] { "!READ", "UPDATE" })));
@@ -180,7 +180,7 @@ public class LoginTest {
         final RoleDefinition adminRoleDefinition = securityService.getOrCreateRoleDefinitionFromPrototype(AdminRole.getInstance(), /* makeReadableForAll */ true);
         final UserGroup adminTenant = securityService.getUserGroupByName(admin.getName()+SecurityService.TENANT_SUFFIX);
         securityService.createSimpleUser(username, "u@a.b", password, username, /* company */ null,
-                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null);
+                /* locale */ null, /* validationBaseURL */ null, /* owning group */ null, /* clientIP */ null);
         final UserGroup defaultUserGroup = securityService.getUserGroupByName(username + SecurityService.TENANT_SUFFIX);
         final QualifiedObjectIdentifier myId = my.getIdentifier();
         // grant admin role to user unqualified, implying READ on all objects including the "my" SERVER

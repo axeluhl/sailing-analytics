@@ -73,7 +73,7 @@ public class SecurityResourceTest {
             Activator.setSecurityService(service);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
-                    /* validation URL */ Locale.ENGLISH, null, null);
+                    /* validation URL */ Locale.ENGLISH, null, null, /* clientIP */ null);
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken(USERNAME, PASSWORD));
             Session session = authenticatedAdmin.getSession();
@@ -94,11 +94,11 @@ public class SecurityResourceTest {
     
     @Test
     public void testNullClientIP() {
-        assertFalse(service.isClientIPAndUserAgentLocked(null)); // ensure there is no exception being thrown
+        assertFalse(service.isClientIPLockedForBearerTokenAuthentication(null)); // ensure there is no exception being thrown
         service.failedBearerTokenAuthentication(null);
-        assertTrue(service.isClientIPAndUserAgentLocked(null));
+        assertTrue(service.isClientIPLockedForBearerTokenAuthentication(null));
         service.successfulBearerTokenAuthentication(null);
-        assertFalse(service.isClientIPAndUserAgentLocked(null));
+        assertFalse(service.isClientIPLockedForBearerTokenAuthentication(null));
     }
     
     @Test

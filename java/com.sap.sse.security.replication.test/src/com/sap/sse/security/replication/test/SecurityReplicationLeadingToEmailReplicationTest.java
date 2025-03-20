@@ -120,7 +120,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         masterSecurityService.createSimpleUser(username, email, password, 
-                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null, /* clientIP */ null);
         masterSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
@@ -146,7 +146,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         replicaSecurityService.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null, /* clientIP */ null);
         replicaSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();

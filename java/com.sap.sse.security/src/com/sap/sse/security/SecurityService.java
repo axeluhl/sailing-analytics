@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
@@ -19,6 +20,7 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.http.HttpHeaderUtil;
@@ -59,6 +61,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.subscription.Subscription;
 import com.sap.sse.security.shared.subscription.SubscriptionPlan;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.util.HttpRequestUtils;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -78,6 +81,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String ALL_USERNAME = "<all>";
     String TENANT_SUFFIX = "-tenant";
     String REPLICABLE_FULLY_QUALIFIED_CLASSNAME = SecurityServiceImpl.class.getName();
+    /**
+     * The default locking duration per client IP address for user creation.
+     * 
+     * @see HttpRequestUtils#getClientIP(HttpServletRequest)
+     */
+    Duration DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION = Duration.ONE_MINUTE;
 
     SecurityManager getSecurityManager();
 
@@ -199,9 +208,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * 
      * @param validationBaseURL
      *            if <code>null</code>, no validation will be attempted
+     * @param requestClientIP
+     *            used for throttling user creation requests coming from the same IP address
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company,
-            Locale locale, String validationBaseURL, UserGroup userOwner)
+            Locale locale, String validationBaseURL, UserGroup userOwner, String requestClientIP)
             throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
@@ -609,8 +620,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination, RoleCopyListener callback);
 
-    User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
-            Callable<User> createActionReturningCreatedObject);
+    User checkPermissionForUserCreationAndRevertOnErrorForUserCreation(String username,
+            Callable<User> createActionReturningCreatedObject) throws UserManagementException;
 
     /**
      * Do only use this, if it is not possible to get the actual instance of the object to delete using the
@@ -871,7 +882,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * (typically one second). After the locking duration expires, the record of the {@code clientIP/userAgent}
      * combination is kept around for another locking duration, so that if another call to this method with an equal
      * combination of {@code clientIP} and {@code userAgent} is made, that combination will remain
-     * {@link #isClientIPAndUserAgentLocked(String) locked}, and the locking duration is increased.
+     * {@link #isClientIPLockedForBearerTokenAuthentication(String) locked}, and the locking duration is increased.
      * <p>
      * 
      * If two locking durations have expired without this method being invoked for equal {@cod eclientIP} and
@@ -883,7 +894,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * Call this when the combination of {@code clientIP} and {@code userAgent} was not
-     * {@link #isClientIPAndUserAgentLocked(String) locked} and a successful bearer token-based
+     * {@link #isClientIPLockedForBearerTokenAuthentication(String) locked} and a successful bearer token-based
      * authentication attempt was made. This will remove the locking record for the combination,
      * and in case of an unsuccessful future attempt the locking duration will start at
      * the low default.
@@ -898,5 +909,5 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * of {@code clientIP} and {@code userAgent}. Invoking {@link #failedBearerTokenAuthentication(String)}
      * will establish (if not yet locked) or extend the locking duration for the combination.
      */
-    boolean isClientIPAndUserAgentLocked(String clientIP);
+    boolean isClientIPLockedForBearerTokenAuthentication(String clientIP);
 }

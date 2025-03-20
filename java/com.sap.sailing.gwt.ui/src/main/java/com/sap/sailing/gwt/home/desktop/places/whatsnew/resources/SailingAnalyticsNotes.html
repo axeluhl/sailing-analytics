@@ -18,6 +18,10 @@
                 (<a href="mailto:support@sapsailing.com">support@sapsailing.com</a>).</li>
             <li>Failed password authentication attempts now lead to an increasing delay for accepting
                 the next password authentication attempt for the same user.</li>
+            <li>User account creation is limited now to one new user account per client IP address per minute.</li>
+            <li>A failing attempt to authenticate a request with a bearer token, as obtained from
+                <a href="https://sapsailing.com/security/api/restsecurity/access_token">/security/api/restsecurity/access_token</a>,
+                will ban the requesting client IP address for a gradually increasing amount of time.</li>
          </ul>
          <h5 class="articleSubheadline">February 2025</h5>
          <ul class="bulletList">

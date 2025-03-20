@@ -63,7 +63,7 @@ public class LeagueEventHierarchyOwnershipChangeTest {
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         Mockito.doReturn(securityService).when(service).getSecurityService();
         securityService.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
-                /* validation URL */ Locale.ENGLISH, null, null);
+                /* validation URL */ Locale.ENGLISH, null, null, /* clientIP */ null);
     }
     
     @Before
