@@ -10,6 +10,7 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  org.mockito.mockito-core,
  net.bytebuddy.byte-buddy;bundle-version="1.14.12",
  net.bytebuddy.byte-buddy-agent;bundle-version="1.14.12",
- org.objenesis;bundle-version="3.3.0"
+ org.objenesis;bundle-version="3.3.0",
+ com.nulab-inc.zxcvbn;bundle-version="1.9.0"
 Automatic-Module-Name: com.sap.sse.test
 Import-Package: javax.xml.bind

@@ -83,8 +83,13 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.nulabinc.zxcvbn.StandardDictionaries;
+import com.nulabinc.zxcvbn.StandardKeyboards;
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
+import com.nulabinc.zxcvbn.ZxcvbnBuilder;
+import com.nulabinc.zxcvbn.io.ClasspathResource;
+import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -282,6 +287,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * task that a while after lock expiry the record is expunged again from the map to avoid garbage piling up.
      */
     private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+
+    private final Zxcvbn passwordValidator;
     
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -361,6 +368,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
         aclResolver = new SecurityServiceAclResolver(accessControlStore);
+        try {
+            passwordValidator = createPasswordValidator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private Zxcvbn createPasswordValidator() throws IOException {
+        final ZxcvbnBuilder builder = new ZxcvbnBuilder();
+        builder.dictionaries(StandardDictionaries.loadAllDictionaries());
+        builder.keyboards(StandardKeyboards.loadAllKeyboards());
+        return builder
+                .keyboard(new SlantedKeyboardLoader("qwertz", new ClasspathResource("qwertz-keyboard.txt")).load())
+                .build();
     }
     
     @Override
@@ -1106,8 +1127,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (password == null) {
             result = false;
         } else {
-            final Zxcvbn zxcvbn = new Zxcvbn();
-            final Strength strength = zxcvbn.measure(password);
+            final Strength strength = passwordValidator.measure(password);
             result = strength.getGuessesLog10() > 8;
         }
         return result;
