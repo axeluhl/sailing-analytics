@@ -499,14 +499,14 @@
          unpack="false"/>
 
    <plugin
-         id="com.nulabinc.zxcvbn"
+         id="com.nulab-inc.zxcvbn"
          download-size="0"
          install-size="0"
          version="1.9.0"
          unpack="false"/>
 
    <plugin
-         id="com.nulabinc.zxcvbn.source"
+         id="com.nulab-inc.zxcvbn.source"
          download-size="0"
          install-size="0"
          version="1.9.0"
