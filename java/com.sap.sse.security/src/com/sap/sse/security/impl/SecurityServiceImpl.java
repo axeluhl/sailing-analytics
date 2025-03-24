@@ -1079,7 +1079,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (password == null || password.length() < 5) {
+        } else if (isPasswordGoodEnough(password)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -1097,6 +1097,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
         return result;
+    }
+
+    private boolean isPasswordGoodEnough(String password) {
+        return password == null || password.length() < 5;
     }
     
     /**
@@ -1183,7 +1187,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
-        if (newPassword == null || newPassword.length() < 5) {
+        if (isPasswordGoodEnough(newPassword)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct
