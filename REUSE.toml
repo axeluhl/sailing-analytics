@@ -1,0 +1,88 @@
+version = 1
+SPDX-PackageName = "sailing-analytics"
+SPDX-PackageSupplier = "SAP Open Source Program Office ospo@sap.com"
+SPDX-PackageDownloadLocation = "https://github.com/SAP/sailing-analytics"
+
+[[annotations]]
+path = "java/com.google.gwt.servlet/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.google.gwt.servlet contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/net.sf.marineapi/doc/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 doc contributors."
+SPDX-License-Identifier = "GPL-3.0-only"
+
+[[annotations]]
+path = "java/com.google.gwt.user/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.google.gwt.user contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/com.googlecode.java-diff-utils.test/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.googlecode.java-diff-utils.test contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 SAP SE or an SAP affiliate company and sailing-analytics contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/com.google.gwt.dev/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.google.gwt.dev contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/org.mp4parser.isoparser/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 org.mp4parser.isoparser contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/elemental2/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 elemental2 contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/org.json.simple/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 org.json.simple contributors."
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "java/org.openqa.selenium.osgi/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 org.openqa.selenium.osgi contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/com.google.gwt.ajaxloader/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.google.gwt.ajaxloader contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/com.googlecode.java-diff-utils/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 com.googlecode.java-diff-utils contributors."
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "java/com.sap.sailing.gwt.ui/qrcode/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 qrcode contributors."
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "ios/SAPTracker/src/xcode/SAPTracker/flags/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 flags contributors."
+SPDX-License-Identifier = "MIT"
