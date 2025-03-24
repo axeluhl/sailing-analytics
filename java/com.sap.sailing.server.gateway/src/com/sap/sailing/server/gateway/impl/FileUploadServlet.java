@@ -22,6 +22,7 @@ import org.json.simple.JSONObject;
 import com.sap.sse.common.fileupload.FileUploadConstants;
 import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
+import com.sap.sse.security.SecurityService;
 
 /**
  * Accepts a multi-part MIME encoded set of files. Returns an array of JSONObjects that each contain
@@ -42,10 +43,22 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
+        final JSONArray resultList = new JSONArray();
+        final SecurityService securityService = getSecurityService();
+        if (securityService.getCurrentUser() == null) {
+            final JSONObject noUserError = new JSONObject();
+            noUserError.put(FileUploadConstants.STATUS, Status.FORBIDDEN.name());
+            noUserError.put(FileUploadConstants.MESSAGE, "Must be authenticated to upload file");
+            resultList.add(noUserError);
+        } else if (!securityService.getCurrentUser().isEmailValidated()) {
+            final JSONObject noVaidatedEmailAddressError = new JSONObject();
+            noVaidatedEmailAddressError.put(FileUploadConstants.STATUS, Status.FORBIDDEN.name());
+            noVaidatedEmailAddressError.put(FileUploadConstants.MESSAGE, "File upload permitted only with validated e-mail address");
+            resultList.add(noVaidatedEmailAddressError);
+        }
         /**
          * Expects the HTTP header {@code Content-Length} to be set.
          */
-        final JSONArray resultList = new JSONArray();
         for (FileItem fileItem : fileItems) {
             final JSONObject result = new JSONObject();
             final String fileExtension;
@@ -81,6 +94,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
                 } else {
                     final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
                             .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
+                    logger.info("User "+securityService.getCurrentUser().getName()+" uploaded file "+fileName+", URI "+fileUri);
                     result.put(FileUploadConstants.FILE_NAME, fileNameUnderscoreEncoded);
                     result.put(FileUploadConstants.FILE_URI, fileUri.toString());
                     result.put(FileUploadConstants.CONTENT_TYPE, fileItem.getContentType());
