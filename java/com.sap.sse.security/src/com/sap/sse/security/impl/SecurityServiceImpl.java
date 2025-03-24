@@ -83,6 +83,8 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.nulabinc.zxcvbn.Strength;
+import com.nulabinc.zxcvbn.Zxcvbn;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -1079,7 +1081,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (isPasswordGoodEnough(password)) {
+        } else if (!isPasswordGoodEnough(password)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -1100,7 +1102,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     private boolean isPasswordGoodEnough(String password) {
-        return password == null || password.length() < 5;
+        final boolean result;
+        if (password == null) {
+            result = false;
+        } else {
+            final Zxcvbn zxcvbn = new Zxcvbn();
+            final Strength strength = zxcvbn.measure(password);
+            result = strength.getGuessesLog10() > 10;
+        }
+        return result;
     }
     
     /**
@@ -1187,7 +1197,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
-        if (isPasswordGoodEnough(newPassword)) {
+        if (!isPasswordGoodEnough(newPassword)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct
