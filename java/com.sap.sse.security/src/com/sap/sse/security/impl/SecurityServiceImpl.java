@@ -1108,7 +1108,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         } else {
             final Zxcvbn zxcvbn = new Zxcvbn();
             final Strength strength = zxcvbn.measure(password);
-            result = strength.getGuessesLog10() > 10;
+            result = strength.getGuessesLog10() > 8;
         }
         return result;
     }
