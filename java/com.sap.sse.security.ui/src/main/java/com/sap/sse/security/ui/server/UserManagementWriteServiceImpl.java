@@ -279,7 +279,8 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
                         try {
                             User newUser = getSecurityService().createSimpleUser(username, email, password, fullName,
                                     company, getLocaleFromLocaleName(localeName), validationBaseURL,
-                                    getSecurityService().getDefaultTenantForCurrentUser(), clientIP);
+                                    getSecurityService().getDefaultTenantForCurrentUser(), clientIP,
+                                    /* enforce strong password */ true);
                             return newUser;
                         } catch (UserManagementException e) {
                             logger.severe("Error creating user " + username+": "+e.getMessage());

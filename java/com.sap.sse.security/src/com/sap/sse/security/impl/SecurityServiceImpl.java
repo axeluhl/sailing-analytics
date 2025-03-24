@@ -275,7 +275,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     /**
      * Contains locking objects keyed by client IP addresses ({@code null} not allowed) that describe which client IPs
      * are locked for {@link User} creation, e.g., through the
-     * {@link #createSimpleUser(String, String, String, String, String, Locale, String, UserGroup, String)
+     * {@link #createSimpleUser(String, String, String, String, String, Locale, String, UserGroup, String, boolean)
      * createSimpleUser} method.<p>
      * 
      * When entering values into this map, the method entering it is responsible for also scheduling a background
@@ -455,7 +455,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
-                        null, /* clientIP */ null);
+                        null, /* clientIP */ null, /* enforce strong password */ false);
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition, /* transitive */ true);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
@@ -1070,7 +1070,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser,
-            String requestClientIP) throws UserManagementException, MailException, UserGroupManagementException {
+            String requestClientIP, boolean enforceStrongPassword) throws UserManagementException, MailException, UserGroupManagementException {
         if (requestClientIP != null) {
             checkAndRecordUserCreationFromClientIP(requestClientIP);
         }
@@ -1081,7 +1081,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (!isPasswordGoodEnough(password)) {
+        } else if (enforceStrongPassword && !isPasswordGoodEnough(password)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
