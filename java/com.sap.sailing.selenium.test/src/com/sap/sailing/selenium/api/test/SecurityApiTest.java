@@ -42,6 +42,7 @@ import com.sap.sse.security.util.SecuredServer.RoleDescriptor;
 import com.sap.sse.security.util.impl.SecuredServerImpl;
 
 public class SecurityApiTest extends AbstractSeleniumTest {
+    private static final String DUMMY_PASSWORD = "staIOYFS;'';]rt123";
     private static final String USERNAME = "max";
     private static final String USERNAME_FULL = "Max Mustermann";
 
@@ -55,7 +56,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     @Test
     public void testCreateAndGetUser() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        final AccessToken createUserResponse = securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, "start123");
+        final AccessToken createUserResponse = securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, DUMMY_PASSWORD);
         assertEquals("Responded username of createUser is different!", USERNAME, createUserResponse.getUsername());
         assertNotNull("Token is missing in reponse!", createUserResponse.getAccessToken());
         User getUserResponse = securityApi.getUser(adminCtx, USERNAME);
@@ -148,7 +149,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     public void testAddRoleToUser() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
-        securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, "start123");
+        securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, DUMMY_PASSWORD);
         securedServer.addRoleToUser(EventManagerRole.getInstance().getId(), USERNAME, /* qualified for group */ null, /* qualifiedForUserWithName */ USERNAME, /* transitive */ true);
         final Iterable<RoleDescriptor> roles = securedServer.getRoles(USERNAME);
         assertTrue(Util.stream(roles)

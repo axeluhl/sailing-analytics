@@ -24,7 +24,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
 
-    private static final String DONALDS_PASSWORD = "daisy0815";
+    private static final String DONALDS_PASSWORD = "daisy_LUYjl82.0815";
 
     private ApiContext ownerCtx;
 
