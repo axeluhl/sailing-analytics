@@ -13,6 +13,7 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
 import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
+import com.google.gwt.maps.client.overlays.MapCanvasProjection;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -30,7 +31,7 @@ public class Swarm implements TimeListener {
     private StreamletParameters parameters;
 
     private Timer loopTimer;
-    private Mercator projection;
+    private MapCanvasProjection mapProjection;
     private final VectorField field;
 
     private boolean zoomChanged = false;
@@ -85,6 +86,7 @@ public class Swarm implements TimeListener {
         this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
+        this.mapProjection = fullcanvas.getMapProjection();
         this.map = map;
         timer.addTimeListener(this);
         this.parameters = streamletPars;
@@ -123,11 +125,6 @@ public class Swarm implements TimeListener {
     }
 
     private void startSwarmIfNecessaryAndUpdateProjection() {
-        if (projection == null) {
-            projection = new Mercator(fullcanvas, map);
-        }
-        // ensure projection fits the map
-        projection.calibrate();
         // ensure canvas fits the map
         updateBounds();
         if (particles == null) {
@@ -182,7 +179,6 @@ public class Swarm implements TimeListener {
 
     public void stop() {
         removeBoundsChangeHandler();
-        projection.clearCanvas();
         loopTimer.cancel();
     }
 
@@ -206,7 +202,7 @@ public class Swarm implements TimeListener {
                     } else {
                         particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                     }
-                    particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                    particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToDivPixel(particle.currentPosition));
                     particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                     particle.v = v;
                     done = true;
@@ -245,9 +241,7 @@ public class Swarm implements TimeListener {
 
     public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
         this.zoomChanged |= zoomChanged;
-        if (this.zoomChanged) {
-            projection.clearCanvas();
-        } else {
+        if (!this.zoomChanged) {
             fullcanvas.setCanvasSettings();
         }
         this.swarmPause = swarmPause;
@@ -258,8 +252,8 @@ public class Swarm implements TimeListener {
         final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
         swarmOffScreen = !fieldBounds.intersects(mapBounds);
         visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
-        Vector boundsSWpx = this.projection.latlng2pixel(visibleBoundsOfField.getSouthWest());
-        Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
+        Vector boundsSWpx = new Vector(mapProjection.fromLatLngToDivPixel(visibleBoundsOfField.getSouthWest()));
+        Vector boundsNEpx = new Vector(mapProjection.fromLatLngToDivPixel(visibleBoundsOfField.getNorthEast()));
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         int newNParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
@@ -337,7 +331,7 @@ public class Swarm implements TimeListener {
                 double lngDeg = particle.currentPosition.getLongitude()
                         + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = LatLng.newInstance(latDeg, lngDeg);
-                particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
+                particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToDivPixel(particle.currentPosition));
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
