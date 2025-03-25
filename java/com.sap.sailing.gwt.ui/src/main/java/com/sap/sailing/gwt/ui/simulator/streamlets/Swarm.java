@@ -179,6 +179,7 @@ public class Swarm implements TimeListener {
 
     public void stop() {
         removeBoundsChangeHandler();
+        clearCanvas();
         loopTimer.cancel();
     }
 
@@ -241,12 +242,21 @@ public class Swarm implements TimeListener {
 
     public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
         this.zoomChanged |= zoomChanged;
-        if (!this.zoomChanged) {
+        if (this.zoomChanged) {
+            clearCanvas();
+        } else {
             fullcanvas.setCanvasSettings();
         }
         this.swarmPause = swarmPause;
     }
-
+    
+    private void clearCanvas() {
+        double w = this.canvas.getOffsetWidth();
+        double h = this.canvas.getOffsetHeight();
+        Context2d g = this.canvas.getContext2d();
+        g.clearRect(0, 0, w, h);
+    }
+    
     private void updateBounds() {
         LatLngBounds fieldBounds = this.field.getFieldCorners();
         final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
