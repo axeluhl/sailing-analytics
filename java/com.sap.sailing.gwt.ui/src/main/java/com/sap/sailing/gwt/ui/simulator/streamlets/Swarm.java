@@ -202,7 +202,7 @@ public class Swarm implements TimeListener {
                     } else {
                         particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                     }
-                    particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToDivPixel(particle.currentPosition));
+                    particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToContainerPixel(particle.currentPosition));
                     particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                     particle.v = v;
                     done = true;
@@ -252,8 +252,8 @@ public class Swarm implements TimeListener {
         final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
         swarmOffScreen = !fieldBounds.intersects(mapBounds);
         visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
-        Vector boundsSWpx = new Vector(mapProjection.fromLatLngToDivPixel(visibleBoundsOfField.getSouthWest()));
-        Vector boundsNEpx = new Vector(mapProjection.fromLatLngToDivPixel(visibleBoundsOfField.getNorthEast()));
+        Vector boundsSWpx = new Vector(mapProjection.fromLatLngToContainerPixel(visibleBoundsOfField.getSouthWest()));
+        Vector boundsNEpx = new Vector(mapProjection.fromLatLngToContainerPixel(visibleBoundsOfField.getNorthEast()));
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
         int newNParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
@@ -282,17 +282,16 @@ public class Swarm implements TimeListener {
             ctxt.setGlobalCompositeOperation("source-over");
             ctxt.setFillStyle("white");
             for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
-                Particle particle = particles[idx];
-                if (particle == null || particle.stepsToLive == 0) {
-                    continue;
+                final Particle particle = particles[idx];
+                if (particle != null && particle.stepsToLive != 0) {
+                    double particleSpeed = particle.v == null ? 0 : particle.v.length();
+                    ctxt.setLineWidth(field.getLineWidth(particleSpeed));
+                    ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
+                    ctxt.beginPath();
+                    ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
+                    ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
+                    ctxt.stroke();
                 }
-                double particleSpeed = particle.v == null ? 0 : particle.v.length();
-                ctxt.setLineWidth(field.getLineWidth(particleSpeed));
-                ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
-                ctxt.beginPath();
-                ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
-                ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
-                ctxt.stroke();
             }
         }
     }
@@ -331,7 +330,7 @@ public class Swarm implements TimeListener {
                 double lngDeg = particle.currentPosition.getLongitude()
                         + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = LatLng.newInstance(latDeg, lngDeg);
-                particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToDivPixel(particle.currentPosition));
+                particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToContainerPixel(particle.currentPosition));
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
