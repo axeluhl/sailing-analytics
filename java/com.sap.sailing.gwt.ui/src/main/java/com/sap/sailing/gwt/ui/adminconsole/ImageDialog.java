@@ -297,7 +297,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
                                     });
                         }
                     }
-                    if(busyCounter <= 0) {
+                    if (busyCounter <= 0) {
                         busyIndicator.setBusy(false);
                     }
                 }
