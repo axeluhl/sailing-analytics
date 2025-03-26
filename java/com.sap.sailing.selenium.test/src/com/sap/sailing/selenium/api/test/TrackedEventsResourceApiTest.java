@@ -41,6 +41,8 @@ import junit.framework.AssertionFailedError;
 
 public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
 
+    private static final String TEST_USER_PASSWORD = "tesOJDS8729438*&tuser";
+
     private final TrackedEventsApi trackedEventsApi = new TrackedEventsApi();
 
     private final EventApi eventApi = new EventApi();
@@ -369,8 +371,8 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
 
         // create test user
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "tuser", "Test User", null, "testuser");
-        final ApiContext userCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "tuser", "testuser");
+        securityApi.createUser(adminSecurityCtx, "tuser", "Test User", null, TEST_USER_PASSWORD);
+        final ApiContext userCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "tuser", TEST_USER_PASSWORD);
 
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 

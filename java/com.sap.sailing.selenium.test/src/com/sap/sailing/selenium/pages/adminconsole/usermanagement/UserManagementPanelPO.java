@@ -21,6 +21,8 @@ import com.sap.sse.security.SecurityService;
 
 public class UserManagementPanelPO extends PageArea {
     private static final Logger logger = Logger.getLogger(UserManagementPanelPO.class.getName());
+    
+    public static final String PASSWORD_COMPLEXITY_SALT = "O(*lhjsfdliyljh['>O`][sodf";
 
     @FindBy(how = BySeleniumId.class, using = "UsersTable")
     private WebElement userTable;
@@ -113,7 +115,7 @@ public class UserManagementPanelPO extends PageArea {
     public void createUserWithEqualUsernameAndPassword(String usernameAndPassword) {
         logger.info("Starting process to create user "+usernameAndPassword);
         final CreateUserDialogPO createUserDialog = getCreateUserDialog();
-        createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword, usernameAndPassword);
+        createUserDialog.setValues(usernameAndPassword, "", usernameAndPassword+PASSWORD_COMPLEXITY_SALT, usernameAndPassword+PASSWORD_COMPLEXITY_SALT);
         createUserDialog.clickOkButtonOrThrow();
     }
 

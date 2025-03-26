@@ -51,6 +51,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
 
+    private static final String DAGOBERTS_PASSWORD = "daiHF(*&#($o97sy1337";
+    private static final String DONALDS_PASSWORD = "daasdf][];l*&isy0815";
     private static String EVENT_NAME = "<ppp> loggingsession";
     private static String OTHER_EVENT_NAME = "<xxx> loggingsession";
     private static String BOAT_CLASS = "75QMNATIONALEKREUZER";
@@ -189,12 +191,12 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
         SecurityApi securityApi = new SecurityApi();
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
-                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
-        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
-        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", "daisy1337");
+                ApiContext.SECURITY_CONTEXT, "donald", DONALDS_PASSWORD);
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, DAGOBERTS_PASSWORD);
+        final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert", DAGOBERTS_PASSWORD);
         // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary Event/Regatta.
         eventApi.createEvent(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
         Competitor competitor = regattaApi.createAndAddCompetitor(userWithCompetitorCtx, EVENT_NAME, BOAT_CLASS, null, "donald", "USA");
@@ -217,15 +219,15 @@ public class RegattaApiTest extends AbstractSeleniumTest {
 
         SecurityApi securityApi = new SecurityApi();
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
         final ApiContext userWithCompetitorCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald",
-                "daisy0815");
-        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, "daisy1337");
+                DONALDS_PASSWORD);
+        securityApi.createUser(adminSecurityCtx, "dagobert", "Dagobert Duck", null, DAGOBERTS_PASSWORD);
         final ApiContext userOwningEventCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "dagobert",
-                "daisy1337");
+                DAGOBERTS_PASSWORD);
 
         final ApiContext userWithCompetitorAndSecurityCtx = createApiContext(getContextRoot(),
-                ApiContext.SECURITY_CONTEXT, "donald", "daisy0815");
+                ApiContext.SECURITY_CONTEXT, "donald", DONALDS_PASSWORD);
 
         // TODO we currently can't just create a competitor using the API. This is only possible by using a temporary
         // Event/Regatta.

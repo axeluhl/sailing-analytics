@@ -32,6 +32,8 @@ import com.sap.sse.common.Util;
 
 public class UserGroupApiTest extends AbstractSeleniumTest {
 
+    private static final String ANOTHER_TEST_PASSWORD = "pa0984<><;''ssword";
+    private static final String DONALDS_PASSWORD = "daisy9874kl.]]*#0815";
     private final UserGroupApi userGroupApi = new UserGroupApi();
     private final RoleApi roleApi = new RoleApi();
     private final SecurityApi securityApi = new SecurityApi();
@@ -91,11 +93,11 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final String addingUsername = "adding user";
         final String addedUsername = "added user";
 
-        securityApi.createUser(adminCtx, addingUsername, "test", "company", "password");
-        securityApi.createUser(adminCtx, addedUsername, "test", "company", "password");
+        securityApi.createUser(adminCtx, addingUsername, "test", "company", ANOTHER_TEST_PASSWORD);
+        securityApi.createUser(adminCtx, addedUsername, "test", "company", ANOTHER_TEST_PASSWORD);
 
         final ApiContext userCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, addingUsername,
-                "password");
+                ANOTHER_TEST_PASSWORD);
 
         // create user group
         final UserGroup userGroupCreated = userGroupApi.createUserGroup(adminCtx, "test-group-01");
@@ -121,11 +123,11 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
     public void testGetReadableUserGroups() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final String user1Name = "user1";
-        securityApi.createUser(adminSecurityCtx, user1Name, "test", "company", "password");
+        securityApi.createUser(adminSecurityCtx, user1Name, "test", "company", ANOTHER_TEST_PASSWORD);
         final ApiContext user1Ctx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
-                "password");
+                ANOTHER_TEST_PASSWORD);
         final ApiContext user1SecurityCtx = ApiContext.createApiContext(getContextRoot(), SECURITY_CONTEXT, user1Name,
-                "password");
+                ANOTHER_TEST_PASSWORD);
         assertEquals(1, Util.size(userGroupApi.getReadableGroupsOfUser(user1Ctx, user1Name)));
 
         // admin creates new group and adds user -> does not mean the user is allowed to read the group
@@ -175,7 +177,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
             securityApi.getUser(adminCtx, username);
 
         } catch (RuntimeException e) {
-            securityApi.createUser(adminCtx, username, "test", "company", "password");
+            securityApi.createUser(adminCtx, username, "test", "company", ANOTHER_TEST_PASSWORD);
         }
 
         // add user to group
@@ -207,9 +209,9 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         final String eventName = "testevent";
         final String eventName2 = "testevent2";
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
-        final ApiContext ownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
+        final ApiContext ownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "donald", DONALDS_PASSWORD);
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
 
@@ -235,16 +237,16 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
     public void addUserToOwnGroupWithoutPermissionOnUserTest() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final String userToAdd = "usertoadd";
-        securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, "daisy0815");
-        securityApi.createUser(adminSecurityCtx, userToAdd, "", null, "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "groupowner", "groupowner", null, DONALDS_PASSWORD);
+        securityApi.createUser(adminSecurityCtx, userToAdd, "", null, DONALDS_PASSWORD);
 
         final ApiContext groupownerSecurityCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner",
-                "daisy0815");
+                DONALDS_PASSWORD);
         // create group owned by "groupowner"
         final UserGroup privateUserGroup = userGroupApi.createUserGroup(groupownerSecurityCtx, "mygroup");
 
         // add user "usertoadd" to private user group
-        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", "daisy0815");
+        final ApiContext groupownerCtx = createApiContext(getContextRoot(), SECURITY_CONTEXT, "groupowner", DONALDS_PASSWORD);
         userGroupApi.addUserToUserGroupWithoutPermissionOnUser(groupownerCtx, userToAdd,
                 privateUserGroup.getGroupId());
         final UserGroup privateUserGroupToCheck = userGroupApi.getUserGroup(adminSecurityCtx,

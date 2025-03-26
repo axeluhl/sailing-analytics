@@ -73,7 +73,7 @@ public class SecurityResourceTest {
             Activator.setSecurityService(service);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
-                    /* validation URL */ Locale.ENGLISH, null, null, /* clientIP */ null);
+                    /* validation URL */ Locale.ENGLISH, null, null, /* clientIP */ null, /* enforce strong password */ false);
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken(USERNAME, PASSWORD));
             Session session = authenticatedAdmin.getSession();
