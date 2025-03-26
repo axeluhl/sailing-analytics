@@ -569,6 +569,15 @@
                 "Copyright 2016 yanwsh@gmail.com"
             ],
             "key": "ASL2.0"
+        },
+        {
+            "name": "zxcvbn",
+            "version": "1.9.0",
+            "owner": "nulab",
+            "homepage": "https://github.com/nulab/zxcvbn4j",
+            "acknowledgements": [
+            ],
+            "key": "MITL"
         }
     ],
     "licenses": [

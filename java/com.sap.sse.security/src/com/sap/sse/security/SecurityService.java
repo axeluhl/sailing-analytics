@@ -205,14 +205,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     /**
      * This version should only be used for tests, normally the defaultTenand handling should be used
-     * 
      * @param validationBaseURL
      *            if <code>null</code>, no validation will be attempted
      * @param requestClientIP
      *            used for throttling user creation requests coming from the same IP address
+     * @param enforceStrongPassword TODO
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company,
-            Locale locale, String validationBaseURL, UserGroup userOwner, String requestClientIP)
+            Locale locale, String validationBaseURL, UserGroup userOwner, String requestClientIP, boolean enforceStrongPassword)
             throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;

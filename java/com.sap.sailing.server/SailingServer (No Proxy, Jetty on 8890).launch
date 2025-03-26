@@ -243,6 +243,8 @@
 <setEntry value="com.sun.jna.source@default:default"/>
 <setEntry value="com.sun.jna.platform@default:default"/>
 <setEntry value="com.sun.jna.platform.source@default:default"/>
+<setEntry value="com.nulab-inc.zxcvbn@default:default"/>
+<setEntry value="com.nulab-inc.zxcvbn.source@default:default"/>
 </setAttribute>
     <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>

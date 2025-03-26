@@ -202,7 +202,7 @@ public class SecurityResource extends AbstractSecurityResource {
                             final String fullNameToUse = preferFirstIfNotNullOrElseSecond(formFullName, queryFullName);
                             final String companyToUse = preferFirstIfNotNullOrElseSecond(formCompany, queryCompany);
                             User newUser = getSecurityService().createSimpleUser(usernameToUse, emailToUse, passwordToUse, fullNameToUse, companyToUse,
-                                    Locale.ENGLISH, validationBaseURL, getSecurityService().getDefaultTenantForCurrentUser(), clientIP);
+                                    Locale.ENGLISH, validationBaseURL, getSecurityService().getDefaultTenantForCurrentUser(), clientIP, /* enforce strong password */ true);
                             SecurityUtils.getSubject().login(new UsernamePasswordToken(usernameToUse, passwordToUse));
                             return newUser;
                         }

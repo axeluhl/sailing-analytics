@@ -83,6 +83,13 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.nulabinc.zxcvbn.StandardDictionaries;
+import com.nulabinc.zxcvbn.StandardKeyboards;
+import com.nulabinc.zxcvbn.Strength;
+import com.nulabinc.zxcvbn.Zxcvbn;
+import com.nulabinc.zxcvbn.ZxcvbnBuilder;
+import com.nulabinc.zxcvbn.io.ClasspathResource;
+import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -273,13 +280,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     /**
      * Contains locking objects keyed by client IP addresses ({@code null} not allowed) that describe which client IPs
      * are locked for {@link User} creation, e.g., through the
-     * {@link #createSimpleUser(String, String, String, String, String, Locale, String, UserGroup, String)
+     * {@link #createSimpleUser(String, String, String, String, String, Locale, String, UserGroup, String, boolean)
      * createSimpleUser} method.<p>
      * 
      * When entering values into this map, the method entering it is responsible for also scheduling a background
      * task that a while after lock expiry the record is expunged again from the map to avoid garbage piling up.
      */
     private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+
+    private final Zxcvbn passwordValidator;
     
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
@@ -359,6 +368,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
         aclResolver = new SecurityServiceAclResolver(accessControlStore);
+        try {
+            passwordValidator = createPasswordValidator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private Zxcvbn createPasswordValidator() throws IOException {
+        final ZxcvbnBuilder builder = new ZxcvbnBuilder();
+        builder.dictionaries(StandardDictionaries.loadAllDictionaries());
+        builder.keyboards(StandardKeyboards.loadAllKeyboards());
+        return builder
+                .keyboard(new SlantedKeyboardLoader("qwertz", new ClasspathResource("qwertz-keyboard.txt")).load())
+                .build();
     }
     
     @Override
@@ -453,7 +476,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
-                        null, /* clientIP */ null);
+                        null, /* clientIP */ null, /* enforce strong password */ false);
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition, /* transitive */ true);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
@@ -1068,7 +1091,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser,
-            String requestClientIP) throws UserManagementException, MailException, UserGroupManagementException {
+            String requestClientIP, boolean enforceStrongPassword) throws UserManagementException, MailException, UserGroupManagementException {
         if (requestClientIP != null) {
             checkAndRecordUserCreationFromClientIP(requestClientIP);
         }
@@ -1079,7 +1102,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (password == null || password.length() < 5) {
+        } else if (enforceStrongPassword && !isPasswordGoodEnough(password)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -1096,6 +1119,17 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         updateUserProperties(username, fullName, company, locale);
         // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
+        return result;
+    }
+
+    private boolean isPasswordGoodEnough(String password) {
+        final boolean result;
+        if (password == null) {
+            result = false;
+        } else {
+            final Strength strength = passwordValidator.measure(password);
+            result = strength.getGuessesLog10() > 8;
+        }
         return result;
     }
     
@@ -1183,7 +1217,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
-        if (newPassword == null || newPassword.length() < 5) {
+        if (!isPasswordGoodEnough(newPassword)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct

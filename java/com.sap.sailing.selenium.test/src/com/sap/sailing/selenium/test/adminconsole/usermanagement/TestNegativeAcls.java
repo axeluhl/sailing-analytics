@@ -330,7 +330,7 @@ public class TestNegativeAcls extends AbstractSeleniumTest {
     
     private AdminConsolePage changeUserAndReloadAdminConsole(String usernameAndPassword) {
         clearSession(getWebDriver());
-        setUpAuthenticatedSession(getWebDriver(), usernameAndPassword, usernameAndPassword);
+        setUpAuthenticatedSession(getWebDriver(), usernameAndPassword, usernameAndPassword+UserManagementPanelPO.PASSWORD_COMPLEXITY_SALT);
         return AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
     }
     

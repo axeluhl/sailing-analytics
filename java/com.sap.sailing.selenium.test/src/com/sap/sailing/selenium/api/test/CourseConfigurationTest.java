@@ -67,6 +67,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class CourseConfigurationTest extends AbstractSeleniumTest {
+    private static final String DONALDS_PASSWORD = "dai:LKJ][][''sy0815";
+
     private static final Logger logger = Logger.getLogger(CourseConfigurationTest.class.getName());
     
     private final CourseConfigurationApi courseConfigurationApi = new CourseConfigurationApi();
@@ -759,9 +761,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
-        final ApiContext sharedServerCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
+        final ApiContext sharedServerCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         testCreateCourseAndReload(ctx, sharedServerCtx);
     }
 
@@ -873,9 +875,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
-        final ApiContext sharedServerCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext ctx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
+        final ApiContext sharedServerCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         testCreateCourseConfigurationWithStoreToInventory(ctx, sharedServerCtx);
     }
 

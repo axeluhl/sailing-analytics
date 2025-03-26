@@ -33,7 +33,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
     private void createUser(final UserManagementPanelPO userManagementPanel) {
         final CreateUserDialogPO createUserdialog = userManagementPanel.getCreateUserDialog();
         assertNotNull(createUserdialog);
-        createUserdialog.setValues(TEST_USER_NAME, TEST_USER_MAIL, TEST_USER_PASSWORD, TEST_USER_PASSWORD);
+        createUserdialog.setValues(TEST_USER_NAME, TEST_USER_MAIL, TEST_USER_PASSWORD+UserManagementPanelPO.PASSWORD_COMPLEXITY_SALT, TEST_USER_PASSWORD+UserManagementPanelPO.PASSWORD_COMPLEXITY_SALT);
         createUserdialog.clickOkButtonOrThrow();
         // wait until user is displayed
         userManagementPanel.waitUntilUserFound(TEST_USER_NAME);

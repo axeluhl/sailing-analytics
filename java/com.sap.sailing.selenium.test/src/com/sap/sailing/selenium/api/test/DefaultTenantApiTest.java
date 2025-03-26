@@ -18,6 +18,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class DefaultTenantApiTest extends AbstractSeleniumTest {
 
+    private static final String DONALDS_PASSWORD = "dais2097430*:JH['y0815";
     private static final String TENANT_GROUP_NAME = "NewGroup";
     private static final String EVENT_NAME = "TestEvent2";
     private AdminConsolePage adminConsole;
@@ -28,7 +29,7 @@ public class DefaultTenantApiTest extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        userToken = SecurityApi.createUser("donald", "daisy0815").run().getAccessToken();
+        userToken = SecurityApi.createUser("donald", DONALDS_PASSWORD).run().getAccessToken();
         adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
         tenantGroupId = UserGroupApi.createUserGroup(TENANT_GROUP_NAME).auth(userToken).run().getGroupId();
