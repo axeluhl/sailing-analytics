@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
  */
 public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
 
-    private LatLng nw;
+    private LatLng upperLeftCornerLatLng;
 
     public MovingCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
@@ -32,13 +32,13 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             // calculate pixel-positions of old and new canvas-bounds using the same, current mapProjection
             // start from LatLng, as the canvas might have jumped to new bounds that do not intersect with the old bounds
             final Point nwOldPx;
-            if (nw == null) {
+            if (upperLeftCornerLatLng == null) {
                 nwOldPx = null;
             } else {
-                nwOldPx = mapProjection.fromLatLngToDivPixel(nw);
+                nwOldPx = mapProjection.fromLatLngToDivPixel(upperLeftCornerLatLng);
             }
-            nw = mapProjection.fromContainerPixelToLatLng(Point.newInstance(0, 0));
-            final Point nwNewPx = mapProjection.fromLatLngToDivPixel(nw);
+            upperLeftCornerLatLng = mapProjection.fromContainerPixelToLatLng(Point.newInstance(0, 0));
+            final Point nwNewPx = mapProjection.fromLatLngToDivPixel(upperLeftCornerLatLng);
             widgetPosLeft = Math.round(nwNewPx.getX());
             widgetPosTop = Math.round(nwNewPx.getY());
             // calculate the translation-vector between old and new origin in pixels
@@ -70,6 +70,6 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
     }
     
     public void initCanvasOrigin() {
-        nw = null;
+        upperLeftCornerLatLng = null;
     }
 }

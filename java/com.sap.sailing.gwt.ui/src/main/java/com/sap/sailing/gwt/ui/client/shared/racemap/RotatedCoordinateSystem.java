@@ -47,7 +47,7 @@ public class RotatedCoordinateSystem implements CoordinateSystem {
 
     @Override
     public Bearing map(Bearing bearing) {
-        return bearing.add(rotationAngle);
+        return bearing;
     }
 
     @Override
