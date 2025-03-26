@@ -37,7 +37,7 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             } else {
                 nwOldPx = mapProjection.fromLatLngToDivPixel(nw);
             }
-            nw = LatLng.newInstance(getMap().getBounds().getNorthEast().getLatitude(), getMap().getBounds().getSouthWest().getLongitude()); // FIXME bug6098: MapWidget.getBounds() returns the smallest bounding box with NW/SE fully containing the visible part of the map
+            nw = mapProjection.fromContainerPixelToLatLng(Point.newInstance(0, 0));
             final Point nwNewPx = mapProjection.fromLatLngToDivPixel(nw);
             widgetPosLeft = Math.round(nwNewPx.getX());
             widgetPosTop = Math.round(nwNewPx.getY());
