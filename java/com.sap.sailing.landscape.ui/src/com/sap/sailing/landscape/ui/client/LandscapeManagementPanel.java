@@ -533,10 +533,12 @@ public class LandscapeManagementPanel extends SimplePanel {
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getName(), stringMessages.name());
        proxiesTable.addColumn(instanceIdProxiesColumn, stringMessages.instanceId());
        proxiesTable.addColumn(amiProxyProxiesColumn, stringMessages.id());
-       proxiesTable.addColumn(instancePublicIpProxiesColumn  , stringMessages.publicIp());
+       proxiesTable.addColumn(instancePublicIpProxiesColumn, stringMessages.publicIp());
        proxiesTable.addColumn(instancePrivateIpProxiesColumn, stringMessages.privateIp());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getAvailabilityZoneName(), stringMessages.availabilityZone());
        proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getHealth(), stringMessages.state());
+       proxiesTable.addColumn(reverseProxyDTO -> reverseProxyDTO.getLaunchTimePoint().toString(), stringMessages.startTimePoint(),
+               (rp1, rp2)->rp1.getLaunchTimePoint().compareTo(rp2.getLaunchTimePoint())); // don't compare by string representation but time point4
        //setup actions
        final ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell> proxiesActionColumn = new ActionsColumn<ReverseProxyDTO, ReverseProxyImagesBarCell>(
                new ReverseProxyImagesBarCell(stringMessages), (revProxy, action) -> true);
