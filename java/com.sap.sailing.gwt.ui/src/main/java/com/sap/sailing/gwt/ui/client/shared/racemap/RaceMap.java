@@ -501,7 +501,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * The competitor for which the advantage line is currently showing. Should this competitor's quick rank change, or
      * should ranks be received while this field is {@code null}, the advantage line
-     * {@link #showAdvantageLine(Iterable, Date, long)} drawing procedure} needs to be triggered.
+     * {@link #showAdvantageLineAndUpdateWindLadder(Iterable, Date, long)} drawing procedure} needs to be triggered.
      */
     private CompetitorDTO advantageLineCompetitor;
     protected Label estimatedDurationOverlay;
@@ -619,7 +619,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (advantageLineCompetitor == null ||
                     (oldQuickRank != null && advantageLineCompetitor.getIdAsString().equals(oldQuickRank.competitor.getIdAsString())) ||
                     (quickRank != null && advantageLineCompetitor.getIdAsString().equals(quickRank.competitor.getIdAsString()))) {
-                showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+                showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
             }
         }
 
@@ -781,12 +781,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (centerOfCourse != null) {
                 final Bearing lastCombinedTrueWindFromDirection = getLastCombinedTrueWindFromDirection();
                 if (lastCombinedTrueWindFromDirection != null) {
+                    final int lastCombinedTrueWindFromDirectionInIntegerDegrees = (int) Math.round(lastCombinedTrueWindFromDirection.getDegrees());
                     // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
                     coordinateSystem.setCoordinateSystem(new RotatedCoordinateSystem(
-                            lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
+                            new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90))));
                     if (map != null) {
                         mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer());
-                        mapOptions.setHeading((int) lastCombinedTrueWindFromDirection.getDegrees());
+                        mapOptions.setHeading(lastCombinedTrueWindFromDirectionInIntegerDegrees);
                     } else {
                         mapOptions = null;
                     }
@@ -906,7 +907,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
                         advantageLineLength = getMapDiagonalVisibleDistance();
-                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+                        showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
 
                     private void showLayoutsAfterAnimationFinishes() {
@@ -932,11 +933,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 .RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
                                 .withZoomSettings(clearedZoomSettings).build();
                         refreshMapWithoutAnimation();
-                        if (streamletOverlay != null 
-                                && settings.isShowWindStreamletOverlay()
-                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
-                            streamletOverlay.onDragEnd();
-                        }
                     }
                 });
                 map.addDragStartHandler(event -> {
@@ -963,10 +959,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (streamletOverlay != null 
                                 && settings.isShowWindStreamletOverlay()
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
-                            streamletOverlay.setCanvasSettings();
+                            streamletOverlay.onDragEnd();
+                            streamletOverlay.onBoundsChanged(/* zoomChanged */ false);
                         }
                         advantageLineLength = getMapDiagonalVisibleDistance();
-                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+                        showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                         refreshMapWithoutAnimation();
                         if (!mapFirstZoomDone) {
                             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this)); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
@@ -993,7 +990,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         advantageLineLength = getMapDiagonalVisibleDistance();
-                        showAdvantageLine(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+                        showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                     }
                 });
                 // If there was a time change before the API was loaded, reset the time
@@ -1390,7 +1387,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void updateMapWithWindInfo(final Date newTime, final long transitionTimeInMillis,
             final Iterable<CompetitorDTO> competitorsToShow, final WindInfoForRaceDTO windInfo,
             final List<com.sap.sse.common.Util.Pair<WindSource, WindTrackInfoDTO>> windSourcesToShow) {
-        showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
+        showAdvantageLineAndUpdateWindLadder(competitorsToShow, newTime, transitionTimeInMillis);
         for (WindSource windSource : windInfo.windTrackInfoByWindSource.keySet()) {
             WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
             switch (windSource.getType()) {
@@ -1542,8 +1539,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // entries that are considered not overlapping; subsequently, fromAndToOverlap.getC() will contain true for
                 // all its entries so that the other response received for GetRaceMapDataAction will consider this an
                 // overlap if it happens after this update.
-                final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositionsForCompetitors = result.getBoatPositionsForCompetitors(
-                        competitorsByIdAsString);
+                final Map<CompetitorDTO, GPSFixDTOWithSpeedWindTackAndLegTypeIterable> boatPositionsForCompetitors =
+                        result.getBoatPositionsForCompetitors(competitorsByIdAsString);
                 positionRequest.processResponse(boatPositionsForCompetitors);
                 updateBoatPositions(newTime, transitionTimeInMillis,
                         competitorsToShow, boatPositionsForCompetitors, /* updateTailsOnly */ true, detailTypeChanged, detailType);
@@ -1607,7 +1604,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-                        showWindLadder(raceMapDataDTO, transitionTimeInMillis);
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
@@ -1736,7 +1732,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     competitorSelection.getSelectedFilteredCompetitors());
             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it
             // needs to adjust to new boat positions
-            showAdvantageLine(competitorsToShow, newTime, transitionTimeInMillis);
+            showAdvantageLineAndUpdateWindLadder(competitorsToShow, newTime, transitionTimeInMillis);
         }
     }
 
@@ -2054,34 +2050,42 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             new com.sap.sse.common.Util.Pair<Integer, CompetitorDTO>(legOfLeaderCompetitor, leadingCompetitorDTO);
     }
 
-    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
+    private void showAdvantageLineAndUpdateWindLadder(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && !quickFlagDataProvider.getQuickRanks().isEmpty()
                 && lastCombinedWindTrackInfoDTO != null) {
-            boolean drawAdvantageLine = false;
-            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
+            final Pair<Integer, CompetitorDTO> visibleLeaderInfo;
+            final WindTrackInfoDTO windDataForLegMiddle;
+            GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = null;
+            boolean isVisibleLeaderInfoComplete = false;
+            boolean isLegTypeKnown = false;
+            LegInfoDTO legInfoDTO = null;
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE) || settings.isShowWindLadder()) {
                 // find competitor with highest rank
-                com.sap.sse.common.Util.Pair<Integer, CompetitorDTO> visibleLeaderInfo = getBestVisibleCompetitorWithOneBasedLegNumber(competitorsToShow);
-                // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
-                // don't show anything
-                GPSFixDTOWithSpeedWindTackAndLegType lastBoatFix = null;
-                boolean isVisibleLeaderInfoComplete = false;
-                boolean isLegTypeKnown = false;
-                WindTrackInfoDTO windDataForLegMiddle = null;
-                LegInfoDTO legInfoDTO = null;
+                visibleLeaderInfo = getBestVisibleCompetitorWithOneBasedLegNumber(competitorsToShow);
                 if (visibleLeaderInfo != null
                         && visibleLeaderInfo.getA() > 0
-                        && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()
+                        && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
                         // get wind at middle of leg for leading visible competitor
-                        && (windDataForLegMiddle = lastCombinedWindTrackInfoDTO
-                                .getCombinedWindOnLegMiddle(visibleLeaderInfo.getA() - 1)) != null
-                        && !windDataForLegMiddle.windFixes.isEmpty()) {
-                    isVisibleLeaderInfoComplete = true;
-                    legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
-                    if (legInfoDTO.legType != null) {
-                        isLegTypeKnown = true;
+                    windDataForLegMiddle = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(visibleLeaderInfo.getA() - 1);
+                    if (windDataForLegMiddle != null && !windDataForLegMiddle.windFixes.isEmpty()) {
+                        isVisibleLeaderInfoComplete = true;
+                        legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA() - 1);
+                        if (legInfoDTO.legType != null) {
+                            isLegTypeKnown = true;
+                        }
+                        lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                     }
-                    lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
+                } else {
+                    windDataForLegMiddle = null;
                 }
+            } else {
+                visibleLeaderInfo = null;
+                windDataForLegMiddle = null;
+            }
+            boolean drawAdvantageLine = false;
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE)) {
+                // the boat fix may be null; may mean that no positions were loaded yet for the leading visible boat;
+                // don't show anything
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
                     BoatDTO boat = competitorSelection.getBoat(visibleLeaderInfo.getB());
                     Distance distanceFromBoatPosition = boat.getBoatClass().getHullLength(); // one hull length
@@ -2157,25 +2161,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     advantageTimer = null;
                 }
             }
+            showWindLadder(lastBoatFix, windDataForLegMiddle, visibleLeaderInfo, timeForPositionTransitionMillis);
         }
     }
 
-    private void showWindLadder(RaceMapDataDTO raceMapDataDTO, long timeForPositionTransitionMillis) {
-        if (settings.isShowWindLadder() && map != null && raceMapDataDTO != null && lastCombinedWindTrackInfoDTO != null) {
-            Pair<Integer, CompetitorDTO> bestVisibleCompetitor = getBestVisibleCompetitorWithOneBasedLegNumber(getCompetitorsToShow());
+    private void showWindLadder(GPSFixDTOWithSpeedWindTackAndLegType bestVisibleCompetitorPosition,
+            WindTrackInfoDTO windDataForLegMiddle,
+            Pair<Integer, CompetitorDTO> bestVisibleCompetitor, long timeForPositionTransitionMillis) {
+        if (settings.isShowWindLadder() && map != null && bestVisibleCompetitorPosition != null && lastCombinedWindTrackInfoDTO != null) {
             if (bestVisibleCompetitor != null) {
-                final GPSFixDTOWithSpeedWindTackAndLegTypeIterable fixes = raceMapDataDTO.boatPositions.get(bestVisibleCompetitor.getB());
-                if (fixes != null) {
-                    Position competitorPosition = fixes.last().position;
-                    WindTrackInfoDTO windTrackDTO = lastCombinedWindTrackInfoDTO.getCombinedWindOnLegMiddle(bestVisibleCompetitor.getA() - 1); // Zero based
-                    WindDTO windFix = null;
-                    if (windTrackDTO != null && windTrackDTO.windFixes != null && !windTrackDTO.windFixes.isEmpty()) {
-                        windFix = windTrackDTO.windFixes.get(0);
-                    }
+                if (windDataForLegMiddle != null && windDataForLegMiddle.windFixes != null && !windDataForLegMiddle.windFixes.isEmpty()) {
+                    final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
                     if (windLadder == null) {
                         windLadder = new WindLadder(map, 0 /* TODO z-index */, coordinateSystem);
                     }
-                    windLadder.update(windFix, competitorPosition, timeForPositionTransitionMillis);
+                    windLadder.update(windFix, bestVisibleCompetitorPosition.position, timeForPositionTransitionMillis);
                     if (!windLadder.isVisible()) {
                         windLadder.setVisible(true);
                     }

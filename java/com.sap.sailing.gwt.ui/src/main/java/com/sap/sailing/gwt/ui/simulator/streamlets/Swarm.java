@@ -55,7 +55,7 @@ public class Swarm implements TimeListener {
      */
     private boolean swarmOffScreen = false;
 
-    private int swarmPause = 0;
+    private int swarmPauseInTicks = 0;
 
     /**
      * Bounds in the map's coordinate system which may have undergone rotation and translation. See the
@@ -142,9 +142,9 @@ public class Swarm implements TimeListener {
         double time0 = Duration.currentTimeMillis();
         // upon zooming the swarm is shortly paused, to ensure no strange rendering during the css zoom
         // animations
-        if (swarmPause > 1) {
-            swarmPause--;
-        } else if (swarmPause == 1) {
+        if (swarmPauseInTicks > 1) {
+            swarmPauseInTicks--;
+        } else if (swarmPauseInTicks == 1) {
             // ensure bounds and projections are up to date
             startSwarmIfNecessaryAndUpdateProjection();
             if (zoomChanged) {
@@ -156,10 +156,10 @@ public class Swarm implements TimeListener {
                 // process the offset
                 diffPx = fullcanvas.getDiffPx();
             }
-            swarmPause = 0;
+            swarmPauseInTicks = 0;
         }
         // update the swarm if it is not paused
-        if ((!swarmOffScreen) && (swarmPause == 0)) {
+        if ((!swarmOffScreen) && (swarmPauseInTicks == 0)) {
             execute(diffPx);
             diffPx = new Vector(0, 0);
         }
@@ -249,7 +249,7 @@ public class Swarm implements TimeListener {
         } else {
             fullcanvas.setCanvasSettings();
         }
-        this.swarmPause = swarmPause;
+        this.swarmPauseInTicks = swarmPause;
     }
     
     private void clearCanvas() {
@@ -389,7 +389,7 @@ public class Swarm implements TimeListener {
         timePoint = newTime;
     }
 
-    public void pause(int swarmPause) {
-        this.swarmPause = swarmPause;
+    public void pause(int swarmPauseInTicks) {
+        this.swarmPauseInTicks = swarmPauseInTicks;
     }
 }

@@ -26,7 +26,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture(), this::redraw);
 
-    protected Double windBearing;
+    protected Double windBearingRadians;
     protected Position fixPosition;
 
     protected Double drawnPatternSize;
@@ -43,27 +43,27 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         this.windLadder = windLadder;
     }
 
-    public boolean update(Double windBearing, Position fixPosition, long timeForPositionTransitionMillis) {
-        return this.update(windBearing, fixPosition, timeForPositionTransitionMillis, false);
+    public boolean update(Double windBearingRadians, Position fixPosition, long timeForPositionTransitionMillis) {
+        return this.update(windBearingRadians, fixPosition, timeForPositionTransitionMillis, false);
     }
 
     /**
      * @return {@code true} if this canvas can perform the requested update
      */
-    public boolean update(Double windBearing, Position fixPosition, long timeForPositionTransitionMillis, boolean redraw) {
+    public boolean update(Double windBearingRadians, Position fixPosition, long timeForPositionTransitionMillis, boolean redraw) {
         boolean canAnimate = true;
-        if (windBearing != null) {
-            this.windBearing = windBearing;
+        if (windBearingRadians != null) {
+            this.windBearingRadians = windBearingRadians;
         }
         if (fixPosition != null ) {
             this.fixPosition = fixPosition;
         }
-        if (getMapProjection() != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
+        if (getMapProjection() != null && this.windBearingRadians != null && this.fixPosition != null && tileGen.getReady()) {
             // Rotation
-            updateDrawingAngleAndSetCanvasRotation(Math.toDegrees(this.windBearing));
+            updateDrawingAngleAndSetCanvasRotation(Math.toDegrees(this.windBearingRadians));
             // Offset from centered position
             Point fixPointInMap = getMapProjection().fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
-            Point windUnitVector = Point.newInstance(-Math.sin(-this.windBearing), -Math.cos(-this.windBearing));
+            Point windUnitVector = Point.newInstance(-Math.sin(-this.windBearingRadians), -Math.cos(-this.windBearingRadians));
             // Dot product of the two vectors above
             final double fixPointWindwardDistance = fixPointInMap.getX() * windUnitVector.getX() + fixPointInMap.getY() * windUnitVector.getY();
             final double fixPointWindwardDistanceChange = fixPointWindwardDistance - previousFixPointWindwardDistance;
@@ -78,7 +78,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             }
             previousOnAxisOffset = onAxisOffset;
             Point offsetVector = Point.newInstance(onAxisOffset * windUnitVector.getX(), onAxisOffset * windUnitVector.getY());
-            canAnimate = isInBounds(this.windBearing, offsetVector);
+            canAnimate = isInBounds(this.windBearingRadians, offsetVector);
             setCanvasPosition(getWidgetPosLeft() + offsetVector.getX(), getWidgetPosTop() + offsetVector.getY());
             if (transitionDisableCountdown > 0) {
                 transitionDisableCountdown -= 1;
@@ -170,21 +170,18 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         int size = Math.max(mapWidth, mapHeight);
         int reserve = (int) (size * CANVAS_RESERVE);
         int sizeWithReserve = size + reserve;
-
         canvas.setWidth(String.valueOf(sizeWithReserve));
         canvas.setHeight(String.valueOf(sizeWithReserve));
         canvas.setCoordinateSpaceWidth(sizeWithReserve);
         canvas.setCoordinateSpaceHeight(sizeWithReserve);
-
         int widthReserve = sizeWithReserve - mapWidth;
         int heightReserve = sizeWithReserve - mapHeight;
-
-        Point sw = getMapProjection().fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
-        Point ne = getMapProjection().fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
-        setWidgetPosLeft(Math.min(sw.getX(), ne.getX()) - widthReserve / 2);
-        setWidgetPosTop(Math.min(sw.getY(), ne.getY()) - heightReserve / 2);
-
-        setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
+        if (getMapProjection() != null) {
+            final Point upperLeftCorner = getMapProjection().fromLatLngToDivPixel(getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0)));
+            setWidgetPosLeft(Math.round(upperLeftCorner.getX()) - widthReserve / 2);
+            setWidgetPosTop(Math.round(upperLeftCorner.getY()) - heightReserve / 2);
+            setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
+        }
         updateDrawingAngleAndSetCanvasRotation(0.0);
     }
 

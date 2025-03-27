@@ -31,22 +31,22 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             final int canvasHeight = getMap().getDiv().getClientHeight();
             // calculate pixel-positions of old and new canvas-bounds using the same, current mapProjection
             // start from LatLng, as the canvas might have jumped to new bounds that do not intersect with the old bounds
-            final Point nwOldPx;
+            final Point nwOldDivPx;
             if (upperLeftCornerLatLng == null) {
-                nwOldPx = null;
+                nwOldDivPx = null;
             } else {
-                nwOldPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
+                nwOldDivPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
             }
             upperLeftCornerLatLng = getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0));
-            final Point nwNewPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
-            widgetPosLeft = Math.round(nwNewPx.getX());
-            widgetPosTop = Math.round(nwNewPx.getY());
+            final Point nwNewDivPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
+            widgetPosLeft = Math.round(nwNewDivPx.getX());
+            widgetPosTop = Math.round(nwNewDivPx.getY());
             // calculate the translation-vector between old and new origin in pixels
-            if (nwOldPx == null) {
+            if (nwOldDivPx == null) {
                 diffPx = new Vector(0, 0);
             } else {
-                double oldPosLeft = Math.round(nwOldPx.getX());
-                double oldPosTop = Math.round(nwOldPx.getY());
+                double oldPosLeft = Math.round(nwOldDivPx.getX());
+                double oldPosTop = Math.round(nwOldDivPx.getY());
                 diffPx = new Vector(oldPosLeft - widgetPosLeft, oldPosTop - widgetPosTop);
             }
             // store canvas-content, because setWidth() and setHeight() will clear canvas and change Context2d 
