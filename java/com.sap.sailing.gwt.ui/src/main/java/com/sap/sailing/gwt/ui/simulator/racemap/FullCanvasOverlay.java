@@ -67,12 +67,10 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         if (mapHeight == null) {
             mapHeight = getMap().getDiv().getClientHeight();
         }
-        int canvasWidth = mapWidth;
-        int canvasHeight = mapHeight;
-        canvas.setWidth(String.valueOf(canvasWidth));
-        canvas.setHeight(String.valueOf(canvasHeight));
-        canvas.setCoordinateSpaceWidth(canvasWidth);
-        canvas.setCoordinateSpaceHeight(canvasHeight);
+        canvas.setWidth(String.valueOf(mapWidth));
+        canvas.setHeight(String.valueOf(mapHeight));
+        canvas.setCoordinateSpaceWidth(mapWidth);
+        canvas.setCoordinateSpaceHeight(mapHeight);
         if (getMapProjection() != null) {
             final Point upperLeftCorner = getMapProjection().fromLatLngToDivPixel(getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0)));
             setWidgetPosLeft(Math.round(upperLeftCorner.getX()));

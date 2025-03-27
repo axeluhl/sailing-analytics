@@ -233,7 +233,7 @@ public abstract class CanvasOverlayV3 {
         this.latLngPosition = latLngPosition;
     }
 
-    protected MapWidget getMap() {
+    public MapWidget getMap() {
         return map;
     }
 
