@@ -24,7 +24,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     protected WindLadder windLadder;
 
-    protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture());
+    protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture(), this::redraw);
 
     protected Double windBearing;
     protected Position fixPosition;
@@ -58,11 +58,11 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         if (fixPosition != null ) {
             this.fixPosition = fixPosition;
         }
-        if (mapProjection != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
+        if (getMapProjection() != null && this.windBearing != null && this.fixPosition != null && tileGen.getReady()) {
             // Rotation
             updateDrawingAngleAndSetCanvasRotation(Math.toDegrees(this.windBearing));
             // Offset from centered position
-            Point fixPointInMap = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
+            Point fixPointInMap = getMapProjection().fromLatLngToDivPixel(coordinateSystem.toLatLng(this.fixPosition));
             Point windUnitVector = Point.newInstance(-Math.sin(-this.windBearing), -Math.cos(-this.windBearing));
             // Dot product of the two vectors above
             final double fixPointWindwardDistance = fixPointInMap.getX() * windUnitVector.getX() + fixPointInMap.getY() * windUnitVector.getY();
@@ -131,9 +131,9 @@ public class WindLadderOverlay extends FullCanvasOverlay {
     }
 
     private double calculatePatternScale(int patternSize) {
-        Position pos1 = coordinateSystem.getPosition(mapProjection.fromDivPixelToLatLng(Point.newInstance(0, 0)));
+        Position pos1 = coordinateSystem.getPosition(getMapProjection().fromDivPixelToLatLng(Point.newInstance(0, 0)));
         Position pos2 = coordinateSystem
-                .getPosition(mapProjection.fromDivPixelToLatLng(Point.newInstance(patternSize, 0)));
+                .getPosition(getMapProjection().fromDivPixelToLatLng(Point.newInstance(patternSize, 0)));
         final double patternSizeMeters = pos1.getDistance(pos2).getMeters();
         //final double pixelsPerMeter = patternSize / patternSizeMeters;
         //TODO Use multiple of boat size instead?
@@ -179,8 +179,8 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         int widthReserve = sizeWithReserve - mapWidth;
         int heightReserve = sizeWithReserve - mapHeight;
 
-        Point sw = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
-        Point ne = mapProjection.fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
+        Point sw = getMapProjection().fromLatLngToDivPixel(getMap().getBounds().getSouthWest());
+        Point ne = getMapProjection().fromLatLngToDivPixel(getMap().getBounds().getNorthEast());
         setWidgetPosLeft(Math.min(sw.getX(), ne.getX()) - widthReserve / 2);
         setWidgetPosTop(Math.min(sw.getY(), ne.getY()) - heightReserve / 2);
 

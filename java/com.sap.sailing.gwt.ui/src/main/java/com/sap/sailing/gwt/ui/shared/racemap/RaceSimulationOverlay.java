@@ -123,7 +123,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
 
     @Override
     protected void draw() {
-        if (mapProjection != null) {
+        if (getMapProjection() != null) {
             super.setCanvasSettings();
             drawPaths();
         }
@@ -196,7 +196,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             ctxt.setStrokeStyle(this.colors.getColor(colorIdx));
             ctxt.beginPath();
             for (SimulatorWindDTO point : points) {
-                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
+                Point px = getMapProjection().fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 if (first) {
                     ctxt.moveTo(px.getX(), px.getY());
                     first = false;
@@ -211,7 +211,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                 if (start.timepoint.until(point.timepoint).asMillis() % timeStep.asMillis() != 0) {
                     continue;
                 }
-                Point px = mapProjection.fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
+                Point px = getMapProjection().fromLatLngToContainerPixel(coordinateSystem.toLatLng(point.position));
                 ctxt.beginPath();
                 ctxt.arc(px.getX(), px.getY(), 1.5, 0, 2 * Math.PI);
                 ctxt.closePath();
@@ -374,7 +374,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                     visiblePaths[2] = Boolean.FALSE; // hide right-opportunist by default
                                 }
                                 clearCanvas();
-                                if (mapProjection != null) {
+                                if (getMapProjection() != null) {
                                     drawPaths();
                                 }
                             }

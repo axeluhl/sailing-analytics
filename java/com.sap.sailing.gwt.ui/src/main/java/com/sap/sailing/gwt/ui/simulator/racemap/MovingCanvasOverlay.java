@@ -26,7 +26,7 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
     @Override
     public void setCanvasSettings() {
         // do nothing, if mapProjection is not available
-        if (mapProjection != null) {
+        if (getMapProjection() != null) {
             final int canvasWidth = getMap().getDiv().getClientWidth();
             final int canvasHeight = getMap().getDiv().getClientHeight();
             // calculate pixel-positions of old and new canvas-bounds using the same, current mapProjection
@@ -35,10 +35,10 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             if (upperLeftCornerLatLng == null) {
                 nwOldPx = null;
             } else {
-                nwOldPx = mapProjection.fromLatLngToDivPixel(upperLeftCornerLatLng);
+                nwOldPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
             }
-            upperLeftCornerLatLng = mapProjection.fromContainerPixelToLatLng(Point.newInstance(0, 0));
-            final Point nwNewPx = mapProjection.fromLatLngToDivPixel(upperLeftCornerLatLng);
+            upperLeftCornerLatLng = getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0));
+            final Point nwNewPx = getMapProjection().fromLatLngToDivPixel(upperLeftCornerLatLng);
             widgetPosLeft = Math.round(nwNewPx.getX());
             widgetPosTop = Math.round(nwNewPx.getY());
             // calculate the translation-vector between old and new origin in pixels

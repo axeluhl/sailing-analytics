@@ -109,7 +109,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
     @Override
     protected void draw() {
         super.draw();
-        if (mapProjection != null) {
+        if (getMapProjection() != null) {
             if ((macroWeather) && (swarm == null)) {
                 macroWeather = false;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);

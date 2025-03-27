@@ -73,8 +73,8 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-        if (mapProjection != null) {
-            final Point upperLeftCorner = mapProjection.fromLatLngToDivPixel(mapProjection.fromContainerPixelToLatLng(Point.newInstance(0, 0)));
+        if (getMapProjection() != null) {
+            final Point upperLeftCorner = getMapProjection().fromLatLngToDivPixel(getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0)));
             setWidgetPosLeft(Math.round(upperLeftCorner.getX()));
             setWidgetPosTop(Math.round(upperLeftCorner.getY()));
             setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
@@ -112,7 +112,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     @Override
     protected void draw() {
-        if (mapProjection != null) {
+        if (getMapProjection() != null) {
             // Reset the canvas, e.g. onMove() of map or onResize() of window
             setCanvasSettings();
         }
@@ -239,7 +239,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         logger.fine(msg);
         Position position = windDTO.position;
         LatLng positionLatLng = coordinateSystem.toLatLng(position);
-        Point canvasPositionInPx = mapProjection.fromLatLngToDivPixel(positionLatLng);
+        Point canvasPositionInPx = getMapProjection().fromLatLngToDivPixel(positionLatLng);
         double x = canvasPositionInPx.getX() - getWidgetPosLeft();
         double y = canvasPositionInPx.getY() - getWidgetPosTop();
         //windFieldPoints.put(new ToolTip(x, y), windDTO);
