@@ -11,6 +11,7 @@ import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
 import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
+import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -44,6 +45,8 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     public String pointColor = "Red";
     public String textColor = "Black";
     
+    private boolean mapProjectionSet = false;
+    
     protected static Logger logger = Logger.getLogger(FullCanvasOverlay.class.getName());
     
     public FullCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
@@ -57,6 +60,20 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         diffPx = new Vector(0, 0);
     }
     
+    @Override
+    protected OverlayViewOnDrawHandler getOnDrawHandler() {
+        return methods->{
+            if (!mapProjectionSet && methods.getProjection() != null) {
+                Scheduler.get().scheduleFixedDelay(()->{
+                    mapProjectionSet = true;
+                    setCanvasSettings();
+                    return false;
+                }, /* delay */ 1000);
+            }
+            super.getOnDrawHandler().onDraw(methods);
+        };
+    }
+
     /**
      *  Set the canvas to be the size of the map and set it to the top left corner of the map 
      */
@@ -110,7 +127,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
     
     @Override
     protected void draw() {
-        if (getMapProjection() != null) {
+        if (!mapProjectionSet && getMapProjection() != null) {
             // Reset the canvas, e.g. onMove() of map or onResize() of window
             setCanvasSettings();
         }

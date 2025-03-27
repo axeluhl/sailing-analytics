@@ -64,11 +64,6 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
         }
     }
 
-    @Override
-    protected void draw() {
-        // do nothing; setCanvasSettings() is called directly
-    }
-    
     public void initCanvasOrigin() {
         upperLeftCornerLatLng = null;
     }

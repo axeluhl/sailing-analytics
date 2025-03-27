@@ -901,9 +901,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             simulationOverlay.setVisible(false);
                             showLayoutsAfterAnimationFinishes();
                         }
-                        if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds) // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                        if (streamletOverlay != null
                                 && settings.isShowWindStreamletOverlay()
                                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
+                            streamletOverlay.setCanvasSettings();
                             streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                         }
                         advantageLineLength = getMapDiagonalVisibleDistance();
@@ -1007,6 +1008,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (settings.isShowWindStreamletOverlay() && paywallResolver.hasPermission(
                         SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
                     streamletOverlay.setVisible(true);
+                    streamletOverlay.setCanvasSettings();
                 }
                 if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEAREACIRCLES)) {
                     getAndShowCourseAreaCircles();
