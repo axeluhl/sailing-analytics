@@ -85,7 +85,9 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             } else {
                 updateTransition(timeForPositionTransitionMillis);
             }
-            if (redraw) redraw();
+            if (redraw) {
+                redraw();
+            }
             draw();
         }
         return canAnimate;

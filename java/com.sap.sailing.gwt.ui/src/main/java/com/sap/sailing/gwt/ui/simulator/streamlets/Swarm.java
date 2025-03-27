@@ -31,7 +31,6 @@ public class Swarm implements TimeListener {
     private StreamletParameters parameters;
 
     private Timer loopTimer;
-    private MapCanvasProjection mapProjection;
     private final VectorField field;
 
     private boolean zoomChanged = false;
@@ -86,7 +85,6 @@ public class Swarm implements TimeListener {
         this.field = vectorField;
         this.fullcanvas = fullcanvas;
         this.canvas = fullcanvas.getCanvas();
-        this.mapProjection = fullcanvas.getMapProjection();
         this.map = map;
         timer.addTimeListener(this);
         this.parameters = streamletPars;
@@ -96,6 +94,10 @@ public class Swarm implements TimeListener {
         valueRange = new ValueRangeFlexibleBoundaries(/* wind speed in knots */ 0.0, /* wind speed in knots */ 60.0,
                 /* percentage */ 0.15, /* minimumHalfBoundaryWidthInKnots */ 0.35);
         colorMapper = new ColorMapper(valueRange, !colored, ValueSpreader.LINEAR);
+    }
+
+    private MapCanvasProjection getMapProjection() {
+        return fullcanvas.getMapProjection();
     }
 
     public void start(final int animationIntervalMillis) {
@@ -203,7 +205,7 @@ public class Swarm implements TimeListener {
                     } else {
                         particle.stepsToLive = 1 + (int) Math.round(Math.random() * 40);
                     }
-                    particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToContainerPixel(particle.currentPosition));
+                    particle.currentPixelCoordinate = new Vector(getMapProjection().fromLatLngToContainerPixel(particle.currentPosition));
                     particle.previousPixelCoordinate = particle.currentPixelCoordinate;
                     particle.v = v;
                     done = true;
@@ -258,23 +260,25 @@ public class Swarm implements TimeListener {
     }
     
     private void updateBounds() {
-        LatLngBounds fieldBounds = this.field.getFieldCorners();
-        final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
-        swarmOffScreen = !fieldBounds.intersects(mapBounds);
-        visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
-        Vector boundsSWpx = new Vector(mapProjection.fromLatLngToContainerPixel(visibleBoundsOfField.getSouthWest()));
-        Vector boundsNEpx = new Vector(mapProjection.fromLatLngToContainerPixel(visibleBoundsOfField.getNorthEast()));
-        double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
-        double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        int newNParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
-                * this.parameters.swarmScale);
-        if (newNParticles > this.nParticles) {
+        if (getMapProjection() != null) {
+            LatLngBounds fieldBounds = this.field.getFieldCorners();
+            final LatLngBounds mapBounds = map.getBounds(); // FIXME bug6098 map.getBounds() for rotated VECTOR maps returns the smallest SW/NE box fully containing the visible part of the map
+            swarmOffScreen = !fieldBounds.intersects(mapBounds);
+            visibleBoundsOfField = BoundsUtil.intersect(fieldBounds, mapBounds);
+            Vector boundsSWpx = new Vector(getMapProjection().fromLatLngToContainerPixel(visibleBoundsOfField.getSouthWest()));
+            Vector boundsNEpx = new Vector(getMapProjection().fromLatLngToContainerPixel(visibleBoundsOfField.getNorthEast()));
+            double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
+            double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
+            int newNParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
+                    * this.parameters.swarmScale);
+            if (newNParticles > this.nParticles) {
+                this.nParticles = newNParticles;
+                createParticles();
+            }
             this.nParticles = newNParticles;
-            createParticles();
+            cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude() / 180. * Math.PI
+                    + visibleBoundsOfField.getNorthEast().getLatitude() / 180. * Math.PI) / 2);
         }
-        this.nParticles = newNParticles;
-        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude() / 180. * Math.PI
-                + visibleBoundsOfField.getNorthEast().getLatitude() / 180. * Math.PI) / 2);
     }
 
     private void drawSwarm() {
@@ -340,7 +344,7 @@ public class Swarm implements TimeListener {
                 double lngDeg = particle.currentPosition.getLongitude()
                         + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = LatLng.newInstance(latDeg, lngDeg);
-                particle.currentPixelCoordinate = new Vector(mapProjection.fromLatLngToContainerPixel(particle.currentPosition));
+                particle.currentPixelCoordinate = new Vector(getMapProjection().fromLatLngToContainerPixel(particle.currentPosition));
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
