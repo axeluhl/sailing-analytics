@@ -24,7 +24,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     protected WindLadder windLadder;
 
-    protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture(), this::redraw);
+    protected ImageTileGenerator tileGen = new ImageTileGenerator(RESOURCES.windLadderTexture(), ()->{ redraw(); draw(); });
 
     protected Double windBearingRadians;
     protected Position fixPosition;
@@ -36,12 +36,14 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     protected boolean redraw = true;
     protected int transitionDisableCountdown;
+    private final String name;
 
-    public WindLadderOverlay(WindLadder windLadder, MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+    public WindLadderOverlay(WindLadder windLadder, MapWidget map, int zIndex, CoordinateSystem coordinateSystem, String name) {
         super(map, zIndex, coordinateSystem);
         this.map.addZoomChangeHandler(event -> this.onZoomChange());
         this.windLadder = windLadder;
-        getCanvas().getElement().setId("wind-ladder-display");
+        getCanvas().getElement().setId("wind-ladder-display-"+name);
+        this.name = name;
     }
 
     public boolean update(Double windBearingRadians, Position fixPosition, long timeForPositionTransitionMillis) {
@@ -258,5 +260,10 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             mapHeight = getMap().getDiv().getClientHeight();
         }
         return mapHeight;
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString()+" "+name;
     }
 }

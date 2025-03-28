@@ -66,7 +66,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
                     mapProjectionSet = true;
                     setCanvasSettings();
                     super.getOnDrawHandler().onDraw(methods);
-                    return false;
+                    return false; // don't repeat
                 }, /* delay */ 1000);
             } else {
                 super.getOnDrawHandler().onDraw(methods);
