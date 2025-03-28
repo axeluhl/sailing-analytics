@@ -3321,7 +3321,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         final boolean needtoUpdateWindLadder;
         if (newSettings.isShowWindLadder() != settings.isShowWindLadder()) {
-            windLadder.setVisible(newSettings.isShowWindLadder());
+            if (windLadder != null) {
+                windLadder.setVisible(newSettings.isShowWindLadder());
+            }
             needtoUpdateWindLadder = newSettings.isShowWindLadder();
         } else {
             needtoUpdateWindLadder = false;
