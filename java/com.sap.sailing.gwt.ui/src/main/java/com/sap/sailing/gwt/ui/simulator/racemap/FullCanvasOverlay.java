@@ -9,8 +9,6 @@ import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
-import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
-import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.sap.sailing.domain.common.Position;
@@ -67,10 +65,12 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
                 Scheduler.get().scheduleFixedDelay(()->{
                     mapProjectionSet = true;
                     setCanvasSettings();
+                    super.getOnDrawHandler().onDraw(methods);
                     return false;
-                }, /* delay */ 2000);
+                }, /* delay */ 1000);
+            } else {
+                super.getOnDrawHandler().onDraw(methods);
             }
-            super.getOnDrawHandler().onDraw(methods);
         };
     }
 
@@ -93,9 +93,6 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
             setWidgetPosLeft(Math.round(upperLeftCorner.getX()));
             setWidgetPosTop(Math.round(upperLeftCorner.getY()));
             setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
-            logger.info("set size for "+this+" to "+mapWidth+"x"+mapHeight+"@"+getWidgetPosLeft()+","+getWidgetPosTop());
-        } else {
-            logger.info("map projection for "+this+" is null");
         }
     }
 
@@ -104,22 +101,13 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         mapWidth = null;
         mapHeight = null;
     	// improve browser performance by deferred scheduling of redraws
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            public void execute() {
-                draw();
-            }
-        });
+        Scheduler.get().scheduleDeferred(this::draw);
     }
 
     @Override
     public void addToMap() {
         if (map != null) {
-            map.addResizeHandler(new ResizeMapHandler() {
-                @Override
-                public void onEvent(ResizeMapEvent event) {
-                    onResize();
-                }
-            });
+            map.addResizeHandler(e->onResize());
         }
         super.addToMap();
     }

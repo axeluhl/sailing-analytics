@@ -68,9 +68,6 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             }
             // update canvas position
             setCanvasPosition(widgetPosLeft, widgetPosTop);
-            logger.info("set size of "+this+" to "+canvasWidth+"x"+canvasHeight+" at "+widgetPosLeft+","+widgetPosTop);
-        } else {
-            logger.info("map projection of "+this+" is null");
         }
     }
 

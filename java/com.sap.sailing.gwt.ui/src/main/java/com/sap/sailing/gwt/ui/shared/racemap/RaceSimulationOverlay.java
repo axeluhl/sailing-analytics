@@ -79,6 +79,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         this.disableRaceSimulator = disableRaceSimulator;
         this.colors = new ColorPaletteGenerator();
         this.pathNameFormatter = new PathNameFormatter(stringMessages);
+        getCanvas().getElement().setId("race-simulation-overlay");
     }
     
     public void updateLeg(int newLeg, boolean clearCanvas, long newVersion) {
@@ -127,7 +128,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             super.setCanvasSettings();
             drawPaths();
         } else {
-            logger.info("map projection is null");
+            logger.info("map projection of "+this+" was null");
         }
     }    
 
@@ -155,14 +156,14 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         // clear paths
         double w = this.getCanvas().getOffsetWidth();
         double h = this.getCanvas().getOffsetHeight();
-        Context2d g = this.getCanvas().getContext2d();
+        final Context2d g = this.getCanvas().getContext2d();
         g.clearRect(0, 0, w, h);
         // clear legend
         if (simulationLegend != null) {
             w = simulationLegend.getOffsetWidth();
             h = simulationLegend.getOffsetHeight();
-            g = simulationLegend.getContext2d();
-            g.clearRect(0, 0, w, h);            
+            final Context2d legend = simulationLegend.getContext2d();
+            legend.clearRect(0, 0, w, h);
         }
     }
     
@@ -180,7 +181,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         }
         drawLegend(simulationLegend);
         // calibrate canvas
-        super.setCanvasSettings();
+        setCanvasSettings();
         // draw paths
         Context2d ctxt = canvas.getContext2d();
         PathDTO[] paths = simulationResult.getPaths();

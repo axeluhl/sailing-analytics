@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Cursor;
@@ -52,9 +50,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Frank
  */
 public abstract class CanvasOverlayV3 {
-    private static final Logger logger = Logger.getLogger(CanvasOverlayV3.class.getName());
-
-    
     private OverlayView customOverlayView;
     
     /**
@@ -431,9 +426,6 @@ public abstract class CanvasOverlayV3 {
             getCanvas().setHeight(newHeightInPx + "px");
             getCanvas().setCoordinateSpaceWidth(newWidthInPx);
             getCanvas().setCoordinateSpaceHeight(newHeightInPx);
-            logger.info("set canvas size for "+this+" to "+newWidthInPx+"x"+newHeightInPx);
-        } else {
-            logger.info("canvas for "+this+" is null");
         }
     }
 

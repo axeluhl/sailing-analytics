@@ -41,6 +41,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
         super(map, zIndex, coordinateSystem);
         this.map.addZoomChangeHandler(event -> this.onZoomChange());
         this.windLadder = windLadder;
+        getCanvas().getElement().setId("wind-ladder-display");
     }
 
     public boolean update(Double windBearingRadians, Position fixPosition, long timeForPositionTransitionMillis) {
