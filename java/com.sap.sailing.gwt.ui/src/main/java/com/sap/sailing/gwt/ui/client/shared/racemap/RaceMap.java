@@ -3319,11 +3319,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 courseAreaCirclesToShow.clear();
             }
         }
+        final boolean needtoUpdateWindLadder;
+        if (newSettings.isShowWindLadder() != settings.isShowWindLadder()) {
+            windLadder.setVisible(newSettings.isShowWindLadder());
+            needtoUpdateWindLadder = newSettings.isShowWindLadder();
+        } else {
+            needtoUpdateWindLadder = false;
+        }
         this.settings = newSettings;
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
             if (timer.getPlayState() != PlayStates.Playing) {
                 maneuverMarkersAndLossIndicators.updateManeuverMarkersAfterSettingsChanged();
             }
+        }
+        if (needtoUpdateWindLadder) {
+            showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
         }
         if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();

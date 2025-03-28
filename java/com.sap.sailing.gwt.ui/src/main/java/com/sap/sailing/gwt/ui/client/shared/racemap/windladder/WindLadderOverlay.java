@@ -186,6 +186,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
         }
         updateDrawingAngleAndSetCanvasRotation(0.0);
+        redraw();
     }
 
     /**
