@@ -1508,7 +1508,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response getStartAnalysis(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
             @QueryParam("secret") String regattaSecret) {
         Response response = null;
-        Regatta regatta = findRegattaByName(regattaName);
+        final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
@@ -1520,7 +1520,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
                 try {
-                    JSONObject jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
+                    final JSONObject jsonStartAnalysis = getStartAnalysis(trackedRace, regatta);
                     response = Response.ok(streamingOutput(jsonStartAnalysis)).build();
                 } catch (NoWindException | InterruptedException | ExecutionException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -1569,6 +1569,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 competitorStartAnalysisJson.put("speedOverGroundAtStartOfRaceInKnots", entry.speedOverGroundAtStartOfRaceInKnots);
                                 competitorStartAnalysisJson.put("speedOverGroundFiveSecondsBeforeStartInKnots", entry.speedOverGroundFiveSecondsBeforeStartInKnots);
                                 competitorStartAnalysisJson.put("timeBetweenRaceStartAndCompetitorStartInSeconds", entry.timeBetweenRaceStartAndCompetitorStartInSeconds);
+                                competitorStartAnalysisJson.put("startTack", entry.startTack);
                                 competitorStartAnalysis.add(competitorStartAnalysisJson);
                             }
                         }
