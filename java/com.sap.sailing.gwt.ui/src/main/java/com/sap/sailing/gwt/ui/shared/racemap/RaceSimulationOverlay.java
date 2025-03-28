@@ -126,6 +126,8 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         if (getMapProjection() != null) {
             super.setCanvasSettings();
             drawPaths();
+        } else {
+            logger.info("map projection is null");
         }
     }    
 
@@ -155,7 +157,6 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         double h = this.getCanvas().getOffsetHeight();
         Context2d g = this.getCanvas().getContext2d();
         g.clearRect(0, 0, w, h);
-        
         // clear legend
         if (simulationLegend != null) {
             w = simulationLegend.getOffsetWidth();

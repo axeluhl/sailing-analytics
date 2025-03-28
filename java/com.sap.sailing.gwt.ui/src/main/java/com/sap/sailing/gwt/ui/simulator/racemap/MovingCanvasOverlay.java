@@ -51,16 +51,26 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
             }
             // store canvas-content, because setWidth() and setHeight() will clear canvas and change Context2d 
             Context2d ctxt = canvas.getContext2d();
-            final ImageData canvasContent = ctxt.getImageData(0, 0, canvas.getElement().getClientWidth(), canvas.getElement().getClientHeight());
-            canvas.setWidth(String.valueOf(canvasWidth));
-            canvas.setHeight(String.valueOf(canvasHeight));
-            canvas.setCoordinateSpaceWidth(canvasWidth);
-            canvas.setCoordinateSpaceHeight(canvasHeight);
-            // get updated Context2d and restore canvas-content moved by translation-vector
-            ctxt = canvas.getContext2d();
-            ctxt.putImageData(canvasContent, diffPx.x, diffPx.y);
+            final int clientWidth = canvas.getElement().getClientWidth();
+            final int clientHeight = canvas.getElement().getClientHeight();
+            ImageData canvasContent = null;
+            if (clientWidth > 0 && clientHeight > 0) {
+                canvasContent = ctxt.getImageData(0, 0, canvas.getElement().getClientWidth(), canvas.getElement().getClientHeight());
+            }
+            canvas.setWidth(String.valueOf(Math.max(1, canvasWidth)));
+            canvas.setHeight(String.valueOf(Math.max(1, canvasHeight)));
+            canvas.setCoordinateSpaceWidth(Math.max(1, canvasWidth));
+            canvas.setCoordinateSpaceHeight(Math.max(1, canvasHeight));
+            if (clientWidth > 0 && clientHeight > 0) {
+                // get updated Context2d and restore canvas-content moved by translation-vector
+                ctxt = canvas.getContext2d();
+                ctxt.putImageData(canvasContent, diffPx.x, diffPx.y);
+            }
             // update canvas position
             setCanvasPosition(widgetPosLeft, widgetPosTop);
+            logger.info("set size of "+this+" to "+canvasWidth+"x"+canvasHeight+" at "+widgetPosLeft+","+widgetPosTop);
+        } else {
+            logger.info("map projection of "+this+" is null");
         }
     }
 

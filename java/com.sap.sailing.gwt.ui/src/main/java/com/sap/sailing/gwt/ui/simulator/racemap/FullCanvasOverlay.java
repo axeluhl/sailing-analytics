@@ -68,7 +68,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
                     mapProjectionSet = true;
                     setCanvasSettings();
                     return false;
-                }, /* delay */ 1000);
+                }, /* delay */ 2000);
             }
             super.getOnDrawHandler().onDraw(methods);
         };
@@ -84,15 +84,18 @@ public abstract class FullCanvasOverlay extends CanvasOverlayV3 implements Requi
         if (mapHeight == null) {
             mapHeight = getMap().getDiv().getClientHeight();
         }
-        canvas.setWidth(String.valueOf(mapWidth));
-        canvas.setHeight(String.valueOf(mapHeight));
-        canvas.setCoordinateSpaceWidth(mapWidth);
-        canvas.setCoordinateSpaceHeight(mapHeight);
+        canvas.setWidth(String.valueOf(Math.max(1, mapWidth)));
+        canvas.setHeight(String.valueOf(Math.max(1, mapHeight)));
+        canvas.setCoordinateSpaceWidth(Math.max(1, mapWidth));
+        canvas.setCoordinateSpaceHeight(Math.max(1, mapHeight));
         if (getMapProjection() != null) {
             final Point upperLeftCorner = getMapProjection().fromLatLngToDivPixel(getMapProjection().fromContainerPixelToLatLng(Point.newInstance(0, 0)));
             setWidgetPosLeft(Math.round(upperLeftCorner.getX()));
             setWidgetPosTop(Math.round(upperLeftCorner.getY()));
             setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
+            logger.info("set size for "+this+" to "+mapWidth+"x"+mapHeight+"@"+getWidgetPosLeft()+","+getWidgetPosTop());
+        } else {
+            logger.info("map projection for "+this+" is null");
         }
     }
 
