@@ -185,7 +185,7 @@ public class WindLadderOverlay extends FullCanvasOverlay {
             setWidgetPosTop(Math.round(upperLeftCorner.getY()) - heightReserve / 2);
             setCanvasPosition(getWidgetPosLeft(), getWidgetPosTop());
         }
-        updateDrawingAngleAndSetCanvasRotation(0.0);
+        updateDrawingAngleAndSetCanvasRotation(windBearingRadians==null?0.0:Math.toDegrees(windBearingRadians));
         redraw();
     }
 
@@ -230,8 +230,8 @@ public class WindLadderOverlay extends FullCanvasOverlay {
 
     @Override
     protected void drawCenterChanged() {
+        windLadder.swap();
         update(null, null, -1);
-        windLadder.forceSwap();
     }
 
     protected void onZoomChange() {

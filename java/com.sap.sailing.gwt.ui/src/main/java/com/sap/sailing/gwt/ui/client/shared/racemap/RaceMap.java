@@ -2550,7 +2550,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (newZoomLevel != map.getZoom()) {
                     // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
                     // appears different on the screen due to map-animations
-                    // following sequences keep the selected boats allways visible:
+                    // following sequences keep the selected boats always visible:
                     //   zoom-in : 1. panTo(), 2. setZoom()
                     //   zoom-out: 1. setZoom(), 2. panTo() 
                     autoZoomIn = newZoomLevel > map.getZoom();
@@ -3321,7 +3321,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         final boolean needtoUpdateWindLadder;
         if (newSettings.isShowWindLadder() != settings.isShowWindLadder()) {
-            windLadder.setVisible(newSettings.isShowWindLadder());
+            if (windLadder != null) {
+                windLadder.setVisible(newSettings.isShowWindLadder());
+            }
             needtoUpdateWindLadder = newSettings.isShowWindLadder();
         } else {
             needtoUpdateWindLadder = false;
@@ -3794,6 +3796,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         this.addVideoToRaceButton.setVisible(visible);
     }
 
+    /**
+     * Based on the map's {@link MapWidget#getBounds()} which may be more than what's actually visible because it's the smallest
+     * NW/SE lat/lng "rectangle" that contains the possibly rotated visible area.
+     */
     private Distance getMapDiagonalVisibleDistance() {
         return coordinateSystem.getPosition(currentMapBounds.getSouthWest()).getDistance(coordinateSystem.getPosition(currentMapBounds.getNorthEast())); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
     }
