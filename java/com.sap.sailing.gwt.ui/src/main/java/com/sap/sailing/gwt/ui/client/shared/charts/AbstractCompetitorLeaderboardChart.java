@@ -1,13 +1,11 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -31,6 +29,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardDataEntriesAction;
@@ -40,9 +39,10 @@ import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -50,11 +50,14 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
  */
-public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends AbstractSettings> extends AbstractLazyComponent<SettingsType> implements Component<SettingsType>, 
+public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends GenericSerializableSettings>
+        extends AbstractLazyComponent<SettingsType>
+        implements Component<SettingsType>, 
     CompetitorSelectionChangeListener, RequiresResize, TimeListener {
     public static final String LODA_LEADERBOARD_CHART_DATA_CATEGORY = "loadLeaderboradChartData";
     
@@ -73,9 +76,14 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
     
-    public AbstractCompetitorLeaderboardChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, String leaderboardName, 
+    private final List<Runnable> chartDataUpdateCallbacks = new ArrayList<>();
+
+    public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
             DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             final StringMessages stringMessages, ErrorReporter errorReporter) {
+        super(parent, context);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.competitorSelectionProvider = competitorSelectionProvider;
@@ -84,8 +92,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
         this.timer = timer;
         this.leaderboardName = leaderboardName;
         this.selectedDetailType = detailType;
-
-        competitorSeries = new HashMap<CompetitorDTO, Series>();
+        competitorSeries = new HashMap<>();
         raceColumnNames = new ArrayList<String>();
         raceColumnNamesWithData = new ArrayList<String>();
     }
@@ -101,6 +108,18 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
         
         return chart;
     }
+    
+    /**
+     * Add a {@link Runnable callback} to get notified when the chart data has been updated successfully.
+     * 
+     * @param callback {@link Runnable} to call on chart data update
+     * @return {@link HandlerRegistration} to remove the callback
+     */
+    public HandlerRegistration addChartDataUpdatedHandler(final Runnable callback) {
+        this.chartDataUpdateCallbacks.add(callback);
+        return () -> this.chartDataUpdateCallbacks.remove(callback);
+    }
+
 
     protected boolean isCompetitorVisible(CompetitorDTO competitor) {
         return Util.isEmpty(competitorSelectionProvider.getSelectedCompetitors()) || competitorSelectionProvider.isSelected(competitor);
@@ -154,7 +173,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
                 chart.getYAxis().setReversed(true);
                 chart.getYAxis().setTickInterval(1.0);
                 break;
-            case REGATTA_TOTAL_POINTS_SUM:
+            case REGATTA_NET_POINTS_SUM:
                 chart.getYAxis().setTickInterval(5.0);
                 chart.getYAxis().setReversed(false);
                 break;
@@ -192,11 +211,15 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName());
             result.setPlotOptions(new LinePlotOptions()
-            .setLineWidth(LINE_WIDTH)
-            .setMarker(new Marker().setEnabled(true).setRadius(4).setSymbol(Symbol.DIAMOND))
-            .setShadow(true).setHoverStateLineWidth(LINE_WIDTH)
-            .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml()).setSelected(true));
+                    .setLineWidth(LINE_WIDTH)
+                    .setMarker(new Marker().setEnabled(true).setRadius(4).setSymbol(Symbol.DIAMOND))
+                    .setShadow(true)
+                    .setHoverStateLineWidth(LINE_WIDTH)
+                    .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml())
+                    .setSelected(true)
+                );
             competitorSeries.put(competitor, result);
+            chart.addSeries(result, false, true);
         }
         return result;
     }
@@ -227,35 +250,20 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
                 sailingService, leaderboardName, /* date */ null, selectedDetailType);
         
         asyncActionsExecutor.execute(getLeaderboardDataEntriesAction, LODA_LEADERBOARD_CHART_DATA_CATEGORY,
-                new AsyncCallback<List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>>>() {
+                new AsyncCallback<List<Triple<String, List<CompetitorDTO>, List<Double>>>>() {
                     @Override
-                    public void onSuccess(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result) {
-                        List<Series> chartSeries = new ArrayList<Series>(Arrays.asList(chart.getSeries()));
+                    public void onSuccess(List<Triple<String, List<CompetitorDTO>, List<Double>>> result) {
                         chart.hideLoading();
                         setWidget(chart);
                         raceColumnNames.clear();
-                        
-                        switch (selectedDetailType) {
-                        case OVERALL_RANK:
-                        case REGATTA_RANK:
-                            fillTotalRanksSeries(result, chartSeries);
-                            break;
-                        case REGATTA_TOTAL_POINTS_SUM:
-                            fillTotalPointsSeries(result, chartSeries);
-                            break;
-                        default:
-                            break;
-                        }
-        
+                        fillSeries(result);
                         // TODO will removing the following line do harm on any usage of this abstract base class?
                         // chart.setSizeToMatchContainer();
-                        
                         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
-                        // positions (nativeAdjustCheckboxPosition)
-                        // in the BaseChart class would not be called
+                        // positions (nativeAdjustCheckboxPosition) in the BaseChart class would not be called
                         chart.redraw();
+                        chartDataUpdateCallbacks.forEach(Runnable::run);
                     }
-        
                     @Override
                     public void onFailure(Throwable caught) {
                         chart.hideLoading();
@@ -265,82 +273,22 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
                 });
     }
 
-    private void fillTotalRanksSeries(List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result, List<Series> chartSeries) {
-        Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
-        for (Series series : competitorSeries.values()) {
-            for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
-                series.removePoint(p, /* redraw */false, /* animation */false);
-            }
-        }
+    private void fillSeries(List<Triple<String, List<CompetitorDTO>, List<Double>>> result) {
         int raceColumnNumber = 0;
-        int maxCompetitorCount = 0;
-        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
-            List<Double> dataValues = entry.getC();
-            raceColumnNames.add(entry.getA());
-            if(hasValidValues(dataValues)) {
-                raceColumnNamesWithData.add(entry.getA());
-                int index = 0;
-                maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
-                for (CompetitorDTO competitor : entry.getB()) {
-                    if (isCompetitorVisible(competitor)) {
-                        Series series = getOrCreateSeries(competitor);
-                        Double dataValue = dataValues.get(index);
-                        if (dataValue != null) {
-                            series.addPoint(raceColumnNumber, dataValue, /* redraw */false, /* shift */false, /* animation */ false);
-                        }
-    
-                        unusedSeries.remove(series);
-                        if (!chartSeries.contains(series)) {
-                            chart.addSeries(series);
-                            chartSeries.add(series);
-                        }
-                    }
-                    index++;
-                }
-                raceColumnNumber++;
-            }
-        }
-        setHeight();
-    }
-
-    private void setHeight() {
-        chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
-    }
-
-    private void fillTotalPointsSeries(
-            List<com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>>> result,
-            List<Series> chartSeries) {
-        Double maxTotalPoints = 0.0;
-        Set<Series> unusedSeries = new HashSet<Series>(competitorSeries.values());
-        for (Series series : competitorSeries.values()) {
-            for (Point p : new ArrayList<Point>(Arrays.asList(series.getPoints()))) {
-                series.removePoint(p, /* redraw */ false, /* animation */ false);
-            }
-        }
-        int raceColumnNumber = 0;
-        int maxCompetitorCount = 0;
-        for (com.sap.sse.common.Util.Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
-            List<Double> dataValues = entry.getC();
+        final Map<CompetitorDTO, Point[]> competitorWithCoordinatePoints = new ConcurrentHashMap<>();
+        for (Triple<String, List<CompetitorDTO>, List<Double>> entry : result) {
+            final List<Double> dataValues = entry.getC();
             raceColumnNames.add(entry.getA());
             if (hasValidValues(dataValues)) {
                 raceColumnNamesWithData.add(entry.getA());
                 int index = 0;
-                maxCompetitorCount = Math.max(maxCompetitorCount, entry.getB().size());
                 for (CompetitorDTO competitor : entry.getB()) {
                     if (isCompetitorVisible(competitor)) {
-                        Series series = getOrCreateSeries(competitor);
                         Double dataValue = dataValues.get(index);
                         if (dataValue != null) {
-                            Double sumTotalPoints = dataValue;
-                            series.addPoint(raceColumnNumber, sumTotalPoints, /* redraw */ false, /* shift */ false, /* animation */ false);
-                            if (sumTotalPoints > maxTotalPoints) {
-                                maxTotalPoints = sumTotalPoints;
-                            }
-                        }
-                        unusedSeries.remove(series);
-                        if (!chartSeries.contains(series)) {
-                            chart.addSeries(series);
-                            chartSeries.add(series);
+                            final Point[] points = competitorWithCoordinatePoints
+                                    .computeIfAbsent(competitor, c -> new Point[result.size()]);
+                            points[raceColumnNumber] = new Point(raceColumnNumber, dataValue);
                         }
                     }
                     index++;
@@ -348,7 +296,13 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
                 raceColumnNumber++;
             }
         }
+        competitorWithCoordinatePoints
+                .forEach((competitor, points) -> getOrCreateSeries(competitor).setPoints(points, false));
         setHeight();
+    }
+    
+    private void setHeight() {
+        chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
     }
     
     private boolean hasValidValues(List<Double> values) {

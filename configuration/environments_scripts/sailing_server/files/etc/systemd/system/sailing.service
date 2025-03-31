@@ -1,0 +1,13 @@
+[Unit]
+Description=The sailing start-up service reading through EC2 userdata and acting accordingly
+Requires=-.mount
+After=-.mount mongod.service
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/sailing start
+ExecStop=/usr/local/bin/sailing stop

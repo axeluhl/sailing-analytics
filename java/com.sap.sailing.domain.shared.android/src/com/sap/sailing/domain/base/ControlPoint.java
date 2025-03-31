@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 
-public interface ControlPoint extends WithID, Named {
+public interface ControlPoint extends NamedWithID {
     Iterable<Mark> getMarks();
+
+    String getShortName();
 }

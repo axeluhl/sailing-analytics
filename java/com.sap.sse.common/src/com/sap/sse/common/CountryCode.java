@@ -1,6 +1,8 @@
 package com.sap.sse.common;
 
-public interface CountryCode {
+import java.io.Serializable;
+
+public interface CountryCode extends Serializable {
 
     String getTwoLetterISOCode();
 

@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
-public interface CrewMember {
-	public String getName();
-	
-	public String getNationality();
+import java.io.Serializable;
 
-	public String getPosition();
+public interface CrewMember extends Serializable{
+    public String getName();
+
+    public String getNationality();
+
+    public String getPosition();
 }

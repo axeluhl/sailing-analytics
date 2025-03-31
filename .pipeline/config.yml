@@ -1,0 +1,29 @@
+# Project-specific config
+# Defaults are loaded from (with increasing precedence):
+#  1. https://github.tools.sap/project-piper/sap-piper/blob/master/resources/piper-defaults.yml
+#  2. https://github.tools.sap/SAPMobile/sap-mobile-pipeline/blob/main/custom-defaults-android.yml
+general:
+  # Vault config
+  vaultPath: 'piper/PIPELINE-GROUP-5565'
+  vaultBasePath: 'piper/PIPELINE-GROUP-5565'
+  vaultServerUrl: 'https://vault.tools.sap'
+  vaultNamespace: 'ies/hyperspace/pipelines'
+  vaultPipelineName: 'PIPELINE-29049'
+  # Versioning
+  versioningModel: 'full'  # possible values:  major, major-minor, semantic, full
+
+steps:
+  # Fastlane
+  sapExecuteFastlane:
+    platform: 'android'
+  # Configuration for Sonar Scan
+  sonarExecuteScan:
+    versioningModel: 'semantic' # overwrite default from general section -> Track metrics since last release
+    sonarVaultSecretName: 'PIPELINE-29049/sonar-SAP-Sailing-Analytics-Sonarqube'
+  # Cumulus
+  sapCumulusUpload:
+    pipelineId: '84d219f0-1abb-4b37-bad0-e2893612ce25'
+    versioningModel: 'semantic' # overwrite default from general section -> don't spam Cumulus
+  # Rotating vault secret if it is expring soon:
+  vaultRotateSecretId:
+    daysBeforeExpiry: 45

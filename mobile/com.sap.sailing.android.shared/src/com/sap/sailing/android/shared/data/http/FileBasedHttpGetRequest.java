@@ -19,7 +19,7 @@ public class FileBasedHttpGetRequest extends HttpGetRequest {
         super(url, listener, context);
         this.outputFile = outputFile;
     }
-    
+
     public File getOutputFile() {
         return outputFile;
     }
@@ -33,7 +33,7 @@ public class FileBasedHttpGetRequest extends HttpGetRequest {
                 return null;
             }
         } finally {
-            outputStream.close();
+            safeClose(outputStream);
         }
         return new FileInputStream(outputFile);
     }

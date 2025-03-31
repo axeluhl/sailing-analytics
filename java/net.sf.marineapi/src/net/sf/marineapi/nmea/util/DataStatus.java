@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -24,46 +24,45 @@ package net.sf.marineapi.nmea.util;
  * DataStatus defines the validity of data being broadcasted by an NMEA device.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public enum DataStatus {
 
-    /** Valid data available. May also indicate boolean value <code>true</code>. */
-    ACTIVE('A'),
+	/** Valid data available. May also indicate boolean value <code>true</code>. */
+	ACTIVE('A'),
 
-    /**
-     * No valid data available. May also indicate boolean value
-     * <code>false</code>.
-     */
-    VOID('V');
+	/**
+	 * No valid data available. May also indicate boolean value
+	 * <code>false</code>.
+	 */
+	VOID('V');
 
-    private final char character;
+	private final char character;
 
-    DataStatus(char ch) {
-        character = ch;
-    }
+	DataStatus(char ch) {
+		character = ch;
+	}
 
-    /**
-     * Returns the character used in NMEA sentences to indicate the status.
-     * 
-     * @return Char indicator for DataStatus
-     */
-    public char toChar() {
-        return character;
-    }
+	/**
+	 * Returns the character used in NMEA sentences to indicate the status.
+	 * 
+	 * @return Char indicator for DataStatus
+	 */
+	public char toChar() {
+		return character;
+	}
 
-    /**
-     * Returns the DataStatus enum for status char used in sentences.
-     * 
-     * @param ch Status char
-     * @return DataStatus
-     */
-    public static DataStatus valueOf(char ch) {
-        for (DataStatus ds : values()) {
-            if (ds.toChar() == ch) {
-                return ds;
-            }
-        }
-        return valueOf(String.valueOf(ch));
-    }
+	/**
+	 * Returns the DataStatus enum for status char used in sentences.
+	 * 
+	 * @param ch Status char
+	 * @return DataStatus
+	 */
+	public static DataStatus valueOf(char ch) {
+		for (DataStatus ds : values()) {
+			if (ds.toChar() == ch) {
+				return ds;
+			}
+		}
+		return valueOf(String.valueOf(ch));
+	}
 }

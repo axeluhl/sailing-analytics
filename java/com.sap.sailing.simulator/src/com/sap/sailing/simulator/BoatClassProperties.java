@@ -1,10 +1,12 @@
 package com.sap.sailing.simulator;
 
+import com.sap.sse.common.Distance;
+
 public interface BoatClassProperties {
 
     String getName();
     
-    Double getLength();
+    Distance getLength();
     
     String getPolar();
     

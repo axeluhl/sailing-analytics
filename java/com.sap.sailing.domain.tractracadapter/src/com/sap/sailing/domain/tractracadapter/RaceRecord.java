@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 public class RaceRecord {
     private static final Logger logger = Logger.getLogger(RaceRecord.class.getName());
@@ -39,11 +42,14 @@ public class RaceRecord {
     private final List<String> boatClassNames;
     private final String raceStatus;
     private final String raceVisibility;
+    private final boolean hasReplay;
     private final URL jsonUrl;
+    private final URI defaultUpdateURI;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String paramURLAsString,
             String ID, String trackingstarttime, String trackingendtime, String racestarttime,
-            String commaSeparatedBoatClassNames, String status, String visibility, boolean loadLiveAndStoredURI)
+            String commaSeparatedBoatClassNames, String status, String visibility, boolean hasReplay, boolean loadLiveAndStoredURI,
+            String defaultUpdateURI)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
@@ -51,6 +57,7 @@ public class RaceRecord {
         this.replayURL = replayURL;
         this.raceStatus = status;
         this.raceVisibility = visibility;
+        this.hasReplay = hasReplay;
         this.ID = ID;
         this.jsonUrl = jsonURL;
         this.boatClassNames = new ArrayList<String>();
@@ -86,20 +93,15 @@ public class RaceRecord {
             }
         }
         this.racestarttime = tp;
-        
-        String jsonURLAsString = jsonURL.toString();
-        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
-        int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
-        String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
-        final String baseURL = jsonURLAsString.substring(0, indexOfLastSlash);
-        
+        String technicalEventName = getTechnicalEventName(jsonURL);
+        final String baseJsonURL = getBaseURL(jsonURL);
         try {
             if (paramURLAsString == null || paramURLAsString.isEmpty()) {
                 // for backward compatibility (the param_url field was not always in the JSON document) and perhaps for live mode
-                paramURL = new URL(baseURL + "/clientparams.php?event="
+                paramURL = new URL(baseJsonURL + "/clientparams.php?event="
                         + technicalEventName + "&race=" + ID);
             } else {
-                paramURL = new URL(paramURLAsString);
+                paramURL = new URL(jsonURL, paramURLAsString); // handle relative to JSON URL if not absolute
             }
         } catch (Exception e) {
             logger.info("Couldn't parse TracTrac paramURL " + paramURLAsString + " for race record " + getName());
@@ -107,27 +109,45 @@ public class RaceRecord {
             throw e;
         }
         if (loadLiveAndStoredURI) {
-                Map<String, String> paramURLContents = parseParams(paramURL);
-                String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
-                liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
-                String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-                if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
-                        storedURIAsString.startsWith("https:")) {
-                    storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
-                } else {
-                    storedURI = new URI(baseURL+"/"+storedURIAsString);
-                }
+            Map<String, String> paramURLContents = parseParams(paramURL);
+            String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
+            liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
+            String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
+            if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
+                    storedURIAsString.startsWith("https:")) {
+                storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+            } else {
+                storedURI = new URI(getBaseURL(paramURL)+"/"+storedURIAsString);
+            }
         } else {
             paramURLAsString = null;
             liveURI = null;
             storedURI = null;
         }
+        this.defaultUpdateURI = defaultUpdateURI == null ? null : new URI(defaultUpdateURI);
     }
 
+    private String getBaseURL(URL url) {
+        String jsonURLAsString = url.toString();
+        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
+        final String baseURL = jsonURLAsString.substring(0, indexOfLastSlash);
+        return baseURL;
+    }
+    
+    private String getTechnicalEventName(URL jsonUrl) {
+        String jsonURLAsString = jsonUrl.toString();
+        int indexOfLastSlash = jsonURLAsString.lastIndexOf('/');
+        int indexOfLastButOneSlash = jsonURLAsString.lastIndexOf('/', indexOfLastSlash-1);
+        String technicalEventName = jsonURLAsString.substring(indexOfLastButOneSlash+1, indexOfLastSlash);
+        return technicalEventName;
+    }
+    
     private Map<String, String> parseParams(URL paramURL) throws IOException {
         Map<String, String> result = new HashMap<String, String>();
         Pattern pattern = Pattern.compile("^([^:]*):(.*)$");
-        BufferedReader r = new BufferedReader(new InputStreamReader(paramURL.openStream()));
+        final URLConnection connection = HttpUrlConnectionHelper.redirectConnection(paramURL);
+        final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+        BufferedReader r = new BufferedReader(new InputStreamReader(connection.getInputStream(), charset));
         String line;
         while ((line = r.readLine()) != null) {
             Matcher matcher = pattern.matcher(line);
@@ -140,6 +160,10 @@ public class RaceRecord {
     
     public boolean hasLiveAndStoredURI() {
         return liveURI != null;
+    }
+    
+    public boolean hasReplay() {
+        return hasReplay;
     }
 
     public String getName() {
@@ -198,5 +222,8 @@ public class RaceRecord {
         return jsonUrl;
     }
     
+    public URI getDefaultUpdateURI() {
+        return defaultUpdateURI;
+    }
 }
 

@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/mark/addMarkToRegatta</h2>
+
+<b>Description:</b>
+<p>Adds a Mark to a specified Regatta</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Intput format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>regattaName: the name of the regatta to add the mark to.<br>
+            markName: the name of the mark to add.
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>shortName: short name of the mark to create. Defaults to the name if not given.<br>
+            originatingMarkTemplateId: UUID of an existing mark template on which the mark is based on<br>
+            originatingMarkPropertiesId: UUID of existing mark properties on which the mark is based on<br>
+            color: Optional color of the mark to create. Defaults to null if not provided.<br>
+            type: Optional type of the mark to create. Defaults to null if not provided.<br>
+            pattern: Optional pattern of the mark to create. Defaults to null if not provided.<br>
+            shape: Optional shape of the mark to create. Defaults to null if not provided.<br>
+        </td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            Request:
+            <pre>
+            {
+                "markName":"MyMark",
+                "markShortName":"MM",
+                "originatingMarkTemplateId":"305ffb4b-c23d-42a1-be45-f76a2bad8fab",
+                "originatingMarkPropertiesId":"dc77e3d1-d405-435e-8699-ce7245a6fd4a",
+                "regattaName":"test"
+            }
+            </pre>
+            Response:
+            <pre>
+            {
+                "markId":uuidOfGeneratedMark
+            }
+            </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

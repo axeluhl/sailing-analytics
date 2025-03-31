@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base.racegroup.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -13,16 +12,21 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     
     private final String displayName;
     private final BoatClass boatClass;
-    private final CourseArea courseArea;
     private final Iterable<SeriesWithRows> series;
     private final RegattaConfiguration regattaConfiguration;
+    private final boolean canBoatsOfCompetitorsChangePerRace;
 
-    public RaceGroupImpl(String name, String displayName, BoatClass boatClass, CourseArea courseArea,
-            Iterable<SeriesWithRows> series, RegattaConfiguration regattaConfiguration) {
+    /**
+     * @param series
+     *            the series; for a regatta they are expected to be in the same order as {@code Regatta.getSeries()}
+     *            would deliver them.
+     */
+    public RaceGroupImpl(String name, String displayName, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, Iterable<SeriesWithRows> series,
+            RegattaConfiguration regattaConfiguration) {
         super(name);
         this.displayName = displayName;
         this.boatClass = boatClass;
-        this.courseArea = courseArea;
+        this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
         this.series = series;
         this.regattaConfiguration = regattaConfiguration;
     }
@@ -33,13 +37,13 @@ public class RaceGroupImpl extends NamedImpl implements RaceGroup {
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return courseArea;
+    public Iterable<SeriesWithRows> getSeries() {
+        return series;
     }
 
     @Override
-    public Iterable<SeriesWithRows> getSeries() {
-        return series;
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return canBoatsOfCompetitorsChangePerRace;
     }
 
     @Override

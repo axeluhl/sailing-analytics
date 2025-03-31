@@ -1,24 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
-    
-    <ImageView 
-        android:id="@+id/compass_view_background"
-        android:src="@drawable/compass_back_302dpi_new"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/compass_view_compass"
-        android:layout_gravity="center"
-        android:layout_centerInParent="true" />
-    
-    <ImageView 
-        android:id="@+id/compass_view_needle"
-        android:src="@drawable/compass_needle_302dpi_north_new"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/compass_view_needle"
-        android:layout_gravity="center"
-        android:layout_centerInParent="true" />
+    android:layout_height="wrap_content">
 
-</merge>
+    <ImageView
+        android:id="@+id/compass_view_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:contentDescription="@string/compass_view_compass"
+        android:scaleType="centerInside"
+        android:src="?attr/compass_back" />
+
+    <com.sap.sailing.racecommittee.app.ui.views.BackAwareEditText
+        android:id="@+id/compass_view_degree"
+        style="?attr/textLarge"
+        android:layout_width="@dimen/wind_input"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:hint="?attr/sap_light_gray"
+        android:inputType="number"
+        tools:text="300°" />
+
+    <TextView
+        android:id="@+id/compass_view_value"
+        style="?attr/textLarge"
+        android:layout_width="@dimen/wind_input"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/compass_view_needle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:contentDescription="@string/compass_view_needle"
+        android:scaleType="centerInside"
+        android:src="?attr/compass_needle" />
+
+</RelativeLayout>

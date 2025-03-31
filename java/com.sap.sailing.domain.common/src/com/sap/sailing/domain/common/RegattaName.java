@@ -18,6 +18,11 @@ public class RegattaName implements RegattaIdentifier {
     }
     
     @Override
+    public String toString() {
+        return getRegattaName();
+    }
+    
+    @Override
     public Object getRegatta(RegattaFetcher regattaFetcher) {
         return regattaFetcher.getRegatta(this);
     }

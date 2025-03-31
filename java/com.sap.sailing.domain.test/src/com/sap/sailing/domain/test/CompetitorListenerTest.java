@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.RGBColor;
 
 /**
@@ -36,12 +37,12 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private Object whatChangedNationality;
     private Object oldNationality;
     private Object newNationality;
-    private boolean sailIdChanged;
-    private String oldSailId;
-    private String newSailId;
     private boolean nameChanged;
     private String oldName;
     private String newName;
+    private boolean shortNameChanged;
+    private String oldShortName;
+    private String newShortName;
     private boolean colorChanged;
     private Color oldColor;
     private Color newColor;
@@ -50,33 +51,51 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private boolean emailChanged;
     private String oldEmail;
     private String newEmail;
+    private boolean searchTagChanged;
+    private String oldSearchTag;
+    private String newSearchTag;
     private boolean flagImageChanged;
     private URI oldFlagImageURL;
     private URI newFlagImageURL;
+    private boolean timeOnTimeFactorChanged;
+    private Double oldTimeOnTimeFactor;
+    private Double newTimeOnTimeFactor;
+    private boolean timeOnDistanceAllowancePerNauticalMileChanged;
+    private Duration oldTimeOnDistanceAllowancePerNauticalMile;
+    private Duration newTimeOnDistanceAllowancePerNauticalMile;
     
     @Before
     public void setUp() {
-        baseDomainFactory = new DomainFactoryImpl();
-        competitor = TrackBasedTest.createCompetitor("Hasso");
+        baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        competitor = (DynamicCompetitor) TrackBasedTest.createCompetitorWithBoat("Hasso");
         nationalityChanged = false;
         whatChangedNationality = null;
         oldNationality = null;
         newNationality = null;
-        sailIdChanged = false;
-        oldSailId = null;
-        newSailId = null;
         nameChanged = false;
         oldName = null;
         newName = null;
+        shortNameChanged = false;
+        oldShortName = null;
+        newShortName = null;
         colorChanged = false;
         oldColor = null;
         newColor = null;
         emailChanged = false;
         oldEmail = null;
         newEmail = null;
+        searchTagChanged = false;
+        oldSearchTag = null;
+        newSearchTag = null;
         flagImageChanged = false;
         oldFlagImageURL = null;
         newFlagImageURL = null;
+        timeOnTimeFactorChanged = false;
+        oldTimeOnTimeFactor = null;
+        newTimeOnTimeFactor = null;
+        timeOnDistanceAllowancePerNauticalMileChanged = false;
+        oldTimeOnDistanceAllowancePerNauticalMile = null;
+        newTimeOnDistanceAllowancePerNauticalMile = null;
         listener = new CompetitorChangeListener() {
             private static final long serialVersionUID = 4581029778988240209L;
 
@@ -89,19 +108,19 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
             }
             
             @Override
-            public void sailIdChanged(String oldSailId, String newSailId) {
-                sailIdChanged = true;
-                CompetitorListenerTest.this.oldSailId = oldSailId;
-                CompetitorListenerTest.this.newSailId = newSailId;
-            }
-            
-            @Override
             public void nameChanged(String oldName, String newName) {
                 nameChanged = true;
                 CompetitorListenerTest.this.oldName = oldName;
                 CompetitorListenerTest.this.newName = newName;
             }
-            
+
+            @Override
+            public void shortNameChanged(String oldShortName, String newShortName) {
+                shortNameChanged = true;
+                CompetitorListenerTest.this.oldShortName = oldShortName;
+                CompetitorListenerTest.this.newShortName = newShortName;
+            }
+
             @Override
             public void colorChanged(Color oldColor, Color newColor) {
                 colorChanged = true;
@@ -117,10 +136,33 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
             }
 
             @Override
+            public void searchTagChanged(String oldSearchTag, String newSearchTag) {
+                searchTagChanged = true;
+                CompetitorListenerTest.this.oldSearchTag = oldSearchTag;
+                CompetitorListenerTest.this.newSearchTag = newSearchTag;
+            }
+
+            @Override
             public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
                 flagImageChanged = true;
                 CompetitorListenerTest.this.oldFlagImageURL = oldFlagImageURL;
                 CompetitorListenerTest.this.newFlagImageURL = newFlagImageURL;
+            }
+
+            @Override
+            public void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor) {
+                timeOnTimeFactorChanged = true;
+                CompetitorListenerTest.this.oldTimeOnTimeFactor = oldTimeOnTimeFactor;
+                CompetitorListenerTest.this.newTimeOnTimeFactor = newTimeOnTimeFactor;
+            }
+
+            @Override
+            public void timeOnDistanceAllowancePerNauticalMileChanged(
+                    Duration oldTimeOnDistanceAllowancePerNauticalMile,
+                    Duration newTimeOnDistanceAllowancePerNauticalMile) {
+                timeOnDistanceAllowancePerNauticalMileChanged = true;
+                CompetitorListenerTest.this.oldTimeOnDistanceAllowancePerNauticalMile = oldTimeOnDistanceAllowancePerNauticalMile;
+                CompetitorListenerTest.this.newTimeOnDistanceAllowancePerNauticalMile = newTimeOnDistanceAllowancePerNauticalMile;
             }
         };
         competitor.addCompetitorChangeListener(listener);
@@ -139,16 +181,39 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     }
     
     @Test
+    public void testChangeTimeOnTimeFactor() {
+        competitor.setTimeOnTimeFactor(1.209);
+        assertTrue(timeOnTimeFactorChanged);
+        assertNull(oldTimeOnTimeFactor);
+        assertEquals(1.209, newTimeOnTimeFactor, 0.00000001);
+    }
+    
+    @Test
+    public void testChangeTimeOnDistanceAllowancePerNauticalMile() {
+        competitor.setTimeOnDistanceAllowancePerNauticalMile(Duration.ONE_HOUR);
+        assertTrue(timeOnDistanceAllowancePerNauticalMileChanged);
+        assertNull(oldTimeOnDistanceAllowancePerNauticalMile);
+        assertEquals(Duration.ONE_HOUR.asMillis(), newTimeOnDistanceAllowancePerNauticalMile.asMillis());
+    }
+    
+    @Test
     public void testSimpleCompetitorListenerPatternForName() {
         competitor.setName("Dr. Hasso Plattner");
         assertTrue(nameChanged);
         assertEquals("Hasso", oldName);
         assertEquals("Dr. Hasso Plattner", newName);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertFalse(nationalityChanged);
     }
 
+    @Test
+    public void testShortNameChange() throws URISyntaxException {
+        competitor.setShortName("Dr. HP");
+        assertTrue(shortNameChanged);
+        assertEquals("HP", oldShortName);
+        assertEquals("Dr. HP", newShortName);
+    }
+    
     @Test
     public void testFlagChange() throws URISyntaxException {
         competitor.setFlagImage(new URI("http://www.something.de/pic.png"));
@@ -166,15 +231,11 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     }
 
     @Test
-    public void testSimpleCompetitorListenerPatternForSailId() {
-        final String myOldSailId = competitor.getBoat().getSailID();
-        competitor.getBoat().setSailId("POR 40");
-        assertFalse(nameChanged);
-        assertTrue(sailIdChanged);
-        assertEquals(myOldSailId, oldSailId);
-        assertEquals("POR 40", newSailId);
-        assertFalse(colorChanged);
-        assertFalse(nationalityChanged);
+    public void testSearchTagChange() throws URISyntaxException {
+        competitor.setSearchTag("hasso");
+        assertTrue(searchTagChanged);
+        assertNull(oldSearchTag);
+        assertEquals("hasso", newSearchTag);
     }
 
     @Test
@@ -183,7 +244,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         final RGBColor myNewColor = new RGBColor(123, 12, 234);
         competitor.setColor(myNewColor);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertTrue(colorChanged);
         assertEquals(myOldColor, oldColor);
         assertEquals(myNewColor, newColor);
@@ -196,7 +256,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         final Nationality myNewNationality = DomainFactory.INSTANCE.getOrCreateNationality("POR");
         competitor.getTeam().setNationality(myNewNationality);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertTrue(nationalityChanged);
         assertEquals(myOldNationality, oldNationality);
@@ -206,16 +265,14 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Test
     public void testCompetitorSerializationLosesAllExternalListeners() throws ClassNotFoundException, IOException {
-        DomainFactory baseDomainFactory = new DomainFactoryImpl();
+        DomainFactory baseDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         clonedCompetitor.setName("Dr. Hasso Plattner");
-        clonedCompetitor.getBoat().setSailId("POR 40");
         final RGBColor myNewColor = new RGBColor(123, 12, 234);
         clonedCompetitor.setColor(myNewColor);
         final Nationality myNewNationality = baseDomainFactory.getOrCreateNationality("POR");
         clonedCompetitor.getTeam().setNationality(myNewNationality);
         assertFalse(nameChanged);
-        assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertFalse(nationalityChanged);
     }
@@ -241,7 +298,6 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         competitor = clonedCompetitor;
         competitor.addCompetitorChangeListener(listener);
-        testSimpleCompetitorListenerPatternForSailId();
     }
     
     @Test

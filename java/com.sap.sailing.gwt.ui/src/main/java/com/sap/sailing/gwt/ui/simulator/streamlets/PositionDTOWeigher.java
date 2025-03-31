@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import java.util.Date;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sse.common.Distance;
 
 /**
- * A weigher that uses a {@link DegreePosition} and a {@link Date} to compute a confidence based on space and time
+ * A weigher that uses a {@link DegreePosition} and a {@link Date} to compute a confidence based on spatial
  * distance. If the <code>fix</code> or the <code>request</code> parameter in a call to
  * {@link #getConfidence(com.sap.sse.common.Util.Pair, com.sap.sse.common.Util.Pair)} have a <code>null</code>
  * {@link Position} then no distance-based confidence is considered, and only the time difference is taken into account.
@@ -29,7 +29,6 @@ public class PositionDTOWeigher implements Weigher<Position> {
     private final AverageLatitudeProvider averageLatitudeDegProvider;
     
     public static interface AverageLatitudeProvider {
-        double getAverageLatitudeDeg();
         double getCosineOfAverageLatitude();
     }
     

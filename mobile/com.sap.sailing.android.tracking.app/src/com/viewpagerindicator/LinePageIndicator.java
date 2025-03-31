@@ -15,6 +15,8 @@
  */
 package com.viewpagerindicator;
 
+import com.sap.sailing.android.tracking.app.R;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -33,8 +35,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-
-import com.sap.sailing.android.tracking.app.R;
 
 /**
  * Draws a line for each page. The current page line is colored differently than the unselected page lines.
@@ -198,8 +198,8 @@ public class LinePageIndicator extends View implements PageIndicator {
         for (int i = 0; i < count; i++) {
             float dx1 = horizontalOffset + (i * lineWidthAndGap);
             float dx2 = dx1 + mLineWidth;
-            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset, (i == mCurrentPage) ? mPaintSelected
-                    : mPaintUnselected);
+            canvas.drawLine(dx1, verticalOffset, dx2, verticalOffset,
+                    (i == mCurrentPage) ? mPaintSelected : mPaintUnselected);
         }
     }
 
@@ -296,13 +296,13 @@ public class LinePageIndicator extends View implements PageIndicator {
         }
         if (mViewPager != null) {
             // Clear us from the old pager.
-            mViewPager.setOnPageChangeListener(null);
+            mViewPager.clearOnPageChangeListeners();
         }
         if (viewPager.getAdapter() == null) {
             throw new IllegalStateException("ViewPager does not have adapter instance.");
         }
         mViewPager = viewPager;
-        mViewPager.setOnPageChangeListener(this);
+        mViewPager.addOnPageChangeListener(this);
         invalidate();
     }
 

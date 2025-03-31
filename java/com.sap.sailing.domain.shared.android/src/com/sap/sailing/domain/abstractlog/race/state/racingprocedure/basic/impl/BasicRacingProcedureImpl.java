@@ -1,12 +1,11 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.basic.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -24,9 +23,9 @@ import com.sap.sse.common.TimePoint;
 
 public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 
-    public BasicRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
-            RacingProcedureConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+    public BasicRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
+            RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
     }
 
     @Override
@@ -61,7 +60,12 @@ public class BasicRacingProcedureImpl extends BaseRacingProcedure {
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
+    @Override
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent>asList(new RaceStateEventImpl(startTime, RaceStateEvents.START));
     }
 

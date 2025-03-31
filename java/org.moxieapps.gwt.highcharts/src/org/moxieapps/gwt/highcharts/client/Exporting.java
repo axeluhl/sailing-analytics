@@ -93,7 +93,7 @@ public class Exporting extends Configurable<Exporting> {
      * @return A reference to this {@link Exporting} instance for convenient method chaining.
      */
     public Exporting setFilename(String fileName) {
-        return this.setOption("fileName", fileName);
+        return this.setOption("filename", fileName);
     }
 
     /**

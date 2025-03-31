@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: com.sap.sse.landscape.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: com.sap.sse.landscape
+Import-Package: org.mockito;version="4.8.1",
+ org.mockito.hamcrest;version="4.8.1",
+ org.mockito.mock;version="4.8.1",
+ org.mockito.stubbing;version="4.8.1"
+Require-Bundle: org.junit
+Automatic-Module-Name: com.sap.sse.landscape.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

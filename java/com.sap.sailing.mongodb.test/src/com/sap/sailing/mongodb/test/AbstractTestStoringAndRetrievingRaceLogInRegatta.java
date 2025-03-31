@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 
@@ -18,11 +19,13 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends RaceLogMongoDBTest {
@@ -60,8 +63,12 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
             boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
         List<Series> series = createSeriesForTestRegatta();
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), RegattaImpl.getDefaultName(regattaBaseName,
-                boatClass == null ? null : boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
-                courseArea, /* useStartTimeInference */true);
+                boatClass == null ? null : boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
+                courseArea, /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false,
+                OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
         return regatta;
     }
 
@@ -70,7 +77,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         // -------- qualifying series ------------
         List<String> emptyRaceColumnNames = Collections.emptyList();
         List<Fleet> qualifyingFleets = createQualifyingFleets();
-        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, qualifyingFleets,
+        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         return series;

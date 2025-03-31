@@ -1,0 +1,96 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style field="style" type="com.sap.sailing.gwt.home.shared.partials.anniversary.AbstractAnniversaryItem.Style">
+        .content {
+            padding: 1em .7em;
+            background-color: #f8f8f8;
+            margin: 1em 0; 
+        }
+        .symbolContainer {
+            width: 7em;
+            height: 7em;
+            margin: auto;
+            border: 0.2em solid #fff;
+            background: #008fcc;
+            color: #fff;
+            text-align: center;
+            padding: 0.5em 0.333333333333333em;
+            border-radius: 0.666666666666667em;
+            box-shadow: 0 0 18px rgba(0,0,0,0.13), 0 2px 6px rgba(0,0,0,0.25);
+            text-transform: uppercase;
+        }
+        .icon {
+            background-repeat: no-repeat;
+            background-size: contain;
+            width: 3em;
+            height: 3em;
+            margin: 0 1.75em;
+        }
+        .count {
+            font-weight: bold;
+            font-size: 1.75em;
+            line-height: 1.333333333333333em;
+        }
+        .unit {
+            line-height: .75em;
+            font-size: 1.125em;
+        }
+        .countdown .count {
+            padding-top: .5em;
+        }
+        .countdown .unit {
+            line-height: 1.333333333333333em;
+        }
+        .announcement .count {
+            font-size: 1.5em;
+        }
+        .announcement .unit {
+            font-size: 0.833333333333333em;
+        }
+        .teaser, .description {
+            padding: 0 .5em;
+        }
+        .teaser, .description, .link {
+            margin-top: 1em;
+        }
+        .teaser {
+            font-size: 1.333333333333333em;
+            font-weight: bold;
+            color: #008fcc;
+        }
+        .description {
+            position: relative;
+        }
+        .legalNotice {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #008fcc;
+            line-height: 1em;
+            position: absolute;
+        }
+        .link {
+            width: 100%;
+            text-align: center;
+            border-radius: .3846154em;
+        }
+    </ui:style>
+    <div class="{style.content}">
+        <div class="{style.symbolContainer}">
+            <div ui:field="iconUi" class="{style.icon}"></div>
+            <div ui:field="countUi" class="{style.count}"></div>
+            <div ui:field="unitUi" class="{style.unit}"></div>
+        </div>
+        <div ui:field="teaserUi" class="{style.teaser}"></div>
+        <div class="{style.description}">
+            <span ui:field="descriptionUi"></span>
+            <span class="{style.legalNotice}" ui:field="legalNoticeUi">*</span>
+        </div>
+        <a ui:field="linkUi" target="_blank" class="{res.mainCss.button} {res.mainCss.buttonstrong} 
+                {res.mainCss.buttonarrowrightwhite} {style.link}">
+            <ui:text from="{i18n.anniversaryRaceLinkText}" />
+        </a>
+    </div>
+</ui:UiBinder> 

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -20,8 +21,13 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.TimePanelCssResources.TimePanelCss;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
+import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.TimeRangeChangeListener;
@@ -30,11 +36,15 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.UserService;
 
-public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -59,7 +69,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Button backToLivePlayButton;
     protected final StringMessages stringMessages;
     protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
-    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss");
+    protected final DateTimeFormat timeFormatterDetailed = DateTimeFormat.getFormat("HH:mm:ss:SS"); 
     private final ImageResource playSpeedImg;
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
@@ -70,6 +81,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final Button slowDownButton;
     private final Button speedUpButton;
     private final Button toggleAdvancedModeButton;
+    private final Button resetZoomButton;
 
     private final FlowPanel controlsPanel;
     private final SimplePanel timePanelSlider;
@@ -77,8 +89,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final FlowPanel playControlPanel;
     private final FlowPanel timePanelInnerWrapper;
 
+    private final SecuredDTO raceDTO;
+
     /** 
-     * the minimum time the slider extends it's time when the end of the slider is reached
+     * the minimum time the slider extends its time when the end of the slider is reached
      */
     private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
     private boolean advancedModeShown;
@@ -86,11 +100,28 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private static ClientResources resources = GWT.create(ClientResources.class);
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
+    private final boolean forcePaddingRightToAlignToCharts;
+    private UserService userService;
+
+    /**
+     * @param forcePaddingRightToAlignToCharts
+     *            if <code>true</code>, the right padding will always be set such that the time panel lines up with
+     *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
+     *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
+     */
+    public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
+            TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages,
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService,
+            final SecuredDTO raceDTO) {
+        super(parent, context);
+        this.raceDTO = raceDTO;
+        this.userService = userService;
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
         this.canReplayWhileLiveIsPossible = canReplayWhileLiveIsPossible;
+        this.forcePaddingRightToAlignToCharts = forcePaddingRightToAlignToCharts;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
@@ -102,7 +133,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
         timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();
@@ -123,7 +153,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 return timeWithMinutesFormatter.format(date); 
             }
         });
-
+        timeSlider.ensureDebugId("timeSlider");
         timeSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
@@ -137,23 +167,17 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 }
             }
         });
-        
         timePanelInnerWrapper.add(timePanelSliderFlowWrapper);
         timePanelSlider.add(timeSlider);
-
         controlsPanel = new FlowPanel();
-        
         controlsPanel.setStyleName("timePanel-controls");
         timePanelInnerWrapper.add(controlsPanel);
-        
         // play button control
         playControlPanel = new FlowPanel();
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
-        
         toggleAdvancedModeButton = createToggleAdvancedModeButton();
         playControlPanel.add(toggleAdvancedModeButton);
-        
         playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -170,7 +194,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         playPauseButton.setTitle(stringMessages.startStopPlaying());
         playPauseButton.setStyleName("playPauseButton");
         playControlPanel.add(playPauseButton);
-
         backToLivePlayButton = new Button(stringMessages.raceIsInLiveTimePanelMode());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
@@ -190,36 +213,27 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timeLabel = new Label();
         timeControlPanel.add(dateLabel);
         timeControlPanel.add(timeLabel);
-        
         dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().setClassName("timeLabel");
-
         // time to start control
         timeToStartControlPanel = new FlowPanel();
         timeToStartControlPanel.setStyleName("timePanel-controls-timeToStart");
         timeToStartLabel = new Label();
         timeToStartControlPanel.add(timeToStartLabel);
         timeToStartLabel.getElement().setClassName("timeToStartLabel");
-        
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
         playModeControlPanel.add(playModeImage);
         playModeImage.getElement().getStyle().setFloat(Style.Float.LEFT);
-        
         playModeLabel = new Label();
         playModeControlPanel .add(playModeLabel);
-
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         playModeLabel.getElement().setClassName("playModeLabel");
-        
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
-        
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
-        playSpeedBox.setWidth("25px");
-        playSpeedBox.setHeight("14px");
         playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
@@ -229,11 +243,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                 TimePanel.this.timer.setPlaySpeedFactor(newPlaySpeedFactor);
             }
         });
-        
         Image playSpeedImage = new Image(playSpeedImg);
         playSpeedControlPanel.add(playSpeedImage);
         playSpeedControlPanel.add(playSpeedBox);
-
         slowDownButton = new Button("-1");
         slowDownButton.addClickHandler(new ClickHandler() {
             @Override
@@ -245,7 +257,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         slowDownButton.setTitle(stringMessages.slowPlaySpeedDown());
         slowDownButton.addStyleName("timePanelButton-SlowDown");
         playSpeedControlPanel.add(slowDownButton);
-
         speedUpButton = new Button("+1");
         speedUpButton.addClickHandler(new ClickHandler() {
             @Override
@@ -257,40 +268,45 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         speedUpButton.setTitle(stringMessages.speedPlaySpeedUp());
         speedUpButton.addStyleName("timePanelButton-SpeedUp");
         playSpeedControlPanel.add(speedUpButton);
-
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
-       
+        playSpeedImage.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedBox.getElement().getStyle().setPadding(2, Style.Unit.PX);
-
         speedUpButton.addStyleName("timePanelButton");
         slowDownButton.addStyleName("timePanelButton");
-
         // time delay
         FlowPanel timeDelayPanel = new FlowPanel();
         timeDelayPanel.setStyleName("timePanel-controls-timeDelay");
-
         timeDelayLabel = new Label();
         timeDelayPanel.add(timeDelayLabel);
-        
         timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-       
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
-        setWidget(timePanelInnerWrapper);
+        initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
-        
         controlsPanel.add(playSpeedControlPanel);
         controlsPanel.add(playModeControlPanel );
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
-        
+        resetZoomButton = new Button(stringMessages.resetZoom());
+        resetZoomButton.setEnabled(false);
+        resetZoomButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                timeRangeProvider.resetTimeZoom();
+            }
+        });
+        controlsPanel.add(resetZoomButton);
         hideControlsPanel();
     }
     
+    public TimeRangeWithZoomProvider getTimeRangeProvider() {
+        return timeRangeProvider;
+    }
+
     private Button createSettingsButton() {
         Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(timePanelCss.settingsButtonStyle());
@@ -329,11 +345,15 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         if (timeRangeProvider.isZoomed()) {
-            timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+            timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
         } else {
+            if (getFromTime() == null || getToTime() == null) {
+                initializeTimeRange(oldTime, newTime);
+            }
             if (getFromTime() != null && getToTime() != null) {
                 // handle the case where time advances beyond slider's end.
                 if (newTime.after(getToTime())) {
+                    // in live mode, expand the range
                     switch (timer.getPlayMode()) {
                     case Live:
                         Date newMaxTime = new Date(newTime.getTime());
@@ -343,17 +363,18 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
                         setMinMax(getFromTime(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
                         break;
                     case Replay:
+                        // in replay, stop playing when the end of the range has been reached
                         timer.pause();
                         break;
                     }
                 }
-                timeSlider.setCurrentValue(new Double(newTime.getTime()), false);
+                timeSlider.setCurrentValue(Double.valueOf(newTime.getTime()), false);
             }
         }
         dateLabel.setText(getDateLabelText(newTime));
         timeLabel.setText(getTimeLabelText(newTime));
         String timeToStartLabelText = getTimeToStartLabelText(newTime);
-        if(timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
+        if (timeToStartLabelText != null && !timeToStartLabelText.isEmpty()) {
             timeToStartControlPanel.setVisible(true);
             timeToStartLabel.setText(getTimeToStartLabelText(newTime));
         } else {
@@ -362,16 +383,36 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         }
     }
 
+    /**
+     * When the time range is not yet properly initialized and we get a time change, adjust the time range so that old and
+     * new time are in range. A margin of one minute is used before and after. This method assumes that at least one of the
+     * two time points passed as parameters has a value other than <code>null</code>. Should the other be <code>null</code>,
+     * it is ignored. No assumptions are made about the temporal relation of the two time points to each other; in other
+     * words, <code>oldTime</code> may also be after <code>newTime<code> which could, e.g., be the case for a timer running
+     * backwards. 
+     */
+    private void initializeTimeRange(Date oldTime, Date newTime) {
+        TimePoint from = Util.getEarliestOfTimePoints(getFromTime()==null?null:new MillisecondsTimePoint(getFromTime()), oldTime==null?null:new MillisecondsTimePoint(oldTime));
+        from = Util.getEarliestOfTimePoints(from, newTime==null?null:new MillisecondsTimePoint(newTime));
+        TimePoint to = Util.getEarliestOfTimePoints(getToTime()==null?null:new MillisecondsTimePoint(getToTime()), oldTime==null?null:new MillisecondsTimePoint(oldTime));
+        from = Util.getEarliestOfTimePoints(to, newTime==null?null:new MillisecondsTimePoint(newTime));
+        timeRangeProvider.setTimeRange(from==null?null:from.asDate(), to==null?null:to.asDate());
+    }
+
     protected String getTimeToStartLabelText(Date time) {
         return null;
     }
 
     protected String getTimeLabelText(Date time) {
         final String timeLabelText;
+        DateTimeFormat formatter = timeFormatter;
+        if (timer.getRefreshInterval() < 1000) {
+            formatter = timeFormatterDetailed;
+        }
         if (lastReceivedDataTimepoint == null) {
-            timeLabelText = timeFormatter.format(time);
+            timeLabelText = formatter.format(time);
         } else {
-            timeLabelText = timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")";
+            timeLabelText = formatter.format(time) + " (" + formatter.format(lastReceivedDataTimepoint) + ")";
         }
         return timeLabelText;
     }
@@ -394,31 +435,23 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
-                
-        boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime())) {
-            changed = true;
-            timeSlider.setMaxValue(new Double(max.getTime()), fireEvent);
-        }
-        if (!min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinValue(new Double(min.getTime()), fireEvent);
-        }
-        if (changed) {
-            if(!timeRangeProvider.isZoomed()) {
-                timeRangeProvider.setTimeRange(min, max, this);
+        final Optional<Pair<Double, Double>> changed =
+                timeSlider.setMinAndMaxValue(Double.valueOf(min.getTime()), Double.valueOf(max.getTime()), fireEvent);
+        if (changed.isPresent()) {
+            final Double changedMin = changed.get().getA();
+            final Double changedMax = changed.get().getB();
+            if (!timeRangeProvider.isZoomed()) {
+                timeRangeProvider.setTimeRange(new Date(changedMin.longValue()), new Date(changedMax.longValue()), this);
             }
-            
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
             } else {
                 timeSlider.setStepSize(1000, fireEvent);
             }
-
             // Christopher: following setCurrentValue requires stepsize to be set <> 0 (otherwise division by zero; NaN)
             if (timeSlider.getCurrentValue() == null) {
-                timeSlider.setCurrentValue(new Double(min.getTime()), fireEvent);
+                timeSlider.setCurrentValue(changedMin, fireEvent);
             }
         }
     }
@@ -493,14 +526,17 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        resetZoomButton.setEnabled(true);
     }
 
     @Override
     public void onTimeZoomReset() {
+        resetZoomButton.setEnabled(false);
     }
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {
@@ -530,13 +566,23 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     protected void setLiveGenerallyPossible(boolean possible) {
         backToLivePlayButton.setVisible(possible);
+        updateTimeSliderPadding(possible);
         updatePlayPauseButtonsVisibility(timer.getPlayMode());
+    }
+
+    private void updateTimeSliderPadding(boolean backToLivePlayButtonVisible) {
+        Style timePanelStyle = timePanelSlider.getElement().getStyle();
+        if (backToLivePlayButtonVisible || forcePaddingRightToAlignToCharts) {
+            timePanelStyle.setPaddingRight(66, Unit.PX);
+        } else {
+            timePanelStyle.clearPaddingRight();
+        }
+        timeSlider.onResize();
     }
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
-        TimePanelSettings result = new TimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
+        TimePanelSettings result = new TimePanelSettings(timer.getRefreshInterval());
         return (T) result;
     }
 
@@ -551,8 +597,8 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     }
 
     @Override
-    public SettingsDialogComponent<T> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent(T settings) {
+        return new TimePanelSettingsDialogComponent<T>(settings, stringMessages, userService, raceDTO);
     }
 
     @Override
@@ -595,4 +641,18 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     public String getDependentCssClassName() {
         return "timePanel";
     }
+
+    public Button getBackToLiveButton() {
+        return backToLivePlayButton;
+    }
+
+    @Override
+    public String getId() {
+        return "TimePanel";
+    }
+
+    public void setBarOverlays(Iterable<BarOverlay> overlays) {
+        timeSlider.setBarOverlays(overlays);
+    }
+
 }

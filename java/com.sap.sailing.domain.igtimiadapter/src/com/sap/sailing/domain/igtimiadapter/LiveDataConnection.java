@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter;
 
+import java.net.InetSocketAddress;
+
 public interface LiveDataConnection {
     /**
      * Disconnects this connection. Afterwards, the connection will no longer feed live data to its listener(s).
@@ -18,4 +20,6 @@ public interface LiveDataConnection {
     void addListener(BulkFixReceiver listener);
     
     void removeListener(BulkFixReceiver listener);
+    
+    InetSocketAddress getRemoteAddress();
 }

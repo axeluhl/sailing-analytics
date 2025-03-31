@@ -3,7 +3,7 @@
  * Copyright (C) 2012 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -27,7 +27,6 @@ import net.sf.marineapi.nmea.sentence.HeadingSentence;
  * degrees.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  * @see net.sf.marineapi.provider.HeadingProvider
  */
 public class HeadingEvent extends ProviderEvent {
@@ -42,7 +41,7 @@ public class HeadingEvent extends ProviderEvent {
 	public HeadingEvent(Object source, HeadingSentence s) {
 		super(source);
 		heading = s.getHeading();
-		isTrue= s.isTrue();
+		isTrue = s.isTrue();
 	}
 
 	/**
@@ -62,8 +61,8 @@ public class HeadingEvent extends ProviderEvent {
 	public boolean isTrue() {
 		return isTrue;
 	}
-	
-	/* 
+
+	/*
 	 * (non-Javadoc)
 	 * @see java.util.EventObject#toString()
 	 */

@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+.premium-container {
+ cursor: pointer;
+ display: inline-block;
+ padding-top: 2px;
+}
+
+.premium-active {
+ border: 1px solid rgb(239, 170, 0);
+}
+
+.premium-active .premium-permitted {
+ background-image: none;
+ padding-right: 0px;
+}
+.premium-active .not-premium-permitted {
+ background-image: resourceUrl("premiumIcon");
+ background-position: right 0 top 3px;
+ background-repeat: no-repeat;
+ background-size: 16px;
+ padding-right: 20px;
+}
+
+.premium-button {
+ pointer-events: none;
+ background-color: transparent !important;
+ color: black;
+}

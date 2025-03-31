@@ -6,9 +6,9 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.GateStartConfigurationJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 
 public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements JsonDeserializer<RacingProcedureConfiguration> {
@@ -28,15 +28,14 @@ public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfi
     }
     
     @Override
-    protected GateStartConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag) throws JsonDeserializationException {
+    protected GateStartConfiguration createResult(JSONObject object, Boolean inidividualRecall, Boolean resultEntryEnabled, Flags classFlag) throws JsonDeserializationException {
     	GateStartConfigurationImpl result = new GateStartConfigurationImpl();
     	result.setClassFlag(classFlag);
-    	result.setHasInidividualRecall(inidividualRecall);
-    	
+    	result.setHasIndividualRecall(inidividualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
     	if (object.containsKey(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER)) {
-    	    result.setHasInidividualRecall((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER));
+    	    result.setHasPathfinder((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER));
     	}
-    	
         if (object.containsKey(GateStartConfigurationJsonSerializer.FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME)) {
             result.setHasAdditionalGolfDownTime((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME));
         }

@@ -10,10 +10,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceRowDeserializer implements JsonDeserializer<RaceRow> {
 
@@ -28,6 +28,7 @@ public class RaceRowDeserializer implements JsonDeserializer<RaceRow> {
 
     public RaceRow deserialize(JSONObject object) throws JsonDeserializationException {
         JSONObject fleetObject = Helpers.toJSONObjectSafe(object.get(RaceRowJsonSerializer.FIELD_FLEET));
+        // the race cells are expected to be written in the order of the race columns in the series / leaderboard
         JSONArray cellsObject = Helpers.getNestedArraySafe(object, RaceRowJsonSerializer.FIELD_RACE_CELLS);
 
         Collection<RaceCell> races = new ArrayList<RaceCell>();

@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-public class PlacemarkOrderDTO extends NamedDTO {
+public class PlacemarkOrderDTO implements Serializable {
     private static final long serialVersionUID = -4981887843843495494L;
     private List<PlacemarkDTO> placemarks;
     

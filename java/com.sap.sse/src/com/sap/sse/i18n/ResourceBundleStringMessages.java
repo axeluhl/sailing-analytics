@@ -1,62 +1,76 @@
 package com.sap.sse.i18n;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Locale;
-import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
+
+import com.sap.sse.i18n.impl.NullResourceBundleStringMessages;
 
 /**
  * Allow server-side internationalization similar to GWT client-side by using property files.
  * 
  * Get Locale in GWT-Context by calling
+ * 
  * <pre>
  * LocaleInfo.getCurrentLocale().getLocaleName();
  * </pre>
  * 
  * Then transform back to {@link Locale} on server by calling
+ * 
  * <pre>
  * ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
  * </pre>
  */
 public interface ResourceBundleStringMessages {
+    static final ResourceBundleStringMessages NULL = new NullResourceBundleStringMessages();
 
-    public String getResourceBaseName();
+    String getResourceBaseName();
 
-    public String get(Locale locale, String messageKey);
-    public String get(Locale locale, String messageKey, String... parameters);
-    
-    public static final class Util {
+    String get(Locale locale, String messageKey);
 
-        private static boolean supportedLocalesHaveBeenInitialized = false;
-        private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
-        private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
+    String get(Locale locale, String messageKey, String... parameters);
+
+    static final class Util {
+        private static final Locale FALLBACK_LOCALE = Locale.ROOT;
+
+        public static Control createControl(String encoding) {
+            return new Control() {
+                @Override
+                public Locale getFallbackLocale(String baseName, Locale locale) {
+                    return locale.equals(FALLBACK_LOCALE) ? null : FALLBACK_LOCALE;
+                }
+
+                @Override
+                public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader,
+                        boolean reload) throws IllegalAccessException, InstantiationException, IOException {
+                    String localeExt = "";
+                    if (!locale.getLanguage().isEmpty()) {
+                        localeExt = "_" + locale.getLanguage();
+                    }
+                    if (format.contains("class")) {
+                        return null;
+                    }
+                    String classPathFilePath = baseName + localeExt + ".properties";
+                    try (InputStream is = loader.getResourceAsStream(classPathFilePath);) {
+                        if (is == null) {
+                            return null;
+                        }
+                        return new PropertyResourceBundle(new InputStreamReader(is, encoding));
+                    }
+                }
+            };
+
+        }
 
         public static Locale getLocaleFor(String localeInfoName) {
-            Locale locale = getSupportedLocalesMap().get(localeInfoName);
-            return locale != null ? locale : DEFAULT_LOCALE;
+            return Locale.forLanguageTag(localeInfoName);
         }
-        
-        public static Iterable<Locale> getSupportedLocales() {
-            return getSupportedLocalesMap().values();
-        }
-        
-        private static Map<String, Locale> getSupportedLocalesMap() {
-            if (!supportedLocalesHaveBeenInitialized) {
-                initializeSupportedLocales();
-            }
-            
-            return supportedLocalesMappedByLocaleInfo;
-        }
-        
-        private static void initializeSupportedLocales() {
-            supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
-            supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
-            
-            supportedLocalesHaveBeenInitialized = true;
-        }
-        
-        private Util () {
-        }
-        
-    }
 
+        private Util() {
+        }
+    }
 }

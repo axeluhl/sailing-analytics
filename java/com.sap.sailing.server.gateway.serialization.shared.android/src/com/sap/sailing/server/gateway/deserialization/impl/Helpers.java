@@ -1,16 +1,15 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
-import java.io.Serializable;
-import java.util.UUID;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializationException;
 
 public class Helpers {
-    
     private final static Logger logger = Logger.getLogger(Helpers.class.getName());
 
     public static JSONArray toJSONArraySafe(Object object) throws JsonDeserializationException {
@@ -32,7 +31,7 @@ public class Helpers {
     public static JSONObject getNestedObjectSafe(JSONObject parent, String fieldName)
             throws JsonDeserializationException {
         Object childObject = parent.get(fieldName);
-        if (!(childObject instanceof JSONObject)) {
+        if (childObject != null && !(childObject instanceof JSONObject)) {
             throw new JsonDeserializationException(String.format("Field %s with %s wasn't a nested JSON object.",
                     fieldName, childObject.toString()));
         }
@@ -48,13 +47,16 @@ public class Helpers {
         return (JSONArray) childObject;
     }
 
-    public static Serializable tryUuidConversion(Serializable serializableId) {
-        try {
-            return UUID.fromString(serializableId.toString());
-        } catch (IllegalArgumentException iae) {
-            logger.warning("The serializable " + serializableId.toString() + " could not be converted to a UUID");
+    public static URL getURLField(JSONObject parent, String fieldName) {
+        URL result = null;
+        String urlAsString = (String) parent.get(fieldName);
+        if (urlAsString != null) {
+            try {
+                result = new URL(urlAsString);
+            } catch (MalformedURLException e) {
+                logger.severe("Error deserializing URL " + urlAsString);
+            }
         }
-        return serializableId;
+        return result;
     }
-
 }

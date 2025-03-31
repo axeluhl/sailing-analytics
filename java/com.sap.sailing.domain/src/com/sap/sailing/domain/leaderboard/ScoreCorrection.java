@@ -6,7 +6,9 @@ import java.util.concurrent.Callable;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -37,8 +39,12 @@ public interface ScoreCorrection extends Serializable {
         Double getUncorrectedScore();
 
         MaxPointsReason getMaxPointsReason();
+        
+        Double getIncrementalScoreCorrectionInPoints();
 
         boolean isCorrected();
+        
+        boolean isCorrectedIncrementally();
         
         /**
          * @return the time point for which this result is valid
@@ -60,13 +66,20 @@ public interface ScoreCorrection extends Serializable {
      * @param timePoint
      *            the time point for which to get the corrected score; score corrections have a validity time interval.
      *            Only the last score correction valid at <code>timePoint</code> is considered.
-     * 
      * @param numberOfCompetitorsFetcher
      *            can determine the number of competitors to use as the basis for penalty score calculation
      *            ("max points") if needed
      */
+    default Result getCorrectedScore(Callable<Integer> trackedRankProvider, Competitor competitor, RaceColumn raceColumn,
+            Leaderboard leaderboard, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme) {
+        return getCorrectedScore(trackedRankProvider, competitor, raceColumn, leaderboard, timePoint,
+                numberOfCompetitorsFetcher, scoringScheme, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
     Result getCorrectedScore(Callable<Integer> trackedRankProvider, Competitor competitor, RaceColumn raceColumn,
-            TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme);
+            Leaderboard leaderboard, TimePoint timePoint,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 
     /**
      * @param timePoint
@@ -93,11 +106,23 @@ public interface ScoreCorrection extends Serializable {
      */
     boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
+    boolean isScoreCorrectedIncrementally(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    
+    Double getIncementalScoreCorrectionInPoints(Competitor competitor, RaceColumn raceColumn);
+    
     /**
      * Checks if this score correction object has any score corrections for any competitor valid at any time point for
      * the race column specified by <code>raceInLeaderboard</code>.
      */
     boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
+    
+    /**
+     * Similar to {@link #hasCorrectionFor(RaceColumn)}, but returns <code>true</code> only if score corrections are found
+     * for any competitor who in <code>raceInLeaderboard</code> is not in a tracked race and hence the fleet assignment
+     * cannot be determined. This is helpful, e.g., for progress detection. If score corrections are present for such
+     * untracked competitors then all untracked fleets need to be assumed as finished.
+     */
+    boolean hasCorrectionForNonTrackedFleet(RaceColumn raceInLeaderboard);
     
     /**
      * @return all race columns for which this score corrections object has at least one correction; note that this

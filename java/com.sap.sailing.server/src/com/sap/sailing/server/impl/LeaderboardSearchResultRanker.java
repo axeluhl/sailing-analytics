@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.LeaderboardSearchResult;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 
 public class LeaderboardSearchResultRanker extends LeaderboardSearchResultBaseRanker<LeaderboardSearchResult> {
     private final TrackedRegattaRegistry trackedRegattaRegistry;

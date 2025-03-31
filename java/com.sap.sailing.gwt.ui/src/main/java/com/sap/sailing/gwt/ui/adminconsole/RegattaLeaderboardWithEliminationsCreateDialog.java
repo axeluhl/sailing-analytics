@@ -1,0 +1,35 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.function.Consumer;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
+
+public class RegattaLeaderboardWithEliminationsCreateDialog extends RegattaLeaderboardWithEliminationsDialog {
+
+    public RegattaLeaderboardWithEliminationsCreateDialog(SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+            Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringMessages,
+            ErrorReporter errorReporter, DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
+        super(sailingServiceWrite, userService, stringMessages.createRegattaLeaderboard(), new LeaderboardDescriptorWithEliminations(
+                new LeaderboardDescriptor(), Collections.emptySet()), existingRegattas,
+                existingLeaderboards, stringMessages,
+                errorReporter, new RegattaLeaderboardWithEliminationsDialog.LeaderboardParameterValidator(stringMessages, existingLeaderboards), callback);
+        nameTextBox.setEnabled(true); // a name can be selected during creation of a regatta leaderboard with eliminations
+    }
+
+    @Override
+    protected Consumer<Pair<CompetitorRegistrationsPanel, AsyncCallback<Collection<CompetitorDTO>>>> getEliminatedCompetitorsRetriever() {
+        eliminatedCompetitors = new HashSet<>();
+        return callback->callback.getB().onSuccess(eliminatedCompetitors);
+    }
+}

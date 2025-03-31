@@ -1,0 +1,16 @@
+#!/bin/bash
+JAVA_HOME=/opt/sapjvm_8
+VARLOGOLD=/var/log/old
+# Production:
+CACHE=$VARLOGOLD/cache/unique-ips-per-referrer
+# Test:
+#CACHE=$VARLOGOLD/cache/unique-ips-per-referrer/test
+
+JAR_FILE=$VARLOGOLD/com.sap.sse.jar
+
+$JAVA_HOME/bin/java -Xmx8G -jar $JAR_FILE $CACHE $*
+
+# Do the sorting of all .unique files now:
+for i in `find $CACHE -name '*.unique'`; do
+  cat $i | awk '{ print $2 " " $1; }' | sort -rn >${i}.sorted
+done

@@ -24,7 +24,7 @@ import com.sap.sse.common.Util;
 public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final String LEADERBOARD = "BMW Cup - J80";
     
-    private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+    private static final String BMW_CUP_JSON_URL = "http://event2.tractrac.com/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String BMW_CUP_RACE_8 = "BMW Cup Race 8";
     private static final String BMW_CUP_REGATTA = "BMW Cup";
     private static final String BMW_CUP_BOAT_CLASS = "J/80";
@@ -32,7 +32,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final TrackableRaceDescriptor TRACKABLE_RACE = new TrackableRaceDescriptor(
             BMW_CUP_REGATTA, BMW_CUP_RACE_8, BMW_CUP_BOAT_CLASS);
     private static final TrackedRaceDescriptor TRACKED_RACE = new TrackedRaceDescriptor(
-            BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
+            (BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")").replace('/',  '_'), BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
     @Override
@@ -66,7 +66,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private void startTrackingRaceAndWait(AdminConsolePage adminConsole, String jsonUrl, TrackableRaceDescriptor trackableRace,
             TrackedRaceDescriptor trackedRace, long waitingTime) {
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(jsonUrl);
+        tracTracEvents.addConnectionAndListTrackableRaces(jsonUrl);
         tracTracEvents.setTrackSettings(false, true, false);
         tracTracEvents.startTrackingForRace(trackableRace);
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();

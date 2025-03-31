@@ -1,0 +1,9 @@
+@charset "UTF-8";
+
+.icon {
+    background-size: contain;
+}
+
+.icon-location {
+    background: resourceUrl("iconLocation") no-repeat;
+}

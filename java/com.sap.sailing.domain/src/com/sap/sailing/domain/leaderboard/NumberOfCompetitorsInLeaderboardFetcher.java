@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.leaderboard;
 
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
+import com.sap.sse.common.TimePoint;
 
 /**
  * Computing the competitors can be a bit expensive, particularly if the fleet is large and there may be suppressed
@@ -23,4 +25,5 @@ import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
  */
 public interface NumberOfCompetitorsInLeaderboardFetcher {
     int getNumberOfCompetitorsInLeaderboard();
+    int getNumberOfCompetitorsWithoutMaxPointReason(RaceColumn column, TimePoint timePoint);
 }

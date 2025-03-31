@@ -1,0 +1,55 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+default_platform(:android)
+
+platform :android do
+
+  def update_version_code(code: 1)
+    set_properties_value(
+      path: "gradle.properties",
+      key: "appVersionCode",
+      value: "#{code}"
+    )
+  end
+
+  desc "Compile debug and test sources and lint them"
+  lane :build do
+    gradle(task: "compileDebugSources")
+    gradle(task: "compileDebugUnitTestSources")
+    gradle(task: "compileDebugAndroidTestSources")
+  end
+
+  desc "Runs all the tests & creates Jacoco Coverage reports"
+  lane :test do
+    UI.message("Using empty test reports")
+    # gradle(task: "jacocoTestCoverageVerification")
+  end
+
+  desc "Assemble app"
+  lane :releaseBuild do
+    # Automatic versioning
+    if is_ci
+      commits = sh("git rev-list --count HEAD").to_i
+      update_version_code(code: commits)
+    end
+
+    gradle(task: "assembleRelease")  # Build .apk
+    #gradle(task: "bundleRelease")  # Build .aab
+  end
+
+  desc "Call Kotlin Lint"
+  lane :lint do
+    gradle(task: "ktlintCheck")
+  end
+
+end

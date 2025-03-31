@@ -19,6 +19,7 @@ package com.sap.sse.gwt.client.controls.slider;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -45,6 +46,9 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.shared.DebugConstants;
 
 /**
  * A widget that allows the user to select a value within a range of possible values using a sliding bar that responds
@@ -356,26 +360,21 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         this.maxValue = maxValue;
         this.images = images;
         setLabelFormatter(tickLabelFormatter);
-
         // Create the outer shell
         getElement().getStyle().setPosition(Position.RELATIVE);
         setStyleName("gwt-SliderBar-shell");
-
         // Create the line
         lineElement = DOM.createDiv();
         DOM.appendChild(getElement(), lineElement);
         lineElement.getStyle().setPosition(Position.ABSOLUTE);
         lineElement.setPropertyString("className", "gwt-SliderBar-line");
-
         // Create the knob
         knobImage.setResource(images.slider());
         Element knobElement = knobImage.getElement();
         DOM.appendChild(getElement(), knobElement);
         knobElement.getStyle().setPosition(Position.ABSOLUTE);
         knobElement.setPropertyString("className", "gwt-SliderBar-knob");
-
-        sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS);
-
+        sinkEvents(Event.MOUSEEVENTS | Event.KEYEVENTS | Event.FOCUSEVENTS | Event.TOUCHEVENTS);
         // workaround to render properly when parent Widget does not
         // implement ProvidesResize since DOM doesn't provide element
         // height and width until onModuleLoad() finishes.
@@ -499,7 +498,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 if (slidingMouse) {
                     DOM.releaseCapture(getElement());
                     slidingMouse = false;
-                    slideKnob(event);
+                    // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+                    slideKnob(event.getClientX());
                     stopSliding(true, true);
                 } else if (slidingKeyboard) {
                     slidingKeyboard = false;
@@ -507,12 +507,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 }
                 unhighlight();
                 break;
-
             // Highlight on focus
             case Event.ONFOCUS:
                 highlight();
                 break;
-
             // Mousewheel events
             case Event.ONMOUSEWHEEL:
                 int velocityY = event.getMouseWheelVelocityY();
@@ -523,7 +521,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     shiftLeft(1);
                 }
                 break;
-
             // Shift left or right on key press
             case Event.ONKEYDOWN:
                 if (!slidingKeyboard) {
@@ -531,7 +528,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     if (event.getCtrlKey()) {
                         multiplier = (int) (getTotalRange() / stepSize / 10);
                     }
-
                     switch (event.getKeyCode()) {
                     case KeyCodes.KEY_HOME:
                         event.preventDefault();
@@ -570,31 +566,56 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     stopSliding(true, true);
                 }
                 break;
-
             // Mouse Events
             case Event.ONMOUSEDOWN:
-                setFocus(true);
-                slidingMouse = true;
-                DOM.setCapture(getElement());
-                startSliding(true, true);
                 event.preventDefault();
-                slideKnob(event);
+                startSlidingAtX(event.getClientX());
                 break;
             case Event.ONMOUSEUP:
                 if (slidingMouse) {
                     DOM.releaseCapture(getElement());
                     slidingMouse = false;
-                    slideKnob(event);
+                    // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+                    slideKnob(event.getClientX());
                     stopSliding(true, true);
                 }
                 break;
             case Event.ONMOUSEMOVE:
                 if (slidingMouse) {
-                    slideKnob(event);
+                    // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+                    slideKnob(event.getClientX());
+                }
+                break;
+            case Event.ONTOUCHSTART:
+                event.preventDefault();
+                startSlidingAtX(event.getTouches().get(0).getClientX());
+                break;
+            case Event.ONTOUCHMOVE:
+                if (slidingMouse) {
+                    // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+                    slideKnob(event.getTouches().get(event.getTouches().length()-1).getClientX());
+                }
+                break;
+            case Event.ONTOUCHEND:
+                if (slidingMouse) {
+                    DOM.releaseCapture(getElement());
+                    slidingMouse = false;
+                    // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+                    slideKnob(event.getTouches().get(event.getTouches().length()-1).getClientX());
+                    stopSliding(true, true);
                 }
                 break;
             }
         }
+    }
+
+    private void startSlidingAtX(int clientX) {
+        setFocus(true);
+        slidingMouse = true;
+        DOM.setCapture(getElement());
+        startSliding(true, true);
+        // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+        slideKnob(clientX);
     }
 
     /**
@@ -654,17 +675,19 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         if (!isMinMaxInitialized() || curValue == null) {
             return;
         }
-        this.curValue = Math.max(minValue, Math.min(maxValue, curValue));
-        double remainder = (this.curValue - minValue) % stepSize;
-        this.curValue -= remainder;
+        Double newValue = Math.max(minValue, Math.min(maxValue, curValue));
+        final double remainder = (newValue - minValue) % stepSize;
+        newValue -= remainder;
         // Go to next step if more than halfway there
-        if ((remainder > (stepSize / 2)) && ((this.curValue + stepSize) <= maxValue)) {
-            this.curValue += stepSize;
+        if ((remainder > (stepSize / 2)) && ((newValue + stepSize) <= maxValue)) {
+            newValue += stepSize;
         }
+        final boolean isValueChanged = !newValue.equals(this.curValue) && this.curValue != null;
+        this.curValue = newValue;
         // Redraw the knob
         drawKnob();
         // Fire the ValueChangeEvent if the value actually changed
-        if (fireEvent && !curValue.equals(this.curValue)) {
+        if (fireEvent && isValueChanged) {
             ValueChangeEvent.fire(this, this.curValue);
         }
     }
@@ -704,9 +727,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        this.maxValue = maxValue;
-        drawTickLabels();
-        resetCurrentValue(fireEvent);
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            onMinMaxValueChanged(fireEvent);
+        }
     }
 
     /**
@@ -716,8 +740,44 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMinValue(Double minValue, boolean fireEvent) {
-        this.minValue = minValue;
-        drawTickLabels();
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+
+    /**
+     * Set the minimum and maximum value
+     * 
+     * @param minValue
+     *            the current value for min
+     * @param maxValue
+     *            the current value for max
+     * @return {@link Pair} of min and max if they have changed
+     */
+    public Optional<Pair<Double, Double>> setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        boolean changed = false;
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            changed = true;
+        }
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            changed = true;
+        }
+        if (changed) {
+            onMinMaxValueChanged(fireEvent);
+            return Optional.of(new Pair<>(this.minValue, this.maxValue));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Handle value changes of min and/or max value
+     */
+    protected void onMinMaxValueChanged(boolean fireEvent) {
+        redraw();
         resetCurrentValue(fireEvent);
     }
 
@@ -812,11 +872,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @return the text to put in the label
      */
     protected String formatTickLabel(Double value, Double previousValue) {
+        final String result;
         if (tickLabelFormatter != null) {
-            return tickLabelFormatter.formatLabel(this, value, previousValue);
+            result = tickLabelFormatter.formatLabel(this, value, previousValue);
         } else {
-            return (int) (10 * value) / 10.0 + "";
+            result = (int) (10 * value) / 10.0 + "";
         }
+        return result;
     }
 
     /**
@@ -886,16 +948,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         DOM.appendChild(getElement(), label);
                         tickLabelElements.add(label);
                     }
-
                     // Set the label text
                     double value = minValue + (getTotalRange() * i / numTickLabels);
                     label.getStyle().setVisibility(Visibility.HIDDEN);
                     label.getStyle().setProperty("display", "");
                     label.setPropertyString("innerHTML", formatTickLabel(value, previousValue));
-
                     // Move to the left so the label width is not clipped by the shell
                     label.getStyle().setLeft(0, Unit.PX);
-
                     // Position the label and make it visible
                     int labelWidth = label.getOffsetWidth();
                     int labelLeftOffset = lineLeftOffset + (lineWidth * i / numTickLabels) - (labelWidth / 2);
@@ -903,10 +962,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
                     label.getStyle().setLeft(labelLeftOffset, Unit.PX);
                     label.getStyle().setVisibility(Visibility.VISIBLE);
-
                     previousValue = value;
                 }
-
                 // Hide unused labels
                 for (int i = (numTickLabels + 1); i < tickLabelElements.size(); i++) {
                     tickLabelElements.get(i).getStyle().setDisplay(Display.NONE);
@@ -953,7 +1010,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     tick.getStyle().setLeft(tickLeftOffset, Unit.PX);
                     tick.getStyle().setVisibility(Visibility.VISIBLE);
                 }
-
                 // Hide unused ticks
                 for (int i = (numTicks + 1); i < tickElements.size(); i++) {
                     tickElements.get(i).getStyle().setDisplay(Display.NONE);
@@ -987,9 +1043,11 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         markerElem = DOM.createDiv();
                         markerElem.getStyle().setPosition(Position.ABSOLUTE);
                         markerElem.getStyle().setDisplay(Display.NONE);
+                        markerElem.setAttribute(DebugConstants.DEBUG_ID_ATTRIBUTE, "sliderBarMarker-" + marker.name);
                         DOM.appendChild(getElement(), markerElem);
                         markerElements.add(markerElem);
                     }
+                    markerElem.setTitle(formatTickLabel(marker.position, null));
                     if (enabled) {
                         markerElem.setPropertyString("className", "gwt-SliderBar-mark");
                     } else {
@@ -1014,7 +1072,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                     lastMarkerElement = markerElem;
                     lastMarkerOffsetLeft = markerLeftOffset;
                 }
-
                 // Hide unused markers
                 for (int i = numMarkers; i < markerElements.size(); i++) {
                     markerElements.get(i).getStyle().setDisplay(Display.NONE);
@@ -1037,6 +1094,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             int lineWidth = lineElement.getOffsetWidth();
             if (numMarkers > 0) {
                 Element lastMarkerLabel = null;
+                Marker lastMarker = null;
                 int lastMarkerLabelOffsetLeft = 0;
                 // Create the labels or make them visible
                 for (int i = 0; i < numMarkers; i++) {
@@ -1048,37 +1106,33 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = DOM.createDiv();
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
-                        if (enabled) {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
-                        } else {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
-                        }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
                     }
-
+                    label.setTitle(formatTickLabel(marker.position, null));
+                    if (enabled) {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel");
+                    } else {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
+                    }
                     // Set the marker label text
                     label.getStyle().setVisibility(Visibility.HIDDEN);
                     label.getStyle().setProperty("display", "");
                     label.setPropertyString("innerHTML", marker.name);
-
                     // Move to the left so the label width is not clipped by the shell
                     label.getStyle().setLeft(0, Unit.PX);
-
                     // Position the label and make it visible
                     double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
                     int labelWidth = label.getOffsetWidth();
                     int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
                     labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
-
                     label.getStyle().setLeft(labelLeftOffset, Unit.PX);
                     label.getStyle().setVisibility(Visibility.VISIBLE);
-
                     // hide last marker label if it is too close to the one just created
                     if (lastMarkerLabelOffsetLeft > 0 && (labelLeftOffset-lastMarkerLabelOffsetLeft) <= 20) {
-                        if (lastMarkerLabel != null) {
+                        if (lastMarkerLabel != null && lastMarker != null) {
                             lastMarkerLabel.setPropertyString("className", "gwt-SliderBar-markerlabel-tooClose");
-                            lastMarkerLabel.setPropertyString("innerHTML", "M"); // no space for more
+                            lastMarkerLabel.setPropertyString("innerHTML", lastMarker.name); // no space for more
                             int currentMarkerOffsetLeft = labelLeftOffset;
                             try {
                                 currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
@@ -1088,10 +1142,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                             lastMarkerLabel.getStyle().setLeft(currentMarkerOffsetLeft-8, Unit.PX);
                         }
                     }
+                    lastMarker = marker;
                     lastMarkerLabel = label;
                     lastMarkerLabelOffsetLeft = labelLeftOffset;
                 }
-
                 // Hide unused labels
                 for (int i = (numMarkers + 1); i < markerLabelElements.size(); i++) {
                     markerLabelElements.get(i).getStyle().setDisplay(Display.NONE);
@@ -1122,12 +1176,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Slide the knob to a new location.
      * 
-     * @param event
-     *            the mouse event
+     * @param x
+     *            the x coordinate, without scroll consideration, as extracted from a click or touch event
      */
-    private void slideKnob(Event event) {
+    private void slideKnob(int clientX) {
         // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
-        int x = event.getClientX() + Window.getScrollLeft();
+        int x = clientX + Window.getScrollLeft();
         if (x > 0) {
             int lineWidth = lineElement.getOffsetWidth();
             int lineLeft = lineElement.getAbsoluteLeft();

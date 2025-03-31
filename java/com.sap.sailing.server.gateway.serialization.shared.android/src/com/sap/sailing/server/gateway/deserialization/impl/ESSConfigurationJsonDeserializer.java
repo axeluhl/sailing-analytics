@@ -6,8 +6,8 @@ import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class ESSConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements
         JsonDeserializer<RacingProcedureConfiguration> {
@@ -26,11 +26,12 @@ public class ESSConfigurationJsonDeserializer extends RacingProcedureConfigurati
     }
 
     @Override
-    protected ESSConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag)
+    protected ESSConfiguration createResult(JSONObject object, Boolean inidividualRecall, Boolean resultEntryEnabled, Flags classFlag)
             throws JsonDeserializationException {
         ESSConfigurationImpl result = new ESSConfigurationImpl();
         result.setClassFlag(classFlag);
-        result.setHasInidividualRecall(inidividualRecall);
+        result.setHasIndividualRecall(inidividualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
         return result;
     }
 

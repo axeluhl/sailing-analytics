@@ -3,10 +3,29 @@ Bundle-ManifestVersion: 2
 Fragment-Host: com.sap.sailing.domain.igtimiadapter
 Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.domain.igtimiadapter.test
+Automatic-Module-Name: com.sap.sailing.domain.igtimiadapter.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.junit4;bundle-version="4.8.2",
+Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.common,
  com.sap.sse.mongodb,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sap.sse.security.testsupport,
+ org.mockito.mockito-core;bundle-version="1.10.14",
+ org.hamcrest;bundle-version="2.2.0",
+ org.objenesis;bundle-version="2.1.0",
+ net.bytebuddy.byte-buddy;bundle-version="1.12.18",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.12.18"
+Import-Package: com.mongodb.client;version="4.11.1",
+ com.mongodb.session;version="4.11.1",
+ com.sap.sailing.domain.igtimiadapter.persistence,
+ com.sap.sailing.domain.igtimiadapter.server,
+ com.sap.sailing.domain.igtimiadapter.server.riot,
+ com.sap.sse.shared.util,
+ javax.servlet,
+ org.eclipse.jetty.server;version="[9.4.0,10.0.0)",
+ org.eclipse.jetty.server.handler;version="[9.4.0,10.0.0)",
+ org.eclipse.jetty.servlet;version="[9.4.0,10.0.0)",
+ org.eclipse.jetty.websocket.server;version="[9.4.0,10.0.0)",
+ org.eclipse.jetty.websocket.servlet;version="[9.4.0,10.0.0)"

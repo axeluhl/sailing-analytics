@@ -2,11 +2,16 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Named;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
+import com.tractrac.model.lib.api.map.IMapItem;
+import com.tractrac.model.lib.api.map.IPositionedItem;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -26,18 +31,24 @@ import com.sap.sse.common.Named;
 public interface MetadataParser {
     public interface ControlPointMetaData extends Named {
         MarkType getType();
-        String getColor();
+        Color getColor();
         String getShape();
         String getPattern();
         Serializable getId();
     }
-    
-    Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
+
+    public interface BoatMetaData extends Named {
+        String getId();
+        String getColor();
+        UUID getUuid();
+    }
+
+    Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, int numberOfWaypoints);
 
     /**
      * Returns as many metadata objects as there are marks in the control point (two for a gate, one otherwise)
      */
-    Iterable<ControlPointMetaData> parseControlPointMetadata(TracTracControlPoint controlPoint);
+    ControlPointMetaData parseControlPointMetadata(IPositionedItem positionedItem);
 
     /**
      * Parses the race metadata for sideline information
@@ -50,7 +61,13 @@ public interface MetadataParser {
      * 
      * @return keys are the sideline names, such as "SIDELINE1", values are the control points that form the sideline
      */
-    Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
-            Iterable<? extends TracTracControlPoint> controlPoints);
+    Map<String, Iterable<IPositionedItem>> parseSidelinesFromRaceMetadata(String raceMetadataString,
+            Iterable<? extends IMapItem> controlPoints);
 
+    /**
+     * Parses the boat name, boad id and the boat color for a competitor (entry) of a race.
+     * @param competitor
+     * @return the boat metadata or null if no metadata is availalble
+     */
+    BoatMetaData parseCompetitorBoat(IRaceCompetitor competitor);
 }

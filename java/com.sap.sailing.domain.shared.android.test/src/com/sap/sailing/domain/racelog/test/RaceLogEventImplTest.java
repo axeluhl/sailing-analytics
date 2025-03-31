@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.test;
 
-import static junit.framework.Assert.assertSame;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ public class RaceLogEventImplTest {
 
         public TestRaceLogEvent(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
                 Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
-            super(createdAt, author, logicalTimePoint, pId, pInvolvedBoats, pPassId);
+            super(createdAt, logicalTimePoint, author, pId, pInvolvedBoats, pPassId);
         }
 
         @Override

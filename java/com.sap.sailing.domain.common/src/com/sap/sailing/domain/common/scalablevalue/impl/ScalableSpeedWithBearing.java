@@ -1,12 +1,12 @@
 package com.sap.sailing.domain.common.scalablevalue.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.DoubleTriple;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
@@ -36,7 +36,7 @@ public class ScalableSpeedWithBearing implements ScalableValue<DoubleTriple, Spe
         this(speed.getKnots(), sin, cos);
     }
     
-    private ScalableSpeedWithBearing(double speedInKnots, double sin, double cos) {
+    public ScalableSpeedWithBearing(double speedInKnots, double sin, double cos) {
         this.speedInKnots = speedInKnots;
         this.sin = sin;
         this.cos = cos;
@@ -49,7 +49,8 @@ public class ScalableSpeedWithBearing implements ScalableValue<DoubleTriple, Spe
 
     @Override
     public ScalableSpeedWithBearing add(ScalableValue<DoubleTriple, SpeedWithBearing> t) {
-        return new ScalableSpeedWithBearing(speedInKnots + t.getValue().getA(), sin+t.getValue().getB(), cos+t.getValue().getC());
+        final DoubleTriple tValue = t.getValue();
+        return new ScalableSpeedWithBearing(speedInKnots + tValue.getA(), sin+tValue.getB(), cos+tValue.getC());
     }
 
     @Override

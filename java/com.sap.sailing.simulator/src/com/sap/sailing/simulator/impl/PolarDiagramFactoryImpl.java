@@ -13,7 +13,7 @@ public class PolarDiagramFactoryImpl implements PolarDiagramFactory {
 	public PolarDiagram getPolarDiagram(BoatClass boatClass) {
 		// TODO generalize to dependency on boat class; this is just the first hard-coded example
 		String csvFilePath;
-		if (boatClass.getDisplayName().equals(BoatClassMasterdata._49ER.getDisplayName())) {
+		if (boatClass.getName().equals(BoatClassMasterdata._49ER.getDisplayName())) {
 			csvFilePath = "PolarDiagram49STG.csv";
 		} else {
 			return null;

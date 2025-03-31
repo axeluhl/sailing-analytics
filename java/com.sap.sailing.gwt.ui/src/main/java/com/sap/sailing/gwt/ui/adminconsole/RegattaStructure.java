@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -27,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 class RegattaStructure {
     private final Iterable<String> seriesNamesInOrder;
     private final Map<String, LinkedHashSet<String>> seriesNamesToFleetNames;
+    private final RankingMetrics rankingMetricType;
     
     public RegattaStructure(RegattaDTO regatta) {
         seriesNamesToFleetNames = new HashMap<>();
@@ -40,6 +42,7 @@ class RegattaStructure {
                 fleetNames.add(fleet.getName());
             }
         }
+        this.rankingMetricType = regatta.rankingMetricType;
     }
 
     @Override
@@ -62,6 +65,7 @@ class RegattaStructure {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((rankingMetricType == null) ? 0 : rankingMetricType.hashCode());
         result = prime * result + ((seriesNamesInOrder == null) ? 0 : seriesNamesInOrder.hashCode());
         result = prime * result + ((seriesNamesToFleetNames == null) ? 0 : seriesNamesToFleetNames.hashCode());
         return result;
@@ -76,6 +80,8 @@ class RegattaStructure {
         if (getClass() != obj.getClass())
             return false;
         RegattaStructure other = (RegattaStructure) obj;
+        if (rankingMetricType != other.rankingMetricType)
+            return false;
         if (seriesNamesInOrder == null) {
             if (other.seriesNamesInOrder != null)
                 return false;

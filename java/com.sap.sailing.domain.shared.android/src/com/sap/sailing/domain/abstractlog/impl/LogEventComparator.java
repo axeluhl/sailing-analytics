@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
 
 /**
  * Comparator sorting by pass, then by {@link AbstractLogEventAuthor}, then by {@link RaceLogEvent#getCreatedAt()}
@@ -28,25 +29,25 @@ public class LogEventComparator implements Comparator<Timed>, Serializable {
         if (o1 instanceof AbstractLogEvent && o2 instanceof AbstractLogEvent) {
             return compareEvents((AbstractLogEvent<?>) o1, (AbstractLogEvent<?>) o2);
         }
-
         // fallback to timed comparison
         return timedComparator.compare(o1, o2);
     }
     
     protected int compareEvents(AbstractLogEvent<?> e1, AbstractLogEvent<?> e2) {
-        //compare author priorities
+        // compare author priorities
         int result = e1.getAuthor().compareTo(e2.getAuthor());
-        if (result != 0) return result;
-        
-        //compare created at timepoints
-        result = e1.getCreatedAt().compareTo(e2.getCreatedAt());
-        if (result != 0) return result;
-        
-        //compare logical timepoints
-        result = e1.getLogicalTimePoint().compareTo(e2.getLogicalTimePoint());
-        if (result != 0) return result;
-        
-        //compare ids
-        return e1.getId().toString().compareTo(e2.getId().toString());
+        if (result == 0) {
+            // compare created at timepoints
+            result = e1.getCreatedAt().compareTo(e2.getCreatedAt());
+            if (result == 0) {
+                // compare logical timepoints
+                result = Util.compareToWithNull(e1.getLogicalTimePoint(), e2.getLogicalTimePoint(), /* nullIsLess */ false);
+                if (result == 0) {
+                    // compare ids
+                    result = e1.getId().toString().compareTo(e2.getId().toString());
+                }
+            }
+        }
+        return result;
     }
 }

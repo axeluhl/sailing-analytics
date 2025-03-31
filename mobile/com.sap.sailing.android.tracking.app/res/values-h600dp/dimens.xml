@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Values for regatta buttons-->
+    <dimen name="regatta_button_layout_height">190dp</dimen>
+    <dimen name="regatta_button_margin">10dp</dimen>
+    <dimen name="regatta_button_padding">10dp</dimen>
+    <dimen name="tracking_button_height">120dp</dimen>
+</resources>

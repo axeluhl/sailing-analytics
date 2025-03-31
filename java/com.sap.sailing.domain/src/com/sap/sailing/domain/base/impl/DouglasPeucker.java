@@ -6,18 +6,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ScheduledExecutorService;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -31,7 +28,7 @@ import com.sap.sse.common.Util;
 public class DouglasPeucker<ItemType, FixType extends GPSFix> {
     private final GPSFixTrack<ItemType, FixType> track;
     
-    private final Executor executor;
+    private final ScheduledExecutorService executor;
 
     public DouglasPeucker(GPSFixTrack<ItemType, FixType> track) {
         this.track = track;
@@ -42,7 +39,7 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
      * Allows clients to specify a non-default, optionally multi-threaded executor that will be used to perform the
      * high-effort computations.
      */
-    public DouglasPeucker(GPSFixTrack<ItemType, FixType> track, Executor executor) {
+    public DouglasPeucker(GPSFixTrack<ItemType, FixType> track, ScheduledExecutorService executor) {
         this.track = track;
         this.executor = executor;
     }
@@ -96,15 +93,8 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
             if (fix.getTimePoint().compareTo(to) > 0) {
                 break;
             }
-            RunnableFuture<Util.Pair<FixType, Distance>> crossTrackErrorFuture = new FutureTask<Util.Pair<FixType, Distance>>(
-                    new Callable<Util.Pair<FixType, Distance>>() {
-                        @Override
-                        public Util.Pair<FixType, Distance> call() throws Exception {
-                            return new Util.Pair<FixType, Distance>(fix, fix.getPosition().absoluteCrossTrackError(
-                                    fromPosition, bearing));
-                        }
-                    });
-            executor.execute(crossTrackErrorFuture);
+            Future<Util.Pair<FixType, Distance>> crossTrackErrorFuture = executor.submit(
+                    ()->new Util.Pair<FixType, Distance>(fix, fix.getPosition().absoluteCrossTrackError(fromPosition, bearing)));
             crossTrackErrorFutures.add(crossTrackErrorFuture);
         }
         for (Future<Util.Pair<FixType, Distance>> crossTrackErrorFuture : crossTrackErrorFutures) {

@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /sailinglandscape/api/landscape/movetoarchiveserver</h2>
+
+<b>Description:</b>
+ <p>Archives the contents of an application replica set, optionally also its underlying database, and if the result compares equal, removes
+ the entire replica set. Optionally, the replica set's database can be moved to a different (e.g., less expensive "cold-storage") MongoDB environment.
+ See also <a href="removeapplicationreplicaset.html">here</a> for the steps taken during replica set removal.</p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory query parameters:</td>
+        <td>
+            <div><tt>regionId</tt>, region where to set up the replica set, e.g., eu-west-1</div>
+            <div><tt>replicaSetName</tt>, name of the replica set; used as the hostname to which the domain name is appended, as well as
+                                 for the database and RabbitMQ exchange name</div>
+            <div><tt>keyName</tt>, the name of the SSH key to use; must identify an existing SSH key by that name in the region specified
+                          and will be used to log on to existing and new instances using a root ssh connection.</div>
+            <div><tt>privateKeyEncryptionPassphrase</tt>, the pass phrase to decrypt the private key for the key specified by the keyName parameter</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional form parameters:</td>
+        <td>
+            <div><tt>bearerTokenForReplicaSetToArchive</tt>, the bearer token to use to authenticate with the replica set that is to be archived.
+                                                    If not provided, the bearer token of the subject used to authenticate this request
+                                                    is used by default.</div>
+            <div><tt>bearerTokenForArchive</tt>, the bearer token to use to authenticate with the archive server to which to import the content.
+                                                    If not provided, the bearer token of the subject used to authenticate this request
+                                                    is used by default.</div>
+            <div><tt>timeoutInMilliseconds</tt>, timeout in milliseconds to wait for responses from nodes when analyzing the replica sets
+                                        existing in the region; if not specified, waiting will not time out.</div>
+            <div><tt>durationToWaitBeforeCompareServersInMilliseconds</tt>, tells how long to wait before starting to compare the content in the archive
+                                                                   with the original content after importing. The reason such a wait time
+                                                                   can be appropriate is, among other things, that after starting to load all tracked
+                                                                   races in the archive some time will pass until all data hase been loaded and
+                                                                   all calculations based on the data have completed, such as maneuver calculations
+                                                                   and wind estimation. A comparison may fail if wind estimations haven't completed
+                                                                   yet for a race in the archive. If not provided, this defaults to five minutes.</div>
+            <div><tt>maxNumberOfCompareserverAttempts</tt>, if the comparison started after durationToWaitBeforeCompareServersInMilliseconds fails, this many
+                                                   attempts will be made, each after waiting another durationToWaitBeforeCompareServersInMilliseconds.
+                                                   Only if these many comparisons all fail will the process be called a failure, and further processing
+                                                   such as removing the replica set or archiving its database will not be executed.</div>
+            <div><tt>removeApplicationReplicaSet</tt>, boolean value defaulting to true; if true, the original replica set will be
+                                              <a href="removeapplicationreplicaset.html">removed</a> if importing and comparing the content worked
+                                              successfully.</div>
+            <div><tt>mongoUriToArchiveDbTo</tt>, if provided, this must identify a full-fledged database-specific MongoDB URI, such as
+                                        <tt>mongodb://172.16.0.123/mynewevent?replicaSet=archive&retryWrites=true&readPreference=nearest</tt>.
+                                        If provided, it specified the database end point to which to move the replica set's original DB content.
+                                        After moving, the DB content will be compared by hashing original and copy, and only if this comparison
+                                        was successful will the original be dropped. Note: although you must specify a DB name ("mynewevent" in
+                                        the example above), the DB name in the URI will be ignored, and the original DB name will be used under
+                                        all circumstances for the copy.</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>curl -X POST -d 'regionId=eu-west-2' -d 'replicaSetName=axelstest' -d 'keyName=Horst' --data-urlencode 'privateKeyEncryptionPassphrase=HorstsSuperSecretPassword' -H 'Authorization: Bearer RwGK+DV38LKjeuDu+Bx87/3blLJHD7Ff+NCLeud9nRQ=' --data-urlencode 'bearerTokenForReplicaSetToArchive=DE7x+W/dwFKRAxFbJkC/IMafEnJ8kTQF+MUHNVhEwsD4=' --data-urlencode 'bearerTokenForArchive=CHxGpF0nr78Z4m/f28/MgiYhdRB3xoDCYd+rLc37rTt=' --data-urlencode 'mongoUriToArchiveDbTo=mongodb://172.31.36.221/mynewevent?replicaSet=archive&retryWrites=true&readPreference=nearest' "https://sapsailing.com/sailinglandscape/api/landscape/movetoarchiveserver"<br>
+        produces output:<pre>
+        {
+          "uuidForMdiProgress": "1f07d1cf-0652-4fc3-83bc-a79612a5aa68"
+        }
+        </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

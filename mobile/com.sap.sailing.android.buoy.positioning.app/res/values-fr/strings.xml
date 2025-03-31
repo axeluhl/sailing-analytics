@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Type de parcours"</string>
+    <string name="marks">"Marques"</string>
+    <string name="set_position">"Définir position"</string>
+    <string name="set_position_disabled_gps">"Activez le GPS\npour définir votre position."</string>
+    <string name="set_position_no_gps_yet">"En attente de la connexion GPS"</string>
+    <string name="reset_position">"Réinitialiser la position"</string>
+    <string name="getting_marks">"Accès aux marques de la course..."</string>
+    <string name="set">"position définie"</string>
+    <string name="unknown">"sans objet"</string>
+    <string name="not_set">"position non définie"</string>
+    <string name="mark_list_accuracy">"(Exactitude env. %1$sm)"</string>
+    <string name="accuracy_detail">"de la position GPS"</string>
+    <string name="distance_detail">"par rapport à l\'ancienne bouée"</string>
+    
+    
+    <string name="accuracy">"Exactitude du GPS"</string>
+    <string name="distance">"Distance par rapport à l\'ancienne bouée"</string>
+    <string name="position_set">"La position a été définie."</string>
+    <string name="no_information">"Aucune information"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Positionnez l\'appareil près de la marque, puis appuyez sur \'Définir position\' pour définir la position de la marque. Utilisez l\'indicateur d\'exactitude pour décider si la position affichée est suffisamment précise. Veuillez activer le GPS, ou attendez jusqu\'à ce que le GPS soit disponible."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Options"</string>
+
+    <string name="server">"Interrogation"</string>
+    <string name="server_sync_settings">"Fréquence d\'interrogation (en secondes)"</string>
+
+    <string name="options_menu_checkout">"Se déconnecter"</string>
+    <string name="checkout_warning_message">"Voulez-vous vraiment vous déconnecter ? Vous allez devoir vous reconnecter à l\'aide du code QR fourni pour accéder à vos marques."</string>
+
+    <string name="no_marks_message">"Aucune marque"</string>
+
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppTheme.Base">
+        <item name="checkedItemBackground">@drawable/checked_item_background_ripple</item>
+    </style>
+
+    <style name="AppTheme.Button">
+        <item name="android:textColor">@color/constant_white</item>
+        <item name="android:background">@drawable/button_ripple</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppTheme.Round">
+        <item name="android:background">@drawable/round_button_ripple</item>
+        <item name="android:padding">@dimen/logout_padding</item>
+    </style>
+</resources>

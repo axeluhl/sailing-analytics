@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Bearing;
 
 public class RadianBearingImpl extends AbstractBearing implements Bearing {
     private static final long serialVersionUID = 5044142324540650696L;

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/button_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="24dp"
+    android:layout_marginLeft="24dp"
+    android:layout_marginRight="24dp"
+    android:orientation="horizontal">
+
+    <Spinner
+        android:id="@+id/spinner_penalty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:background="@drawable/spinner_background"
+        android:spinnerMode="dropdown" />
+
+    <Button
+        android:id="@+id/button_penalty"
+        style="?attr/buttonSolidNormal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/penalty"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/button_apply"
+        style="?attr/buttonSolidNormal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_weight="1"
+        android:text="@string/apply_button" />
+
+    <Button
+        android:id="@+id/button_publish"
+        style="?attr/buttonSolidNormal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        tools:text="@string/confirm" />
+
+</LinearLayout>

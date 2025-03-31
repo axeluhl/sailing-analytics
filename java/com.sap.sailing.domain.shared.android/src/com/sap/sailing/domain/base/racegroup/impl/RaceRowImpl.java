@@ -9,6 +9,10 @@ public class RaceRowImpl implements RaceRow {
     private Fleet fleet;
     private Iterable<RaceCell> races;
 
+    /**
+     * @param races
+     *            expected to be provided in the order in which the race columns appear in the series / leaderboard
+     */
     public RaceRowImpl(Fleet fleet, Iterable<RaceCell> races) {
         this.fleet = fleet;
         this.races = races;
@@ -22,6 +26,11 @@ public class RaceRowImpl implements RaceRow {
     @Override
     public Iterable<RaceCell> getCells() {
         return races;
+    }
+
+    @Override
+    public String toString() {
+        return "RaceRowImpl [fleet=" + fleet + ", races=" + races + "]";
     }
 
 }

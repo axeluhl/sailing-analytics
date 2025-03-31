@@ -2,11 +2,11 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * True heading; the difference to {@link HDGM} is the local declination at the point in time the measurement was made
@@ -19,8 +19,12 @@ public class HDG extends Fix {
     private final Bearing trueHeading;
     
     public HDG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        this(timePoint, sensor, new DegreeBearingImpl((((Number) valuesPerSubindex.get(1)).doubleValue()+360.)%360.));
+    }
+
+    public HDG(TimePoint timePoint, Sensor sensor, Bearing trueHeading) {
         super(sensor, timePoint);
-        trueHeading = new DegreeBearingImpl((((Number) valuesPerSubindex.get(1)).doubleValue()+360.)%360.);
+        this.trueHeading = trueHeading;
     }
 
     public Bearing getTrueHeading() {

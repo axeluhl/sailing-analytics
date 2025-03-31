@@ -1,0 +1,10 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.accordion.AccordionResources" />
+    <g:FlowPanel addStyleNames="{res.mediaCss.grid}">
+        <g:SimplePanel ui:field="headerUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+        <g:FlowPanel ui:field="itemsUi" addStyleNames="{local_res.css.accordion}" />
+        <g:SimplePanel ui:field="footerUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
+    </g:FlowPanel>
+</ui:UiBinder> 

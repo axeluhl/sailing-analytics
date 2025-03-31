@@ -1,0 +1,26 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
+	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
+	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.fakeseries">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <g:HTMLPanel>
+    <c:TabPanel ui:field="tabPanelUi">
+      <c:header>
+        <dp:seriesheader.SeriesHeader ui:field="seriesHeader" />
+      </c:header>
+      <c:tabcontent title="{i18n.events}">
+        <s:eventstab.SeriesEventsTabView />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.overallLeaderboard}">
+        <s:overallleaderboardtab.EventSeriesOverallLeaderboardTabView />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.regattaLeaderboards}">
+        <s:leaderboardstab.EventSeriesLeaderboardsTabView />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.competitorsAnalytics}">
+        <s:analyticstab.EventSeriesCompetitorAnalyticsTabView />
+      </c:tabcontent>
+    </c:TabPanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 

@@ -1,18 +1,19 @@
 package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
-import java.util.Set;
 
-public interface MasterDataImportObjectCreationCount extends Serializable{
+public interface MasterDataImportObjectCreationCount extends Serializable {
+    int getLeaderboardCount();
 
-    public abstract int getLeaderboardCount();
+    int getLeaderboardGroupCount();
 
-    public abstract int getLeaderboardGroupCount();
+    int getEventCount();
+    
+    int getRegattaCount();
 
-    public abstract int getEventCount();
+    int getMediaTrackCount();
 
-    public abstract int getRegattaCount();
+    Iterable<String> getNamesOfOverwrittenRegattaNames();
 
-    public abstract Set<String> getOverwrittenRegattaNames();
-
+    int getTrackedRacesCount();
 }

@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-replicaset
+  labels:
+    app: {{ template "sapsailing-app-name" . }}
+    role: sailing-deployment
+    environment: {{ .Values.environment }}
+spec:
+  replicas: {{ .Values.replica.count }}
+  selector:
+    matchLabels:
+      app: {{ template "sapsailing-app-name" . }}
+      role: {{ .Values.replica.role }}
+      environment: {{ .Values.environment }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sapsailing-app-name" . }}
+        role: {{ .Values.replica.role }}
+        environment: {{ .Values.environment }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+    spec:
+    # AntiAffinity between replicas and associated master
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 80
+              podAffinityTerm:
+                labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - {{ template "sapsailing-app-name" . }}
+                      - key: environment
+                        operator: In
+                        values:
+                          - {{ .Values.environment }}
+                      - key: role
+                        operator: In
+                        values:
+                          - {{ .Values.replica.role }}
+                topologyKey: kubernetes.io/hostname
+            - weight: 40
+              podAffinityTerm:
+                labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - {{ template "sapsailing-app-name" . }}
+                      - key: environment
+                        operator: In
+                        values:
+                          - {{ .Values.environment }}
+                      - key: role
+                        operator: In
+                        values:
+                          - {{ .Values.master.role }}
+                topologyKey: kubernetes.io/hostname
+      initContainers:
+      - name: wait-for-master-to-register
+        image: alstolten/alpine-with-curl:latest
+        args:
+        - /bin/sh
+        - "-c"
+        - |
+          set -x
+          while [ $(curl -sw '%{http_code}' "{{ template "sailing-master-service-name" . }}:8888/gwt/status" -o /dev/null) -ne 200 ]; do sleep 10; done
+      containers:
+      - name: sailing
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: 8888
+          name: http-port
+        - containerPort: 14888
+          name: telnet-port
+        resources:
+{{- if .Values.replica.resources }}
+{{- tpl (toYaml .Values.replica.resources) . | nindent 10 }}
+{{- end }}
+        volumeMounts:
+        - name: prometheus-java-agent
+          mountPath: /home/sailing/servers/server/configuration/prometheus-java-agent
+        env:
+        - name: MONGODB_URI
+          value: {{ template "mongodb-connection-string-replica" . }}
+        - name: REPLICATION_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_SERVLET_HOST
+          value: {{ template "sailing-master-service-name" . }}
+        - name: REPLICATE_MASTER_SERVLET_PORT
+          value: '8888'
+        - name: REPLICATE_MASTER_QUEUE_HOST
+          value: {{ .Values.rabbitmq.host }}
+        - name: REPLICATE_MASTER_QUEUE_PORT
+          value: "{{ .Values.rabbitmq.port }}"
+        - name: REPLICATE_ON_START
+          value: {{ .Values.replica.replicateOnStart }}
+        - name: REPLICATE_MASTER_EXCHANGE_NAME
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.master.role }}
+          {{- if .Values.replica.replicateMasterBearerToken }}
+        - name: REPLICATE_MASTER_BEARER_TOKEN
+          value: {{ .Values.replica.replicateMasterBearerToken }}
+          {{- end }}
+        - name: REPLICATE_MASTER_USERNAME
+          value: {{ .Values.replica.replicateMasterUsername }}
+        - name: REPLICATE_MASTER_PASSWORD
+          value: {{ .Values.replica.replicateMasterPassword }}
+        - name: SERVER_NAME
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
+        - name: REPLICATION_CHANNEL
+          value: {{ template "sapsailing-app-name" . }}-{{ .Values.replica.role }}
+        - name: ADDITIONAL_JAVA_ARGS
+          value: -javaagent:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx_prometheus_javaagent-0.13.0.jar=9102:/home/sailing/servers/server/configuration/prometheus-java-agent/jmx-prometheus-config.yaml
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          exec:
+            command:
+            - ./status
+          initialDelaySeconds: 10
+          periodSeconds: 30
+      volumes:
+        - name: prometheus-java-agent
+          configMap:
+            name: prometheus-java-agent
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecret }}

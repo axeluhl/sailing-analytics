@@ -58,7 +58,9 @@ public class WindSensorOverlay extends CanvasOverlayV3 {
             // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
             if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                transformer.drawToCanvas(getCanvas(), coordinateSystem.mapDegreeBearing(rotationDegOfWindSymbol), 1.0);
+                transformer.drawToCanvas(getCanvas(), coordinateSystem.mapDegreeBearing(rotationDegOfWindSymbol), 1.0,
+                        /* transparency based on confidence; down to 0.01 (1%) we draw fully opaque (1.0); below that we'll fade out */
+                        windDTO.confidence == null ? null : Math.min(1.0, 1000*windDTO.confidence));
                 setLatLngPosition(coordinateSystem.toLatLng(windDTO.position));
                 Point sensorPositionInPx = mapProjection.fromLatLngToDivPixel(getLatLngPosition());
                 setCanvasPosition(sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);

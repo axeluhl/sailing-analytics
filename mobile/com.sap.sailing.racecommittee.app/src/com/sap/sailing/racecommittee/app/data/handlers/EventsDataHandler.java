@@ -12,18 +12,22 @@ public class EventsDataHandler extends DataHandler<Collection<EventBase>> {
     }
 
     @Override
-    public void onResult(Collection<EventBase> data) {
+    public void onResult(Collection<EventBase> data, boolean isCached) {
         manager.addEvents(data);
     }
-    
+
     @Override
     public boolean hasCachedResults() {
         return !manager.getDataStore().getEvents().isEmpty();
     }
-    
+
     @Override
     public Collection<EventBase> getCachedResults() {
         return manager.getDataStore().getEvents();
     }
 
+    @Override
+    public void clearCache() {
+        manager.getDataStore().getEvents().clear();
+    }
 }

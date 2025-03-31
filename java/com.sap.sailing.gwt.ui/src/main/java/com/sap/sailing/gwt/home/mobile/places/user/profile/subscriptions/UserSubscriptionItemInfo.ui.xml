@@ -1,0 +1,24 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
+             xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .image {
+	       height: 1em !important;
+        }
+    </ui:style>
+    <div class="{res.mainCss.spacermarginbottomsmall} {style.container}">
+        <span ui:field="labelUi" class="{style.label}"/>
+        <span ui:field="valueUi"/>
+        <img ui:field="imageUi" class="{style.image}" />
+    </div>
+</ui:UiBinder> 

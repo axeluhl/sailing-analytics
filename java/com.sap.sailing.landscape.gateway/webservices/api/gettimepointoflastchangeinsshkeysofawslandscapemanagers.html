@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API</h1>
+<h2>URL: /landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers</h2>
+
+<b>Description:</b>
+ <p>Obtains the time point when the last change in the set of users having the permission <tt>LANDSCAPE:MANAGE:AWS</tt> was
+    observed. The earliest time point that may be reported is the time this bundle has been activated.
+ </p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory form parameters:</td>
+        <td>
+            None
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><pre>curl -H 'Authorization: Bearer RvGK+D73k9KjeuDu+Bx17/3clLJHD7Ff+NCLeu9YDOQ=' -X GET https://security-service.sapsailing.com/landscape/api/landscape/get_time_point_of_last_change_in_ssh_keys_of_aws_landscape_managers
+           </pre><br>
+        produces a 200 status code with output
+        <pre>
+              {
+                  "timePointOfLastChangeOfSetOfLandscapeManagers-millis": 1645220854886,
+                  "timePointOfLastChangeOfSetOfLandscapeManagers-iso": "2022-02-18T21:47:34.047Z"
+              }
+        ]</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

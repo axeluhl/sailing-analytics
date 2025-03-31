@@ -1,0 +1,16 @@
+package com.sap.sailing.gwt.home.desktop.places.events;
+
+import com.google.gwt.user.client.ui.Composite;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
+
+public abstract class AbstractEventsView extends Composite implements EventsView {
+    protected EventListViewDTO eventListView;
+    
+    @Override
+    public void setEvents(EventListViewDTO eventListView) {
+        this.eventListView = eventListView;
+        updateEventsUI();
+    }
+
+    protected abstract void updateEventsUI();
+}

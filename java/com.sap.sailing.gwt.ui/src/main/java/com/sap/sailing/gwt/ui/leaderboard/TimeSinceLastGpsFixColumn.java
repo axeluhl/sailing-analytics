@@ -1,17 +1,18 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
-public class TimeSinceLastGpsFixColumn extends FormattedDoubleDetailTypeColumn {
+public class TimeSinceLastGpsFixColumn extends FormattedDoubleLeaderboardRowDTODetailTypeColumn {
 
     public TimeSinceLastGpsFixColumn(DetailType detailType,
-            com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField<Double> field, String headerStyle,
+            DataExtractor<Double, LeaderboardRowDTO> field, String headerStyle,
             String columnStyle, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(detailType, field, headerStyle, columnStyle, displayedLeaderboardRowsProvider);
     }
 
     @Override
-    protected MinMaxRenderer createMinMaxRenderer() {
+    protected MinMaxRenderer<LeaderboardRowDTO> createMinMaxRenderer() {
         return new TrackingQualityMinMaxRenderer(this, getComparator());
     }
 

@@ -1,0 +1,122 @@
+#!/bin/sh
+ANDROID_RELEASE_BRANCH=hyperspace
+RELEASE_BRANCHES="release-race-manager-app release-buoy-pinger-app"
+APP_DIRS="mobile/com.sap.sailing.android.tracking.app/ mobile/com.sap.sailing.android.buoy.positioning.app/ mobile/com.sap.sailing.racecommittee.app/"
+APP_GRADLE_PROPERTIES="gradle.properties"
+FILES2SIGN=files2sign.json
+VERSION_FILE=cfg/VERSION
+GIT_REMOTE=githubsapsailing
+
+OPTION_UPDATE_ANDROID_VERSIONS=1
+OPTION_PERFORM_GIT_OPERATIONS=1
+
+usage() {
+  echo "$0 [-m -g -r <git-remote>]"
+  echo ""
+  echo "See more usage details in the sapsailing.com wiki at:"
+  echo "  https://wiki.sapsailing.com/wiki/info/landscape/building-and-deploying#building-deploying-stopping-and-starting-server-instances"
+  echo "-m Disable upgrading the versionCode and versionName"
+  echo "-g Disable the final git push operation to ${RELEASE_BRANCHES}"
+  echo "-r The git remote; defaults to origin"
+  exit 2
+}
+
+# Read and update versionCode in build.gradle
+# Based on new versionCode the versionNme will also be updated.
+increment_version_code_and_set_version_name() {
+  DIR=$1
+  GRADLE_PROPERTIES_FILE=$DIR$APP_GRADLE_PROPERTIES
+  echo "Incrementing version code and version name for $DIR"
+  
+  OLD_VERSION_CODE=`grep 'appVersionCode=[0-9]*' $GRADLE_PROPERTIES_FILE | sed -e 's/^.*appVersionCode=\([0-9]*\).*$/\1/'`
+  NEW_VERSION_CODE=$(($OLD_VERSION_CODE + 1))
+  NEW_VERSION_NAME=1.4.$NEW_VERSION_CODE
+
+  echo $DIR: OLD_VERSION_CODE is $OLD_VERSION_CODE, NEW_VERSION_CODE is $NEW_VERSION_CODE
+  echo $DIR: Using NEW_VERSION_NAME=\"$NEW_VERSION_NAME\"
+  sed --in-place -e "s/appVersionCode=$OLD_VERSION_CODE/appVersionCode=$NEW_VERSION_CODE/" "$GRADLE_PROPERTIES_FILE"
+  sed --in-place -e "s/appVersionName=\([^\"]*\)/appVersionName=$NEW_VERSION_NAME/" "$GRADLE_PROPERTIES_FILE"
+}
+
+# Update files2sign.json with new updated version name 
+# replace, e.g. "version": "1.4.xy" with new one
+update_files2sign() {
+  echo "Update files2sign.json with new versionName $NEW_VERSION_NAME"
+  for f in $( find . -name "${FILES2SIGN}" ); do
+    OLD_VERSION_NAMES=`grep '"version": "1.4.[0-9]*"' "${f}" | sed -e 's/^.*\"version\": \"\(1.4.[0-9]*\)\".*$/\1/'`
+    for OLD_VERSION_NAME in $OLD_VERSION_NAMES; do
+      sed --in-place -e "s/\"version\": \"$OLD_VERSION_NAME\"/\"version\": \"$NEW_VERSION_NAME\"/" "${f}"
+    done
+  done
+}
+
+# Update the cfg/VERSION file with new updated version name
+update_version_file() {
+  echo "Update cfg/VERSION with new versionName $NEW_VERSION_NAME"
+  echo $NEW_VERSION_NAME > "$VERSION_FILE"
+}
+
+# Parse the first argument for the help option
+while [ "$1" != "" ]
+do
+  case $1 in
+    -h | --help) usage;;
+    *) break;;
+  esac
+done
+
+# Parse the options
+options="mgr:"
+while getopts "$options" option
+do
+  case $option in
+    m) OPTION_UPDATE_ANDROID_VERSIONS=0;;
+    g) OPTION_PERFORM_GIT_OPERATIONS=0;;
+    r) GIT_REMOTE=$OPTARG;;
+    \?) exit 4;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# change directory to the git root, assuming this script is in the configuration/ subfolder
+GIT_DIR="`dirname \"$0\"`/.."
+echo GIT_DIR: $GIT_DIR
+cd "$GIT_DIR"
+
+git fetch $GIT_REMOTE
+git checkout $ANDROID_RELEASE_BRANCH
+git merge -m "Merging $GIT_REMOTE/$ANDROID_RELEASE_BRANCH" $GIT_REMOTE/$ANDROID_RELEASE_BRANCH
+if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
+  git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:$ANDROID_RELEASE_BRANCH
+fi
+
+# Patch the build.gradle files to upgrade the versionCode sequential counter relevant for the PlayStore
+# and the versionName which is what the user sees and which we expect to follow a major.minor version scheme,
+# where this script increments the minor version by one
+if [ "$OPTION_UPDATE_ANDROID_VERSIONS" = "1" ]; then
+  for m in $APP_DIRS; do
+    increment_version_code_and_set_version_name $m
+  done
+  update_files2sign
+  update_version_file
+fi
+
+# Now commit the version changes and amend the commit using the change request ID tag:
+git commit -a -m "Upgraded Android apps from version $OLD_VERSION_NAME to $NEW_VERSION_NAME"
+git commit --amend -m "`git show -s --pretty=format:%s%n%n%b`"
+for RELEASE_BRANCH in ${RELEASE_BRANCHES}; do
+  git checkout ${RELEASE_BRANCH}
+  echo "Merging version number changes into release branch ${RELEASE_BRANCH}"
+  git merge -m "Merging version update from ${ANDROID_RELEASE_BRANCH} into ${RELEASE_BRANCH}" ${ANDROID_RELEASE_BRANCH}
+  if [ "$OPTION_PERFORM_GIT_OPERATIONS" = "1" ]; then
+    git push $GIT_REMOTE ${RELEASE_BRANCH}:${RELEASE_BRANCH}
+  fi
+done
+
+echo "Launch a stage build here: https://xmake-mobile-dev.wdf.sap.corp/job/sapsailingprogram/job/sapsailingcapture.android-SP-REL-common_directshipment/"
+echo "using $RELEASE_BRANCH as the Treeish to build."
+echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases (remove the saprole parameter from the URL)"
+echo "Copy the description of, e.g., https://support.wdf.sap.corp/sap/support/message/1970099762 to start with and adjust versions and commit IDs."
+echo "Make sure you have your MoMa stuff updated, particularly the Release Notes section."
+echo "See, e.g., https://moma.mo.sap.corp/#/editAssemblyData/189"
+echo "Then wait for feedback on the release build being ready for smoke testing, do the smoke tests and report back in BCP. That's it :-)"

@@ -1,5 +1,12 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,13 +16,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class LeaderboardFragment extends BaseFragment {
 

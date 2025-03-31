@@ -15,8 +15,8 @@ import com.sap.sailing.domain.tractracadapter.impl.TracTracRaceTrackerImpl;
  * @author Frederik Petersen
  *
  */
+@FunctionalInterface
 public interface LoadingQueueDoneCallBack {
-
     /**
      * Callback method
      * See {@link AbstractReceiverWithQueue} and {@link TracTracRaceTrackerImpl} for example usage.
@@ -24,5 +24,4 @@ public interface LoadingQueueDoneCallBack {
      * @param receiver Receiver that handled the marked event.
      */
     void loadingQueueDone(Receiver receiver);
-    
 }

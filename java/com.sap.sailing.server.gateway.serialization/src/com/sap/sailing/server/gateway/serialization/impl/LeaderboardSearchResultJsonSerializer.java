@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
@@ -10,11 +11,11 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<LeaderboardSearchResult> {
     public static final String FIELD_SERVER_BASE_URL = "serverBaseURL";
-    public static final String FIELD_EVENT = "event";
+    public static final String FIELD_EVENTS = "events";
     public static final String FIELD_LEADERBOARD = "leaderboard";
     public static final String FIELD_LEADERBOARD_NAME = "name";
     public static final String FIELD_LEADERBOARD_DISPLAY_NAME = "displayName";
@@ -25,7 +26,8 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
     private final JsonSerializer<EventBase> eventBaseJsonSerializer;
     private final JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer;
 
-    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer, JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer) {
+    public LeaderboardSearchResultJsonSerializer(JsonSerializer<EventBase> eventBaseJsonSerializer,
+            JsonSerializer<LeaderboardGroupBase> leaderboardGroupBaseJsonSerializer) {
         this.eventBaseJsonSerializer = eventBaseJsonSerializer;
         this.leaderboardGroupBaseJsonSerializer = leaderboardGroupBaseJsonSerializer;
     }
@@ -33,10 +35,11 @@ public class LeaderboardSearchResultJsonSerializer implements JsonSerializer<Lea
     @Override
     public JSONObject serialize(LeaderboardSearchResult leaderboardSearchResult) {
         JSONObject result = new JSONObject();
-        result.put(
-                FIELD_EVENT,
-                leaderboardSearchResult.getEvent() == null ? null : eventBaseJsonSerializer
-                        .serialize(leaderboardSearchResult.getEvent()));
+        JSONArray eventsJson = new JSONArray();
+        for (final Event e : leaderboardSearchResult.getEvents()) {
+            eventsJson.add(eventBaseJsonSerializer.serialize(e));
+        }
+        result.put(FIELD_EVENTS, eventsJson);
         JSONObject leaderboardJson = new JSONObject();
         result.put(FIELD_LEADERBOARD, leaderboardJson);
         Leaderboard leaderboard = leaderboardSearchResult.getLeaderboard();

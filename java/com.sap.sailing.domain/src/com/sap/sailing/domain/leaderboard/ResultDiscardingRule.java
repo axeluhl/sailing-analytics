@@ -2,9 +2,11 @@ package com.sap.sailing.domain.leaderboard;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -21,5 +23,17 @@ public interface ResultDiscardingRule extends Serializable {
      * columns to discard. It affects the count of races. Only columns contained can be part of the result.
      */
     Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
-            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint);
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint, ScoringScheme scoringScheme);
+
+    default Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            ScoringScheme scoringScheme, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint,
+                scoringScheme, raceColumn->leaderboard.getTotalPoints(competitor, raceColumn, timePoint, cache), cache);
+    }
+
+    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard,
+            Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint,
+            ScoringScheme scoringScheme,
+            Function<RaceColumn, Double> totalPointsSupplier, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache);
 }

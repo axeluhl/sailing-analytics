@@ -10,10 +10,12 @@ public class SwissTimingReplayRaceDTO extends AbstractRaceRecordDTO {
     public String boat_class;
     public Date startTime;
     public String link;
+    public String swissTimingUrl;
 
     public SwissTimingReplayRaceDTO() {}
     
-    public SwissTimingReplayRaceDTO(String flight_number, String race_id, String rsc, String name, String boat_class, Date startTime, String link, boolean hasRememberedRegatta) {
+    public SwissTimingReplayRaceDTO(String flight_number, String race_id, String rsc, String name, String boat_class,
+            Date startTime, String link, boolean hasRememberedRegatta, String swissTimingUrl) {
         super(name, hasRememberedRegatta);
         this.flight_number = flight_number;
         this.race_id = race_id;
@@ -21,6 +23,7 @@ public class SwissTimingReplayRaceDTO extends AbstractRaceRecordDTO {
         this.boat_class = boat_class;
         this.startTime = startTime;
         this.link = link;
+        this.swissTimingUrl = swissTimingUrl;
     }
     
     @Override

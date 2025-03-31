@@ -8,16 +8,22 @@ public class WindSourceTypeFormatter {
         switch (windSourceType) {
         case COMBINED:
             return stringMessages.combinedWindSourceTypeName();
+        case LEG_MIDDLE:
+            return stringMessages.legMiddleWindSourceTypeName();
         case COURSE_BASED:
             return stringMessages.courseBasedWindSourceTypeName();
         case TRACK_BASED_ESTIMATION:
             return stringMessages.trackBasedEstimationWindSourceTypeName();
+        case MANEUVER_BASED_ESTIMATION:
+            return stringMessages.maneuverBasedEstimationWindSourceTypeName();
         case EXPEDITION:
             return stringMessages.windSensorWindSourceTypeName();
         case WEB:
             return stringMessages.webWindSourceTypeName();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeName();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeName();
         }
         return null;
     }
@@ -26,16 +32,22 @@ public class WindSourceTypeFormatter {
         switch (windSourceType) {
         case COMBINED:
             return stringMessages.combinedWindSourceTypeTooltip();
+        case LEG_MIDDLE:
+            return stringMessages.legMiddleWindSourceTypeTooltip();
         case COURSE_BASED:
             return stringMessages.courseBasedWindSourceTypeTooltip();
         case TRACK_BASED_ESTIMATION:
             return stringMessages.trackBasedEstimationWindSourceTypeTooltip();
+        case MANEUVER_BASED_ESTIMATION:
+            return stringMessages.maneuverBasedEstimationWindSourceTypeTooltip();
         case EXPEDITION:
             return stringMessages.windSensorWindSourceTypeTooltip();
         case WEB:
             return stringMessages.webWindSourceTypeTooltip();
         case RACECOMMITTEE:
             return stringMessages.raceCommitteeWindSourceTypeTooltip();
+        case WINDFINDER:
+            return stringMessages.windFinderWindSourceTypeTooltip();
         }
         return null;
     }

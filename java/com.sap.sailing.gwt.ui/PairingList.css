@@ -1,0 +1,154 @@
+/** Add css rules here for your application. */
+.clear {
+  clear: both;
+  font-size: 1px;
+  height: 0px;
+  line-height: 0px;
+  margin: -1px 0 0;
+  width: 100%; }
+
+.cover {
+  left: -1000px;
+  overflow: hidden;
+  position: absolute;
+  top: -1000px; }
+
+html {
+  font-size: 15px;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+    background: #fff;
+    font-family: 'Open Sans', Arial, Verdana, sans-serif;
+    line-height: 1;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+  }
+
+/** Example rules used by the template application (remove for your app) */
+h1 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #777777;
+  margin: 40px 0px 70px;
+  text-align: center;
+  }
+
+table {
+  border-collapse: separate; }
+
+
+.refreshAndSettings {
+  background: #f2f2f2;
+  border-bottom: 2px solid #fff;
+  border-top: 2px solid #fff;
+  height: 30px; }
+
+.refreshAndSettings table td {
+    padding: 0 10px 0 0;}
+
+.refreshAndSettings table table td{
+    padding: 0 0 0 0;}
+
+input.magnifier{
+    display: block;
+    margin: 3px auto 0 auto !important;
+}
+
+body, table td, select, button {
+    font-family: 'Open Sans', Arial, Verdana, sans-serif;
+    font-size: 14px;
+}
+
+.errorLabel {
+    color: #FF0000;
+}
+
+.abstractChartPanel-importantMessageOfChart {
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    height: 70px;
+    margin: 0 auto;
+    padding: 49px 0 0 80px;
+    width: 300px;
+    color: #7c7c7c;
+    background: url(images/important-message.png) left center no-repeat;
+}
+
+.LeaderboardHeader {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+    font-family: 'Open Sans', Arial, Verdana, sans-serif;
+    font-size: 18px;
+    color: #fff;
+    margin-top: 22px;
+}
+
+.leaderboardHeading {
+    font-size: 16px;
+    font-family: 'Open Sans', Arial, Verdana, sans-serif;
+    font-weight: bold;
+}
+
+.gwt-DialogBox {
+    z-index: 20;
+}
+
+.bold {
+    font-family: 'Open Sans Condensed', sans-serif;
+    font-weight: bold;
+}
+
+.trackingQuality-circle {
+  width: 8px;
+  height: 8px;
+  -moz-border-radius-topleft: 50%;
+  -webkit-border-top-left-radius: 50%;
+  -o-border-top-left-radius: 50%;
+  -ms-border-top-left-radius: 50%;
+  border-top-left-radius: 50%;
+  -moz-border-radius-topright: 50%;
+  -webkit-border-top-right-radius: 50%;
+  -o-border-top-right-radius: 50%;
+  -ms-border-top-right-radius: 50%;
+  border-top-right-radius: 50%;
+  -moz-border-radius-bottomleft: 50%;
+  -webkit-border-bottom-left-radius: 50%;
+  -o-border-bottom-left-radius: 50%;
+  -ms-border-bottom-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  -moz-border-radius-bottomright: 50%;
+  -webkit-border-bottom-right-radius: 50%;
+  -o-border-bottom-right-radius: 50%;
+  -ms-border-bottom-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+  float: left;
+}
+
+.circleYellow {
+  background: #fbba00;
+}
+
+.circleGreen {
+  background: #8ab54e;
+}
+
+.circleRed {
+  background: #f01010;
+}
+
+.busyIndicator-Simple {
+    margin-top: 7px;    
+}
+
+.busyIndicator-Circle {
+}

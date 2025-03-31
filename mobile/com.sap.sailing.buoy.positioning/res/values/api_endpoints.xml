@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="preference_server_gps_fixes_post_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard_name}/marks/{mark-id}/gps_fixes</string>
-    <string name="preference_server_marks_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard_name}/marks?</string>
-    <string name="preference_server_leaderboard_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboard_name}</string>
-</resources>

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.state;
 
-
 public interface RaceStateChangedListener {
     
     void onRacingProcedureChanged(ReadonlyRaceState state);
@@ -14,9 +13,10 @@ public interface RaceStateChangedListener {
      * TODO: We need to recheck the AbortFinder to enable these interface methods
      * void onAborted(RaceState2 state);
      * void onGeneralRecall(RaceState2 state);*/
-    void onFinishingPositioningsChanged(ReadonlyRaceState state);
+    void onFinishingPositionsChanged(ReadonlyRaceState state);
     void onFinishingPositionsConfirmed(ReadonlyRaceState state);
     void onCourseDesignChanged(ReadonlyRaceState state);
     void onWindFixChanged(ReadonlyRaceState state);
-
+    void onTagEventsChanged(ReadonlyRaceState state);
+    void onResultsAreOfficialChanged(ReadonlyRaceState state);
 }

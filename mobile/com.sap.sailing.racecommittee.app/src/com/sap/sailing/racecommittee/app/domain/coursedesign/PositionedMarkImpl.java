@@ -1,12 +1,12 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import com.sap.sailing.domain.base.impl.MarkImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
     private static final long serialVersionUID = -7903960088124343841L;
@@ -30,7 +30,7 @@ public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
     public Bearing getBearingFrom(Position other) {
         double lat1R = other.getLatRad();
         double lat2R = getPosition().getLatRad();
-        double dLngR = getPosition().getLngRad()-other.getLngRad();
+        double dLngR = getPosition().getLngRad() - other.getLngRad();
         double a = Math.sin(dLngR) * Math.cos(lat2R);
         double b = Math.cos(lat1R) * Math.sin(lat2R) - Math.sin(lat1R) * Math.cos(lat2R) * Math.cos(dLngR);
         double bearingD = Math.toDegrees(Math.atan2(a, b));
@@ -47,8 +47,8 @@ public class PositionedMarkImpl extends MarkImpl implements PositionedMark {
         double lat2R = other.getLatRad();
         double dLatR = Math.abs(lat2R - lat1R);
         double dLngR = Math.abs(other.getLngRad() - getPosition().getLngRad());
-        double a = Math.sin(dLatR / 2) * Math.sin(dLatR / 2) + Math.cos(lat1R) * Math.cos(lat2R) * Math.sin(dLngR / 2)
-                * Math.sin(dLngR / 2);
+        double a = Math.sin(dLatR / 2) * Math.sin(dLatR / 2)
+                + Math.cos(lat1R) * Math.cos(lat2R) * Math.sin(dLngR / 2) * Math.sin(dLngR / 2);
         double dR = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return new MeterDistance(earthRadiusInMeters).scale(dR);
     }

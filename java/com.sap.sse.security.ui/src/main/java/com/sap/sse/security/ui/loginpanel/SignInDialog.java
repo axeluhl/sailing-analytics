@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog;
 import com.sap.sse.security.ui.client.component.ForgotPasswordDialog;
@@ -16,8 +16,8 @@ import com.sap.sse.security.ui.client.shared.oauthlogin.OAuthLogin;
 public class SignInDialog extends AbstractUserDialog {
     private final UserService userService;
     
-    public SignInDialog(StringMessages stringMessages, UserManagementServiceAsync userManagementService, UserService userService, DialogCallback<UserData> callback) {
-        super(stringMessages, stringMessages.signIn(), stringMessages.signIn(), userManagementService, /* user */ null, /* validator */ null, callback);
+    public SignInDialog(StringMessages stringMessages, UserManagementWriteServiceAsync userManagementWriteService, UserService userService, DialogCallback<UserData> callback) {
+        super(stringMessages, stringMessages.signIn(), stringMessages.signIn(), userManagementWriteService, /* user */ null, /* validator */ null, callback);
         this.userService = userService;
     }
 
@@ -28,13 +28,13 @@ public class SignInDialog extends AbstractUserDialog {
         result.setWidget(0, 1, getNameBox());
         result.setWidget(1, 0, new Label(getStringMessages().password()));
         result.setWidget(1, 1, getPwBox());
-        result.setWidget(2, 0, new OAuthLogin(getUserManagementService()));
+        result.setWidget(2, 0, new OAuthLogin(userService.getUserManagementWriteService()));
         Anchor forgotPassword = new Anchor(getStringMessages().forgotPassword());
         result.setWidget(3, 0, forgotPassword);
         forgotPassword.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new ForgotPasswordDialog(StringMessages.INSTANCE, getUserManagementService(), userService.getCurrentUser()).show();
+                new ForgotPasswordDialog(StringMessages.INSTANCE, userService.getUserManagementWriteService(), userService.getCurrentUser()).show();
             }
         });
         return result;

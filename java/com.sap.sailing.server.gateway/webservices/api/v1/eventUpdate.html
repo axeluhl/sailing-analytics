@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/events/{event-id}/update</h2>
+
+<b>Description:</b>
+<p>Updates an existing event. Individual attributes of the Event object can be updated by providing a
+corresponding form parameter in the stream.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>empty</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>none; when no parameters are provided the call is a no-op</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>eventname name of the event</div>
+			<div>eventdescription the event description text</div>
+			<div>startdate the event start date in ISO format (e.g., 2017-08-17T10:00:00+0200)</div>
+			<div>startdateasmillis (alternative to startdate) the event start date in milliseconds since the epoch (Unix time)</div>
+			<div>enddate the event end date in ISO format (e.g., 2017-08-19T20:00:00+0200)</div>
+			<div>enddateasmillis (alternative to enddate) the event end date in milliseconds since the epoch (Unix time)</div>
+			<td>venuename or venuelat/venuelng can be provided, as follows
+				<div>venuename the name of the venue; if not provided, venuelat and venuelng can be used, and the name of
+				     the town nearest to the coordinates will be used as a venue name then</div>
+				<div>venuelat decimal degrees; can be provided instead of a venuename, together with venuelng encoding the location of the event</div>
+				<div>venuelng decimal degrees; can be provided instead of a venuename, together with venuelat encoding the location of the event</div>
+			</td>
+			<div>ispublic a boolean value, true/false, telling whether the event shall be public</div>
+			<div>officialwebsiteurl URL of the official web site</div>
+			<div>baseurl event base URL; will be used in e-mails sent out, e.g., for registration; defaults to the base URL of this request</div>
+			<div>leaderboardgroupids IDs of the leaderboard groups to add to the new event; to clear the list, provide a single
+			     empty occurrence as in <pre>leaderboardgroupids=</pre>. If the parameter is not mentioned once then the leaderboard
+			     groups are left unchanged. To provide multiple leaderboard groups, repeat the parameter multiple times, as in
+			     <pre>leaderboardgroupids=57ecd43f-1e77-4e98-a245-2ec51e95f58b&leaderboardgroupids=158e326e-f831-45b2-a1c0-05926d548513</pre></div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://dev.sapsailing.com/sailingserver/api/v1/events/createEvent"<br>
+		produces output<pre>
+		{
+			"eventid":cb8d7c69-fd82-45f6-a0a3-2920eb3307cb,
+			"eventname":"Session admin 24-08-2017 16:46:40",
+			"eventstartdate":1503586000961,
+			"eventenddate":1504190800961,
+			"leaderboardgroupid":99859e24-2fe0-4c4e-bcbb-2df272a26c2c,
+			"regatta":"Session admin 24-08-2017 16:46:40",
+			"leaderboard":"Session admin 24-08-2017 16:46:40"
+		}
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

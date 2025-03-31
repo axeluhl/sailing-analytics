@@ -7,8 +7,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.ArrayListNavigableSet;
-import com.sap.sse.util.impl.UnmodifiableNavigableSet;
+import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
+import com.sap.sse.shared.util.impl.UnmodifiableNavigableSet;
 
 /**
  * The only "raw" fix produced by this wind track implementation is based on the course layout of the tracked race to

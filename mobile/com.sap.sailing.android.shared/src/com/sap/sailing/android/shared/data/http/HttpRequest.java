@@ -3,6 +3,7 @@ package com.sap.sailing.android.shared.data.http;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,18 +11,19 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.http.HttpStatus;
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
 
 import android.content.Context;
-
-import com.sap.sailing.android.shared.logging.ExLog;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 public abstract class HttpRequest {
 
     private final static String TAG = HttpRequest.class.getName();
 
-    private final static int lowestOkCode = HttpStatus.SC_OK;
-    private final static int lowestRedirectCode = HttpStatus.SC_MULTIPLE_CHOICES;
+    private final static int lowestOkCode = HttpURLConnection.HTTP_OK;
+    private final static int lowestRedirectCode = HttpURLConnection.HTTP_MULT_CHOICE;
 
     private static void validateHttpResponseCode(HttpURLConnection connection) throws IOException {
         int statusCode = connection.getResponseCode();
@@ -31,7 +33,7 @@ public abstract class HttpRequest {
             }
             throw new IOException(String.format("Request response had error code %d.", statusCode));
         }
-        throw new IOException(String.format("Request response had no valid status."));
+        throw new IOException("Request response had no valid status.");
     }
 
     public interface HttpRequestProgressListener {
@@ -42,16 +44,18 @@ public abstract class HttpRequest {
     private final URL url;
     private final Context context;
     private boolean isCancelled;
+    protected SharedPreferences pref;
 
-    public HttpRequest(URL url, Context context) {
-        this(url, null, context);
+    public HttpRequest(Context context, URL url) {
+        this(context, url, null);
     }
 
-    public HttpRequest(URL url, HttpRequestProgressListener listener, Context context) {
+    public HttpRequest(Context context, URL url, HttpRequestProgressListener listener) {
         this.url = url;
         this.listener = listener;
         this.isCancelled = false;
         this.context = context;
+        this.pref = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public String getUrlAsString() {
@@ -67,8 +71,7 @@ public abstract class HttpRequest {
     }
 
     /**
-     * Returns a copied {@link InputStream} of the server's response.
-     * You must close this stream when done.
+     * Returns a copied {@link InputStream} of the server's response. You must close this stream when done.
      */
     public InputStream execute() throws IOException {
         ExLog.i(context, TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
@@ -78,37 +81,43 @@ public abstract class HttpRequest {
         connection.setConnectTimeout(5000);
         connection.setReadTimeout(15000);
         connection.setRequestProperty("connection", "close");
+        connection.setRequestProperty("Accept-Encoding", "");
+
+        String accessToken = pref.getString(context.getString(R.string.preference_access_token_key), null);
+        if (accessToken != null) {
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+        }
 
         BufferedInputStream responseInputStream = null;
         try {
             try {
                 responseInputStream = doRequest(connection);
             } catch (FileNotFoundException fnfe) {
+                if (HttpURLConnection.HTTP_UNAUTHORIZED == connection.getResponseCode()) {
+                    throw new UnauthorizedException(connection.getHeaderField("WWW-Authenticate"));
+                }
                 // 404 errors...
-                throw new FileNotFoundException(String.format(
-                        "(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.", this.hashCode(),
+                throw new FileNotFoundException(context.getString(R.string.http_request_exception, this.hashCode(),
                         fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
             }
 
             validateHttpResponseCode(connection);
 
             InputStream copiedResponseInputStream = readAndCopyResponse(connection, responseInputStream);
-            
+
             if (copiedResponseInputStream != null) {
-                ExLog.i(context, TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
+                ExLog.i(context, TAG, context.getString(R.string.http_request_executed, this.hashCode()));
             } else {
-                ExLog.i(context, TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
+                ExLog.i(context, TAG, context.getString(R.string.http_request_aborted, this.hashCode()));
             }
-            
+
             connection.disconnect();
             return copiedResponseInputStream;
         } catch (IOException e) {
-            ExLog.i(context, TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
+            ExLog.i(context, TAG, context.getString(R.string.http_request_failed, this.hashCode()));
             throw e;
         } finally {
-            if (responseInputStream != null) {
-                responseInputStream.close();
-            }
+            safeClose(responseInputStream);
         }
     }
 
@@ -139,6 +148,16 @@ public abstract class HttpRequest {
             outputStream.write(data, 0, count);
         }
         return true;
+    }
+
+    protected void safeClose(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                ExLog.ex(context, TAG, e);
+            }
+        }
     }
 
     protected abstract BufferedInputStream doRequest(HttpURLConnection connection) throws IOException;

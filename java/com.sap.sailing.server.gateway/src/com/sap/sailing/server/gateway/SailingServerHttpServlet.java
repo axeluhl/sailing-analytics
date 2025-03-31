@@ -10,14 +10,15 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.DateParser;
 
 public abstract class SailingServerHttpServlet extends HttpServlet {
@@ -37,7 +38,9 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
 
     private BundleContext context;
     
-    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
+    
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     private TypeBasedServiceFinderFactory serviceFinderFactory;
 
@@ -47,11 +50,12 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     }
 
     @Override
-    public void init(ServletConfig config) throws ServletException {  
+    public void init(ServletConfig config) throws ServletException {
        super.init(config);  
        context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);  
-       racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
-       racingEventServiceTracker.open();
+       racingEventServiceTracker = FullyInitializedReplicableTracker.createAndOpen(context, RacingEventService.class);
+       securityServiceTracker = new ServiceTracker<SecurityService, SecurityService>(context, SecurityService.class.getName(), null);
+       securityServiceTracker.open();
        tracTracAdapterFactoryTracker = new ServiceTracker<TracTracAdapterFactory, TracTracAdapterFactory>(context, TracTracAdapterFactory.class.getName(), null);
        tracTracAdapterFactoryTracker.open();
        serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
@@ -71,6 +75,10 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
     
     public RacingEventService getService() {
         return racingEventServiceTracker.getService();
+    }
+    
+    public SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
     }
     
     public TracTracAdapterFactory getTracTracAdapterFactory() {
@@ -124,16 +132,6 @@ public abstract class SailingServerHttpServlet extends HttpServlet {
             }
         }
         return timePoint;
-    }
-
-    protected TrackedRace getTrackedRace(HttpServletRequest req) {
-        Regatta regatta = getRegatta(req);
-        RaceDefinition race = getRaceDefinition(req);
-        TrackedRace trackedRace = null;
-        if (regatta != null && race != null) {
-            trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-        }
-        return trackedRace;
     }
 
     protected TypeBasedServiceFinderFactory getServiceFinderFactory() {

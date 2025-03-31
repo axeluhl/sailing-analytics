@@ -1,24 +1,25 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class AutoUpdater {
 
@@ -35,12 +36,14 @@ public class AutoUpdater {
     }
 
     public void checkForUpdate(boolean forceUpdate) {
-        String serverUrl = preferences.getServerBaseURL();
-        try {
-            new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
-        } catch (MalformedURLException e) {
-            // ServerBaseURL in preferences is defect? App will crash...
-            ExLog.ex(context, TAG, e);
+        if (AppUtils.with(context).isSideLoaded()) {
+            String serverUrl = preferences.getServerBaseURL();
+            try {
+                new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
+            } catch (MalformedURLException e) {
+                // ServerBaseURL in preferences is defect? App will crash...
+                ExLog.ex(context, TAG, e);
+            }
         }
     }
 
@@ -70,8 +73,8 @@ public class AutoUpdater {
         OnClickListener okListener = new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(context, SettingsActivity.class);
-                intent.putExtra(SettingsActivity.EXTRA_SHOW_FRAGMENT, GeneralPreferenceFragment.class.getName());
+                Intent intent = new Intent(context, PreferenceActivity.class);
+                intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, GeneralPreferenceFragment.class.getName());
                 context.startActivity(intent);
                 dialog.dismiss();
             }
@@ -84,15 +87,13 @@ public class AutoUpdater {
             }
         };
 
-        builder.setTitle(R.string.auto_update_completed)
-                .setMessage(
-                        R.string.auto_update_completed_text)
+        builder.setTitle(R.string.auto_update_completed).setMessage(R.string.auto_update_completed_text)
                 .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
                 .setNegativeButton(android.R.string.cancel, cancelListener).create().show();
     }
 
     private void setWasUpdated(SharedPreferences updatedPreferences, boolean wasUpdated) {
-        updatedPreferences.edit().putBoolean(HIDDEN_PREFERENCE_UPDATED_FLAG, wasUpdated).commit();
+        updatedPreferences.edit().putBoolean(HIDDEN_PREFERENCE_UPDATED_FLAG, wasUpdated).apply();
     }
 
     private SharedPreferences getUpdatedPreferences() {
@@ -101,8 +102,7 @@ public class AutoUpdater {
 
     private void clearUpdateCache() {
         for (File file : FileHandlerUtils.getExternalApplicationFolder(context).listFiles()) {
-            if (file.getName().startsWith("auto-update-") &&
-                    file.getName().endsWith(".apk")) {
+            if (file.getName().startsWith("auto-update-") && file.getName().endsWith(".apk")) {
                 boolean result = file.delete();
                 if (result) {
                     ExLog.i(context, TAG, String.format("Deleted old update file %s", file.getName()));

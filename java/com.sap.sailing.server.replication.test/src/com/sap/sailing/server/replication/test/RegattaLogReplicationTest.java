@@ -1,7 +1,5 @@
 package com.sap.sailing.server.replication.test;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -24,7 +22,6 @@ public class RegattaLogReplicationTest extends
         AbstractLogReplicationTest<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> {
     
     private RegattaLogEvent regattaLogEvent;
-//    private RegattaLogEvent anotherRegattaLogEvent;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
     
     private TimePoint t(long millis) {
@@ -33,13 +30,12 @@ public class RegattaLogReplicationTest extends
     
     @Before
     public void createEvent() throws Exception {
-        final Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
-        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), author, t(0), 0, competitor);
-//        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
+        final CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("Test Competitor");
+        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitor);
     }
     
     @Test
-    public void testRegattaLogEmptyOnInitialLoad() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRegattaLogEmptyOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -51,7 +47,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRegattaLogStateOnInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRegattaLogStateOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -64,7 +60,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -77,7 +73,7 @@ public class RegattaLogReplicationTest extends
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RegattaLog masterLog = masterLeaderboard.getRegattaLog();

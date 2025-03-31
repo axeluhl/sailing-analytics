@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class PositionJsonSerializer implements JsonSerializer<Position> {
     public static final String FIELD_LATITUDE_DEG = "latitude_deg";
@@ -12,10 +12,8 @@ public class PositionJsonSerializer implements JsonSerializer<Position> {
     @Override
     public JSONObject serialize(Position position) {
         JSONObject result = new JSONObject();
-
         result.put(FIELD_LATITUDE_DEG, position.getLatDeg());
         result.put(FIELD_LONGITUDE_DEG, position.getLngDeg());
-
         return result;
     }
 }

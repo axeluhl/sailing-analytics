@@ -1,8 +1,13 @@
 package com.sap.sailing.domain.persistence.impl;
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bson.Document;
+
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -13,10 +18,10 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
     private final String regattaName;
     private final WindSource windSource;
     private final MongoObjectFactoryImpl mongoObjectFactory;
-    private final DBCollection windTracksCollection;
+    private final MongoCollection<org.bson.Document> windTracksCollection;
 
     public MongoWindListener(TrackedRace trackedRace, String regattaName, WindSource windSource,
-            MongoObjectFactory mongoObjectFactory, DB database) {
+            MongoObjectFactory mongoObjectFactory, MongoDatabase database) {
         super();
         this.regattaName = regattaName;
         this.trackedRace = trackedRace;
@@ -27,14 +32,28 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
 
     @Override
     public void windDataReceived(Wind wind) {
-        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedRace.getRace(), regattaName, windSource, wind);
-        windTracksCollection.insert(windTrackEntry);
+        final Document windTrackEntry = createWindFixDocument(wind);
+        windTracksCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertOne(windTrackEntry);
+    }
+
+    private Document createWindFixDocument(Wind wind) {
+        final Document windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedRace.getRace(), regattaName, windSource, wind);
+        return windTrackEntry;
+    }
+
+    @Override
+    public void windDataReceived(Iterable<Wind> winds) {
+        final List<Document> windTrackEntries = new ArrayList<>();
+        for (final Wind wind : winds) {
+            windTrackEntries.add(createWindFixDocument(wind));
+        }
+        windTracksCollection.withWriteConcern(WriteConcern.UNACKNOWLEDGED).insertMany(windTrackEntries);
     }
 
     @Override
     public void windDataRemoved(Wind wind) {
-        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedRace.getRace(), regattaName, windSource, wind);
-        windTracksCollection.remove(windTrackEntry);
+        Document windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedRace.getRace(), regattaName, windSource, wind);
+        windTracksCollection.deleteOne(windTrackEntry);
     }
 
     @Override

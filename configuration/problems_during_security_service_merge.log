@@ -1,0 +1,28 @@
+storemerge_abeam-training.log:SEVERE: User Masanobu from group abeam-training-server dropped. Removing from group.
+	nobu@jp.northsails.com and Kousakabeer@docomo.ne.jo
+	(e-mail sent)
+storemerge_AST.log:SEVERE: Dropping unqualified permission DATA_MINING for user elliss
+storemerge_ASVIA.log:SEVERE: User axel.schmidt.91 from group ASVIA-server dropped. Removing from group.
+	axel.sebastian.schmidt@rwth-aachen.de and Axel.sebastian.schmidt@rwth-aachen.de
+	(user added to ASVIA-server)
+storemerge_NOR.log:SEVERE: User thomas from group NOR-server dropped. Removing from group.
+	thomas@no.northsails.com and mail@t-klug.de
+	(e-mail sent)
+storemerge_NOR.log:SEVERE: User frank from group NOR-server dropped. Removing from group.
+	""  and bode.f@gmx.de
+	(users frank and "Frank Bode" added again to group NOR-server)
+storemerge_peterwagner.log:SEVERE: User peter.wagner from group peterwagner-server dropped. Removing from group.
+	ueberwagner@gmail.com and peter.wagner@segelverband.at
+	(added peter.wagner again to peterwagner-server and added role admin:peterwagner-server to user peter.wagner)
+storemerge_peterwagner.log:SEVERE: User tamara from group peterwagner-server dropped. Removing from group.
+	tamara96fischer@gmai.com and tamara96fischer@gmail.com
+	(e-mail sent)
+storemerge_schwielochsee.log:SEVERE: User rahxam from group schwielochsee-server dropped. Removing from group.
+	mh@sc-schwielochsee.de and maximilian.hartig@sap.com
+	(user added to group again and given admin:schwielochsee-server; e-mail sent)
+storemerge_SEGELZENTRUM.log:SEVERE: User max from group SEGELZENTRUM-server dropped. Removing from group.
+	maximilian.gross@sap.com and maxgross@t-online.de
+storemerge_TracTracTest.log:SEVERE: User jorge from group TracTracTest-server dropped. Removing from group.
+	maximilian.gross@sap.com and maxgross@t-online.de
+storemerge_USSAILING.log:SEVERE: User Peter from group USSAILING-server dropped. Removing from group.
+	maximilian.gross@sap.com and maxgross@t-online.de

@@ -1,0 +1,572 @@
+package com.sap.sse.datamining.ui.client.selection;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style.TextAlign;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.DataGrid;
+import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LayoutPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
+import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.SerializableSettings;
+import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.data.ReportParameterToDimensionFilterBindings;
+import com.sap.sse.datamining.shared.dto.DataMiningReportDTO;
+import com.sap.sse.datamining.shared.dto.FilterDimensionIdentifier;
+import com.sap.sse.datamining.shared.dto.FilterDimensionParameter;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.shared.impl.dto.parameters.ParameterModelListener;
+import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
+import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
+import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
+import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
+import com.sap.sse.datamining.ui.client.ReportProvider;
+import com.sap.sse.datamining.ui.client.resources.DataMiningDataGridResources;
+import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+
+/**
+ * The UI component that allows the user to select filter values for a single dimension. The component
+ * consists of a label with the dimension's name, a search toggle button that shows/hides a search/filter
+ * text box, and a "data grid" with a check box column and the dimension values that pass all retriever
+ * levels and dimension filters up to the point where this dimension filter occurs in the left-to-right
+ * arrangement of several components of this type.<p>
+ * 
+ * Items of this type are arranged by the {@link HierarchicalDimensionListFilterSelectionProvider}.
+ */
+public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements ParameterModelListener {
+
+    private static final DataMiningResources Resources = GWT.create(DataMiningResources.class);
+    private static final NaturalComparator NaturalComparator = new NaturalComparator();
+    
+    private final DataMiningServiceAsync dataMiningService;
+    private final ErrorReporter errorReporter;
+    private final DataMiningSession session;
+    private final Set<FilterSelectionChangedListener> listeners;
+
+    private final DataRetrieverChainDefinitionProvider retrieverChainProvider;
+    private final FilterSelectionProvider filterSelectionProvider;
+    
+    private final DataRetrieverLevelDTO retrieverLevel;
+    private final FunctionDTO dimension;
+    
+    private final DockLayoutPanel mainPanel;
+    private final AbstractFilterablePanel<Serializable> filterPanel;
+    private final LayoutPanel contentContainer;
+    private final SimpleBusyIndicator busyIndicator;
+
+    private final Set<Serializable> availableData;
+    private final ListDataProvider<Serializable> filteredData;
+    private final MultiSelectionModel<Serializable> selectionModel;
+    private final DataGrid<Serializable> dataGrid;
+    private final Column<Serializable, Boolean> checkboxColumn;
+     
+    /**
+     * May reference a parameter object if the filter value comes from the actual value of
+     * a parameter in the parameter model of a report. For example, if a report contains
+     * several queries that all have a dimension filter for "Regatta Name" and the user wants
+     * all those queries to be applied for the same regatta then all "Regatta Name" dimension
+     * filters in those queries would all be bound to the same {@link FilterDimensionParameter}
+     * object so that setting an actual value (a dimension filter, typically consisting of an
+     * explicit value list) will apply to all queries at the same time.<p>
+     * 
+     * May be {@code null}, meaning that the value for this dimension filter is not shared with
+     * any other filters / queries.
+     */
+    private FilterDimensionParameter parameter;
+    private ReportProvider reportProvider;
+    private final ToggleButton parameterSettingsButton;
+    private final ReportParameterToDimensionFilterBindings reportParameterBindings;
+    
+    private String searchInputToApply;
+    
+    /**
+     * Preserves user selection across model updates, e.g., due to changes in preceding filter level, leading to
+     * a different value set from which to select
+     */
+    private Iterable<? extends Serializable> selectionToBeApplied;
+    private Consumer<Iterable<String>> selectionCallback;
+    
+    /**
+     * Checked in {@link #selectionChanged(SelectionChangeEvent); if set to {@code true} then one selection
+     * change event is ignored. This can be used, e.g., to ignore one selection change event when updating
+     * the selection explicitly after a parameter bound to this filter has changed its value, or during
+     * initial binding of an already existing parameter.
+     */
+    private boolean dontPropagateNextSelectionChangeEventToBoundParameter;
+
+    public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSession session,
+            DataRetrieverChainDefinitionProvider retrieverChainProvider,
+            FilterSelectionProvider filterSelectionProvider, DataRetrieverLevelDTO retrieverLevel,
+            FunctionDTO dimension, ReportParameterToDimensionFilterBindings reportParameterBindings,
+            ReportProvider reportProvider) {
+        super(parent, componentContext);
+        this.dataMiningService = dataMiningService;
+        this.errorReporter = errorReporter;
+        this.session = session;
+        this.retrieverChainProvider = retrieverChainProvider;
+        this.filterSelectionProvider = filterSelectionProvider;
+        this.retrieverLevel = retrieverLevel;
+        this.dimension = dimension;
+        this.reportParameterBindings = reportParameterBindings;
+        this.reportProvider = reportProvider;
+        listeners = new HashSet<>();
+        DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
+        dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
+        dataGrid.setAutoHeaderRefreshDisabled(true);
+        dataGrid.setAutoFooterRefreshDisabled(true);
+        dataGrid.addStyleName("dataMiningBorderTop");
+        availableData = new HashSet<>();
+        filteredData = new ListDataProvider<Serializable>(this::elementAsString);
+        filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData, getDataMiningStringMessages()) {
+            @Override
+            public Iterable<String> getSearchableStrings(Serializable element) {
+                return Collections.singleton(elementAsString(element));
+            }
+
+            @Override
+            public AbstractCellTable<Serializable> getCellTable() {
+                return dataGrid;
+            }
+        };
+        filterPanel.setWidth("100%");
+        filterPanel.setSpacing(1);
+        filterPanel.getTextBox().setWidth("100%");
+        filteredData.addDataDisplay(dataGrid);
+        // Selection Model:
+        selectionModel = new MultiSelectionModel<>(this::elementAsString);
+        selectionModel.addSelectionChangeHandler(this::selectionChanged);
+        dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.createCustomManager(new CustomCheckboxEventTranslator()));
+        // Checkbox Column:
+        checkboxColumn = new Column<Serializable, Boolean>(new CheckboxCell(true, false)) {
+            @Override
+            public Boolean getValue(Serializable object) {
+                return selectionModel.isSelected(object);
+            }
+        };
+        dataGrid.addColumn(checkboxColumn);
+        TextColumn<Serializable> contentColumn = new TextColumn<Serializable>() {
+            @Override
+            public String getValue(Serializable element) {
+                return elementAsString(element);
+            }
+        };
+        contentColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        dataGrid.addColumn(contentColumn);
+        busyIndicator = new SimpleBusyIndicator(false, 0.85f);
+        busyIndicator.getElement().getStyle().setTextAlign(TextAlign.CENTER);
+        contentContainer = new LayoutPanel();
+        contentContainer.add(busyIndicator);
+        contentContainer.setWidgetTopBottom(busyIndicator, 10, Unit.PX, 10, Unit.PX);
+        contentContainer.setWidgetLeftRight(busyIndicator, 10, Unit.PX, 10, Unit.PX);
+        // "P" parameter bind/unbind toggle button
+        final Image parameterIcon = new Image(Resources.parameterIcon().getSafeUri());
+        parameterIcon.setSize("16px", "16px");
+        parameterSettingsButton = new ToggleButton(parameterIcon);
+        parameterSettingsButton.addStyleName("query-parameter");
+        updateParameterFromReportParameterBindings();
+        mainPanel = new DockLayoutPanel(Unit.PX);
+        mainPanel.addNorth(createHeaderPanel(), 40);
+        mainPanel.addNorth(filterPanel, 35);
+        mainPanel.setWidgetHidden(filterPanel, true);
+        mainPanel.add(contentContainer);
+        updateContent(null);
+    }
+
+    private Widget createHeaderPanel() {
+        final HorizontalPanel headerPanel = new HorizontalPanel();
+        headerPanel.setSpacing(2);
+        headerPanel.setWidth("100%");
+        headerPanel.setHeight("100%");
+        headerPanel.addStyleName("dimensionFilterSelectionHeader");
+        headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        // label with dimension's display name:
+        final Label headerLabel = new Label(dimension.getDisplayName());
+        headerLabel.addStyleName("emphasizedLabel");
+        headerPanel.add(headerLabel);
+        headerPanel.setCellWidth(headerLabel, "100%");
+        headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
+        parameterSettingsButton.addClickHandler(e -> {
+            if (this.parameter == null) {
+                final DataMiningReportDTO currentReport = reportProvider.getCurrentReport().getReport();
+                final Set<FilterDimensionParameter> reportParametersBeforeDialogShown = Util.asNewSet(currentReport.getParameters());
+                new PickOrCreateReportParameterDialog(currentReport, dimension.getReturnTypeName(), getDataMiningStringMessages(),
+                        new DialogCallback<FilterDimensionParameter>() {
+                            @Override
+                            public void ok(FilterDimensionParameter editedObject) {
+                                if (editedObject == null) {
+                                    if (parameter != null) {
+                                        unbindFromParameter(parameter);
+                                    }
+                                    parameterSettingsButton.setDown(false);
+                                } else {
+                                    parameter = editedObject;
+                                    reportParameterBindings.setParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension), editedObject);
+                                    GWT.log("New parameter bindings "+reportParameterBindings);
+                                    if (Util.contains(reportParametersBeforeDialogShown, editedObject)) {
+                                        GWT.log("Propagating parameter value of "+parameter.getName()+" to "+retrieverLevel+"/"+dimension+": "+editedObject.getValues());
+                                        // the parameter existed before; copy its value set to the current selection:
+                                        parameterValueChanged(editedObject, Collections.emptySet());
+                                    } else {
+                                        GWT.log("Setting parameter value of "+parameter.getName()+" from "+retrieverLevel+"/"+dimension+" to "+selectionModel.getSelectedSet());
+                                        // a new parameter; set the parameter's value to the current selection:
+                                        DimensionFilterSelectionProvider.this.dontPropagateNextSelectionChangeEventToBoundParameter = true;
+                                        parameter.setValues(selectionModel.getSelectedSet());
+                                        dontPropagateNextSelectionChangeEventToBoundParameter = false;
+                                    }
+                                    editedObject.addParameterModelListener(DimensionFilterSelectionProvider.this);
+                                }
+                            }
+
+                            @Override
+                            public void cancel() {
+                                parameterSettingsButton.setDown(false);
+                            }
+                }).show();
+            } else {
+                unbindFromParameter(this.parameter);
+            }
+        });
+        headerPanel.add(parameterSettingsButton);
+        headerPanel.setCellHorizontalAlignment(parameterSettingsButton, HasHorizontalAlignment.ALIGN_RIGHT);
+        // toggle button to display the filter/search text field:
+        ToggleButton toggleFilterButton = new ToggleButton(new Image(Resources.searchIcon()));
+        toggleFilterButton.setTitle(getDataMiningStringMessages().filterDimensionValues());
+        toggleFilterButton.addClickHandler(e -> {
+            boolean enabled = toggleFilterButton.isDown();
+            mainPanel.setWidgetHidden(filterPanel, !enabled);
+            if (enabled) {
+                Scheduler.get().scheduleDeferred(() -> {
+                    filterPanel.getTextBox().setFocus(true);
+                    filterPanel.getTextBox().selectAll();
+                });
+            }
+            if (enabled) {
+                filterPanel.search(searchInputToApply);
+            } else {
+                searchInputToApply = filterPanel.getTextBox().getValue();
+                filterPanel.search(null);
+            }
+        });
+        headerPanel.add(toggleFilterButton);
+        headerPanel.setCellHorizontalAlignment(toggleFilterButton, HasHorizontalAlignment.ALIGN_RIGHT);
+        return headerPanel;
+    }
+    
+    public void removedFromContainer() {
+        if (parameter != null) {
+            parameter.removeParameterModelListener(this);
+            parameter = null;
+        }
+    }
+
+    public void updateContent(Runnable callback) {
+        final HashMap<DataRetrieverLevelDTO,SerializableSettings> retrieverSettings = retrieverChainProvider.getRetrieverSettings();
+        final HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = filterSelectionProvider.getSelection();
+        if (filterSelection.containsKey(retrieverLevel)) {
+            filterSelection.get(retrieverLevel).remove(dimension);
+        }
+        final HashSet<FunctionDTO> dimensions = new HashSet<>();
+        dimensions.add(dimension);
+        availableData.clear();
+        contentContainer.remove(dataGrid);
+        busyIndicator.setBusy(true);
+        dataMiningService.getDimensionValuesFor(session, retrieverChainProvider.getDataRetrieverChainDefinition(), retrieverLevel, dimensions,
+                retrieverSettings, filterSelection, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<QueryResultDTO<HashSet<Object>>>() {
+                    @Override
+                    public void onSuccess(QueryResultDTO<HashSet<Object>> result) {
+                        final Map<GroupKey, HashSet<Object>> results = result.getResults();
+                        final List<Serializable> sortedData = new ArrayList<>();
+                        if (!results.isEmpty()) {
+                            GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
+                            @SuppressWarnings("unchecked")
+                            final Collection<? extends Serializable> resultsForContentKey = (Collection<? extends Serializable>) results.get(contentKey);
+                            availableData.addAll(resultsForContentKey);
+                            sortedData.addAll(availableData);
+                            sortedData.sort((o1, o2) -> NaturalComparator.compare(o1.toString(), o2.toString()));
+                        }
+                        busyIndicator.setBusy(false);
+                        filterPanel.updateAll(sortedData);
+                        contentContainer.add(dataGrid);
+                        internalSetSelection(selectionToBeApplied != null ? selectionToBeApplied : selectionModel.getSelectedSet(),
+                                             selectionCallback != null ? selectionCallback : m -> { });
+                        selectionToBeApplied = null;
+                        selectionCallback = null;
+                        if (callback != null) {
+                            callback.run();
+                        }
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error fetching the dimension values of " + dimension + ": " + caught.getMessage());
+                        selectionToBeApplied = null;
+                        selectionCallback = null;
+                    }
+                });
+    }
+    
+    private String elementAsString(Object element) {
+        return element.toString();
+    }
+    
+    /**
+     * If a {@link #parameter} is bound to this dimension filter, the parameter's value is updated to reflect the new
+     * selection.
+     * <p>
+     * 
+     * TODO bug4789: consider finding out whether this was an incremental or "radical" selection change and try to
+     * update the parameter value set accordingly: incrementally if the change seems to be incremental, or by simply
+     * setting the current selected set as the new parameter value set if considered "radical."
+     * <p>
+     * 
+     * Then, all {@link #listeners} are notified.
+     */
+    private void selectionChanged(SelectionChangeEvent event) {
+        if (parameter != null) {
+            if (dontPropagateNextSelectionChangeEventToBoundParameter) {
+                GWT.log("Ignoring selection change for "+retrieverLevel+"/"+dimension);
+            } else {
+                GWT.log("Propagating selection change for "+retrieverLevel+"/"+dimension+" to parameter "+parameter.getName()+"; new value set: "+selectionModel.getSelectedSet());
+                parameter.removeParameterModelListener(this);
+                parameter.setValues(selectionModel.getSelectedSet());
+                parameter.addParameterModelListener(this);
+            }
+        }
+        notifyListeners();
+    }
+
+    /**
+     * @return a non-live snapshot copy of this dimension filter's current selection
+     */
+    public HashSet<? extends Serializable> getSelection() {
+        return new HashSet<>(selectionModel.getSelectedSet());
+    }
+
+    public void setSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
+        updateParameterFromReportParameterBindings();
+        selectionToBeApplied = selection;
+        selectionCallback = callback;
+        if (!busyIndicator.isBusy()) {
+            internalSetSelection(selectionToBeApplied, selectionCallback);
+            selectionToBeApplied = null;
+            selectionCallback = null;
+        }
+    }
+
+    /**
+     * Based on {@link #reportParameterBindings} ensures {@link #parameter} matches the entry in {@link #reportParameterBindings} for
+     * this dimension filter and adjusts the parameter toggle button state accordingly. No changes are applied to either the parameter
+     * or the selection.
+     */
+    private void updateParameterFromReportParameterBindings() {
+        final FilterDimensionParameter newParameter = reportParameterBindings.getParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+        if (parameter != newParameter) {
+            if (parameter != null) {
+                parameter.removeParameterModelListener(this);
+            }
+            if (newParameter != null) {
+                newParameter.addParameterModelListener(this);
+            }
+        }
+        parameterSettingsButton.setDown(newParameter != null);
+        parameter = newParameter;
+    }
+
+    private void internalSetSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
+        // a parameter bound not only to this but also to others will then be restricted to the values from availableData but must not;
+        // this method is for "programmatic" update only and not for user-initiated, so it should be fine to temporarily detach any
+        // parameter update listener while manipulating the selection here:
+        dontPropagateNextSelectionChangeEventToBoundParameter = true; // avoid even propagating selection to parameter value
+        clearSelection();
+        Collection<Serializable> missingValues = new ArrayList<>();
+        for (Serializable value : selection) {
+            if (availableData.contains(value)) {
+                selectionModel.setSelected(value, true);
+            } else if (parameter == null || !Util.contains(parameter.getValues(), value)) {
+                // don't add values as missing if they originated from the parameter bound to this dimension filter
+                missingValues.add(value);
+            }
+        }
+        selectionModel.getSelectedSet(); // flush selection, fire events
+        dontPropagateNextSelectionChangeEventToBoundParameter = false;
+        if (!missingValues.isEmpty()) {
+            String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
+            callback.accept(Collections.singleton(getDataMiningStringMessages()
+                    .filterValuesOfDimensionAreNotAvailable(dimension.getDisplayName(), listedValues)));
+        } else {
+            callback.accept(Collections.emptySet());
+        }
+    }
+
+    public void clearSelection() {
+        selectionModel.clear();
+    }
+
+    public void addListener(FilterSelectionChangedListener listener) {
+        listeners.add(listener);
+    }
+    
+    private void notifyListeners() {
+        for (FilterSelectionChangedListener listener : listeners) {
+            listener.selectionChanged();
+        }
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return mainPanel;
+    }
+
+    @Override
+    public String getId() {
+        return "DimensionFilterSelectionProvider";
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return getEntryWidget().isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        getEntryWidget().setVisible(visibility);
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(SerializableSettings settings) {
+        return null;
+    }
+
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(SerializableSettings newSettings) {
+        // no-op
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return "dimensionFilterSelectionProvider";
+    }
+    
+    private class CustomCheckboxEventTranslator implements EventTranslator<Serializable> {
+        
+        @Override
+        public boolean clearCurrentSelection(CellPreviewEvent<Serializable> event) {
+            return !isCheckboxColumn(event.getColumn());
+        }
+
+        @Override
+        public SelectAction translateSelectionEvent(CellPreviewEvent<Serializable> event) {
+            NativeEvent nativeEvent = event.getNativeEvent();
+            if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
+                if (nativeEvent.getCtrlKey()) {
+                    Serializable value = event.getValue();
+                    selectionModel.setSelected(value, !selectionModel.isSelected(value));
+                    return SelectAction.IGNORE;
+                }
+                if (!selectionModel.getSelectedSet().isEmpty() && !isCheckboxColumn(event.getColumn())) {
+                    return SelectAction.DEFAULT;
+                }
+            }
+            return SelectAction.TOGGLE;
+        }
+
+        private boolean isCheckboxColumn(int columnIndex) {
+            return columnIndex == dataGrid.getColumnIndex(checkboxColumn);
+        }
+        
+    }
+
+    @Override
+    public void parameterAdded(DataMiningReportDTO report, FilterDimensionParameter parameter) {
+        // we don't care about new parameters here; a user has to pick it for binding this dimension filter to it
+    }
+
+    @Override
+    public void parameterRemoved(DataMiningReportDTO report, FilterDimensionParameter parameter) {
+        if (parameter == this.parameter) {
+            unbindFromParameter(parameter);
+        }
+    }
+
+    private void unbindFromParameter(FilterDimensionParameter parameter) {
+        parameter.removeParameterModelListener(this);
+        reportParameterBindings.removeParameterBinding(new FilterDimensionIdentifier(retrieverLevel, dimension));
+        this.parameter = null; // unbind this dimension filter;
+    }
+
+    @Override
+    public void parameterValueChanged(FilterDimensionParameter parameter, Iterable<? extends Serializable> oldValues) {
+        GWT.log("Filter parameter "+parameter.getName()+" with type "+parameter.getTypeName()+" and bound to dimension filter "+
+                retrieverLevel+"/"+dimension+" changed from "+oldValues+" to "+parameter.getValues());
+        dontPropagateNextSelectionChangeEventToBoundParameter = true;
+        selectionModel.clear();
+        for (final Serializable newValue : parameter.getValues()) {
+            selectionModel.setSelected(newValue, true);
+        }
+        selectionModel.getSelectedSet(); // force all selection events to fire while we're still not propagating to parameter value
+        dontPropagateNextSelectionChangeEventToBoundParameter = false;
+    }
+}

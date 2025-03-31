@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.google.gwt.user.cellview.client.CellTable;
 
 public interface LeaderboardTableResources extends CellTable.Resources {
-    interface LeaderboardTableStyle extends CellTable.Style {
+    public interface LeaderboardTableStyle extends CellTable.Style {
         /**
          * Applied to header cells of race columns
          */
@@ -53,6 +53,11 @@ public interface LeaderboardTableResources extends CellTable.Resources {
          * Applied to the totals columns
          */
         String cellTableTotalColumn();
+        
+        /**
+         * Applied to the SailId column
+         */
+        String cellTableSailIdColumn();
 
     }
 

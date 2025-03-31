@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/options_menu_settings"
+        android:icon="@drawable/settings_grey"
+        android:title="@string/options_menu_settings"
+        app:showAsAction=""/>
+
+    <item
+        android:id="@+id/options_menu_checkout"
+        android:icon="@drawable/ic_menu_info_details"
+        android:title="@string/options_menu_checkout"
+        app:showAsAction=""/>
+
+    <item
+        android:id="@+id/options_menu_info"
+        android:title="@string/about"/>
+</menu>

@@ -1,0 +1,19 @@
+#!/bin/bash
+curl -s -k "https://localhost:9443/gwt/status" 2>/dev/null >/dev/null
+PRIMARY_HTTPS_STATUS=$?
+if [ "${PRIMARY_HTTPS_STATUS}" != "0" ]; then
+  echo "Primary master not reachable through https://localhost:9443/gwt/status
+HTTP status code was ${PRIMARY_HTTPS_STATUS}" | notify-operators "PRIMARY MASTER NOT REACHABLE THROUGH PORT 9443" 
+fi
+curl -s -k "http://localhost:8888/gwt/status" 2>/dev/null >/dev/null
+PRIMARY_HTTP_STATUS=$?
+if [ "${PRIMARY_HTTP_STATUS}" != "0" ]; then
+  echo "Primary master not reachable through http://localhost:8888/gwt/status
+HTTP status code was ${PRIMARY_HTTP_STATUS}" | notify-operators "PRIMARY MASTER NOT REACHABLE THROUGH PORT 9443" 
+fi
+curl -s -k "https://localhost:9444/gwt/status" 2>/dev/null >/dev/null
+SECONDARY_STATUS=$?
+if [ "${SECONDARY_STATUS}" != "0" ]; then
+  echo "Primary master not reachable through https://localhost:9444/gwt/status
+HTTP status code was ${SECONDARY_STATUS}" | notify-operators "SECONDARY MASTER NOT REACHABLE THROUGH PORT 9444" 
+fi

@@ -1,0 +1,32 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:login="urn:import:com.sap.sailing.gwt.home.desktop.places.morelogininformation">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationResources" />
+    <ui:style>
+    .clear {
+        clear: both;
+    }
+    .registerContainer {
+        text-align: center;
+    }
+    .register {
+        cursor: pointer;
+    }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <h1 class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from="{i18n.moreLoginInformationHeadline}" /></h1>
+        <p class="{res.mediaCss.small12} {res.mediaCss.columns}"><ui:text from="{i18n.moreLoginInformationIntroduction}" /></p>
+        <login:MoreLoginInformationContent addStyleNames="{style.clear}" title="{i18n.moreLoginInformationSectionSailorProfilesHeading}" image="{local_res.sailorprofiles}" imageOnLeft="false" content="{i18n.moreLoginInformationSectionSailorProfilesDescription}" />
+        <login:MoreLoginInformationContent addStyleNames="{style.clear}" title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
+        <login:MoreLoginInformationContent title="{i18n.strategySimulator}" image="{local_res.simulator}" imageOnLeft="false" content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
+        <login:MoreLoginInformationContent title="{i18n.moreLoginInformationSectionUserNotificationsHeading}" image="{local_res.notifications}" imageOnLeft="true" content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
+        <div class="{res.mainCss.spacermargintopmediumsmall} {res.mainCss.spacermarginbottommedium} {style.registerContainer}">
+            <a ui:field="registerControl" class="{res.mainCss.button} {style.register}">
+               <ui:text from="{i18n.moreLoginInformationRegisterControlText}"/>
+            </a>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

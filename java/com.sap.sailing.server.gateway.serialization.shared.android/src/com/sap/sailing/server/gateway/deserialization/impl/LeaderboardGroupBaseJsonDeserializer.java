@@ -6,10 +6,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.impl.StrippedLeaderboardGroupImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class LeaderboardGroupBaseJsonDeserializer implements JsonDeserializer<LeaderboardGroupBase> {
 
@@ -22,8 +22,9 @@ public class LeaderboardGroupBaseJsonDeserializer implements JsonDeserializer<Le
         String description = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DESCRIPTION);
         String displayName = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_DISPLAY_NAME);
         Boolean hasOverallLeaderboard = (Boolean) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_HAS_OVERALL_LEADERBOARD);
+        String overallLeaderboardName = (String) object.get(LeaderboardGroupBaseJsonSerializer.FIELD_OVERALL_LEADERBOARD_NAME);
         LeaderboardGroupBase result = new StrippedLeaderboardGroupImpl(id, name, description, displayName, 
-                hasOverallLeaderboard == null ? false : hasOverallLeaderboard);
+                hasOverallLeaderboard == null ? false : hasOverallLeaderboard, overallLeaderboardName);
         return result;
     }
 }

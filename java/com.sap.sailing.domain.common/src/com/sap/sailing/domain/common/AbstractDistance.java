@@ -2,6 +2,10 @@ package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public abstract class AbstractDistance implements Distance {
 
@@ -19,12 +23,28 @@ public abstract class AbstractDistance implements Distance {
     
     @Override
     public int compareTo(Distance o) {
-        return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;
+        final double meters = getMeters();
+        final double otherMeters = o.getMeters();
+        return meters > otherMeters ? 1 : meters == otherMeters ? 0 : -1;
     }
 
+    private Speed inSeconds(double seconds) {
+        return new KilometersPerHourSpeedImpl(getKilometers() * 3600 / seconds);
+    }
+    
     @Override
     public Speed inTime(long milliseconds) {
         return new KilometersPerHourSpeedImpl(getKilometers() * 1000. * 3600. / milliseconds);
+    }
+    
+    @Override
+    public Speed inTime(Duration duration) {
+        return inSeconds(duration.asSeconds());
+    }
+
+    @Override
+    public Duration atSpeed(Speed speed) {
+        return new SecondsDurationImpl(getMeters() / speed.getMetersPerSecond());
     }
 
     @Override
@@ -70,5 +90,21 @@ public abstract class AbstractDistance implements Distance {
     @Override
     public Distance add(Distance d) {
         return new NauticalMileDistance(getNauticalMiles()+d.getNauticalMiles());
+    }
+
+    @Override
+    public double divide(Distance other) {
+        return getMeters() / other.getMeters();
+    }
+
+    @Override
+    public Distance abs() {
+        final Distance result;
+        if (getMeters() >= 0) {
+            result = this;
+        } else {
+            result = scale(-1);
+        }
+        return result;
     }
 }

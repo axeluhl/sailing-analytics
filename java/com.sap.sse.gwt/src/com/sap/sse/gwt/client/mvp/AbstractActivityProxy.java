@@ -5,8 +5,9 @@ import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * Manages GWT code splitting by moving an activity and everything that activity exclusively uses to a separate code
@@ -53,7 +54,7 @@ public abstract class AbstractActivityProxy extends AbstractActivity {
 
         @Override
         public void onFailure(Throwable reason) {
-            Window.alert(reason.getMessage());
+            Notification.notify(reason.getMessage(), NotificationType.ERROR);
         }
     }
 

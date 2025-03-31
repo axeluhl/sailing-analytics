@@ -1,0 +1,3 @@
+{"_id":{"$oid":"5e3192079d7cdfdd30a81a2b"},"ID":{"$binary":"b0/czSuz3l0sf6hSuEpHpw==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5e3192089d7cdfdd30a81a3c"},"ID":{"$binary":"GUjfvYC6fjEIWVRygtCZnQ==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e3194c39d7cdfdd30a81df9"},"ID":{"$binary":"o0vqwDEw95iKR6/kWmV1oA==","$type":"03"},"NAME":"userWithACL-tenant","USERNAMES":["userWithACL"],"ROLE_DEFINITION_MAP":[]}

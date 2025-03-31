@@ -1,166 +1,251 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.ui.adapters.NamedArrayAdapter;
-import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FragmentAttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoadFailedDialog;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sse.common.Named;
 
-public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>,
-        DialogListenerHost {
-    
-    //private static String TAG = NamedListFragment.class.getName();
-    
-    private ItemSelectedListener<T> listener;
-    private NamedArrayAdapter<T> listAdapter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
+        implements LoadClient<Collection<T>>, DialogListenerHost {
 
     protected ArrayList<T> namedList;
+    protected List<CheckedItem> checkedItems;
+    protected ItemSelectedListener<T> listener;
+    protected CheckedItemAdapter listAdapter;
+    protected int mSelectedIndex = -1;
+    private View footerView;
 
-    protected abstract ItemSelectedListener<T> attachListener(Activity activity);
+    protected abstract ItemSelectedListener<T> attachListener(Context context);
 
-    protected abstract String getHeaderText();
+    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
+            ReadonlyDataManager manager
+    );
 
-    protected NamedArrayAdapter<T> createAdapter(Context context, ArrayList<T> items) {
-        return new NamedArrayAdapter<T>(context, items);
-    }
-
-    /*@Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.list_fragment, container, false);
-    }*/
-    
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        ViewGroup parent = (ViewGroup) inflater.inflate(R.layout.list_fragment, container, false);
-        parent.addView(v, 0);
-        return parent;
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        listener = attachListener(context);
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        this.listener = attachListener(activity);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.list_fragment, container, false);
     }
-    
-    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        namedList = new ArrayList<>();
+        checkedItems = new ArrayList<>();
+        listAdapter = new CheckedItemAdapter(getActivity(), checkedItems);
+        if (savedInstanceState != null) {
+            mSelectedIndex = savedInstanceState.getInt("position", -1);
+            if (mSelectedIndex >= 0) {
+                listAdapter.setCheckedPosition(mSelectedIndex);
+            }
+        }
+        getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        setListAdapter(listAdapter);
+    }
 
-        addHeader();
-
-        namedList = new ArrayList<T>();
-        listAdapter = createAdapter(getActivity(), /*android.R.layout.simple_list_item_single_choice, */namedList);
-
-        this.getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        this.setListAdapter(listAdapter);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        footerView = View.inflate(requireContext(), R.layout.footer_progress, null);
+        getListView().addFooterView(footerView);
 
         showProgressBar(true);
-        loadItems();
-    }
-
-    private void loadItems() {
-        setListShown(false);
-        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    public void onResume() {
+        super.onResume();
+        initLoader();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("position", mSelectedIndex);
+    }
+
+    @Override
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        listAdapter.setCheckedPosition(position);
+
+        mSelectedIndex = position;
+
         // this unchecked cast here seems unavoidable.
         // even SDK example code does it...
-        @SuppressWarnings("unchecked")
-        T item = (T) l.getItemAtPosition(position);
-        listener.itemSelected(this, item);
-    }
-
-    private void addHeader() {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        ViewGroup header = (ViewGroup) inflater.inflate(R.layout.selection_list_header_view, getListView(), false);
-        getListView().addHeaderView(header, null, false);
-        TextView textText = ((TextView) header.findViewById(R.id.textHeader));
-        textText.setText(getHeaderText());
-    }
-
-    @Override
-    public void onLoadSucceded(Collection<T> data, boolean isCached) {
-        setListShown(true);
-        namedList.clear();
-        namedList.addAll(data);
-        Collections.sort(namedList, new NaturalNamedComparator());
-        listAdapter.notifyDataSetChanged();
-
-        showProgressBar(false);
+        listener.itemSelected(this, namedList.get(position));
     }
 
     @Override
     public void onLoadFailed(Exception reason) {
-        setListShown(true);
         namedList.clear();
         listAdapter.notifyDataSetChanged();
-        
+
         showProgressBar(false);
 
-        String message = reason.getMessage();
-        if (message == null) {
-            message = reason.toString();
+        if (reason instanceof UnauthorizedException) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle(R.string.loading_failure);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.setMessage(getActivity().getString(R.string.user_unauthorized));
+            builder.show();
+        } else {
+            String message = reason.getMessage();
+            if (message == null) {
+                message = reason.toString();
+            }
+            showLoadFailedDialog(message);
         }
-        showLoadFailedDialog(message);
     }
 
-    private void showProgressBar(boolean visible) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.setProgressBarIndeterminateVisibility(visible);
+    @Override
+    public void onLoadSucceeded(Collection<T> data, boolean isCached) {
+        namedList.clear();
+        checkedItems.clear();
+        if (!isCached) {
+            listAdapter.setCheckedPosition(-1);
+            mSelectedIndex = -1;
         }
+        // TODO: Quickfix for 2889
+        if (data != null) {
+            namedList.addAll(data);
+            for (Named named : namedList) {
+                CheckedItem item = new CheckedItem();
+                item.setText(named.getName());
+                item.setSubtext(getEventSubText(named));
+                checkedItems.add(item);
+            }
+            listAdapter.notifyDataSetChanged();
+        }
+
+        if (!isCached) {
+            showProgressBar(false);
+        }
+    }
+
+    private String getEventSubText(Named named) {
+        String subText = null;
+        if (named instanceof EventBase) {
+            final EventBase eventBase = (EventBase) named;
+            String dateString;
+            if (eventBase.getStartDate() != null && eventBase.getEndDate() != null) {
+                final Locale locale = getResources().getConfiguration().locale;
+                final int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+                final Calendar startDate = Calendar.getInstance();
+                startDate.setTime(eventBase.getStartDate().asDate());
+                final Calendar endDate = Calendar.getInstance();
+                endDate.setTime(eventBase.getEndDate().asDate());
+                final int startYear = startDate.get(Calendar.YEAR);
+                String start;
+                if (startYear == currentYear) {
+                    start = String.format(
+                            "%s %s",
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
+                } else {
+                    start = String.format(
+                            "%s %s %s",
+                            startYear,
+                            startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                            startDate.get(Calendar.DATE)
+                    );
+                }
+                final StringBuilder builder = new StringBuilder();
+                if (startYear != endDate.get(Calendar.YEAR)) {
+                    builder.append(endDate.get(Calendar.YEAR))
+                            .append(" ")
+                            .append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
+                    builder.append(endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale))
+                            .append(" ")
+                            .append(endDate.get(Calendar.DATE));
+                } else if (startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                    builder.append(endDate.get(Calendar.DATE));
+                }
+                final String end = builder.toString();
+                dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
+                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(),
+                        (!TextUtils.isEmpty(dateString) ? ", " : ""),
+                        (!TextUtils.isEmpty(dateString) ? dateString : ""));
+            }
+        }
+        return subText;
+    }
+
+    ReadonlyDataManager getDataManager() {
+        return OnlineDataManager.create(getActivity());
+    }
+
+    Loader<DataLoaderResult<Collection<T>>> initLoader() {
+        return getLoaderManager().initLoader(0, null, createLoaderCallbacks(getDataManager()));
+    }
+
+    Loader<DataLoaderResult<Collection<T>>> restartLoader() {
+        return getLoaderManager().restartLoader(0, null, createLoaderCallbacks(getDataManager()));
     }
 
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
         FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
+        // FIXME this can't be the real solution for the autologin
         dialog.setTargetFragment(this, 0);
         // We cannot use DialogFragment#show here because we need to commit the transaction
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()
         manager.beginTransaction().add(dialog, "failedDialog").commitAllowingStateLoss();
     }
-    
-    @Override
-    public DialogResultListener getListener() {
-        return new DialogResultListener() {
-            
-            @Override
-            public void onDialogPositiveButton(AttachedDialogFragment dialog) {
-                loadItems();
-            }
-            
-            @Override
-            public void onDialogNegativeButton(AttachedDialogFragment dialog) {
-                
-            }
-        };
+
+    void showProgressBar(boolean visible) {
+        footerView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    protected void selectItem(T eventBase, boolean notify) {
+        final int position = namedList.indexOf(eventBase);
+        listAdapter.setCheckedPosition(position);
+        listAdapter.notifyDataSetChanged();
+
+        mSelectedIndex = position;
+        if (mSelectedIndex >= 0) {
+            getListView().setSelection(mSelectedIndex);
+        }
+        if (notify) {
+            listener.itemSelected(this, eventBase);
+        }
     }
 }

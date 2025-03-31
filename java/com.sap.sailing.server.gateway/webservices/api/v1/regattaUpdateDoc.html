@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{name}</h2>
+
+<b>Description:</b>
+<p>The service updates the details of a regatta.<br/>
+All slashes contained within the {name} parameter must be replaced by "__" (double underscore).</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Input format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+            <ul>
+                <li>startTimePointAsMillis: The start of the regatta as millis or null to unset</li>
+                <li>endTimePointAsMillis: The end of the regatta as millis or null to unset</li>
+                <li>defaultCourseAreaUuid: The UUID of an existing course area or null to unset</li>
+                <li>buoyZoneRadiusInHullLengths: Double to set buoy zone value or null to unset</li>
+                <li>useStartTimeInference: Only one of useStartTimeInference and controlTrackingFromStartAndFinishTimes may be true</li>
+                <li>controlTrackingFromStartAndFinishTimes: Only one of useStartTimeInference and controlTrackingFromStartAndFinishTimes may be true</li>
+                <li>autoRestartTrackingUponCompetitorSetChange: If set, changes in the competitor registrations trigger removing and re-tracking of the tracked races affected
+                    to reflect the changes in the set of competitors. Note that this has the effect that until the race(s) is/are re-loaded, users may see incorrect
+                    or incomplete states.</li>
+            </ul>
+        </td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+            <ul>
+                <li>registrationLinkSecret: The regatta secret to set. Be aware that any pre-existing registration link may get invalid by setting a new secret.</li>
+                <li>competitorRegistrationType: Either of [CLOSED, OPEN_UNMODERATED].</li>
+            </ul>
+        </td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/Kieler Woche (5o5)">http://www.sapsailing.com/sailingserver/api/v1/regattas/Kieler Woche (5o5)</a><br>
+            Example payload:<br>
+            <pre>
+            {
+                "startTimePointAsMillis": 4576345346567576,
+                "endTimePointAsMillis": 4576345521232345,
+                "defaultCourseAreaUuid": "f00e9053-e0ad-430f-a555-73f7ec2e59e1",
+                "buoyZoneRadiusInHullLengths": 7.4,
+                "useStartTimeInference": false,
+                "controlTrackingFromStartAndFinishTimes": true
+            }
+            </pre>
+        </td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

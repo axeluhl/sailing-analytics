@@ -1,0 +1,43 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="i18n"
+    type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="main"
+    type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local"
+    type="com.sap.sailing.gwt.home.desktop.partials.subscription.SubscriptionCardResources"></ui:with>
+  <ui:style>
+  </ui:style>
+  <g:HTMLPanel styleName="{main.mediaCss.stackenblochen} {local.css.content}">
+    <h1>
+      <ui:text from="{i18n.subscriptionPlanOverview}" />
+    </h1>
+    <div class="{local.css.subscriptionHeader}">
+      <span class="{local.css.hint}">
+        <g:Button ui:field="businessModelInfoButton">
+          <b>ⓘ </b>
+          <ui:text
+            from="{i18n.subscriptionBusinessModelInfoButton}" />
+        </g:Button>
+      </span>
+    </div>
+    <g:FlowPanel ui:field="container"
+      styleName="{local.css.container}"></g:FlowPanel>
+    <div class="{local.css.subscriptionHeader}">
+      <span class="{local.css.hint}">
+        <g:Button ui:field="emailContact">
+          <b>✉ </b><ui:text from="{i18n.contactServicesAndInformation}" />
+        </g:Button>
+      </span>
+      <span>&nbsp;</span>
+    </div>
+    <h1>
+      <ui:text from="{i18n.premiumFeatureList}" />
+    </h1>
+    <span>
+      <ui:text from="{i18n.premiumFeatureListDescription}" />
+    </span>
+    <g:FlowPanel ui:field="features" styleName="{local.css.featureList}"></g:FlowPanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 

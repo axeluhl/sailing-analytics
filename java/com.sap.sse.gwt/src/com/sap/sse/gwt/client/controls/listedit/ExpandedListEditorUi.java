@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.StringMessages;
@@ -25,7 +24,7 @@ import com.sap.sse.gwt.client.StringMessages;
  * "Remove" button is shown.
  * <p>
  * 
- * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved()} method(s)
+ * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved(int)} method(s)
  * to be notified of changes to the list. Alternatively or in addition, clients can
  * {@link ListEditorComposite#addValueChangeHandler(com.google.gwt.event.logical.shared.ValueChangeHandler) add a value
  * change handler} to the enclosing {@link ListEditorComposite}.
@@ -38,7 +37,7 @@ import com.sap.sse.gwt.client.StringMessages;
 public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<ValueType> {
     private final ImageResource removeImage;
 
-    private Grid expandedValuesGrid;
+    protected Grid expandedValuesGrid;
     private final boolean canRemoveItems;
 
     /**
@@ -63,7 +62,6 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     public Widget initWidget() {
         expandedValuesGrid = new Grid(0, 2);
         expandedValuesGrid.ensureDebugId("ExpandedValuesGrid");
-        
         VerticalPanel panel = new VerticalPanel();
         panel.add(createAddWidget());
         panel.add(expandedValuesGrid);
@@ -81,7 +79,7 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         }
     }
 
-    private void addRow(ValueType newValue) {
+    protected void addRow(ValueType newValue) {
         int rowIndex = expandedValuesGrid.insertRow(expandedValuesGrid.getRowCount());
         if (canRemoveItems) {
             PushButton removeButton = new PushButton(new Image(removeImage));
@@ -105,10 +103,13 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         context.getValue().remove(rowIndexToRemove);
         context.onChange();
         
-        onRowRemoved();
+        onRowRemoved(rowIndexToRemove);
     }
     
-    protected void setValueFromValueWidget(ValueBoxBase<ValueType> valueWidget, ValueType newValue, boolean fireEvents) {
+    /**
+     * @param valueWidget a widget returned previously from {@link #createValueWidget(int, Object)}
+     */
+    protected void setValueFromValueWidget(Widget valueWidget, ValueType newValue, boolean fireEvents) {
         for (int i = 0; i < expandedValuesGrid.getRowCount(); i++) {
             Widget gridWidget = expandedValuesGrid.getWidget(i, 0);
             if (gridWidget.getElement() == valueWidget.getElement()) {
@@ -134,6 +135,6 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
     }
 
     @Override
-    public void onRowRemoved() {
+    public void onRowRemoved(int rowIndex) {
     }
 }

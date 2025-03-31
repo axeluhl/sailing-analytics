@@ -1,11 +1,12 @@
 #!/bin/bash
 set -o functrace
+source ./configuration/correctFilePathInRelationToCurrentOs.sh
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
 PROJECT_TYPE="sailing"
 
-find_project_home () 
+find_project_home ()
 {
     if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then
         echo ""
@@ -23,7 +24,34 @@ find_project_home ()
         return 0
     fi
 
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+    echo $(correct_file_path  "$1")
+}
+
+clean_gwt_artifacts ()
+{
+    cd $PROJECT_HOME/java
+    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.* com.sap.$PROJECT_TYPE.gwt.ui/.generated
+    rm -rf com.sap.sailing.dashboards.gwt/com.sap.sailing.dashboards.gwt.* com.sap.sailing.dashboards.gwt/.generated
+    rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.* com.sap.sse.security.ui/.generated
+    rm -rf com.sap.sse.gwt/com.sap.sse.gwt.* com.sap.sse.gwt/.generated
+}
+
+set_ACDIR_and_depending_variables () {
+    ACDIR="$1"
+    JETTY_CONFIG_DIR="${ACDIR}/${JETTY_CONFIG_SUBDIR}"
+    VERSION_TXT="${JETTY_CONFIG_DIR}/version.txt"
+    VERSION_JSON="${JETTY_CONFIG_DIR}/version.json"
+}
+
+create_version_info_files ()
+{
+    echo "$VERSION_INFO System:" > "${VERSION_TXT}"
+    echo "{
+    \"commit_id\":\"$HEAD_SHA\",
+    \"active_branch\":\"$active_branch\",
+    \"build_date\":\"$HEAD_DATE\",
+    \"release\":\"$SIMPLE_VERSION_INFO\"
+}" > "${VERSION_JSON}"
 }
 
 # this holds for default installation
@@ -40,8 +68,9 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
+#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+    SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
@@ -68,15 +97,14 @@ SIMPLE_VERSION_INFO="$active_branch-$HEAD_DATE"
 # The number of worker threads to use for building GWT permutations.
 # Can be overridden using the -x option
 GWT_WORKERS=2
-
-# The number of worker threads to use for building GWT permutations.
-# Can be overridden using the -x option
-GWT_WORKERS=2
+# The default resolution for headless Firefox for Selenium tests:
+export MOZ_HEADLESS_WIDTH=1600
+export MOZ_HEADLESS_HEIGHT=900
 
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
 
-p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/target/products/raceanalysis.product.id/linux/gtk/$ARCH
 
 HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
@@ -88,9 +116,10 @@ clean="clean"
 offline=0
 proxy=0
 android=1
+java=1
 reporting=0
 suppress_confirmation=0
-extra=''
+export extra='--batch-mode -DtestSuffix=.noAutomaticTestingBasedOnBundleName'
 parallelexecution=0
 p2local=0
 
@@ -98,9 +127,11 @@ if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
     echo "-g Disable GWT compile, no gwt files will be generated, old ones will be preserved."
+    echo "-G Build forked GWT and gwt-maven-plugin locally instead of downloading Github release."
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
+    echo "-A Only build mobile projects (e.g. RaceCommittee App) and skip backend/server build"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -110,6 +141,7 @@ if [ $# -eq 0 ]; then
     echo "                  com.sap.sailing.monitoring. Only works if there is a fully built server available."
     echo "                  This parameter can also hold the name of the release if you are using the release command."
     echo "-l <telnet port>  Telnet port the OSGi server is running. Optional but enables fully automatic hot-deploy."
+    echo "-L in conjunction with the release sub-command, build the release only locally to dist/ and do not upload"
     echo "-s <target server> Name of server you want to use as target for install, hot-deploy or remote-reploy. This overrides default behaviour."
     echo "-w <ssh target> Target for remote-deploy and release. Must comply with the following format: user@server."
     echo "-u Run without confirmation messages. Use with extreme care."
@@ -152,36 +184,45 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparvm:n:l:s:w:x:j:u'
+options=':bgtocpaArvmLG:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
         g) gwtcompile=0;;
+        G) BUILD_GWT_FORK=1;;
         t) testing=0;;
         b) onegwtpermutationonly=1;;
         o) offline=1;;
         c) clean="";;
         p) proxy=1;;
         a) android=0;;
+        A) android=1
+           java=0;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
         l) OSGI_TELNET_PORT=$OPTARG;;
+        L) LOCAL_RELEASE_ONLY=1;;
         s) TARGET_SERVER_NAME=$OPTARG
            HAS_OVERWRITTEN_TARGET=1;;
         w) REMOTE_SERVER_LOGIN=$OPTARG;;
         u) suppress_confirmation=1;;
         v) p2local=1;;
         x) GWT_WORKERS=$OPTARG;;
-        j) TESTCASE_TO_EXECUTE=$OPTARG;; 
+        j) TESTCASE_TO_EXECUTE=$OPTARG;;
         \?) echo "Invalid option"
             exit 4;;
     esac
 done
 
-ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
+JETTY_CONFIG_SUBDIR=configuration/jetty
+set_ACDIR_and_depending_variables "${SERVERS_HOME}/${TARGET_SERVER_NAME}"
 echo INSTALL goes to $ACDIR
-extra="${extra} -Dgwt.workers=${GWT_WORKERS}"
+echo TMP will be used for java.io.tmpdir and is $TMP
+if [ "$TMP" = "" ]; then
+  export TMP=/tmp
+fi
+extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
 
 shift $((OPTIND-1))
 
@@ -193,13 +234,11 @@ fi
 rm $START_DIR/build.log
 
 if [[ "$@" == "clean" ]]; then
-    ./gradlew clean
+    JAVA_HOME="${JAVA8_HOME}" ./gradlew clean
     if [[ $? != 0 ]]; then
         exit 100
     fi
-    cd $PROJECT_HOME/java
-    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-    rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
+    clean_gwt_artifacts
     cd $PROJECT_HOME
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
     echo "Maven version used: `mvn --version`"
@@ -240,7 +279,7 @@ if [[ "$@" == "release" ]]; then
     rm -rf $PROJECT_HOME/dist/*
     mkdir -p $PROJECT_HOME/build
 
-    RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
+    RELEASE_NOTES="Release ${VERSION_INFO}\n${RELEASE_NOTES}"
     echo -e $RELEASE_NOTES > $PROJECT_HOME/build/release-notes.txt
     echo "" >> $PROJECT_HOME/build/release-notes.txt
     echo "Commits for the last $COMMIT_WEEK_COUNT weeks:" >> $PROJECT_HOME/build/release-notes.txt
@@ -248,26 +287,32 @@ if [[ "$@" == "release" ]]; then
     cd $PROJECT_HOME
     git log --decorate --pretty=format:"%h - %an, %ar : %s" --date=relative --abbrev-commit --since=$COMMIT_WEEK_COUNT.weeks >> $PROJECT_HOME/build/release-notes.txt
 
-    cd $PROJECT_HOME/build
-    ACDIR=$PROJECT_HOME/build
+    set_ACDIR_and_depending_variables "${PROJECT_HOME}/build"
+    cd "${ACDIR}"
 
-    mkdir -p configuration/jetty/etc
+    mkdir -p ${JETTY_CONFIG_SUBDIR}/etc
     mkdir plugins
 
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/generateMailProperties.sh $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $ACDIR/
     cp -v $p2PluginRepository/configuration/config.ini configuration/
 
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties ${JETTY_CONFIG_SUBDIR}/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
     cp -v $PROJECT_HOME/java/target/configuration/mail.properties configuration/
+    cp -v $PROJECT_HOME/java/target/configuration/debug.properties configuration/
     cp -v $PROJECT_HOME/configuration/mongodb.cfg $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
@@ -277,11 +322,10 @@ if [[ "$@" == "release" ]]; then
     cp -rv $PROJECT_HOME/configuration/native-libraries $ACDIR/
     cp -v $PROJECT_HOME/configuration/buildAndUpdateProduct.sh $ACDIR/
 
-    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
-
     if [[ $OSGI_BUNDLE_NAME != "" ]]; then
         SIMPLE_VERSION_INFO="$OSGI_BUNDLE_NAME-$HEAD_DATE"
     fi
+    create_version_info_files
 
     # removing compile reports as they do not belong into a release
     find $ACDIR -name soycReport | xargs rm -rf
@@ -306,25 +350,29 @@ MEMORY=4096m
 REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
-     
+
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
-    
+
     cd $PROJECT_HOME
     rm -rf build/*
 
     SSH_CMD="ssh $REMOTE_SERVER_LOGIN"
     SCP_CMD="scp -r"
 
-    echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to  $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
+    echo "Packaged release $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO.tar.gz! I've put an env.sh that matches the current branch to $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/env.sh!"
 
-    echo "Checking the remote connection..."
-    REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
-    echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
-    
-    `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
-    echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+    if [ "${LOCAL_RELEASE_ONLY}" != "1" ]; then
+        echo "Checking the remote connection..."
+        REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
+        echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
+
+        `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
+        echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
+    else
+        echo "Release available at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/, tarball at $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz"
+    fi
 fi
 
 if [[ "$@" == "local-deploy" ]]; then
@@ -484,7 +532,6 @@ if [[ "$@" == "hot-deploy" ]]; then
     BUNDLE_ID=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 1`
     OLD_ACTIVATED_NAME=`echo $OLD_BUNDLE_INFORMATION | cut -d " " -f 3`
     echo "Could identify bundle-id $BUNDLE_ID for $OLD_ACTIVATED_NAME"
-
 	if [ $suppress_confirmation -eq 0 ]; then
         read -s -n1 -p "I will now stop and reinstall the bundle mentioned in the line above. Is this right? (y/N): " answer
         case $answer in
@@ -538,7 +585,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             echo "INFO: Activating proxy profile"
             extra="$extra -P no-debug.with-proxy"
             MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	    ANDROID_OPTIONS="--proxy-host proxy --proxy-port 8080"
+	    ANDROID_OPTIONS="--proxy_host=proxy --proxy_port=8080"
         else
             extra="$extra -P no-debug.without-proxy"
 	    ANDROID_OPTIONS=""
@@ -547,26 +594,25 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	cd $PROJECT_HOME/java
 	if [ $gwtcompile -eq 1 ] && [[ "$clean" == "clean" ]]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
-	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-        GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
-        if [ $onegwtpermutationonly -eq 1 ]; then
-            echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
-            for i in $GWT_XML_FILES; do
-                echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
-                cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
-                mv $i.sed $i
-            done
-        else
-            echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
-            for i in $GWT_XML_FILES; do
-                echo "INFO: Patching $i files such that all GWT permutations are compiled"
-                cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
-                mv $i.sed $i
-            done
-        fi
-
+	    clean_gwt_artifacts
+	    GWT_XML_FILES=`find . -name '*.gwt.xml'`
+	    if [ $onegwtpermutationonly -eq 1 ]; then
+		echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
+		for i in $GWT_XML_FILES; do
+		    echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
+		    cp $i $i.bak
+		    cat $i | sed -e 's/AllPermutations/SinglePermutation/' >$i.sed
+		    mv $i.sed $i                
+		done
+	    else
+		echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
+		for i in $GWT_XML_FILES; do
+		    echo "INFO: Patching $i files such that all GWT permutations are compiled"
+		    cp $i $i.bak
+		    cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
+		    mv $i.sed $i
+		done
+	    fi
 	else
 	    echo "INFO: GWT Compilation disabled"
 	    extra="$extra -Pdebug.no-gwt-compile"
@@ -575,17 +621,20 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $p2local -eq 1 ]; then
 	    echo "INFO: Building and using local p2 repo"
 	    #build local p2 repo
-	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
+	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
+            echo "JAVA_HOME used: $JAVA_HOME"
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn ${extra} -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
-	    #create local target definition
+	    # Build AWS API; its local repo must exist for creating the local target definition in the next step
+	    (cd com.amazon.aws.aws-java-api; ./createLocalAwsApiP2Repository.sh | tee -a $START_DIR/build.log)
+	    # create local target definition
 	    (cd com.sap.$PROJECT_TYPE.targetplatform/scripts; ./createLocalTargetDef.sh)
 	    extra="$extra -Dp2-local" # activates the p2-target.local profile in java/pom.xml
 	else
-	    echo "INFO: Using remote p2 repo (http://p2.sapsailing.com/p2/sailing/)"
+	    echo "INFO: Using remote p2 repos (http://p2.sapsailing.com/p2/sailing/ and http://p2.sapsailing.com/p2/aws-sdk/)"
         fi
 
     # back to root!
@@ -607,7 +656,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
         parallelexecution=1
         echo "INFO: Running build in parallel with 2.5*CPU threads"
-	    extra="$extra -T 2.5C"
+        extra="$extra -T 2.5C"
     fi
 
     if [ $android -eq 1 ]; then
@@ -617,115 +666,142 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             exit 1
         fi
         echo "ANDROID_HOME=$ANDROID_HOME"
-        PATH=$PATH:$ANDROID_HOME/tools
+        PATH=$PATH:$ANDROID_HOME/tools/bin
         PATH=$PATH:$ANDROID_HOME/platform-tools
-	ANDROID="$ANDROID_HOME/tools/android"
-	if [ \! -x "$ANDROID" ]; then
-	  ANDROID="$ANDROID_HOME/tools/android.bat"
-	fi
+        SDK_MANAGER="$ANDROID_HOME/cmdline-tools/8.0/bin/sdkmanager"
+        if [ \! -x "$SDK_MANAGER" ]; then
+            SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
+        fi
+        echo "SDK_MANAGER=${SDK_MANAGER}"
+        echo "cmdline-tools:"
+        ls -l "$ANDROID_HOME/cmdline-tools/"
+        
+        BUILD_TOOLS_VERSION=`grep "buildTools = " build.gradle | cut -d "\"" -f 2`
+        echo "BUILD_TOOLS_VERSION=$BUILD_TOOLS_VERSION"
+        TARGET_API_VERSION=`grep "targetSdk = " build.gradle | cut -d "=" -f 2 | sed 's/ //g'`
+        echo "TARGET_API_VERSION=$TARGET_API_VERSION"
+        echo "Updating Android SDK at ${ANDROID_HOME}"
+        $SDK_MANAGER --update --sdk_root=${ANDROID_HOME} && yes | $SDK_MANAGER --licenses
+        echo "Getting Android build-tools, platform-tools and platform ${TARGET_API_VERSION}"
+        $SDK_MANAGER --sdk_root=${ANDROID_HOME} "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
 
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "RC_APP_VERSION=$RC_APP_VERSION"
-        extra="$extra -Drc-app-version=$RC_APP_VERSION"
+        # TODO: make distinction available for gradle builds as well
+        # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
+        # Use the following line for regular builds with no staged Nexus artifacts:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile"
 
-        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
-        echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
-        extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
-
-        NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.0
-        TARGET_API=22
-        TEST_API=18
-        ANDROID_ABI=armeabi-v7a
-        AVD_NAME="androidTest-${NOW}"
-        echo "Updating Android SDK (tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (platform-tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter platform-tools --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter android-${TARGET_API} --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
-        ./gradlew clean build | tee -a $START_DIR/build.log
-        if [[ $? != 0 ]]; then
+        echo "Building apps with Gradle..."
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew build
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
-        # testing deactivated due to errors in hudson
-        if [ $testing -eq 1 ]; then
-            adb emu kill
-            echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
-            echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
-            echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force -p ${START_DIR}/emulator
-            echo "Starting emulator..." | tee -a $START_DIR/build.log
-            emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
-            echo "Waiting for startup..." | tee -a $START_DIR/build.log
-            adb wait-for-device
-            sleep 60
-            $PROJECT_HOME/configuration/androidWaitForEmulator.sh
-            if [[ $? != 0 ]]; then
-                adb emu kill
-                "$ANDROID" delete avd --name ${AVD_NAME}
-                exit 102
-            fi
-            adb shell input keyevent 82 &
-            ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
-            if [[ $? != 0 ]]; then
-              adb emu kill
-              "$ANDROID" delete avd --name ${AVD_NAME}
-              exit 101
-            fi
-            adb emu kill
-            "$ANDROID" delete avd --name ${AVD_NAME}
+        JAVA_HOME="${JAVA8_HOME}" ./gradlew assemble
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            exit 100
         fi
-    else
-        echo "INFO: Deactivating mobile modules"
-        extra="$extra -P !with-mobile"
+        if [ $testing -eq 1 ]; then
+            echo "Starting JUnit tests..."
+            # ./gradlew test | tee -a $START_DIR/build.log
+            # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            #    exit 103
+            # fi
+            # TODO find a way that the emulator test is stable in hudson
+            # adb emu kill
+            # echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
+            # echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
+            # echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force -p ${START_DIR}/emulator
+            # echo "Starting emulator..." | tee -a $START_DIR/build.log
+            # emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
+            # echo "Waiting for startup..." | tee -a $START_DIR/build.log
+            # adb wait-for-device
+            # sleep 60
+            # $PROJECT_HOME/configuration/androidWaitForEmulator.sh
+            # if [[ $? != 0 ]]; then
+            #     adb emu kill
+            #     "$ANDROID" delete avd --name ${AVD_NAME}
+            #     exit 102
+            # fi
+            # adb shell input keyevent 82 &
+            # ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
+            # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            #   adb emu kill
+            #   "$ANDROID" delete avd --name ${AVD_NAME}
+            #   exit 101
+            # fi
+            # adb emu kill
+            # "$ANDROID" delete avd --name ${AVD_NAME}
+        fi
     fi
 
-    if [ $reporting -eq 1 ]; then
-        echo "INFO: Activating reporting"
-        extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+    if [ $java -eq 1 ]; then
+        if [ $reporting -eq 1 ]; then
+            echo "INFO: Activating reporting"
+            extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+        fi
+    
+        # make sure to honour the service configuration
+        # needed to make sure that tests use the right servers
+        if [ -n "${MONGODB_HOST}" ]; then
+          APP_PARAMETERS="-Dmongo.host=${MONGODB_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${MONGODB_PORT}" ]; then
+          APP_PARAMETERS="-Dmongo.port=${MONGODB_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${EXPEDITION_PORT}" ]; then
+          APP_PARAMETERS="-Dexpedition.udp.port=${EXPEDITION_PORT} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_HOST}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeHost=${REPLICATION_HOST} ${APP_PARAMETERS}"
+        fi
+        if [ -n "${REPLICATION_CHANNEL}" ]; then
+          APP_PARAMETERS="-Dreplication.exchangeName=${REPLICATION_CHANNEL} ${APP_PARAMETERS}"
+        fi
+    
+        extra="$extra -P with-not-android-relevant,!with-mobile"
+        if [ $gwtcompile -eq 1 ]; then
+          if [ "${BUILD_GWT_FORK}" = "1" ]; then
+            echo "Building and installing forked GWT version..."
+	    JAVA_HOME="${JAVA8_HOME}" `dirname $0`/install-gwt "${PROJECT_HOME}"
+          else
+            echo "Downloading and installing forked GWT version..."
+            `dirname $0`/install-gwt-from-fork-releases https://github.com/SAP/gwt-forward-serialization-rpc https://github.com/SAP/gwt-maven-plugin-forward-serialization-rpc 2.11.0 .
+          fi
+        fi
+        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+        echo "Maven version used: `mvn --version`"
+        echo "JAVA_HOME used: $JAVA_HOME"
+	export MAVEN_OPTS="-Xmx4g"
+        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+        # now get the exit status from mvn, and not that of tee which is what $? contains now
+        MVN_EXIT_CODE=${PIPESTATUS[0]}
+        echo "Maven exit code is $MVN_EXIT_CODE"
+    
+        if [ $reporting -eq 1 ]; then
+            echo "INFO: Generating reports"
+            echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
+            mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+            tar -xzf configuration/surefire-reports-resources.tar.gz
+            echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
+            echo "INFO: Be sure to check the result of the actual BUILD run!"
+        fi
+    
+        cd $PROJECT_HOME/java
+        if [ $gwtcompile -eq 1 ]; then
+    	# Now move back the backup .gwt.xml files before they were (maybe) patched
+    	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
+    	for i in $GWT_XML_FILES; do
+    	    mv -v $i.bak $i
+    	done
+        fi
+    
+        if [ $MVN_EXIT_CODE -eq 0 ]; then
+    	echo "Build complete. Do not forget to install product..."
+        else
+            echo "Build had errors. Maven exit status was $MVN_EXIT_CODE"
+        fi
+        exit $MVN_EXIT_CODE
     fi
-
-    # make sure to honour the service configuration
-    # needed to make sure that tests use the right servers
-    APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
-
-    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-    echo "Maven version used: `mvn --version`"
-    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
-    # now get the exit status from mvn, and not that of tee which is what $? contains now
-    MVN_EXIT_CODE=${PIPESTATUS[0]}
-    echo "Maven exit code is $MVN_EXIT_CODE"
-
-    if [ $reporting -eq 1 ]; then
-        echo "INFO: Generating reports"
-        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
-        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
-        tar -xzf configuration/surefire-reports-resources.tar.gz
-        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
-        echo "INFO: Be sure to check the result of the actual BUILD run!"
-    fi
-
-    cd $PROJECT_HOME/java
-    if [ $gwtcompile -eq 1 ]; then
-	# Now move back the backup .gwt.xml files before they were (maybe) patched
-	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	for i in $GWT_XML_FILES; do
-	    mv -v $i.bak $i
-	done
-    fi
-
-    if [ $MVN_EXIT_CODE -eq 0 ]; then
-	echo "Build complete. Do not forget to install product..."
-    else
-        echo "Build had errors. Maven exit status was $MVN_EXIT_CODE"
-    fi
-    exit $MVN_EXIT_CODE
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
@@ -767,8 +843,8 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
         mkdir $ACDIR/configuration
     fi
 
-    if [ ! -d "$ACDIR/configuration/jetty/etc" ]; then
-        mkdir -p $ACDIR/configuration/jetty/etc
+    if [ ! -d "${JETTY_CONFIG_DIR}/etc" ]; then
+        mkdir -p ${JETTY_CONFIG_DIR}/etc
     fi
 
     cd $ACDIR
@@ -782,20 +858,24 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
-
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/stopReplicating.sh $ACDIR/
+    cp -v $PROJECT_HOME/java/target/generateMailProperties.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/
     cp -v $PROJECT_HOME/java/target/http2udpmirror $ACDIR
 
     # overwrite configurations that should never be customized and belong to the build
     cp -v $p2PluginRepository/configuration/config.ini configuration/
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml ${JETTY_CONFIG_SUBDIR}/etc
+    cp -v $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties ${JETTY_CONFIG_SUBDIR}/etc
 
     if [ ! -f "$ACDIR/env.sh" ]; then
         cp -v $PROJECT_HOME/java/target/env.sh $ACDIR/
+        cp -v $PROJECT_HOME/java/target/env-default-rules.sh $ACDIR/
+        cp -v $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $ACDIR/
         cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/mail.properties $ACDIR/configuration/
         cp -v $PROJECT_HOME/java/target/configuration/logging.properties $ACDIR/configuration/
@@ -811,8 +891,9 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
 
     # make sure to read the information from env.sh
     . $ACDIR/env.sh
+    . $ACDIR/env-default-rules.sh
 
-    echo "$VERSION_INFO System:" > $ACDIR/configuration/jetty/version.txt
+    create_version_info_files
 
     # When a server is installed using this script
     # then we no longer define important options in
@@ -826,7 +907,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "${JETTY_CONFIG_DIR}/etc/jetty-http.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -870,22 +951,27 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SSH_CMD "mkdir -p $REMOTE_SERVER/plugins"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/logs"
         $SSH_CMD "mkdir -p $REMOTE_SERVER/tmp"
-        $SSH_CMD "mkdir -p $REMOTE_SERVER/configuration/jetty/etc"
+        $SSH_CMD "mkdir -p $REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc"
 
         $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-http.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/jetty-deploy.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
+        $SCP_CMD $PROJECT_HOME/java/target/${JETTY_CONFIG_SUBDIR}/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/env-default-rules.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/defineReverseProxyMappings.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/refreshInstance.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/stopReplicating.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
+        $SCP_CMD $PROJECT_HOME/java/target/generateMailProperties.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/logging.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     fi
@@ -901,7 +987,7 @@ if [[ "$@" == "remote-deploy" ]]; then
     $SCP_CMD $p2PluginRepository/plugins/*.jar $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/plugins/
 
     echo "$VERSION_INFO System: remotedly-deployed" > /tmp/version-remote-deploy.txt
-    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/version.txt
+    $SCP_CMD /tmp/version-remote-deploy.txt $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/${JETTY_CONFIG_SUBDIR}/version.txt
     rm /tmp/version-remote-deploy.txt
 
     echo "Deployed successfully. I did NOT change any configuration (no env.sh or config.ini or jetty.xml adaption), only code!"

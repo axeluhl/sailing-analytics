@@ -2,14 +2,11 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TimeZone;
@@ -25,7 +22,6 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -35,9 +31,8 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBasedTest {
 
@@ -50,15 +45,17 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     }
 
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         super.setUp("event_20110505_SailingTea", // Semifinale
-                /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
+                /* raceId */ "01ea3604-02ef-11e1-9efc-406186cbf87c",
+                /* liveUri */ null, /* storedUri */ null,
+                new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("CR Start (1)", new DegreePosition(53.562944999999985, 10.010104000000046));
-        markPositions.put("CR Start (2)", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("CR Start - 1", new DegreePosition(53.562944999999985, 10.010104000000046));
+        markPositions.put("CR Start - 2", new DegreePosition(53.562944999999985, 10.010104000000046));
         markPositions.put("Leeward mark", new DegreePosition(53.562145000000015, 10.009252));
         markPositions.put("Luvtonne", new DegreePosition(53.560581899999995, 10.005657));
         for (Waypoint w : getTrackedRace().getRace().getCourse().getWaypoints()) {
@@ -75,7 +72,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     public void testManeuversForDennis() throws NoWindException {
         Competitor dennis = getCompetitorByName("Gehrlein");
         NavigableSet<MarkPassing> dennisMarkPassings = getTrackedRace().getMarkPassings(dennis);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(dennis, dennisMarkPassings.first().getTimePoint(),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(dennis, dennisMarkPassings.first().getTimePoint(),
                 dennisMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.set(2011, 10-1, 30, 13, 32, 42);
@@ -94,7 +91,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
     }
 
-    private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,
+    private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
             MillisecondsTimePoint timePoint, int toleranceInMilliseconds) {
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == type && (newTack == null || newTack == maneuver.getNewTack()) &&

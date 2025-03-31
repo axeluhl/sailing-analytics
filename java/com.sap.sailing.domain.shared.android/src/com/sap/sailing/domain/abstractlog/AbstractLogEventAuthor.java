@@ -19,10 +19,9 @@ public interface AbstractLogEventAuthor extends Named, Comparable<AbstractLogEve
     /**
      * A lesser number represents a higher priority. Suggested priority levels:
      * <ol>
-     * <li>Start Vessel</li>
-     * <li>Finish Vessel</li>
+     * <li>Race Officer on a Vessel</li>
      * <li>Shore Control</li>
-     * <li>Compatibility priority for old events</li>
+     * <li>Demo Mode</li>
      * </ol>
      */
     int getPriority();

@@ -1,74 +1,104 @@
 package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
-import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 
+/**
+ * Equality is based solely on the {@link #getManeuver() maneuver} that constitutes the mark passing.
+ */
 public class MarkPassingWithContext implements HasMarkPassingContext {
-    private final HasTrackedRaceContext trackedRaceContext;
-    private final MarkPassing markPassing;
+    private static final long serialVersionUID = -337042113749307686L;
+    private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
+    private final Maneuver maneuver;
+    
+    private Double absoluteRank;
+    private boolean rankHasBeenInitialized;
+    private Wind wind;
 
-    public MarkPassingWithContext(HasTrackedRaceContext trackedRaceContext, MarkPassing markPassing) {
-        super();
-        this.trackedRaceContext = trackedRaceContext;
-        this.markPassing = markPassing;
+    public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver markPassingManeuver) {
+        this.trackedLegOfCompetitor = trackedLegOfCompetitor;
+        this.maneuver = markPassingManeuver;
     }
 
     @Override
-    public HasTrackedRaceContext getTrackedRaceContext() {
-        return trackedRaceContext;
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((maneuver == null) ? 0 : maneuver.hashCode());
+        return result;
     }
 
     @Override
-    public MarkPassing getMarkPassing() {
-        return markPassing;
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MarkPassingWithContext other = (MarkPassingWithContext) obj;
+        if (maneuver == null) {
+            if (other.maneuver != null)
+                return false;
+        } else if (!maneuver.equals(other.maneuver))
+            return false;
+        return true;
     }
 
     @Override
-    public Competitor getCompetitor() {
-        return markPassing.getCompetitor();
+    public Wind getWindInternal() {
+        return wind;
     }
 
     @Override
-    public Speed getSpeed() {
-        return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(getMarkPassing().getTimePoint());
+    public void setWindInternal(Wind wind) {
+        this.wind = wind;
     }
 
     @Override
-    public Speed getSpeedTenSecondsBefore() {
-        return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(getMarkPassing().getTimePoint().minus(10000 /* ms */));
+    public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
+        return trackedLegOfCompetitor;
     }
 
-    private TrackedRace getTrackedRace() {
-        return trackedRaceContext.getTrackedRace();
+    @Override
+    public Maneuver getManeuver() {
+        return maneuver;
     }
     
     @Override
-    public String getPreviousLegTypeSignifier() throws NoWindException {
-        final String result;
-        TrackedLeg previousLeg = getPreviousLeg();
-        if (previousLeg == null) {
-            result = "Start";
-        } else {
-            result = previousLeg.getLegType(getMarkPassing().getTimePoint()).toString();
-        }
-        return result;
+    public Waypoint getWaypoint() {
+        return getManeuver().getMarkPassing().getWaypoint();
+    }
+    
+    @Override
+    public NauticalSide getPassingSide() {
+        return getManeuver().getToSide();
     }
 
-    private TrackedLeg getPreviousLeg() {
-        final TrackedLeg result;
-        Waypoint waypoint = markPassing.getWaypoint();
-        if (waypoint == getTrackedRace().getRace().getCourse().getFirstWaypoint()) {
-            result = null;
-        } else {
-            result = getTrackedRace().getTrackedLegFinishingAt(waypoint);
+    @Override
+    public Double getRelativeRank() {
+        Leaderboard leaderboard = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
+        double competitorCount = Util.size(leaderboard.getCompetitors());
+        return getAbsoluteRank() == null ? null : getAbsoluteRank() / competitorCount;
+    }
+
+    @Override
+    public Double getAbsoluteRank() {
+        if (!rankHasBeenInitialized) {
+            TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
+            Competitor competitor = getTrackedLegOfCompetitorContext().getCompetitor();
+            int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint());
+            absoluteRank = rank == 0 ? null : Double.valueOf(rank);
+            rankHasBeenInitialized = true;
         }
-        return result;
+        return absoluteRank;
     }
 }

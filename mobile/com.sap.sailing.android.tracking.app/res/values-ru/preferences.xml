@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Экономия энергии"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"Выберите интервал отправки обновлений GPS"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Выберите максимально возможное значение, обеспечивающее экономию заряда аккумулятора и достаточную частоту обновления для вашего варианта использования."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"Обновления GPS будут отправляться на сервер%1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"каждые"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"незамедлительно"</item>
+    	<item>"5 секунд"</item>
+    	<item>"10 секунд"</item>
+    	<item>"20 секунд"</item>
+    	<item>"60 секунд"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Вкл."</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Выкл."</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Показать: магнитное"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Показать: истинное"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Направление"</string>
+</resources>

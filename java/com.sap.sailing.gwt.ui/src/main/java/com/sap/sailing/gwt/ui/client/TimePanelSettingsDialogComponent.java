@@ -1,78 +1,86 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.ui.client.UserService;
 
-public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
-		implements SettingsDialogComponent<T> {
-	protected DoubleBox refreshIntervalBox;
-	protected final StringMessages stringMessages;
-	protected final T initialSettings;
-	protected FlowPanel mainContentPanel;
+public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> implements SettingsDialogComponent<T> {
+    protected DoubleBox refreshIntervalBox;
+    protected final StringMessages stringMessages;
+    protected final T initialSettings;
+    protected FlowPanel mainContentPanel;
+    private UserService userService;
 
-	private static String STYLE_LABEL = "settingsDialogLabel";
-	private static String STYLE_INPUT = "settingsDialogValue";
-	private static String STYLE_BOXPANEL = "boxPanel";
+    private static String STYLE_LABEL = "settingsDialogLabel";
+    private static String STYLE_INPUT = "settingsDialogValue";
+    private static String STYLE_BOXPANEL = "boxPanel";
 
-	public TimePanelSettingsDialogComponent(T settings,
-			StringMessages stringMessages) {
-		this.stringMessages = stringMessages;
-		initialSettings = settings;
-	}
+    private final SecuredDTO raceDTO;
 
-	protected StringMessages getStringMessages() {
-		return stringMessages;
-	}
+    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages, UserService userService, SecuredDTO raceDTO) {
+        this.stringMessages = stringMessages;
+        initialSettings = settings;
+        this.userService = userService;
+        this.raceDTO = raceDTO;
+    }
 
-	@Override
-	public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-		mainContentPanel = new FlowPanel();
-		FlowPanel labelAndRefreshIntervalBoxPanel = new FlowPanel();
-		Label labelIntervalBox = new Label(stringMessages.refreshInterval()
-				+ ":");
-		labelIntervalBox.setStyleName(STYLE_LABEL);
-		labelAndRefreshIntervalBoxPanel.add(labelIntervalBox);
-		refreshIntervalBox = dialog.createDoubleBox(
-				((double) initialSettings.getRefreshInterval()) / 1000, 4);
-		refreshIntervalBox.setStyleName(STYLE_INPUT);
-		labelAndRefreshIntervalBoxPanel.setStyleName(STYLE_BOXPANEL);
-		labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
-		mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
-		return mainContentPanel;
-	}
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public T getResult() {
-		T result = (T) new TimePanelSettings();
-		result.setRefreshInterval(refreshIntervalBox.getValue() == null ? -1
-				: (long) (refreshIntervalBox.getValue() * 1000));
-		return result;
-	}
+    @Override
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
+        mainContentPanel = new FlowPanel();
+        FlowPanel labelAndRefreshIntervalBoxPanel = new FlowPanel();
+        Label labelIntervalBox = new Label(stringMessages.refreshInterval() + ":");
+        labelIntervalBox.setStyleName(STYLE_LABEL);
+        labelAndRefreshIntervalBoxPanel.add(labelIntervalBox);
+        refreshIntervalBox = dialog.createDoubleBox(((double) initialSettings.getRefreshInterval()) / 1000, 4);
+        refreshIntervalBox.setStyleName(STYLE_INPUT);
+        labelAndRefreshIntervalBoxPanel.setStyleName(STYLE_BOXPANEL);
+        labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
+        mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
+        return mainContentPanel;
+    }
 
-	@Override
-	public Validator<T> getValidator() {
-		return new Validator<T>() {
-			@Override
-			public String getErrorMessage(TimePanelSettings valueToValidate) {
-				String errorMessage = null;
-				if (valueToValidate.getRefreshInterval() < 500) {
-					errorMessage = stringMessages
-							.refreshIntervalMustBeGreaterThanXSeconds("0.5");
-				}
-				return errorMessage;
-			}
-		};
-	}
+    @SuppressWarnings("unchecked")
+    @Override
+    public T getResult() {
+        long refreshInterval = refreshIntervalBox.getValue() == null ? -1
+                : (long) (refreshIntervalBox.getValue() * 1000);
+        return (T) new TimePanelSettings(refreshInterval);
+    }
 
-	@Override
-	public FocusWidget getFocusWidget() {
-		return refreshIntervalBox;
-	}
+    @Override
+    public Validator<T> getValidator() {
+        return new Validator<T>() {
+            @Override
+            public String getErrorMessage(TimePanelSettings valueToValidate) {
+                String errorMessage = null;
+                if (userService.hasPermission(raceDTO, SecuredDomainType.TrackedRaceActions.DETAIL_TIMER)) {
+                    if (valueToValidate.getRefreshInterval() < 50) {
+                        errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.05");
+                    }
+                } else {
+                    if (valueToValidate.getRefreshInterval() < 500) {
+                        errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.5");
+                    }
+                }
+                return errorMessage;
+            }
+        };
+    }
+
+    @Override
+    public FocusWidget getFocusWidget() {
+        return refreshIntervalBox;
+    }
 }

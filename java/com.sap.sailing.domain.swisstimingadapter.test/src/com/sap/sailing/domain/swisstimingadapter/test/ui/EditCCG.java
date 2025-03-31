@@ -10,6 +10,7 @@
  */
 package com.sap.sailing.domain.swisstimingadapter.test.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -248,18 +249,22 @@ public class EditCCG extends javax.swing.JDialog {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        List<String> devices = new ArrayList<String>();
-        devices.add(jSailNumber1.getText());
-        if (jRadioButton2.isSelected())
-            devices.add(jSailNumber2.getText());
-        marks.add(new MarkWithDesc(jMarkDescription.getText(), Integer.parseInt(jMarkIndex.getText()),devices));
+        List<Serializable> deviceIds = new ArrayList<>();
+        deviceIds.add(jSailNumber1.getText());
+        if (jRadioButton2.isSelected()) {
+            deviceIds.add(jSailNumber2.getText());
+        }
+        marks.add(new MarkWithDesc(jMarkDescription.getText(), Integer.parseInt(jMarkIndex.getText()), deviceIds));
         jMarkList.setListData(marks.toArray(new CCGMessage[0]));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        for (CCGMessage o : jMarkList.getSelectedValuesList())
-            marks.remove(o);
+        for (CCGMessage o : jMarkList.getSelectedValuesList()) {
+            for (final Mark m : o.getMarkList()) {
+                marks.remove(m);
+            }
+        }
         jMarkList.setListData(marks.toArray(new CCGMessage[0]));
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -269,13 +274,13 @@ public class EditCCG extends javax.swing.JDialog {
     
     private class MarkWithDesc extends MarkImpl {
         
-        public MarkWithDesc(String description, int index, Iterable<String> devices) {
-            super(description, index, devices, /* markType */ null);
+        public MarkWithDesc(String description, int index, Iterable<Serializable> deviceIds) {
+            super(description, index, deviceIds, /* markType */ null);
         }
         
         @Override
         public String toString(){
-            return "Mark " + getIndex() + ": " + getDescription() +  getDevices();
+            return "Mark " + getIndex() + ": " + getDescription() +  getDeviceIds();
         }
     }
     

@@ -2,7 +2,7 @@ package com.sap.sailing.selenium.test.leaderboard;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -10,9 +10,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
-import com.sap.sailing.selenium.core.WebDriverWindow;
-import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -35,7 +34,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private static final String BMW_CUP_JSON_URL =
-            "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+            "http://event2.tractrac.com/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
     private static final String REGATTA = "The BMW Cup"; //$NON-NLS-1$
     private static final String LEADERBOARD = "The BMW Cup (J80)"; //$NON-NLS-1$
     private static final String EVENT = "BMW Cup"; //$NON-NLS-1$
@@ -46,7 +45,6 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private TrackableRaceDescriptor trackableRace;
     private TrackedRaceDescriptor trackedRace;
     private RaceDescriptor raceColumn;
-    private AdminConsolePage adminConsole;
     
     @Override
     @Before
@@ -54,56 +52,59 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRace = new TrackableRaceDescriptor(EVENT,  RACE, BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
-        this.raceColumn = new RaceDescriptor("R3", "Default", false, false, 0.0);
+        this.raceColumn = new RaceDescriptor("D3", "Default", false, false, 0.0);
         clearState(getContextRoot());
         super.setUp();
-        adminConsole = configureRegattaAndLeaderboard();
+        configureRegattaAndLeaderboard();
     }
     
     @Test
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
-        WindowManager manager = this.environment.getWindowManager();
-        WebDriverWindow adminConsoleWindow = manager.getCurrentWindow();
-        WebDriverWindow leaderboardWindow = manager.openNewWindow();
-        leaderboardWindow.switchToWindow();
-        LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
-        LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
-        List<String> races = leaderboardTable.getRaceNames();
-        assertThat("Expected only R3", races, equalTo(Arrays.asList("R3")));
-        int r3ColumnIndex = leaderboardTable.getColumnIndex("R3");
-        for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(r3ColumnIndex);
-            assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
-        }
-        adminConsoleWindow.switchToWindow();
-        // Go to the administration console and unset the "useStartTimeInference" flag
-        RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
-        RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
-        RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
-        regattaEditDialog.setUseStartTimeInference(false);
-        regattaEditDialog.pressOk();
-        leaderboardWindow.switchToWindow();
-        leaderboard.refresh();
-        for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(r3ColumnIndex);
-            assertEquals("", raceColumnContent); // all competitors have an empty score because there is no start time anymore
-        }
-        leaderboardWindow.close();
+        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+            final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(leaderboardWindowDriver);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, /* race details */ false);
+            LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
+            List<String> races = leaderboardTable.getRaceNames();
+            assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
+            int d3ColumnIndex = leaderboardTable.getColumnIndex("D3");
+            for (LeaderboardEntry e : leaderboardTable.getEntries()) {
+                String raceColumnContent = e.getColumnContent(d3ColumnIndex);
+                assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
+            }
+
+            WebDriver driver = adminConsoleWindow.switchToWindow();
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(driver, getContextRoot());
+            // Go to the administration console and unset the "useStartTimeInference" flag
+            RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
+            RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
+            RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
+            regattaEditDialog.setUseStartTimeInference(false);
+            regattaEditDialog.pressOk();
+            
+            leaderboardWindow.switchToWindow();
+            leaderboard.refresh();
+            for (LeaderboardEntry e : leaderboardTable.getEntries()) {
+                String raceColumnContent = e.getColumnContent(d3ColumnIndex);
+                assertEquals("", raceColumnContent); // all competitors have an empty score because there is no start time anymore
+            }
+        });
     }
     
-    private AdminConsolePage configureRegattaAndLeaderboard() {
+    private void configureRegattaAndLeaderboard() {
         // Open the admin console for some configuration steps
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // Create a regatta with 1 series and 5 races as well as a leaderboard
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
-        regattaStructure.createRegatta(this.regatta);
+        regattaStructure.createRegatta(this.regatta, /* withDefaultLeaderboard */ false);
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
         seriesDialog.addRaces(3, 3);
         seriesDialog.pressOk();
+        regattaDetails.deleteSeries("Default");
         // Start the tracking for the races and wait until they are ready to use
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
-        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.addConnectionAndListTrackableRaces(BMW_CUP_JSON_URL);
         tracTracEvents.setReggataForTracking(this.regatta);
         tracTracEvents.setTrackSettings(false, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
@@ -114,6 +115,5 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
         leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
-        return adminConsole;
     }
 }

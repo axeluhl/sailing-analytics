@@ -11,7 +11,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,11 +22,12 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.common.impl.RenamableImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -32,7 +35,7 @@ import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
-public class CourseImpl extends NamedImpl implements Course {
+public class CourseImpl extends RenamableImpl implements Course {
 
     private static final long serialVersionUID = -4280487649617132403L;
 
@@ -40,7 +43,11 @@ public class CourseImpl extends NamedImpl implements Course {
     
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
+    private Waypoint firstWaypoint;
+    private Waypoint lastWaypoint;
     private final List<Leg> legs;
+    private UUID originatingCourseTemplateId;
+    private final Map<Mark, UUID> associatedRoles;
     private transient Set<CourseListener> listeners;
     private transient NamedReentrantReadWriteLock lock;
     
@@ -52,18 +59,25 @@ public class CourseImpl extends NamedImpl implements Course {
     private final Serializable updateMonitor;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
+        this(name, waypoints, /* originatingCourseTemplateId */ null);
+    }
+
+    public CourseImpl(String name, Iterable<Waypoint> waypoints, UUID originatingCourseTemplateId) {
         super(name);
-        updateMonitor = ""; 
+        this.associatedRoles = new HashMap<>();
+        this.originatingCourseTemplateId = originatingCourseTemplateId;
+        updateMonitor = ""+new Random().nextDouble(); 
         lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
                 /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
-        this.waypoints = new ArrayList<Waypoint>();
-        waypointIndexes = new HashMap<Waypoint, Integer>();
+        this.waypoints = new ArrayList<>();
+        waypointIndexes = new HashMap<>();
         legs = new ArrayList<Leg>();
         Iterator<Waypoint> waypointIter = waypoints.iterator();
         int i=0;
         if (waypointIter.hasNext()) {
             Waypoint previous = waypointIter.next();
+            firstWaypoint = previous;
             this.waypoints.add(previous);
             waypointIndexes.put(previous, i++);
             while (waypointIter.hasNext()) {
@@ -75,6 +89,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 legs.add(leg);
                 previous = current;
             }
+            lastWaypoint = previous;
         }
         assert this.waypoints.size() == waypointIndexes.size();
     }
@@ -142,7 +157,16 @@ public class CourseImpl extends NamedImpl implements Course {
             if (waypoints.size() > 1) {
                 legs.add(new LegImpl(this, waypoints.size()-2));
             }
+            if (zeroBasedPosition == 0) {
+                firstWaypoint = waypointToAdd;
+            }
+            if (zeroBasedPosition == waypoints.size()-1) {
+                lastWaypoint = waypointToAdd;
+            }
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', before notifying listeners");
+            // note: we're still holding the course's write lock, so if any listener should synchronize on any object
+            // then all other code also synchronizing on those objects and requiring a lock on this course must make sure to obtain
+            // this course's lock *before* the synchronized block. See also bug 5803.
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
             logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "', after notifying listeners");
             assert waypoints.size() == waypointIndexes.size();
@@ -172,6 +196,17 @@ public class CourseImpl extends NamedImpl implements Course {
                 if (!legs.isEmpty()) { // if we had only one waypoint, we didn't have any legs
                     // last waypoint was removed; remove last leg
                     legs.remove(legs.size() - 1);
+                }
+                if (waypoints.isEmpty()) {
+                    firstWaypoint = null;
+                    lastWaypoint = null;
+                } else {
+                    if (zeroBasedPosition == 0) {
+                        firstWaypoint = waypoints.get(0);
+                    }
+                    if (zeroBasedPosition == waypoints.size()) {
+                        lastWaypoint = waypoints.get(waypoints.size()-1);
+                    }
                 }
                 logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "', before notifying listeners");
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
@@ -209,12 +244,16 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public Leg getFirstLeg() {
-        try {
-            return legs.get(0);
-        } catch (IndexOutOfBoundsException e) {
-            // yes, it's a bit clumsy, but this way it's still atomic without requiring a lock which is even more expensive
-            return null;
+        Leg result = null;
+        if (!legs.isEmpty()) {
+            try {
+                result = legs.get(0);
+            } catch (IndexOutOfBoundsException e) {
+                // The legs collection could have turned empty since the check; we don't want to have to lock here...
+                // Yes, it's a bit clumsy, but this way it's still atomic without requiring a lock which is even more expensives
+            }
         }
+        return result;
     }
 
     @Override
@@ -243,24 +282,13 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
+    public Leg getLeg(int zeroBasedIndexOfWaypoint) {
+        return legs.get(zeroBasedIndexOfWaypoint);
+    }
+
+    @Override
     public String toString() {
-        lockForRead();
-        try {
-            StringBuilder result = new StringBuilder(getName());
-            result.append(": ");
-            boolean first = true;
-            for (Waypoint waypoint : getWaypoints()) {
-                if (!first) {
-                    result.append(" -> ");
-                } else {
-                    first = false;
-                }
-                result.append(waypoint);
-            }
-            return result.toString();
-        } finally {
-            unlockAfterRead();
-        }
+        return internalToString();
     }
 
     @Override
@@ -301,22 +329,12 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public Waypoint getFirstWaypoint() {
-        lockForRead();
-        try {
-            return waypoints.isEmpty() ? null : waypoints.get(0);
-        } finally {
-            unlockAfterRead();
-        }
+        return firstWaypoint;
     }
 
     @Override
     public Waypoint getLastWaypoint() {
-        lockForRead();
-        try {
-            return waypoints.isEmpty() ? null : waypoints.get(waypoints.size() - 1);
-        } finally {
-            unlockAfterRead();
-        }
+        return lastWaypoint;
     }
 
     @Override
@@ -330,7 +348,9 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
+    public void update(Iterable<Pair<ControlPoint, PassingInstruction>> newControlPoints,
+            Map<Mark, UUID> associatedRoles, UUID originatingCouseTemplateIdOrNull, DomainFactory baseDomainFactory)
+            throws PatchFailedException {
         Patch<Waypoint> patch = null;
         synchronized (updateMonitor) {
             lockForRead();
@@ -370,6 +390,9 @@ public class CourseImpl extends NamedImpl implements Course {
                 lockForWrite();
                 try {
                     logger.info("applying course update " + patch + " to course " + this);
+                    this.getAssociatedRoles().clear();
+                    this.getAssociatedRoles().putAll(associatedRoles);
+                    this.originatingCourseTemplateId = originatingCouseTemplateIdOrNull;
                     CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
                     patch.applyToInPlace(courseAsWaypointList);
                 } finally {
@@ -377,5 +400,20 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
             }
         }
+    }
+
+    @Override
+    public UUID getOriginatingCourseTemplateIdOrNull() {
+        return originatingCourseTemplateId;
+    }
+
+    @Override
+    public Map<Mark, UUID> getAssociatedRoles() {
+        return associatedRoles;
+    }
+
+    @Override
+    public void addRoleMapping(Mark mark, UUID markRoleId) {
+        associatedRoles.put(mark, markRoleId);
     }
 }

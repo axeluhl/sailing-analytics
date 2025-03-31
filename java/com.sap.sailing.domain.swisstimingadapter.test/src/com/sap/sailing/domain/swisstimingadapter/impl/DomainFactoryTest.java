@@ -2,12 +2,12 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
 
@@ -17,7 +17,7 @@ public class DomainFactoryTest {
 
     @Before
     public void before() {
-        com.sap.sailing.domain.base.DomainFactory baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
+        com.sap.sailing.domain.base.DomainFactory baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         swissTimingDomainFactory = new com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl(
                 baseDomainFactory);
     }
@@ -53,14 +53,4 @@ public class DomainFactoryTest {
         assertThat(raceType, is(notNullValue()));
         assertThat(raceType.getRaceCode(), is(OlympicRaceCode.UNKNOWN));
     }
-    
-    @Ignore
-    @Test
-    public void testCompetitorLookup() throws Exception {
-        before();
-        
-//        swissTimingDomainFactory.getOrCreateCompetitor(boatID, threeLetterIOCCode, name, boatClass);
-
-    }
-
 }

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 
 public class KnotSpeedWithBearingImpl extends AbstractSpeedWithBearingImpl {
     private static final long serialVersionUID = -2300633070560631053L;

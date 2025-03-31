@@ -10,17 +10,24 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sse.ServerStartupConstants;
+import com.sap.sse.rest.StreamingOutputUtil;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+
 @Path("/threads")
-public class ThreadManager {
+public class ThreadManager extends StreamingOutputUtil {
     @Context ServletContext servletContext; 
 
     @Path("")
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getThreads() {
+        checkThreadsPermission();
         JSONArray threadsJson = new JSONArray();
         Thread[] threads = new Thread[10000];
         Thread.enumerate(threads);
@@ -35,8 +42,13 @@ public class ThreadManager {
                 threadsJson.add(threadJson);
             }
         }
-        String json = threadsJson.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(streamingOutput(threadsJson), MediaType.APPLICATION_JSON).build();
+    }
+
+    private void checkThreadsPermission() {
+        SecurityUtils.getSubject().checkPermissions(SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                SecuredSecurityTypes.ServerActions.THREADS,
+                new TypeRelativeObjectIdentifier(ServerStartupConstants.SERVER_NAME)));
     }
 
     @SuppressWarnings("deprecation") // using Thread.suspend()
@@ -44,6 +56,7 @@ public class ThreadManager {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response suspend(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];
@@ -56,21 +69,74 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }
 
-    @SuppressWarnings("deprecation") // using Thread.suspend()
+    @SuppressWarnings("deprecation") // using Thread.stop()
+    @Path("{name}/stop")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response stop(@PathParam("name") String name) {
+        checkThreadsPermission();
+        final Response response;
+        JSONObject result = new JSONObject();
+        Thread[] threads = new Thread[10000];
+        boolean found = false;
+        Thread.enumerate(threads);
+        for (Thread t : threads) {
+            if (t != null && t.getName().equals(name)) {
+                t.stop();
+                result.put("status", "OK");
+                found = true;
+            }
+        }
+        if (!found) {
+            result.put("status", "Not found");
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
+        } else {
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
+
+    @Path("{name}/interrupt")
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    public Response interrupt(@PathParam("name") String name) {
+        checkThreadsPermission();
+        final Response response;
+        JSONObject result = new JSONObject();
+        Thread[] threads = new Thread[10000];
+        boolean found = false;
+        Thread.enumerate(threads);
+        for (Thread t : threads) {
+            if (t != null && t.getName().equals(name)) {
+                t.interrupt();
+                result.put("status", "OK");
+                found = true;
+            }
+        }
+        if (!found) {
+            result.put("status", "Not found");
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
+        } else {
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
+        }
+        return response;
+    }
+
+    @SuppressWarnings("deprecation") // using Thread.resume()
     @Path("{name}/resume")
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response resume(@PathParam("name") String name) {
+        checkThreadsPermission();
         final Response response;
         JSONObject result = new JSONObject();
         Thread[] threads = new Thread[10000];
@@ -83,12 +149,11 @@ public class ThreadManager {
                 found = true;
             }
         }
-        String json = result.toJSONString();
         if (!found) {
             result.put("status", "Not found");
-            response = Response.status(Status.NOT_FOUND).entity(json).build();
+            response = Response.status(Status.NOT_FOUND).entity(streamingOutput(result)).build();
         } else {
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(streamingOutput(result), MediaType.APPLICATION_JSON).build();
         }
         return response;
     }

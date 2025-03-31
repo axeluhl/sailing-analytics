@@ -13,12 +13,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -75,20 +81,30 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
 
     @Override
     public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
-            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint) {
+            Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint, ScoringScheme scoringScheme) {
+        return getDiscardedRaceColumns(competitor, leaderboard, raceColumnsToConsider, timePoint, scoringScheme, new LeaderboardDTOCalculationReuseCache(timePoint));
+    }
+
+    @Override
+    public Set<RaceColumn> getDiscardedRaceColumns(final Competitor competitor, final Leaderboard leaderboard,
+                Iterable<RaceColumn> raceColumnsToConsider, final TimePoint timePoint,
+                ScoringScheme scoringScheme, Function<RaceColumn, Double> totalPointsSupplier,
+                WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
-        Set<RaceColumn> result;
+        final Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
-            final Map<RaceColumn, Double> netPointsForCompetitorPerColumn = new HashMap<>();
-            List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
-            for (RaceColumn raceColumn : raceColumnsToConsider) {
+            final Map<RaceColumn, Double> totalPointsForCompetitorPerColumn = new HashMap<>();
+            final List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
+            for (final RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
-                    netPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
+                    final Double totalPoints = totalPointsSupplier.apply(raceColumn);
+                    totalPointsForCompetitorPerColumn.put(raceColumn,
+                            totalPoints == null ? null : scoringScheme.getScoreScaledByFactor(raceColumn, totalPoints));
                 }
             }
             result = new HashSet<RaceColumn>();
-            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
+            final Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
                 @Override
                 public int compare(RaceColumn raceColumn1, RaceColumn raceColumn2) {
                     // invert to get bad races first; have the score comparator sort null scores as "better" so they end
@@ -96,25 +112,47 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                     return -leaderboard
                             .getScoringScheme()
                             .getScoreComparator(/* nullScoresAreBetter */true)
-                            .compare(netPointsForCompetitorPerColumn.get(raceColumn1),
-                                    netPointsForCompetitorPerColumn.get(raceColumn2));
+                            .compare(totalPointsForCompetitorPerColumn.get(raceColumn1),
+                                    totalPointsForCompetitorPerColumn.get(raceColumn2));
                 }
             };
             Collections.sort(sortedRaces, comparator);
-            int i=0;
-            Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
-            while (badRacesIter.hasNext() && i<resultsToDiscard) {
+            final Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
+            while (badRacesIter.hasNext() && result.size()<resultsToDiscard) {
                 final RaceColumn badRace = badRacesIter.next();
                 final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);
                 if (maxPointsReason == null || maxPointsReason.isDiscardable()) {
-                    result.add(badRace);
-                    i++;
+                    addDiscardIfWithinSeriesLimits(result, badRace);
                 }
             }
         } else {
             result = Collections.emptySet();
         }
         return result;
+    }
+
+    /**
+     * Only adds the discard if the {@link Series} to which the {@code badRace} {@link RaceColumn} belongs
+     * does not define a separate limit for the number of its races that may be discarded, or if that number
+     * is less than the number of races discarded so far from that series.
+     */
+    private void addDiscardIfWithinSeriesLimits(Set<RaceColumn> result, RaceColumn badRace) {
+        final Series series;
+        if (!(badRace instanceof RaceColumnInSeries) ||
+                (series = ((RaceColumnInSeries) badRace).getSeries()).getMaximumNumberOfDiscards() == null ||
+                getRacesDiscardedFromSeries(result, series) < series.getMaximumNumberOfDiscards()) {
+            result.add(badRace);
+        }
+    }
+
+    private int getRacesDiscardedFromSeries(Set<RaceColumn> result, Series series) {
+        int count = 0;
+        for (final RaceColumn rc : result) {
+            if (rc instanceof RaceColumnInSeries && ((RaceColumnInSeries) rc).getSeries() == series) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private int getNumberOfResultsToDiscard(Competitor competitor, Iterable<RaceColumn> raceColumnsToConsider,

@@ -10,6 +10,7 @@ import java.util.Locale;
  */
 public interface FileStorageServiceProperty extends Serializable {
     boolean isRequired();
+    boolean isPassword();
     String getName();
     
     /**

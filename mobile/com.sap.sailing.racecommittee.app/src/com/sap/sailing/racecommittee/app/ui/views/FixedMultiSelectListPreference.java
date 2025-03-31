@@ -21,12 +21,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import android.content.Context;
-import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
-import android.util.AttributeSet;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.preference.Preference;
+import android.support.v14.preference.MultiSelectListPreference;
+import android.util.AttributeSet;
 
 /**
  * Applies the fix of
@@ -55,7 +55,6 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
         obtainReflectionInformation();
     }
 
-    @SuppressWarnings("unchecked")
     private void obtainReflectionInformation() {
         fixNeeded = false;
         if (android.os.Build.VERSION.SDK_INT < VERSION_CODE_JELLY_BEAN) {
@@ -64,7 +63,10 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
             try {
                 mValuesField = MultiSelectListPreference.class.getDeclaredField("mValues");
                 mValuesField.setAccessible(true);
-                mValuesReference = (Set<String>) mValuesField.get(this);
+
+                @SuppressWarnings("unchecked")
+                Set<String> valueReference = (Set<String>) mValuesField.get(this);
+                mValuesReference = valueReference;
 
                 persistStringSetMethod = Preference.class.getDeclaredMethod("persistStringSet", java.util.Set.class);
                 persistStringSetMethod.setAccessible(true);
@@ -93,8 +95,8 @@ public class FixedMultiSelectListPreference extends MultiSelectListPreference {
         super.setValues(values);
     }
 
-    private void fixedSetValues(Set<String> values) throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException {
+    private void fixedSetValues(Set<String> values)
+            throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         mValuesReference.clear();
         mValuesReference.addAll(values);
 

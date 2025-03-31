@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Speed;
 
 public class KilometersPerHourSpeedImpl extends AbstractSpeedImpl implements Speed {
     private static final long serialVersionUID = -524654796500981303L;

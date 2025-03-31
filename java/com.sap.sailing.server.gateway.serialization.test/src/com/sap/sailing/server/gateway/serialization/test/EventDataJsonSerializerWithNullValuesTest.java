@@ -20,18 +20,22 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public class EventDataJsonSerializerWithNullValuesTest {
     protected final UUID expectedId = UUID.randomUUID();
@@ -41,7 +45,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL = null;
-    protected final URL expectedLogoImageURL = null;
+    protected final URL expectedBaseURL = null;
     protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
@@ -58,17 +62,19 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
-        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
-        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
-        
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
+
         when(expectedLeaderbaordGroup.getId()).thenReturn(UUID.randomUUID());
         when(expectedLeaderbaordGroup.getName()).thenReturn("LG");
         when(expectedLeaderbaordGroup.getDescription()).thenReturn("LG Description");
@@ -79,31 +85,20 @@ public class EventDataJsonSerializerWithNullValuesTest {
     @Test
     public void testBasicAttributes() throws MalformedURLException {
         JSONObject result = serializer.serialize(event);
-        assertEquals(
-                expectedId,
+        assertEquals(expectedId,
                 UUID.fromString(result.get(EventBaseJsonSerializer.FIELD_ID).toString()));
-        assertEquals(
-                expectedName,
+        assertEquals(expectedName,
                 result.get(EventBaseJsonSerializer.FIELD_NAME));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedOfficialWebsiteURL,
+        assertEquals(expectedOfficialWebsiteURL,
                 result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
-        assertEquals(
-                expectedLogoImageURL,
-                result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL) == null ? null :
-                    new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
-        assertEquals(
-                expectedDescription,
+        assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
-        assertEquals(
-                expectedStartDate,
+        assertEquals(expectedStartDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_START_DATE)).longValue()));
-        assertEquals(
-                expectedEndDate,
+        assertEquals(expectedEndDate,
                 new MillisecondsTimePoint(((Number) result.get(EventBaseJsonSerializer.FIELD_END_DATE)).longValue()));
     }
 

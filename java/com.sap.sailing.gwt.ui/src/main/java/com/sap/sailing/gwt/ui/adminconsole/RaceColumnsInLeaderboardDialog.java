@@ -110,8 +110,7 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         int racesCount = raceNameEntryFields.size();
         for(int i = 0; i < racesCount; i++) {
             String raceColumnName = raceNameEntryFields.get(i).getValue();
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
-            raceColumnDTO.setName(raceColumnName);
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO(raceColumnName, /* oneAlwaysStaysOne */ false);
             raceColumnDTO.setMedalRace(isMedalRaceCheckboxes.get(i).getValue());
             racesWithFleet.add(raceColumnDTO);
         }
@@ -188,10 +187,5 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
             raceColumnsGrid = new Grid(0, 0);
         }
         parentPanel.insert(raceColumnsGrid, widgetIndex);
-    }
-
-    @Override
-    public void show() {
-        super.show();
     }
 }

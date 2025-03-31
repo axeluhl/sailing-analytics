@@ -9,7 +9,7 @@ public class LoginEntryPoint extends AbstractSecurityEntryPoint {
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
         RootPanel rootPanel = RootPanel.get();
-        rootPanel.add(new LoginView(getUserManagementService(), getUserService(), StringMessages.INSTANCE,
+        rootPanel.add(new LoginView(getUserManagementWriteService(), getUserService(), StringMessages.INSTANCE,
                 getApplicationName(StringMessages.INSTANCE.signIn())));
     }
 }

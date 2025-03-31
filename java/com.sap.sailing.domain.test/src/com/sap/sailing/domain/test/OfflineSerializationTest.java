@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +30,6 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -47,6 +47,14 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.interfaces.UserStore;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
     private static final Logger logger = Logger.getLogger(OfflineSerializationTest.class.getName());
@@ -59,7 +67,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
      */
     @Test
     public void testHashCodeOfSerializedPairIsConsistent() throws ClassNotFoundException, IOException {
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         final Throwable s1 = new Throwable();
         final Throwable s2 = new Throwable();
         com.sap.sse.common.Util.Pair<Throwable, Throwable> p =
@@ -91,15 +99,43 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
      */
     @Test
     public void testSerializingIntArray() throws ClassNotFoundException, IOException {
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         int[] intArray = new int[] { 5, 8 };
         int[] clone = cloneBySerialization(intArray, receiverDomainFactory);
         assertTrue(Arrays.equals(intArray, clone));
     }
+    
+    @Test
+    public void testSerializingUserStore() throws UserGroupManagementException, UserManagementException, ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        UserStore userStore = new UserStoreImpl("defaultTenant");
+        userStore.clear();
+        UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin"+SecurityService.TENANT_SUFFIX);
+        User user = userStore.createUser("admin", "", new LockingAndBanningImpl());
+        defaultTenant.add(user);
+        userStore.updateUserGroup(defaultTenant);
+        user.getDefaultTenantMap().put("testserver", defaultTenant);
+        userStore.updateUser(user);
+
+        {
+            User admin = userStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
+        UserStore deserializedUserStore = cloneBySerialization(userStore, receiverDomainFactory);
+        assertNotNull(deserializedUserStore);
+        {
+            User admin = deserializedUserStore.getUserByName("admin");
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
+            assertTrue(adminTenant.contains(admin));
+            assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
+        }
+    }
 
     @Test
     public void testSerializingEventWithLeaderboardGroups() throws ClassNotFoundException, IOException {
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         Event e = new EventImpl("Event Name", MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(
                 Duration.ONE_DAY.times(10)), "At Home", /* is public */true, UUID.randomUUID());
         LeaderboardGroup lg1 = new LeaderboardGroupImpl("LG1", "LG1 Description", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Collections.<Leaderboard> emptyList());
@@ -117,7 +153,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
      */
     @Test
     public void testSerializingResultDiscardingRuleImpl() throws ClassNotFoundException, IOException {
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         ThresholdBasedResultDiscardingRuleImpl rdri = new ThresholdBasedResultDiscardingRuleImpl(new int[] { 5, 8 });
         ThresholdBasedResultDiscardingRuleImpl clone = cloneBySerialization(rdri, receiverDomainFactory);
         assertTrue(Arrays.equals(rdri.getDiscardIndexResultsStartingWithHowManyRaces(),
@@ -127,7 +163,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     // see bug 1605
     @Test
     public void testSerializingOverallLeaderboardWithFactorOnColumn() throws ClassNotFoundException, IOException {
-        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
+        Leaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ThresholdBasedResultDiscardingRuleImpl(new int[] { 3, 5 }), new HighPoint(), new CourseAreaImpl("Alpha", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null));
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("LeaderboardGroup", "Test Leaderboard Group", /* displayName */ null, /* displayGroupsInReverseOrder */ false, Arrays.asList(new Leaderboard[] { leaderboard }));
         final LeaderboardGroupMetaLeaderboard overallLeaderboard =
                 new LeaderboardGroupMetaLeaderboard(leaderboardGroup, new HighPoint(),
@@ -136,16 +172,16 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         final double FACTOR = 2.0;
         overallLeaderboard.getRaceColumnByName("Test Leaderboard").setFactor(FACTOR);
         
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         LeaderboardGroup clone = cloneBySerialization(leaderboardGroup, receiverDomainFactory);
-        assertEquals(FACTOR, overallLeaderboard.getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
-        assertEquals(FACTOR, clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
+        assertEquals(FACTOR, overallLeaderboard.getScoringScheme().getScoreFactor(overallLeaderboard.getRaceColumnByName("Test Leaderboard")), 0.00000001);
+        assertEquals(FACTOR, clone.getOverallLeaderboard().getScoringScheme().getScoreFactor(clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard")), 0.00000001);
     }
     
     @Test
     public void testIdentityStabilityOfMarkSerialization() throws ClassNotFoundException, IOException {
-        DomainFactory senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
         Mark receiversMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
         Mark receiversSecondCopyOfMark1 = cloneBySerialization(sendersMark1, receiverDomainFactory);
@@ -154,8 +190,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
 
     @Test
     public void testIdentityStabilityOfWaypointSerialization() throws ClassNotFoundException, IOException {
-        DomainFactory senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         Mark sendersMark1 = senderDomainFactory.getOrCreateMark("TestBuoy1");
         Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersMark1, /*passingInstruction*/null);
         Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
@@ -165,8 +201,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
 
     @Test
     public void testIdentityStabilityOfBoatClassSerialization() throws ClassNotFoundException, IOException {
-        DomainFactory senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         BoatClass sendersBoatClass1 = senderDomainFactory.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true);
         BoatClass receiversBoatClass1 = cloneBySerialization(sendersBoatClass1, receiverDomainFactory);
         BoatClass receiversSecondCopyOfBoatClass1 = cloneBySerialization(sendersBoatClass1, receiverDomainFactory);
@@ -175,8 +211,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
 
     @Test
     public void testIdentityStabilityOfNationalitySerialization() throws ClassNotFoundException, IOException {
-        DomainFactory senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         Nationality sendersNationality1 = senderDomainFactory.getOrCreateNationality("GER");
         Nationality receiversNationality1 = cloneBySerialization(sendersNationality1, receiverDomainFactory);
         Nationality receiversSecondCopyOfNationality1 = cloneBySerialization(sendersNationality1, receiverDomainFactory);
@@ -185,15 +221,14 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
 
     @Test
     public void testIdentityStabilityOfCompetitorSerialization() throws ClassNotFoundException, IOException {
-        DomainFactory senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        DomainFactory senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         String competitorName = "Tina Maximiliane Lutz";
-        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                        senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
+                        /* dateOfBirth */null, "This is Rigo, the coach")), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);
@@ -201,8 +236,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
     
     @Test
     public void ensureSameObjectWrittenTwiceComesOutIdentical() throws ClassNotFoundException, IOException {
-        final DomainFactoryImpl senderDomainFactory = new DomainFactoryImpl();
-        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        final DomainFactoryImpl senderDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER);
         Nationality n = senderDomainFactory.getOrCreateNationality("GER");
         Object[] copies = cloneManyBySerialization(receiverDomainFactory, n, n);
         assertEquals(2, copies.length);

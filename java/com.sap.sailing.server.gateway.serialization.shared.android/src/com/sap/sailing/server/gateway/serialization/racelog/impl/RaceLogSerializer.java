@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogSerializer implements JsonSerializer<RaceLog> {
 
@@ -23,7 +23,7 @@ public class RaceLogSerializer implements JsonSerializer<RaceLog> {
     }
     
     @Override
-    public JSONObject serialize(RaceLog object) {
+    public JSONObject serialize(final RaceLog object) {
         JSONObject result = new JSONObject();
         object.lockForRead();
         try {

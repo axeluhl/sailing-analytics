@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.sap.sse.operationaltransformation.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.junit4;bundle-version="4.8.2",
+Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.replication
 Fragment-Host: com.sap.sse.operationaltransformation
+Automatic-Module-Name: com.sap.sse.operationaltransformation.test

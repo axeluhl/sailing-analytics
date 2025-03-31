@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/remoteserverreference[{/name}]</h2>
+
+<b>Description:</b>
+<p>Lists the remote server references managed by this server</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    The service requires the requesting user to have permission <tt>SERVER:CONFIGURE_REMOTE_INSTANCES:{SERVER_NAME}</tt> for the
+    server to which the request is sent.
+    <tr>
+        <td>Example 1:</td>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/remoteserverreference" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        produces output:<pre>
+        [
+	  {
+	    "remoteServerName": "Local8889",
+	    "remoteServerUrl": "http://127.0.0.1:8889",
+	    "include": true,
+	    "eventIds": []
+	  },
+	  {
+	    "remoteServerName": "LYC",
+	    "remoteServerUrl": "https://lyc.sapsailing.com",
+	    "include": true,
+	    "eventIds": [
+	      "e611747c-a09a-4f41-b3ca-11ffbfe46c17",
+	      "97cac659-6d23-4d86-9b60-44c1447b6e88"
+	    ]
+	  }
+	]
+        </pre>
+        which describes the server references currently known by this server.
+        </td>
+        <td>Example 2:</td>
+        <td>curl -X POST http://127.0.0.1:8889/sailingserver/api/v1/remoteserverreference/Local8889" -H "Authorization: Basic YWRtaW46YWRtaW4="<br>
+        produces output:<pre>
+	  {
+	    "remoteServerName": "Local8889",
+	    "remoteServerUrl": "http://127.0.0.1:8889",
+	    "include": true,
+	    "eventIds": []
+	  }
+        </pre>
+        which describes the single server reference found under the name <tt>Local8889</tt>.
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

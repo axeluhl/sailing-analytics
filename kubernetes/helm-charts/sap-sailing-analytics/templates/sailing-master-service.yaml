@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "sailing-master-service-name" . }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: {{ template "sapsailing-app-name" . }} 
+    role: {{ .Values.master.role }}
+    environment: {{ .Values.environment }}
+  ports:
+    - port: 8888
+      targetPort: http-port

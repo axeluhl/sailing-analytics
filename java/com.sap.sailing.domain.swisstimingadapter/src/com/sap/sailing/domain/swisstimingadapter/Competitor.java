@@ -1,8 +1,9 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface Competitor {
+public interface Competitor extends Serializable {
     String getBoatID();
     
     String getThreeLetterIOCCode();
@@ -11,5 +12,5 @@ public interface Competitor {
     
     String getName();
     
-    String getID();
+    String getIdAsString();
 }

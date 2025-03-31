@@ -11,5 +11,4 @@ public class DeckmanAdapterImpl implements DeckmanAdapter {
     public LogFile parseLogFile(Reader r) throws IOException {
         return new LogFileImpl(r);
     }
-    
 }

@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,7 +9,7 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
@@ -37,7 +37,7 @@ public class TestAbstractParallelProcessorWithManySimpleInstructions {
         
         Collection<Processor<Integer, ?>> receivers = new ArrayList<>();
         receivers.add(receiver);
-        processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), receivers) {
+        processor = new AbstractParallelProcessor<Integer, Integer>(Integer.class, Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), receivers) {
             @Override
             protected ProcessorInstruction<Integer> createInstruction(final Integer element) {
                 return new AbstractProcessorInstruction<Integer>(this) {

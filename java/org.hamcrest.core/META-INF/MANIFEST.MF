@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.hamcrest.core
+Bundle-SymbolicName: org.hamcrest.core
+Bundle-Version: 2.2.0
+Require-Bundle: org.hamcrest;bundle-version="2.2.0";visibility:=reexport
+Automatic-Module-Name: org.hamcrest.core
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

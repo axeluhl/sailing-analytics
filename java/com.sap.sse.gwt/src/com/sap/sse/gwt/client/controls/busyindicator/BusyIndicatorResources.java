@@ -7,4 +7,7 @@ public interface BusyIndicatorResources extends ClientBundle {
 
     @Source("busy_indicator_circle.gif")
     ImageResource busyIndicatorCircle();
+
+    @Source("busy_indicator_circle_inverted.gif")
+    ImageResource busyIndicatorCircleInverted();
 }

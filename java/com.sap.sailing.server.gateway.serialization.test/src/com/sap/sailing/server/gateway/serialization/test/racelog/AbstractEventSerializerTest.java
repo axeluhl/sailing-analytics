@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -17,9 +18,9 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.BaseRaceLogEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent> {
 
@@ -54,7 +55,8 @@ public abstract class AbstractEventSerializerTest<EventType extends RaceLogEvent
         when(event.getCreatedAt()).thenReturn(createdAtTimePoint);
         when(event.getLogicalTimePoint()).thenReturn(logicalTimePoint);
         when(event.getPassId()).thenReturn(expectedPassId);
-        when(event.getInvolvedBoats()).thenReturn(Collections.<Competitor> emptyList());
+        final List<Competitor> emptyList = Collections.<Competitor> emptyList();
+        when(event.getInvolvedCompetitors()).thenReturn(emptyList);
         when(event.getAuthor()).thenReturn(author);
     }
 

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -19,7 +20,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 /**
  * Manages a set of {@link RaceColumnListener}s with the usual add/remove and notification logic. It is {@link Serializable}
  * and serializes only those listeners that are not {@link RaceColumnListener#isTransient() transient}.
- * 
+ *
  * @author Axel Uhl (d043530)
  *
  */
@@ -30,12 +31,12 @@ public class RaceColumnListeners implements Serializable {
     public RaceColumnListeners() {
         raceColumnListeners = new HashSet<>();
     }
-    
+
     @SuppressWarnings("unchecked") // need to cast to a typed generic
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         raceColumnListeners = (Set<RaceColumnListener>) ois.readObject();
     }
-    
+
     private void writeObject(ObjectOutputStream oos) throws IOException {
         final Set<RaceColumnListener> setToWrite;
         synchronized (raceColumnListeners) {
@@ -48,7 +49,7 @@ public class RaceColumnListeners implements Serializable {
         }
         oos.writeObject(setToWrite);
     }
-    
+
     public void addRaceColumnListener(RaceColumnListener listener) {
         synchronized (raceColumnListeners) {
             raceColumnListeners.add(listener);
@@ -60,7 +61,7 @@ public class RaceColumnListeners implements Serializable {
             raceColumnListeners.remove(listener);
         }
     }
-    
+
     public void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
@@ -85,6 +86,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+        }
+    }
+
     public void notifyListenersAboutIsStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
@@ -94,6 +101,12 @@ public class RaceColumnListeners implements Serializable {
     public void notifyListenersAboutHasSplitFleetContiguousScoringChanged(RaceColumn raceColumn, boolean hasSplitFleetContiguousScoring) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.hasSplitFleetContiguousScoringChanged(raceColumn, hasSplitFleetContiguousScoring);
+        }
+    }
+
+    public void notifyListenersAboutHasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.hasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
         }
     }
 
@@ -118,6 +131,12 @@ public class RaceColumnListeners implements Serializable {
     public void notifyListenersAboutRaceColumnMoved(RaceColumn raceColumn, int newIndex) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceColumnMoved(raceColumn, newIndex);
+        }
+    }
+
+    public void notifyListenersAboutRaceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.raceColumnNameChanged(raceColumn, oldName, newName);
         }
     }
 
@@ -151,9 +170,27 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutMaximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.maximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
+        }
+    }
+
     public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        }
+    }
+
+    public void notifyListenersAboutRegattaLogEventAdded(RegattaLogEvent event) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.regattaLogEventAdded(event);
+        }
+    }
+
+    public void notifyListenersAboutOneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.oneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
         }
     }
 }

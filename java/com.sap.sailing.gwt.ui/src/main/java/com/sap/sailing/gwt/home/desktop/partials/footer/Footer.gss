@@ -1,0 +1,55 @@
+/**
+ * Website footer styling
+ */
+ @def SITEFOOTER_BACKGROUND_COLOR #333;
+ @def SITEFOOTER_TEXT_COLOR #fff;
+ 
+.sitefooter {
+  font-size: 1rem;
+  background: SITEFOOTER_BACKGROUND_COLOR;
+  border-top: 0.333333333333333em solid SITEFOOTER_BACKGROUND_COLOR;
+  color: SITEFOOTER_TEXT_COLOR;
+  line-height: 5em;
+  width: 100%;
+  margin-top: -5.333333333333333em;
+  padding: 0 1.333333333333333em;
+}
+.sitefooter_copyright {
+  font-weight: 600;
+  margin-right: 2em;
+}
+@media (min-width: 45em) {
+  .sitefooter_copyright {
+    float: left;
+  }
+}
+.sitefooter_links {
+  text-align: left;
+  font-size: 1em;
+  font-weight: 400;
+}
+.sitefooter_links_link {
+  display: block;
+  color: SITEFOOTER_TEXT_COLOR;
+  text-decoration: none;
+  margin-right: 2em;
+}
+.sitefooter_links_link:last-child {
+  margin-right: 0;
+}
+@media (min-width: 45em) {
+  .sitefooter_links_link {
+    display: inline-block;
+  }
+}
+.sitefooter_language {
+  text-align: left;
+}
+.sitefooter_language select {
+  background-color: SITEFOOTER_BACKGROUND_COLOR;
+}
+@media (min-width: 45em) {
+  .sitefooter_language {
+    text-align: right;
+  }
+}

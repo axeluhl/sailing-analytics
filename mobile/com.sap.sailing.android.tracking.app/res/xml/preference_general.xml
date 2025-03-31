@@ -3,14 +3,17 @@
 
     <!--  Energy Saving -->
     <PreferenceCategory android:title="@string/settings_category_energy_saving">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="@string/preference_energy_saving_enabled_key"
-            android:switchTextOn="@string/preference_energy_saving_is_enabled"
-            android:switchTextOff="@string/preference_energy_saving_is_disabled"
-            android:summaryOn="@string/prefrence_energy_saving_summary_is_enabled"
-            android:summaryOff="@string/prefrence_energy_saving_summary_is_disabled"
-            android:title="@string/energy_saving_enabled"/>
+        <ListPreference
+        	android:defaultValue="@string/preference_energy_saving_sending_interval_default"
+        	android:key="@string/preference_energy_saving_sending_interval_key"
+        	android:entryValues="@array/preference_energy_saving_sending_interval_values"
+        	android:entries="@array/preference_energy_saving_sending_interval_entries"
+        	android:title="@string/preference_energy_saving_sending_interval"
+        	android:summary="@string/preference_energy_saving_sending_interval_summary"/>
+        	
+        <EditTextPreference
+            android:key="@string/preference_energy_saving_sending_interval_message_key"
+            android:selectable="false"/>
     </PreferenceCategory>
 
     <!--  Connection -->
@@ -22,7 +25,7 @@
             android:title="@string/device_identifier"
             android:selectable="false"/>
 
-        <SwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="@string/preference_heading_with_declination_subtracted_key"
             android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"

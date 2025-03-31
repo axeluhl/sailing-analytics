@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = -3228244237400937852L;
@@ -22,15 +23,26 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     private Map<FleetDTO, RaceDTO> racesPerFleet;
     private Double explicitFactor;
     private double effectiveFactor;
+    private boolean oneAlwaysStaysOne;
     private Map<FleetDTO, RaceLogTrackingInfoDTO> raceLogTrackingInfos;
     
     public enum RaceColumnLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE };
 
-    public RaceColumnDTO() {
+    @Deprecated
+    RaceColumnDTO() {} // for GWT RPC serialization only
+    
+    /**
+     * @param oneAlwaysStaysOne
+     *            tells whether when scaling results with the {@link #getEffectiveFactor() effective column factor}, the
+     *            1.0 score shall always remain 1.0.
+     */
+    public RaceColumnDTO(String name, boolean oneAlwaysStaysOne) {
+        super(name);
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         raceLogTrackingInfos = new HashMap<FleetDTO, RaceLogTrackingInfoDTO>();
         racesPerFleet = new HashMap<FleetDTO, RaceDTO>();
         fleets = new ArrayList<FleetDTO>();
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 
     public RaceColumnLiveState getLiveState(long serverTimePointAsMillis) {
@@ -53,6 +65,10 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     
     public void setExplicitFactor(Double explicitFactor) {
         this.explicitFactor = explicitFactor;
+    }
+    
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
     }
 
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
@@ -129,6 +145,24 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         return start;
     }
     
+    public Date getStartOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.startOfTracking;
+        }
+        return start;
+    }
+    
+    public Date getEndOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.endOfTracking;
+        }
+        return start;
+    }
+    
     /**
      * @return The {@link PlacemarkOrderDTO places} or <code>null</code>, if no places are available
      */
@@ -157,7 +191,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     public boolean isLive(FleetDTO fleet, long serverTimePointAsMillis) {
         boolean result = false;
         final RaceDTO raceDTO = racesPerFleet.get(fleet);
-        if(raceDTO != null) {
+        if (raceDTO != null) {
             result = raceDTO.isLive(serverTimePointAsMillis);
         }
         return result;
@@ -169,7 +203,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     public boolean hasLiveRaces(long serverTimePointAsMillis) {
         boolean result = false;
-        for(FleetDTO fleet: fleets) {
+        for (FleetDTO fleet: fleets) {
             result |= isLive(fleet, serverTimePointAsMillis);
         }
         return result;

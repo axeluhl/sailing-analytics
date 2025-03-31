@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,16 +10,17 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -27,11 +29,18 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -40,6 +49,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
+import com.sap.sailing.domain.tractracadapter.impl.AbstractLoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -61,7 +71,7 @@ import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
  * @author Axel Uhl (d043530)
  * 
  */
-public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
+public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest implements TrackingDataLoader {
     private final Logger logger = Logger.getLogger(OnlineTracTracBasedTest.class.getName());
     private DomainFactoryImpl domainFactory;
     private Regatta domainEvent;
@@ -81,10 +91,9 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         super();
     }
     
-    
     @Before
-    public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+    public void setUp() throws Exception {
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER));
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
@@ -95,6 +104,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         finishSetUp(receiverTypes);
     }
 
+    protected void setUp(String regattaName, String raceId, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
+        finishSetUp(receiverTypes);
+    }
 
     private void finishSetUp(ReceiverType... receiverTypes) throws InterruptedException {
         assertEquals(getExpectedEventName(), getTracTracEvent().getName());
@@ -103,7 +118,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
             throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
-        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+        setUp(paramUrl, liveUri, storedUri, OneDesignRankingMetric::new, receiverTypes);
+    }
+
+    protected void setUp(URL paramUrl, URI liveUri, URI storedUri, RankingMetricConstructor rankingMetricConstructor, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, CreateModelException {
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri, rankingMetricConstructor);
         finishSetUp(receiverTypes);
     }
 
@@ -112,9 +132,10 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
-                /* trackedRegattaRegistry */null,
-                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, receiverTypes)) {
+                /* trackedRegattaRegistry */ null,
+                mock(RaceLogAndTrackedRaceResolver.class), /* markPassingRaceFingerprintRegistry */ null, mock(LeaderboardGroupResolver.class), /* courseDesignUpdateURI */null, /* tracTracPassword */
+                /* tracTracUsername */null, null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false,
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, new DefaultRaceTrackingHandler(), /* raceAndCompetitorStatusWithRaceLogReconciler */ null, receiverTypes)) {
             receivers.add(r);
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
@@ -128,31 +149,34 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                 case Begin:
                     logger.info("Stored data begin");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
-                    if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
-                    }
+                    new Thread(()->{
+                        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(getTracTracRace().getId(), /* timeout in millis */ 10000);
+                        if (trackedRegatta != null && raceDefinition != null && trackedRegatta.getTrackedRace(raceDefinition) != null) {
+                            trackedRegatta.getTrackedRace(raceDefinition).onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
+                        }
+                    }, "waiting for race definition for race "+getTracTracRace().getId()).start();
                     break;
                 case End:
-                    logger.info("Stored data end");
-                    lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
-                    if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
-                    }
+                    logger.info("Stored data end. Delaying status update on tracked race "+getTrackedRace()+" until all events queued in receivers so far have been processed");
+                    new AbstractLoadingQueueDoneCallBack(receivers) {
+                        @Override
+                        protected void executeWhenAllReceiversAreDoneLoading() {
+                            logger.info("Queues of all receivers for tracked race "+getTrackedRace()+" have processed all events up to when StoredData.End was received");
+                            TrackedRaceStatusImpl lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
+                            if (getTrackedRace() != null) {
+                                getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
+                            }
+                        }
+                    };
                     break;
                 case Progress:
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, storedDataEvent.getProgress());
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 default:
                     break;
-                }
-                if (storedDataEvent.getProgress() == 1.0) {
-                    synchronized (semaphor) {
-                        storedDataLoaded = true;
-                        semaphor.notifyAll();
-                    }
                 }
             }
             
@@ -168,12 +192,27 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace.getId());
         assertNotNull(race);
         logger.info("Waiting for stored data to be loaded for " + race.getName());
+        getTrackedRace().runWhenDoneLoading(()->{
+            synchronized (semaphor) {
+                storedDataLoaded = true;
+                semaphor.notifyAll();
+            }
+        });
         synchronized (getSemaphor()) {
             while (!isStoredDataLoaded()) {
                 getSemaphor().wait();
             }
         }
-        logger.info("Stored data has been loaded for " + race.getName());
+        logger.info("Stored data has been loaded for " + race.getName()+". Waiting for receivers to process it...");
+        final CountDownLatch latch = new CountDownLatch(receivers.size());
+        for (Receiver receiver : receivers) {
+            receiver.callBackWhenLoadingQueueIsDone(r->{
+                latch.countDown();
+                logger.info(receiver+" done loading");
+            });
+        }
+        latch.await();
+        logger.info("Stored data has been processed by receivers");
         for (Receiver receiver : receivers) {
             logger.info("Stopping receiver "+receiver);
             receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
@@ -195,6 +234,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         return new DynamicRaceDefinitionSet() {
             @Override
             public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
+                setTrackedRace((DynamicTrackedRaceImpl) trackedRace);
             }
         };
     }
@@ -206,21 +246,33 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException, SubscriberInitializationException, CreateModelException {
-        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
         final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
         final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
-        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
     }
 
 
-    protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri)
+    protected void setUpWithoutLaunchingController(String regattaName, String raceId, final URI liveUri,
+            final URI storedUri) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        final URL paramUrl = getParamUrl(regattaName, raceId);
+        setUpWithoutLaunchingController(paramUrl, liveUri, storedUri, OneDesignRankingMetric::new);
+    }
+
+
+    protected URL getParamUrl(String regattaName, String raceId) throws MalformedURLException {
+        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/"+raceId+".txt");
+    }
+
+
+    protected void setUpWithoutLaunchingController(final URL paramUrl, final URI liveUri, final URI storedUri, RankingMetricConstructor rankingMetricConstructor)
             throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
-            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(DomainFactory.TEST_RACE_LOG_RESOLVER));
         }
         domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                getTracTracRace(), /* trackedRegattaRegistry */ null);
+                getTracTracRace(), /* trackedRegattaRegistry */ null, rankingMetricConstructor);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
@@ -239,19 +291,18 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
      * downwind or reaching leg. Wind information is queried by {@link TrackedLegImpl} based on
      * the marks' positions. Therefore, approximate mark positions are set here for all marks
      * of {@link #getTrackedRace()}'s courses for the time span starting at the epoch up to now.
-     * @param timePointForFixes TODO
      */
     public static void fixApproximateMarkPositionsForWindReadOut(DynamicTrackedRace race, TimePoint timePointForFixes) {
         TimePoint epoch = new MillisecondsTimePoint(0l);
         TimePoint now = MillisecondsTimePoint.now();
         Map<String, Position> markPositions = new HashMap<String, Position>();
-        markPositions.put("K Start (1)", new DegreePosition(54.497439439999994, 10.205943000000001));
-        markPositions.put("K Start (2)", new DegreePosition(54.500209999999996, 10.20206472));
-        markPositions.put("K Mark4 (2)", new DegreePosition(54.499422999999986, 10.200381692));
-        markPositions.put("K Mark4 (1)", new DegreePosition(54.498954999999995, 10.200982));
+        markPositions.put("K Start - 1", new DegreePosition(54.497439439999994, 10.205943000000001));
+        markPositions.put("K Start - 2", new DegreePosition(54.500209999999996, 10.20206472));
+        markPositions.put("K Mark4 - 2", new DegreePosition(54.499422999999986, 10.200381692));
+        markPositions.put("K Mark4 - 1", new DegreePosition(54.498954999999995, 10.200982));
         markPositions.put("K Mark1", new DegreePosition(54.489738990000006, 10.17079423000015));
-        markPositions.put("K Finish (1)", new DegreePosition(54.48918199999999, 10.17003714));
-        markPositions.put("K Finish (2)", new DegreePosition(54.48891756, 10.170632146666675));
+        markPositions.put("K Finish - 1", new DegreePosition(54.48918199999999, 10.17003714));
+        markPositions.put("K Finish - 2", new DegreePosition(54.48891756, 10.170632146666675));
         for (Waypoint w : race.getRace().getCourse().getWaypoints()) {
             for (Mark mark : w.getMarks()) {
                 race.getOrCreateTrack(mark).addGPSFix(new GPSFixImpl(markPositions.get(mark.getName()), epoch));

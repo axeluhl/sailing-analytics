@@ -23,6 +23,9 @@
 	top: -1000px;
 }
 
+html {
+  font-size: 15px;
+}
 
 body {
 	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
@@ -48,7 +51,7 @@ table td,select,button {
 
 .contentOuterPanel {
 	background: #dddcdc;
-	margin: 0 12px 0 12px;
+	margin: 0 12px 120px;
 	padding: 12px;
 }
 
@@ -91,23 +94,6 @@ table {
 
 .RaceBoardHeaderPanel {
 	margin: 0 12px 18px 12px;
-}
-
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
-
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
-
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
 }
 
 .leaderboardLabel {
@@ -159,6 +145,7 @@ input.magnifier {
 .mainPanel {
 	width: 100%;
 	margin-left: 13px;
+	margin-bottom: 120px;
 }
 
 .leaderboardGroupPanel-GroupName {
@@ -187,7 +174,8 @@ input.magnifier {
 	margin: 5px 5px 5px 0;
 	text-decoration: none;
   	font-family: 'Open Sans', Arial, Verdana, sans-serif;
-    font-weight: 600
+    font-weight: 600;
+    box-sizing: content-box;
 }
 
 .leaderboardGroupPanel-BoatClass {
@@ -206,8 +194,8 @@ input.magnifier {
     padding: 5px;
 	display: block;
 	float: left;
-	width: 8px;
-	height: 8px;
+	width: 18px;
+	height: 18px;
 	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;

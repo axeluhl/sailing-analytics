@@ -8,7 +8,7 @@
 		type="com.sap.sse.security.ui.login.LoginViewResources" />
 	<g:HTMLPanel styleName="{local_res.css.loginform}">
 		<div class="{local_res.css.loginform_header}">
-			<img src="{icon_res.sapLogo.getSafeUri}" />
+			<img ui:field="logoImage" src="{icon_res.sapLogo.getSafeUri}" />
 			<g:Label styleName="{local_res.css.loginform_header_appname}"
 				ui:field="appNameLabel" />
 		</div>

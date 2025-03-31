@@ -20,17 +20,24 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.VenueImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackingConnectorInfoJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonSerializer;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 
 public class EventWithNullStartAndEndDataJsonSerializerTest {
 
@@ -41,7 +48,9 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
     protected final TimePoint expectedEndDate = null;
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
+    protected final URL expectedBaseURL; 
     protected final URL expectedLogoImageURL;
+    protected final ImageDescriptor expectedLogoImageDescriptor;
     protected final LeaderboardGroupBase expectedLeaderboardGroup = mock(LeaderboardGroupBase.class);
     protected final Iterable<LeaderboardGroupBase> expectedLeaderboardGroups = Collections.singleton(expectedLeaderboardGroup);
 
@@ -52,7 +61,9 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
 
     public EventWithNullStartAndEndDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
+        expectedBaseURL = new URL("http://our.veryown.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
+        expectedLogoImageDescriptor = new ImageDescriptorImpl(expectedLogoImageURL, MillisecondsTimePoint.now());
     }
     
     @Before
@@ -67,18 +78,20 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
-        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>singleton(expectedLogoImageDescriptor));
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         doReturn(expectedLeaderboardGroups).when(event).getLeaderboardGroups();
 
         // ... and the serializer itself.		
-        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-        deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
+        serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                new LeaderboardGroupBaseJsonSerializer(), new TrackingConnectorInfoJsonSerializer());
+        deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(), new TrackingConnectorInfoJsonDeserializer());
     }
 
     @Test
@@ -99,7 +112,9 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedDescription, deserializedEvent.getDescription());
         assertEquals(expectedOfficialWebsiteURL, deserializedEvent.getOfficialWebsiteURL());
-        assertEquals(expectedLogoImageURL, deserializedEvent.getLogoImageURL());
+        assertEquals(expectedBaseURL, deserializedEvent.getBaseURL());
+        assertEquals(1, Util.size(deserializedEvent.getImages()));
+        assertEquals(expectedLogoImageURL, deserializedEvent.getImages().iterator().next().getURL());
         LeaderboardGroupBase deserializedLg = deserializedEvent.getLeaderboardGroups().iterator().next();
         assertEquals(expectedLeaderboardGroup.getName(), deserializedLg.getName());
         assertEquals(expectedLeaderboardGroup.getDescription(), deserializedLg.getDescription());

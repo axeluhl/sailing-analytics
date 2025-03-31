@@ -26,11 +26,11 @@
       <properties>
         <!-- Leave empty, if no proxy is needed in your environment! -->
         <parameters.proxy>
-          -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080
+          -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.wdf.sap.corp -Dhttps.proxyPort=8080
         </parameters.proxy>
         <!-- Change the configuration file to the one you like to use for the tests. -->
         <parameters.integration-tests>
-          -Dselenium.test.environment.configuration=ci-test-environment.xml
+          -Dselenium.test.environment.configuration=ci-test-environment.xml -Dmongo.dbName=winddbTest -DspatialWind=true
         </parameters.integration-tests>
       </properties>
     </profile>

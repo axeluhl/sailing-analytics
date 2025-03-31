@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"Sim"</string>
+    <string name="no">"Não"</string>
+    <string name="confirm_data_hello_name">"Oi {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Você está efetuando o logon como {sail_id}"</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"Não sou eu!"</string>
+    <string name="confirm_delete_checkin">"Eliminar este check-in?"</string>
+    <string name="download_team_image_message">"Baixando imagem da equipe..."</string>
+    <string name="checkout_warning_message">"Você pretende REALMENTE efetuar o logoff? será necessário efetuar um novo logon com o código QR fornecido para acessar sua regata!"</string>
+</resources>

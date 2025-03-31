@@ -1,0 +1,48 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    <ui:style type="com.sap.sse.security.ui.client.premium.PremiumListBox.Style">
+        .premium-listbox {
+            display: inline-block;
+        }
+        .premium-container, 
+        .premium-container select:disabled.premium-list-box + label {
+            cursor: pointer;
+        }
+        .premium-container .premium-list-box {
+            padding-right: 0;
+        }
+        .premium-container select.premium-list-box {
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.75);
+            border: 1px solid #efaa00;
+        }
+        .premium-container {
+            padding-right: 10px;
+            top: -3px;
+            position: relative;
+        }
+        .premium-permitted .premium-container, 
+        .premium-permitted .premium-container select:disabled.premium-list-box + label {
+            cursor: default;
+        }
+        .premium-container select:disabled.premium-list-box {
+            pointer-events: none;
+        }
+        .premium-container .premium-icon {
+            width: 17px;
+            height: 17px;
+            margin: 2px;
+            vertical-align: top;
+        }
+        .premium-permitted .premium-container .premium-icon {
+            display: none;
+        }
+    </ui:style>
+    <g:FocusPanel ui:field="container" addStyleNames="{style.premium-listbox}">
+        <g:FlowPanel addStyleNames="{style.premium-container}">
+            <g:ListBox ui:field="listBox" addStyleNames="{style.premium-list-box}" />
+            <g:Image ui:field="image" addStyleNames="{style.premium-icon}"/>
+        </g:FlowPanel>
+    </g:FocusPanel>
+</ui:UiBinder> 

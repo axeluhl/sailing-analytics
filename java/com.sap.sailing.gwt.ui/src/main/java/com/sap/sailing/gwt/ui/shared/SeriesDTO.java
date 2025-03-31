@@ -4,34 +4,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class SeriesDTO extends NamedDTO {
     private static final long serialVersionUID = -3813445377426310687L;
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private int[] discardThresholds;
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
-    
-    public SeriesDTO() {}
-    
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal,
+    private boolean hasCrossFleetMergedRanking;
+    private Integer maximumNumberOfDiscards;
+    private boolean oneAlwaysStaysOne;
+
+    public SeriesDTO() {
+        super("");
+    }
+
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            boolean hasSplitFleetContiguousScoring) {
+            boolean hasSplitFleetContiguousScoring, boolean hasCrossFleetMergedRanking, Integer maximumNumberOfDiscards, boolean oneAlwaysStaysOne) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
-    
+
     /**
      * Copy/clone constructor; the {@link #raceColumns} collection is created as a copy and not just assigned by reference.
      * Therefore, altering the elements in the {@link #raceColumns} collection of the new object does not alter the {@link #raceColumns}
@@ -40,16 +50,17 @@ public class SeriesDTO extends NamedDTO {
     public SeriesDTO(SeriesDTO otherSeries) {
         this(otherSeries.getName(), otherSeries.getFleets(),
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
-                otherSeries.isMedal(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
-                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring());
+                otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
+                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(), otherSeries.hasCrossFleetMergedRanking(),
+                otherSeries.getMaximumNumberOfDiscards(), otherSeries.isOneAlwaysStaysOne());
     }
 
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
 
-    public boolean isMedal() {
-        return isMedal;
+    public Boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
     }
 
     public List<FleetDTO> getFleets() {
@@ -60,8 +71,20 @@ public class SeriesDTO extends NamedDTO {
         this.fleets = fleets;
     }
 
+    public boolean isMedal() {
+        return isMedal;
+    }
+
     public void setMedal(boolean isMedal) {
         this.isMedal = isMedal;
+    }
+
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    public void setFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
     }
 
     public List<RaceColumnDTO> getRaceColumns() {
@@ -71,7 +94,7 @@ public class SeriesDTO extends NamedDTO {
     public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
         this.raceColumns = raceColumns;
     }
-    
+
     /**
      * @return whether this series defines its local result discarding rule; if so, any leaderboard based on the
      *         enclosing regatta has to respect this and has to use a result discarding rule implementation that keeps
@@ -84,7 +107,7 @@ public class SeriesDTO extends NamedDTO {
     public int[] getDiscardThresholds() {
         return discardThresholds;
     }
-    
+
     public void setDiscardThresholds(int[] discardThresholds) {
         this.discardThresholds = discardThresholds;
     }
@@ -96,7 +119,7 @@ public class SeriesDTO extends NamedDTO {
     public void setStartsWithZeroScore(Boolean startsWithZeroScore) {
         this.startsWithZeroScore = startsWithZeroScore;
     }
-    
+
     public void setFirstColumnIsNonDiscardableCarryForward(boolean firstColumnIsNonDiscardableCarryForward) {
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
     }
@@ -107,5 +130,25 @@ public class SeriesDTO extends NamedDTO {
 
     public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+
+    public void setCrossFleetMergedRanking(Boolean hasCrossFleetMergedRanking) {
+        this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
+    }
+
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+    }
+
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
+    }
+
+    public void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne) {
+        this.oneAlwaysStaysOne = oneAlwaysStaysOne;
     }
 }

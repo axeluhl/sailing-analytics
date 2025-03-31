@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Awssensorfixstore
+Bundle-SymbolicName: com.sap.sailing.awssensorfixstore
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.sap.sailing.awssensorfixstore.impl.Activator
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.sap.sailing.awssensorfixstore
+Bundle-ActivationPolicy: lazy
+Import-Package: org.osgi.framework;version="1.8.0"
+Require-Bundle: com.amazon.aws.aws-java-api;bundle-version="2.15.57",
+ com.sap.sailing.domain,
+ com.sap.sse.common,
+ com.sap.sailing.domain.common

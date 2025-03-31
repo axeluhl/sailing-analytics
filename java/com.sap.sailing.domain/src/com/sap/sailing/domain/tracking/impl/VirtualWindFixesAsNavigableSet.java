@@ -12,8 +12,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.AbstractUnmodifiableNavigableSet;
-import com.sap.sse.util.impl.DescendingNavigableSet;
+import com.sap.sse.shared.util.impl.AbstractUnmodifiableNavigableSet;
+import com.sap.sse.shared.util.impl.DescendingNavigableSet;
 
 /**
  * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}. Subclasses have to specify a resolution and a
@@ -89,7 +89,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         if (timePointOfLastEvent != null && timePoint.compareTo(timePointOfLastEvent) > 0) {
             result = lowerToResolution(timePointOfLastEvent);
         } else {
-            result = new MillisecondsTimePoint((timePoint.asMillis() - 1) / getResolutionInMilliseconds()
+            final long minuend = timePoint.asMillis() <= 0 ? getResolutionInMilliseconds()+1 : 1;
+            result = new MillisecondsTimePoint((timePoint.asMillis() - minuend) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
         }
         return result;
@@ -101,7 +102,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         if (timePointOfLastEvent != null && timePoint.compareTo(timePointOfLastEvent) > 0) {
             result = floorToResolution(timePointOfLastEvent);
         } else {
-            result = new MillisecondsTimePoint(timePoint.asMillis() / getResolutionInMilliseconds()
+            final long minuend = timePoint.asMillis() < 0 ? getResolutionInMilliseconds() : 0;
+            result = new MillisecondsTimePoint((timePoint.asMillis() - minuend) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
         }
         return result;
@@ -113,7 +115,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         if (startOfTracking != null && timePoint.compareTo(startOfTracking) < 0) {
             result = ceilingToResolution(startOfTracking);
         } else {
-            result = new MillisecondsTimePoint(((timePoint.asMillis() - 1) / getResolutionInMilliseconds() + 1)
+            final long minuend = timePoint.asMillis() <= 0 ? getResolutionInMilliseconds()+1 : 1;
+            result = new MillisecondsTimePoint(((timePoint.asMillis() - minuend) / getResolutionInMilliseconds() + 1)
                     * getResolutionInMilliseconds());
         }
         return result;
@@ -122,10 +125,11 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     protected TimePoint higherToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
-        if (startOfTracking == null && timePoint.compareTo(startOfTracking) < 0) {
+        if (startOfTracking != null && timePoint.compareTo(startOfTracking) < 0) {
             result = higherToResolution(startOfTracking);
         } else {
-            result = new MillisecondsTimePoint((timePoint.asMillis() / getResolutionInMilliseconds() + 1)
+            final long minuend = timePoint.asMillis() < 0 ? getResolutionInMilliseconds()-1 : 0;
+            result = new MillisecondsTimePoint(((timePoint.asMillis() - minuend) / getResolutionInMilliseconds() + 1)
                     * getResolutionInMilliseconds());
         }
         return result;
@@ -192,7 +196,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
             @Override
             public Wind next() {
-                Wind result = floor(new DummyWind(timePoint));
+                Wind result = floor(createDummyWindFix(timePoint));
                 timePoint = new MillisecondsTimePoint(timePoint.asMillis() + getResolutionInMilliseconds());
                 return result;
             }
@@ -235,7 +239,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> subSet(Wind fromElement, boolean fromInclusive, Wind toElement, boolean toInclusive) {
-        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement.getTimePoint())
+        return createSubset(getTrack(), getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement.getTimePoint())
                 : higherToResolution(fromElement.getTimePoint()), toInclusive ? floorToResolution(toElement.getTimePoint())
                 : lowerToResolution(toElement.getTimePoint()));
     }
@@ -247,13 +251,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> headSet(Wind toElement, boolean inclusive) {
-        return createSubset(track, getTrackedRace(), /* from */ null,
+        return createSubset(getTrack(), getTrackedRace(), /* from */ null,
                 inclusive ? ceilingToResolution(toElement.getTimePoint()) : lowerToResolution(toElement.getTimePoint()));
     }
 
     @Override
     public NavigableSet<Wind> tailSet(Wind fromElement, boolean inclusive) {
-        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement.getTimePoint())
+        return createSubset(getTrack(), getTrackedRace(), inclusive ? floorToResolution(fromElement.getTimePoint())
                 : higherToResolution(fromElement.getTimePoint()),
         /* to */ null);
     }
@@ -331,6 +335,10 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint getToInternal() {
         return to;
+    }
+
+    protected DummyWind createDummyWindFix(TimePoint timePoint) {
+        return new DummyWind(timePoint);
     }
 }
 

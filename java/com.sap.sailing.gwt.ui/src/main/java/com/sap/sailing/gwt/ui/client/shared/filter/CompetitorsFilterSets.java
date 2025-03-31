@@ -65,7 +65,6 @@ public class CompetitorsFilterSets {
         if(filterSet == activeFilterSet) {
             activeFilterSet = null;
         }
-        
         return filterSets.remove(filterSet);
     }
     

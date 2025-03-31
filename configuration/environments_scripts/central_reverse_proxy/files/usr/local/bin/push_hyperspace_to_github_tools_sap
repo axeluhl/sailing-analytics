@@ -1,0 +1,5 @@
+#!/bin/bash
+# Pushes the git bare to the hyperspace branch used for mobile builds. Ran as root to access the private
+# access token but uses su to execute  git commands as the trac user.
+PAT=$( cat /root/github_tools_sap.pat )
+su - trac -c "cd /home/trac/git; git push https://${PAT}@github.tools.sap/SAP-Sailing-Analytics/sapsailing hyperspace:hyperspace"

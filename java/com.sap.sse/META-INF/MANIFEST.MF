@@ -6,21 +6,36 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.sap.sse,
+ com.sap.sse.classloading,
  com.sap.sse.gateway,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
+ com.sap.sse.metering,
  com.sap.sse.osgi,
+ com.sap.sse.pairinglist,
+ com.sap.sse.pairinglist.impl,
  com.sap.sse.qrcode,
- com.sap.sse.settings,
+ com.sap.sse.rest,
+ com.sap.sse.serialization,
  com.sap.sse.util,
+ com.sap.sse.util.graph,
  com.sap.sse.util.impl,
- com.sap.sse.util.kmeans
+ com.sap.sse.util.kmeans,
+ com.sap.sse.util.topologicalordering
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.shared.android,
  org.apache.servicemix.bundles.zxing;bundle-version="3.1.0",
- org.json.simple;bundle-version="1.1.0"
+ org.json.simple;bundle-version="1.1.0",
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore;bundle-version="4.4.9",
+ com.sun.jersey,
+ org.apache.shiro.core
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
+ javax.ws.rs.core;version="1.1.1",
+ org.apache.commons.fileupload;version="1.2.2",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
+Automatic-Module-Name: com.sap.sse
+Bundle-Activator: com.sap.sse.impl.Activator

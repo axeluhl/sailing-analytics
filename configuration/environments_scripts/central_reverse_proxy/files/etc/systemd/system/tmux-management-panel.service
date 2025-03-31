@@ -1,0 +1,12 @@
+[Unit]
+Description=Starts up the tmux management panel
+Requires=-.mount
+After=-.mount  
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oenshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/tmuxManagementConsole.sh

@@ -2,11 +2,11 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Course over ground
@@ -19,8 +19,12 @@ public class COG extends Fix {
     private final Bearing courseOverGround;
     
     public COG(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        this(timePoint, sensor, new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue())); 
+    }
+
+    public COG(TimePoint timePoint, Sensor sensor, Bearing courseOverGround) {
         super(sensor, timePoint);
-        courseOverGround = new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        this.courseOverGround = courseOverGround;
     }
 
     public Bearing getCourseOverGround() {

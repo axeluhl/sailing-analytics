@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -25,8 +28,12 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingAndORCPerformanceCurveCache;
+import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A leaderboard whose columns are defined by leaderboards. This can be useful for a regatta series where many regattas
@@ -64,18 +71,27 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
      */
     private transient WeakHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionChangeForwardersByLeaderboard;
     
+    private transient CPUMeter cpuMeter;
+    
     private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener, Serializable {
         private static final long serialVersionUID = 915433462154943441L;
 
         @Override
-        public void correctedScoreChanced(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
+        public void correctedScoreChanged(Competitor competitor, RaceColumn raceColumn, Double oldCorrectedScore, Double newCorrectedScore) {
             getScoreCorrection().notifyListeners(competitor, raceColumn, oldCorrectedScore, newCorrectedScore);
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-                MaxPointsReason newMaxPointsReason) {
-            getScoreCorrection().notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+        public void incrementalScoreCorrectionChanged(Competitor competitor, RaceColumn raceColumn,
+                Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+            getScoreCorrection().notifyListenersAboutIncrementalScoreChange(competitor, raceColumn,
+                    oldScoreOffsetInPoints, newScoreOffsetInPoints);
+        }
+
+        @Override
+        public void maxPointsReasonChanged(Competitor competitor, RaceColumn raceColumn,
+                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+            getScoreCorrection().notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
 
         @Override
@@ -103,6 +119,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(resultDiscardingRule);
+        this.cpuMeter = CPUMeter.create();
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
@@ -110,6 +127,11 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         scoreCorrectionChangeForwardersByLeaderboard = new WeakHashMap<Leaderboard, ScoreCorrectionListener>();
     }
     
+    @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
+    }
+
     @Override
     protected SettableScoreCorrection createScoreCorrection() {
         return new MetaLeaderboardScoreCorrection(this);
@@ -123,6 +145,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        this.cpuMeter = CPUMeter.create();
         @SuppressWarnings("unchecked")
         Map<? extends Leaderboard, ? extends MetaLeaderboardColumn> columnsForLeaderboardAsStrongMap = (Map<? extends Leaderboard, ? extends MetaLeaderboardColumn>) ois.readObject();
         columnsForLeaderboards = new WeakHashMap<Leaderboard, MetaLeaderboardColumn>(columnsForLeaderboardAsStrongMap);
@@ -139,24 +162,60 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> boats = new HashSet<>();
         for (Leaderboard leaderboard : getLeaderboards()) {
-            Util.addAll(leaderboard.getCompetitors(), result);
+            for (Boat boat: leaderboard.getAllBoats()) {
+                boats.add(boat);
+            }
+        }
+        return boats;
+    }
+
+    @Override
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        Set<Competitor> competitors = new HashSet<Competitor>();
+        Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            final Pair<Iterable<RaceDefinition>, Iterable<Competitor>> allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered = leaderboard.getAllCompetitorsWithRaceDefinitionsConsidered();
+            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getA(), raceDefinitionsConsidered);
+            Util.addAll(allCompetitorsFromLeaderboardWithRaceDefinitionsConsidered.getB(), competitors);
+        }
+        return new Pair<>(raceDefinitionsConsidered, competitors);
+    }
+ 
+    @Override
+    public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        final Iterable<Competitor> result;
+        if (fleet == metaFleet && Util.contains(getRaceColumns(), raceColumn)) {
+            result = ((MetaLeaderboardColumn) raceColumn).getAllCompetitors();
+        } else {
+            result = Collections.emptySet();
         }
         return result;
     }
 
+    @Override
+    public Boat getBoatOfCompetitor(Competitor competitor, RaceColumn raceColumn, Fleet fleet) {
+        return null;
+    }
+    
     @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
-        Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
-        return competitorsFromBestToWorst.indexOf(competitor)+1;
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint, WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        final Leaderboard leaderboard = ((MetaLeaderboardColumn) race).getLeaderboard();
+        final int result;
+        if (leaderboard.hasScores(competitor, timePoint)) {
+            final Iterable<Competitor> competitorsFromBestToWorst = leaderboard.getCompetitorsFromBestToWorst(timePoint, cache);
+            result = Util.indexOf(new ObscuringIterable<>(competitorsFromBestToWorst, getSuppressedCompetitors()), competitor)+1;
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
     @Override
@@ -168,7 +227,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         return result;
     }
 
-    protected RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+    protected MetaLeaderboardColumn getColumnForLeaderboard(Leaderboard leaderboard) {
         MetaLeaderboardColumn result = columnsForLeaderboards.get(leaderboard);
         if (result == null) {
             result = new MetaLeaderboardColumn(leaderboard, metaFleet);
@@ -182,7 +241,7 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         leaderboard.addRaceColumnListener(this);
         final ScoreCorrectionChangeForwarder listener = new ScoreCorrectionChangeForwarder();
         scoreCorrectionChangeForwardersByLeaderboard.put(leaderboard, listener);
-        leaderboard.getScoreCorrection().addScoreCorrectionListener(listener);
+        leaderboard.addScoreCorrectionListener(listener);
     }
     
     protected void unregisterScoreCorrectionChangeForwarder(Leaderboard leaderboard) {
@@ -233,5 +292,22 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public boolean isResultsAreOfficial(RaceColumn raceColumn, Fleet fleet) {
+        if (!(raceColumn instanceof MetaLeaderboardColumn)) {
+            throw new IllegalArgumentException("Expected a MetaLeaderboardColumn in a MetaLeaderboard but got "+raceColumn.getClass());
+        }
+        final MetaLeaderboardColumn metaRaceColumn = (MetaLeaderboardColumn) raceColumn;
+        final Leaderboard leaderboard = metaRaceColumn.getLeaderboard();
+        for (final RaceColumn raceColumnLeaderboardRaceColumn : leaderboard.getRaceColumns()) {
+            for (final Fleet raceColumnLeaderboardFleet : raceColumnLeaderboardRaceColumn.getFleets()) {
+                if (!leaderboard.isResultsAreOfficial(raceColumnLeaderboardRaceColumn, raceColumnLeaderboardFleet)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

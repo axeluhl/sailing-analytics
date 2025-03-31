@@ -3,16 +3,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -22,27 +19,37 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionDialog;
+import com.sap.sailing.gwt.ui.adminconsole.swisstiming.SwissTimingArchivedConnectionTableWrapper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * Allows the user to start and stop tracking of events, regattas and races using the SwissTiming connector.
@@ -51,64 +58,46 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  * @author Jens Rommel (D047974)
  * 
  */
-public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel {
+public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPanel implements FilterablePanelProvider<SwissTimingArchiveConfigurationWithSecurityDTO> {
     private final ErrorReporter errorReporter;
     private final LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO> filterablePanelEvents;
     private final ListDataProvider<SwissTimingReplayRaceDTO> raceList;
     private final CellTable<SwissTimingReplayRaceDTO> raceTable;
-    private final Map<String, SwissTimingArchiveConfigurationDTO> previousConfigurations;
-    private final ListBox previousConfigurationsComboBox;
-    private final TextBox jsonUrlBox;
-    private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
-        this.errorReporter = errorReporter;
+    private final SwissTimingArchivedConnectionTableWrapper connectionsTable;
+
+    public SwissTimingReplayConnectorPanel(final Presenter presenter, StringMessages stringMessages, CellTableWithCheckboxResources tableResources) {
+        super(presenter, true, stringMessages);
+        this.errorReporter = presenter.getErrorReporter();
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
-        previousConfigurationsComboBox = new ListBox();
-        previousConfigurationsComboBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                updateJsonUrlFromSelectedPreviousConfiguration();
-            }
-        });
-        previousConfigurations = new HashMap<String, SwissTimingArchiveConfigurationDTO>();
-        getConnectionHistory();
 
-        jsonUrlBox = new TextBox();
-        jsonUrlBox.getElement().getStyle().setWidth(50, Unit.EM);
-
-        VerticalPanel mainPanel = new VerticalPanel();
+        // setup UI
+        final VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
         
-        CaptionPanel captionPanelConnections = new CaptionPanel(stringMessages.connections());
+        final CaptionPanel captionPanelConnections = new CaptionPanel(stringMessages.connections());
         mainPanel.add(captionPanelConnections);
 
-        VerticalPanel verticalPanel = new VerticalPanel();
+        final VerticalPanel verticalPanel = new VerticalPanel();
         
         captionPanelConnections.setContentWidget(verticalPanel);
         captionPanelConnections.setStyleName("bold");
-        
-        grid = new Grid(3, 2);
-        verticalPanel.add(grid);
 
-        grid.setWidget(0, 0, new Label(stringMessages.swissTimingEvents() + ":"));
-        grid.setWidget(0, 1, previousConfigurationsComboBox);
-        grid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
-        grid.setWidget(1, 1, jsonUrlBox);
+        // add connections table
+        connectionsTable = new SwissTimingArchivedConnectionTableWrapper(presenter.getUserService(), sailingServiceWrite, stringMessages,
+                errorReporter, true, tableResources, () -> {
+                });
+        connectionsTable.refreshConnectionList();
 
-        Button btnListRaces = new Button(stringMessages.listRaces());
-        grid.setWidget(2, 1, btnListRaces);
-        btnListRaces.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                fillRaces(sailingService);
-            }
-        });
-        
+        // create button UI
+        final AccessControlledButtonPanel buttonPanel = createButtonPanel(sailingServiceWrite, presenter.getUserService(), errorReporter,
+                stringMessages);
+        verticalPanel.add(buttonPanel);
+        verticalPanel.add(connectionsTable);
+
+        // Table
         TextColumn<SwissTimingReplayRaceDTO> regattaNameColumn = new TextColumn<SwissTimingReplayRaceDTO>() {
             @Override
             public String getValue(SwissTimingReplayRaceDTO object) {
@@ -159,7 +148,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         // the regatta selection for a tracked race
         HorizontalPanel regattaPanel = new HorizontalPanel();
         racesPanel.add(regattaPanel);
-        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        Label lblRegattas = new Label(stringMessages.regattaUsedForTheTrackedRace());
         lblRegattas.setWordWrap(false);
         regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
         regattaPanel.setSpacing(5);
@@ -171,7 +160,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
-        Label lblFilterEvents = new Label(stringMessages.filterRacesByName()+ ":");
+        Label lblFilterEvents = new Label(stringMessages.filterRaces()+ ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
@@ -184,31 +173,45 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         boatClassNamesColumn.setSortable(true);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingReplayRaceDTO>(/* pageSize */ 10000, tableRes);
+        raceTable = new BaseCelltable<SwissTimingReplayRaceDTO>(/* pageSize */10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(regattaNameColumn, "RSC");
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingReplayRaceDTO>() {});
-
-        racesHorizontalPanel.add(raceTable);
-        racesHorizontalPanel.add(trackPanel);
-
         raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
-        raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
-        raceTable.addColumnSortHandler(columnSortHandler);
-
-        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents,
+                availableSwissTimingRaces, raceList, stringMessages) {
             @Override
             public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
+                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.rsc));
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<SwissTimingReplayRaceDTO> getCellTable() {
+                return raceTable;
+            }
         };
-        
+        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
+                new EntityIdentityComparator<SwissTimingReplayRaceDTO>() {
+                    @Override
+                    public boolean representSameEntity(SwissTimingReplayRaceDTO dto1, SwissTimingReplayRaceDTO dto2) {
+                        return dto1.race_id.equals(dto2.race_id);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingReplayRaceDTO t) {
+                        return t.race_id.hashCode();
+                    }
+                }, filterablePanelEvents.getAllListDataProvider()) {
+        });
+
+        racesHorizontalPanel.add(raceTable);
+        racesHorizontalPanel.add(trackPanel);
+        raceList.addDataDisplay(raceTable);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
+        raceTable.addColumnSortHandler(columnSortHandler);
         filterPanel.add(filterablePanelEvents);
         
         Label lblTrackSettings = new Label(stringMessages.trackNewEvent());
@@ -244,7 +247,71 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                         useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
+        btnTrack.setEnabled(false);
+        connectionsTable.getSelectionModel().addSelectionChangeHandler(
+                e -> btnTrack.setEnabled(connectionsTable.getSelectionModel().getSelectedSet().size() == 1));
+    }
 
+    private AccessControlledButtonPanel createButtonPanel(final SailingServiceWriteAsync sailingServiceWrite,
+            UserService userService, ErrorReporter errorReporter, StringMessages stringMessages) {
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService,
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT);
+        // Refresh action
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> connectionsTable.refreshConnectionList());
+        // Create action
+        buttonPanel.addCreateAction(stringMessages.addSwissTimingAchivedConnection(),
+                () -> new SwissTimingArchivedConnectionDialog(
+                        new DialogCallback<SwissTimingArchiveConfigurationWithSecurityDTO>() {
+                            @Override
+                            public void ok(SwissTimingArchiveConfigurationWithSecurityDTO editedConnection) {
+                                sailingServiceWrite.createSwissTimingArchiveConfiguration(editedConnection.getJsonUrl(),
+                                        new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                errorReporter
+                                                        .reportError("Exception trying to create configuration in DB: "
+                                                                + caught.getMessage());
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Void voidResult) {
+                                                connectionsTable.refreshConnectionList();
+                                                connectionsTable.getFilterField().search(editedConnection.getJsonUrl());
+                                            }
+                                        }));
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }, userService, errorReporter).show());
+        // Remove action
+        buttonPanel.addRemoveAction(stringMessages.remove(), connectionsTable.getSelectionModel(), false, () -> {
+            sailingServiceWrite.deleteSwissTimingArchiveConfigurations(connectionsTable.getSelectionModel().getSelectedSet(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(
+                                    "Exception trying to delete configuration(s) in DB: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            connectionsTable.refreshConnectionList();
+                        }
+                    });
+        });
+        // List Race action
+        final Button listRacesButton = buttonPanel.addUnsecuredAction(stringMessages.listRaces(), () -> {
+            fillRaces(sailingServiceWrite);
+        });
+        listRacesButton.setEnabled(false);
+        // add change handlers to enable and disable List Races and Remove
+        connectionsTable.getSelectionModel().addSelectionChangeHandler(e -> {
+            final boolean objectSelected = connectionsTable.getSelectionModel().getSelectedSet().size() == 1;
+            listRacesButton.setEnabled(objectSelected);
+        });
+        return buttonPanel;
     }
 
     private String getBoatClassNamesAsString(SwissTimingReplayRaceDTO object) {
@@ -277,31 +344,13 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         return result;
     }
 
-    private void getConnectionHistory() {
-        sailingService.getPreviousSwissTimingArchiveConfigurations(new AsyncCallback<List<SwissTimingArchiveConfigurationDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Remote Procedure Call getPreviousConfigurations() - Failure: "
-                        + caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<SwissTimingArchiveConfigurationDTO> result) {
-                previousConfigurationsComboBox.clear();
-                previousConfigurations.clear();
-                for (SwissTimingArchiveConfigurationDTO configEntry : result) {
-                    String name = configEntry.getJsonUrl();
-                    previousConfigurations.put(name, configEntry);
-                    previousConfigurationsComboBox.addItem(name);
-                }
-                updateJsonUrlFromSelectedPreviousConfiguration();
-            }
-        });
-    }
-
     private void fillRaces(final SailingServiceAsync sailingService) {
-        final String swissTimingJsonUrl = jsonUrlBox.getValue();
-        sailingService.listSwissTiminigReplayRaces(swissTimingJsonUrl, new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
+        final Set<SwissTimingArchiveConfigurationWithSecurityDTO> selectedObjects = connectionsTable.getSelectionModel()
+                .getSelectedSet();
+        if (selectedObjects.size() == 1) {
+            SwissTimingArchiveConfigurationWithSecurityDTO selectedObject = selectedObjects.iterator().next();
+            sailingService.listSwissTiminigReplayRaces(selectedObject.getJsonUrl(),
+                    new AsyncCallback<List<SwissTimingReplayRaceDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 SwissTimingReplayConnectorPanel.this.errorReporter.reportError("Error trying to list SwissTiming races: "
@@ -316,26 +365,9 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                 raceList.getList().addAll(availableSwissTimingRaces);
                 filterablePanelEvents.getTextBox().setText(null);
                 filterablePanelEvents.updateAll(races);
-                // store a successful configuration in the database for later retrieval
-                sailingService.storeSwissTimingArchiveConfiguration(swissTimingJsonUrl,
-                        new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Exception trying to store configuration in DB: "
-                                        + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(Void voidResult) {
-                                // refresh list of previous configurations
-                                SwissTimingArchiveConfigurationDTO stConfig = new SwissTimingArchiveConfigurationDTO(swissTimingJsonUrl);
-                                if (previousConfigurations.put(stConfig.getJsonUrl(), stConfig) == null) {
-                                    previousConfigurationsComboBox.addItem(stConfig.getJsonUrl());
-                                }
-                            }
-                        });
             }
         });
+        }
     }
 
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
@@ -353,7 +385,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             }
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
-            sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
+            sailingServiceWrite.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
                 useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -363,21 +395,14 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
                     @Override
                     public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
+                        presenter.getRegattasRefresher().reloadAndCallFillAll();
                     }
                 });
         }
     }
 
-    private void updateJsonUrlFromSelectedPreviousConfiguration() {
-        int selectedIndex = previousConfigurationsComboBox.getSelectedIndex();
-        String selectedConfiguration;
-        if (selectedIndex >= 0) {
-            selectedConfiguration = previousConfigurationsComboBox.getItemText(selectedIndex);
-        } else {
-            selectedConfiguration = null;
-        }
-        jsonUrlBox.setText(selectedConfiguration);
+    @Override
+    public AbstractFilterablePanel<SwissTimingArchiveConfigurationWithSecurityDTO> getFilterablePanel() {
+        return connectionsTable.getFilterField();
     }
-    
 }

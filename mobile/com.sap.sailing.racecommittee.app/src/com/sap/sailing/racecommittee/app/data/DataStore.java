@@ -1,9 +1,8 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
+import android.content.Context;
 
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.EventBase;
@@ -12,35 +11,79 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
+
 public interface DataStore {
-    
-    public void reset();
-    
-    public SharedDomainFactory getDomainFactory();
 
-    public Collection<EventBase> getEvents();
-    public EventBase getEvent(Serializable id);
-    public boolean hasEvent(Serializable id);
-    public void addEvent(EventBase event);
+    void reset();
 
-    public Collection<CourseArea> getCourseAreas(EventBase event);
-    public CourseArea getCourseArea(Serializable id);
-    public boolean hasCourseArea(Serializable id);
-    public void addCourseArea(EventBase event, CourseArea courseArea);
+    SharedDomainFactory getDomainFactory();
 
-    public Collection<ManagedRace> getRaces();
-    public void addRace(ManagedRace race);
-    public ManagedRace getRace(Serializable id);
-    public boolean hasRace(Serializable id);
+    Collection<EventBase> getEvents();
 
-    public Collection<Mark> getMarks();
-    public Mark getMark(Serializable id);
-    public boolean hasMark(Serializable id);
-    public void addMark(Mark mark);
-    
-    public CourseBase getLastPublishedCourseDesign();
-    public void setLastPublishedCourseDesign(CourseBase courseData);
+    EventBase getEvent(Serializable id);
 
-    public Set<RaceGroup> getRaceGroups();
-    public RaceGroup getRaceGroup(String name);
+    boolean hasEvent(Serializable id);
+
+    void addEvent(EventBase event);
+
+    Collection<CourseArea> getCourseAreas(EventBase event);
+
+    CourseArea getCourseArea(Serializable id);
+
+    boolean hasCourseArea(Serializable id);
+
+    void addCourseArea(EventBase event, CourseArea courseArea);
+
+    Collection<ManagedRace> getRaces();
+
+    void addRace(ManagedRace race);
+
+    void addRace(int index, ManagedRace race);
+
+    void removeRace(Context context, ManagedRace race);
+
+    ManagedRace getRace(String id);
+
+    ManagedRace getRace(SimpleRaceLogIdentifier id);
+
+    boolean hasRace(String id);
+
+    boolean hasRace(SimpleRaceLogIdentifier id);
+
+    void registerRaces(Context context, Collection<ManagedRace> races);
+
+    void clearRaces(Context context);
+
+    Collection<Mark> getMarks(RaceGroup raceGroup);
+
+    Mark getMark(RaceGroup raceGroup, Serializable id);
+
+    boolean hasMark(RaceGroup raceGroup, Serializable id);
+
+    void addMark(RaceGroup raceGroup, Mark mark);
+
+    CourseBase getLastPublishedCourseDesign(RaceGroup raceGroup);
+
+    void setLastPublishedCourseDesign(RaceGroup raceGroup, CourseBase courseData);
+
+    Set<RaceGroup> getRaceGroups();
+
+    RaceGroup getRaceGroup(String name);
+
+    Serializable getEventUUID();
+
+    void setEventUUID(Serializable uuid);
+
+    /**
+     * The ID of the course area to which the user has logged on. Used as filter when
+     * loading regattas / race groups, and used in start time events when scheduling
+     * a race, assuming that this is the course area where the start will happen.
+     */
+    UUID getCourseAreaId();
+
+    void setCourseAreaId(UUID uuid);
 }

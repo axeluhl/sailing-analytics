@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"省电"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"选择 GPS 更新发送间隔"</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"根据您的使用情况，选择尽可能高的值以维持电池寿命，同时保持合理的现场体验。"</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"GPS 更新将发送到服务器%1$s %2$s。"</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"每"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"立即"</item>
+    	<item>"5 秒"</item>
+    	<item>"10 秒"</item>
+    	<item>"20 秒"</item>
+    	<item>"60 秒"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"开"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"关"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"显示：磁性"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"显示：实际"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"标题"</string>
+</resources>

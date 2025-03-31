@@ -2,8 +2,11 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,6 +14,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
@@ -26,8 +30,10 @@ public class RaceLogAttachOnTrackedRaceTest {
         private RaceLog raceLog;
         
         @Override
-        public void detachRaceLog(Serializable identifier) {
+        public RaceLog detachRaceLog(Serializable identifier) {
+            final RaceLog result = this.raceLog;
             this.raceLog = null;
+            return result;
         }
         
         @Override
@@ -38,6 +44,13 @@ public class RaceLogAttachOnTrackedRaceTest {
         @Override
         public RaceLog getRaceLog(Serializable identifier) {
             return raceLog;
+        }
+        
+        @Override
+        public RaceDefinition getRace() {
+            final RaceDefinition result = mock(RaceDefinition.class);
+            when(result.getCompetitors()).thenReturn(Collections.emptySet());
+            return result;
         }
     }
     
@@ -51,52 +64,39 @@ public class RaceLogAttachOnTrackedRaceTest {
     @Test
     public void testAttachDefaultFleet() {
         RaceColumn column = leaderboard.addRaceColumn("R1", false);
-        
         TrackedRace trackedRace = new MyMockedTrackedRace();
         Fleet defaultFleet = Util.get(column.getFleets(), 0);
-        
         column.setTrackedRace(defaultFleet, trackedRace);
-        
         assertSame(column.getRaceLog(defaultFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(defaultFleet)));
     }
     
     @Test
     public void testAttachAndDetach() {
         RaceColumn column = leaderboard.addRaceColumn("R1", false);
-        
         TrackedRace trackedRace = new MyMockedTrackedRace();
         Fleet fleet = Util.get(column.getFleets(), 0);
-        
         column.setTrackedRace(fleet, trackedRace);
         column.setTrackedRace(fleet, null);
-        
         assertNull(trackedRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
     }
     
     @Test
     public void testAttachToDefaultFleet() {
         RaceColumn column = leaderboard.addRaceColumn("R1", false);
-        
         TrackedRace trackedRace = new MyMockedTrackedRace();
-        
         Fleet defaultFleet = leaderboard.getFleet(null);
         column.setTrackedRace(defaultFleet, trackedRace);
-        
         assertSame(column.getRaceLog(defaultFleet), trackedRace.getRaceLog(column.getRaceLogIdentifier(defaultFleet)));
     }
     
     @Test
     public void testReattach() {
         RaceColumn column = leaderboard.addRaceColumn("R1", false);
-        
         Fleet fleet = Util.get(column.getFleets(), 0);
-        
         TrackedRace firstRace = new MyMockedTrackedRace();
         TrackedRace secondRace = new MyMockedTrackedRace();
-        
         column.setTrackedRace(fleet, firstRace);
         column.setTrackedRace(fleet, secondRace);
-        
         assertNull(firstRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
         assertSame(column.getRaceLog(fleet), secondRace.getRaceLog(column.getRaceLogIdentifier(fleet)));
     }

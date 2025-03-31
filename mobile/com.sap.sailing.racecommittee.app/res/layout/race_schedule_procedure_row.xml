@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/listView_row_height"
+    android:paddingLeft="@dimen/listView_row_padding"
+    android:paddingRight="@dimen/listView_row_padding"
+    android:paddingTop="@dimen/listView_row_padding">
+
+    <ImageView
+        android:id="@+id/checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="?attr/check_18dp"/>
+
+    <TextView
+        android:id="@+id/start_procedure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/checked"
+        android:textAppearance="?attr/textNormal"
+        android:textSize="@dimen/textSize_20"
+        tools:text="Zulu"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thick_line"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/sap_gray"/>
+</RelativeLayout>

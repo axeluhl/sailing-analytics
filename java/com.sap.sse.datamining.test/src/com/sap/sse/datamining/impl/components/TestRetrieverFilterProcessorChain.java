@@ -1,8 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +20,7 @@ import com.sap.sse.datamining.test.util.components.NullProcessor;
 
 public class TestRetrieverFilterProcessorChain {
     
+    private String retrievedDataTypeMessageKey;
     private Processor<Iterable<Integer>, Integer> retrievalProcessor;
     private Collection<Integer> dataSource;
     
@@ -59,6 +59,7 @@ public class TestRetrieverFilterProcessorChain {
         OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
         retrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
+        assertThat(resultDataBuilder.getDataTypeMessageKey(), is(retrievedDataTypeMessageKey));
     }
     
     @Test
@@ -67,12 +68,17 @@ public class TestRetrieverFilterProcessorChain {
         layeredDataSource.add(dataSource);
         layeredDataSource.add(dataSource);
         layeredDataSource.add(dataSource);
-        
+
+        @SuppressWarnings("unchecked")
+        Class<Iterable<Iterable<Integer>>> inputType = (Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class;
+        @SuppressWarnings("unchecked")
+        Class<Iterable<Integer>> retrievedType = (Class<Iterable<Integer>>)(Class<?>) Iterable.class;
         Collection<Processor<Iterable<Integer>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(retrievalProcessor);
-        @SuppressWarnings("unchecked")
-        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>((Class<Iterable<Iterable<Integer>>>)(Class<?>) Iterable.class, (Class<Iterable<Integer>>)(Class<?>) Iterable.class,
-                                                                                                                                                                                    ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0) {
+        String layeredRetrievedDataTypeMessageKey = "NumberList";
+        Processor<Iterable<Iterable<Integer>>, Iterable<Integer>> layeredRetrievalProcessor = new AbstractRetrievalProcessor<Iterable<Iterable<Integer>>, Iterable<Integer>>(
+                inputType, retrievedType, ConcurrencyTestsUtil.getSharedExecutor(), resultReceivers, 0,
+                layeredRetrievedDataTypeMessageKey) {
             @Override
             protected Iterable<Iterable<Integer>> retrieveData(Iterable<Iterable<Integer>> element) {
                 return element;
@@ -88,6 +94,7 @@ public class TestRetrieverFilterProcessorChain {
         OverwritingResultDataBuilder resultDataBuilder = new OverwritingResultDataBuilder();
         layeredRetrievalProcessor.getAdditionalResultData(resultDataBuilder);
         assertThat(resultDataBuilder.getRetrievedDataAmount(), is(expectedRetrievedDataAmount));
+        assertThat(resultDataBuilder.getDataTypeMessageKey(), is(retrievedDataTypeMessageKey));
     }
     
     @SuppressWarnings("unchecked")
@@ -110,11 +117,14 @@ public class TestRetrieverFilterProcessorChain {
                 return element >= 0;
             }
         };
-        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
+        Processor<Integer, Integer> filtrationProcessor = new ParallelFilteringProcessor<>(Integer.class, ConcurrencyTestsUtil.getSharedExecutor(), filtrationResultReceivers, elementGreaterZeroFilterCriteria);
         
+        Class<Iterable<Integer>> inputType = (Class<Iterable<Integer>>) (Class<?>) Iterable.class;
         Collection<Processor<Integer, ?>> retrievalResultReceivers = new ArrayList<>();
         retrievalResultReceivers.add(filtrationProcessor);
-        retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Integer>, Integer>((Class<Iterable<Integer>>)(Class<?>) Iterable.class, Integer.class, ConcurrencyTestsUtil.getExecutor(), retrievalResultReceivers, 1) {
+        retrievedDataTypeMessageKey = "Number";
+        retrievalProcessor = new AbstractRetrievalProcessor<Iterable<Integer>, Integer>(inputType, Integer.class,
+                ConcurrencyTestsUtil.getSharedExecutor(), retrievalResultReceivers, 1, retrievedDataTypeMessageKey) {
             @Override
             protected Iterable<Integer> retrieveData(Iterable<Integer> element) {
                 return element;

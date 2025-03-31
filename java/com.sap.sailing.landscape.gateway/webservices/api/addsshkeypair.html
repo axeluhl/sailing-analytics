@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API</h1>
+<h2>URL: /landscape/api/landscape/add_ssh_key</h2>
+
+<b>Description:</b>
+ <p>Persistently stores the SSH key pair provided in the user's key repository and uploads the public key to
+ the AWS region specified. The request must be authenticated by a user with the SERVER:CREATE:{server-name}
+ permission as well as the SSH_KEY:CREATE:{key_name} permission. If a key for the same region with an equal
+ name already existed, it will be overwritten by the key details provided with this request.
+ </p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory form parameters:</td>
+        <td>
+            <div><tt>region</tt>, the ID of the region in which to create the key</div>
+            <div><tt>key_name</tt>, name of the key; must be unique in the region within the AWS account</div>
+            <div><tt>public_key</tt>, string representation of the public key</div>
+            <div><tt>encrypted_private_key</tt>, the string representation of the encrypted private key</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><pre>
+           curl -d 'region=eu-west-2' -d 'key_name=Axel' \
+            --data-urlencode 'public_key=ssh-rsa AAAAB3Nz829yc2EAAAABIwAAAIEAu+eA2h6Fox7s9yir93P8MQ8HRXah3hd9Q4N4qjTa7ustnYfwOBxsVgIZh3CUT+6m66fgQij82kQd3Dt7IXR5Ja3wLIdFa/HCsvN4gtaag65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNFehdOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here' \
+            --data-urlencode 'encrypted_private_key=-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,6AD2FAB5CD88880AF5ED4B465671A67C
+
+fVjmaoHF+tpc131GYjJLHVsa+eSHk2UxVqpYCHPwBKrvxFfsGx6cuj9lvj8LRRC0
+4Y4OtBGN9wj9+Sj9LBBCEGCWLwrT9feXEyn6YI++196LrX/vr1FC+dk2knAhf+Lv
+pigpvdJKWQADa18/bbySbJK6QJ9AJKy0U6tu+/Dbf+rxKcdiHFS88lG8atdA7W3A
+QvVh4xE0sSEryGTVi4PGm62epNRCxo9O8jhc0yNZ7uZzlTHHKqKAISWT1PGlgVuR
+OjmeOtj6Aafe6dvsXvpFoT2xe+9yGMDGKyyAW4crXia+fVrOjlKL4mTON1PDsmMQ
+Ob4hyYXV7aGJJrLCf2XURcyRSeuUvQNDM32wg6892kwXBDtp/CP4rww8pgtO4Oje
+fOS5Ye8SGbq9ghjYvXQf3MqnnHDA7E9c7Ko7bDikftKCLnpR6Slu+BzGtgvOB9Tq
+DIVV6mvU5TOa+dWgv7M/FNRfbbs209nczUeJs+9/cr94ee4+V0oTEhRweLhwXrhU
+nfmze+REiPSwMy4sktkU+bfRy/11pzriCPacarIjiHKIx6qsSljZTiSE6oSm2kZh
+Onq8RjQmZ+zFpo4uMgsBSyorSNuejSWZkrXfJmuInvOEnVyXeV9Z2OemHAc4dVEr
+hA+EhmXuZbpPza3CEx5iR11bfXDHSS6+JRXSJztMSvj5MZC82KF9fVbQ/oHRX0dc
+vxsVZD4R6hWN+uFiuXr2KVWMEqmb2RrbwAjLB9kej9I+VZxEJ6/gtJnJL1/sUaV
+K940d2tuGhAcQy5YT/cnCy7Hg9222KZuCsWhDrY+Wd0=
+-----END RSA PRIVATE KEY-----' \
+            -H 'Authorization: Bearer mkCZcm02pjAeQRwBD1RkKo582joVMDTPsb0SXF8lSTc=' \
+            -X POST https://security-service.sapsailing.com/landscape/api/landscape/add_ssh_key</pre><br>
+        produces a 200 status code with output
+        <pre>
+            {
+              "name": "Axel",
+              "regionId": "eu-west-2",
+              "creatorName": "admin",
+              "creationTimeMillis": 1645439343022,
+              "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAABbBIwAAAIEAu+eA2345ox7s9yir93P8MQ8HRXah3tD739N4qjTa7ustnYfwOBxsVghke3CUT+6m66fgQijkG6Qd3Dt7IXR5Ja3wLIdFa/HCsvN4gtL6Q65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNFehdOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here"
+            }</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

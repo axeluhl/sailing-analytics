@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,9 +14,12 @@ import org.apache.shiro.cache.CacheException;
 import org.apache.shiro.session.Session;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.security.operations.ClearReplicatingCacheOperation;
+import com.sap.sse.security.operations.PutToReplicatingCacheOperation;
+import com.sap.sse.security.operations.RemoveFromReplicatingCacheOperation;
 
 /**
- * A {@link Cache}s whose modifying operations are replicated. This works because by intercepting the writing operations
+ * A {@link Cache}s whose modifying operations are replicated. This works by intercepting the writing operations
  * and running them as a replicable operation on the {@link ReplicableSecurityService}.
  * 
  * @author Axel Uhl (D043530)
@@ -26,7 +30,7 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     private static final long serialVersionUID = 6628512191363526330L;
     private transient ReplicableSecurityService securityService;
     private final String name;
-    private final ConcurrentHashMap<K, V> cache;
+    private final ConcurrentMap<K, V> cache;
 
     public ReplicatingCache(ReplicableSecurityService securityService, String name) {
         super();
@@ -55,6 +59,10 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
 
     @Override
     public V put(K key, V value) throws CacheException {
+        return put(key, value, /* store */ true);
+    }
+
+    public V put(K key, V value, boolean store) throws CacheException {
         if (logger.isLoggable(Level.FINER)) {
             logger.finer("put("+key+", "+value+") into cache "+name+"@"+System.identityHashCode(this));
             if (value instanceof Session) {
@@ -63,9 +71,13 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
             }
         }
         V result = cache.put(key, value);
-        final String myName = name;
-        securityService.replicate(s->
-            s.getCacheManager().getCache(myName).put(key, value));
+        if (store && value instanceof Session) {
+            final Session session = (Session) value;
+            if (!session.getAttributeKeys().isEmpty()) {
+                securityService.replicate(new PutToReplicatingCacheOperation<K, V>(getName(), key, value));
+                securityService.storeSession(getName(), (Session) value);
+            }
+        }
         return result;
     }
 
@@ -85,19 +97,18 @@ public class ReplicatingCache<K, V> implements Cache<K, V>, Named {
     @Override
     public V remove(K key) throws CacheException {
         V result = cache.remove(key);
-        final String myName = name;
-        securityService.replicate(s->
-            s.getCacheManager().getCache(myName).remove(key));
+        securityService.replicate(new RemoveFromReplicatingCacheOperation<K>(getName(), key));
+        if (result instanceof Session) {
+            securityService.removeSession(getName(), (Session) result);
+        }
         return result;
     }
 
     @Override
     public void clear() throws CacheException {
         cache.clear();
-        final String myName = name;
-        securityService.replicate(s->{ 
-            s.getCacheManager().getCache(myName).clear(); return null;
-        });
+        securityService.replicate(new ClearReplicatingCacheOperation(getName()));
+        securityService.removeAllSessions(getName());
     }
 
     @Override

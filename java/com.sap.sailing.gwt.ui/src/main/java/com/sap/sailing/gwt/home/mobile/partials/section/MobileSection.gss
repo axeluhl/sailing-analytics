@@ -1,0 +1,32 @@
+.section {
+  font-size: 1rem;
+}
+.sectionHeader {
+  font-size: 1rem;
+  position: relative;
+  padding: 0;
+  background: #ebebeb;
+  border-top: 2px solid #ccc;
+}
+.sectionSubHeader {
+  background: #f2f2f2;
+  border-top: 1px solid #ccc;
+  overflow: hidden;
+}
+.sectionHeaderNoBorder {
+  border-top: none;
+}
+.sectionContent {
+  padding: 0;
+}
+/* .sectionContent:empty { */
+/*   border-bottom: 2px solid #ccc; */
+/* } */
+/* .sectionContent .sectionContent:empty { */
+/*   border-bottom: 0 none; */
+/* } */
+.edgeToEdgeSectionContentHolder {
+  padding: 0;
+}
+.sectionContentHolder {
+}

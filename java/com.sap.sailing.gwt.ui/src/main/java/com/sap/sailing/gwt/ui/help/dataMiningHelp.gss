@@ -1,0 +1,26 @@
+@def SHADOW_COLOR #21a0e4;
+
+.help-icon {
+    width: 23px;
+    height: auto;
+    box-shadow: 0 0 5px SHADOW_COLOR;
+    background-color: rgba(255, 255, 255, .4);
+    border-radius: 100%;
+}
+
+.help-popup {
+    box-shadow: 0 0 10px SHADOW_COLOR;
+    border: 0 none;
+}
+
+.help-popup .content {
+    margin: .5em;
+}
+
+.help-popup .content .text {
+    font-weight: bold;
+}
+
+.help-popup .content .link {
+    font-style: italic;
+}

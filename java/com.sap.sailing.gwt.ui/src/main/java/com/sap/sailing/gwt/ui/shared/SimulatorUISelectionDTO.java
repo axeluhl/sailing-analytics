@@ -1,9 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.client.SimulatorService;
 
 public class SimulatorUISelectionDTO implements IsSerializable {
-
+    /**
+     * The index refers to the order in which {@link SimulatorService#getBoatClasses()} returns the boat classes inside
+     * the {@link BoatClassDTOsAndNotificationMessage#getBoatClassDTOs()} result. Starts with 0. Can be used, e.g., for
+     * the {@link SimulatorService#getPolarDiagram(Double, int)} method's {@code boatClassIndex} parameter.
+     */
     public Integer boatClassIndex;
     public Integer raceIndex;
     public Integer competitorIndex;

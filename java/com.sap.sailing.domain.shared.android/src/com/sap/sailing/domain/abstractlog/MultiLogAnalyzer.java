@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.sap.sse.common.Util;
+
 /**
  * Apply one kind of analyzer to multiple logs, and combine (reduce) their output into one result value.
  */
@@ -31,7 +33,7 @@ public class MultiLogAnalyzer<InterimResultT, FinalResultT>
     public static abstract class CollectionReducer<T, C extends Collection<T>> implements ResultReducer<Collection<T>, C> {
         @Override
         public C reduce(Collection<T> interimResult, C reducedFinalResult) {
-            reducedFinalResult.addAll(interimResult);
+            Util.addAll(interimResult, reducedFinalResult);
             return reducedFinalResult;
         }
     }
@@ -71,7 +73,7 @@ public class MultiLogAnalyzer<InterimResultT, FinalResultT>
 
     }
 
-    public MultiLogAnalyzer(AnalyzerFactory< InterimResultT> analyzerFactory,
+    public MultiLogAnalyzer(AnalyzerFactory<InterimResultT> analyzerFactory,
             ResultReducer<InterimResultT, FinalResultT> resultReducer, AbstractLog<?, ?>... logs) {
         this(analyzerFactory, resultReducer, Arrays.asList(logs));
     }

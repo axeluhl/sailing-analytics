@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -9,25 +10,32 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * A base class for a leaderboard viewer.
  * 
  * @author Frank Mittag (c163874)
  */
-public abstract class AbstractLeaderboardViewer extends SimplePanel {
+public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPerspectiveLifecycle> extends AbstractPerspectiveComposite<PL, LeaderboardPerspectiveOwnSettings> {
+    
+    protected static final ViewerToolbar RES = GWT.create(ViewerToolbar.class);
     protected final StringMessages stringMessages;
-    private final LeaderboardPanel leaderboardPanel;
+    private LeaderboardPanel<?> leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -35,39 +43,49 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
 
     protected final Timer timer;
     protected final boolean hideToolbar;
-    
-    private final static String STYLE_VIEWER_TOOLBAR = "viewerToolbar";
-    private final static String STYLE_VIEWER_TOOLBAR_INNERELEMENT = "viewerToolbar-innerElement";
-    private final static String STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON = "viewerToolbar-settingsButton";
 
-    public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages, boolean hideToolbar, LeaderboardPanel leaderboardPanel) {
+
+    public AbstractLeaderboardViewer(Component<?> parent,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            PL lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
+            CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
+            Timer timer, StringMessages stringMessages) {
+        super(parent, componentContext, lifecycle, settings);
+        
+
         this.competitorSelectionProvider = competitorSelectionProvider;
-        this.leaderboardPanel = leaderboardPanel;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
-        this.hideToolbar = hideToolbar;
+        this.hideToolbar = settings.getPerspectiveOwnSettings().isHideToolbar();
+        
+        RES.css().ensureInjected();
     }
     
-    public LeaderboardPanel getLeaderboardPanel() {
+    protected void init(LeaderboardPanel<?> leaderboardPanel) {
+        addChildComponent(leaderboardPanel);
+        this.leaderboardPanel = leaderboardPanel;
+    }
+
+    public LeaderboardPanel<?> getLeaderboardPanel() {
         return leaderboardPanel;
     }
 
     protected FlowPanel createViewerPanel() {
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
-        getElement().getStyle().setMarginLeft(12, Unit.PX);
-        getElement().getStyle().setMarginRight(12, Unit.PX);
+        mainPanel.getElement().getStyle().setMarginLeft(12, Unit.PX);
+        mainPanel.getElement().getStyle().setMarginRight(12, Unit.PX);
         if (!hideToolbar) {
             componentsNavigationPanel = new FlowPanel();
-            componentsNavigationPanel.addStyleName(STYLE_VIEWER_TOOLBAR);
+            componentsNavigationPanel.addStyleName(RES.css().viewerToolbar());
             mainPanel.add(componentsNavigationPanel);
         }
         return mainPanel;
     }
     
-    protected <SettingsType extends AbstractSettings> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
+    protected <SettingsType extends Settings> void addComponentToNavigationMenu(final Component<SettingsType> component, boolean isCheckboxEnabled, 
             String componentDisplayName, final boolean hasSettingsWhenComponentIsInvisible) {
         if (!hideToolbar) {
             final String componentName = componentDisplayName != null ? componentDisplayName : component.getLocalizedShortName();
@@ -80,7 +98,7 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
             checkBox.setEnabled(isCheckboxEnabled);
             checkBox.setValue(component.isVisible());
             checkBox.setTitle(stringMessages.showHideComponent(componentName));
-            checkBox.addStyleName(STYLE_VIEWER_TOOLBAR_INNERELEMENT);
+            checkBox.addStyleName(RES.css().viewerToolbarInnerElement());
             checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> newValue) {
@@ -108,11 +126,32 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
                 });
             }
             settingsButton.setEnabled(component.hasSettings() && hasSettingsWhenComponentIsInvisible);
-            settingsButton.addStyleName(STYLE_VIEWER_TOOLBAR_SETTINGS_BUTTON);
+            settingsButton.addStyleName(RES.css().viewerToolbarSettingsButton());
             settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
             settingsButton.setTitle(stringMessages.settingsForComponent(componentName));
             componentsNavigationPanel.add(settingsButton);
         }
+    }
+
+
+    @Override
+    public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public boolean hasPerspectiveOwnSettings() {
+        return true;
+    }
+
+    @Override
+    public String getId() {
+        return null;
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return null;
     }
 }
 

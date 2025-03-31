@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"Да"</string>
+    <string name="no">"Нет"</string>
+    <string name="confirm_data_hello_name">"Здравствуйте, {full_name}!"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Вы выполняете вход как {sail_id}."</string>
+    <string name="confirm_data_is_correct">"ОК"</string>
+    <string name="decline_data_is_incorrect">"Это не я!"</string>
+    <string name="confirm_delete_checkin">"Действительно удалить эту регистрацию?"</string>
+    <string name="download_team_image_message">"Загрузка изображения команды..."</string>
+    <string name="checkout_warning_message">"ДЕЙСТВИТЕЛЬНО выйти? Для доступа к регате потребуется повторный вход с помощью предоставленного QR-кода!"</string>
+</resources>

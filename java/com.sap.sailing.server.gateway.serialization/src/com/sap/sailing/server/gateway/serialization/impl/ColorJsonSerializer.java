@@ -2,9 +2,9 @@ package com.sap.sailing.server.gateway.serialization.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class ColorJsonSerializer implements JsonSerializer<Color> {
     public static final String FIELD_RED = "r";

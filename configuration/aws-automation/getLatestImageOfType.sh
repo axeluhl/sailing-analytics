@@ -1,0 +1,1 @@
+../environments_scripts/repo/usr/local/bin/getLatestImageOfType.sh

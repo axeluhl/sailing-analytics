@@ -11,5 +11,10 @@ public interface LeaderboardGroupResolver {
      */
     LeaderboardGroup getLeaderboardGroupByName(String leaderboardGroupName);
 
+    /**
+     * @param leaderboardGroupID may be {@code null} in which case {@code null} is returned immediately
+     */
     LeaderboardGroup getLeaderboardGroupByID(UUID leaderboardGroupID);
+    
+    LeaderboardGroup resolveLeaderboardGroupByRegattaName(String regattaName);
 }

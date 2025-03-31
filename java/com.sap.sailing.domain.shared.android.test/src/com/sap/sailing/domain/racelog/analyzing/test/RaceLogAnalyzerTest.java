@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.junit.Before;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
@@ -29,7 +30,12 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?
     protected abstract AnalyzerType createAnalyzer(RaceLog raceLog);
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds) {
-        return createEvent(type, milliseconds, 0, UUID.randomUUID());
+        final T result = createEvent(/* priority */ 0, type, milliseconds);
+        return result;
+    }
+    
+    protected static <T extends RaceLogEvent> T createEvent(int priority, Class<T> type, long milliseconds) {
+        return createEvent(priority, type, milliseconds, 0, UUID.randomUUID());
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, Serializable id) {
@@ -41,7 +47,12 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, Serializable id) {
-        return createEvent(type, milliseconds, passId, id, mock(AbstractLogEventAuthor.class));
+        return createEvent(/* priority */ 0, type, milliseconds, passId, id);
+    }
+    
+    protected static <T extends RaceLogEvent> T createEvent(int priority, Class<T> type, long milliseconds, int passId, Serializable id) {
+        final AbstractLogEventAuthor author = new LogEventAuthorImpl("Author", priority);
+        return createEvent(type, milliseconds, passId, id, author);
     }
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds, int passId, AbstractLogEventAuthor author) {

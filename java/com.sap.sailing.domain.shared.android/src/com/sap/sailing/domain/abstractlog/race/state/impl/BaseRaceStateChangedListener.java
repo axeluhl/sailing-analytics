@@ -44,7 +44,7 @@ public abstract class BaseRaceStateChangedListener implements RaceStateChangedLi
     }
 
     @Override
-    public void onFinishingPositioningsChanged(ReadonlyRaceState state) {
+    public void onFinishingPositionsChanged(ReadonlyRaceState state) {
 
     }
 
@@ -63,4 +63,13 @@ public abstract class BaseRaceStateChangedListener implements RaceStateChangedLi
         
     }
 
+    @Override
+    public void onTagEventsChanged(ReadonlyRaceState state) {
+        
+    }
+
+    @Override
+    public void onResultsAreOfficialChanged(ReadonlyRaceState state) {
+        
+    }
 }

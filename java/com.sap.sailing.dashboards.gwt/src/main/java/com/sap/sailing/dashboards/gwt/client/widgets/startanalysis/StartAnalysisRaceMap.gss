@@ -1,0 +1,144 @@
+@require 'theme';
+
+.raceMapIndicatorPanel {
+	margin-top: DASHBOARD_SPACE_VERY_SMALL;
+	margin-left: DASHBOARD_SPACE_VERY_SMALL;
+	right: 0px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+	background-color: white;
+}
+
+.raceMapIndicatorPanelTextLabel {
+	margin-top: DASHBOARD_SPACE_VERY_SMALL;
+	width: 50px;
+	height: DASHBOARD_SPACE_SMALL;
+	line-height: DASHBOARD_SPACE_SMALL;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
+	font-weight: bold;
+	font-family: DASHBOARD_FONT_FAMILY;
+	text-align: center;
+	color: white;
+}
+
+.raceMapIndicatorPanelCanvas {
+	width: 30px !important;
+	height: 30px !important;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.combinedWindPanel {}
+
+.combinedWindPanel.premiumReady {
+    border-color: #efaa00;
+    background-image: resourceUrl("premiumIcon");
+    background-position: right top;
+    background-size: 30%;
+    background-repeat: no-repeat;
+}
+.combinedWindPanel.premiumActive {
+    border-color: #efaa00;
+}
+
+.trueNorthIndicatorPanel {
+	opacity: 0.0;
+	margin-top: 10px;
+}
+
+.estimatedDuration {
+    margin-top:10px;
+    font-size: 19px;
+    color:black;
+    background-color:rgba(255,255,255,0.75);
+    border:1px solid #c9caca;
+    border-radius:4px;
+    text-align: left;
+    height:30px;
+    padding-right: 8px;
+    padding-left: 8px;
+    margin-bottom: 10px;
+}
+
+.estimatedDurationWithHeader {
+    margin-top:70px;
+}
+
+.raceMapShareLinkButton {
+    margin-right: 10px;
+    margin-bottom: 110px;
+    z-index: 1;
+    border-color: white;
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer;
+}
+
+.raceMapVideoUploadButton {
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 100%;
+    border-width: thin;
+    border-style: solid;
+    background-color: rgb(0, 143, 204) !important;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    z-index: 1;
+    border-color: white;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    background-image: resourceUrl("uploadVideoIcon");
+    background-size: 74%;
+}
+
+.advancedFunctionsPopup {
+    display: none;
+}
+
+.exitFullScreenButton {
+    display: none;
+}
+
+.fullScreenButton {
+    display: none;
+}
+
+.moreOptionsButton {
+    display: none;
+}
+
+.settingsButton {
+    display: none;
+}
+
+.tagsButton {
+    display: none;
+}
+
+.topLeftControlsWrapperPanel {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.trueNorthIndicatorButton {
+    display: none;
+}
+
+.underHeaderPosition {
+    top: 0;
+    padding-top: 60px; 
+}
+ 
+.zoomInButton {
+    display: none;
+}
+
+.zoomOutButton {
+    display: none;
+}
+
+.moreOptions {}

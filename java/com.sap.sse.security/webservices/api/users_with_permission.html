@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity/users_with_permission</h2>
+
+<b>Description:</b>
+<p>Finds the usernames of those users who have the permission specified, through direct assignment, group membership, or roles
+assigned, considering object ownerships and ACLs on the object identified by the permission. The permission must name a single
+specific object ID. Example request: <pre>
+     /security/api/restsecurity/users_with_permission?permission=EVENT:READ:587e5fef-53ea-47f0-a71b-1fc29053b4f0
+   </pre>
+         </p>
+<br/>
+<table>
+	<tr>
+		<td>Request Method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>a JSON array containing the user names. Example output:<br>
+		    <pre>
+       		[
+			"Ron",
+			"marcusbaur",
+			"alstolten",
+			"nina",
+			"Shaun",
+			"thessenmueller",
+			"uhl",
+			"admin",
+			"douglasedwards",
+			"alarie505"
+		]
+         </pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>
+			<div>permission: cdescribes a permission string in the typical format
+				TYPE:ACTION:OBJECT-ID. Example: permission=EVENT:DELETE:587e5fef-53ea-47f0-a71b-1fc29053b4f0.
+				A single action for a single type with a single object ID needs to be specified.
+				</div> 
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><code>curl -X GET "http://127.0.0.1:8888/security/api/restsecurity/users_with_permission?permission=EVENT:READ:587e5fef-53ea-47f0-a71b-1fc29053b4f0"</code><br>
+	            Will provide a JSON document as explained above.</td>
+	</tr>
+</table>
+</body>
+</html>

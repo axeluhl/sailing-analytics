@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.leaderboard.meta;
 
+import java.util.Collections;
+
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
@@ -39,10 +42,14 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
 
     public LeaderboardGroupMetaLeaderboard(LeaderboardGroup leaderboardGroup, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
+        super(getOverallLeaderboardName(leaderboardGroup.getName()), scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
         registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards();
+    }
+
+    public static String getOverallLeaderboardName(String leaderboardGroupName) {
+        return leaderboardGroupName + " " + LeaderboardNameConstants.OVERALL;
     }
 
     public void registerAsScoreCorrectionChangeForwarderAndRaceColumnListenerOnAllLeaderboards() {
@@ -86,7 +93,12 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return null;
+    public Iterable<CourseArea> getCourseAreas() {
+        return Collections.emptySet();
+    }
+    
+    @Override
+    public LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaMetaLeaderboard;
     }
 }

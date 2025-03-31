@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -25,13 +26,17 @@ import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -43,123 +48,146 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
         final UUID regattaId = UUID.randomUUID();
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName,
-                /*startDate*/ null, /*endDate*/ null, regattaId, series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
-        
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId, series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
-        
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNull(replicatedRegatta.getDefaultCourseArea());        
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
         assertNull(replicatedRegatta.getRegattaConfiguration());
     }
-    
+
+    @Test
+    public void testSpecificRegattaReplicationWithDifferentBoatsOfCompetitorsCanChangePerRaceSettings() throws InterruptedException {
+        final String baseEventName = "Kiel Week 2012";
+        final String boatClass1Name = "49er";
+        final String boatClass2Name = "49erFX";
+        final boolean canBoatsOfCompetitorsChangePerRaceRegatta1 = true;
+        final boolean canBoatsOfCompetitorsChangePerRaceRegatta2 = false;
+        final Iterable<Series> series = Collections.emptyList();
+        final UUID regattaId1 = UUID.randomUUID();
+        final UUID regattaId2 = UUID.randomUUID();
+        Regatta masterRegatta1 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass1Name),
+                boatClass1Name, canBoatsOfCompetitorsChangePerRaceRegatta1, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId1, series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
+        Regatta masterRegatta2 = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClass2Name),
+                boatClass2Name, canBoatsOfCompetitorsChangePerRaceRegatta2, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, regattaId2, series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
+
+        Thread.sleep(1000);
+
+        Regatta replicatedRegatta1 = replica.getRegatta(new RegattaName(masterRegatta1.getName()));
+        assertNotNull(replicatedRegatta1);
+        assertEquals(replicatedRegatta1.canBoatsOfCompetitorsChangePerRace(), canBoatsOfCompetitorsChangePerRaceRegatta1);
+        Regatta replicatedRegatta2 = replica.getRegatta(new RegattaName(masterRegatta2.getName()));
+        assertNotNull(replicatedRegatta2);
+        assertEquals(replicatedRegatta2.canBoatsOfCompetitorsChangePerRace(), canBoatsOfCompetitorsChangePerRaceRegatta2);
+    }
+
     @Test
     public void testUpdateSpecificRegattaReplicationForCourseArea() throws InterruptedException {
         Regatta replicatedRegatta;
-        
         final UUID alphaCourseAreaId = UUID.randomUUID();
         final UUID tvCourseAreaId = UUID.randomUUID();
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
-        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
-        
+        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId},
+                /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null});
+        master.addCourseAreas(event.getId(), new String[] {"TV"}, new UUID[] {tvCourseAreaId}, /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null});
         UUID currentCourseAreaId = null;
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("Kiel Week 2012", "49er"), "49er", 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
-        
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("Kiel Week 2012", "49er"), "49er",
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                Collections.<Series> emptyList(), /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
-                currentCourseAreaId, null, /* useStartTimeInference */ true));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
+                currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getDefaultCourseArea());
-        
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
         // Test for 'alpha'
         currentCourseAreaId = alphaCourseAreaId;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, 
-                currentCourseAreaId, null, /* useStartTimeInference */ true));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
+                currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
-        
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().iterator().next().getId());
         // Test for 'tv'
         currentCourseAreaId = tvCourseAreaId;
         master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null,
-                currentCourseAreaId, null, /* useStartTimeInference */ true));
+                currentCourseAreaId, null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertEquals(currentCourseAreaId, replicatedRegatta.getDefaultCourseArea().getId());
-        
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(currentCourseAreaId, replicatedRegatta.getCourseAreas().iterator().next().getId());
         // Test back to 'null'
         currentCourseAreaId = null;
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null, /* useStartTimeInference */ true));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
+                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
-    
-    @Test
-    public void testRegattaToEventAssociationBeingReplicated() throws InterruptedException {
-        final UUID tvCourseAreaId = UUID.randomUUID();
-        final UUID golfCourseAreaId = UUID.randomUUID();
-        final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
-        final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", /*isPublic*/true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "TV", tvCourseAreaId);
-        master.addCourseArea(event.getId(), "Golf", golfCourseAreaId);
-        final String regattaName = RegattaImpl.getDefaultName("Kiel Week 2012", "49er");
-        Regatta masterRegatta = master.createRegatta(regattaName, "49er", /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), tvCourseAreaId, /* useStartTimeInference */ true);
-        event = master.getEvent(event.getId());
-        assertTrue(event.getRegattas().iterator().hasNext());
-        assertEquals(regattaName, event.getRegattas().iterator().next().getName());
-        Thread.sleep(1000);
-        Event replicatedEvent = replica.getEvent(event.getId());
-        Iterator<Regatta> regattasInReplicatedEvent = replicatedEvent.getRegattas().iterator();
-        assertTrue(regattasInReplicatedEvent.hasNext());
-        assertEquals(regattaName, regattasInReplicatedEvent.next().getName());
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, golfCourseAreaId, null, /* useStartTimeInference */ true));
-    }
-    
-    @Test
+
     public void testUpdateSpecificRegattaReplicationForProcedureAndCourseDesignerAndConfig() throws InterruptedException {
         Regatta replicatedRegatta;
-        
         final UUID alphaCourseAreaId = UUID.randomUUID();
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
-        
         Event event = master.addEvent("Event", /* eventDescription */ null, eventStartDate, eventEndDate, "Venue", true, UUID.randomUUID());
-        master.addCourseArea(event.getId(), "Alpha", alphaCourseAreaId);
-        
+        master.addCourseAreas(event.getId(), new String[] {"Alpha"}, new UUID[] {alphaCourseAreaId}, /* centerPositions */ new Position[0], /* radiuses */ new Distance[0]);
         UUID currentCourseAreaId = null;
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("RR", "49er"), "49er", /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), Collections.<Series>emptyList(),
-                true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId, /* useStartTimeInference */ true);
-        
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName("RR", "49er"), "49er",
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                Collections.<Series> emptyList(), true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), currentCourseAreaId,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         // Test for 'null'
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null, /* useStartTimeInference */ true));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, null,
+                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
         assertNull(replicatedRegatta.getRegattaConfiguration());
-        
         // Test for values
         RegattaConfigurationImpl config = new RegattaConfigurationImpl();
         config.setDefaultCourseDesignerMode(CourseDesignerMode.BY_MARKS);
-        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, config, /* useStartTimeInference */ true));
+        master.apply(new UpdateSpecificRegatta(masterRegatta.getRegattaIdentifier(), /*startDate*/ null, /*endDate*/ null, currentCourseAreaId, config,
+                /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
+                /* autoRestartTrackingUponCompetitorSetChange */ false, /* registrationLinkSecret */ null, CompetitorRegistrationType.CLOSED));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -178,20 +206,25 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(regattaId.equals(replicatedRegatta.getId()));
     }
-    
+
     @Test
     public void testSpecificRegattaReplicationWithTwoEmptySeries() throws InterruptedException {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false,
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series medal = new SeriesImpl("Medal", /* isMedal */ true,
+        Series medal = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -215,18 +248,23 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Medal", replicatedMedal.getName());
         assertEquals(1, Util.size(replicatedMedal.getFleets()));
         assertNotNull(replicatedMedal.getFleetByName("Medal"));
-        assertNull(replicatedRegatta.getDefaultCourseArea());
+        assertTrue(Util.isEmpty(replicatedRegatta.getCourseAreas()));
     }
-    
+
     @Test
     public void testRegattaUpdateSeriesWithNewSeries() throws InterruptedException {
         final String baseEventName = "Extreme Sailing Series 2020";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                Arrays.asList(new Series[] { qualification }), /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -237,13 +275,13 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Qualification", replicatedQualification.getName());
         assertEquals(2, Util.size(replicatedQualification.getFleets()));
         assertFalse(seriesIter.hasNext());
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false,
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         FleetDTO finalsGoldFleet = new FleetDTO("Gold", 1, Color.GRAY);
-        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(),
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(), finals.isFleetsCanRunInParallel(),
                 new int[] {},
-                finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
-                finals.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
+                finals.isStartsWithZeroScore(), finals.isFirstColumnNonDiscardableCarryForward(),
+                finals.hasSplitFleetContiguousScoring(), finals.hasCrossFleetMergedRanking(), finals.getMaximumNumberOfDiscards(), finals.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -260,16 +298,21 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedFinals.getFleetByName("Gold"));
         assertEquals(1, replicatedFinals.getFleetByName("Gold").getOrdering());
     }
-    
+
     @Test
     public void testSeriesNameChangeReplicationTest() throws InterruptedException {
         final String baseEventName = "Extreme Sailing Series 2021";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
-                UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true);
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
+                Arrays.asList(new Series[] { qualification }), /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), /* course area ID */ (Serializable) null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -277,11 +320,12 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Iterator<? extends Series> seriesIter = replicatedRegatta.getSeries().iterator();
         Series replicatedQualification = seriesIter.next();
         assertEquals("Qualification", replicatedQualification.getName());
-        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali", 
-                qualification.isMedal(),
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali",
+                qualification.isMedal(), qualification.isFleetsCanRunInParallel(),
                 new int[] {},
-                qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
-                qualification.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] {  })));
+                qualification.isStartsWithZeroScore(), qualification.isFirstColumnNonDiscardableCarryForward(),
+                qualification.hasSplitFleetContiguousScoring(), qualification.hasCrossFleetMergedRanking(), qualification.getMaximumNumberOfDiscards(),
+                qualification.isOneAlwaysStaysOne(), Arrays.asList(new FleetDTO[] {  })));
         Thread.sleep(1000);
         replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -289,7 +333,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         replicatedQualification = seriesIter.next();
         assertEquals("Simons Quali", replicatedQualification.getName());
     }
-    
+
     @Test
     public void testSpecificRegattaReplicationWithCourseArea() throws InterruptedException {
         final String eventName = "ESS Singapur";
@@ -301,10 +345,14 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
         final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
         Event masterEvent = master.addEvent(eventName, /* eventDescription */ null, eventStartDate, eventEndDate, venueName, isPublic, UUID.randomUUID());
-        CourseArea masterCourseArea = master.addCourseArea(masterEvent.getId(), courseArea, UUID.randomUUID());
-        
-        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
-                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), masterCourseArea.getId(), /* useStartTimeInference */ true);
+        CourseArea masterCourseArea = master.addCourseAreas(masterEvent.getId(), new String[] {courseArea}, new UUID[] {UUID.randomUUID()},
+                /* centerPositions */ new Position[] {null}, /* radiuses */ new Distance[] {null})[0];
+        Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(eventName, boatClassName),
+                boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* startDate */ null, /* endDate */ null, UUID.randomUUID(), series,
+                /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT),
+                masterCourseArea.getId(), /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, /* autoRestartTrackingUponCompetitorSetChange */ false, OneDesignRankingMetric::new);
         Thread.sleep(1000);
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertNotNull(replicatedEvent);
@@ -314,8 +362,9 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedRegatta);
         assertTrue(replicatedRegatta.isPersistent());
         assertTrue(Util.isEmpty((replicatedRegatta.getSeries())));
-        assertNotNull(replicatedRegatta.getDefaultCourseArea());
-        assertEquals(masterCourseArea.getId(), replicatedRegatta.getDefaultCourseArea().getId());
-        assertEquals(masterCourseArea.getName(), replicatedRegatta.getDefaultCourseArea().getName());
+        assertNotNull(replicatedRegatta.getCourseAreas());
+        assertEquals(1, Util.size(replicatedRegatta.getCourseAreas()));
+        assertEquals(masterCourseArea.getId(), replicatedRegatta.getCourseAreas().iterator().next().getId());
+        assertEquals(masterCourseArea.getName(), replicatedRegatta.getCourseAreas().iterator().next().getName());
     }
 }

@@ -19,12 +19,11 @@ public class RaceLogEventComparator extends LogEventComparator implements Compar
     private static final long serialVersionUID = 6146135178558781346L;
 
     protected int compareEvents(AbstractLogEvent<?> e1, AbstractLogEvent<?> e2) {
-        //compare passes
+        // compare passes
         if (e1 instanceof RaceLogEvent && e2 instanceof RaceLogEvent) {
             int result = ((RaceLogEvent) e1).getPassId() - ((RaceLogEvent) e2).getPassId();
             if (result != 0) return result;
         }
-        
         return super.compareEvents(e1, e2);
     }
 }

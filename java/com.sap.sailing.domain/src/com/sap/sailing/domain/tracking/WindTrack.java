@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -12,7 +12,12 @@ public interface WindTrack extends DynamicTrack<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
     
     public static final Distance WIND_HALF_CONFIDENCE_DISTANCE = new MeterDistance(100);
-    public static final long WIND_HALF_CONFIDENCE_TIME_MILLIS = 10000l;
+    
+    /**
+     * The following is used as a "standard deviation" in a Gaussian normal distribution; in order
+     * to still get positive confidences, a rather large duration of 30min is chosen here.
+     */
+    public static final Duration WIND_HALF_CONFIDENCE_DURATION = Duration.ONE_SECOND.times(5);
 
     /**
      * Estimates a wind force and direction based on tracked wind data.<p>
@@ -35,6 +40,14 @@ public interface WindTrack extends DynamicTrack<Wind> {
      * A listener is notified whenever a new fix is added to this track
      */
     void addListener(WindListener listener);
+    
+    /**
+     * Adds multiple {@link Wind} fixes in one call. This allows listeners to be notified with the
+     * {@link WindListener#windDataReceived(Iterable)} callback method, taking action on all wind fixes actually added
+     * at once. Only those fixes really added (not those where an equal {@link Wind} object was already contained in
+     * this track} are passed to the {@link WindListener#windDataReceived(Iterable)} method.
+     */
+    void add(Iterable<Wind> fixesToAdd);
 
     void remove(Wind wind);
 

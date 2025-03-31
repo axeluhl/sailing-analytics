@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sponsorships Engine Security Webservices API</title>
+</head>
+<body>
+<h1>SAP Sponsorships Engine Security Webservices API</h1>
+<h2>URL: /api/restsecurity</h2>
+
+<b>Description:</b>
+<p>The service adds a role to a user, defining whether the role is to be qualified to a specific
+group or user ownership, and deciding whether the role assignment is transitive or non-transitive
+which decides about whether the receiving user is allowed to pass on the permissions obtained
+from this role assignment to other users.</p>
+<br/>
+
+<b>Add Role to User</b>
+<table>
+    <tr>
+        <td>Request Method:</td>
+        <td>PUT /add_role_to_user</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Only the status code is relevant. 2xx for success.
+        </td>
+    </tr>
+     <tr>
+        <td>Query parameters:</td>
+        <td>
+            <div>username</div> Name of the user to which to assign the role
+            <div>role_definition_id</div> Unique ID of the role definition, telling which role to assign to the user
+            <div>qualifying_group_id</div> Optional unique ID of the user group for which to qualify the role assignment. If provided,
+                                           the role's permissions will only be granted to the user if the object to which
+                                           the permission applies is owned by the group identified by this ID.
+            <div>qualifying_username</div> Optional name of the user for which to qualify the role assignment. If provided,
+                                           the role's permissions will only be granted to the user identified by <tt>username</tt>
+                                           if the object to which the permission applies is owned by the user identified by
+                                           <tt>qualifying_username</tt>.
+            <div>transitive</div> Tells whether the role assignment is transitive; if <tt>true</tt>, the user identified by
+                                  <tt>username</tt> will be able to pass on the permissions from the role assignment to
+                                  other users. Default is <tt>false</tt>.
+        </td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><code>curl -X PUT -H "Authorization: Bearer MVPg/uCV1QGqMDmDtUuOQBrSrB1NlIldm0LW+dnxZ2A=" "http://admin:admin@127.0.0.1:8888/security/api/restsecurity/add_role_to_user?username=valerie&qualifying_group_id=82832851-07ac-47ee-9ddf-6f4f9eaa7823</code><br>
+                Will provide a 200 response as explained above.</td>
+    </tr>
+</table>
+</body>
+</html>

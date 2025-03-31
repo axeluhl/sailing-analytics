@@ -8,17 +8,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -29,7 +29,9 @@ import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @SuppressWarnings("restriction")
@@ -140,46 +142,37 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         // TODO: refactor, so that trackedRace is passed from server; no separate access to RacingEventService
         TrackedRace trackedRace = null; //this.service.getTrackedRace(regatta, raceDef)
         trackedRace.waitUntilNotLoading();
-
         Iterator<Competitor> competitors = raceDef.getCompetitors().iterator();
         Competitor competitor = null;
-
         for (int index = 0; index <= this.competitorIndex; index++) {
             competitor = competitors.next();
         }
-
         Leg leg = raceDef.getCourse().getLegs().get(this.legIndex);
-
         TimePoint startTime = trackedRace.getMarkPassing(competitor, leg.getFrom()).getTimePoint();
         TimePoint endTime = trackedRace.getMarkPassing(competitor, leg.getTo()).getTimePoint();
-
-        GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+        final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
         track.lockForRead();
-        Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
-
-        LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
-
-        while (it.hasNext()) {
-            GPSFixMoving gpsFix = it.next();
-            if (gpsFix.getTimePoint().after(endTime)) {
-                break;
+        try {
+            Iterator<GPSFixMoving> it = track.getFixesIterator(startTime, true);
+            LinkedList<TimedPositionWithSpeed> path = new LinkedList<TimedPositionWithSpeed>();
+            while (it.hasNext()) {
+                GPSFixMoving gpsFix = it.next();
+                if (gpsFix.getTimePoint().after(endTime)) {
+                    break;
+                }
+                Position position = gpsFix.getPosition();
+                TimePoint timePoint = gpsFix.getTimePoint();
+                Wind gpsWind = trackedRace.getWind(position, timePoint);
+                if (gpsWind.getKnots() == 1.0) {
+                    path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, scale(gpsWind, this.windScale)));
+                } else {
+                    path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
+                }
             }
-
-            Position position = gpsFix.getPosition();
-            TimePoint timePoint = gpsFix.getTimePoint();
-
-            Wind gpsWind = trackedRace.getWind(position, timePoint);
-
-            if (gpsWind.getKnots() == 1.0) {
-                path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, scale(gpsWind, this.windScale)));
-            } else {
-                path.addLast(new TimedPositionWithSpeedImpl(timePoint, position, gpsWind));
-            }
+            return new PathImpl(path, null, this.algorithmTimedOut);
+        } finally {
+            track.unlockAfterRead();
         }
-
-        track.unlockAfterRead();
-
-        return new PathImpl(path, null, this.algorithmTimedOut);
     }
 
     @SuppressWarnings("null")
@@ -255,8 +248,8 @@ public class PathGeneratorTracTrac extends PathGeneratorBase {
         this.intializeRaceHandle();
         List<String> result = new ArrayList<String>();
         RaceDefinition race = this.raceHandle.getRace();
-        for (Competitor competitor : race.getCompetitors()) {
-            result.add(competitor.getName() + ", " + competitor.getBoat().getName());
+        for (Entry<Competitor, Boat> competitorAndBoatEntry: race.getCompetitorsAndTheirBoats().entrySet()) {
+            result.add(competitorAndBoatEntry.getKey().getName() + ", " + competitorAndBoatEntry.getValue().getName());
         }
         return result;
     }

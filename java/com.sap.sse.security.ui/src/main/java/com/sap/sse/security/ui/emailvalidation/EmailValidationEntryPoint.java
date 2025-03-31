@@ -15,7 +15,7 @@ public class EmailValidationEntryPoint extends AbstractSecurityEntryPoint {
         final String validationSecret = Window.Location.getParameter("v");
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         final Label resultLabel = new Label();
-        getUserManagementService().validateEmail(username, validationSecret, new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
+        getUserManagementWriteService().validateEmail(username, validationSecret, new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
                 resultLabel.setText(getStringMessages().errorValidatingEmail(username, caught.getMessage()));

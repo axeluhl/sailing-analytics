@@ -2,11 +2,9 @@ package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Duration;
 
-public class MillisecondsDurationImpl implements Duration {
+public class MillisecondsDurationImpl extends AbstractDuration {
     private static final long serialVersionUID = -4257982564719184723L;
-    private long millis;
-    
-    MillisecondsDurationImpl() {} // for serialization only
+    private final long millis;
     
     public MillisecondsDurationImpl(long millis) {
         super();
@@ -16,6 +14,11 @@ public class MillisecondsDurationImpl implements Duration {
     @Override
     public long asMillis() {
         return millis;
+    }
+
+    @Override
+    public Duration abs() {
+        return millis >= 0 ? this : new MillisecondsDurationImpl(-millis);
     }
 
     @Override
@@ -29,8 +32,23 @@ public class MillisecondsDurationImpl implements Duration {
     }
 
     @Override
+    public Duration divide(double divisor) {
+        return new MillisecondsDurationImpl((long) (1. / divisor * asMillis()));
+    }
+
+    @Override
+    public double divide(Duration duration) {
+        return ((double) asMillis()) / (double) duration.asMillis();
+    }
+
+    @Override
     public Duration times(long factor) {
         return new MillisecondsDurationImpl(asMillis() * factor);
+    }
+
+    @Override
+    public Duration times(double factor) {
+        return new MillisecondsDurationImpl((long) (factor*asMillis()));
     }
 
     @Override
@@ -40,7 +58,7 @@ public class MillisecondsDurationImpl implements Duration {
 
     @Override
     public double asHours() {
-        return asMillis() / Duration.ONE_HOUR.asMillis();
+        return ((double) asMillis()) / (double) Duration.ONE_HOUR.asMillis();
     }
 
     @Override
@@ -48,13 +66,6 @@ public class MillisecondsDurationImpl implements Duration {
         return asMillis() / Duration.ONE_DAY.asMillis();
     }
     
-    @Override
-    public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append(asSeconds()).append("s==").append(asMillis()).append("ms");
-        return result.toString();
-    }
-
     @Override
     public Duration minus(Duration duration) {
         return new MillisecondsDurationImpl(asMillis()-duration.asMillis());
@@ -95,6 +106,11 @@ public class MillisecondsDurationImpl implements Duration {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public Duration mod(Duration d) {
+        return new MillisecondsDurationImpl(asMillis() % d.asMillis());
     }
 
 }

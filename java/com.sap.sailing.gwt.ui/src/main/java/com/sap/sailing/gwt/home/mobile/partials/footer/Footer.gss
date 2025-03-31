@@ -1,0 +1,29 @@
+ @def SITEFOOTER_BACKGROUND_COLOR #333;
+ @def SITEFOOTER_TEXT_COLOR #fff;
+
+.sitefooter {
+  background: SITEFOOTER_BACKGROUND_COLOR;
+  padding: 5em 3em;
+  margin-top: -11em;
+  color: SITEFOOTER_TEXT_COLOR;
+  text-align: center;
+  font-size: 110%;
+}
+.sitefooter a {
+  color: SITEFOOTER_TEXT_COLOR;
+  line-height: 2;
+  padding: 5px; 
+}
+.sitefooter_language {
+  display: block;
+}
+.sitefooter_language select {
+  font-size: 110%;
+  background-color: SITEFOOTER_BACKGROUND_COLOR;
+}
+.sitefooter_links {
+  padding: 3em 0;
+}
+.sitefooter_copyright {
+  font-weight: 600;
+}

@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xml>
 <lint>
-    <issue id="IconLocation" severity="ignore" />
-    <issue id="NestedWeights">
-        <ignore path="res/layout/results_capturing_view.xml" />
+    <issue id="CommitPrefEdits">
+        <ignore path="src/com/sap/sailing/racecommittee/app/AppPreferences.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/utils/autoupdate/AutoUpdater.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/preference/GeneralPreferenceFragment.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/utils/PreferenceHelper.java" />
     </issue>
-    <issue id="UselessLeaf">
-        <ignore path="res/layout/results_capturing_view.xml" />
+    <issue id="ContentDescription" severity="ignore" />
+    <issue id="GradleOverrides">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+    <issue id="IconLocation" severity="ignore" />
+    <issue id="InflateParams">
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/raceinfo/running/ConfirmDialog.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/dialogs/ProtestTimeDialogFragment.java" />
+        <ignore path="src/com/sap/sailing/racecommittee/app/ui/fragments/RaceInfoFragment.java" />
+    </issue>
+    <issue id="OldTargetApi" severity="ignore" />
+    <issue id="RtlHardcoded" severity="ignore" />
+    <issue id="RtlSymmetry" severity="ignore" />
+    <issue id="UnusedAttribute">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+    <issue id="UnusedResources" severity="ignore" />
+    <issue id="UseCompoundDrawables">
+        <ignore path="res/layout/race_panel_left.xml" />
+        <ignore path="res/layout/race_panel_right.xml" />
+        <ignore path="res/layout/race_schedule_mode.xml" />
+        <ignore path="res/layout/race_schedule_procedure.xml" />
+        <ignore path="res/layout/race_schedule_procedure_gate_start_pathfinder.xml" />
+        <ignore path="res/layout/race_schedule_procedure_gate_start_timing.xml" />
+        <ignore path="res/layout/race_schedule_start_time.xml" />
     </issue>
 </lint>

@@ -1,38 +1,38 @@
 package com.sap.sailing.domain.common;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.common.impl.WindSpeedSteppingWithMaxDistance;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.SerializableSettings;
 
-public interface PolarSheetGenerationSettings extends Serializable, Settings {
+public abstract class PolarSheetGenerationSettings extends SerializableSettings {
 
-    Integer getMinimumDataCountPerGraph();
+    private static final long serialVersionUID = 2018523638816898236L;
 
-    double getMinimumWindConfidence();
+    public abstract Integer getMinimumDataCountPerGraph();
 
-    Integer getMinimumDataCountPerAngle();
+    public abstract double getMinimumWindConfidence();
 
-    int getNumberOfHistogramColumns();
+    public abstract Integer getMinimumDataCountPerAngle();
 
-    double getMinimumConfidenceMeasure();
+    public abstract int getNumberOfHistogramColumns();
 
-    boolean useOnlyWindGaugesForWindSpeed();
+    public abstract double getMinimumConfidenceMeasure();
 
-    boolean shouldRemoveOutliers();
+    public abstract boolean useOnlyWindGaugesForWindSpeed();
 
-    double getOutlierDetectionNeighborhoodRadius();
+    public abstract boolean shouldRemoveOutliers();
 
-    double getOutlierMinimumNeighborhoodPct();
+    public abstract double getOutlierDetectionNeighborhoodRadius();
 
-    boolean useOnlyEstimatedForWindDirection();
+    public abstract double getOutlierMinimumNeighborhoodPct();
 
-    WindSpeedSteppingWithMaxDistance getWindSpeedStepping();
+    public abstract boolean useOnlyEstimatedForWindDirection();
 
-    boolean splitByWindgauges();
+    public abstract WindSpeedSteppingWithMaxDistance getWindSpeedStepping();
 
-    boolean areDefault();
+    public abstract boolean splitByWindgauges();
 
-    double getPctOfLeadingCompetitorsToInclude();
+    public abstract boolean areDefault();
+
+    public abstract double getPctOfLeadingCompetitorsToInclude();
 
 }

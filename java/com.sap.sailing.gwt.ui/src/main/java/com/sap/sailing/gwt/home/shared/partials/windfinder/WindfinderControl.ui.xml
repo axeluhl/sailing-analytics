@@ -1,0 +1,9 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderResources" />
+    <div class="{res.mainCss.button} {local_res.css.windfindercontrol}">
+        <div class="{local_res.css.windfindercontrol_text}" ui:field="labelUi"></div>
+        <div class="{local_res.css.windfindercontrol_icon}" ui:field="iconUi"></div>
+    </div>
+</ui:UiBinder>

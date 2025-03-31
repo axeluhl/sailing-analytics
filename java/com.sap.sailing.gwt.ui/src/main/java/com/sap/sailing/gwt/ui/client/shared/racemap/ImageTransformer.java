@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -55,11 +56,12 @@ public class ImageTransformer {
         return canvas;
     }
     
-    private void scale(double scaleFactor) {
+    public void scale(double scaleFactor) {
         if (scaleFactor != currentScale) {
             canvasWidth = (int) Math.round(imageWidth * scaleFactor);
             canvasHeight = (int) Math.round(imageHeight * scaleFactor);
             canvasRadius = (int) Math.sqrt(canvasWidth * canvasWidth / 4 + canvasHeight * canvasHeight / 4);
+            GWT.log("canvas radius: " + canvasRadius + "(h:" + canvasHeight + "/w:" + canvasWidth + ")");
             canvas.setSize("" + 2 * canvasRadius + "px", "" + 2 * canvasRadius + "px");
             canvas.setCoordinateSpaceWidth(2 * canvasRadius);
             canvas.setCoordinateSpaceHeight(2 * canvasRadius);
@@ -111,6 +113,14 @@ public class ImageTransformer {
     }
 
     public void drawToCanvas(Canvas canvas, double angleInDegrees, double scaleFactor) {
+        drawToCanvas(canvas, angleInDegrees, scaleFactor, /* globalAlpha; no transparency */ null);
+    }
+    
+    /**
+     * @param globalAlpha
+     *            0.0 means fully transparent; 1.0 means fully opaque; {@code null} will default to 1.0 (fully opaque).
+     */
+    public void drawToCanvas(Canvas canvas, double angleInDegrees, double scaleFactor, Double globalAlpha) {
         if (imageElement != null) {
             int canvasWidth = (int) Math.round(imageWidth * scaleFactor);
             int canvasHeight = (int) Math.round(imageHeight * scaleFactor);
@@ -125,6 +135,9 @@ public class ImageTransformer {
             context.translate(canvasRadius, canvasRadius);
             context.rotate(angleInRadians);
             context.scale(scaleFactor, scaleFactor);
+            if (globalAlpha != null) {
+                context.setGlobalAlpha(globalAlpha);
+            }
             context.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
             context.restore();
         }

@@ -180,7 +180,7 @@ public class FlagPlotOptions extends PlotOptions<FlagPlotOptions> {
      * @return A reference to this {@link FlagPlotOptions} instance for convenient method chaining.
      */
     public FlagPlotOptions setShape(Shape shape) {
-        return this.setOption("shape", shape != null ? shape : null);
+        return this.setOption("shape", shape != null ? shape.toString() : null);
     }
 
     /**

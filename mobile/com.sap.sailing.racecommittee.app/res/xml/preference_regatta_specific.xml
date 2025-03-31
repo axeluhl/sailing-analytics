@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<Preference
-            android:key="@string/preference_regatta_specific_save_key"
-            android:summary="@string/empty"
-            android:title="@string/empty" />
-
+    <Preference android:key="@string/preference_regatta_specific_save_key" />
 </PreferenceScreen>

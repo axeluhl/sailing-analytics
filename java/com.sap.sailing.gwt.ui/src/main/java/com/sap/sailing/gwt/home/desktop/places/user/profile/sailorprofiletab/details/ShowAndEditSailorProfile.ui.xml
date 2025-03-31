@@ -1,0 +1,31 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:lv="urn:import:com.sap.sailing.gwt.home.shared.partials.listview"
+    xmlns:dac="urn:import:com.sap.sailing.gwt.home.desktop.partials.desktopaccordion"
+    xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.editable">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="sprd"
+        type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources" />
+
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+        <ms:InlineEditLabel ui:field="titleUi" addStyleNames="{sprd.css.showAndEditHeader}" />
+        <div class="{res.mediaCss.column}">
+            <ms:EditableSuggestedMultiSelectionCompetitor
+                ui:field="competitorSelectionUi"
+                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
+            <lv:BoatClassListView ui:field="boatClassesUi"
+                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
+            <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
+                <dac:DesktopAccordion ui:field="accordionEventsUi" title="{i18n.events}" />
+            </div>
+            <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
+                <dac:DesktopAccordion ui:field="accordionStatisticsUi" title="{i18n.statistics}" />
+            </div>
+            <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
+                <dac:DesktopAccordion ui:field="accordionPolarDiagramUi"
+                    title="{i18n.polarSheetChart}" />
+            </div>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder> 

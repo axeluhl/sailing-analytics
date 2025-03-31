@@ -1,0 +1,9 @@
+package com.sap.sailing.expeditionconnector.impl;
+
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
+import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdentifierSerializationHandler;
+
+public class ExpeditionGpsStringSerializationHandler extends ExpeditionGpsDeviceIdentifierSerializationHandler
+implements DeviceIdentifierStringSerializationHandler {
+
+}

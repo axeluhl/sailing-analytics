@@ -18,7 +18,6 @@ import com.sap.sailing.velum.resultimport.CsvParser;
 import com.sap.sse.common.TimePoint;
 
 public class CsvParserImpl implements CsvParser {
-
     private final InputStream inputStream;
     private final String filename;
     private final TimePoint lastModified;
@@ -45,7 +44,6 @@ public class CsvParserImpl implements CsvParser {
         if(underScoreIndex > 0) {
             result = filename.substring(0, underScoreIndex);
         }
-        
         return result;
     }
 
@@ -63,11 +61,11 @@ public class CsvParserImpl implements CsvParser {
         int endIndexForRacePoints = -1;
         while (line != null) {
             int firstSeparator = line.indexOf(SEPARATOR);
-            if(line.startsWith("Wettfahrten")) {
+            if (line.startsWith("Wettfahrten")) {
                 // ignore line
             } else if (firstSeparator > 0) {
                 String firstEntry = line.substring(0, firstSeparator);
-                if(firstEntry.startsWith("G-PL") || firstEntry.startsWith("G-Pl")) {
+                if (firstEntry.startsWith("G-PL") || firstEntry.startsWith("G-Pl")) {
                     // header line
                     // scan the number of races
                     String[] splittedHeadline = line.split(SEPARATOR);
@@ -95,7 +93,7 @@ public class CsvParserImpl implements CsvParser {
                         List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
                         
                         int index = startIndexForRacePoints;
-                        while(index <= endIndexForRacePoints) {
+                        while (index <= endIndexForRacePoints) {
                             Integer rank;
                             String maxPointsReason;
                             Double points;
@@ -103,7 +101,7 @@ public class CsvParserImpl implements CsvParser {
                             
                             String rankOrMaxPointsReason = splittedRow[index++];
                             String pointsAsText = splittedRow[index++];
-                            if(rankOrMaxPointsReason.startsWith("[") && rankOrMaxPointsReason.endsWith("]")) {
+                            if (rankOrMaxPointsReason.startsWith("[") && rankOrMaxPointsReason.endsWith("]")) {
                                 rankOrMaxPointsReason = rankOrMaxPointsReason.substring(1, rankOrMaxPointsReason.length() - 1);
                                 discarded = true;
                             }
@@ -115,12 +113,11 @@ public class CsvParserImpl implements CsvParser {
                                 rank = null;
                                 maxPointsReason = rankOrMaxPointsReason;
                             }
-                            if(pointsAsText.startsWith("[") && pointsAsText.endsWith("]")) {
+                            if (pointsAsText.startsWith("[") && pointsAsText.endsWith("]")) {
                                 pointsAsText = pointsAsText.substring(1, pointsAsText.length() - 1);
                             }
                             pointsAsText = pointsAsText.replaceAll(",",".");
                             points = Double.valueOf(pointsAsText);
-                            
                             if (points != 0.0) {
                                 CompetitorEntry entry = new DefaultCompetitorEntryImpl(rank,
                                         maxPointsReason, points, discarded);
@@ -135,7 +132,6 @@ public class CsvParserImpl implements CsvParser {
                     } catch (NumberFormatException e) {
                         // no idea
                     }
-                    
                 }
             } else {
                 // probably last line

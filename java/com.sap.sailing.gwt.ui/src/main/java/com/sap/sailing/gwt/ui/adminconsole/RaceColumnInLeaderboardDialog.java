@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -11,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 /**
  * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property,
@@ -134,13 +136,21 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     }
 
     @Override
+    protected Focusable getInitialFocusWidget() {
+        final FocusWidget result;
+        if (isRegattaLeaderboard) {
+            result = explicitFactorBox;
+        } else {
+            result = raceNameBox;
+        }
+        return result;
+    }
+
+    @Override
     public void show() {
         super.show();
         if (isRegattaLeaderboard) {
-            explicitFactorBox.setFocus(true);
             explicitFactorBox.selectAll();
-        } else {
-            raceNameBox.setFocus(true);
         }
     }
 }

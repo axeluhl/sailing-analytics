@@ -2,6 +2,7 @@ package com.sap.sailing.simulator;
 
 import java.util.List;
 
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.simulator.impl.SparseSimulationDataException;
 
 

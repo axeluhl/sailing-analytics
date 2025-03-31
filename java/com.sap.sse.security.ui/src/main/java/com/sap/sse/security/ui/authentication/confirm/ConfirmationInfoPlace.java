@@ -1,0 +1,50 @@
+package com.sap.sse.security.ui.authentication.confirm;
+
+import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
+
+public class ConfirmationInfoPlace extends AbstractAuthenticationPlace {
+    private final String name;
+    private final Action action;
+
+    public enum Action {
+        ACCOUNT_CREATED {
+            @Override
+            public String getMessage(StringMessages i18n, String name) {
+                return i18n.signedUpSuccessfully(name);
+            }
+        },
+        RESET_REQUESTED {
+            @Override
+            public String getMessage(StringMessages i18n, String name) {
+                return i18n.passwordResetLinkSent(name);
+            }
+        };
+        
+        public abstract String getMessage(StringMessages i18n, String name);
+    };
+
+    public ConfirmationInfoPlace(Action action, String name) {
+        this.action = action;
+        this.name = name;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfirmationInfoPlace [name=" + name + ", action=" + action + "]";
+    }
+    
+    @Override
+    public String getHeaderText() {
+        return StringMessages.INSTANCE.accountConfirmation();
+    }
+
+}

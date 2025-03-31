@@ -2,84 +2,63 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.Venue;
-import com.sap.sailing.domain.common.impl.ImageSizeImpl;
+import com.sap.sailing.domain.common.Placemark;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
+import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.media.ImageSize;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
     private static final Logger logger = Logger.getLogger(EventImpl.class.getName());
+
+    private final ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
     
-    private final Set<Regatta> regattas;
+    private final ConcurrentMap<String, Boolean> windFinderReviewedSpotsCollectionIds;
     
-    private ConcurrentLinkedQueue<LeaderboardGroup> leaderboardGroups;
-    
-    private transient ConcurrentHashMap<URL, Future<ImageSize>> imageSizeFetchers;
-    private transient ExecutorService executor;
+    private transient ConcurrentMap<EventListener, Boolean> eventListeners;
     
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName, boolean isPublic, UUID id) {
         this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id);
     }
-    
+
     /**
      * @param venue must not be <code>null</code>
      */
     public EventImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue, boolean isPublic, UUID id) {
         super(name, startDate, endDate, venue, isPublic, id);
-        this.regattas = new HashSet<Regatta>();
         this.leaderboardGroups = new ConcurrentLinkedQueue<>();
-        this.imageSizeFetchers = new ConcurrentHashMap<>();
-        this.executor = Executors.newCachedThreadPool();
+        this.windFinderReviewedSpotsCollectionIds = new ConcurrentHashMap<>();
+        this.eventListeners = new ConcurrentHashMap<>();
     }
-    
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        if (leaderboardGroups == null) {
-            leaderboardGroups = new ConcurrentLinkedQueue<>();
+        if (eventListeners == null) {
+            eventListeners = new ConcurrentHashMap<>();
         }
-        this.imageSizeFetchers = new ConcurrentHashMap<>();
-        this.executor = Executors.newCachedThreadPool();
-    }
-    
-    @Override
-    public Iterable<Regatta> getRegattas() {
-        return Collections.unmodifiableSet(regattas);
-    }
-
-    @Override
-    public void addRegatta(Regatta regatta) {
-        regattas.add(regatta);
-    }
-
-    @Override
-    public void removeRegatta(Regatta regatta) {
-        regattas.remove(regatta);
     }
     
     public String toString() {
@@ -100,116 +79,121 @@ public class EventImpl extends EventBaseImpl implements Event {
     @Override
     public void addLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         leaderboardGroups.add(leaderboardGroup);
+        eventListeners.keySet().forEach(eventListener->eventListener.leaderboardGroupAdded(this, leaderboardGroup));
     }
 
     @Override
     public boolean removeLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
-        return leaderboardGroups.remove(leaderboardGroup);
+        final boolean result = leaderboardGroups.remove(leaderboardGroup);
+        eventListeners.keySet().forEach(eventListener->eventListener.leaderboardGroupRemoved(this, leaderboardGroup));
+        return result;
     }
     
-    private Future<ImageSize> getOrCreateImageSizeCalculator(final URL imageURL) {
-        Future<ImageSize> imageSizeFetcher = imageSizeFetchers.get(imageURL);
-        if (imageSizeFetcher == null) {
-            imageSizeFetcher = executor.submit(new Callable<ImageSize>() {
-                @Override
-                public ImageSize call() throws IOException {
-                    ImageSize result = null;
-                    ImageInputStream in = null;
-                    try {
-                        URLConnection conn = imageURL.openConnection();
-                        in = ImageIO.createImageInputStream(conn.getInputStream());
-                        final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
-                        if (readers.hasNext()) {
-                            ImageReader reader = readers.next();
-                            try {
-                                reader.setInput(in);
-                                result = new ImageSizeImpl(reader.getWidth(0), reader.getHeight(0));
-                            } finally {
-                                reader.dispose();
+    @Override
+    public void addEventListener(EventListener eventListener) {
+        eventListeners.put(eventListener, true);
+    }
+
+    @Override
+    public void removeEventListener(EventListener eventListener) {
+        eventListeners.remove(eventListener);
+    }
+
+    @Override
+    public Iterable<String> getWindFinderReviewedSpotsCollectionIds() {
+        return Collections.unmodifiableSet(windFinderReviewedSpotsCollectionIds.keySet());
+    }
+
+    @Override
+    public Iterable<String> getAllFinderSpotIdsUsedByTrackedRacesInEvent() {
+        final Set<String> result = new HashSet<>();
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                    for (final WindSource windTrackerWindSource : trackedRace.getWindSources(WindSourceType.WINDFINDER)) {
+                        result.add(windTrackerWindSource.getId().toString());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void setWindFinderReviewedSpotsCollection(Iterable<String> reviewedSpotsCollectionIds) {
+        windFinderReviewedSpotsCollectionIds.clear();
+        for (final String reviewedSpotsCollectionId : reviewedSpotsCollectionIds) {
+            windFinderReviewedSpotsCollectionIds.putIfAbsent(reviewedSpotsCollectionId, true);
+        }
+    }
+
+    @Override
+    public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
+        final Set<TrackingConnectorInfo> result = new HashSet<>();
+        for (LeaderboardGroup lbg : this.getLeaderboardGroups()) {
+            for (Leaderboard lb : lbg.getLeaderboards()) {
+                for (TrackedRace tr : lb.getTrackedRaces()) {
+                    final TrackingConnectorInfo trackingConnectorInfo = tr.getTrackingConnectorInfo();
+                    if (trackingConnectorInfo != null) {
+                        result.add(trackingConnectorInfo);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Position getLocation() {
+        final int MAX_NUMBER_OF_POSITION_SAMPLES = 5;
+        final Set<Position> positionSamples = new HashSet<>();
+        for (final LeaderboardGroup leaderboardGroup : getLeaderboardGroups()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (Util.containsAny(leaderboard.getCourseAreas(), getVenue().getCourseAreas())) {
+                    for (final TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+                        if (trackedRace.getStartOfRace() != null) {
+                            final Position centerOfCourse = trackedRace.getCenterOfCourse(trackedRace.getStartOfRace());
+                            if (centerOfCourse != null) {
+                                positionSamples.add(centerOfCourse);
+                                if (positionSamples.size() >= MAX_NUMBER_OF_POSITION_SAMPLES) {
+                                    return getAveragePosition(positionSamples);
+                                }
                             }
                         }
-                    } catch (IOException ioe) {
-                        logger.log(Level.SEVERE, "Stale image link "+imageURL+" for event "+getName()+". Please double-check and replace or remove.", ioe);
-                        throw ioe;
-                    } finally {
-                        if (in != null) {
-                            in.close();
-                        }
                     }
-                    return result;
                 }
-            });
-            imageSizeFetchers.put(imageURL, imageSizeFetcher);
-        }
-        return imageSizeFetcher;
-    }
-    
-    @Override
-    public ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
-        Future<ImageSize> imageSizeCalculator = getOrCreateImageSizeCalculator(imageURL);
-        return imageSizeCalculator.get();
-    }
-
-    @Override
-    public void addImageURL(URL imageURL) {
-        super.addImageURL(imageURL);
-        refreshImageSizeFetcher(imageURL);
-    }
-
-    private void refreshImageSizeFetcher(URL imageURL) {
-        if (imageURL != null) {
-            removeImageSizeFetcher(imageURL);
-            getOrCreateImageSizeCalculator(imageURL);
-        }
-    }
-
-    @Override
-    public void removeImageURL(URL imageURL) {
-        super.removeImageURL(imageURL);
-        removeImageSizeFetcher(imageURL);
-    }
-
-    private void removeImageSizeFetcher(URL imageURL) {
-        if (imageURL != null) {
-            imageSizeFetchers.remove(imageURL);
-        }
-    }
-
-    @Override
-    public void setImageURLs(Iterable<URL> imageURLs) {
-        super.setImageURLs(imageURLs);
-        if (imageURLs != null) {
-            for (URL imageURL : imageURLs) {
-                refreshImageSizeFetcher(imageURL);
             }
         }
+        // try to geo-code the venue:
+        final ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
+        try {
+            final Placemark placemark = geocoder.getPlacemark(getVenue().getName(), new Placemark.ByPopulation().reversed());
+            if (placemark != null) {
+                positionSamples.add(placemark.getPosition());
+            }
+        } catch (IOException | ParseException e) {
+            logger.log(Level.WARNING, "Problem while trying to resolve venue name "+getVenue().getName()+" with geocoder", e);
+        }
+        return positionSamples.isEmpty() ? null : getAveragePosition(positionSamples);
     }
 
-    @Override
-    public void addSponsorImageURL(URL sponsorImageURL) {
-        super.addSponsorImageURL(sponsorImageURL);
-        refreshImageSizeFetcher(sponsorImageURL);
-    }
-
-    @Override
-    public void removeSponsorImageURL(URL sponsorImageURL) {
-        super.removeSponsorImageURL(sponsorImageURL);
-        removeImageSizeFetcher(sponsorImageURL);
-    }
-
-    @Override
-    public void setSponsorImageURLs(Iterable<URL> sponsorImageURLs) {
-        super.setSponsorImageURLs(sponsorImageURLs);
-        if (sponsorImageURLs != null) {
-            for (URL imageURL : sponsorImageURLs) {
-                refreshImageSizeFetcher(imageURL);
+    private Position getAveragePosition(Set<Position> positionSamples) {
+        ScalablePosition sum = null;
+        int count = 0;
+        for (Position waypointPosition : positionSamples) {
+            ScalablePosition p = new ScalablePosition(waypointPosition);
+            if (sum == null) {
+                sum = p;
+            } else {
+                sum = sum.add(p);
             }
         }
-    }
-
-    @Override
-    public void setLogoImageURL(URL logoImageURL) {
-        super.setLogoImageURL(logoImageURL);
-        refreshImageSizeFetcher(logoImageURL);
+        final Position result;
+        if (sum == null) {
+            result = null;
+        } else {
+            result = sum.divide(count);
+        }
+        return result;
     }
 }

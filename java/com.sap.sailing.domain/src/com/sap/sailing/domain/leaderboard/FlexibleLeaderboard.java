@@ -5,7 +5,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -23,7 +22,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Renamable, IsRegattaLike {
+public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, IsRegattaLike {
     /**
      * Moves the column with the name <code>name</code> up. 
      * @param name The name of the column to move.
@@ -48,7 +47,7 @@ public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Rena
      *            tells if the column to add represents a medal race which has double score and cannot be discarded
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRaceColumn(String name, boolean medalRace);
+    FlexibleRaceColumn addRaceColumn(String name, boolean medalRace);
     
     /**
      * Adds a tracked race to this leaderboard. If a {@link RaceColumn} with name <code>columnName</code> already exists
@@ -62,15 +61,16 @@ public interface FlexibleLeaderboard extends LeaderboardThatHasRegattaLike, Rena
      * 
      * @return the race column in the leaderboard used to represent the tracked <code>race</code>
      */
-    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
+    FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
 
     void removeRaceColumn(String columnName);
 
     void updateIsMedalRace(String raceName, boolean isMedalRace);
 
     /**
-     * Sets the default {@link CourseArea} of this leaderboard.
-     * @param newCourseArea the {@link CourseArea} to be set.
+     * Sets the {@link CourseArea}s for this leaderboard, telling on which course areas races in this leaderboard may
+     * happen. Afterwards, {@link #getCourseAreas()} will return an {@link Iterable} that has exactly the elements
+     * contained in {@code newCourseAreas}.
      */
-    void setDefaultCourseArea(CourseArea newCourseArea);
+    void setCourseAreas(Iterable<CourseArea> newCourseAreas);
 }

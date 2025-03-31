@@ -30,9 +30,7 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
                 destination.add(event);
             }
         }
-        
     }
-    
 
     /**
      * Implement in your test to drive some pass- and author-specific tests.
@@ -69,10 +67,8 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         RaceLogEvent minorEvent = createEvent(RaceLogEvent.class, 0, 0, UUID.randomUUID(), author);
         TargetPair pair = getTargetEventsAndResultForPassAwareTests(1, author);
         ResultType expectedResult = pair.getB();
-        
         pair.addAll(raceLog);
         raceLog.add(minorEvent);
-
         assertEquals(expectedResult, analyzer.analyze());
     }
     
@@ -82,13 +78,10 @@ public abstract class PassAwareRaceLogAnalyzerTest<AnalyzerType extends RaceLogA
         AbstractLogEventAuthor majorAuthor = mock(AbstractLogEventAuthor.class);
         when(minorAuthor.compareTo(majorAuthor)).thenReturn(-1);
         when(majorAuthor.compareTo(minorAuthor)).thenReturn(1);
-        
         TargetPair minorPair = getTargetEventsAndResultForPassAwareTests(0, minorAuthor);
         minorPair.addAll(raceLog);
-        
         TargetPair majorPair = getBlockingEventsAndResultForPassAwareTests(0, majorAuthor);
         majorPair.addAll(raceLog);
-        
         assertNotSame(minorPair.getB(), analyzer.analyze());
         assertEquals(majorPair.getB(), analyzer.analyze());
     }

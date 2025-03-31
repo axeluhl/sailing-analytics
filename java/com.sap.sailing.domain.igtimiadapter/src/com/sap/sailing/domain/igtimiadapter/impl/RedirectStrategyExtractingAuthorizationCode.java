@@ -2,6 +2,7 @@ package com.sap.sailing.domain.igtimiadapter.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,7 +67,7 @@ public class RedirectStrategyExtractingAuthorizationCode implements RedirectStra
     }
     
     private String getCodeFromRedirect(final Header locationHeader) throws URISyntaxException {
-        List<NameValuePair> params = URLEncodedUtils.parse(new URI(locationHeader.getValue()), "UTF-8");
+        List<NameValuePair> params = URLEncodedUtils.parse(new URI(locationHeader.getValue()), Charset.forName("UTF-8"));
         for (NameValuePair param : params) {
             if (param.getName().equals("code")) {
                 return param.getValue();

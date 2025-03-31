@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/boatclasses</h2>
+
+<b>Description:</b>
+<p>Gets information about a boat class or the list of available boat classes</p>
+<br />
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>boatclassname</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Example all boat classes:</td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/boatclasses">http://www.sapsailing.com/sailingserver/api/v1/boatclasses</a></td>
+    </tr>
+    <tr>
+        <td>Example answer</td>
+    <td><pre>
+     <code>
+[
+{
+"name": "MANTRA28",
+"typicallyStartsUpwind": true
+},
+{
+"name": "30QMSCHÄRENKREUZER",
+"typicallyStartsUpwind": true
+},
+{
+"name": "75QMNATIONALEKREUZER",
+"typicallyStartsUpwind": true
+},
+...
+]
+</code>
+    </pre>
+    </td>
+    </tr>
+    <tr>
+        <td>Example specific boat class </td>
+        <td><a href="http://www.sapsailing.com/sailingserver/api/v1/boatclasses/MANTRA28">http://www.sapsailing.com/sailingserver/api/v1/boatclasses/MANTRA28</a></td>
+    </tr>
+    <tr>
+        <td>Example answer</td>
+   <td><pre>
+     <code>
+{
+"name": "MANTRA28",
+"typicallyStartsUpwind": true
+}
+</code>
+    </pre></td>
+  </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

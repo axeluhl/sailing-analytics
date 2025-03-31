@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,8 +16,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -51,12 +54,12 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
-    public void removeListener(Object listener) {
+    public void removeListener(RaceLogEventVisitor listener) {
         innerRaceLog.removeListener(listener);
     }
 
     @Override
-    public void addAllListeners(HashSet<RaceLogEventVisitor> listeners) {
+    public void addAllListeners(Iterable<RaceLogEventVisitor> listeners) {
         innerRaceLog.addAllListeners(listeners);
     }
 
@@ -146,8 +149,20 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     }
 
     @Override
+    public Iterator<RaceLogEvent> getFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        return innerRaceLog.getFixesIterator(startingAt, startingAtInclusive, endingAt, endingAtInclusive);
+    }
+
+    @Override
     public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
         return innerRaceLog.getRawFixesIterator(startingAt, inclusive);
+    }
+
+    @Override
+    public Iterator<RaceLogEvent> getRawFixesIterator(TimePoint startingAt, boolean startingAtInclusive,
+            TimePoint endingAt, boolean endingAtInclusive) {
+        return innerRaceLog.getRawFixesIterator(startingAt, startingAtInclusive, endingAt, endingAtInclusive);
     }
 
     @Override
@@ -243,5 +258,23 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public void revokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         innerRaceLog.revokeEvent(author, toRevoke);
+    }
+
+    @Override
+    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<RaceLogEvent, ScalableValue<InternalType, ValueType>> converter) {
+        return innerRaceLog.getInterpolatedValue(timePoint, converter);
+    }
+    
+    @Override
+    public int size() {
+        return innerRaceLog.size();
+    }
+
+    @Override
+    public <T> T getValueSum(TimePoint from, TimePoint to, T nullElement,
+            com.sap.sailing.domain.tracking.Track.Adder<T> adder, TimeRangeCache<T> cache,
+            com.sap.sailing.domain.tracking.Track.TimeRangeValueCalculator<T> valueCalculator) {
+        return innerRaceLog.getValueSum(from, to, nullElement, adder, cache, valueCalculator);
     }
 }

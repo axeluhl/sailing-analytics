@@ -10,9 +10,9 @@ import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJs
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 public class DeviceConfigurationParser implements DataParser<DeviceConfiguration> {
-    
+
     private DeviceConfigurationJsonDeserializer deserializer;
-    
+
     public DeviceConfigurationParser(DeviceConfigurationJsonDeserializer deserializer) {
         this.deserializer = deserializer;
     }

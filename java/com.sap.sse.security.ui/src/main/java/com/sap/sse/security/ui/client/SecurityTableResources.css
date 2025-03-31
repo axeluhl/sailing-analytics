@@ -1,0 +1,20 @@
+.cellTableCheckboxColumnCell {
+}
+
+.cellTableCheckboxSelected {
+    height: 13px;
+    width: 13px;
+    margin: auto auto;
+/*     border: 1px solid #fcbb22; */
+/*     background-color: #fcbb22; */
+    border: solid 1px #acacac;
+    background-color: #cacaca;
+    
+}
+
+.cellTableCheckboxDeselected {
+    height: 13px;
+    width: 13px;
+    margin: auto auto;
+    border: solid 1px #acacac;
+}

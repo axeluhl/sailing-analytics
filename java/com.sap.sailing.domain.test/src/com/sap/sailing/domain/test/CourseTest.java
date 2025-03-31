@@ -4,17 +4,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -23,15 +30,16 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -185,7 +193,8 @@ public class CourseTest {
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp2.getMarks().iterator().next(), wp2.getPassingInstructions()));
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp3.getMarks().iterator().next(), wp3.getPassingInstructions()));
         courseToUpdate.add(new com.sap.sse.common.Util.Pair<ControlPoint, PassingInstruction>(wp1.getMarks().iterator().next(), wp1.getPassingInstructions()));
-        course.update(courseToUpdate, DomainFactory.INSTANCE);
+        course.update(courseToUpdate, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
     }
     
@@ -199,17 +208,20 @@ public class CourseTest {
     @Test
     public void testWaypointDeleteWithSubsequentInsertInOnePatch() throws PatchFailedException {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
-        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"), new MarkImpl("Black Conical"), "RC-Black Conical"));
+        final WaypointImpl rcBlackConical = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("RC"),
+                new MarkImpl("Black Conical"), "RC-Black Conical", "RC-Black Conical"));
         waypoints.add(rcBlackConical);
         final WaypointImpl orange = new WaypointImpl(new MarkImpl("Orange"));
         waypoints.add(orange);
-        final WaypointImpl whiteGate = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("White L"), new MarkImpl("White R"), "White Gate"));
+        final WaypointImpl whiteGate = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("White L"),
+                new MarkImpl("White R"), "White Gate", "White Gate"));
         waypoints.add(whiteGate);
         final WaypointImpl red = new WaypointImpl(new MarkImpl("Red"));
         waypoints.add(red);
         final WaypointImpl yellow = new WaypointImpl(new MarkImpl("Yellow"));
         waypoints.add(yellow);
-        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder"));
+        final WaypointImpl finishPoleCylinder = new WaypointImpl(new ControlPointWithTwoMarksImpl(
+                new MarkImpl("Finish Pole"), new MarkImpl("Cylinder"), "Finish Pole-Cylinder", "Finish Pole-Cylinder"));
         waypoints.add(finishPoleCylinder);
         Course course = new CourseImpl("Race 24", waypoints);
         assertWaypointIndexes(course);
@@ -220,7 +232,8 @@ public class CourseTest {
         courseToUpdate.add(new Pair<>(red.getControlPoint(), red.getPassingInstructions()));
         courseToUpdate.add(new Pair<>(yellow.getControlPoint(), yellow.getPassingInstructions()));
         courseToUpdate.add(new Pair<>(finishPoleCylinder.getControlPoint(), finishPoleCylinder.getPassingInstructions()));
-        course.update(courseToUpdate, DomainFactory.INSTANCE);
+        course.update(courseToUpdate, new HashMap<>(), course.getOriginatingCourseTemplateIdOrNull(),
+                DomainFactory.INSTANCE);
         assertWaypointIndexes(course);
         List<ControlPoint> newControlPoints = new ArrayList<>();
         for (Waypoint newWp : course.getWaypoints()) {
@@ -297,13 +310,19 @@ public class CourseTest {
         waypoints.add(wp3);
         Course course = new CourseImpl("Test Course", waypoints);
         assertWaypointIndexes(course);
-        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
+        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Hasso");
+        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
-                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,/* delayToLiveInMillis */3000,
+                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                        new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
+                new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats),
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
-                /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false);
+                /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
         assertLegStructure(course, trackedRace);
         course.removeWaypoint(0);
         assertLegStructure(course, trackedRace);
@@ -327,14 +346,19 @@ public class CourseTest {
         final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
         waypoints.add(wp2);
         Course course = new CourseImpl("Test Course", waypoints);
-        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
+        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Hasso");
+        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null)),
-                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
-                        hasso), Collections.<Sideline> emptyList(),
-                        EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null,
+                        new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new,
+                        /* registrationLinkSecret */ UUID.randomUUID().toString())),
+                new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats), Collections.<Sideline> emptyList(),
+                EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
-                        /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false);
+                        /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                        mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null);
         assertLegStructure(course, trackedRace);
         final WaypointImpl wp1_5 = new WaypointImpl(new MarkImpl("Test Mark 1.5"));
         assertWaypointIndexes(course);

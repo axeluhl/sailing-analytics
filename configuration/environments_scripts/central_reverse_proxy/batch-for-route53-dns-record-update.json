@@ -1,0 +1,32 @@
+{
+    "Comment": "Alter logfiles record ",
+    "Changes": [
+      {
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+          "Name": "logfiles.internal.sapsailing.com",
+          "Type": "A",
+          "TTL": 60,
+          "ResourceRecords": [
+            {
+              "Value": "LOGFILES_INTERNAL_IP"
+            }
+          ]
+        }
+      },
+      {
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+          "Name": "smtp.internal.sapsailing.com",
+          "Type": "A",
+          "TTL": 60,
+          "ResourceRecords": [
+            {
+              "Value": "SMTP_INTERNAL_IP"
+            }
+          ]
+        }
+      }
+    ]
+  }
+  

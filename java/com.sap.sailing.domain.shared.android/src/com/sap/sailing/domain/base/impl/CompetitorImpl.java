@@ -9,30 +9,51 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
+import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
     private final DynamicTeam team;
-    private final DynamicBoat boat;
     private final Serializable id;
     private String name;
+    private String shortName;
+    private String searchTag;
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
     private String email;
     private URI flagImage;
+    private Double timeOnTimeFactor;
+    private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.team = team;
-        this.boat = boat;
         this.color = color;
         this.email = email;
         this.flagImage = flagImage;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
+        this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
+    }
+
+    private Object writeReplace() {
+        if (CompetitorSerializationCustomizer.getCurrentCustomizer().removalOfPersonalDataNecessary(this)) {
+            return new CompetitorImpl(id, name, shortName, color, /* email */ null, flagImage, team, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMile, searchTag);
+        }
+        return this;
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -44,7 +65,28 @@ public class CompetitorImpl implements DynamicCompetitor {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public String getShortName() {
+        return shortName;
+    }
+
+    @Override
+    public String getShortInfo() {
+        final String result;
+        if (getShortName() != null) {
+            result = getShortName(); 
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean hasBoat() {
+        return false;
+    }
+
     @Override
     public String toString() {
         return getName();
@@ -60,7 +102,19 @@ public class CompetitorImpl implements DynamicCompetitor {
             }
         }
     }
+
+    @Override
+    public void setShortName(String newShortName) {
+        final String oldShortName = this.shortName;
+        if (!Util.equalsWithNull(oldShortName, newShortName)) {
+            this.shortName = newShortName;
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.shortNameChanged(oldShortName, newShortName);
+            }
+        }
+    }
     
+
     @Override
     public Serializable getId() {
         return id;
@@ -71,17 +125,18 @@ public class CompetitorImpl implements DynamicCompetitor {
         return team;
     }
 
-    @Override
-    public DynamicBoat getBoat() {
-        return boat;
+    public Nationality getNationality() {
+        return getTeam() == null ? null : getTeam().getNationality();
     }
 
-    @Override
-    public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(), getBoat());
+    public Competitor resolve(SharedDomainFactory<?> domainFactory) {
+        Competitor result = domainFactory
+                .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
+                        getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag, /* storePersistently */ true);
         return result;
     }
 
+    @Override
     public Color getColor() {
         return color;
     }
@@ -101,7 +156,6 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             listeners.add(listener);
         }
-        getBoat().addBoatChangeListener(listener);
         getTeam().addNationalityChangeListener(listener);
     }
 
@@ -110,7 +164,6 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             listeners.remove(listener);
         }
-        getBoat().removeCompetitorChangeListener(listener);
         getTeam().removeNationalityChangeListener(listener);
     }
     
@@ -120,6 +173,22 @@ public class CompetitorImpl implements DynamicCompetitor {
         }
     }
 
+    @Override
+    public String getSearchTag() {
+        return searchTag;
+    }
+
+    public void setSearchTag(String newSearchTag) {
+        final String oldSearchTag = this.searchTag;
+        if (!Util.equalsWithNull(oldSearchTag, newSearchTag)) {
+            this.searchTag = newSearchTag;
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.searchTagChanged(oldSearchTag, newSearchTag);
+            }
+        }
+    }
+
+    @Override
     public String getEmail() {
         return email;
     }
@@ -134,6 +203,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         }
     }
     
+    @Override
     public boolean hasEmail(){
         return email != null && !email.isEmpty();
     }
@@ -153,4 +223,62 @@ public class CompetitorImpl implements DynamicCompetitor {
             }
         }
     }
+
+    @Override
+    public Double getTimeOnTimeFactor() {
+        return timeOnTimeFactor;
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile() {
+        return timeOnDistanceAllowancePerNauticalMile;
+    }
+
+    @Override
+    public void setTimeOnTimeFactor(Double timeOnTimeFactor) {
+        assertFiniteTimeOnTimeFactor(timeOnTimeFactor);
+        Double oldTimeOnTimeFactor = this.timeOnTimeFactor;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        if (!Util.equalsWithNull(oldTimeOnTimeFactor, timeOnTimeFactor)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.timeOnTimeFactorChanged(oldTimeOnTimeFactor, timeOnTimeFactor);
+            }
+        }
+    }
+
+    private void assertFiniteTimeOnTimeFactor(Double timeOnTimeFactor) {
+        if (timeOnTimeFactor != null && !Double.isFinite(timeOnTimeFactor)) {
+            throw new IllegalArgumentException("A competitor's time-on-time factor must be a finite number. "+timeOnTimeFactor+" is not.");
+        }
+    }
+
+    @Override
+    public void setTimeOnDistanceAllowancePerNauticalMile(Duration timeOnDistanceAllowancePerNauticalMile) {
+        Duration oldTimeOnDistanceAllowancePerNauticalMile = this.timeOnDistanceAllowancePerNauticalMile;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
+        if (!Util.equalsWithNull(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.timeOnDistanceAllowancePerNauticalMileChanged(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile);
+            }
+        }
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.COMPETITOR;
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return getTypeRelativeObjectIdentifier(getId());
+    }
+
+    public static TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier(Serializable id) {
+        return new TypeRelativeObjectIdentifier(id.toString());
+    }
+
 }

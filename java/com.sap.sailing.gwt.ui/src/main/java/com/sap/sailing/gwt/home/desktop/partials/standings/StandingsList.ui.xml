@@ -1,0 +1,36 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.standings.StandingsResources" />
+  <ui:style>
+  .scoreInformation {
+    border-bottom: 1px solid #dedede;
+    font-size: 0.866666666666667em;
+    padding: 0.75em 1.25em;
+  }
+  .noResults {
+    font-weight: bold;
+    font-style: italic;
+    padding: 1.2em;
+  }
+  </ui:style>
+    <div class="{local_res.css.standings_list}" style="display: none;">
+      <a ui:field="headerLinkUi" class="{local_res.css.standingsHeaderLink}">
+        <div>
+          <span class="{local_res.css.standingsHeaderTitle}" ui:field="headerTitleUi" />
+          <span class="{res.mainCss.label}" style="display: none;" ui:field="headerLabelUi" />
+        </div>
+        <div class="{local_res.css.standingsHeaderArrow}" ui:field="headerArrowUi" />
+      </a>
+      <div class="{local_res.css.standings_list_content}">
+        <div class="{res.mediaCss.small12}">
+          <div class="{local_res.css.regattalistitem_table}">
+          	  <div ui:field="noResultsUi" class="{style.noResults}" style="display: none;"><ui:text from="{i18n.noResults}" /></div>
+              <div ui:field="scoreInformationUi" class="{style.scoreInformation}" style="display: none;"><ui:text from="{i18n.noResults}" /></div>
+              <div ui:field="itemContainerUi" style="display: table; width: 100%;" />
+          </div>
+        </div>
+      </div>
+    </div>
+</ui:UiBinder>

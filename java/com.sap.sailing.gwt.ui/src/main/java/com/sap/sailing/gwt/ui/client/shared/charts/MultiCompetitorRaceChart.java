@@ -1,13 +1,14 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.UUID;
+
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -15,6 +16,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -30,31 +32,25 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  */
 public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiCompetitorRaceChartSettings> implements Component<MultiCompetitorRaceChartSettings> {
     
-    private boolean hasOverallLeaderboard;
+    private final MultiCompetitorRaceChartLifecycle lifecycle;
     
-    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+    /**
+     * Creates a Chart used for example in the Raceboard to display various additional data.
+     * Cannot be used without a lifecycle, as the allowedDetailTypes are determined via the lifecycle
+     */
+    public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
+            MultiCompetitorRaceChartLifecycle lifecycle,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            RaceCompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
-            final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
-        if (leaderboardGroupName != null) {
-            sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
-                    new AsyncCallback<LeaderboardGroupDTO>() {
-                        @Override
-                        public void onSuccess(LeaderboardGroupDTO group) {
-                            hasOverallLeaderboard = group != null ? group.hasOverallLeaderboard() : false;
-                        }
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error fetching the leaderboard group '" + leaderboardGroupName
-                                    + "': " + caught.getMessage());
-                        }
-                    });
-        } else {
-            hasOverallLeaderboard = false;
-        }
+            final String leaderboardGroupName, final UUID leaderboardGroupId, String leaderboardName) {
+        super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
+                selectedRaceIdentifier, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter,
+                /* show initially */DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                allowTimeAdjust, leaderboardGroupName, leaderboardGroupId, leaderboardName);
+        this.lifecycle = lifecycle;
     }
     
     @Override
@@ -62,16 +58,39 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
         return settingsButton;
     }
-
+    
     @Override
-    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
+    }
+    
+    @Override
+    public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent(
+            MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings, getStringMessages(),
+                lifecycle.getAllowedDetailTypes());
     }
 
     @Override
+    /**
+     * {@see com.sap.sse.gwt.client.shared.components.Component} filters the first and second detailtype using the
+     * lifecycles allowedTypes. If non allowed types are found, then they are replaced by either
+     * WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD or none for the first and second type. What types are allowed is
+     * determined by the environment, for example if additional foiling sensor data is imported
+     */
     public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
-        boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
+        DetailType firstType = newSettings.getFirstDetailType();
+        DetailType secondType = newSettings.getSecondDetailType();
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), firstType)) {
+            // if the first type is not allowed here, choose a different valid value
+            firstType = DetailType.CHART_WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
+        }
+        if (!Util.contains(lifecycle.getAllowedDetailTypes(), secondType)) {
+            //if the second type is not allowed here, do not set it.
+            secondType = null;
+        }
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(firstType, secondType);
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);
@@ -85,7 +104,7 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.competitorCharts();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -93,4 +112,8 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         return "multiCompetitorRaceChart";
     }
 
+    @Override
+    public String getId() {
+        return lifecycle.getComponentId();
+    }
 }

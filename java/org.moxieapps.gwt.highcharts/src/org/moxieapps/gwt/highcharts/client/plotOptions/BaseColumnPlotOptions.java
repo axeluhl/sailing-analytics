@@ -104,6 +104,20 @@ public abstract class BaseColumnPlotOptions<T extends BaseColumnPlotOptions> ext
     }
 
     /**
+     * Convenience method for setting the 'depth' option of the column plot options.  Equivalent to:
+     * <pre><code>
+     *     columnPlotOptions.setOption("depth", 40);
+     * </code></pre>
+     * Depth of the columns in a 3D column chart. Requires highcharts-3d.js. Defaults to 25.
+     *
+     * @param depth A number representing the depth of the columns in the 3D chart.
+     * @return A reference to this {@link ColumnPlotOptions} instance for convenient method chaining.
+     */
+    public T setDepth(Number depth) {
+        return this.setOption("depth", depth);
+    }
+
+    /**
      * Convenience method for setting the 'groupPadding' option of the column plot options.  Equivalent to:
      * <pre><code>
      *     columnPlotOptions.setOption("groupPadding", 4);

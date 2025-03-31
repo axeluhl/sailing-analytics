@@ -12,12 +12,12 @@ public class CollectionUtils {
         Util.addAll(iterable, list);
         return list;
     }
-    
+
     public static boolean isEqualCollection(final Collection<?> left, final Collection<?> right) {
         if (left.size() != right.size()) {
             return false;
         }
-        
+
         // There may be better implementations ;-)
         return left.containsAll(right) && right.containsAll(left);
     }

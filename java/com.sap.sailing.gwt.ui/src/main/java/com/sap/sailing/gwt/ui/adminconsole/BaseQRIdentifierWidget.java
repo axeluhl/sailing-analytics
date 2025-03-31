@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -15,21 +16,25 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
 
 public abstract class BaseQRIdentifierWidget implements IsWidget {
-    
     protected final TextBox serverBox;
     protected final Grid inputGrid;
     private final QRCodeComposite qrCodeComposite;
     private final Widget baseWidget;
     private final Label error;
-    private final Label url;
+    final Label url;
+    private RegExp urlValidator = null;
+    private RegExp urlPlusTldValidator = null;
+    StringMessages stringMessages;
 
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages) {
-        this(qrCodeSize, stringMessages, QRCodeComposite.ERROR_CORRECTION_LEVEL_H);
+        this(qrCodeSize, stringMessages, QRCodeWrapper.ERROR_CORRECTION_LEVEL_H);
     }
     
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages, int errorCorrectionLevel) {
+        this.stringMessages = stringMessages;
         serverBox = new TextBox();
         serverBox.setVisibleLength(40);
         serverBox.setValue(Window.Location.getProtocol() + "//" + Window.Location.getHost());
@@ -45,25 +50,20 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
                 generateQRCode();
             }
         });
-        
         inputGrid = new Grid(1, 2);
         inputGrid.setWidget(0, 0, new Label(stringMessages.serverUrl()+":"));
         inputGrid.setWidget(0, 1, serverBox);
-        
         qrCodeComposite = new QRCodeComposite(qrCodeSize, errorCorrectionLevel);
-        
         error = new Label();
         error.setStyleName("errorLabel");
-        
         url = new Label();
-        
+        url.ensureDebugId("QRIdentifierURL");
         VerticalPanel panel = new VerticalPanel();
         panel.add(inputGrid);
         panel.add(qrCodeComposite);
         panel.setCellHorizontalAlignment(qrCodeComposite, HasHorizontalAlignment.ALIGN_CENTER);
         panel.add(error);
         panel.add(url);
-        
         baseWidget = panel;
     }
     
@@ -77,7 +77,7 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     public void generateQRCode() {
         try {
             String qrCodeUrl = generateEncodedQRCodeContent();
-            qrCodeComposite.generateQRCode(qrCodeUrl);
+            qrCodeComposite.setQrCodeContent(qrCodeUrl);
             error.setText("");
             url.setText(qrCodeUrl);
         } catch (QRCodeURLCreationException e) {
@@ -86,11 +86,29 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     }
     
     protected String getServerUrlWithoutFinalSlash() {
-        String serverUrl = serverBox.getValue();
+        final String result;
+        final String serverUrl = serverBox.getValue();
         if (serverUrl.endsWith("/")) {
-            return serverUrl.substring(0, serverUrl.length() - 1);
+            result = serverUrl.substring(0, serverUrl.length() - 1);
+        } else {
+            result = serverUrl;
         }
-        return serverUrl;
+        return result;
+    }
+    
+    
+    //from: https://stackoverflow.com/questions/4498225/gwt-java-url-validator#4499412 as java.net.URL not available in GWT
+    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
+        if (urlValidator == null || urlPlusTldValidator == null) {
+            urlValidator = RegExp.compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+            urlPlusTldValidator = RegExp.compile("^((ftp|http|https)://[\\w@.\\-\\_]+\\.[a-zA-Z]{2,}(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+        }
+        return (topLevelDomainRequired ? urlPlusTldValidator : urlValidator).exec(url) != null;
+    }
+    
+    public boolean isServerUrlValid(){
+        String url = getServerUrlWithoutFinalSlash();
+        return isValidUrl(url, false);
     }
     
     protected void clear() {

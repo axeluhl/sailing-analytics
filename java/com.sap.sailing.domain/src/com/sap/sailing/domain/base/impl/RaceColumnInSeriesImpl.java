@@ -2,18 +2,25 @@ package com.sap.sailing.domain.base.impl;
 
 
 import java.util.Iterator;
+import java.util.Map;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
- * Obtains flees and medal information from the {@link Series} to which it is connected at construction time.
+ * Obtains fleets and medal information from the {@link Series} to which it is connected at construction time.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -65,6 +72,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
     @Override
+    public boolean isOneAlwaysStaysOne() {
+        return getSeries().isOneAlwaysStaysOne();
+    }
+
+    @Override
     public Series getSeries() {
         return series;
     }
@@ -104,12 +116,12 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
 
     @Override
     public boolean isDiscardable() {
-        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnIsNonDiscardableCarryForward());
+        return !isMedalRace() && (!isFirstColumnInSeries() || !getSeries().isFirstColumnNonDiscardableCarryForward());
     }
 
     @Override
     public boolean isCarryForward() {
-        return isFirstColumnInSeries() && getSeries().isFirstColumnIsNonDiscardableCarryForward();
+        return isFirstColumnInSeries() && getSeries().isFirstColumnNonDiscardableCarryForward();
     }
 
     /**
@@ -119,6 +131,56 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public boolean hasSplitFleetContiguousScoring() {
         return getSeries().hasSplitFleetContiguousScoring();
     }
+
+    /**
+     * Delegates to {@link Series#hasCrossFleetMergedRanking()}.
+     */
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return getSeries().hasCrossFleetMergedRanking();
+    }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        final RaceExecutionOrderProvider result;
+        if (getRegatta() != null) {
+            result = getRegatta().getRaceExecutionOrderProvider();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public RegattaLog getRegattaLog() {
+        Regatta regatta = getRegatta();
+        return regatta == null ? null : regatta.getRegattaLog();
+    }
     
-    
+    @Override
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors using the same boat for all races of the regatta  
+        assert(!getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitor(competitorWithBoat, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors using the same boat for all races of the regatta  
+        assert(!getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitors(competitorWithBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        // this method can only be called if the competitors changing the boats during the regatta  
+        assert(getRegatta().canBoatsOfCompetitorsChangePerRace());
+        super.registerCompetitor(competitor, boat, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {    
+        super.registerCompetitors(competitorsAndBoats, fleet);
+    }
+
 }

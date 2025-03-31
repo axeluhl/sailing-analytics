@@ -6,30 +6,29 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceScreen;
-
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.ui.activities.SettingsActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+import com.sap.sse.common.util.NaturalComparator;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceClickListener;
+import android.support.v7.preference.PreferenceScreen;
 
 public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         Context context = getActivity();
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(context);
-        
-        
+
         Set<RaceGroup> raceGroups = getRaceGroups(context);
         if (raceGroups.isEmpty()) {
             Preference preference = new Preference(context);
@@ -56,25 +55,25 @@ public class RegattaSpecificPreferenceFragment extends BasePreferenceFragment {
         Preference preference = new Preference(screen.getContext());
         preference.setTitle(getString(R.string.configure_regatta, raceGroup.getName()));
         preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            
+
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                SettingsActivity.openSpecificRegattaConfiguration(getActivity(), raceGroup);
+                PreferenceActivity.openSpecificRegattaConfiguration(getActivity(), raceGroup);
                 return false;
             }
         });
         screen.addPreference(preference);
     }
-    
+
     private static class RaceGroupComparator implements Comparator<RaceGroup> {
 
         private NaturalComparator nameComparator = new NaturalComparator();
-        
+
         @Override
         public int compare(RaceGroup lhs, RaceGroup rhs) {
             return nameComparator.compare(lhs.getName(), rhs.getName());
         }
-        
+
     }
 
 }

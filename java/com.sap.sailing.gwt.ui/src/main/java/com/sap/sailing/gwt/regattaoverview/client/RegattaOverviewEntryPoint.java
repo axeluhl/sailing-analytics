@@ -1,49 +1,49 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
-import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
+import com.sap.sailing.gwt.ui.client.AbstractSailingReadEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
-import com.sap.sse.gwt.client.URLEncoder;
-import com.sap.sse.gwt.theme.client.component.sapheader2.SAPHeader2;
-import com.sap.sse.gwt.theme.client.resources.ThemeResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.client.premium.PaywallResolver;
+import com.sap.sse.security.ui.client.premium.PaywallResolverImpl;
 
-public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
+public class RegattaOverviewEntryPoint extends AbstractSailingReadEntryPoint  {
 
-    private final static String PARAM_EVENT = "event";
-    private final static String PARAM_ONLY_RUNNING_RACES = "onlyrunningraces";
-    private final static String PARAM_ONLY_RACES_OF_SAME_DAY = "onlyracesofsameday";
-    private final static String PARAM_REGATTA = "regatta";
-    private final static String PARAM_COURSE_AREA = "coursearea";
+    private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
     
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
-    private final Label eventNameLabel = new Label();
-    private final Label venueNameLabel = new Label();
     private final Label clockLabel = new Label();
 
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
+    private SAPSailingHeaderWithAuthentication siteHeader;
 
     @Override
     public void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        ThemeResources.INSTANCE.mediaCss().ensureInjected();
-        ThemeResources.INSTANCE.mainCss().ensureInjected();
+        SharedResources.INSTANCE.mediaCss().ensureInjected();
+        SharedResources.INSTANCE.mainCss().ensureInjected();
         RegattaOverviewResources.INSTANCE.css().ensureInjected();
 
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
@@ -51,27 +51,26 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         rootPanel.add(containerPanel);
         containerPanel.addStyleName(RegattaOverviewResources.INSTANCE.css().container());
         
-        FlowPanel descriptionUi = new FlowPanel();
-        descriptionUi.setStyleName(style.eventDescription());
-        eventNameLabel.addStyleName(style.eventLabel());
-        venueNameLabel.addStyleName(style.venueLabel());
         clockLabel.addStyleName(style.clockLabel());
-        descriptionUi.add(eventNameLabel);
-        descriptionUi.add(venueNameLabel);
 
-        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi, false);
+        siteHeader = new SAPSailingHeaderWithAuthentication();
+        PaywallResolver paywallResolver = new PaywallResolverImpl(getUserService(), getSubscriptionServiceFactory());
+        new FixedSailingAuthentication(getUserService(), paywallResolver, siteHeader.getAuthenticationMenuView());
 
-        logoAndTitlePanel.addWidgetToRightSide(clockLabel);
-        containerPanel.addNorth(logoAndTitlePanel, 75);
+        siteHeader.addWidgetToRightSide(clockLabel);
+        containerPanel.addNorth(siteHeader, 75);
+        
+        RegattaOverviewContextDefinition regattaOverviewContextDefinition = serializer
+                .deserializeFromCurrentLocation(new RegattaOverviewContextDefinition());
 
-        String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
-        if (eventIdAsString == null) {
-            Window.alert("Missing parameter");
+        if (regattaOverviewContextDefinition.getEvent() == null) {
+            Notification.notify("Missing parameter", NotificationType.ERROR);
             return;
         }
 
+        
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(UUID.fromString(eventIdAsString));
+        createAndAddRegattaPanel(regattaOverviewContextDefinition);
         toggleDetailPanel(false);
         
         regattaPanel.setEntryClickedHandler(new EntryHandler() { 
@@ -89,21 +88,19 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
     
     private void toggleDetailPanel(boolean visibile) {
-        containerPanel.setWidgetSize(detailPanel, visibile ? 110 : 0);
+        containerPanel.setWidgetSize(detailPanel, visibile ? 125 : 0);
         containerPanel.animate(500);
-        // containerPanel.setWidgetHidden(detailPanel, !visibile);
     }
 
-    private void createAndAddRegattaPanel(UUID eventId) {
-        RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent);
+    private void createAndAddRegattaPanel(RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
+        regattaPanel = new RegattaOverviewPanel(getSailingService(), getUserService(), this, getStringMessages(),
+                regattaOverviewContextDefinition);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override
             public void onEventDTOLoaded(EventDTOLoadedEvent e) {
-                eventNameLabel.setText(e.getCurrentEvent().getName());
-                venueNameLabel.setText(e.getCurrentEvent().venue.getName());
-
+                siteHeader.setHeaderTitle(e.getCurrentEvent().getName());
+                siteHeader.setHeaderSubTitle(e.getCurrentEvent().getVenue().getName());
             }
         }, EventDTOLoadedEvent.TYPE);
 
@@ -130,59 +127,9 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         containerPanel.addSouth(detailPanel, 110);
     }
 
-    public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
-        List<UUID> visibleCourseAreas = new ArrayList<UUID>();
-        List<String> visibleRegattas = new ArrayList<String>();
-
-        boolean showOnlyCurrentlyRunningRaces = Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES) == null 
-                || !Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES).equalsIgnoreCase("false");
-
-        boolean showOnlyRacesOfSameDay = Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY) != null 
-                && Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY).equalsIgnoreCase("true");
-
-        if (Window.Location.getParameterMap().containsKey(PARAM_COURSE_AREA)) {
-            for (String value : Window.Location.getParameterMap().get(PARAM_COURSE_AREA)) {
-                visibleCourseAreas.add(UUID.fromString(value));
-            }
-        }
-
-        if (Window.Location.getParameterMap().containsKey(PARAM_REGATTA)) {
-            visibleRegattas.addAll(Window.Location.getParameterMap().get(PARAM_REGATTA));
-        }
-
-        return new RegattaRaceStatesSettings(visibleCourseAreas, visibleRegattas, showOnlyRacesOfSameDay, showOnlyCurrentlyRunningRaces);
-    }
-
-    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings, 
-            boolean isSetVisibleCourseAreasInUrl, boolean isSetVisibleRegattasInUrl) {
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        String showOnlyCurrentlyRunningRaces = "&" + PARAM_ONLY_RUNNING_RACES + "=" + (settings.isShowOnlyCurrentlyRunningRaces() ? "true" : "false");
-        String showOnlyRacesOfSameDay = "&" + PARAM_ONLY_RACES_OF_SAME_DAY + "=" + (settings.isShowOnlyRacesOfSameDay() ? "true" : "false");
-
-        StringBuilder visibleCourseAreas = new StringBuilder();
-        if (isSetVisibleCourseAreasInUrl) {
-            for (UUID visibleCourseArea : settings.getVisibleCourseAreas()) {
-                visibleCourseAreas.append('&');
-                visibleCourseAreas.append(PARAM_COURSE_AREA);
-                visibleCourseAreas.append('=');
-                visibleCourseAreas.append(visibleCourseArea.toString());
-            }
-        }
-        StringBuilder visibleRegattas = new StringBuilder();
-        if (isSetVisibleRegattasInUrl) {
-            for (String visibleRegatta : settings.getVisibleRegattas()) {
-                visibleRegattas.append('&');
-                visibleRegattas.append(PARAM_REGATTA);
-                visibleRegattas.append('=');
-                visibleRegattas.append(visibleRegatta);
-            }
-        }
-        String link = URLEncoder.encode("/gwt/RegattaOverview.html?" + PARAM_EVENT+ "=" + eventId.toString()
-                + visibleCourseAreas.toString()
-                + visibleRegattas.toString()
-                + showOnlyCurrentlyRunningRaces
-                + showOnlyRacesOfSameDay
-                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-        return link;
+    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings) {
+        UrlBuilder urlBuilder = serializer.serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(settings);
+        serializer.serializeToUrlBuilder(new RegattaOverviewContextDefinition(eventId), urlBuilder);
+        return urlBuilder.buildString();
     }
 }

@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.racelog.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
@@ -14,10 +15,10 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -87,7 +88,7 @@ public class RaceLogRevocationTest {
         sendClientEvent(clientCRaceLog, event, clientCUUID);
     }
     
-    private static void assertNumUnrevoked(RaceLog raceLog, int expectedNum) {
+    private static void assertNumUnrevoked(final RaceLog raceLog, int expectedNum) {
         raceLog.lockForRead();
         try {
             assertEquals(expectedNum, Util.size(raceLog.getUnrevokedEvents()));
@@ -96,7 +97,7 @@ public class RaceLogRevocationTest {
         }
     }
     
-    private static void assertNumAll(RaceLog raceLog, int expectedNum) {
+    private static void assertNumAll(final RaceLog raceLog, int expectedNum) {
         raceLog.lockForRead();
         try {
             assertEquals(expectedNum, Util.size(raceLog.getRawFixes()));
@@ -107,7 +108,7 @@ public class RaceLogRevocationTest {
     
     @Test
     public void sameEventRevokedByTwoClientsBeforeSync() throws NotRevokableException {
-        RaceLogDenoteForTrackingEvent event = RaceLogEventFactory.INSTANCE.createDenoteForTrackingEvent(
+        RaceLogDenoteForTrackingEvent event = new RaceLogDenoteForTrackingEventImpl(
                 now(), serverAuthor, 0, "race", null, null);
         serverRaceLog.add(event);
         
@@ -125,7 +126,7 @@ public class RaceLogRevocationTest {
         clientBRaceLog.revokeEvent(clientBAuthor, event);
         clientCRaceLog.revokeEvent(clientCAuthor, event);
         //expected, because A does not have sufficient priority
-        assertThat("event not revoked due to insufficient author priority", event, isIn(clientARaceLog.getUnrevokedEvents()));
+        assertThat("event not revoked due to insufficient author priority", event, is(in(clientARaceLog.getUnrevokedEvents())));
         
         //update clients
         sendClientAEvent(null);

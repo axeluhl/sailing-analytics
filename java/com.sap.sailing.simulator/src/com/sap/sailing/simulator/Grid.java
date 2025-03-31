@@ -3,11 +3,11 @@ package com.sap.sailing.simulator;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * The Grid interface defines access to a set of GPS-positions which form a lattice of supporting positions for

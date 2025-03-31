@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API</h1>
+<h2>URL: /landscape/api/landscape/get_ssh_keys_owned_by_user</h2>
+
+<b>Description:</b>
+ <p>Queries the SSH key pairs stored persistently in users' key repositories. A set of user names must be
+ provided; they will be compared to the "creator name" of the SSH key.
+ The user authenticating this request will only see the key pairs for which he/she has the SSH_KEY:READ:{key_name}
+ permission.
+ </p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory form parameters:</td>
+        <td>
+            <div><tt>username[]</tt>, one or more usernames for which to query their SSH key pairs</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><pre>curl -H 'Authorization: Bearer RvGK+D73k9KjeuDu+Bx17/3clLJHD7Ff+NCLeu9YDOQ=' -X GET http://127.0.0.1:8888/landscape/api/landscape/get_ssh_keys_owned_by_user?username[]=admin
+           </pre><br>
+        produces a 200 status code with output
+        <pre>        [
+              {
+                "name": "Axel",
+                "regionId": "eu-west-2",
+                "creatorName": "admin",
+                "creationTimeMillis": 1645439343022,
+                "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAu+eA2h6Fox7s9yir93P8MQ8H9eu83tDSQ4N4qjTa7ustnYfwOBxsVgIZh3CUT+6m66fgQijkG6Qd3Dt7IXR5Ja3wLIdFa/HCsvN4gtL6Q65o7/XyiPRc98EafQPW1+Cux+ieZsB+NoNKhdUOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here"
+              }
+        ]</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

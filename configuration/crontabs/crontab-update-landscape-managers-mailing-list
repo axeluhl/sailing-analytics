@@ -1,0 +1,1 @@
+*/10 * * * *       export PATH=/bin:/usr/bin:/usr/local/bin; sleep $(( $RANDOM * 60 / 32768 )); update_landscape_managers_mailing_list.sh $(cat /root/ssh-key-reader.token) /var/cache

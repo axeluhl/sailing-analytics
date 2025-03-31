@@ -2,6 +2,10 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+
 
 public interface Position extends Serializable {
     double getLatRad();
@@ -11,6 +15,16 @@ public interface Position extends Serializable {
     double getLatDeg();
 
     double getLngDeg();
+    
+    /**
+     * Generates a string representation of the form S03°45.235' E003°22.837'
+     */
+    String getAsDegreesAndDecimalMinutesWithCardinalPoints();
+    
+    /**
+     * Generates a string representation of the form (-3.7539166666, 3.3806166666)
+     */
+    String getAsSignedDecimalDegrees();
 
     /**
      * Central angle between this position and the other position, in radians
@@ -20,7 +34,10 @@ public interface Position extends Serializable {
     Distance getDistance(Position p);
     
     /**
-     * The bearing from this position towards <code>p</code> on a great circle
+     * The bearing from this position towards <code>p</code> on a great circle, using the shortest path.
+     * 
+     * @return {@code null} if {@code p} is {@code null}, otherwise the bearing from {@code this} {@link Position} to
+     *         {@code p} along a great circle
      */
     Bearing getBearingGreatCircle(Position p);
 
@@ -57,18 +74,24 @@ public interface Position extends Serializable {
     Distance crossTrackError(Position p, Bearing bearing);
 
     /**
-     * Computes how far along the great circle starting at <code>from</code> and pointing
-     * to <code>bearing</code> one has to travel to reach the projection of this position
-     * onto the great circle described by <code>from</code> and <code>bearing</code>. Note that
-     * if the angle between this position and the great circle is 90 degrees then there is
-     * no solution, and a <code>NaN</code> or exception will result.
+     * Computes how far along the great circle starting at <code>from</code> and pointing to <code>bearing</code> one
+     * has to travel to reach the projection of this position onto the great circle described by <code>from</code> and
+     * <code>bearing</code>. Note that if the angle between this position and the great circle is 90 degrees then there
+     * is no solution, and a <code>NaN</code> or exception will result.
+     * <p>
+     * 
+     * The distance returned will be negative if one needs to travel towards the reverse of {@code bearing} to reach this
+     * position starting at {@code from} on the shortest path.<p>
+     * 
+     * If either <code>from</code> or <code>bearing</code> or both are <code>null</code>, <code>null</code> is returned.
      */
 
     Distance alongTrackDistance(Position from, Bearing bearing);
     
     /**
-     * Computes the distance from this position to the line between <code>left<code> and <code>right<code>. This distance
-     * is positive if <code>left<code> is actually the position farther to the left, as seen from this position.
+     * Computes the distance from this position to the line between <code>left</code> and <code>right</code>. This distance
+     * is positive if <code>left</code> is actually the position farther to the left, as seen from this position; negative
+     * otherwise.
      */
     Distance getDistanceToLine(Position left, Position right);
     
@@ -116,4 +139,10 @@ public interface Position extends Serializable {
      */
     Position getIntersection(Bearing thisBearing, Position to, Bearing toBearing);
     
+    /**
+     * Calculates the speed vector needed to reach the {@code to} position from this position in time
+     * {@code inTime}. A {@link NullPointerException} will be thrown if either {@code to} or {@code inTime}
+     * is {@code null}.
+     */
+    SpeedWithBearing getSpeedWithBearingToReachOnGreatCircle(Position to, Duration inTime);
 }

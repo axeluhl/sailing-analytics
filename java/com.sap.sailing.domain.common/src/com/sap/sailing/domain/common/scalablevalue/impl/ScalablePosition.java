@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.scalablevalue.impl;
 
+import com.sap.sailing.domain.common.DoubleTriple;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sse.common.scalablevalue.ScalableValue;
@@ -14,7 +15,10 @@ public class ScalablePosition implements ScalableValueWithDistance<ScalablePosit
                 Math.sin(position.getLatRad()));
     }
     
-    private ScalablePosition(double x, double y, double z) {
+    /**
+     * Use the three components obtained from {@link #getValueAsTriple()}
+     */
+    public ScalablePosition(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -63,5 +67,9 @@ public class ScalablePosition implements ScalableValueWithDistance<ScalablePosit
     @Override
     public double getDistance(Position other) {
         return divide(1).getDistance(other).getCentralAngleDeg();
+    }
+    
+    public DoubleTriple getValueAsTriple() {
+        return new DoubleTriple(x, y, z);
     }
 }

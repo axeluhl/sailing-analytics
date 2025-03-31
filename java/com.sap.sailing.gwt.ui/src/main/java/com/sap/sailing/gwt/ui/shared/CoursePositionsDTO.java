@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -8,12 +9,16 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 
 public class CoursePositionsDTO implements IsSerializable {
+    public RaceCourseDTO course;
     public List<Position> waypointPositions;
-    public List<Position> startMarkPositions;
-    public List<Position> finishMarkPositions;
     public Set<MarkDTO> marks;
     
     public int totalLegsCount;
+    
+    /**
+     * The leg number is 0 before the start, the number of the current leg during the race
+     * and the number of the last leg at the end of the race even if the race has finished. 
+     */
     public int currentLegNumber;
     
     /**
@@ -21,7 +26,7 @@ public class CoursePositionsDTO implements IsSerializable {
      * {@link #startLineAdvantageousSide}, {@link #startLineAdvantageInMeters} and {@link #startLineLengthInMeters} are
      * also both <code>null</code>.
      */
-    public Double startLineAngleToCombinedWind;
+    public Double startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind;
     public NauticalSide startLineAdvantageousSide;
     public Double startLineAdvantageInMeters;
     public Double startLineLengthInMeters;
@@ -31,8 +36,36 @@ public class CoursePositionsDTO implements IsSerializable {
      * {@link #finishLineAdvantageousSide}, {@link #finishLineAdvantageInMeters} and
      * {@link #finishLineAdvantageInMeters} are also both <code>null</code>.
      */
-    public Double finishLineAngleToCombinedWind;
+    public Double finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind;
     public NauticalSide finishLineAdvantageousSide;
     public Double finishLineAdvantageInMeters;
     public Double finishLineLengthInMeters;
+
+    public WaypointDTO getEndWaypointForLegNumber(int legNumber) {
+        WaypointDTO result = null;
+        if(legNumber > 0 && legNumber <= totalLegsCount && course != null && course.waypoints != null) {
+            result = course.waypoints.get(legNumber);
+        }
+        return result;
+    }
+
+    public List<Position> getStartMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(0).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
+
+    public List<Position> getFinishMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(course.waypoints.size()-1).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
 }

@@ -3,7 +3,9 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -11,12 +13,15 @@ import java.util.Set;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.CacheUpdater;
@@ -24,6 +29,8 @@ import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
 public class SmartFutureCacheTest {
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
+    
     @Test
     public void testPerformanceOfGetAndCall() {
         SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
@@ -41,6 +48,38 @@ public class SmartFutureCacheTest {
             sfc.get("humba", /* waitForLatest */ false);
         }
         System.out.println("testPerformanceOfGetAndCall took "+(System.currentTimeMillis()-start)+"ms");
+    }
+
+    @Test
+    public void testExceptionInComputeCacheUpdate() {
+        final boolean[] throwException = new boolean[1];
+        synchronized (this) { // make sure that other threads see this after the synchronized block has completed
+            throwException[0] = true;
+        }
+        SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
+                new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
+                    @Override
+                    public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) {
+                        synchronized (SmartFutureCacheTest.this) { // make sure we see the latest change to throwException
+                            if (throwException[0]) {
+                                throw new NullPointerException("Humba");
+                            } else {
+                                return "Humba";
+                            }
+                        }
+                    }
+                }, "SmartFutureCacheTest.testExceptionInComputeCacheUpdate");
+        sfc.triggerUpdate("humba", /* update interval */ null);
+        try {
+            // during the first call, expecting exception
+            sfc.get("humba", /* waitForLatest */ true);
+            fail("Expected RuntimeException because computeCacheUpdate threw one");
+        } catch (RuntimeException expected) {
+            assertSame(ExecutionException.class, expected.getCause().getClass());
+        }
+        throwException[0] = false;
+        sfc.triggerUpdate("humba", /* update interval */ null);
+        assertEquals("Humba", sfc.get("humba", /* waitForLatest */ true));
     }
     
     @Test
@@ -155,7 +194,7 @@ public class SmartFutureCacheTest {
         assertNull(sfc.get("Trala", /* waitForLatest */ false));
         assertFalse(updateWasCalled[0]);
         sfc.triggerUpdate("Trala", new FromAToBUpdateInterval(43, 49)); // should result in update interval 42..49
-        assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
+        assertEquals(Integer.valueOf(91), sfc.get("Trala", /* waitForLatest */ true));
         assertTrue(updateWasCalled[0]);
     }
 
@@ -193,7 +232,7 @@ public class SmartFutureCacheTest {
             }
         }
         assertTrue(updateWasCalled[0]);
-        assertEquals(new Integer(91), sfc.get("Trala", /* waitForLatest */ true));
+        assertEquals(Integer.valueOf(91), sfc.get("Trala", /* waitForLatest */ true));
     }
     
     @Ignore // used only to solve bug 1314; it's hard to test re-cycling of tasks reliably without depending on timing issues
@@ -259,7 +298,6 @@ public class SmartFutureCacheTest {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CyclicBarrier barrier = new CyclicBarrier(2);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
-
             @Override
             public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
                 synchronized (callCounter) {
@@ -270,7 +308,7 @@ public class SmartFutureCacheTest {
                 barrier.await();
                 barrier.await();
                 barrier.await();
-                //For this test case value will be same as key, when updated.
+                // For this test case value will be same as key, when updated.
                 return key;
             }
 
@@ -303,7 +341,6 @@ public class SmartFutureCacheTest {
         final AtomicInteger callCounter = new AtomicInteger(0);
         CyclicBarrier barrier = new CyclicBarrier(2);
         CacheUpdater<Integer, Integer, EmptyUpdateInterval> cacheUpdater = new CacheUpdater<Integer, Integer, SmartFutureCache.EmptyUpdateInterval>() {
-
             @Override
             public Integer computeCacheUpdate(Integer key, EmptyUpdateInterval updateInterval) throws Exception {
                 synchronized (callCounter) {
@@ -330,10 +367,8 @@ public class SmartFutureCacheTest {
         assertEquals(1, callCounter.get());
         testCache.triggerUpdate(1, null);
         testCache.suspend();
-
         CyclicBarrier getResultBarrier = new CyclicBarrier(2);
         Thread thread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 //FIXME find a way to guarantee that get is called, while the first computeUpdate Future is still running
@@ -349,9 +384,7 @@ public class SmartFutureCacheTest {
         });
         thread.start();
         barrier.await();
-        
         barrier.await();
-
         barrier.await();
         assertEquals(2, callCounter.get());
         //Trigger again. This update should not retrigger add another future, since cache is disabled and no
@@ -370,7 +403,5 @@ public class SmartFutureCacheTest {
             timeOut = true;
         }
         assertTrue(timeOut);
-        
-        
     }
 }

@@ -9,15 +9,15 @@ import java.util.Map;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 public class DeclinationServiceImpl implements DeclinationService {
     private final Distance defaultMaxDistance;
     private final DeclinationStore persistentStore;
-    private final NOAAImporter noaaImporter;
+    private final DeclinationImporter declinationImporter;
     
     /**
      * Keys are years
@@ -29,26 +29,23 @@ public class DeclinationServiceImpl implements DeclinationService {
      */
     private final Map<Integer, QuadTree<Declination>> importerCache;
     
-    /**
-     * Constructs a service that has a default position tolerance of <code>defaultMaxDistance</code>.
-     */
-    public DeclinationServiceImpl(Distance defaultMaxDistance) {
+    public DeclinationServiceImpl(Distance defaultMaxDistance, DeclinationImporter declinationImporter) {
+        this.declinationImporter = declinationImporter;
         this.defaultMaxDistance = defaultMaxDistance;
         this.yearStore = new HashMap<Integer, QuadTree<Declination>>();
-        this.persistentStore = new DeclinationStore();
-        this.noaaImporter = new NOAAImporter();
+        this.persistentStore = new DeclinationStore(declinationImporter);
         this.importerCache = new HashMap<Integer, QuadTree<Declination>>();
     }
 
     @Override
     public Declination getDeclination(TimePoint timePoint, Position position,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
         return getDeclination(timePoint, position, defaultMaxDistance, timeoutForOnlineFetchInMilliseconds);
     }
 
     @Override
     public Declination getDeclination(TimePoint timePoint, Position position, Distance maxDistance,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
         Calendar cal = new GregorianCalendar();
         cal.setTime(timePoint.asDate());
         Declination result = null;
@@ -84,7 +81,7 @@ public class DeclinationServiceImpl implements DeclinationService {
                     // else it's further away from the requested position as demanded by maxDistance
                 }
             }
-            result = noaaImporter.getDeclination(position, timePoint, timeoutForOnlineFetchInMilliseconds);
+            result = declinationImporter.getDeclination(position, timePoint, timeoutForOnlineFetchInMilliseconds);
             if (result != null) {
                 if (importerCacheForYear == null) {
                     importerCacheForYear = new QuadTree<Declination>();
@@ -98,13 +95,18 @@ public class DeclinationServiceImpl implements DeclinationService {
         return result;
     }
 
-    private QuadTree<Declination> getYearStore(int year) throws IOException, ClassNotFoundException,
-            ParseException {
+    private QuadTree<Declination> getYearStore(int year) throws IOException, ParseException {
         QuadTree<Declination> result = yearStore.get(year);
         if (result == null) {
-            result = persistentStore.getStoredDeclinations(year);
-            if (result != null) {
-                yearStore.put(year, result);
+            synchronized (this) {
+                // make sure we only trigger one invocation of persistentStore.getStoredDeclinations(year) even for multiple threads
+                result = yearStore.get(year);
+                if (result == null) {
+                    result = persistentStore.getStoredDeclinations(year);
+                    if (result != null) {
+                        yearStore.put(year, result);
+                    }
+                }
             }
         }
         return result;

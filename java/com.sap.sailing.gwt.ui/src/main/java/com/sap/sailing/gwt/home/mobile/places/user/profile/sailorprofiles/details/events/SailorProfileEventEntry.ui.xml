@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+    <g:HTMLPanel>
+        <g:HTMLPanel ui:field="sectionTitleContainerUi" addStyleNames="{spmr.css.eventTableHeader}">
+            <div ui:field="sectionTitleUi" class="{spmr.css.eventTableHeaderText}" />
+        </g:HTMLPanel>
+        <g:HTMLPanel ui:field="contentContainerRegattasUi"
+            addStyleNames="{spmr.css.eventEntryPanel} {res.mediaCss.column}">
+        </g:HTMLPanel>
+    </g:HTMLPanel>
+</ui:UiBinder> 

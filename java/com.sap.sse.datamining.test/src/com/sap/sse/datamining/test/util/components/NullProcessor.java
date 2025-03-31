@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.test.util.components;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.impl.components.AbstractProcessor;
 
 public class NullProcessor<InputType, ResultType> extends AbstractProcessor<InputType, ResultType> {

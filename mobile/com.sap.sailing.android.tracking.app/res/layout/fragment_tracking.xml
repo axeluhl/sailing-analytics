@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scroll_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="402dp"
     android:layout_gravity="center"
@@ -14,146 +13,155 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/black">
+        android:background="@color/tracking_status_row_color">
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/mode_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/gps_quality"
+            android:layout_below="@+id/tracking_status_label"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp"
+            android:paddingLeft="@dimen/fragment_side_margin"
             android:paddingRight="10dp"
-            android:text="@string/tracking_mode"/>
+            android:text="@string/tracking_mode"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@id/mode_label"
             android:layout_alignBottom="@id/mode_label"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:paddingRight="10dp"
+            android:layout_alignParentRight="true"
             android:paddingLeft="10dp"
+            android:paddingRight="@dimen/fragment_side_margin"
             android:text="@string/tracking_mode_caching"
-            android:textColor="@color/sap_green"/>
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/tracking_unsent_fixes_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_below="@+id/mode_label"
             android:gravity="center_vertical"
+            android:paddingLeft="@dimen/fragment_side_margin"
             android:paddingRight="10dp"
-            android:paddingLeft="10dp"
-            android:text="@string/tracking_unsent_fixes"/>
+            android:text="@string/tracking_unsent_fixes"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/tracking_unsent_fixes"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_alignBaseline="@id/tracking_unsent_fixes_label"
             android:layout_alignBottom="@id/tracking_unsent_fixes_label"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:paddingRight="10dp"
+            android:layout_alignParentRight="true"
             android:paddingLeft="10dp"
-            android:text="@string/none"/>
+            android:paddingRight="@dimen/fragment_side_margin"
+            android:text="@string/none"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/tracking_status_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_below="@+id/tracking_unsent_fixes_label"
+            android:layout_alignParentTop="true"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp"
+            android:paddingLeft="@dimen/fragment_side_margin"
             android:paddingRight="10dp"
-            android:text="@string/tracking_status"/>
+            android:text="@string/tracking_status"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/tracking_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@id/tracking_status_label"
             android:layout_alignBottom="@id/tracking_status_label"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:paddingRight="10dp"
+            android:layout_alignParentRight="true"
             android:paddingLeft="10dp"
+            android:paddingRight="@dimen/fragment_side_margin"
             android:text="@string/tracking_status_tracking"
-            android:textColor="@color/sap_green"/>
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
         <LinearLayout
             android:id="@+id/gps_quality_info_layout"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@+id/gps_quality"
             android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/gps_accuracy_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/fragment_side_margin"
                 android:paddingRight="9dp"
-                android:paddingLeft="9dp"
-                android:text=""/>
+                android:text=""
+                android:textColor="@color/fiori_text_color"
+                android:textSize="@dimen/default_text_size"/>
 
             <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
                 android:id="@+id/gps_quality_indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/fragment_side_margin"
                 android:contentDescription="@string/signal_accuracy_indicator_view_description"
                 android:focusable="true"
-                android:paddingRight="10dp"
-                android:paddingLeft="10dp"
                 app:signalQuality="none"/>
         </LinearLayout>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/gps_quality"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/tracking_unsent_fixes_label"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp"
+            android:paddingLeft="@dimen/fragment_side_margin"
             android:paddingRight="10dp"
-            android:text="@string/tracking_gps_accuracy"/>
+            android:text="@string/tracking_gps_accuracy"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/default_text_size"/>
 
         <!-- Separators -->
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/mode_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/tracking_status_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/tracking_unsent_fixes_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/gps_quality"
             android:background="@android:color/darker_gray"/>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/tracking_status_label"
-            android:background="@android:color/darker_gray"/>
     </RelativeLayout>
 </ScrollView>

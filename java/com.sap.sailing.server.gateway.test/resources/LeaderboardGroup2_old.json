@@ -1,0 +1,1638 @@
+{
+  "name": "Österreichische Segelbundesliga 2021",
+  "description": "Österreichische Segelbundesliga 2021 Overall",
+  "events": [
+    "6a4322db-0121-4183-8715-d1b80989c387",
+    "da731bc9-1d9d-4522-a03c-d975ca947bad",
+    "e2886aac-c35a-4089-88db-5d605fa76bc0",
+    "fa5f3120-84bc-4b4d-9356-ee83e5daceef"
+  ],
+  "leaderboards": [
+    {
+      "name": "Austrian League 2021 - Velden (1)",
+      "displayName": "Velden",
+      "isMetaLeaderboard": false,
+      "isRegattaLeaderboard": true,
+      "scoringComment": "Results of race F6, Race 1 have been updated.",
+      "lastScoringUpdate": "Sun Jun 13 12:15:39 UTC 2021",
+      "scoringScheme": "LOW_POINT_WITH_AUTOMATIC_RDG",
+      "regattaName": "Austrian League 2021 - Velden (1)",
+      "series": [
+        {
+          "name": "Default",
+          "isMedalSeries": false,
+          "fleets": [
+            {
+              "name": "Race 1",
+              "color": "#278CC2",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F1",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R1",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "8daa188e-a159-49b5-a800-c4729ce368c4",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R1&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F2",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R4",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0ad0a554-4728-43b8-9112-c543a7f92df5",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R4&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F3",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R7",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "20ede199-3dec-44b8-b5c3-651caeedf318",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R7&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F4",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R10",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "1bd994a2-075d-4f0a-918f-d12868b4b8c9",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R10&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F5",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R13",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "82475a16-a6a1-4edd-a40d-11a9b4f422e2",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R13&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 2",
+              "color": "#FBBA00",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F1",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R2",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "266df39a-cccd-4a3d-ac06-e333cfc2f20f",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R2&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F2",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R5",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "7618e48b-9e30-4990-ab46-77455c4f8f76",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R5&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F3",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R8",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ba6e8559-6353-469b-b744-40958eab3d67",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R8&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F4",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R11",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "bdc96afc-138f-41fe-9ec7-0b92da382e1e",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R11&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F5",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R14",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "6aeab56a-4379-493b-8453-8b783e266399",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R14&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 3",
+              "color": "#8AB54E",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F1",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R3",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "fba070a2-0247-430d-b87a-1150ba27f140",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R3&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F2",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R6",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "4bf512f6-b7e8-4c85-bf28-35c82c2af361",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R6&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F3",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R9",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0c0ed9e0-c984-426b-96e0-9ea84ca33bd8",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R9&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F4",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R12",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "f054a729-63ed-4181-b659-47bc706f629b",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R12&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F5",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Velden (1)",
+                  "trackedRaceName": "R15",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "6bf9f3b1-105c-4059-a1ce-26123b5c30db",
+                  "raceViewerUrls": {
+                    "e2886aac-c35a-4089-88db-5d605fa76bc0": "https://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=e2886aac-c35a-4089-88db-5d605fa76bc0&leaderboardName=Austrian League 2021 - Velden (1)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R15&showMapControls=true&regattaName=Austrian League 2021 - Velden (1)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Austrian League 2021 - Neusiedl (2)",
+      "displayName": "Neusiedl",
+      "isMetaLeaderboard": false,
+      "isRegattaLeaderboard": true,
+      "scoringComment": "Results of race F21, Race 3 have been updated.",
+      "lastScoringUpdate": "Sun Jul 04 14:33:42 UTC 2021",
+      "scoringScheme": "LOW_POINT_WITH_AUTOMATIC_RDG",
+      "regattaName": "Austrian League 2021 - Neusiedl (2)",
+      "series": [
+        {
+          "name": "Neusiedl",
+          "isMedalSeries": false,
+          "fleets": [
+            {
+              "name": "Race 1",
+              "color": "#278CC2",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F6",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R16",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "3cfa5719-2546-4b1e-826a-2415a063120a",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R16&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F7",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R19",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "c9ac75b3-088f-4159-85ca-b36b86c654fb",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R19&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F8",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R22",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0d6f32ca-0b19-4236-8679-2f2496699d05",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R22&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F9",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R25",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0308c8d0-5b53-470b-8001-7b56f2ba0e62",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R25&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F10",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R28",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "cdf849fe-2a6f-48a3-9f7d-6351bcec3c68",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R28&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F11",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R31",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "5390b08e-c823-41a5-9e12-4eb6aa4e5f0a",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R31&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F12",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R34",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "70199809-acc4-48de-baf7-a3ed091b0294",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R34&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F13",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R37",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "973700d8-7c70-44f4-9625-95356cb7a7e5",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R37&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F14",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R40",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2557bb14-6545-4940-a5d5-1ad6733c42ff",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R40&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F15",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R43",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "4e8065cd-a0fb-4c5c-8aba-75ac33a9ec8c",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R43&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F16",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R46",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ebb51e35-4255-4360-8299-d7e07e6a59fd",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R46&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F17",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R49",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "bec27936-b957-4460-aaa4-e84d3dec0cca",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R49&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F18",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R52",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0c5c6337-7fdc-4877-b0dd-264f15605819",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R52&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F19",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R55",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "7b296943-ce95-44f9-9223-7775029c6a6a",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R55&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F20",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R58",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "e0ef8806-b567-4d78-816c-fe5ca1961bc7",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R58&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F21",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R61",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "1945643e-1457-4139-ba2c-b62439a6c129",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R61&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 2",
+              "color": "#E84A1A",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F6",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R17",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "393a4d09-485b-459c-9647-f6304f489ebd",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R17&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F7",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R20",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ab2995db-83a1-49ce-8f42-bda3f672b12b",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R20&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F8",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R23",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "4f014e19-0084-4234-8d34-68932b361314",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R23&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F9",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R26",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "7b45d5ca-af80-4709-aae3-4e086215a05f",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R26&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F10",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R29",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "d127a805-c605-46bc-ad09-f8e812b62daf",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R29&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F11",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R32",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0433704c-5e04-402c-a1ff-198db46f9e4d",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R32&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F12",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R35",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "eb5f23ca-1766-429a-b7c5-7c7af3bca4dc",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R35&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F13",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R38",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "062aebd3-7322-4a47-a9fc-e52d0cd5afed",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R38&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F14",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R41",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "3d682ff3-2a89-4c15-9912-0021effe7aa4",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R41&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F15",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R44",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b4acda42-2a86-425f-af07-55ae61467d7b",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R44&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F16",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R47",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "8468abd3-d6b6-4fb6-9f67-a7c0fea7476a",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R47&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F17",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R50",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "29442aa1-8e52-446a-be06-8e1f70f001f7",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R50&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F18",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R53",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "f5b3b82f-8f03-46ea-9ded-e93a9802fa50",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R53&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F19",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R56",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "c893d21b-c0bd-419f-98da-d88ef572807b",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R56&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F20",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R59",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "145521d3-2418-4f4f-a16e-091b3cd41b52",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R59&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F21",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R62",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "a6d44b7b-14d2-4a16-bb79-89aef057f36c",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R62&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 3",
+              "color": "#FBBA00",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F6",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R18",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "993dd3ec-9853-46a8-b891-69241671ee72",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R18&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F7",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R21",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2387c6ef-c604-4fbd-8308-c96d7520eeb8",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R21&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F8",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R24",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "d7a99025-6373-434a-a8bb-eee130948b43",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R24&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F9",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R27",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "bc1b1446-513c-4bc5-9875-7f45d8b922e1",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R27&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F10",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R30",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "83256576-a8f0-41fd-9031-f64c5fadb9eb",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R30&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F11",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R33",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "924c3e6a-e474-4e97-9210-0190148ad55c",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R33&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F12",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R36",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "298bb387-26e3-4ad1-bb5b-d9f4671b463d",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R36&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F13",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R39",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "300a2d86-ee75-43c0-a72f-af4abda676fb",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R39&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F14",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R42",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "9c962c00-d0a1-47e7-9082-3447396e6e35",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R42&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F15",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R45",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "81bb49e2-9d1f-4cc8-989e-2ff561e86625",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R45&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F16",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R48",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "1d2b9e4f-16e1-4e34-8e48-dbd9195b4969",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R48&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F17",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R51",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "96f2039a-3007-4413-b77a-5b8a5cb378a4",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R51&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F18",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R54",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "39a89791-516d-4706-b2e2-0c1d29c650c8",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R54&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F19",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R57",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2738e5ed-0388-4899-9ecd-c59d328c13e0",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R57&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F20",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R60",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2e3a3124-ec3e-498f-98ac-2afe56e7c33a",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R60&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F21",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Neusiedl (2)",
+                  "trackedRaceName": "R63",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "a64c62a6-264e-4804-a7c5-c455edb4b829",
+                  "raceViewerUrls": {
+                    "6a4322db-0121-4183-8715-d1b80989c387": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=6a4322db-0121-4183-8715-d1b80989c387&leaderboardName=Austrian League 2021 - Neusiedl (2)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R63&showMapControls=true&regattaName=Austrian League 2021 - Neusiedl (2)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Austrian League 2021 - Achensee (3)",
+      "displayName": "Achensee",
+      "isMetaLeaderboard": false,
+      "isRegattaLeaderboard": true,
+      "scoringComment": "Results of race F29, Race 3 have been updated.",
+      "lastScoringUpdate": "Sun Jul 25 14:54:33 UTC 2021",
+      "scoringScheme": "LOW_POINT_WITH_AUTOMATIC_RDG",
+      "regattaName": "Austrian League 2021 - Achensee (3)",
+      "series": [
+        {
+          "name": "Achensee",
+          "isMedalSeries": false,
+          "fleets": [
+            {
+              "name": "Race 1",
+              "color": "#278CC2",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F22",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R1",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "a19428b8-7908-42dd-b4eb-5409c44543a9",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R1&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F23",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R4",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "884520b7-488a-4d1b-ab34-4ebfa5e71df1",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R4&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F24",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R7",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "50e78e5b-7a9d-4943-9f45-2d2ff5bad3b5",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R7&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F25",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R10",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b36c14ac-e32f-429b-93a5-f5800e467052",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R10&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F26",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R13",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "024cb1f8-a0fc-40f9-af4f-a01e369c5a5c",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R13&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F27",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R16",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "a635b504-7541-4702-8c7b-e4b6235aad3d",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R16&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F28",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R19",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "0f448509-3825-43c5-95d5-ef3e1ffcc479",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R19&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F29",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R22",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b713351f-7944-413b-af59-ac10208964af",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R22&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 2",
+              "color": "#E84A1A",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F22",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R2",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "6fbbc66a-8b2b-45e7-ac47-d714bce7bc95",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R2&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F23",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R5",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "31c06457-02e3-4170-9163-3c9cf54e6781",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R5&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F24",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R8",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "1aa1393b-85ab-4f93-aa9a-773c9f7bc802",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R8&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F25",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R11",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "dabd2e99-2b3b-4075-a48d-89e49c2226d1",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R11&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F26",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R14",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "661b56b6-c293-4920-8597-46ef843fa1ec",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R14&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F27",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R17",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "fed82c97-5548-495a-a16c-a75377cd5024",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R17&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F28",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R20",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ccdc07e7-f37f-48ea-8e25-d1cd54474c52",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R20&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F29",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R23",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "dbe7a45e-77be-4e29-9322-c8fc6166add1",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R23&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 3",
+              "color": "#FBBA00",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F22",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R3",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "213b2ef7-00d7-4e87-bf25-a080f8e649ce",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R3&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F23",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R6",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ce6c845b-e0c7-4173-8446-4dce73e0be23",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R6&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F24",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R9",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "578873ea-c91c-4a6d-827d-ad1ad63dee6a",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R9&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F25",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R12",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "1386592f-8016-4049-9444-e9d4880f4ee3",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R12&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F26",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R15",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "c772ec56-5f5d-4ba6-bb5e-a8c1ed2648d9",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R15&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F27",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R18",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "62eefddd-e6d3-42ae-b249-570a75fdedef",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R18&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F28",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R21",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ec0d8ef5-a498-487b-9870-64445b3c9462",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R21&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F29",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Achensee (3)",
+                  "trackedRaceName": "R24",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "cc03f561-9d05-40b9-8078-42419d4244d1",
+                  "raceViewerUrls": {
+                    "fa5f3120-84bc-4b4d-9356-ee83e5daceef": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=fa5f3120-84bc-4b4d-9356-ee83e5daceef&leaderboardName=Austrian League 2021 - Achensee (3)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R24&showMapControls=true&regattaName=Austrian League 2021 - Achensee (3)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Austrian League 2021 - Wolfgangsee (4)",
+      "displayName": "Wolfgangsee",
+      "isMetaLeaderboard": false,
+      "isRegattaLeaderboard": true,
+      "scoringComment": "Results of race F35, Race 3 have been updated.",
+      "lastScoringUpdate": "Sun Sep 26 14:39:32 UTC 2021",
+      "scoringScheme": "LOW_POINT_WITH_AUTOMATIC_RDG",
+      "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+      "series": [
+        {
+          "name": "St.Gilgen",
+          "isMedalSeries": false,
+          "fleets": [
+            {
+              "name": "Race 1",
+              "color": "#278CC2",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F30",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R1",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "4812756d-4852-4ab2-9122-ef7fa2f6a07f",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R1&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F31",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R4",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "f2b16891-b752-46bb-b294-84a83cca8f56",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R4&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F32",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R7",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "ef160cbb-e6e5-4ed4-8327-98333314ccf5",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R7&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F33",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R10",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b000565d-382a-4d11-a44c-8b6fe2980e1e",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R10&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F34",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R13",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b4d1e0cf-2814-4de6-8111-d21a13768687",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R13&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F35",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R16",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "c9d5cdb6-0fbf-43f7-aede-007e856cc3be",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R16&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 2",
+              "color": "#FBBA00",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F30",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R2",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "e1d66566-d5cf-4c6a-a051-878d9a6ce52f",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R2&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F31",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R5",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2024e50a-b6f8-4c25-ab88-d65d586df3ba",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R5&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F32",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R8",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "fe2f5a25-f271-4ce7-8ac9-5f0e41a0cabb",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R8&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F33",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R11",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "3c90eca0-f7d7-4034-b7d6-5f131b0b6781",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R11&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F34",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R14",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "2f2f06db-485f-4f27-8d66-063605af8e6d",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R14&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F35",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R17",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "3bd353d6-fc4d-4a79-a1c7-b44e05b0f5d3",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R17&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            },
+            {
+              "name": "Race 3",
+              "color": "#8AB54E",
+              "ordering": 0,
+              "races": [
+                {
+                  "name": "F30",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R3",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "dc9142fc-7b5d-47d9-b3c1-90039cf61762",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R3&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F31",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R6",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "4f1d3976-a83c-4cd2-ae7d-c59df30cd802",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R6&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F32",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R9",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "b935dbc0-33c3-4c63-a76d-5fd27e48dd81",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R9&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F33",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R12",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "d84d2ca9-b351-49c0-a1bc-8c4a7eff45c1",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R12&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F34",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R15",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "8de30219-9daf-44ad-91a1-e7bfc604ec39",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R15&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                },
+                {
+                  "name": "F35",
+                  "isMedalRace": false,
+                  "isTracked": true,
+                  "regattaName": "Austrian League 2021 - Wolfgangsee (4)",
+                  "trackedRaceName": "R18",
+                  "trackingProviderType": "RaceLog",
+                  "raceId": "3a67fcd2-4e63-4032-869f-8f21f8d8ac24",
+                  "raceViewerUrls": {
+                    "da731bc9-1d9d-4522-a03c-d975ca947bad": "http://austrianleague2021.sapsailing.com/gwt/RaceBoard.html?eventId=da731bc9-1d9d-4522-a03c-d975ca947bad&leaderboardName=Austrian League 2021 - Wolfgangsee (4)&leaderboardGroupId=e7d48cfd-591e-45c3-afeb-7f32f0a7bbb5&raceName=R18&showMapControls=true&regattaName=Austrian League 2021 - Wolfgangsee (4)&mode=PLAYER"
+                  },
+                  "hasGpsData": true,
+                  "hasWindData": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

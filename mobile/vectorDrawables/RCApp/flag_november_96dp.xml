@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="132dp"
+        android:height="96dp"
+        android:viewportWidth="88"
+        android:viewportHeight="64">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 0 0 H 88 V 64 H 0 V 0 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 0 0 H 22 V 16 H 0 V 0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 22 0 H 44 V 16 H 22 V 0 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 44 0 H 66 V 16 H 44 V 0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 66 0 H 88 V 16 H 66 V 0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 0 16 H 22 V 32 H 0 V 16 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 22 16 H 44 V 32 H 22 V 16 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 44 16 H 66 V 32 H 44 V 16 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 66 16 H 88 V 32 H 66 V 16 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 0 32 H 22 V 48 H 0 V 32 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 22 32 H 44 V 48 H 22 V 32 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 44 32 H 66 V 48 H 44 V 32 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 66 32 H 88 V 48 H 66 V 32 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 0 48 H 22 V 64 H 0 V 48 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 22 48 H 44 V 64 H 22 V 48 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 44 48 H 66 V 64 H 44 V 48 Z" />
+    <path
+        android:fillColor="#008FCC"
+        android:pathData="M 66 48 H 88 V 64 H 66 V 48 Z" />
+</vector>

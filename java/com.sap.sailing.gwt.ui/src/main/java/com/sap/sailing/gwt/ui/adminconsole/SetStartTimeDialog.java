@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,16 +21,18 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetStartTimeAndProcedureDTO> {
+public class SetStartTimeDialog extends DataEntryDialogWithDateTimeBox<RaceLogSetStartTimeAndProcedureDTO> {
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     
@@ -42,11 +46,12 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
     private int currentPassId = -1;
     private Label currentStartTimeLabel;
     private Label currentPassIdBox;
-    private BetterDateTimeBox timeBox;
+    private DateAndTimeInput timeBox;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
     private ListBox racingProcedureSelection;
     private CheckBox advancePassIdCheckbox;
+    private ListBox courseAreaSelection;
     
     public SetStartTimeDialog(SailingServiceAsync service, ErrorReporter errorReporter, String leaderboardName, 
             String raceColumnName, String fleetName, StringMessages stringMessages, 
@@ -59,6 +64,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
+        this.ensureDebugId("SetStartTimeDialog");
     }
     
     @Override
@@ -78,12 +84,10 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         currentStartTimeLabel = new Label("");
         grid.setWidget(0, 0, createLabel(stringMessages.startTime()));
         grid.setWidget(0, 1, currentStartTimeLabel);
-        
         currentPassIdBox = new Label("");
         grid.setWidget(1, 0, createLabel(stringMessages.currentPass()));
         grid.setWidget(1, 1, currentPassIdBox);
         currentPanel.add(grid);
-        
         PushButton refreshButton = new PushButton(new Image(resources.reloadIcon()));
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -92,39 +96,65 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
             }
         });
         currentPanel.add(refreshButton);
-        
         current.add(currentPanel);
         return current;
     }
     
     private Widget createInputPanel() {
-        Grid content = new Grid(5, 2);
-        timeBox = createDateTimeBox(new Date());
-        timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
+        Grid content = new Grid(6, 2);
+        timeBox = createDateTimeBox(new Date(), Accuracy.SECONDS);
+        timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
-        
-        
         authorNameBox = createTextBox("Shore");
+        authorNameBox.ensureDebugId("AuthorNameTextBox");
         content.setWidget(1, 0, createLabel(stringMessages.authorName()));
         content.setWidget(1, 1, authorNameBox);
         authorPriorityBox = createIntegerBox(4, 2);
+        authorPriorityBox.ensureDebugId("AuthorPriorityIntegerBox");
         content.setWidget(2, 0, createLabel(stringMessages.authorPriority()));
         content.setWidget(2, 1, authorPriorityBox);
-        
         racingProcedureSelection = createListBox(false);
         ListBoxUtils.setupRacingProcedureTypeListBox(racingProcedureSelection, RacingProcedureType.RRS26, stringMessages.no());
         int racingCounter = 0;
         for (RacingProcedureType racingType : RacingProcedureType.values()) {
             racingProcedureSelection.setValue(racingCounter++, racingType.name());
         }
+        racingProcedureSelection.ensureDebugId("RacingProcedureListBox");
         content.setWidget(3, 0, createLabel(stringMessages.racingProcedure()));
         content.setWidget(3, 1, racingProcedureSelection);
-        
+        courseAreaSelection = createListBox(/* isMultipleSelect */ false);
+        courseAreaSelection.ensureDebugId("CourseAreaSelection");
+        fillCourseAreas();
+        content.setWidget(4, 0, createLabel(stringMessages.courseArea()));
+        content.setWidget(4, 1, courseAreaSelection);
         advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
         advancePassIdCheckbox.setValue(false);
-        content.setWidget(4, 1, advancePassIdCheckbox);
+        advancePassIdCheckbox.ensureDebugId("AdvancePassIdCheckBox");
+        content.setWidget(5, 1, advancePassIdCheckbox);
         return content;
+    }
+
+    private void fillCourseAreas() {
+        service.getCourseAreas(leaderboardName, new AsyncCallback<List<CourseAreaDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.unableToLoadCourseAreas(caught.getMessage()), /* silentMode */ true);
+            }
+
+            @Override
+            public void onSuccess(List<CourseAreaDTO> result) {
+                fillCourseAreaSelection(result);
+            }
+        });
+    }
+
+    private void fillCourseAreaSelection(List<CourseAreaDTO> courseAreas) {
+        courseAreaSelection.clear();
+        courseAreaSelection.addItem(stringMessages.pleaseSelectACourseArea(), "");
+        for (final CourseAreaDTO courseArea : courseAreas) {
+            courseAreaSelection.addItem(courseArea.getName(), courseArea.getId().toString());
+        }
     }
 
     @Override
@@ -139,12 +169,17 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         dto.startTime = timeBox.getValue();
         dto.passId = advancePassIdCheckbox.getValue() ? currentPassId+1 : currentPassId;
         dto.racingProcedure = RacingProcedureType.values()[racingProcedureSelection.getSelectedIndex()];
+        if (courseAreaSelection.getSelectedIndex() <= 0) {
+            dto.courseAreaId = null;
+        } else {
+            dto.courseAreaId = UUID.fromString(courseAreaSelection.getSelectedValue());
+        }
         return dto;
     }
 
     private void refreshCurrentStartTime() {
-        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName, new AsyncCallback<com.sap.sse.common.Util.Triple<Date,Integer, RacingProcedureType>>() {
-            
+        service.getStartTimeAndProcedure(leaderboardName, raceColumnName, fleetName,
+                new AsyncCallback<com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType>>() {
             @Override
             public void onSuccess(com.sap.sse.common.Util.Triple<Date, Integer, RacingProcedureType> result) {
                 if (result == null) {

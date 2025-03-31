@@ -39,6 +39,52 @@ public class WindSpeedSteppingWithMaxDistance extends WindSpeedSteppingImpl {
     public double getMaxDistance() {
         return maxDistance;
     }
+    
+    public double getHistogramXValue(int numberOfHistogramColumns, double knots) {
+        double minInKnots = getMinValueForIndex(getLevelIndexForValue(knots));
+        double maxInKnots = getMaxValueForIndex(getLevelIndexForValue(knots));
+        double cutMax = maxInKnots - minInKnots;
+        double cutValue = knots - minInKnots;
+        int columnIndex = (int) ((cutValue / cutMax) * numberOfHistogramColumns);
+        return minInKnots + columnIndex * (cutMax / numberOfHistogramColumns) + 0.5 * (cutMax / numberOfHistogramColumns);
+    }
+
+    private double getMinValueForIndex(int levelIndexForValue) {
+        double result;
+        if (levelIndexForValue == 0) {
+            double levelMinusMaxDistance = levels[0] - maxDistance;
+            if (levelMinusMaxDistance > 0) {
+                result = levelMinusMaxDistance;
+            } else {
+                result = 0;
+            }
+        } else {
+            double levelMinusMaxDistance = levels[levelIndexForValue] - maxDistance;
+            double betweenLevels = levels[levelIndexForValue - 1] + ((levels[levelIndexForValue] - levels[levelIndexForValue - 1]) / 2.);
+            if (levelMinusMaxDistance > betweenLevels) {
+                result = levelMinusMaxDistance;
+            } else {
+                result = betweenLevels;
+            }
+        }
+        return result;
+    }
+    
+    private double getMaxValueForIndex(int levelIndexForValue) {
+        double result;
+        if (levelIndexForValue == levels.length - 1) {
+            result = levels[levelIndexForValue] + maxDistance;
+        } else {
+            double levelPlusMaxDistance = levels[levelIndexForValue] + maxDistance;
+            double betweenLevels = levels[levelIndexForValue] + ((levels[levelIndexForValue + 1] - levels[levelIndexForValue]) / 2.);
+            if (levelPlusMaxDistance < betweenLevels) {
+                result = levelPlusMaxDistance;
+            } else {
+                result = betweenLevels;
+            }
+        }
+        return result;
+    }
 
     @Override
     public int hashCode() {

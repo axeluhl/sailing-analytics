@@ -1,0 +1,33 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+    .outerBox {
+        overflow: hidden;
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+        background-color: white;
+        height: 40px;
+        opacity: 0;
+    }
+    .scrollPanel {
+        height: 20px;
+        padding-top:25px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+    .content {
+        height: 1px;
+    }
+    </ui:style>
+    
+    <div class="{style.outerBox}">
+            <div ui:field="overlayScrollPanelUi"
+                class="{style.scrollPanel}">
+                <div ui:field="overlayDummyContentUi"
+                    class="{style.content}" />
+            </div>
+    </div>
+</ui:UiBinder> 

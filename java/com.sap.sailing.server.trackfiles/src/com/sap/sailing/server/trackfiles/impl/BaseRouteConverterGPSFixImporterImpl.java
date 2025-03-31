@@ -2,23 +2,23 @@ package com.sap.sailing.server.trackfiles.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import slash.common.type.CompactCalendar;
-import slash.navigation.base.BaseNavigationPosition;
-import slash.navigation.base.BaseRoute;
-import slash.navigation.base.NavigationFormat;
-import slash.navigation.base.NavigationFormatParser;
-import slash.navigation.base.ParserResult;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
+
+import slash.navigation.base.BaseNavigationPosition;
+import slash.navigation.base.BaseRoute;
+import slash.navigation.base.NavigationFormat;
+import slash.navigation.base.NavigationFormatParser;
+import slash.navigation.base.ParserResult;
 
 public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {    
     public BaseRouteConverterGPSFixImporterImpl(List<Class<? extends NavigationFormat<?>>> supportedFormats) {
@@ -36,7 +36,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         List<NavigationFormat> formats = new ArrayList<NavigationFormat>();
         for (Class<? extends NavigationFormat> formatClass : supportedFormats) {
             try {
-                NavigationFormat format = formatClass.newInstance();
+                NavigationFormat format = formatClass.getDeclaredConstructor().newInstance();
                 if (restrictToWritableFormats && format.isSupportsWriting() ||
                         !restrictToWritableFormats && format.isSupportsReading())
                     formats.add(format);
@@ -54,14 +54,12 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
+    public boolean importFixes(InputStream inputStream, Charset charset, Callback callback,
+            boolean inferSpeedAndBearing, String sourceName)
             throws IOException, FormatNotSupportedException {
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;
         try {
-            Method m = NavigationFormatParser.class.getDeclaredMethod("read", InputStream.class, Integer.TYPE,
-                    CompactCalendar.class, List.class);
-            m.setAccessible(true);
             ParserResult result = parser.read(inputStream, /* read buffer size; 1GB max... the problem is that some
                                                             * formats continue to read to the end even if they don't
                                                             * happen to find anything in the stream because they assume
@@ -79,7 +77,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         } catch (Exception e) {
             throw new IOException(e);
         }
-        
+        final AtomicBoolean importedFixes = new AtomicBoolean(false);
         for (BaseRoute route : routes) {
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
             String routeName = route.getName();
@@ -87,10 +85,12 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
             for (BaseNavigationPosition p : positions) {
                 try {
                     addFixAndInfer(callback, inferSpeedAndBearing, convertToGPSFix(p), device);
+                    importedFixes.set(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+        return importedFixes.get();
     }
 }

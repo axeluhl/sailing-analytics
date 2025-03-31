@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sse.common.TimePoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 /**
  * Represent the possible {@link MarkPassing} of a {@link Waypoint}. It contains the {@link Waypoint} it might be passing, a
@@ -15,19 +17,24 @@ import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
  * @author Nicolas Klose
  * 
  */
-public interface Candidate extends Comparable<CandidateImpl> {
+public interface Candidate extends Comparable<CandidateImpl>, Timed {
 
     Waypoint getWaypoint();
+    
+    /**
+     * Is this a candidate for a fixed mark passing?
+     */
+    default boolean isFixed() {
+        return false;
+    }
 
     int getOneBasedIndexOfWaypoint();
-
-    TimePoint getTimePoint();
 
     /**
      * @return the probability that this actually is a passing.
      */
     Double getProbability();
 
-    int compareTo(Candidate arg0);
+    int compareTo(Candidate other);
     
 }

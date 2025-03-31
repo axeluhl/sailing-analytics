@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -29,7 +28,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
      * An optional quick rank provider; if <code>null</code>, a more expensive algorithm based on the {@link #selectedRace}
      * and the leaderboard that can be obtained through the {@link #leaderboardFetcher} needs to be employed to obtain the rank.
      */
-    private QuickRankProvider quickRankProvider;
+    private QuickFlagDataValuesProvider quickRankProvider;
 
     public CompetitorRaceRankFilter() {
     }
@@ -80,7 +79,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
         // competitorsFromBestToWorst then would not contain those competitors that don't have a score
         // assigned yet.
         final LeaderboardRowDTO competitorRow = getLeaderboard().rows.get(competitorDTO);
-        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<CompetitorDTO>();
+        LinkedHashSet<CompetitorDTO> competitorsRankedInColumn = new LinkedHashSet<>();
         if (theRaceColumnDTOThatContainsCompetitorRace != null && competitorRow != null) {
             LeaderboardEntryDTO entryDTO = competitorRow.fieldsByRaceColumnName
                     .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
@@ -97,9 +96,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
                 }
             }
             raceRank = 0;
-            for (Iterator<CompetitorDTO> competitorIter = competitorsRankedInColumn.iterator(); competitorIter
-                    .hasNext();) {
-                CompetitorDTO competitor = competitorIter.next();
+            for (CompetitorDTO competitor : competitorsRankedInColumn) {
                 LeaderboardEntryDTO entryDTOIterated = getLeaderboard().rows.get(competitor).fieldsByRaceColumnName
                         .get(theRaceColumnDTOThatContainsCompetitorRace.getName());
                 // the competitor counts for the selected race if the fleet matches or is unknown
@@ -125,10 +122,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
 
     @Override
     public String getName() {
-        if (this.getOperator() != null) {
-            return FILTER_NAME + " " + this.getOperator().getName() + " " + this.getValue();
-        }
-        return FILTER_NAME + " " + this.getValue();
+        return FILTER_NAME;
     }
 
     @Override
@@ -176,7 +170,7 @@ public class CompetitorRaceRankFilter extends AbstractNumberFilter<CompetitorDTO
     }
 
     @Override
-    public void setQuickRankProvider(QuickRankProvider quickRankProvider) {
+    public void setQuickRankProvider(QuickFlagDataValuesProvider quickRankProvider) {
         this.quickRankProvider = quickRankProvider;
     }
 

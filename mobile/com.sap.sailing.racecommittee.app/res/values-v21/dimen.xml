@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="float_label_padding">3dp</dimen>
+
+</resources>

@@ -1,9 +1,10 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -14,12 +15,15 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.metering.CPUMeter;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -40,33 +44,34 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
         regatta.addRaceColumnListener(this);
     }
 
-    /**
-     * Updates the display name of this regatta leaderboard so that the regatta's name is no longer used as the default name.
-     */
-    @Override
-    public void setName(String newName) {
-        setDisplayName(newName);
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
     }
-
+    
     @Override
     public Regatta getRegatta() {
         return regatta;
     }
-
+    
+    @Override
+    public CPUMeter getCPUMeter() {
+        return getRegatta().getCPUMeter();
+    }
+    
+    public static String getLeaderboardNameForRegatta(Regatta regatta) {
+        return regatta.getName();
+    }
+    
     @Override
     public String getName() {
-        return getRegatta().getName();
+        return getLeaderboardNameForRegatta(getRegatta());
     }
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        List<RaceColumn> result = new ArrayList<RaceColumn>();
-        for (Series series : getRegatta().getSeries()) {
-            for (RaceColumn raceColumn : series.getRaceColumns()) {
-                result.add(raceColumn);
-            }
-        }
-        return result;
+        @SuppressWarnings("unchecked") // the iterable is read-only, so no problem to case <? extends RaceColumn> to RaceColumn
+        Iterable<RaceColumn> raceColumns = (Iterable<RaceColumn>) getRegatta().getRaceColumns();
+        return raceColumns;
     }
 
     @Override
@@ -80,8 +85,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     }
 
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return regatta.getDefaultCourseArea();
+    public Iterable<CourseArea> getCourseAreas() {
+        return regatta.getCourseAreas();
     }
 
     /**
@@ -106,12 +111,31 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
      * {@link RegattaLog}.
      */
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        return regatta.getAllCompetitors();
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        return regatta.getAllCompetitorsWithRaceDefinitionsConsidered();
     }
     
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
+    }
+    
+    @Override
+    public LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboard;
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return getRegatta().getBoatClass();
+    }
+
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        return getRegatta().getOrCreateCompetitorsProvider();
+    }
+    
+    public void setFleetsCanRunInParallelToTrue() {
+        this.getRegattaLike().setFleetsCanRunInParallelToTrue();
     }
 }

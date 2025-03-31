@@ -26,6 +26,30 @@ package org.moxieapps.gwt.highcharts.client;
  * @since 1.6.0
  */
 public class PaneBackground extends Configurable<PaneBackground> {
+    /**
+     * An enumeration of the available shapes for the pane background.
+     */
+    public enum Shape {
+
+        /**
+         * Show the background as solid.
+         */
+        SOLID("sollid"),
+        /**
+         * Show the background as an arc.
+         */
+        ARC("arc");
+
+        private String optionValue;
+
+        private Shape(String optionValue) {
+            this.optionValue = optionValue;
+        }
+
+        public String toString() {
+            return optionValue;
+        }
+    }
 
     /**
      * Convenience method for setting the 'borderColor' option of the pane's border to an RGB hex value.  Equivalent to:
@@ -134,7 +158,7 @@ public class PaneBackground extends Configurable<PaneBackground> {
     /**
      * Convenience method for setting the 'innerRadius' option of the pane's background.  Equivalent to:
      * <pre><code>
-     *     pane.setOption("pane/background/innerRadius", '100%');
+     *     chart.setOption("pane/background/innerRadius", '100%');
      * </code></pre>
      *
      * Note: The official Highcharts API reference refers to this as "innerRadius," however it is implemented as "innerRadius."
@@ -148,7 +172,7 @@ public class PaneBackground extends Configurable<PaneBackground> {
     /**
      * Convenience method for setting the 'innerRadius' option of the pane's background.  Equivalent to:
      * <pre><code>
-     *     pane.setOption("pane/background/innerRadius", 100);
+     *     chart.setOption("pane/background/innerRadius", 100);
      * </code></pre>
      *
      * Note: The official Highcharts API reference refers to this as "innerRadius," however it is implemented as "innerRadius."
@@ -162,7 +186,7 @@ public class PaneBackground extends Configurable<PaneBackground> {
     /**
      * Convenience method for setting the 'outerRadius' option of the pane's background.  Equivalent to:
      * <pre><code>
-     *     pane.setOption("pane/background/outerRadius", '100%');
+     *     chart.setOption("background/outerRadius", '100%');
      * </code></pre>
      *
      * Note: The official Highcharts API reference refers to this as "outerWidth," however it is implemented as "outerRadius."
@@ -176,7 +200,7 @@ public class PaneBackground extends Configurable<PaneBackground> {
     /**
      * Convenience method for setting the 'outerRadius' option of the pane's background.  Equivalent to:
      * <pre><code>
-     *     pane.setOption("pane/background/outerRadius", 100);
+     *     chart.setOption("background/outerRadius", 100);
      * </code></pre>
      *
      * Note: The official Highcharts API reference refers to this as "outerWidth," however it is implemented as "outerRadius."
@@ -185,6 +209,18 @@ public class PaneBackground extends Configurable<PaneBackground> {
      */
     public PaneBackground setOuterRadius(Number outerRadius) {
         return this.setOption("outerRadius", outerRadius);
+    }
+
+    /**
+     * Convenience method for setting the 'background' option of the pane.  Equivalent to:
+     * <pre><code>
+     *     chart.setOption("pane/background/shape", "arc");
+     * </code></pre>
+     * The shape of the pane's background.
+     * @return A reference to this {@link PaneBackground} instance for convenient method chaining.
+     */
+    public PaneBackground setShape(Shape shape) {
+        return this.setOption("shape", shape != null ? shape.toString() : null);
     }
 
 }

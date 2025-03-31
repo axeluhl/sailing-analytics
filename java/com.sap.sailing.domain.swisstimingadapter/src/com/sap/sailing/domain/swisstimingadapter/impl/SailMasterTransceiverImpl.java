@@ -27,23 +27,27 @@ public class SailMasterTransceiverImpl implements SailMasterTransceiver {
      */
     @Override
     public synchronized void sendMessage(String message, OutputStream os) throws IOException {
-        os.write(STX);
-        os.write(message.getBytes(Charset.forName("cp1252")));
-        os.write(ETX);
+        if (os != null) {
+            os.write(STX);
+            os.write(message.getBytes(Charset.forName("cp1252")));
+            os.write(ETX);
+        }
     }
     
     @Override
     public synchronized void sendMessage(SailMasterMessage message, OutputStream os) throws IOException {
-        if (message.getSequenceNumber() == null) {
-            sendMessage(message.getMessage(), os);
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(message.getSequenceNumber());
-            sb.append('|');
-            sb.append(message.getMessage());
-            sendMessage(sb.toString(), os);
+        if (os != null) {
+            if (message.getSequenceNumber() == null) {
+                sendMessage(message.getMessage(), os);
+            } else {
+                StringBuilder sb = new StringBuilder();
+                sb.append(message.getSequenceNumber());
+                sb.append('|');
+                sb.append(message.getMessage());
+                sendMessage(sb.toString(), os);
+            }
+            os.flush();
         }
-        os.flush();
     }
 
     /**

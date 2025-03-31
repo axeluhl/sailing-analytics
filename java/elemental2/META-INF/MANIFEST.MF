@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Elemental2
+Bundle-SymbolicName: elemental2
+Bundle-Version: 1.1.0.qualifier
+Automatic-Module-Name: elemental2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/elemental2-core-1.1.0.jar,
+ lib/elemental2-dom-1.1.0.jar,
+ lib/elemental2-promise-1.1.0.jar,
+ .,
+ lib/base-1.0.0.jar
+Export-Package: com.google.gwt.core.client,
+ elemental2.core,
+ elemental2.dom,
+ elemental2.promise,
+ jsinterop.base

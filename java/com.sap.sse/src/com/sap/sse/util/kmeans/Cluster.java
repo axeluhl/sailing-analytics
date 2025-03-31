@@ -115,7 +115,7 @@ public class Cluster<E, ValueType, AveragesTo, T extends ScalableValueWithDistan
     
     @Override
     public String toString() {
-        return "{mean: "+getMean()+", centroid: "+getCentroid()+", size: "+size()+", variance: "+getVariance()+", elements: "+elements+"}";
+        return "{mean: "+getMean()+", centroid: "+getCentroid()+", size: "+size()+", variance: "+getVariance()+"}";
     }
 
     private double getVariance() {

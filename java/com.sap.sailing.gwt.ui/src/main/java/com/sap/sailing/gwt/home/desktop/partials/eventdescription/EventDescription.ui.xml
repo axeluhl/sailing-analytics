@@ -1,0 +1,11 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.eventdescription.EventDescriptionResources" />
+	<g:HTMLPanel addStyleNames="{local_res.css.box}">
+		<div class="{local_res.css.box_header}" ui:field="titleUi"><ui:text from="{i18n.description}" /></div>
+		<div class="{local_res.css.box_content}" ui:field="descriptionUi"></div>
+	</g:HTMLPanel>
+</ui:UiBinder>

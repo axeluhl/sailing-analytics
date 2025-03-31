@@ -1,12 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.TimePoint;
 
@@ -17,11 +15,18 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
     private final Flags lowerFlag;
     private final boolean isDisplayed;
 
-    public RaceLogFlagEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint, Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, Flags pUpperFlag, Flags pLowerFlag, boolean pIsDisplayed) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId);
+    public RaceLogFlagEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, int pPassId, Flags pUpperFlag, Flags pLowerFlag,
+            boolean pIsDisplayed) {
+        super(createdAt, pTimePoint, author, pId, pPassId);
         this.upperFlag = pUpperFlag;
         this.lowerFlag = pLowerFlag;
         this.isDisplayed = pIsDisplayed;
+    }
+
+    public RaceLogFlagEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId, Flags pUpperFlag,
+            Flags pLowerFlag, boolean pIsDisplayed) {
+        this(now(), logicalTimePoint, author, randId(), pPassId, pUpperFlag, pLowerFlag, pIsDisplayed);
     }
 
     @Override
@@ -49,4 +54,4 @@ public class RaceLogFlagEventImpl extends RaceLogEventImpl implements RaceLogFla
         return "upperFlag=" + upperFlag + ", lowerFlag=" + lowerFlag + ", isDisplayed=" + isDisplayed;
     }
 
- }
+}

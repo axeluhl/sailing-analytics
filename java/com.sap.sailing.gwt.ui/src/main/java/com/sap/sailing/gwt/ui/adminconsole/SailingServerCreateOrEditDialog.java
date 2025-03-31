@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -61,7 +62,6 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<RemoteSaili
         super("Sailing Server", null, stringConstants.ok(), stringConstants.cancel(),
         		new SailingServerValidator(stringConstants, existingSailingServers), callback);
         this.stringConstants = stringConstants;
-        
         nameTextBox = createTextBox(isEditMode ? serverToEdit.getName() : null);
         nameTextBox.setVisibleLength(50);
         urlTextBox = createTextBox(isEditMode ? serverToEdit.getUrl() : null);
@@ -81,22 +81,17 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<RemoteSaili
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
-
         formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
         formGrid.setWidget(1, 0, new Label(stringConstants.url() + ":"));
         formGrid.setWidget(1, 1, urlTextBox);
-
         return panel;
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameTextBox.setFocus(true);
+    protected Focusable getInitialFocusWidget() {
+        return nameTextBox;
     }
-
 }

@@ -1,15 +1,13 @@
 package com.sap.sailing.domain.base;
 
-import java.util.UUID;
+import com.sap.sse.common.NamedWithUUID;
+import com.sap.sse.common.Renamable;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-import com.sap.sailing.domain.common.Renamable;
-import com.sap.sse.common.WithID;
-
-public interface LeaderboardGroupBase extends Renamable, WithID {
-    UUID getId();
-    String getDescription();
+public interface LeaderboardGroupBase extends Renamable, NamedWithUUID, WithQualifiedObjectIdentifier, WithDescription {
     void setDescriptiom(String description);
     boolean hasOverallLeaderboard();
+    String getOverallLeaderboardName();
     String getDisplayName();
     void setDisplayName(String displayName);
 }

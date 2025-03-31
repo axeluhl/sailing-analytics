@@ -1,8 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +18,7 @@ import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
-import com.sap.sse.datamining.shared.impl.NestingCompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.test.util.ComponentTestsUtil;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sse.datamining.test.util.FunctionTestsUtil;
@@ -57,7 +56,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructionWithNullDimensions() {
-        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getExecutor(), receivers, null);
+        new ParallelMultiDimensionsValueNestingGroupingProcessor<>(Number.class, ConcurrencyTestsUtil.getSharedExecutor(), receivers, null);
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -83,9 +82,10 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     }
 
     private void verifyGroupedElement(Number originElement) {
-        GroupKey mainKey = new GenericGroupKey<Object>(originElement.getLength());
-        GroupKey subKey = new GenericGroupKey<Object>(originElement.getCrossSum());
-        GroupKey expectedKey = new NestingCompoundGroupKey(mainKey, subKey);
+        List<GroupKey> keys = new ArrayList<>();
+        keys.add(new GenericGroupKey<Object>(originElement.getLength()));
+        keys.add(new GenericGroupKey<Object>(originElement.getCrossSum()));
+        GroupKey expectedKey = new CompoundGroupKey(keys);
         assertThat(groupedElement.getKey(), is(expectedKey));
     }
 

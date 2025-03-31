@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
-import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DoubleBox;
 
 public class EditCarryValueDialog extends DataEntryDialog<Double> {
     private final DoubleBox carriedPointsBox;
@@ -36,9 +37,13 @@ public class EditCarryValueDialog extends DataEntryDialog<Double> {
     }
 
     @Override
+    protected Focusable getInitialFocusWidget() {
+        return carriedPointsBox;
+    }
+
+    @Override
     public void show() {
         super.show();
-        carriedPointsBox.setFocus(true);
         carriedPointsBox.selectAll();
     }
 }

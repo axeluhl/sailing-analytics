@@ -6,7 +6,7 @@ package com.sap.sailing.domain.common.racelog;
  * 
  */
 public enum RaceLogRaceStatus {
-    UNKNOWN(0), UNSCHEDULED(1), SCHEDULED(2), STARTPHASE(3), RUNNING(4), FINISHING(5), FINISHED(6);
+    UNKNOWN(0), UNSCHEDULED(1), PRESCHEDULED(2), SCHEDULED(3), STARTPHASE(4), RUNNING(5), FINISHING(6), FINISHED(7);
 
     /** the order number represents the natural order of the states */
     private int orderNumber;
@@ -15,12 +15,24 @@ public enum RaceLogRaceStatus {
         this.orderNumber = orderNumber;
     }
     
-    public static boolean isActive(RaceLogRaceStatus status) {
-        if (status == null) {
-            return false;
-        }
+    public boolean isAbortingFlagFromPreviousPassValid() {
+        return this == UNSCHEDULED || this == PRESCHEDULED;
+    }
 
-        return status.equals(SCHEDULED) || status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING);
+    public static boolean isPreRunning(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(SCHEDULED) || status.equals(STARTPHASE));
+    }
+    
+    public static boolean isActive(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(PRESCHEDULED) || status.equals(SCHEDULED) || status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING));
+
+    }
+
+    public static boolean isRunningOrFinished(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING) || status.equals(FINISHED));
     }
 
     public int getOrderNumber() {

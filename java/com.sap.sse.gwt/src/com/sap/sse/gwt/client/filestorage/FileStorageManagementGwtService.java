@@ -19,6 +19,8 @@ public interface FileStorageManagementGwtService extends RemoteService {
     FileStorageServiceDTO[] getAvailableFileStorageServices(String localeInfoName);
 
     /**
+     * If serviceName is null, calls {@link FileStorageManagementGwtService#getActiveFileStorageServiceName()} and uses the returned name
+     * 
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
      */
     FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws NoCorrespondingServiceRegisteredException, IOException;

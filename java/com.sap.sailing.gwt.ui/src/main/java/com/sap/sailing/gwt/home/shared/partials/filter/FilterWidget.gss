@@ -1,0 +1,44 @@
+@external gwt-SuggestBoxPopup, item, item-selected;
+.gwt-SuggestBoxPopup {
+	text-align: left;
+	cursor: pointer;
+    border: .066666666666667rem solid #dedede;
+/* 	border: 1px solid #666; */
+	border-top: 0;
+	background-color: #f2f2f2;
+	z-index: 999;
+}
+.gwt-SuggestBoxPopup .item {
+/* 	border: 1px dotted #aaa; */
+    border: .066666666666667rem solid #dedede;
+    padding: 0 .666666666666667rem;
+    line-height: 2em;
+    white-space: normal !important;
+}
+.gwt-SuggestBoxPopup .item-selected {
+	background-color: #efaa00;
+}
+.input_filter_container {
+	text-align: right;
+    font-weight: 600;
+    position: relative;
+}
+.input_filter_text_input {
+	display: inline-block;
+    padding: .333333333333333em 3.066666666666667em .333333333333333em .666666666666667em;
+    line-height: 1.333333333333333em;
+    color: #666;
+    background-color: #f2f2f2;
+    border: .066666666666667em solid #dedede;
+    width: 100%;
+}
+.input_filter_clear_button {
+    position: absolute;
+    top: .066666666666667em;
+    bottom: .066666666666667em;
+    right: .066666666666667em;
+	border-radius: 0;
+	display: inline-block;
+    padding: .333333333333333em .666666666666667em;
+    line-height: 1.333333333333333em;
+}

@@ -14,7 +14,15 @@ public interface SwissTimingAdapterPersistence {
 
     Iterable<SwissTimingArchiveConfiguration> getSwissTimingArchiveConfigurations();
     
-    void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration);
-    
-    void storeSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration);
+    void createSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
+
+    void updateSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
+
+    void deleteSwissTimingArchiveConfiguration(SwissTimingArchiveConfiguration swissTimingArchiveConfiguration);
+
+    void deleteSwissTimingConfiguration(String creatorName, String jsonURL);
+
+    void updateSwissTimingConfiguration(SwissTimingConfiguration createSwissTimingConfiguration);
+
+    void createSwissTimingConfiguration(SwissTimingConfiguration createSwissTimingConfiguration);
 }

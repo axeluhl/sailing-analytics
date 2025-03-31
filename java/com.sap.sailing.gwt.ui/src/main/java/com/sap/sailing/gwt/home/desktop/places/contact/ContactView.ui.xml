@@ -1,0 +1,18 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+		.panel {
+			width: 100%;
+			background-color: rgb(255,255,255);
+			border: solid 1px black;
+		}
+    </ui:style>
+	<g:VerticalPanel styleName="{style.panel}">
+    	<g:HTML>
+    		Contact content
+    		<div class="{res.mediaCss.smalloffset11}">Humba Humba</div>
+    		<div class="{res.mediaCss.medium9}">Humba Humba</div>
+    	</g:HTML>
+    </g:VerticalPanel> 
+</ui:UiBinder>    

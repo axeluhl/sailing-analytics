@@ -7,6 +7,8 @@ import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 import com.sap.sailing.selenium.pages.gwt.CheckBoxPO;
+import com.sap.sailing.selenium.pages.gwt.ListBoxPO;
+import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class RegattaEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "RacingProcedureConfigurationCheckBox")
@@ -21,8 +23,17 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "UseStartTimeInferenceCheckBox")
     private WebElement useStartTimeInferenceCheckbox;
 
+    @FindBy(how = BySeleniumId.class, using = "CanBoatsOfCompetitorsChangePerRaceCheckBox")
+    private WebElement canBoatsOfCompetitorsChangePerRaceCheckbox;
+    
     @FindBy(how = BySeleniumId.class, using = "CourseAreaListBox")
-    private WebElement courseAreaListBox;
+    private WebElement courseAreaSelection;
+    
+    @FindBy(how = BySeleniumId.class, using = "AddSeriesButton")
+    private WebElement addSeriesButton;
+    
+    @FindBy(how = BySeleniumId.class, using = "SecretTextBox")
+    private WebElement secretTextBox;
 
     public RegattaEditDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
@@ -32,4 +43,30 @@ public class RegattaEditDialogPO extends DataEntryDialogPO {
         CheckBoxPO checkbox = new CheckBoxPO(driver, useStartTimeInferenceCheckbox);
         checkbox.setSelected(b);
     }
+
+    public void setCanBoatsOfCompetitorsChangePerRaceCheckBox(boolean b) {
+        CheckBoxPO checkbox = new CheckBoxPO(driver, canBoatsOfCompetitorsChangePerRaceCheckbox);
+        checkbox.setSelected(b);
+    }
+
+    public SeriesCreateDialogPO addSeries() {
+        this.addSeriesButton.click();
+        WebElement dialog = findElementBySeleniumId(this.driver, "SeriesCreateDialog");
+        return new SeriesCreateDialogPO(this.driver, dialog);
+    }
+    
+    public void addSeries(String seriesName) {
+        SeriesCreateDialogPO seriesCreateDialog = addSeries();
+        seriesCreateDialog.setSeriesName(seriesName);
+        seriesCreateDialog.pressOk();
+    }
+    
+    public String getSecret() {
+        return TextBoxPO.create(driver, secretTextBox).getValue();
+    }
+    
+    public String getSelectedEventId() {
+        return ListBoxPO.create(driver, eventListBox).getSelectedOptionValue();
+    }
 }
+

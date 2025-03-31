@@ -1,0 +1,139 @@
+package com.sap.sailing.domain.windfinderadapter.impl;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.sap.sailing.domain.windfinder.ReviewedSpotsCollection;
+import com.sap.sailing.domain.windfinder.Spot;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.util.BackoffTracker;
+import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.ThreadPoolUtil;
+
+public class ReviewedSpotsCollectionImpl implements ReviewedSpotsCollection {
+    private static final Logger logger = Logger.getLogger(ReviewedSpotsCollectionImpl.class.getName());
+    
+    /**
+     * What needs to be appended to the spot collection {@link #id} in order
+     * to obtain the file name of the document that has the JSON array with
+     * the spot descriptions.
+     */
+    private final static String SPOT_LIST_DOCUMENT_SUFFIX = "_nearby.json";
+    
+    private final String id;
+    private final WindFinderReportParser parser;
+    
+    /**
+     * Initialized during construction time with a future that is passed to the default foreground executor
+     * (foreground because shortly a UI request may be depending on it). The task scheduled will create a
+     * map initialized with the result of calling {@link #loadSpots()}.
+     */
+    private Future<ConcurrentMap<String, Spot>> spotsByIdCache;
+
+    private BackoffTracker backoffTracker;
+    
+    public ReviewedSpotsCollectionImpl(String id) {
+        this.id = id;
+        this.parser = new WindFinderReportParser();
+        this.backoffTracker = new BackoffTracker(Duration.ONE_SECOND.times(5), /* multiplier for each additional failure */ 2);
+        this.spotsByIdCache = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().schedule(() -> {
+            final ConcurrentMap<String, Spot> result = new ConcurrentHashMap<>();
+            for (final Spot spot : loadSpots()) {
+                result.put(spot.getId(), spot);
+            }
+            return result;
+        }, /* delay */ 0, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ReviewedSpotsCollectionImpl other = (ReviewedSpotsCollectionImpl) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public Iterable<Spot> getSpots(boolean cached) throws MalformedURLException, IOException, ParseException, InterruptedException, ExecutionException {
+        final Iterable<Spot> result;
+        if (cached && !spotsByIdCache.get().isEmpty()) {
+            result = new HashSet<>(spotsByIdCache.get().values());
+        } else {
+            result = loadSpots();
+            for (final Spot spot : result) {
+                spotsByIdCache.get().put(spot.getId(), spot);
+            }
+        }
+        return result;
+    }
+    
+    private Iterable<Spot> loadSpots() {
+        Iterable<Spot> result = Collections.emptySet();
+        if (!backoffTracker.backOff()) {
+            try {
+                final URLConnection connection = HttpUrlConnectionHelper
+                        .redirectConnection(
+                                new URL(Activator.BASE_URL_FOR_JSON_DOCUMENTS + "/" + getId() + SPOT_LIST_DOCUMENT_SUFFIX),
+                                /* timeout */ Duration.ONE_SECOND.times(10), /* preConnectionModifier */ null);
+                final Charset charset = HttpUrlConnectionHelper.getCharsetFromConnectionOrDefault(connection, "UTF-8");
+                try (InputStreamReader in = new InputStreamReader((InputStream) connection.getContent(), charset)) {
+                    JSONArray spotsAsJson = (JSONArray) new JSONParser().parse(in);
+                    result = parser.parseSpots(spotsAsJson, this);
+                    backoffTracker.clear();
+                } catch (IOException | ParseException e) {
+                    logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
+                    backoffTracker.logFailure();
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Problem loading spots for spot collection " + id, e);
+                backoffTracker.logFailure();
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "WindFinder Reviewed Spots Collection [id=" + id + "]";
+    }
+}

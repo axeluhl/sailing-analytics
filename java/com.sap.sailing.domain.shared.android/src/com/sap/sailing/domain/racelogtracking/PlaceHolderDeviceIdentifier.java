@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelogtracking;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 
 
 

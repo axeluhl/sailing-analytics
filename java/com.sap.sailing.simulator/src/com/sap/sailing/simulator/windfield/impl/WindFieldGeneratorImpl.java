@@ -8,7 +8,6 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.simulator.Grid;
@@ -23,6 +22,7 @@ import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 

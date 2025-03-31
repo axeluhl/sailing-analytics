@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
+             xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .wordwrapping {
+            word-wrap: break-word;
+        }
+        .content {
+            padding: .333333333333333em;
+        }
+        .deleteControl {
+            width: 100%;
+        }
+    </ui:style>
+    <ms:MobileSection addStyleNames="{style.wordwrapping}">
+        <ms:header>
+            <sh:SectionHeaderContent ui:field="sectionHeaderUi"/>
+        </ms:header>
+        <ms:content>
+            <g:HTMLPanel ui:field="contentContainerUi" addStyleNames="{style.content}">
+                <div ui:field="settingsDataUi" class="{res.mainCss.spacermarginbottomsmall}"></div>
+                <g:Button ui:field="deleteControlUi" text="{i18n.delete}"
+                          addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary} {style.deleteControl}" />
+            </g:HTMLPanel>
+        </ms:content>
+    </ms:MobileSection>
+</ui:UiBinder> 

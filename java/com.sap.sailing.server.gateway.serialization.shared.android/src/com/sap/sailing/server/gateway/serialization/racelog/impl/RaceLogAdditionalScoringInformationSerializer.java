@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogAdditionalScoringInformationEventDeserializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogAdditionalScoringInformationSerializer extends BaseRaceLogEventSerializer {
     public static final String VALUE_CLASS = RaceLogAdditionalScoringInformationEvent.class.getSimpleName();

@@ -12,6 +12,10 @@ public interface ConfidenceFactory extends com.sap.sailing.domain.common.confide
      * an internal <code>useSpeed</code> flag which may, when set to <code>false</code> suppress the consideration of
      * the wind fix's speed (not the bearing) in computing the average. For this to work, the averager has to maintain a
      * separate confidence sum for the speed values considered.
+     * 
+     * @param weigher
+     *            If <code>null</code>, 1.0 will be assumed as default confidence for all values provided, regardless
+     *            the reference point relative to which the average is to be computed
      */
     <RelativeTo> ConfidenceBasedWindAverager<RelativeTo> createWindAverager(Weigher<RelativeTo> weigher);
 

@@ -1,12 +1,12 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
 
 android {
-    buildToolsVersion "22.0.0"
-    compileSdkVersion 22
+    buildToolsVersion rootProject.ext.buildTools
+    compileSdkVersion rootProject.ext.compileSdk
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 22
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
     }
 
     sourceSets {
@@ -15,14 +15,18 @@ android {
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
         }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
+        }
     }
 
     signingConfigs {
         stg_debug {
-            keyAlias 'stg_debug'
-            keyPassword 'stg_debug'
-            storeFile file('../android-keystore/STG-debug.jks')
-            storePassword 'stg_debug'
+            keyAlias "stg_debug"
+            keyPassword "stg_debug"
+            storeFile file("../android-keystore/STG-debug.jks")
+            storePassword "stg_debug"
         }
     }
 
@@ -32,20 +36,30 @@ android {
         }
     }
 }
-
 dependencies {
     /* support libraries */
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    api "com.android.support:support-v4:${rootProject.ext.support}"
+    api "com.android.support:support-v13:${rootProject.ext.support}"
+    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
+    api "com.android.support:preference-v14:${rootProject.ext.support}"
 
     /* local dependencies */
-    compile project(':java:com.sap.sailing.domain.common')
-    compile project(':java:com.sap.sailing.domain.shared.android')
-    compile project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
-    compile project(':java:com.sap.sse.common')
-    compile project(':java:org.json.simple')
+    api project(":com.sap.sailing.domain.shared.android")
+    api project(":com.sap.sailing.server.gateway.serialization.shared.android")
+    api project(":com.sap.sse.shared.android")
 
     /* Google Play Services */
-    compile "com.google.android.gms:play-services-location:6.5.87"
-    /* all local jar-libs */
-    compile fileTree(dir: "libs", include: ["*.jar"])
+    api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
+    api "com.google.android.gms:play-services-vision:${rootProject.ext.play_services}"
+    api "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+
+    /* license dialog */
+    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
+
+    /* Branch.io */
+    api group: "io.branch.sdk.android", name: "library", version: "2.19.2"
+
+    /* JVM tests */
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
 }

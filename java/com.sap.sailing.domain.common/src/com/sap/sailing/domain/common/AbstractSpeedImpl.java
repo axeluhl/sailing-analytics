@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.SecondsDurationImpl;
 
 public abstract class AbstractSpeedImpl implements Speed {
 
@@ -16,27 +19,39 @@ public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
     public Distance travel(TimePoint t1, TimePoint t2) {
-        return new NauticalMileDistance((t2.asMillis() - t1.asMillis()) / 1000. / 3600. * getKnots());
+        return travel(t1.until(t2));
+    }
+    
+    @Override
+    public Distance travel(Duration duration) {
+        return new NauticalMileDistance(duration.asHours() * getKnots());
     }
     
     @Override
     public Duration getDuration(Distance distance) {
-        return new MillisecondsDurationImpl((long) (1000 * distance.getMeters() / getMetersPerSecond()));
+        return distance == null ? null : new SecondsDurationImpl(distance.getMeters() / getMetersPerSecond());
     }
 
     @Override
     public double getMetersPerSecond() {
-        return getKnots() * Mile.METERS_PER_SEA_MILE / 3600;
+        return getKnots() * Mile.METERS_PER_NAUTICAL_MILE / 3600;
     }
 
     @Override
     public double getKilometersPerHour() {
-        return getKnots() * Mile.METERS_PER_SEA_MILE / 1000;
+        return getKnots() * Mile.METERS_PER_NAUTICAL_MILE / 1000;
+    }
+    
+    @Override
+    public double getStatuteMilesPerHour() {
+        return getMetersPerSecond() * 2.2369;
     }
 
     @Override
     public int compareTo(Speed speed) {
-        return getMetersPerSecond() > speed.getMetersPerSecond() ? 1 : getMetersPerSecond() == speed.getMetersPerSecond() ? 0 : -1;
+        final double metersPerSecond = getMetersPerSecond();
+        final double otherMetersPerSecond = speed.getMetersPerSecond();
+        return Double.compare(metersPerSecond, otherMetersPerSecond);
     }
     
     @Override
@@ -60,5 +75,15 @@ public abstract class AbstractSpeedImpl implements Speed {
     @Override
     public double getKnots() {
         return getKilometersPerHour() * 1000. / Mile.METERS_PER_NAUTICAL_MILE;
+    }
+    
+    @Override
+    public double divide(Speed speed) {
+        return getKnots() / speed.getKnots();
+    }
+
+    @Override
+    public Speed scale(double d) {
+        return new KnotSpeedImpl(getKnots()*d);
     }
 }

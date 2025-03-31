@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
 
 /**
  * Represents a set of race columns that are currently to be shown in a leaderboard. Implementations may, e.g.,

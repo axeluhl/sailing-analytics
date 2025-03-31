@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sse.common.Distance;
+
 public interface Bounds {
     Position getNorthEast();
 
@@ -33,4 +35,10 @@ public interface Bounds {
     boolean containsLngDeg(double lngDeg);
 
     boolean isEmpty();
+    
+    /**
+     * @return the length of the diagonal from the {@link #getNorthWest() NW} to the {@link #getSouthEast() SE} corner
+     *         of this bounding box
+     */
+    Distance getDiameter();
 }

@@ -1,0 +1,16 @@
+# The problem with this is that Wordpress seems to redirect to https,
+# leading to an endless redirect loop when the ALB then receives the
+# https request, does the SSL handling and forwards as an http request
+# to here again...
+<VirtualHost *:80>
+	ServerName blog.sapsailing.com
+	CustomLog logs/blog_log combined
+	DocumentRoot /home/wordpress/wordpress
+	<Directory /home/wordpress/wordpress>
+	    Options Indexes FollowSymLinks MultiViews
+	    AllowOverride All
+	    Order allow,deny
+	    allow from all
+	</Directory>
+</VirtualHost>
+

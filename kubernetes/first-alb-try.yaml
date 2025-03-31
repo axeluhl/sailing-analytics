@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myingress
+  annotations:
+    zalando.org/aws-load-balancer-scheme: internal
+spec:
+  rules:
+  - host: test-app.example.org
+    http:
+      paths:
+      - backend:
+          serviceName: sailing-test-service
+          servicePort: 8888

@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -16,7 +14,9 @@ import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.SimulatorUISelection;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.SimulatorUISelectionImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class SimulatorServiceUtils {
 
@@ -394,13 +394,10 @@ public class SimulatorServiceUtils {
         List<TimedPositionWithSpeed> pathPoints = gpsTrack.getPathPoints();
         int noOfPathPoints = pathPoints.size();
         List<Double> diffs = new ArrayList<Double>();
-
         for (int index = 0; index < noOfPathPoints; index++) {
-            diffs.add(new Double(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
+            diffs.add(Double.valueOf(Math.abs(pathPoints.get(index).getTimePoint().asMillis() - timepointAsMillis)));
         }
-
         int indexOfMinDiff = diffs.indexOf(Collections.min(diffs));
-
         return pathPoints.get(indexOfMinDiff).getSpeed();
     }
 
@@ -423,8 +420,7 @@ public class SimulatorServiceUtils {
         double lngDeg = position.getLngDeg();
         double windSpeedKn = windSpeedWithBearing.getKnots();
         double windBearingDeg = windSpeedWithBearing.getBearing().getDegrees();
-        long timepointMsec = timePoint.asMillis();
-        return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
+        return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timePoint);
     }
 
     public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {

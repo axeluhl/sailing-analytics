@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -30,26 +30,25 @@ import net.sf.marineapi.nmea.util.Waypoint;
  * <code>$GPWPL,5536.200,N,01436.500,E,RUSKI*1F</code>
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public interface WPLSentence extends Sentence {
 
-    /**
-     * Get the destination waypoint.
-     * 
-     * @return Waypoint
-     * @throws net.sf.marineapi.parser.DataNotAvailableException If any of the waypoint related data is
-     *             not available.
-     * @throws net.sf.marineapi.parser.ParseException If any of the waypoint related fields contain
-     *             unexpected or illegal value.
-     */
-    Waypoint getWaypoint();
+	/**
+	 * Get the destination waypoint.
+	 * 
+	 * @return Waypoint
+	 * @throws net.sf.marineapi.nmea.parser.DataNotAvailableException If any of the
+	 *             waypoint related data is not available.
+	 * @throws net.sf.marineapi.nmea.parser.ParseException If any of the waypoint
+	 *             related fields contain unexpected or illegal value.
+	 */
+	Waypoint getWaypoint();
 
-    /**
-     * Set the destination waypoint.
-     * 
-     * @param wp Waypoint to set
-     */
-    void setWaypoint(Waypoint wp);
+	/**
+	 * Set the destination waypoint.
+	 * 
+	 * @param wp Waypoint to set
+	 */
+	void setWaypoint(Waypoint wp);
 
 }

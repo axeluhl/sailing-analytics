@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class GateStartConfigurationJsonSerializer extends RacingProcedureConfigurationJsonSerializer implements
         JsonSerializer<RacingProcedureConfiguration> {

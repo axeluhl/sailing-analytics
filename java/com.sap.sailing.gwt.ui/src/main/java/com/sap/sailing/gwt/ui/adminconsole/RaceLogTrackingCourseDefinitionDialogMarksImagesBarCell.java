@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 
 public class RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell extends ImagesBarCell {
     public static final String ACTION_PING = "ACTION_PING";

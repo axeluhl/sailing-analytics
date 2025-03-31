@@ -1,14 +1,26 @@
 package com.sap.sse.mongodb.internal;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.mongodb.DB;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+
+import com.mongodb.ClientSessionOptions;
+import com.mongodb.ConnectionString;
+import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
@@ -19,9 +31,13 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private MongoDBConfiguration configuration;
 
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, Mongo> mongos;
+    private final ConcurrentMap<ConnectionString, MongoClient> mongos;
     
-    private final Map<com.sap.sse.common.Util.Pair<String, Integer>, DB> dbs;
+    private final ConcurrentMap<ConnectionString, MongoDatabase> dbs;
+    
+    private final Map<ClientSession, Boolean> sessionsToRefresh;
+    
+    private Timer timerForSessionRefresh;
 
     /**
      * collection name -> fully qualified class name
@@ -29,9 +45,10 @@ public class MongoDBServiceImpl implements MongoDBService {
     private final Map<String, String> registered;
 
     public MongoDBServiceImpl() {
-        mongos = new HashMap<com.sap.sse.common.Util.Pair<String, Integer>, Mongo>();
-        dbs = new HashMap<com.sap.sse.common.Util.Pair<String,Integer>, DB>();
+        mongos = new ConcurrentHashMap<>();
+        dbs = new ConcurrentHashMap<>();
         registered = new HashMap<String, String>();
+        sessionsToRefresh = Collections.synchronizedMap(new WeakHashMap<>());
     }
 
     public MongoDBServiceImpl(MongoDBConfiguration configuration) {
@@ -45,14 +62,12 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     public void setConfiguration(MongoDBConfiguration configuration) {
         this.configuration = configuration;
-        logger.info("Used Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
+        logger.info("Used Mongo configuration: "+configuration.getMongoClientURI());
     }
 
-    public DB getDB() {
-        if (configuration == null) {
-            configuration = MongoDBConfiguration.getDefaultTestConfiguration();
-            logger.info("Used default Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
-        }
+    @Override
+    public MongoDatabase getDB() {
+        ensureConfigurationDefaultingToTest();
         try {
             return getDB(configuration);
         } catch (UnknownHostException e) {
@@ -60,21 +75,89 @@ public class MongoDBServiceImpl implements MongoDBService {
         }
     }
     
-    private synchronized DB getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
-        com.sap.sse.common.Util.Pair<String, Integer> key = new com.sap.sse.common.Util.Pair<String, Integer>(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
-        DB db = dbs.get(key);
-        if (db == null) {
-            Mongo mongo = mongos.get(key);
-            if (mongo == null) {
-                mongo = new MongoClient(mongoDBConfiguration.getHostName(), mongoDBConfiguration.getPort());
-                mongos.put(key, mongo);
-            }
-            db = mongo.getDB(mongoDBConfiguration.getDatabaseName());
-            dbs.put(key, db);
+    @Override
+    public ClientSession startCausallyConsistentSession() {
+        ensureConfigurationDefaultingToTest();
+        return getMongo(getConfiguration()).startSession(ClientSessionOptions.builder().causallyConsistent(true).build());
+    }
+    
+    @Override
+    public ClientSession startAutoRefreshingSession() {
+        ensureConfigurationDefaultingToTest();
+        final ClientSession result = getMongo(getConfiguration()).startSession();
+        synchronized (sessionsToRefresh) {
+            logger.fine("Adding session with ID "+result.getServerSession().getIdentifier()+" to set of sessions to refresh");
+            sessionsToRefresh.put(result, true);
+            ensureTimerRunning();
+            timerForSessionRefresh.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (sessionsToRefresh) {
+                        if (sessionsToRefresh.isEmpty()) {
+                            logger.fine("Terminating session refresh timer");
+                            cancel();
+                            timerForSessionRefresh.cancel();
+                            timerForSessionRefresh = null;
+                        } else {
+                            final BsonArray sessionIdsAsList = new BsonArray();
+                            for (final ClientSession session : sessionsToRefresh.keySet()) {
+                                final BsonDocument sessionId = session.getServerSession().getIdentifier();
+                                sessionIdsAsList.add(sessionId);
+                            }
+                            logger.fine("Refreshing sessions "+sessionIdsAsList);
+                            getDB().runCommand(new BsonDocument("refreshSessions", sessionIdsAsList));
+                        }
+                    }
+                }
+            }, SESSION_REFERSH_INTERVAL.asMillis(), SESSION_REFERSH_INTERVAL.asMillis());
         }
-        return db;
+        return result;
     }
 
+    private void ensureTimerRunning() {
+        synchronized (sessionsToRefresh) {
+            if (timerForSessionRefresh == null) {
+                logger.fine("Launching session refresh timer");
+                timerForSessionRefresh = new Timer(/* isDaemon */ true);
+            }
+        }
+    }
+
+    private void ensureConfigurationDefaultingToTest() {
+        if (configuration == null) {
+            configuration = MongoDBConfiguration.getDefaultTestConfiguration();
+            logger.info("Used default Mongo configuration: "+configuration.getMongoClientURI());
+        }
+    }
+    
+    private synchronized MongoDatabase getDB(MongoDBConfiguration mongoDBConfiguration) throws UnknownHostException {
+        final ConnectionString connectionString = mongoDBConfiguration.getMongoClientURI();
+        return dbs.computeIfAbsent(connectionString,
+                k->getMongo(mongoDBConfiguration).getDatabase(mongoDBConfiguration.getMongoClientURI().getDatabase()));
+    }
+
+    private MongoClient getMongo(MongoDBConfiguration mongoDBConfiguration) {
+        return getMongo(mongoDBConfiguration.getMongoClientURI());
+    }
+
+    @Override
+    public MongoClient getMongo(ConnectionString mongoConnectionString) {
+        MongoClient mongo = mongos.computeIfAbsent(mongoConnectionString, k-> MongoClients.create(mongoConnectionString));
+        return mongo;
+    }
+
+    @Override
+    public ConnectionString getMongoClientURI() {
+        ensureConfigurationDefaultingToTest();
+        return configuration.getMongoClientURI();
+    }
+
+    @Override
+    public MongoClient getMongoClient() {
+        ensureConfigurationDefaultingToTest();
+        return getMongo(getConfiguration());
+    }
+    
     @Override
     public void registerExclusively(Class<?> registerForInterface, String collectionName)
             throws AlreadyRegisteredException {

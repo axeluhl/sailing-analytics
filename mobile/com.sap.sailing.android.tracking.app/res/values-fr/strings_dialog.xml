@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    <string name="yes">"Oui"</string>
+    <string name="no">"Non"</string>
+    <string name="confirm_data_hello_name">"Bonjour {full_name}"</string>
+    <string name="confirm_data_you_are_signed_in_as_sail_id">"Vous êtes en train de vous connecter en tant que {sail_id}."</string>
+    <string name="confirm_data_is_correct">"OK"</string>
+    <string name="decline_data_is_incorrect">"Ce n\'est pas moi !"</string>
+    <string name="confirm_delete_checkin">"Voulez-vous vraiment supprimer cette connexion ?"</string>
+    <string name="download_team_image_message">"Téléchargement de l\'image de l\'équipe..."</string>
+    <string name="checkout_warning_message">"Voulez-vous vraiment vous déconnecter ? Vous allez devoir vous reconnecter à l\'aide du code QR fourni pour accéder à votre régate."</string>
+</resources>

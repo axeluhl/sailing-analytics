@@ -11,7 +11,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.AbstractHttpPostServlet;
 import com.sap.sailing.server.gateway.HttpMessageSenderServletRequestHandler;
@@ -50,9 +50,9 @@ public class ExpeditionThroughHttpPostServletHandler extends HttpMessageSenderSe
         receiver.addListener(listener, validMessagesOnly);
     }
     
-    private ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
-        ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> result = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
-                getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+    private ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> createExpeditionTrackerFactory(BundleContext context) {
+        ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> result = new ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory>(
+                getContext(), ExpeditionTrackerFactory.class.getName(), null);
         result.open();
         return result;
     }
@@ -61,7 +61,7 @@ public class ExpeditionThroughHttpPostServletHandler extends HttpMessageSenderSe
     protected void stop() {
         UDPExpeditionReceiver receiver;
         try {
-            ExpeditionWindTrackerFactory windTrackerFactory = createExpeditionTrackerFactory(getContext()).getService();
+            ExpeditionTrackerFactory windTrackerFactory = createExpeditionTrackerFactory(getContext()).getService();
             receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
             receiver.removeListener(listener);
         } catch (SocketException e) {

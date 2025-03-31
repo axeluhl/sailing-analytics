@@ -1,12 +1,15 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import android.os.Bundle;
+import java.io.Closeable;
+import java.io.IOException;
 
-import android.support.v7.app.ActionBarActivity;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
-public abstract class LoggableActivity extends ActionBarActivity {
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+public abstract class LoggableActivity extends AppCompatActivity {
     private static final String TAG = LoggableActivity.class.getName();
 
     private LifecycleLogger lifeLogger;
@@ -50,10 +53,20 @@ public abstract class LoggableActivity extends ActionBarActivity {
         super.onDestroy();
         lifeLogger.onDestroy(this);
     }
-    
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         ExLog.i(this, TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
+    }
+
+    public void safeClose(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                ExLog.ex(this, TAG, e);
+            }
+        }
     }
 }

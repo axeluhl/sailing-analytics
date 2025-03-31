@@ -30,11 +30,9 @@ select {
   cursor: pointer;
   cursor: hand;
   font-size:small;
-  background: url("images/hborder.png") repeat-x 0px -2077px;
   border:1px solid #bbb;
   border-bottom: 1px solid #a0a0a0;
   border-radius: 3px;
- -moz-border-radius: 3px;
 }
 .gwt-Button:active {
   border: 1px inset #ccc;
@@ -126,7 +124,7 @@ select {
   background: #F1F1F1;
   padding: 4px 8px 4px 4px;
   cursor: default;
-  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-family: 'Open sans', Arial Unicode MS, Arial, sans-serif;
   font-weight: bold;
   border-bottom: 1px solid #bbbbbb;
   border-top: 1px solid #D2D2D2;
@@ -271,7 +269,7 @@ select {
 }
 .gwt-MenuBar .gwt-MenuItem {
   cursor: default;
-  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-family: 'Open sans', Arial Unicode MS, Arial, sans-serif;
 }
 .gwt-MenuBar .gwt-MenuItem-selected {
   background: #E3E8F3;
@@ -724,7 +722,7 @@ select {
   border: 1px solid #ccc;
   border-top: 1px solid #999;
   font-size: 100%;
-  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-family: 'Open sans', Arial Unicode MS, Arial, sans-serif;
 }
 
 .gwt-SuggestBoxPopup {
@@ -961,7 +959,7 @@ select {
   border: 1px solid #ccc;
   border-top: 1px solid #666;
   font-size: 100%;
-  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-family: 'Open sans', Arial Unicode MS, Arial, sans-serif;
 }
 .gwt-TextArea-readonly {
   color: #888;
@@ -972,7 +970,7 @@ select {
   border: 1px solid #ccc;
   border-top: 1px solid #999;
   font-size: small;
-  font-family: Arial Unicode MS, Arial, sans-serif;
+  font-family: 'Open sans', Arial Unicode MS, Arial, sans-serif;
 }
 .gwt-TextBox-readonly {
   color: #888;
@@ -1234,3 +1232,4 @@ td.datePickerYear {
   background: #e7e7e7 url(images/thumb_horz.png) center center no-repeat;
   cursor: row-resize;
 }
+

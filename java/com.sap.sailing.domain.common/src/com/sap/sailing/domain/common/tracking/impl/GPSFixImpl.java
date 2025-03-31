@@ -37,7 +37,6 @@ public class GPSFixImpl extends AbstractGPSFixImpl implements GPSFix {
     public String toString() {
         return getTimePoint()+": "+getPosition();
     }
-
     
     public static GPSFixImpl create(double lonDeg, double latDeg, long timeMillis) {
         return new GPSFixImpl(new DegreePosition(latDeg, lonDeg), new MillisecondsTimePoint(timeMillis));

@@ -9,6 +9,8 @@ public interface SailMasterTransceiver {
     /**
      * Sends a message, prefixing it with a start byte and suffixing it with an end byte, as required by the
      * SwissTiming SailMaster protocol.
+     * 
+     * @param os if {@code null}, this method is a no-op
      */
     void sendMessage(String message, OutputStream os) throws IOException;
     
@@ -16,6 +18,8 @@ public interface SailMasterTransceiver {
      * Sends the message, prefixing it with a start byte and suffixing it with an end byte, as required by the
      * SwissTiming SailMaster protocol. Before the start byte, the ASCII-encoded
      * {@link SailMasterMessage#getSequenceNumber() sequence number} is transmitted.
+     * 
+     * @param os if {@code null}, this method is a no-op
      */
     void sendMessage(SailMasterMessage message, OutputStream os) throws IOException;
 

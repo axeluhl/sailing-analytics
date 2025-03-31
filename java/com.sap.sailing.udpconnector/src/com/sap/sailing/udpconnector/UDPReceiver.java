@@ -5,13 +5,22 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A runnable received for UDP messages; when run, it starts listening for incoming UDP datagrams on the port specified to the
+ * {@link #UDPReceiver(int) constructor}. Non-empty datagrams are then submitted to the {@link UDPMessageParser} returned by
+ * {@link #getParser()} which concrete subclasses have to implement. The parser produces messages of type {@code MessageType}.
+ * Those will be forwarded to {@link #addListener(UDPMessageListener, boolean) registered} {@link UDPMessageListener listeners}.
+ * 
+ * @author Axel Uhl (d043530)
+ */
 public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType extends UDPMessageListener<MessageType>> implements Runnable {
     private static final Logger logger = Logger.getLogger(UDPReceiver.class.getName());
     
@@ -21,12 +30,16 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
 
     private final DatagramSocket udpSocket;
     
-    private final Map<ListenerType, ToListenerDispatcher> listenerThreads;
+    /**
+     * This field is {@code null} if and only if no listener currently exists in {@link #listeners}. Modifications to
+     * both have to occur while holding this object's monitor ({@code synchronized}).
+     */
+    private ToListenerDispatcher dispatchingToListenersThread;
 
     /**
      * For each listener remembers if the listener is only interested in valid messages.
      */
-    private final Map<ListenerType, Boolean> listeners;
+    private final ConcurrentMap<ListenerType, Boolean> listeners;
 
     /**
      * Maximum IP packet length
@@ -35,13 +48,11 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     
     private class ToListenerDispatcher extends Thread {
         private final LinkedBlockingDeque<MessageType> queue;
-        private final ListenerType listener;
         private boolean stopped;
         
-        public ToListenerDispatcher(ListenerType listener) {
-            super("UDPReceiver ToListenerDispatcher for listener "+listener);
+        public ToListenerDispatcher() {
+            super("UDPReceiver ToListenerDispatcher");
             queue = new LinkedBlockingDeque<MessageType>(/* capacity */ 10000);
-            this.listener = listener;
             stopped = false;
         }
         
@@ -62,12 +73,23 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                 message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 while (!stopped) {
                     if (message != null) {
-                        listener.received(message);
+                        for (final Entry<ListenerType, Boolean> listenerAndValidMessagesOnly : listeners.entrySet()) {
+                            if (!listenerAndValidMessagesOnly.getValue() || message.isValid()) {
+                                try {
+                                    listenerAndValidMessagesOnly.getKey().received(message);
+                                } catch (Exception e) {
+                                    logger.log(Level.WARNING, "Exception "+e.getMessage()+
+                                            " while trying to dispaatch UDP message "+message+
+                                            " to listener "+listenerAndValidMessagesOnly.getKey(), e);
+                                }
+                            }
+                        }
                     }
                     message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 }
             } catch (InterruptedException e) {
                 // when interrupted, this means we'll terminate
+                logger.warning("Listener thread got interrupted and will now terminate.");
             }
         }
     }
@@ -77,21 +99,24 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
      * start this object in a new thread.
      */
     public UDPReceiver(int listeningOnPort) throws SocketException {
-        udpSocket = new DatagramSocket(listeningOnPort);
-        listeners = new HashMap<ListenerType, Boolean>();
-        this.listeningOnPort = listeningOnPort;
-        listenerThreads = new HashMap<ListenerType, ToListenerDispatcher>();
+        udpSocket = listeningOnPort == 0 ? new DatagramSocket() : new DatagramSocket(listeningOnPort);
+        listeners = new ConcurrentHashMap<>();
+        this.listeningOnPort = udpSocket.getLocalPort();
+        dispatchingToListenersThread = null;
     }
     
     public void stop() throws SocketException, IOException {
         stopped = true;
+        synchronized (this) {
+            if (dispatchingToListenersThread != null) {
+                dispatchingToListenersThread.halt();
+            }
+        }
         byte[] buf = new byte[0];
         DatagramPacket stopPacket = new DatagramPacket(buf, 0, InetAddress.getLocalHost(), listeningOnPort);
-        
         DatagramSocket stopper = new DatagramSocket();
         stopper.send(stopPacket);
         stopper.close();
-        
         if (!udpSocket.isConnected()) {
             udpSocket.close();
         }
@@ -115,23 +140,17 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     }
 
     public void run() {
-        byte[] buf = new byte[MAX_PACKET_SIZE];
-        DatagramPacket p = new DatagramPacket(buf, buf.length);
+        final byte[] buf = new byte[MAX_PACKET_SIZE];
+        final DatagramPacket p = new DatagramPacket(buf, buf.length);
         while (!stopped) {
             try {
                 udpSocket.receive(p);
-                String packetAsString = new String(p.getData(), p.getOffset(), p.getLength()).trim();
-                if (packetAsString.length() > 0) {
+                if (p.getLength() > 0) { // don't try to parse empty datagrams
                     MessageType msg = getParser().parse(p);
                     if (msg != null) {
-                        for (ListenerType listener : listeners.keySet()) {
-                            if (!listeners.get(listener) || msg.isValid()) {
-                                try {
-                                    ToListenerDispatcher dispatcher = listenerThreads.get(listener);
-                                    dispatcher.dispatch(msg);
-                                } catch (Exception e) {
-                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+e.getMessage());
-                                }
+                        synchronized (this) {
+                            if (dispatchingToListenersThread != null) {
+                                dispatchingToListenersThread.dispatch(msg);
                             }
                         }
                     }
@@ -140,7 +159,7 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                 logger.log(Level.SEVERE, "Exception while receiving UDP packet", e);
             }
         }
-        logger.info("Closing UDP socket on port "+udpSocket.getPort());
+        logger.info("Closing UDP socket on port "+udpSocket.getLocalPort());
         udpSocket.close();
         if (udpSocket.isConnected()) {
             udpSocket.disconnect();
@@ -148,19 +167,28 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     }
 
     public synchronized void addListener(ListenerType listener, boolean validMessagesOnly) {
-        ToListenerDispatcher listenerThread = new ToListenerDispatcher(listener);
-        listenerThread.start();
-        listenerThreads.put(listener, listenerThread);
         listeners.put(listener, validMessagesOnly);
+        if (dispatchingToListenersThread == null) {
+            dispatchingToListenersThread = new ToListenerDispatcher();
+            dispatchingToListenersThread.setDaemon(true);
+            dispatchingToListenersThread.start();
+        }
     }
 
     public synchronized void removeListener(ListenerType listener) {
         listeners.remove(listener);
-        listenerThreads.remove(listener).halt();
+        if (listeners.isEmpty()) {
+            dispatchingToListenersThread.halt();
+            dispatchingToListenersThread = null;
+        }
     }
 
     public int getPort() {
         return listeningOnPort;
+    }
+    
+    public DatagramSocket getSocket() {
+        return udpSocket;
     }
 
     protected abstract UDPMessageParser<MessageType> getParser();

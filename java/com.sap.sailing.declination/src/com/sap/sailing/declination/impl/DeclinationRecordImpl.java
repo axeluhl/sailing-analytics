@@ -1,10 +1,10 @@
 package com.sap.sailing.declination.impl;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class DeclinationRecordImpl implements Declination {
     private static final long serialVersionUID = 6918630656182340186L;

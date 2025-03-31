@@ -21,6 +21,16 @@ public interface MongoObjectFactory {
      * {@link DomainObjectFactory#getTracTracConfigurations()} called for the same <code>database</code>
      * will return an equal <code>tracTracConfiguration</code> in its results.
      */
-    void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+    void createTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+
+    /**
+     * When the {@link TracTracConfiguration#getTracTracPassword() password} is {@code null} then it
+     * will not be updated but left unchanged.
+     */
+    void updateTracTracConfiguration(TracTracConfiguration tracTracConfiguration);
+
+    void deleteTracTracConfiguration(String creatorName, String jsonurl);
+
+    void clear();
     
 }

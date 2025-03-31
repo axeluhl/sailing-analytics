@@ -4,12 +4,12 @@ import com.google.gwt.http.client.URL;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeComposite;
+import com.sap.sailing.gwt.ui.client.shared.controls.QRCodeWrapper;
 
 public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
     
     private static final int qrCodeSize = 320;
-    private static final int errorCorrectionLevel = QRCodeComposite.ERROR_CORRECTION_LEVEL_L;
+    private static final int errorCorrectionLevel = QRCodeWrapper.ERROR_CORRECTION_LEVEL_L;
     
     private String mappedItemId;
     private String mappedItemType;
@@ -38,12 +38,17 @@ public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
     
     @Override
     protected String generateEncodedQRCodeContent() throws QRCodeURLCreationException {
+        if (!isServerUrlValid()){
+            super.url.setText("");
+            throw new QRCodeURLCreationException(stringMessages.serverURLInvalid());
+        }
+        
         String serverUrl = getServerUrlWithoutFinalSlash();
         if (serverUrl.isEmpty()) {
-            throw new QRCodeURLCreationException("Server URL empty");
+            throw new QRCodeURLCreationException(stringMessages.serverURLEmpty());
         }
         if (mappedItemId == null) {
-            throw new QRCodeURLCreationException("No item selected for mapping");
+            throw new QRCodeURLCreationException(stringMessages.pleaseSelectAnItemToMapTo());
         }
         
         return urlFactory.createURL(serverUrl, mappedItemType, mappedItemId);

@@ -15,12 +15,18 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tractracadapter.impl.Simulator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
 public interface TracTracAdapter {
+    static final String NAME = "TracTrac";
+    static final String DEFAULT_URL = "https://www.tractrac.com/";
+
     DomainFactory getTracTracDomainFactory();
     
     /**
@@ -50,7 +56,9 @@ public interface TracTracAdapter {
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
+            boolean useOfficialEventsToUpdateRaceLog, RaceTrackingHandler raceTrackingHandler)
+                    throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
@@ -60,41 +68,25 @@ public interface TracTracAdapter {
      * @param trackerManager
      *            the race will be added to that manager
      * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     * @param raceStatus 
+     *            if <code>null</code>, the regatta into which the race has previously been loaded will be looked up; if
+     *            found, the race will be loaded into that regatta; otherwise, an existing regatta by the name of the
+     *            TracTrac event with the boat class name appended in parentheses will be looked up; if not found, a
+     *            default regatta with that name will be created, with a single default series and a single default
+     *            fleet. If a valid {@link RegattaIdentifier} is specified, a regatta lookup is performed with that
+     *            identifier; if the regatta is found, it is used to add the races to. Otherwise, a default regatta as
+     *            described above will be created and used.
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
+            long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,
+            boolean useInternalMarkPassingAlgorithm, String tracTracUsername, String tracTracPassword,
+            String raceStatus, String raceVisibility, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination, boolean useOfficialEventsToUpdateRaceLog,
+            URI liveURIFromConfiguration, URI storedURIFromConfiguration)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
-
-    /**
-     * Defines the regatta and for each race listed in the JSON document that is not already being tracked by this service
-     * creates a {@link TracTracRaceTracker} that starts tracking the respective race. The {@link RaceDefinition}s obtained this
-     * way are all grouped into the single {@link Regatta} produced for the event listed in the JSON response. Note that
-     * the many race trackers will have their TracTrac <code>Event</code> each, all with the same name, meaning the same
-     * event but being distinct.
-     * @param trackerManager TODO
-     * @param jsonURL
-     *            URL of a JSON response that contains an "event" object telling the event's name and ID, as well as a
-     *            JSON array named "races" which tells ID and replay URL for the race. From those replay URLs the
-     *            paramURL for the Java client can be derived.
-     * @param timeoutInMilliseconds
-     *            if a race definition is not received for a race of this event within this time, the race tracker for
-     *            that race is stopped; use -1 to wait forever
-     * @param raceLogStore TODO
-     */
-    Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
-            String tracTracPassword, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
-            org.json.simple.parser.ParseException, Exception;
 
     /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for
@@ -114,7 +106,8 @@ public interface TracTracAdapter {
 
     RaceRecord getSingleTracTracRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws Exception;
 
-    TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI,
+    TracTracConfiguration createTracTracConfiguration(String creatorName, String name, String jsonURL,
+            String liveDataURI,
             String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword);
-
+    
 }

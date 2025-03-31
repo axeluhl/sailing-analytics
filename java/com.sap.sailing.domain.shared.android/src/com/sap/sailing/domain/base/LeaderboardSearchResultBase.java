@@ -34,5 +34,5 @@ public interface LeaderboardSearchResultBase extends Hit {
      * that is referenced by the leaderboard as its {@link Leaderboard#getDefaultCourseArea() default course area}, the
      * event is returned; <code>null</code> otherwise.
      */
-    EventBase getEvent();
+    Iterable<? extends EventBase> getEvents();
 }

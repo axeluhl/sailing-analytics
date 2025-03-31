@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RRS26ConfigurationJsonSerializer extends RacingProcedureConfigurationJsonSerializer implements
         JsonSerializer<RacingProcedureConfiguration> {

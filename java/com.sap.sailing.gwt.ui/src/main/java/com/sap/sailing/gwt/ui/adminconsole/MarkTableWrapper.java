@@ -6,20 +6,29 @@ import java.util.Comparator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.Color;
-import com.sap.sse.common.impl.AbstractColor;
-import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
-public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
-    public MarkTableWrapper(boolean multiSelection, SailingServiceAsync sailingService, StringMessages stringMessages,
+public class MarkTableWrapper<S extends RefreshableSelectionModel<MarkDTO>> extends TableWrapper<MarkDTO, S> {    
+    public MarkTableWrapper(boolean multiSelection, SailingServiceWriteAsync sailingServiceWrite, StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, true);
+        super(sailingServiceWrite, stringMessages, errorReporter, multiSelection, true,
+                new EntityIdentityComparator<MarkDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(MarkDTO t) {
+                        return t.getIdAsString().hashCode();
+                    }
+                });
         TextColumn<MarkDTO> markNameColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
@@ -27,7 +36,13 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             }
         };
         table.addColumn(markNameColumn, stringMessages.mark());
-
+        TextColumn<MarkDTO> markShortNameColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.getShortName();
+            }
+        };
+        table.addColumn(markShortNameColumn, stringMessages.shortName());
         TextColumn<MarkDTO> markPositionColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO mark) {
@@ -38,7 +53,6 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             }
         };
         table.addColumn(markPositionColumn, stringMessages.position());
-
         TextColumn<MarkDTO> markTypeColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO mark) {
@@ -46,26 +60,13 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             }
         };
         table.addColumn(markTypeColumn, stringMessages.type());
-        
         Column<MarkDTO, SafeHtml> markColorColumn = new ColorColumn<>(new ColorRetriever<MarkDTO>() {
             @Override
             public Color getColor(MarkDTO t) {
-                Color result;
-                try {
-                    result = t.color != null && !t.color.isEmpty() ? AbstractColor
-                            .getColorByLowercaseNameStatic(t.color.toLowerCase()) == null ? new RGBColor(t.color)
-                            : AbstractColor.getColorByLowercaseNameStatic(t.color.toLowerCase()) : null;
-                } catch (IllegalArgumentException e) {
-                    // if the color name isn't recognized, neither as a named color nor as a HTML color code, an exception will
-                    // result because of the attempt to interpret something unknown as an HTML color. Catch this and return null as
-                    // the color
-                    result = null;
-                }
-                return result;
+                return t.color;
             }
         });
         table.addColumn(markColorColumn, stringMessages.color());
-
         TextColumn<MarkDTO> markShapeColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
@@ -73,7 +74,6 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             }
         };
         table.addColumn(markShapeColumn, stringMessages.shape());
-
         TextColumn<MarkDTO> markPatternColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {
@@ -81,7 +81,6 @@ public class MarkTableWrapper<S extends SelectionModel<MarkDTO>> extends TableWr
             }
         };
         table.addColumn(markPatternColumn, stringMessages.pattern());
-
         TextColumn<MarkDTO> markUUIDColumn = new TextColumn<MarkDTO>() {
             @Override
             public String getValue(MarkDTO markDTO) {

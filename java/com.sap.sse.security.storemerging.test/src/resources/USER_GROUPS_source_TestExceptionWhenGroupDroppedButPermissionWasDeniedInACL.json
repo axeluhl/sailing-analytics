@@ -1,0 +1,4 @@
+{"_id":{"$oid":"5e315ab49d7cdfdd30a74e37"},"ID":{"$binary":"p0SwXhQazKeSHq++eHVrsQ==","$type":"03"},"NAME":"unknown server name-server","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[{"ROLE_DEFINITION_MAP_ROLE_ID":{"$binary":"y0V7Ud9IKcQV4Rif59Gpnw==","$type":"03"},"ROLE_DEFINITION_MAP_FOR_ALL":true}]}
+{"_id":{"$oid":"5e315ab49d7cdfdd30a74e48"},"ID":{"$binary":"8UO+LFy2x/aAn/0rgvb4pQ==","$type":"03"},"NAME":"admin-tenant","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e31601f9d7cdfdd30a75e3c"},"ID":{"$binary":"qkjaUk/uvNBmsr1AeN9vtw==","$type":"03"},"NAME":"aaa-tenant","USERNAMES":["aaa"],"ROLE_DEFINITION_MAP":[]}
+{"_id":{"$oid":"5e31602a9d7cdfdd30a75e59"},"ID":{"$binary":"oUCjpLVY2o/0ulQ8qUV/qQ==","$type":"03"},"NAME":"GroupToBeDropped","USERNAMES":["admin"],"ROLE_DEFINITION_MAP":[]}

@@ -1,0 +1,24 @@
+@require 'theme';
+
+.start_line_advantages_by_wind_component {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: LIGHT_GREY;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+    overflow: hidden;
+}
+
+.advantage_maximum_live_average {
+	position: absolute;
+	width: 100%;
+	top: DASHBOARD_SPACE_MEDIUM;
+	height: auto;
+}
+
+.advantages_on_line_chart_container {
+	position: absolute;
+	top: 145px;
+	width: 100%;
+	bottom: 0px;
+}

@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.NavigableMap;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 
 public interface PolarDiagram extends Serializable {
-
     enum WindSide {
         RIGHT, LEFT, UPWIND, DOWNWIND
     };
@@ -55,5 +54,4 @@ public interface PolarDiagram extends Serializable {
     NavigableMap<Speed, Bearing> getJibeAngles();
     NavigableMap<Speed, Speed> getBeatSOG();
     NavigableMap<Speed, Speed> getJibeSOG();
-
 }

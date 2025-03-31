@@ -31,6 +31,8 @@ public interface TabView<PLACE extends Place, PRESENTER> {
     void start(PLACE requestedPlace, AcceptsOneWidget contentArea);
     
     void setPresenter(PRESENTER presenter);
+    
+    PRESENTER getPresenter();
 
     /**
      * Tells the tab that it is going to be deactiviated (not visible anymore), because of tab switch
@@ -39,6 +41,7 @@ public interface TabView<PLACE extends Place, PRESENTER> {
 
     PLACE placeToFire();
     
-    // TODO implement as defender method when Java 8 is ready as this is "VISIBLE" in most cases
-    State getState();
+    default State getState() {
+        return State.VISIBLE;
+    };
 }

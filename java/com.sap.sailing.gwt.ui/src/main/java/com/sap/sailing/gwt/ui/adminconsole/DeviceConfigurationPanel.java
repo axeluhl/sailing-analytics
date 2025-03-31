@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -13,191 +14,171 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationDetailComposite.DeviceConfigurationCloneListener;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.common.client.help.HelpButton;
+import com.sap.sailing.gwt.common.client.help.HelpButtonResources;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.SelectionProvider;
-import com.sap.sailing.gwt.ui.client.SelectionProviderImpl;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationWithSecurityDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.SelectedElementsCountingButton;
 
-public class DeviceConfigurationPanel extends SimplePanel implements SelectionChangeListener<DeviceConfigurationMatcherDTO>, DeviceConfigurationCloneListener {
-
-    public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
-        if (clientIdentifiers.size() == 1) {
-            return clientIdentifiers.get(0);
-        } else if (clientIdentifiers.size() == 0) {
-            return "["+stringMessages.any()+"]";
-        } else {
-            return clientIdentifiers.toString();
-        }
-    }
-    
-    private final SailingServiceAsync sailingService;
+public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationDetailComposite.DeviceConfigurationFactory {
+    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    
     private Button addConfigurationButton;
     private Button removeConfigurationButton;
     private Button refreshConfigurationsButton;
     private DeviceConfigurationListComposite listComposite;
     private DeviceConfigurationDetailComposite detailComposite;
+    private final RefreshableMultiSelectionModel<DeviceConfigurationWithSecurityDTO> refreshableMultiSelectionModel;
     
-    private final SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider;
-
-    public DeviceConfigurationPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter reporter) {
-        this.sailingService = sailingService;
+    public DeviceConfigurationPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
         this.stringMessages = stringMessages;
-        this.errorReporter = reporter;
-        
-        this.selectionProvider = new SelectionProviderImpl<DeviceConfigurationMatcherDTO>(true);
-        this.selectionProvider.addSelectionChangeListener(this);
-        
-        setupUi();
+        this.errorReporter = presenter.getErrorReporter();
+        listComposite = new DeviceConfigurationListComposite(sailingServiceWrite, errorReporter, stringMessages, userService);
+        refreshableMultiSelectionModel = listComposite.getSelectionModel();
+        detailComposite = setupUi(presenter);
+        refreshableMultiSelectionModel.addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Set<DeviceConfigurationWithSecurityDTO> selectedConfigurations = refreshableMultiSelectionModel
+                        .getSelectedSet();
+                if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
+                    detailComposite.setConfiguration(selectedConfigurations.iterator().next());
+                } else {
+                    detailComposite.setConfiguration(null);
+                }
+                removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
+            }
+        });
     }
-
-    private void setupUi() {
+    
+    private DeviceConfigurationDetailComposite setupUi(Presenter presenter) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         setupControlPanel(mainPanel);
-        setupConfigurationPanels(mainPanel);
+        return setupConfigurationPanels(mainPanel, presenter);
     }
 
     private void setupControlPanel(VerticalPanel mainPanel) {
         HorizontalPanel deviceManagementControlPanel = new HorizontalPanel();
         deviceManagementControlPanel.setSpacing(5);
         addConfigurationButton = new Button(stringMessages.addConfiguration());
+        addConfigurationButton.ensureDebugId("addDeviceConfigurationButton");
         addConfigurationButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 createConfiguration();
             }
         });
-        deviceManagementControlPanel.add(addConfigurationButton);
-        
-        removeConfigurationButton = new Button(stringMessages.remove());
-        removeConfigurationButton.setEnabled(false);
-        removeConfigurationButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeConfiguration();
-            }
-        });
+        if (userService.hasCreatePermission(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION)) {
+            deviceManagementControlPanel.add(addConfigurationButton);
+        }
+        removeConfigurationButton = new SelectedElementsCountingButton<DeviceConfigurationWithSecurityDTO>(
+                stringMessages.remove(), refreshableMultiSelectionModel,
+                StringMessages.INSTANCE::doYouReallyWantToRemoveSelectedElements, (event) -> removeConfiguration());
         deviceManagementControlPanel.add(removeConfigurationButton);
-        
         refreshConfigurationsButton = new Button(stringMessages.refresh());
         refreshConfigurationsButton.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
-                detailComposite.setConfiguration(null);
-                detailComposite.setVisible(false);
                 listComposite.refreshTable();
             }
         });
         deviceManagementControlPanel.add(refreshConfigurationsButton);
-        
+        deviceManagementControlPanel.add(new HelpButton(HelpButtonResources.INSTANCE,
+                stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/360019799279-How-to-work-with-the-SAP-Sailing-Race-Manager-app"));
         mainPanel.add(deviceManagementControlPanel);
     }
 
-    private void setupConfigurationPanels(VerticalPanel mainPanel) {
+    private DeviceConfigurationDetailComposite setupConfigurationPanels(VerticalPanel mainPanel, Presenter presenter) {
         Grid grid = new Grid(1 ,2);
         mainPanel.add(grid);
-        
-        listComposite = createListComposite(sailingService, selectionProvider, errorReporter, stringMessages);
         grid.setWidget(0, 0, listComposite);
         grid.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         grid.getColumnFormatter().getElement(1).getStyle().setPaddingTop(2.0, Unit.EM);
-        
-        detailComposite = createDetailComposite(sailingService, errorReporter, stringMessages, this);
-        detailComposite.setVisible(false);
-        grid.setWidget(0, 1, detailComposite);
-    }
-
-    @Override
-    public void onSelectionChange(List<DeviceConfigurationMatcherDTO> selectedConfigurations) {
-        if (selectedConfigurations.size() == 1 && selectedConfigurations.iterator().hasNext()) {
-            detailComposite.setConfiguration(selectedConfigurations.iterator().next());
-            detailComposite.setVisible(true);
-        } else {
-            detailComposite.setConfiguration(null);
-            detailComposite.setVisible(false);
-        }
-        removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
+        DeviceConfigurationDetailComposite myDetailComposite = new DeviceConfigurationDetailComposite(presenter, stringMessages, this);
+        myDetailComposite.setVisible(false);
+        grid.setWidget(0, 1, myDetailComposite);
+        return myDetailComposite;
     }
     
     private void createConfiguration() {
-        createConfiguration(new DeviceConfigurationDTO());
+        final DeviceConfigurationWithSecurityDTO newConfiguration = new DeviceConfigurationWithSecurityDTO(null);
+        newConfiguration.id = UUID.randomUUID(); // the name will be obtained by the following call
+        obtainAndSetNameForConfigurationAndAdd(newConfiguration);
     }
 
-    private void createConfiguration(final DeviceConfigurationDTO configuration) {
-        sailingService.getDeviceConfigurationMatchers(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
+    /**
+     * Asks the user for a new name for {@code configurationToObtainAndSetNameForAndAdd} that is not used yet by any of
+     * the configurations in all the configurations obtained by
+     * {@link SailingServiceAsync#getDeviceConfigurations(AsyncCallback)}. If such a name has been provided by the user
+     * it is set on {@code configurationToObtainAndSetNameForAndAdd}, and
+     * {@code configurationToObtainAndSetNameForAndAdd} is submitted to the server for creation. This method assumes
+     * that the {@link DeviceConfigurationDTO.id ID} of the {@code configurationToObtainAndSetNameForAndAdd} is unique.
+     */
+    @Override
+    public void obtainAndSetNameForConfigurationAndAdd(
+            final DeviceConfigurationWithSecurityDTO configurationToObtainAndSetNameForAndAdd) {
+        sailingServiceWrite.getDeviceConfigurations(
+                new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationWithSecurityDTO>>() {
             @Override
-            public void onSuccess(List<DeviceConfigurationMatcherDTO> allMatchers) {
-                createConfiguration(allMatchers, configuration);
+                    public void onSuccess(List<DeviceConfigurationWithSecurityDTO> allConfigurations) {
+                new SelectNameForNewDeviceConfigurationDialog(stringMessages, new SelectNameForNewDeviceConfigurationDialog.MatcherValidator(allConfigurations, stringMessages), new DialogCallback<String>() {
+                    @Override
+                    public void ok(String nameForNewDeviceConfiguration) {
+                        configurationToObtainAndSetNameForAndAdd.name = nameForNewDeviceConfiguration;
+                        sailingServiceWrite.createOrUpdateDeviceConfiguration(configurationToObtainAndSetNameForAndAdd, 
+                                new MarkedAsyncCallback<>(new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                listComposite.refreshTable();
+                                refreshableMultiSelectionModel.clear();
+                            }
+                            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(caught.getMessage());
+                            }
+                        }));
+                    }
+                
+                    @Override
+                    public void cancel() { }
+                }).show();
             }
-            
+    
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-        });
-    }
-
-    private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
-        getCreateDialog(stringMessages, 
-                new DeviceConfigurationCreateMatcherDialog.MatcherValidator(allMatchers), 
-                new DialogCallback<DeviceConfigurationMatcherDTO>() {
-            @Override
-            public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
-                sailingService.createOrUpdateDeviceConfiguration(createdMatcher, configuration, 
-                        new AsyncCallback<DeviceConfigurationMatcherDTO>() {
-                    @Override
-                    public void onSuccess(DeviceConfigurationMatcherDTO newMatcher) {
-                        listComposite.refreshTable();
-                        onSelectionChange(Arrays.asList(newMatcher));
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            public void cancel() { }
-        }).show();
+        }));
     }
     
-    protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
-            final Validator<DeviceConfigurationMatcherDTO> validator,
-            final DialogCallback<DeviceConfigurationMatcherDTO> callback) {
-        return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
+    @Override
+    public void update(DeviceConfigurationWithSecurityDTO configurationToUpdate) {
+        listComposite.update(configurationToUpdate);
     }
-
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationListComposite(sailingService, selectionProvider, 
-                errorReporter, stringMessages);
-    }
-
-    protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener) {
-        return new DeviceConfigurationDetailComposite(sailingService, errorReporter, stringMessages, cloneListener);
-    }
-
+    
     private void removeConfiguration() {
-        detailComposite.setConfiguration(null);
-        detailComposite.setVisible(false);
-        for (DeviceConfigurationMatcherDTO identifier : selectionProvider.getSelectedItems()) {
-            sailingService.removeDeviceConfiguration(identifier.type, identifier.clients, new AsyncCallback<Boolean>() {
+        detailComposite.setConfiguration(/* configuration to display */ null);
+        for (DeviceConfigurationDTO config : refreshableMultiSelectionModel.getSelectedSet()) {
+            sailingServiceWrite.removeDeviceConfiguration(config.id, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
                     listComposite.refreshTable();
@@ -209,11 +190,6 @@ public class DeviceConfigurationPanel extends SimplePanel implements SelectionCh
                 }                  
             });
         }
-    }
-
-    @Override
-    public void onCloneRequested(DeviceConfigurationMatcherDTO matcher, DeviceConfigurationDTO configuration) {
-        createConfiguration(configuration);
     }
 
 }

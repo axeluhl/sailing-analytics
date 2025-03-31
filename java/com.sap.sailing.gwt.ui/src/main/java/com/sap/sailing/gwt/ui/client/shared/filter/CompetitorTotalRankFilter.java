@@ -26,12 +26,10 @@ public class CompetitorTotalRankFilter extends AbstractNumberFilter<CompetitorDT
     @Override
     public boolean matches(CompetitorDTO competitorDTO) {
         boolean result = false;
-        
         if (value > 0 && operator != null && getLeaderboard() != null) {
             int totalRank = getLeaderboard().getTotalRank(competitorDTO);
             result = operator.matchValues(value, totalRank);
         }
-        
         return result;
     }
         

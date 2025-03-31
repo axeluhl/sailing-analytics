@@ -5,16 +5,30 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
-public class EventBaseDTO extends NamedDTO implements IsSerializable {
+/**
+ * Basic event information as a DTO. The inherited {@link NamedDTO#equals(Object)} and {@link NamedDTO#hashCode()}
+ * methods that are based on the {@link NamedDTO#getName()} response are overridden here to be based on this event's
+ * {@link #getId() ID}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
-    public VenueDTO venue;
+    private VenueDTO venue;
     public Date startDate;
     public Date endDate;
     public boolean isPublic;
@@ -22,14 +36,10 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
 
     private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
-    private List<String> imageURLs = new ArrayList<>();
-    private List<String> videoURLs = new ArrayList<>();
-    private List<String> sponsorImageURLs = new ArrayList<>();
-    private String logoImageURL;
     private String officialWebsiteURL;
-    /** placeholder for social media URL's -> attributes will be implemented later on */
-    private String facebookURL;
-    private String twitterURL;
+    private Map<String, String> sailorsInfoWebsiteURLs;
+    private List<ImageDTO> images = new ArrayList<>();
+    private List<VideoDTO> videos = new ArrayList<>();
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -51,18 +61,41 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      */
     private boolean isOnRemoteServer;
 
+    @Deprecated
     EventBaseDTO() {
     } // for serialization only
-
-    public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
-        this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<String, ImageSize>();
-    }
 
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
         this.leaderboardGroups = leaderboardGroups;
         this.imageSizes = new HashMap<String, ImageSize>();
+        sailorsInfoWebsiteURLs = new HashMap<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return Util.equalsWithNull(this.getId(), ((EventBaseDTO) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    public ImageDTO getLogoImage() {
+        ImageDTO result = null;
+        for (ImageDTO image : images) {
+            if (image.hasTag(MediaTagConstants.LOGO.getName())) {
+                result = image;
+                break;
+            }
+        }
+        return result;
     }
 
     public boolean isRunning() {
@@ -81,20 +114,45 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.description = description;
     }
 
-    public String getLogoImageURL() {
-        return logoImageURL;
-    }
-
-    public void setLogoImageURL(String logoImageURL) {
-        this.logoImageURL = logoImageURL;
-    }
-
     public String getOfficialWebsiteURL() {
         return officialWebsiteURL;
     }
 
+    private String getUrlWithHttpsAsDefaultProtocolIfMissing(String url) {
+        final String result;
+        if (url != null && !url.contains("://")) {
+            result = "https://" + url;
+        } else {
+            result = url;
+        }
+        return result;
+    }
+
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
-        this.officialWebsiteURL = officialWebsiteURL;
+        this.officialWebsiteURL = getUrlWithHttpsAsDefaultProtocolIfMissing(officialWebsiteURL);
+    }
+
+    public Map<String, String> getSailorsInfoWebsiteURLs() {
+        return sailorsInfoWebsiteURLs;
+    }
+
+    public String getSailorsInfoWebsiteURL(String locale) {
+        return sailorsInfoWebsiteURLs.get(locale);
+    }
+
+    public void setSailorsInfoWebsiteURL(String locale, String url) {
+        if (url == null || url.isEmpty()) {
+            sailorsInfoWebsiteURLs.remove(locale);
+        } else {
+            sailorsInfoWebsiteURLs.put(locale, getUrlWithHttpsAsDefaultProtocolIfMissing(url));
+        }
+    }
+
+    public void setSailorsInfoWebsiteURLs(Map<String, String> sailorsInfoWebsiteURLs) {
+        this.sailorsInfoWebsiteURLs.clear();
+        for (final Entry<String, String> e : sailorsInfoWebsiteURLs.entrySet()) {
+            this.sailorsInfoWebsiteURLs.put(e.getKey(), getUrlWithHttpsAsDefaultProtocolIfMissing(e.getValue()));
+        }
     }
 
     /**
@@ -106,32 +164,13 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         return baseURL;
     }
 
+    /**
+     * Assign the event's base URL.
+     *
+     * NOTE: <code>https://</code> will be assumed if no protocol has been provided.
+     */
     public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
-    }
-
-    public void addImageURL(String imageURL) {
-        imageURLs.add(imageURL);
-    }
-
-    public void addVideoURL(String videoURL) {
-        videoURLs.add(videoURL);
-    }
-
-    public void addSponsorImageURL(String sponsorImageURL) {
-        sponsorImageURLs.add(sponsorImageURL);
-    }
-
-    public List<String> getImageURLs() {
-        return imageURLs;
-    }
-
-    public List<String> getVideoURLs() {
-        return videoURLs;
-    }
-
-    public List<String> getSponsorImageURLs() {
-        return sponsorImageURLs;
+        this.baseURL = getUrlWithHttpsAsDefaultProtocolIfMissing(baseURL);
     }
 
     public Iterable<? extends LeaderboardGroupBaseDTO> getLeaderboardGroups() {
@@ -146,20 +185,28 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.isOnRemoteServer = isOnRemoteServer;
     }
 
-    public String getFacebookURL() {
-        return facebookURL;
+    public void addImage(ImageDTO image) {
+        images.add(image);
     }
 
-    public void setFacebookURL(String facebookURL) {
-        this.facebookURL = facebookURL;
+    public boolean removeImage(ImageDTO image) {
+        return images.remove(image);
     }
 
-    public String getTwitterURL() {
-        return twitterURL;
+    public List<ImageDTO> getImages() {
+        return images;
     }
 
-    public void setTwitterURL(String twitterURL) {
-        this.twitterURL = twitterURL;
+    public void addVideo(VideoDTO video) {
+        videos.add(video);
+    }
+
+    public boolean removeVideo(VideoDTO video) {
+        return videos.remove(video);
+    }
+
+    public List<VideoDTO> getVideos() {
+        return videos;
     }
 
     public void setImageSize(String imageURL, ImageSize imageSize) {
@@ -177,5 +224,13 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
      */
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
+    }
+
+    public VenueDTO getVenue() {
+        return venue;
+    }
+
+    public void setVenue(VenueDTO venue) {
+        this.venue = venue;
     }
 }

@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.base;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Renamable;
 import com.sap.sse.common.Util;
 
 import difflib.PatchFailedException;
@@ -25,11 +28,18 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Course extends CourseBase {
+public interface Course extends CourseBase, Renamable {
     void lockForRead();
 
     void unlockAfterRead();
 
+    /**
+     * Note that the listener's methods will be called while this course still holds its write lock. Should your
+     * listener use synchronization to obtain any object's monitor, all other code also synchronizing on those
+     * objects must make sure to either own at least this course's read lock before entering the synchronized
+     * block or ensure that no attempt is made to acquire this course's lock while in the synchronized block (lock /
+     * synchronization ordering). Otherwise, deadlocks can result. See also bug 5803.
+     */
     void addCourseListener(CourseListener listener);
 
     void removeCourseListener(CourseListener listener);
@@ -39,8 +49,13 @@ public interface Course extends CourseBase {
      * control point list and the control points referenced by this course's waypoints. Change events are propagated
      * to the registered {@link CourseListener}s as if {@link #addWaypoint(int, Waypoint)} and {@link #removeWaypoint(int)}
      * had been used.
+     * 
+     * @param associatedRoles must not be {@code null} but may be empty
      */
-    void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, Map<Mark, UUID> associatedRoles,
+            UUID originatingCouseTemplateIdOrNull, DomainFactory baseDomainFactory) throws PatchFailedException;
     
     int getNumberOfWaypoints();
+
+    Leg getLeg(int zeroBasedIndexOfWaypoint);
 }

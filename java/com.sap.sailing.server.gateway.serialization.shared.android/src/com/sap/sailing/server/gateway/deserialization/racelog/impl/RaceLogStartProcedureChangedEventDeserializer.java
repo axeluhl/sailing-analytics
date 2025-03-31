@@ -7,16 +7,18 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogStartProcedureChangedEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.shared.json.JsonDeserializationException;
+import com.sap.sse.shared.json.JsonDeserializer;
 
 public class RaceLogStartProcedureChangedEventDeserializer extends BaseRaceLogEventDeserializer {
 
-    public RaceLogStartProcedureChangedEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogStartProcedureChangedEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
@@ -24,7 +26,7 @@ public class RaceLogStartProcedureChangedEventDeserializer extends BaseRaceLogEv
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
         RacingProcedureType type = RacingProcedureType.valueOf(object.get(RaceLogStartProcedureChangedEventSerializer.FIELD_START_PROCEDURE_TYPE).toString());
-        return factory.createStartProcedureChangedEvent(createdAt, author, timePoint, id, competitors, passId, type);
+        return new RaceLogStartProcedureChangedEventImpl(createdAt, timePoint, author, id, passId, type);
     }
 
 }

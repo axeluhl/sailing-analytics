@@ -3,13 +3,10 @@ package com.sap.sailing.server.replication.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.UUID;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -17,9 +14,10 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -32,6 +30,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -41,8 +40,9 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
-import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, RaceLogEvent, RaceLogEventVisitor> {
@@ -53,12 +53,12 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     
     @Before
     public void createEvents() throws Exception {
-        raceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(1), author, 42, RaceLogRaceStatus.UNKNOWN);
-        anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(new MillisecondsTimePoint(2), author, 42, RaceLogRaceStatus.UNKNOWN);
+        raceLogEvent = new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(1), author, 42, RaceLogRaceStatus.UNKNOWN);
+        anotherRaceLogEvent = new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(2), author, 42, RaceLogRaceStatus.UNKNOWN);
     }
     
     @Test
-    public void testRaceLogEmptyOnInitialLoad() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceLogEmptyOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -71,7 +71,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceLogStateOnInitialLoad() throws InterruptedException, ClassNotFoundException, IOException {
+    public void testRaceLogStateOnInitialLoad() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -85,7 +85,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -98,7 +98,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnEmptyFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
@@ -110,7 +110,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
 
     @Test
-    public void testRaceEventReplicationOnRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
@@ -124,24 +124,24 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationCourseDesignOnRegatta() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationCourseDesignOnRegatta() throws Exception {
         final String regattaName = "Test";
         final String seriesName = "Default";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
-        raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         masterLog.add(raceLogEvent);
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
     
     @Test
-    public void testRaceEventReplicationOnFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationOnFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
@@ -154,17 +154,17 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     }
     
     @Test
-    public void testRaceEventReplicationCourseDesignOnFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
+    public void testRaceEventReplicationCourseDesignOnFlexibleLeaderboard() throws Exception {
         final String leaderboardName = "Test";
         final String fleetName = "Default";
         final String raceColumnName = "R1";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        raceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         masterLog.add(raceLogEvent);
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        anotherRaceLogEvent = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
@@ -177,27 +177,11 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
             assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
             assertEquals(courseDesignChangedEvent.getCreatedAt(), replicatedEvent.getCreatedAt());
             assertEquals(courseDesignChangedEvent.getLogicalTimePoint(), replicatedEvent.getLogicalTimePoint());
-            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
+            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedCompetitors()), Util.size(replicatedEvent.getInvolvedCompetitors()));
             compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
         } finally {
             replicaLog.unlockAfterRead();
         }
-    }
-
-    @Ignore
-    public void testRaceEventReplicationOnRenamingFlexibleLeaderboard() throws ClassNotFoundException, IOException, InterruptedException {
-        final String leaderboardName = "Test";
-        final String fleetName = "Default";
-        final String raceColumnName = "R1";
-        FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
-        RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
-        masterLog.add(raceLogEvent);
-        RenameLeaderboard renameOperation = new RenameLeaderboard(leaderboardName, leaderboardName + "new");
-        master.apply(renameOperation);
-        Thread.sleep(3000);
-        RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
     }
     
     /**
@@ -218,8 +202,8 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         addAndValidateEventIds(masterLog, replicaLog);
         
         final Series series = masterRegatta.getSeries().iterator().next();
-        final MillisecondsTimePoint approximateRaceStatusEventCreationTimePoint = MillisecondsTimePoint.now();
-        final RaceLogRaceStatusEvent raceStatusEvent = RaceLogEventFactory.INSTANCE.createRaceStatusEvent(approximateRaceStatusEventCreationTimePoint, author, 42,
+        final TimePoint approximateRaceStatusEventCreationTimePoint = MillisecondsTimePoint.now();
+        final RaceLogRaceStatusEvent raceStatusEvent = new RaceLogRaceStatusEventImpl(approximateRaceStatusEventCreationTimePoint, author, 42,
                 RaceLogRaceStatus.UNKNOWN);
         addEventToDB(series.getRaceColumnByName(raceColumnName).getRaceLogIdentifier(series.getFleetByName(fleetName)), raceStatusEvent, regattaName, raceColumnName, fleetName);
         RegattaLeaderboard leaderboard = master.apply(new CreateRegattaLeaderboard(
@@ -266,10 +250,10 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     protected CourseBase createCourseData() {
         CourseBase course = new CourseDataImpl("Test Course");
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
-                new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
-                new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
-                "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), PassingInstruction.Port));
+                new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"),
+                new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
+                "Upper gate", "Upper gate")));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"), "conical", "bold"), PassingInstruction.Port));
         
         return course;
     }

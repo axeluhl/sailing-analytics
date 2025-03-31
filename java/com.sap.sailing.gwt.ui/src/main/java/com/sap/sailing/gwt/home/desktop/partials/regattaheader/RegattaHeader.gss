@@ -1,0 +1,208 @@
+/**
+ * The header of a regatta of an event
+ */
+.regattaheader {
+  width: 100%;
+  float: left;
+  font-size: 1rem;
+  padding: 0.666666666666667em;
+  padding-right: 1em;
+  overflow: hidden;
+  color: #0a0a0a;
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #ddd;
+}
+.regattaheaderpadding {
+  padding-left: 4em;
+  padding-right: 9.666667em;
+}
+.regattaheader_logo {
+  position: absolute;
+  width: 3.333333333333333em;
+  height: 3.333333333333333em;
+  margin: 0.666666666666667em 0.666666666666667em 1em;
+  text-align: center;
+  line-height: 3.333333333333333em;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  left: 1em;
+}
+.regattaheader_logo img {
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+}
+.regattaheader_content {
+/*   float: left; */
+  display: inline-block;
+  width: calc(100% - 4em);
+  overflow: hidden;
+  border-left: 1px solid #ccc;
+  margin-left: 0.666666666666667em;
+  padding-left: 1em;
+}
+.regattaheader_content_title {
+  font-size: 1.466666666666667em;
+  font-weight: 700;
+  line-height: 1.363636363636364em;
+  overflow: hidden;
+}
+.regattaheader_content_details {
+  overflow: hidden;
+  min-height: 1.133333333333333em;
+}
+.regattaheader_content_details_item {
+  float: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  padding: 0 0.666666666666667em;
+  border-right: 1px solid #ccc;
+}
+.regattaheader_content_details_item:first-of-type {
+  padding-left: 0;
+}
+.regattaheader_content_details_item:last-of-type {
+  border: none;
+  padding-right: 0;
+}
+.regattaheader_toggle {
+  float: right;
+  width: 4em;
+  cursor: pointer;
+  margin: 0.666666666666667em 0 0.666666666666667em -4em;
+  line-height: 3.333333333333333em;
+  text-align: center;
+  padding: 0 0.666666666666667em;
+  border-left: 1px solid #ccc;
+}
+.regattaheader_toggle_icon {
+  padding: 1em 0;
+  width: 1.333333333333333em;
+  height: 1.333333333333333em;
+  -webkit-transform: rotate(180deg);
+     -moz-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+          transform: rotate(180deg);
+}
+.standings_listhidden .regattaheader_toggle_icon {
+  -webkit-transform: rotate(0deg);
+     -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
+}
+.regattaheader_arrow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  text-align: right;
+  padding: 0.666666666666667em;
+  padding-right: 5.333333333333333em;
+  background-image: resourceUrl("arrowDownGrey");
+  background-size: 1.333333333333333em 1.333333333333333em;
+  background-position: center;
+  background-repeat: no-repeat;
+  -webkit-transform: rotate(-90deg);
+     -moz-transform: rotate(-90deg);
+      -ms-transform: rotate(-90deg);
+          transform: rotate(-90deg);
+}
+
+.regattaheader_indicators {
+  position: absolute;
+  top: 0;
+  right: 1em;
+  bottom: 0;
+  width: 4.666667em;
+  margin: .666666666666667em 0 1em;
+  cursor: default;
+  font-size: 1rem;
+  border-left: 1px solid #ccc;
+}
+
+.regattaheader_indicators:hover {
+  text-decoration: none;
+}
+
+.regattaheader_indicators.regattaheader_indicators_next_to_arrow {
+  right: 5em;
+  border-right: 1px solid #ccc;
+  cursor: inherit;
+}
+.regattaheader_indicators > div {
+  font-size: 0;
+  text-align: center;
+  margin-top: -0.1rem;
+}
+
+.regattaheader_indicators > div > div {
+  background-size: 1.666666666666667rem 1.666666666666667rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 1.666666666666667rem;
+  height: 1.666666666666667rem;
+  display: inline-block;
+  margin: 0.1rem 0.2rem
+}
+
+.regattaheader_indicators > div > div.regattaheader_indicator_disabled {
+  opacity: 0.15;
+}
+
+.regattaheader_update {
+  width: 20%;
+  float: right;
+  padding: 0.533333333333333em 0;
+  text-align: right;
+  font-weight: 600;
+  color: #666;
+}
+.regattaheader_update_title {
+  text-transform: uppercase;
+}
+img.regattaheader_update_title_icon {
+  height: 1.2em;
+  margin-right: 0.333333333333333em;
+  vertical-align: bottom;
+}
+.regattaheader_update_timestamp {
+  font-size: 12px;
+}
+.iconHeaderGPS, .iconHeaderWind, .iconHeaderVideo, .iconHeaderAudio {
+  pointer-events: none;
+}
+.iconHeaderGPS, .iconGPS {
+  background-image: resourceUrl('gpsFixes');
+}
+.iconHeaderWind, .iconWind {
+  background-image: resourceUrl('wind');
+}
+.iconHeaderVideo, .iconVideo {
+  background-image: resourceUrl('video');
+}
+.iconHeaderAudio, .iconAudio {
+  background-image: resourceUrl('audio');
+}
+
+.iconGPS, .iconWind, .iconVideo, .iconAudio {
+    line-height: 1.5em;
+    position: relative;
+    height:1.666666666666667rem;
+    display: inline-block;
+    padding-left: 2.333333333333333em;
+    background-size: 1.666666666666667rem 1.666666666666667rem;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+}
+.iconWind {
+    margin-left: 0.666666666666667em;
+}
+.iconVideo {
+    padding-top: 0.277777777777778em;
+}
+.iconAudio {
+    margin-left: 0.666666666666667em;
+    padding-top: 0.277777777777778em;
+}

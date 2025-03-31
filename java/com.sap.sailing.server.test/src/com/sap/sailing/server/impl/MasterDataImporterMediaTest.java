@@ -3,10 +3,10 @@ package com.sap.sailing.server.impl;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -26,14 +26,16 @@ import org.mockito.Mockito;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.media.MediaDB;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.tracking.WindStore;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.interfaces.RacingEventService;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -55,19 +57,19 @@ public class MasterDataImporterMediaTest {
         DomainObjectFactory domainObjectFactory = mock(DomainObjectFactory.class, Mockito.RETURNS_MOCKS);
         MongoObjectFactory mongoObjectFactory = mock(MongoObjectFactoryImpl.class);
         WindStore windStore = mock(WindStore.class);
-        GPSFixStore gpsFixStore = mock(GPSFixStore.class);
+        SensorFixStore sensorFixStore = mock(SensorFixStore.class);
 
         MediaDB mediaDb = mock(MediaDB.class);
         when(mediaDb.loadAllMediaTracks()).thenReturn(Arrays.asList(existingDbMediaTracks));
 
         racingEventService = spy(new RacingEventServiceImpl(domainObjectFactory, mongoObjectFactory, mediaDb,
-                windStore, gpsFixStore));
+                windStore, sensorFixStore, /* restoreTrackedRaces */ false));
     }
 
     @Test
     public void testEmptyImportList_NoOverride() throws Exception {
         createRacingEventService();
-        racingEventService.mediaTracksImported(mediaTracksToImport, NO_OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), NO_OVERRIDE);
 
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
@@ -80,7 +82,7 @@ public class MasterDataImporterMediaTest {
     @Test
     public void testEmptyImportList_WithOverride() throws Exception {
         createRacingEventService();
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
@@ -100,10 +102,10 @@ public class MasterDataImporterMediaTest {
         MediaTrack mediaTrackToImport = new MediaTrack(dbId, "title", "url", MillisecondsTimePoint.now(),
                 MillisecondsDurationImpl.ONE_HOUR, MimeType.mp3, assignedRaces);
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracks = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracks.size(), is(1));
+        Iterable<MediaTrack> allMediaTracks = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracks), is(1));
         MediaTrack mediaTrack = allMediaTracks.iterator().next();
         assertThat(mediaTrack, sameInstance(mediaTrackToImport));
 
@@ -126,14 +128,14 @@ public class MasterDataImporterMediaTest {
                 MillisecondsDurationImpl.ONE_HOUR, mimeType, assignedRaces);
 
         createRacingEventService(existingMediaTrack);
-        Collection<MediaTrack> allMediaTracksBeforeImport = racingEventService.getAllMediaTracks();
+        Iterable<MediaTrack> allMediaTracksBeforeImport = racingEventService.getAllMediaTracks();
 
         MediaTrack mediaTrackToImport = new MediaTrack(existingMediaTrack.dbId, existingMediaTrack.title,
                 existingMediaTrack.url, existingMediaTrack.startTime, existingMediaTrack.duration, mimeType, existingMediaTrack.assignedRaces);
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
         assertThat(allMediaTracksAfterImport, is(allMediaTracksBeforeImport));
 
         verify(racingEventService, never()).mediaTrackAdded(any(MediaTrack.class));
@@ -159,10 +161,10 @@ public class MasterDataImporterMediaTest {
         MediaTrack mediaTrackToImport = new MediaTrack(dbId2, existingMediaTrack.title, existingMediaTrack.url,
                 existingMediaTrack.startTime, existingMediaTrack.duration, mimeType, existingMediaTrack.assignedRaces);
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(2));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(2));
 
         verify(racingEventService).mediaTrackAdded(same(mediaTrackToImport));
         verify(racingEventService, never()).mediaTrackDeleted(any(MediaTrack.class));
@@ -188,10 +190,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.title, is(mediaTrackToImport.title));
 
@@ -219,10 +221,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.title, is(mediaTrackToImport.title));
 
@@ -250,10 +252,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.title, is(not(mediaTrackToImport.title)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, NO_OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), NO_OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.title, is(existingMediaTrack.title));
 
@@ -281,10 +283,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.url, is(not(mediaTrackToImport.url)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.url, is(mediaTrackToImport.url));
 
@@ -312,10 +314,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.startTime, is(not(mediaTrackToImport.startTime)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.startTime, is(mediaTrackToImport.startTime));
 
@@ -342,10 +344,10 @@ public class MasterDataImporterMediaTest {
         assertThat(existingMediaTrack.duration, is(not(mediaTrackToImport.duration)));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(mediaTrack.duration, is(mediaTrackToImport.duration));
 
@@ -375,10 +377,10 @@ public class MasterDataImporterMediaTest {
         assertThat(mediaTrackToImport.assignedRaces.size(), is(2));
 
         mediaTracksToImport.add(mediaTrackToImport);
-        racingEventService.mediaTracksImported(mediaTracksToImport, OVERRIDE);
+        racingEventService.mediaTracksImported(mediaTracksToImport, new MasterDataImportObjectCreationCountImpl(), OVERRIDE);
 
-        Collection<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
-        assertThat(allMediaTracksAfterImport.size(), is(1));
+        Iterable<MediaTrack> allMediaTracksAfterImport = racingEventService.getAllMediaTracks();
+        assertThat(Util.size(allMediaTracksAfterImport), is(1));
         MediaTrack mediaTrack = allMediaTracksAfterImport.iterator().next();
         assertThat(existingMediaTrack.assignedRaces, is(mediaTrackToImport.assignedRaces));
         assertThat(mediaTrack.assignedRaces.size(), is(2));

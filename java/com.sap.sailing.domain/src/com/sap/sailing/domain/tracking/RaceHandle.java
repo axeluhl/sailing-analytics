@@ -26,7 +26,7 @@ public interface RaceHandle {
      * Fetch the race definition. If the race definition represented by this handle hasn't been created yet, the call
      * blocks until such a definition is provided by another call, usually by the {@link RaceCourseReceiver}. If
      * <code>timeoutInMilliseconds</code> milliseconds have passed and the race definition is found not to have
-     * shown up until then, a valid but empty set is returned. The unblocking may be deferred even beyond
+     * shown up until then, {@code null} is returned. The unblocking may be deferred even beyond
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the {@link DomainFactory}'s
      * set of races during that time.
      */

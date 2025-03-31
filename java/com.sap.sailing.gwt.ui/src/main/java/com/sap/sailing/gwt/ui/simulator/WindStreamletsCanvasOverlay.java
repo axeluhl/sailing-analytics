@@ -45,16 +45,12 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         windFieldDTO = null;
         getCanvas().getElement().setId("swarm-display");
     }
-
     public WindFieldDTO getWindFieldDTO() {
         return this.windFieldDTO;
     }
-
     public WindFieldGenParamsDTO getWindParams() {
         return this.windParams;
     }
-
-
     public void startStreamlets() {
         if (swarm == null) {
             final SimulatorField field = new SimulatorField(getWindFieldDTO(), getWindParams(), streamletPars, coordinateSystem);
@@ -63,27 +59,22 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         }
         this.swarm.start(40);
     }
-
     public void stopStreamlets() {
         if (swarm != null) {
             this.swarm.stop();
         }
     }
-
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
-
     public void setWindField(final WindFieldDTO windFieldDTO) {
         this.windFieldDTO = windFieldDTO; 
         this.swarm = null;
     }
-
     @Override
     public boolean isVisible() {
         return this.visible;
     }
-
     @Override
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
@@ -99,14 +90,12 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
             }
         }
     }
-
     @Override
     public void addToMap() {
         if (timer != null) {
             timer.addTimeListener(this);
         }
     }
-
     @Override
     public void removeFromMap() {
         if (timer != null) {
@@ -114,11 +103,9 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
         }
         this.setVisible(false);
     }
-
     @Override
     protected void drawCenterChanged() {
     }
-
     @Override
     protected void draw() {
         super.draw();
@@ -127,7 +114,7 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
                 macroWeather = false;
                 SimulatorJSBundle bundle = GWT.create(SimulatorJSBundle.class);
                 String jsonStr = bundle.windStreamletsDataJS().getText();
-                RectField f = RectField.read(jsonStr.substring(19, jsonStr.length() - 1), false, streamletPars, coordinateSystem);
+                RectField f = RectField.read(jsonStr, false, streamletPars, coordinateSystem);
                 map.setZoom(5);
                 map.panTo(f.getCenter());
                 this.swarm = new Swarm(this, map, timer, f, streamletPars);
@@ -135,15 +122,12 @@ public class WindStreamletsCanvasOverlay extends FullCanvasOverlay implements Ti
             }
         }
     }
-
     public Swarm getSwarm() {
         return this.swarm;
     }
-
     @Override
     public void timeChanged(final Date newDate, Date oldDate) {
     }
-
     @Override
     public boolean shallStop() {
         if (timer.getTime().getTime() >= this.endDate.getTime()) {

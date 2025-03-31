@@ -1,0 +1,28 @@
+.fontWeightBold {
+    font-weight: bold;
+}
+
+.fontStyleItalic {
+    font-style: italic;
+}
+
+.textAlignRight {
+    text-align: right !important;
+}
+
+.textColorBlue {
+    color: #008fcc;
+}
+
+.textColorRed {
+    color: #e94a1b;
+}
+
+tr.defaultTableRow td {
+    border-bottom: 0 none;
+    padding-bottom: 0;
+}
+
+tr.borderTableRow td {
+    border-bottom: 1px solid #dfdfdf;
+}

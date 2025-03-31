@@ -3,14 +3,16 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
@@ -20,37 +22,124 @@ import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactPositionHelper;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving>{
+public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving> {
+    private static final Logger logger = Logger.getLogger(DynamicGPSFixMovingTrackImpl.class.getName());
+    
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
+    private static final Bearing MAX_COURSE_DIFFERENCE_BETWEEN_MEASURED_AND_COMPUTED_IN_DEGREES = new DegreeBearingImpl(90);
 
+    private long numberOfOutliersDueToCOGDiff;
+    private long numberOfFixesCheckedForOutlier;
+
+    /**
+     * Uses lossy compaction of fixes. See {@link CompactPositionHelper}. Use {@link #DynamicGPSFixMovingTrackImpl(Object, long, boolean)}
+     * to configure lossless compaction.
+     */
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
-        super(trackedItem, millisecondsOverWhichToAverage);
+        this(trackedItem, millisecondsOverWhichToAverage, /* losslessCompaction */ false);
     }
     
     /**
-     * @param maxSpeedForSmoothening pass <code>null</code> if you don't want speed-based smoothening
+     * Uses lossy compaction. Use {@link #DynamicGPSFixMovingTrackImpl(Object, long, Speed, boolean)} to configure
+     * lossless compaction.
+     * 
+     * @param maxSpeedForSmoothening
+     *            pass <code>null</code> if you don't want speed-based smoothening
      */
     public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
-        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening);
+        this(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening, /* losslessCompaction */ false);
+    }
+
+    /**
+     * @param maxSpeedForSmoothening
+     *            pass <code>null</code> if you don't want speed-based smoothening
+     * @param losslessCompaction
+     *            If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely equal to
+     *            their original, without rounding or range limitations different from those of the original
+     *            {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that, however, has
+     *            stricter limits on ranges and precisions. See {@link CompactPositionHelper} for details on lossy
+     *            compaction.
+     */
+    public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening, boolean losslessCompaction) {
+        super(trackedItem, millisecondsOverWhichToAverage, maxSpeedForSmoothening, losslessCompaction);
+    }
+
+    /**
+     * @param losslessCompaction
+     *            If {@code true}, {@link Wind} fixes will be compacted in a way that they remain precisely equal to
+     *            their original, without rounding or range limitations different from those of the original
+     *            {@link Wind} fix. Lossy compaction, in contrast, may use a more compact form that, however, has
+     *            stricter limits on ranges and precisions. See {@link CompactPositionHelper} for details on lossy
+     *            compaction.
+     */
+    public DynamicGPSFixMovingTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, boolean losslessCompaction) {
+        super(trackedItem, millisecondsOverWhichToAverage, losslessCompaction);
     }
 
     /**
      * This redefinition packs the <code>gpsFix</code> into a more compact representation that conserves
      * memory compared to the original, "naive" implementation. It gets along with a single object.
+     * 
+     * @return {@code true} if and only if the fix was actually added to the competitor's track
      */
     @Override
-    public void addGPSFix(GPSFixMoving gpsFix) {
-        add(gpsFix);
+    public boolean addGPSFix(GPSFixMoving gpsFix) {
+        return add(gpsFix, /* replace */ true);
     }
     
     @Override
     public boolean add(GPSFixMoving fix) {
-        return super.add(new CompactGPSFixMovingImpl(fix));
+        return super.add(fix); // ends up calling this.add(fix, false) where conversion in CompactGPSFixMovingImpl will happen
+    }
+
+    @Override
+    public boolean add(GPSFixMoving fix, boolean replace) {
+        GPSFixMoving compactFix;
+        try {
+            compactFix = isLosslessCompaction() ? new PreciseCompactGPSFixMovingImpl(fix) : new VeryCompactGPSFixMovingImpl(fix);
+        } catch (CompactionNotPossibleException e) {
+            logger.log(Level.FINE, "Couldn't compact fix "+fix+" for track for "+getTrackedItem()+". Using losslessly-compacted fix instead.", e);
+            compactFix = new PreciseCompactGPSFixMovingImpl(fix);
+        }
+        return super.add(compactFix, replace);
+    }
+
+    /**
+     * Interpolates linearly between the two fixes based on their time difference and distance. This
+     * intentionally ignores the {@link GPSFixMoving#getSpeed() speed values} provided by the fixes
+     * themselves for performance reasons.
+     */
+    @Override
+    protected Position getEstimatedPositionBetweenTwoValidFixes(TimePoint timePoint, GPSFixMoving lastFixAtOrBefore, GPSFixMoving firstFixAtOrAfter) {
+        assert lastFixAtOrBefore != null;
+        assert firstFixAtOrAfter != null;
+        assert !timePoint.before(lastFixAtOrBefore.getTimePoint());
+        assert !timePoint.after(firstFixAtOrAfter.getTimePoint());
+        final Position result;
+        final SpeedWithBearing estimatedSpeed = estimateSpeedOnTimeDifferenceAndDistanceOnly(lastFixAtOrBefore, firstFixAtOrAfter);
+        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+        result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                estimatedSpeed.getBearing(), distance);
+        return result;
+    }
+
+    private SpeedWithBearing estimateSpeedOnTimeDifferenceAndDistanceOnly(GPSFixMoving fix1, GPSFixMoving fix2) {
+        assert fix1 != null && fix2 != null;
+        final Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+        return new KnotSpeedWithBearingImpl(distance.inTime(fix1.getTimePoint().until(fix2.getTimePoint())).getKnots(),
+                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
     }
 
     @Override
@@ -110,6 +199,17 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         }
     }
     
+    private double getSmoothenedSpeedRatio(Speed s1, Speed s2) {
+        final double speedToPreviousFactor;
+        final double offsetForSmallSpeedsInKnots = 0.5;
+        if (s1.compareTo(s2) >= 0) {
+            speedToPreviousFactor = (s1.getKnots() + offsetForSmallSpeedsInKnots) / (s2.getKnots() + offsetForSmallSpeedsInKnots);
+        } else {
+            speedToPreviousFactor = (s2.getKnots() + offsetForSmallSpeedsInKnots) / (s1.getKnots() + offsetForSmallSpeedsInKnots);
+        }
+        return speedToPreviousFactor;
+    }
+    
     /**
      * In addition to the base class implementation, we may have the speed and bearing as measured by the device (the
      * special speed/bearing combination 0.0/0.0 is simply ignored, as are fix-provided speed values that exceed
@@ -128,22 +228,11 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         } else {
             boolean fixHasValidSogAndCog = (e.getSpeed().getMetersPerSecond() != 0.0 || e.getSpeed().getBearing().getDegrees() != 0.0) &&
                     (maxSpeedForSmoothing == null || e.getSpeed().compareTo(maxSpeedForSmoothing) <= 0);
-
             GPSFixMoving previous = rawFixes.lower(e);
             final boolean atLeastOnePreviousFixInRange = previous != null && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
-            Speed speedToPrevious = null;
             boolean foundValidPreviousFixInRange = false;
             while (previous != null && !foundValidPreviousFixInRange && e.getTimePoint().asMillis() - previous.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
-                speedToPrevious = previous.getPosition().getDistance(e.getPosition())
-                        .inTime(e.getTimePoint().asMillis() - previous.getTimePoint().asMillis());
-                final double speedToPreviousFactor;
-                if (speedToPrevious.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                    speedToPreviousFactor = speedToPrevious.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                } else {
-                    speedToPreviousFactor = e.getSpeed().getMetersPerSecond() / speedToPrevious.getMetersPerSecond();
-                }
-                foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0)
-                        && (!fixHasValidSogAndCog || speedToPreviousFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                foundValidPreviousFixInRange = isValid(previous, e, e, fixHasValidSogAndCog);
                 previous = rawFixes.lower(previous);
             }
             boolean foundValidNextFixInRange = false;
@@ -152,18 +241,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
             if (!atLeastOnePreviousFixInRange || foundValidPreviousFixInRange) {
                 GPSFixMoving next = rawFixes.higher(e);
                 atLeastOneNextFixInRange = next != null && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed();
-                Speed speedToNext = null;
                 while (next != null && !foundValidNextFixInRange && next.getTimePoint().asMillis() - e.getTimePoint().asMillis() <= getMillisecondsOverWhichToAverageSpeed()) {
-                    speedToNext = e.getPosition().getDistance(next.getPosition())
-                            .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
-                    final double speedToNextFactor;
-                    if (speedToNext.getMetersPerSecond() >= e.getSpeed().getMetersPerSecond()) {
-                        speedToNextFactor = speedToNext.getMetersPerSecond() / e.getSpeed().getMetersPerSecond();
-                    } else {
-                        speedToNextFactor = e.getSpeed().getMetersPerSecond() / speedToNext.getMetersPerSecond();
-                    }
-                    foundValidNextFixInRange = (maxSpeedForSmoothing == null || speedToNext.compareTo(maxSpeedForSmoothing) <= 0)
-                            && (!fixHasValidSogAndCog || speedToNextFactor <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+                    foundValidNextFixInRange = isValid(e, next, e, fixHasValidSogAndCog);
                     next = rawFixes.higher(next);
                 }
             }
@@ -173,9 +252,32 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         return isValid;
     }
 
+    private boolean isValid(GPSFixMoving from, GPSFixMoving to, GPSFixMoving takeCogAndSogFrom, boolean fixHasValidSogAndCog) {
+        boolean foundValidPreviousFixInRange;
+        final SpeedWithBearing speedToNeighbor = from.getSpeedAndBearingRequiredToReach(to);
+        boolean failedDueToCOGDiff = false;
+        foundValidPreviousFixInRange = (maxSpeedForSmoothing == null || speedToNeighbor.compareTo(maxSpeedForSmoothing) <= 0)
+                && (!fixHasValidSogAndCog ||
+                        (getSmoothenedSpeedRatio(speedToNeighbor, takeCogAndSogFrom.getSpeed()) <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
+                        // if speed factor is in acceptable range, also check for a significant difference in COG reported and measured:
+                        && !(failedDueToCOGDiff = speedToNeighbor.getBearing().getDifferenceTo(takeCogAndSogFrom.getSpeed().getBearing()).abs().compareTo(MAX_COURSE_DIFFERENCE_BETWEEN_MEASURED_AND_COMPUTED_IN_DEGREES) > 0)));
+        if (failedDueToCOGDiff) {
+            numberOfOutliersDueToCOGDiff++;
+            logger.finer(()->""+DynamicGPSFixMovingTrackImpl.this+": computed COG "+speedToNeighbor.getBearing()+" differs significantly (by "+
+                    speedToNeighbor.getBearing().getDifferenceTo(takeCogAndSogFrom.getSpeed().getBearing()).abs()+
+                    ") from reported COG "+takeCogAndSogFrom.getSpeed().getBearing()+
+                    "; time points: "+from.getTimePoint()+" / "+to.getTimePoint());
+        } else if (!foundValidPreviousFixInRange) {
+            logger.finer(()->""+DynamicGPSFixMovingTrackImpl.this+": invalid fix "+to+" due to smoothened speed ratio "+
+                    getSmoothenedSpeedRatio(speedToNeighbor, takeCogAndSogFrom.getSpeed())+
+                    " greater or equal threshold "+MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING);
+        }
+        numberOfFixesCheckedForOutlier++;
+        return foundValidPreviousFixInRange;
+    }
+    
     @Override
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
     }
-    
 }

@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    
+    
+    
+    <string name="url_google_geocoder">"http://maps.googleapis.com/maps/api/geocode/json?address="</string>
+    <string name="urlpart_google_geocoder_sensor">"\?sensor=true"</string>
+    <string name="running_on_course">"(na dráze %s)"</string>
+    <string name="course_design_number_waypoints">"Počet trasových bodů dráhy: %d"</string>
+    
+    <string name="service_text_no_races">"Čeká se na závody, které se mají sledovat..."</string>
+    <string name="service_text_num_races">"Počet momentálně sledovaných závodů: %d"</string>
+    
+    <string name="set_time">"Start"</string>
+    <string name="reset_time">"Opakovaný start"</string>
+    <string name="choose">"Vybrat"</string>
+    <string name="current_time">"Aktuální čas"</string>
+    <string name="race_finished_template">"%s je dokončen"</string>
+    <string name="race_first_boat_finished">"První loď dokončila v:"</string>
+    <string name="race_first_finisher">"První dokončil v %1$s"</string>
+    <string name="race_first_finisher_and_time_limit">"První dokončil v %1$s, cílový limit rozjížďky je v %2$s"</string>
+    <string name="race_time_limit">"Cílový limit rozjížďky je v %s"</string>
+    <string name="choose_startmode">"Vyberte startovní režim pro tento závod"</string>
+    <string name="choose_abort_mode">"Vyberte vlajky, které chcete vztyčit"</string>
+    <string name="choose_abort_flag_mode">"Vyberte režim vlajky přerušení"</string>
+    <string name="flags_up">"NAHORU"</string>
+    <string name="flags_down">"DOLŮ"</string>
+    <string name="ap_or_november">"Vyberte vlajku přerušení"</string>
+    <string name="choose_start_mode_flag">"Vyberte vlajku startovního režimu"</string>
+    <string name="abort_starting_phase">"Přerušit startovní fázi"</string>
+    <string name="abort_running_race">"Přerušit rozjížďku"</string>
+    <string name="choose_xray_flag_up">"Vztyčit individuální odvolání"</string>
+    <string name="choose_xray_flag_down">"Spustit individuální odvolání"</string>
+    <string name="choose_first_substitute_flag">"Všeobecné odvolání"</string>
+    <string name="confirm_general_recall">"Vydat všeobecné odvolání?"</string>
+    <string name="confirm">"Potvrdit"</string>
+    <string name="abort">"Zrušit"</string>
+    <string name="choose_blue_flag">"Zahájit dokončovací fázi"</string>
+    <string name="flag_ap">"AP"</string>
+    <string name="flag_november">"N"</string>
+    <string name="flag_jury">"Jury"</string>
+    <string name="label_login_events">"Regata"</string>
+    <string name="label_login_course_area">"Oblast"</string>
+    <string name="label_login_position">"Poloha"</string>
+    <string name="login_type_superuser">"Přihlášení jako superuser"</string>
+    <string name="login_type_officer_on_vessel">"Přihlášení jako rozhodčí na vodě."</string>
+    <string name="login_type_shore_control">"Přihlášení jako rozhodčí na břehu."</string>
+    <string name="login_type_viewer">"Přihlášení jako uživatel v režimu demo (pouze prohlížení)."</string>
+    <string name="racelist_unscheduled">"Dosud nenaplánováno"</string>
+    <string name="racelist_prescheduled">"Předběžně naplánováno na %s"</string>
+    <string name="racelist_scheduled">"Naplánováno na %s"</string>
+    <string name="racelist_startphase">"Start v %s zahájen"</string>
+    <string name="racelist_running">"Probíhá od %s"</string>
+    <string name="racelist_finishing">"Dokončuje se"</string>
+    <string name="racelist_finished">"Dokončeno"</string>
+    <string name="racelist_unknown">"Není známo"</string>
+    <string name="currentlyLoading">"Načítá se..."</string>
+    <string name="racingview_header">"Závody v oblasti dráhy „%s“"</string>
+    <string name="running_on_unknown">"(kliknutím nastavíte dráhu)"</string>
+    <string name="updateIndicator">"Znak aktualizace"</string>
+    <string name="reset_race">"Reset závodu"</string>
+    <string name="postpone">"Odložit"</string>
+    <string name="race_running_since_template">"%1$s se jede od %2$s"</string>
+    <string name="race_reset_confirmation_header">"Chystáte se resetovat závod."</string>
+    <string name="race_reset_confirmation_warning">"Resetováním závodu odstraníte natrvalo veškerá uložená data závodu. Všechny informace o stavu závodu bude nutné zadat znovu. Zachovají se pouze zadané informace o dráze. Důrazně doporučujeme reset závodu neprovádět."</string>
+    <string name="race_reset_confirmation_title">"Resetovat tento závod?"</string>
+    <string name="race_reset_reset_button">"Přesto resetovat"</string>
+    <string name="race_finished_start_time">"Rozjížďka odstartovala v:"</string>
+    <string name="race_finished_end_time">"Rozjížďka skončila v:"</string>
+    <string name="race_startphase_countdown_mode_remove">"%1$s až %2$s je odebráno"</string>
+    <string name="race_startphase_countdown_mode_display">"%1$s až %2$s je zobrazeno"</string>
+    <string name="race_startphase_countdown_start">"%1$s až %2$s startuje"</string>
+    <string name="set_pathfinder">"Průzkumník (králík)"</string>
+    <string name="set_pathfinder_title">"Vyberte průzkumníka (králíka)"</string>
+    <string name="protest_dialog_title">"Začátek protestního časového limitu"</string>
+    <string name="finished_dialog_title">"Nastavte čas, kdy rozjížďka skončila"</string>
+    <string name="protest_start_time">"Začátek protestního časového limitu: %s"</string>
+    <string name="protest_duration">"Délka protestního časového limitu: %d min"</string>
+    <string name="protest_end_time">"Konec protestního časového limitu: %s"</string>
+    <string name="protest_duration_dialog_title">"Doba trvání v minutách"</string>
+    <string name="no_pathfinder_selected">"Není vybrán průzkumník (králík)"</string>
+    <string name="set_line_opening_time">"Start z brány"</string>
+    <string name="no_line_opening_time_selected">"Není vybrán žádný čas"</string>
+    <string name="set_gate_line_opening_time_title">"Nastavit čas startu z brány"</string>
+    <string name="choose_line_open_min">"min"</string>
+    <string name="previous_course">"Předchozí dráha"</string>
+    <string name="make_new_course">"Vytvořit dráhu"</string>
+    <string name="course_design_assets">"Nástroje k navržení dráhy"</string>
+    <string name="course_design_dialog_title">"Sestavit návrh dráhy"</string>
+    <string name="pick_a_rounding_direction">"Vybrat směr obeplouvání"</string>
+    <string name="select_penalty_reason">"Vybrat důvod trestu"</string>
+
+    <string name="passing_instruction_none">"Nic"</string>
+    <string name="passing_instruction_port">"Levobok"</string>
+    <string name="passing_instruction_starboard">"Pravobok"</string>
+    <string name="passing_instruction_single_unknown">"Samostatný, není známo"</string>
+    <string name="passing_instruction_gate">"Brána"</string>
+    <string name="passing_instruction_line">"Čára"</string>
+    <string name="passing_instruction_offset">"Vymezovací"</string>
+    <string name="passing_instruction_fixed_bearing">"Pevný kurz"</string>
+
+    <string name="publish">"Publikovat"</string>
+    <string name="unpublish">"Zrušit publikování"</string>
+    <string name="take_previous">"Použít předchozí dráhu"</string>
+    <string name="take_previous_short">"Použít toto"</string>
+    <string name="markImage">"Vyobrazení značky"</string>
+    <string name="cancel">"Zrušit"</string>
+    <string name="retry">"Opakovat"</string>
+    <string name="yes">"Ano"</string>
+    <string name="no">"Ne"</string>
+    <string name="tracking_list_01">"Startovní listina"</string>
+    <string name="tracking_list_02">"Výsledková listina"</string>
+    <string name="availableFinishingCompetitors">"Závodníci"</string>
+    <string name="choose_blue_flag_finishing">"Dokončit rozjížďku"</string>
+    <string name="drag_handle_description">"Úchyt"</string>
+    <string name="options_menu_settings">"Nastavení"</string>
+    <string name="results_capturing_title">"Výsledky rozjížďky"</string>
+    <string name="results_capturing_view_subject">"Předmět e-mailu"</string>
+    <string name="results_capturing_view_body">"Tělo e-mailu"</string>
+    <string name="results_capturing_view_send">"Odeslat výsledky"</string>
+    <string name="results_capturing_view_add_photo">"Přidat fotografii"</string>
+    <string name="results_capturing_view_list_header">"Připojené fotografie"</string>
+    <string name="results_capturing_view_list_empty">"Zatím žádné fotografie"</string>
+    <string name="results_mail_subject">"[závodní komise – %1$s] %2$s"</string>
+    <string name="results_mail_body">"Výsledky rozjížďky „%s“ jsou připojeny.\n\n"</string>
+    <string name="results_mail_body_boat_class">"Lodní třída: %s\n"</string>
+    <string name="results_mail_body_race_group">"Závodní skupina: %s\n"</string>
+    <string name="results_mail_body_start">"Čas startu: %s\n"</string>
+    <string name="results_mail_body_finish">"Čas dokončení: %s\n"</string>
+
+    <!-- WIND FRAGMENT -->
+    <string name="wind_direction_degrees">"Směr větru od (stupně)"</string>
+    <string name="enter_wind_direction">"Směr (od)"</string>
+    <string name="enter_wind_speed">"Rychlost (uzly)"</string>
+    <string name="enter_wind_gps">"Poloha měření větru"</string>
+    <string name="check_all_data">"3. Ověřte všechna data"</string>
+    <string name="in_degrees">"ve stupních"</string>
+    <string name="in_knots">"v uzlech"</string>
+    <string name="wind_speed_direction_not_a_valid_number">"Jako rychlost nebo směr větru není zadáno platné číslo. Zadejte správnou hodnotu."</string>
+    <string name="wind_location_or_fields_not_valid">"Není zadáno místo nebo směr či rychlost větru. Opravte hodnoty."</string>
+    <string name="waiting_for_gps">"Čeká se na signál GPS..."</string>
+    <string name="manual_entry">"Manuální zadání polohy"</string>
+    <string name="found_gps_position">"Poloha dle GPS"</string>
+    <string name="set_position_manually">"Přidat polohu manuálně"</string>
+    <string name="searchPosition">"Hledá se místo..."</string>
+    <string name="no_location_found">"Místo nelze na základě vašeho dotazu najít."</string>
+    <string name="store_position">"Použít tuto polohu"</string>
+    <string name="store_wind">"Uložit vítr"</string>
+
+    <!-- SETTINGS -->
+    <string name="settings_activity_title">"Nastavení"</string>
+    <string name="settings_category_general">"Další"</string>
+    <string name="settings_general_manageareas_header">"Spravované oblasti dráhy"</string>
+    <string name="settings_general_language_header">"Vybrat jazyk"</string>
+    <string name="settings_general_language_description">"Vyberte jazyk. Aby se změny projevily, možná bude nutné aplikaci restartovat."</string>
+    <string name="override_default_start_procedure_type_select_header">"Výchozí typ startovní procedury v případě přepsání"</string>
+    <string name="override_default_start_procedure_type_select_description">"Pro závody se bude jako výchozí používat vybraný typ startovní procedury. Aby se aktivovala tato volba, musí být označeno pole přepsání."</string>
+    <string name="settings_please_reload">"Načtěte znovu, aby se změny projevily."</string>
+    <string name="settings_advanced_service_header">"URL webové služby"</string>
+    <string name="settings_advanced_mail_header">"Příjemce e-mailu s výsledky"</string>
+    <string name="settings_category_polling">"Cyklické dotazování"</string>
+    <string name="settings_polling_active_header">"Aktivovat cyklické dotazování"</string>
+    <string name="settings_polling_active_description">"Je-li aktivováno, server bude cyklicky dotazován na změny."</string>
+    <string name="settings_polling_interval_header">"Interval cyklického dotazování (sekundy)"</string>
+    <string name="settings_category_developer">"Možnosti pro vývojáře"</string>
+    <string name="compass_view_compass">"Kompas"</string>
+    <string name="compass_view_needle">"Střelka"</string>
+    <string name="racing_course_area_missing">"Oblast dráhy nelze načíst. Vraťte se na přihlašovací stránku."</string>
+    <string name="racing_load_success">"Úspěšně načteno rozjížděk: %d"</string>
+    <string name="generic_load_failure">"Při načítání požadovaných dat došlo k chybě:\n\n„%s“\n\nChcete pokus opakovat?"</string>
+    <string name="set_course_layout">"Nastavit uspořádání dráhy"</string>
+    <string name="loading_failure">"Načítání se nezdařilo"</string>
+    <string name="wind_unknown">"(kliknutím nastavíte vítr)"</string>
+    <string name="wind_info">"%2$s / %1$f uzlů"</string>
+    <string name="login">"Přihlásit se"</string>
+    <string name="please_select_a_login_type">"Vyberte typ přihlášení."</string>
+    <string name="race_list_filter_show_all">"Zobrazit vše"</string>
+    <string name="race_list_filter_show_active">"Zobrazit aktivní"</string>
+    <string name="race_reset_time_schedule_race">"Naplánovat závod"</string>
+    <string name="race_reset_time_startmode_starttime">"Vybrat startovní režim a čas startu"</string>
+    <string name="start">"Nastavit čas startu"</string>
+    <string name="nationality">"Národnost"</string>
+    <string name="number">"Číslo"</string>
+    <string name="set_tracking_list">"Nastavit přehled trasování"</string>
+    <string name="confirm_tracking_list">@string/publish_button_empty</string>
+    <string name="snap">"Snímek"</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">"Chcete se odhlásit a přihlásit se jako nový uživatel?"</string>
+    <string name="change_dialog_title">"Změnit regatu"</string>
+    <string name="change_dialog_message">"Chcete změnit regatu nebo oblast? Momentálně sledované závody budou odpojeny."</string>
+    <string name="logout">"Odhlásit se"</string>
+    <string name="loading_configuration">"Načítání konfigurace..."</string>
+    <string name="loading_configuration_failed">"Při načítání konfigurace došlo k chybě."</string>
+    <string name="loading_configuration_not_found">"Pro toto zařízení nebyla nalezena žádná vzdálená konfigurace."</string>
+    <string name="loading_configuration_succeded">"Vzdálená konfigurace byla použita."</string>
+    <string name="gate_launch_stops_after">"Start z brány skončí za %d min"</string>
+    <string name="settings_category_regatta_defaults">"Konfigurace regaty (výchozí)"</string>
+    <string name="settings_category_regattas">"Konfigurace regaty (specifická)"</string>
+    <string name="settings_category_course_designer">"Konfigurace návrháře dráhy"</string>
+    <string name="override_default_course_designer_type_select_header">"Typ návrháře dráhy"</string>
+    <string name="settings_course_designer_by_name_course_names_header">"Názvy drah"</string>
+    <string name="preference_racing_procedure_startmode_flags_header">"Vlajky startovního režimu"</string>
+    <string name="preference_racing_procedure_classflag_header">"Třídová vlajka"</string>
+    <string name="preference_racing_procedure_hasxray_header">"Individuální odvolání"</string>
+    <string name="preference_racing_procedure_hasxray_description">"Aktivací této možnosti umožníte individuální odvolání."</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">"Zadávání výsledků"</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">"Aktivací této možnosti umožníte zadávání výsledků během závodu a po jeho dokončení."</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_description">"Aktivací této možnosti umožníte výběr průzkumníka (králíka)."</string>
+    <string name="preference_racing_procedure_gatestart_haspathfinder_header">"Průzkumník (králík)"</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">"Aktivací této možnosti umožníte výběr doby, po kterou je vlajka G na půl žerdi."</string>
+    <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">"Doba, po kterou je vlajka G na půl žerdi"</string>
+    <string name="device_identifier">"Název zařízení"</string>
+    <string name="synchronize_connection_settings_header">"Synchronizovat se serverem"</string>
+    <string name="synchronize_connection_settings_description">"Při vytváření konfigurace na serveru můžete kliknutím zde synchronizovat svou aplikaci a nastavení spojení pomocí QR kódu."</string>
+    <string name="update_app_header">"Vynutit aktualizaci"</string>
+    <string name="update_app_description">"Vynucení aktualizace ze serveru. Vhodnější je použít možnost synchronizace."</string>
+    <string name="preference_wakelock_header">"Nechat zapnutou obrazovku"</string>
+    <string name="preference_wakelock_summary">"Vynucení trvalého zapnutí obrazovky. Upozornění: vyšší spotřeba energie z baterie."</string>
+    <string name="preference_offline_header">"Režim offline"</string>
+    <string name="preference_offline_summary">"Vypne se spojení se serverem a systém bude pracovat se statickými daty."</string>
+    <string name="preference_allow_demo_header">"Povolit přihlášení jako divák"</string>
+    <string name="preference_allow_demo_summary">"Je-li nastaveno, můžete se přihlásit jako divák. Zpět na server se nebudou odesílat žádné změny závodu."</string>
+    <string name="options_menu_info">"Informace pro experty"</string>
+    <string name="options_menu_refresh">"Aktualizovat data"</string>
+    <string name="auto_update_install">"Instalovat"</string>
+    <string name="auto_update_install_anyway">"Přesto instalovat"</string>
+    <string name="gate_launch">"Start z brány"</string>
+    <string name="golf_down">"Stáhnout vlajku G"</string>
+    <string name="preference_regatta_specific_title">"Konfigurace regaty – %1$s"</string>
+    <string name="preference_regatta_specific_save_title">"Uložit %1$s konfiguraci"</string>
+    <string name="preference_regatta_specific_save_description">"Tímto se uloží zobrazená konfigurace pro všechny závody %1$s."</string>
+    <string name="auto_update">"Automatická aktualizace"</string>
+    <string name="auto_update_checking_version">"Hledání informací o verzi na serveru..."</string>
+    <string name="auto_update_downloading_version">"Pokus o stažení informací o automatické aktualizaci z %1$s"</string>
+    <string name="auto_update_version_file_url_invalid">"Odkaz na soubor verze nebyl platný."</string>
+    <string name="auto_update_click_install">"Kliknutím na „Instalovat“ aktualizujete na verzi %1$d."</string>
+    <string name="auto_update_force_install">"Verzi nabízenou serverem (verze %1$d) již máte nainstalovanou."</string>
+    <string name="auto_update_with_store">"Vaše stávající verze je instalovaná z %1$s. Verzi staženou ze serveru lze nainstalovat až po odinstalování stávající aplikace."</string>
+    <string name="auto_update_already_up_to_date">"Váš systém je již aktuální!"</string>
+    <string name="auto_update_downloading_apk">"Stahování APK ze serveru..."</string>
+    <string name="auto_update_apk_link_invalid">"Odkaz na stažení nebyl platný."</string>
+    <string name="auto_update_apk_file_error">"Nebylo možné vytvořit soubor ke stažení."</string>
+    <string name="auto_update_error">"Chyba při pokusu o automatickou aktualizaci."</string>
+    <string name="auto_update_completed">"Automatická aktualizace dokončena"</string>
+    <string name="auto_update_completed_text">"Automatická aktualizaci je dokončena. Nyní byste měli znovu synchronizovat nastavení spojení se serverem."</string>
+    <string name="auto_update_completed_take_me_there">"Přejít tam"</string>
+    <string name="wind_gps_is_disabled">"Zdá se, že máte deaktivovanou GPS. Chcete ji aktivovat?"</string>
+    <string name="rrs26_start_mode_changed_to">"Vlajka startovního režimu se změnila na %1$s"</string>
+    <string name="preference_there_are_no_regattas">"Nejsou žádné načtené regaty."</string>
+    <string name="configure_regatta">"Konfigurovat regatu %1$s"</string>
+    <string name="race_start_in_5_minutes">"5 minut"</string>
+    <string name="race_start_in_4_minutes">"4 minuty"</string>
+    <string name="race_start_in_2_minutes">"2 minuty"</string>
+    <string name="race_start_in_1_minute">"1 minuta"</string>
+    <string name="race_set_time">"Nastavit čas"</string>
+    <string name="race_reset_course">"Resetovat dráhu"</string>
+    <string name="no_course_active">"Žádná aktivní dráha"</string>
+    <string name="toggle_group_race_mode">"Skupinová rozjížďka?"</string>
+    <string name="toggle_group_race_mode_off">"Žádná skupinová rozjížďka"</string>
+    <string name="toggle_group_race_mode_on">"Skupinová rozjížďka"</string>
+    <string name="the_selected_time_is_before_the_race_start_">"Zvolený čas je před startem rozjížďky."</string>
+
+    <string name="confirm_start_time">"Potvrdit čas startu"</string>
+    <string name="confirm_start_mode">"Potvrdit startovní režim"</string>
+
+    <string name="start_procedure_change">"Změnit startovní proceduru"</string>
+    <string name="start_procedure_confirm">"Potvrdit startovní proceduru"</string>
+    <string name="start_procedure_line_start">"Start z čáry"</string>
+    <string name="start_procedure_gate_start">"Start z brány"</string>
+    <string name="start_procedure_ess">"ESS"</string>
+    <string name="start_procedure_simplified">"Zjednodušené"</string>
+    <string name="nav_drawer_open">"Otevřít navigační panel"</string>
+    <string name="nav_drawer_close">"Zavřít navigační panel"</string>
+
+    <string name="available_races">"Dostupné závody"</string>
+
+    <string name="race_started">"Startovalo %s"</string>
+    <string name="race_finished">"Dokončilo %s"</string>
+    <string name="race_start">"Start %s"</string>
+    <string name="race_unscheduled">"Nenaplánováno"</string>
+
+    <string name="race_show_all">"zobrazit vše"</string>
+    <string name="race_show_less">"zobrazit méně"</string>
+
+    <string name="races_current">"AKTUÁLNÍ ZÁVODY"</string>
+    <string name="races_all">"VŠECHNY ZÁVODY"</string>
+
+    <string name="welcome">"VÍTEJTE"</string>
+    <string name="change">"Změnit"</string>
+
+    <string name="start_procedure">"Procedura"</string>
+    <string name="start_procedure_more">"Více"</string>
+    <string name="start_mode">"Režim"</string>
+    <string name="course">"Dráha"</string>
+    <string name="wind">"Vítr"</string>
+    <string name="loading_events_succeded">"Události načteny."</string>
+
+    <string name="login_text">"Vítejte\nv SAP Sailing Race Manager"</string>
+    <string name="login_sub_text">"Vyberte regatu"</string>
+    <string name="login_onboarding_text">"Zavedení"</string>
+    <string name="sign_up">"Zaregistrovat se"</string>
+    <string name="flags_abandon">"Přerušit"</string>
+    <string name="flags_recall">"Odvolat"</string>
+    <string name="flags_course">"Dráha"</string>
+    <string name="flags_more">"Dokončit"</string>
+    <string name="flags_postpone">"Odložit"</string>
+    <string name="race_select">"Vyberte závod"</string>
+
+    <string name="gate_start_pathfinder">"Průzkumník"</string>
+    <string name="gate_start_nationality">"Národnost"</string>
+    <string name="gate_start_number">"Č."</string>
+    <string name="gate_start_set_pathfinder">"Nastavit průzkumníka (králíka)"</string>
+    <string name="gate_start_timing">"Časy"</string>
+    <string name="gate_start_set">"Nastavit čas brány"</string>
+
+    <string name="time_launch">"Start z brány\n(minuty)"</string>
+    <string name="time_golf">"Vlajka G\n(minuty)"</string>
+    <string name="time_total">"Celkem\n(minuty)"</string>
+
+    <string name="wind_from">"Ze směru"</string>
+    <string name="wind_speed">"Rychlost"</string>
+    <string name="wind_position">"Poloha"</string>
+    <string name="wind_set_data">"Nastavit údaje o větru"</string>
+    <string name="wind_set_data_multi">"Nastavit údaje o větru (multi)"</string>
+    <string name="wind_off">"Žádné anemometry"</string>
+    <string name="wind_on">"Anemometry aktivní"</string>
+    <string name="wind_set_position">"Nastavit polohu"</string>
+    <string name="wind_enter_position">"Nastavit mou polohu"</string>
+    <string name="wind_kn">"uzly"</string>
+    <string name="wind_address_hint">"Zadat adresu"</string>
+    <string name="wind_sensor">"v %1$s / z %2$.0f° / %3$.1f uzlů"</string>
+    <string name="wind_panel">"Z %1$.0f°\nrychlostí %2$.1f uzlů"</string>
+    <string name="wind_no_data">"Nejsou data"</string>
+
+    <string name="time_up">"Nahoru v #TIME#"</string>
+    <string name="time_down">"Dolů v #TIME#"</string>
+    <string name="time_start">"Start %s"</string>
+    <string name="time_finish">"Cíl N/A"</string>
+    <string name="time">"#TIME#"</string>
+    <string name="set_signal">"Nastavit signál"</string>
+    <string name="flag_ap_desc">"Odložit další rozjížďky"</string>
+    <string name="flag_ap_alpha_desc">"Odložit, tento den se více nezávodí"</string>
+    <string name="flag_ap_hotel_desc">"Odložit, další znamení na břehu"</string>
+    <string name="flag_ap_alpha">"AP a A"</string>
+    <string name="flag_ap_hotel">"AP a H"</string>
+    <string name="flag_xray">"Xray"</string>
+    <string name="flag_xray_desc">"Individuální odvolání"</string>
+    <string name="flag_first_subst">"První opakovač"</string>
+    <string name="flag_first_subst_desc">"Všeobecné odvolání"</string>
+    <string name="flag_blue">"Modrá"</string>
+    <string name="flag_blue_desc">"Zahájit dokončovací fázi"</string>
+    <string name="flag_november_desc">"Přerušit všechny odstartované rozjížďky"</string>
+    <string name="flag_november_alpha">"N a A"</string>
+    <string name="flag_november_hotel">"N a H"</string>
+    <string name="flag_november_alpha_desc">"Přerušit, tento den se více nezávodí"</string>
+    <string name="flag_november_hotel_desc">"Přerušit, další znamení na břehu"</string>
+    <string name="race_reset_confirm">"Reset závodu"</string>
+    <string name="race_reset_cancel">"Ne, děkuji"</string>
+    <string name="race_reset_message">"Opravdu chcete resetovat tento závod včetně všech již provedených nastavení a akcí? Tento krok nebude možné vrátit zpět."</string>
+    <string name="race_begin_finish_header">"Začátek dokončování"</string>
+    <string name="race_end_finish_header">"Konec dokončování\n(začátek dokončování: %s)"</string>
+    <string name="race_begin_finish_current">"Aktuální čas"</string>
+    <string name="race_begin_finish_custom">"Uživatelský čas"</string>
+    <string name="race_setup_confirm">"Potvrdit nastavení"</string>
+
+    <string name="race_summary_title">"Zpráva ze závodu"</string>
+    <string name="race_summary_start">"Start závodu"</string>
+    <string name="race_summary_finish_begin">"Začátek dokončování"</string>
+    <string name="race_summary_finish_end">"Konec dokončování"</string>
+    <string name="race_summary_finish_duration">"Doba trvání dokončování"</string>
+    <string name="race_summary_wind_direction">"Průměrná hodnota směru větru"</string>
+    <string name="race_summary_wind_direction_value">"z %.0f°"</string>
+    <string name="race_summary_wind_speed">"Průměrná rychlost větru"</string>
+    
+    <string name="race_summary_individual_recalls">"Individuální odvolání"</string>
+    
+    <string name="record_voice">"Zaznamenat hlas"</string>
+    <string name="finishing_started">"První v cíli v %1$s"</string>
+    <string name="finishing_started_since">"(%s)"</string>
+    <string name="finishing_done">"Dolů teď"</string>
+    <string name="finished_recording">"Záznam"</string>
+    <string name="finished_replay">"Přehrát hlas"</string>
+    <string name="finished_list">"Cílová listina"</string>
+    <string name="finished_photos">"Pořídit fotografie"</string>
+    <string name="finished_tracking">@string/competitor_list</string>
+    <string name="finished_edit">"Upravit listinu"</string>
+    <string name="finished_publishing">"Publikování"</string>
+    <string name="finished_submit">"Odeslat"</string>
+    <string name="finished_duration">"#TIME# min"</string>
+
+    <string name="finished_text_01">"Vyhodnoťte a odešlete tuto zprávu ze závodu."</string>
+    <string name="finished_text_02">"Vaše vyhodnocení bylo publikováno. Chcete-li provést změny, musíte je znovu odeslat."</string>
+
+    <string name="protest_time">"Protestní časový limit"</string>
+    <string name="protest_time_start">"Začátek protestního časového limitu"</string>
+    <string name="protest_time_end">"Konec protestního časového limitu"</string>
+    <string name="degrees">"Stupně"</string>
+
+    <string name="no_camera">"Nebyla nalezena žádná aplikace fotoaparátu"</string>
+    <string name="delete_file_title">"Odstranit soubor"</string>
+    <string name="delete_file">"Tímto odstraníte obrázek."</string>
+    <string name="start_time">"Čas startu"</string>
+    <string name="start_time_value">"V %1$s v %2$s"</string>
+
+    <!--Extracted locales -->
+    <string name="selected_course_area_lost">"Vybraná oblast dráhy se ztratila."</string>
+    <string name="no_fitting_race_group_found">"Nenalezena žádná odpovídající závodní skupina."</string>
+    <string name="loading_of_course_area_succeeded">"Načítání dat dráhy proběhlo úspěšně."</string>
+    <string name="scores">"Skóre"</string>
+    <string name="no_text">"Žádný text."</string>
+    <string name="error_picture_callback">"Chyba při zapisování souboru obrázku."</string>
+    <string name="competitor_load_error">"Závodníci: %s"</string>
+    <string name="error_announced_finish_time">"Uvedený čas dokončení je před časem prvního, kdo závod dokončil. Zkontrolujte čas."</string>
+    <string name="error_time_before_finish">"Zvolený čas je před startem rozjížďky."</string>
+    <string name="error_set_wind">"Nastavit informace o větru"</string>
+    <string name="use_previous_course_dialog_title">"Použít návrh předchozí dráhy"</string>
+    <string name="use_previous_course_dialog_message">"Použít dříve publikovaný návrh dráhy?"</string>
+    <string name="please_enter_valid_number">"Zadejte platné číslo."</string>
+    <string name="please_enter_valid_pathfinder">"Zadejte platného průzkumníka (králíka)."</string>
+    <string name="error_scanning_qr">"Chyba při skenování QR kódu (%d)"</string>
+    <string name="error_scanning_qr_malformed">"Nesprávná podoba URL"</string>
+    <string name="marks_w_placeholder">"Značky: %s"</string>
+    <string name="error_no_course_to_copy">"Není žádná dráha ke kopírování"</string>
+    <string name="error_missing_second_mark">"Vybrané pokyny pro obeplouvání vyžadují dvě bóje. Vyberte druhou bóji."</string>
+    <string name="error_missing_passing_instructions">"Pro trasový bod nejsou žádné pokyny pro obeplouvání. Pokyny pro obeplouvání vyberete dlouhým stisknutím myši na trasovém bodu."</string>
+    <string name="error_no_way_point">"V návrhu dráhy musí být alespoň jeden trasový bod."</string>
+    <string name="start_w_placeholder">"Start %s"</string>
+    <string name="events_waiting_to_be_sent">"Na odeslání momentálně čeká tento počet událostí: %1$d.\nPoslední úspěšné odeslání proběhlo v %2$s."</string>
+    <string name="no_event_to_be_sent">"Na odeslání momentálně nečeká žádná událost."</string>
+    <string name="never">"nikdy"</string>
+    <string name="theme_changed_title">"Změna motivu"</string>
+    <string name="theme_changed_message">"Změny motivu se projeví po restartu aplikaci."</string>
+    <string name="url_refresh_title">"Došlo ke změně URL serveru."</string>
+    <string name="app_refresh_message">"Odhlaste se z aktuální události, aby se mohla načíst data z nového serveru."</string>
+    <string name="until_xray_removed">"XRAY bude odstraněn v %s"</string>
+    <string name="send_photos">"Odeslat fotografie"</string>
+    <string name="error_wrong_degree_value_title">"Chyba"</string>
+    <string name="error_wrong_degree_value_message">"Zadejte hodnotu od 0 do 360."</string>
+
+    <string name="author_type_officer_vessel">"Rozhodčí na vodě"</string>
+    <string name="author_type_shore_control">"Rozhodčí na břehu"</string>
+    <string name="author_viewer">"Režim demo"</string>
+    <string name="author_type_superuser">"Superuser"</string>
+    <string name="change_proceed">"Pokračovat"</string>
+    <string name="change_cancel">"Zrušit"</string>
+    <string name="change_message">"Podle pravidel závodu nelze v této fázi závodu tato data měnit. Můžete ale opravit nesprávné vstupní údaje."</string>
+    <string name="change_title">"Upozornění"</string>
+    <string name="send_mail">"Odeslat e-mail..."</string>
+    <string name="data_reload_title">"Data byla změněna externě."</string>
+    <string name="data_reload_message">"Data je nutné znovu načíst. Při tom může dojít ke ztrátě některých dat."</string>
+    <string name="preference_allow_dependent_races_header">"Relativní čas startu (minuty)"</string>
+    <string name="preference_allow_dependent_races_description">"Aktivovat relativní čas startu mezi rozjížďkami"</string>
+    <string name="preference_dependent_races_offset_header">"Výchozí posun pro relativní čas startu (minuty)"</string>
+    <string name="preference_allow_edit_race_factor_header">"Změna koeficientu rozjížďky"</string>
+    <string name="preference_protest_time_header">"Délka protestního časového limitu (minuty)"</string>
+    <string name="preference_allow_edit_race_factor_description">"Správci závodu mohou měnit koeficienty jednotlivých rozjížděk"</string>
+    <string name="error_finished_time">"Uvedený čas dokončení je před časem prvního, kdo závod dokončil. Zkontrolujte čas."</string>
+    <string name="error_finishing_time">"Zvolený čas je před startem rozjížďky."</string>
+    <string name="error_time_in_future">"Uvedený čas je v budoucnu. Zkontrolujte zadání."</string>
+    <string name="error_wrong_race_state">"Stav závodu není správný (požadovaný: %1$s; aktuální: %2$s)."</string>
+    <string name="wind_map_button_show">"Větrná mapa"</string>
+    <string name="wind_map_button_hide">"Skrýt"</string>
+    <string name="wind_latitude">"Šířka:"</string>
+    <string name="wind_longitude">"Délka:"</string>
+    <string name="wind_accuracy">"Přesnost:"</string>
+    <string name="dependent_races_absolute">"Absolutní čas startu"</string>
+    <string name="dependent_races_relative">"Relativní čas startu"</string>
+    <string name="dependent_races_prompt">"Vyberte závod"</string>
+    <string name="minutes_after">"Minuty po"</string>
+    <string name="minutes_after_long">"%1$.0f min po %2$s"</string>
+    <string name="wind_accuracy_ago">"před"</string>
+    <string name="gate_time_schedule_long">"%1$d + %2$d = %3$d min"</string>
+    <string name="gate_time_schedule_short">"%d min"</string>
+    <string name="not_available">"n/a"</string>
+    
+    
+    
+    <string name="accuracy_timestamp">"(od %s)"</string>
+    <string name="prev_course">"Předchozí dráha"</string>
+    <string name="layout_course">"Uspořádání dráhy"</string>
+    <string name="wind_degree">"°"</string>
+    <string name="add_waypoint">"Stisknutím plus přidáte trasový bod"</string>
+    <string name="unpublished_course">"Nepublikovaný návrh dráhy"</string>
+    <string name="reset_state_1">"Nový"</string>
+    <string name="reset_state_2">"Reset"</string>
+    <string name="reset_message_1">"Chcete vyprázdnit seznam?"</string>
+    <string name="reset_message_2">"Chcete resetovat na poslední stav?"</string>
+    
+    <string name="onboarding_scan">"Skenovat QR kód"</string>
+    <string name="onboarding_input">"Manuální zadání"</string>
+    <string name="race_group">"Skupinový závod"</string>
+    <string name="wind_select_race">"Vyberte závod"</string>
+    <string name="added_to_result_list">"Do výsledkové listiny přidáno „%1$s“ na pozici %2$d."</string>
+    <string name="get_started">"Začínáme"</string>
+    <string name="position">"Poloha"</string>
+    <string name="server_deeplink_message">"Změna serveru na %1$s proběhla úspěšně."</string>
+    <string name="penalty">"Trest"</string>
+    <string name="score">"Skóre"</string>
+    <string name="finishing_time">"Čas zahájení dokončování"</string>
+    <string name="comment">"Komentář"</string>
+    <string name="get_started_url">"https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp"</string>
+    <string name="user_unauthorized">"Požadavek selhal. Uživatel nemá oprávnění."</string>
+    <string name="server_url">"Server"</string>
+    <string name="username">"Uživatelské jméno"</string>
+    <string name="password">"Heslo"</string>
+    <string name="wrong_credentials">"Uživatelské jméno nebo heslo je neplatné."</string>
+    <string name="unexpected_error">"Došlo k neočekávané chybě."</string>
+    <string name="sending_exception_title">"Upozornění"</string>
+    <string name="sending_exception_message">"Pravděpodobně nemáte oprávnění k odesílání dat na server. Chcete změnit své přihlašovací údaje?"</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Zap."</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Vyp."</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Magnetický"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Zeměpisný"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"Kurz"</string>
+    <string name="finishing_date">"Cílové datum první lodě"</string>
+    <string-array name="sort_by_values">
+        <item>"podle ID plachty"</item>
+        <item>"podle názvu/jména"</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">"Zobrazit neveřejné události"</string>
+    <string name="preference_non_public_events_summary">"Načte všechny události včetně těch neveřejných."</string>
+    <string name="race_factor">"Koeficient"</string>
+    <string name="options_menu_role">"Změnit regatu"</string>
+    <string name="reload_config">"Načíst znovu konfiguraci ze serveru"</string>
+    <string name="abort_title">"Přerušit rozjížďky"</string>
+    <string name="abort_hint">"Které probíhající rozjížďky chcete přerušit?"</string>
+    <string name="abort_dismiss">"Zamítnout"</string>
+    
+    <string name="set_column_factor">"Nastavit koeficient"</string>
+    <string name="set_factor_error">"Při nastavování koeficientu došlo k chybě: %s."</string>
+    <string name="sync_to_minute">"Synchronizovat minuty"</string>
+    <string name="non_public_changed_title">"Neveřejné události"</string>
+
+    <string name="competitor_list">"Výsledky"</string>
+    <string name="sort_by_boat">"podle čísla plachty"</string>
+    <string name="sort_by_short_name">"podle krátkého názvu"</string>
+    <string name="sort_by_name">"podle jména závodníka"</string>
+    <string name="sort_by_start">"podle polohy ke startovní čáře"</string>
+    <string name="sort_by_goal">"podle trasované polohy"</string>
+
+    <string name="apply_button">"Použít"</string>
+    <string name="publish_button_empty">"Publikovat"</string>
+    <string name="publish_button_other">"Publikovat (%d)"</string>
+    <string name="publish_clicked">"Výsledky byly publikovány."</string>
+    <string name="competitor_count">"%d"</string>
+
+    <string name="refresh_title">"Došlo ke změně dat."</string>
+    <string name="refresh_message">"Došlo ke změně dat následujících závodníků. Viz: \n\n%s"</string>
+    <string name="refresh_positive">@android:string/ok</string>
+    <string name="hello_call_error_title">"Nelze se připojit k SAP."</string>
+    <string name="hello_call_error_message">"Aplikaci se nepodařilo navázat spojení se SAP Sailing.\nZkontrolujte, zda máte stabilní mobilní připojení. Má se pokus opakovat?"</string>
+    <string name="hello_call_error_positive">"Opakovat"</string>
+    <string name="hello_call_error_negative">"Ukončit"</string>
+    <string name="hello_call_error_neutral">"Změnit server"</string>
+
+    <string name="competitor_merge_error_message">"U tohoto závodníka došlo ke změně dat z jiného zařízení, přičemž vy jste změnili stejná data. Ujistěte se, že tato data jsou nyní správná."</string>
+
+    <string name="finishing_revoke">"Odvolat"</string>
+    <string name="error_revoke_finished">"Čas skončení závodu nelze odvolat."</string>
+    <string name="error_revoke_finishing">"Čas zahájení dokončování nelze odvolat."</string>
+</resources>

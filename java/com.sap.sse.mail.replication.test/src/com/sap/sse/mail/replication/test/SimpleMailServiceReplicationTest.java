@@ -13,10 +13,8 @@ public class SimpleMailServiceReplicationTest extends AbstractMailServiceReplica
     public void testReplicationOfSendMail() throws InterruptedException,
             IllegalAccessException, MailException {
         master.sendMail("test@ing.me", "oh what a beatiful mail", "to be sent on this day");
-        
         replicaReplicator.waitUntilQueueIsEmpty();
         Thread.sleep(3000);
-
         assertThat("mail was not sent on replica",
                 AbstractMailServiceReplicationTest.numberOfMailsSent.get(replica), equalTo(null));
         assertThat("mail was sent on master",

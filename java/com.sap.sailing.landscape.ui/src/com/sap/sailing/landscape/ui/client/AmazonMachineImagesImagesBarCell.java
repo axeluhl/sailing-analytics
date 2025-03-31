@@ -1,0 +1,36 @@
+package com.sap.sailing.landscape.ui.client;
+
+import java.util.Arrays;
+
+import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.sap.sailing.landscape.ui.client.i18n.StringMessages;
+import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.ImagesBarCell;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+
+public class AmazonMachineImagesImagesBarCell extends ImagesBarCell {
+    static final String ACTION_REMOVE = DefaultActions.DELETE.name();
+    static final String ACTION_UPGRADE = "UPGRADE";
+
+    private final StringMessages stringMessages;
+
+    public AmazonMachineImagesImagesBarCell(StringMessages stringMessages) {
+        super();
+        this.stringMessages = stringMessages;
+    }
+
+    public AmazonMachineImagesImagesBarCell(SafeHtmlRenderer<String> renderer, StringMessages stringMessages) {
+        super();
+        this.stringMessages = stringMessages;
+    }
+
+    @Override
+    protected Iterable<ImageSpec> getImageSpecs() {
+        return Arrays.asList(
+                new ImageSpec(ACTION_REMOVE, stringMessages.remove(),
+                        IconResources.INSTANCE.removeIcon()),
+                new ImageSpec(ACTION_UPGRADE, stringMessages.upgrade(),
+                        IconResources.INSTANCE.refreshIcon())
+                );
+    }
+}

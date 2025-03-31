@@ -1,9 +1,12 @@
 package com.sap.sailing.polars.mining;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -11,24 +14,39 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sse.common.Speed;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.GroupKeyFactory;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.shared.GroupKey;
 
-public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void> {
-    
+/**
+ * Groups incoming fixes by boatclass and legtype into {@link AngleAndSpeedRegression} instances and
+ * provides access methods to regression data.
+ * 
+ * @author D054528 (Frederik Petersen)
+ *
+ */
+public class CubicRegressionPerCourseProcessor implements
+        Processor<GroupedDataEntry<GPSFixMovingWithPolarContext>, Void>, Serializable {
+
+    private static final long serialVersionUID = 3059764273262382648L;
+
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
-    
+
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
-    
+
+    /**
+     * FIXME Make sure replication and listeners interact correctly
+     */
+    private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
+
     @Override
     public boolean canProcessElements() {
-        // TODO Auto-generated method stub
         return true;
     }
 
@@ -46,9 +64,18 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
                 }
             }
             regression.addData(fix.getWind(), fix.getAbsoluteAngleToTheWind(), fix.getBoatSpeed());
+            Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
+            if (listenersForBoatClass != null) {
+                for (PolarsChangedListener listener : listenersForBoatClass) {
+                    listener.polarsChanged();
+                }
+            }
         }
     }
-    
+
+    /**
+     * Returns speed and twa for a given scenario, if data is available in the regression.
+     */
     public SpeedWithBearingWithConfidence<Void> getAverageSpeedAndCourseOverGround(BoatClass boatClass,
             Speed windSpeed, LegType legType) throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -60,7 +87,10 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         }
         return estimatedSpeedAndAngle;
     }
-    
+
+    /**
+     * Returns windspeed and windangle candidates for a given scenario, if enough data is available.
+     */
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,
             Speed speedOverGround, LegType legType, Tack tack) {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -76,7 +106,7 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         }
         return result;
     }
-    
+
     private GroupKey createGroupKey(final BoatClass boatClass, final LegType legType) {
         LegTypePolarClusterKey key = new LegTypePolarClusterKey() {
 
@@ -93,14 +123,22 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         GroupKey compoundKey;
         try {
             compoundKey = GroupKeyFactory.createNestingCompoundKeyFor(key, PolarDataDimensionCollectionFactory
-                    .getCubicRegressionPerCourseClusterKeyDimensions().iterator());
+                    .getCubicRegressionPerCourseClusterKeyDimensions());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
         return compoundKey;
     }
-    
+
+    /**
+     * Allows direct access to speed regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getSpeedRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -112,7 +150,15 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         }
         return polynomialFunction;
     }
-    
+
+    /**
+     * Allows direct access to angle regression functions for debugging purposes.
+     * 
+     * For actual usage of the data please use
+     * {@link #getAverageSpeedAndCourseOverGround(BoatClass, Speed, LegType)}
+     * and
+     * {@link #estimateTrueWindSpeedAndAngleCandidates(BoatClass, Speed, LegType, Tack)}.
+     */
     public PolynomialFunction getAngleRegressionFunction(BoatClass boatClass, LegType legType)
             throws NotEnoughDataHasBeenAddedException {
         GroupKey key = createGroupKey(boatClass, legType);
@@ -132,10 +178,13 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
+    public void setListeners(ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+        this.listeners = listeners;
+    }
 
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
-     // TODO Auto-generated method stub
+        // TODO Auto-generated method stub
         return null;
     }
 
@@ -145,12 +194,11 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         return null;
     }
 
-    
     @Override
     public void finish() throws InterruptedException {
         // Nothing to do here
     }
-    
+
     @Override
     public boolean isFinished() {
         return false;
@@ -160,7 +208,7 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
     public void abort() {
         // TODO Auto-generated method stub
     }
-    
+
     @Override
     public boolean isAborted() {
         // TODO Auto-generated method stub
@@ -173,4 +221,16 @@ public class CubicRegressionPerCourseProcessor implements Processor<GroupedDataE
         return null;
     }
 
+    public Map<GroupKey, AngleAndSpeedRegression> getRegressions() {
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
+    }
+    
+    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate) {
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
+    }
+    
 }

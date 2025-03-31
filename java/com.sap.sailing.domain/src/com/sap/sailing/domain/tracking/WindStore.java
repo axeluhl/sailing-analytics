@@ -24,4 +24,9 @@ public interface WindStore {
      */
     Map<? extends WindSource, ? extends WindTrack> loadWindTracks(String regattaName,
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind);
+    
+    /**
+     * Removes all data from this store. Use with due care.
+     */
+    void clear();
 }

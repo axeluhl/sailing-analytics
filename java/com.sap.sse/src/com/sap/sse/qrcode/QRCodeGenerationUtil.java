@@ -27,11 +27,17 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
  *
  */
 public class QRCodeGenerationUtil {
-    public static InputStream create(String text, int sizeInPixels) throws WriterException, IOException {
+    public static InputStream create(String text, int sizeInPixels) throws Exception {
          Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType,
          ErrorCorrectionLevel>();
          hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
          return create(text, sizeInPixels, hintMap);
+    }
+
+    public static InputStream create(String text, int sizeInPixels, String errorCorrectionLevel) throws Exception {
+        Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.valueOf(errorCorrectionLevel));
+        return create(text, sizeInPixels, hintMap);
     }
     
     public static InputStream create(String text, int sizeInPixels,

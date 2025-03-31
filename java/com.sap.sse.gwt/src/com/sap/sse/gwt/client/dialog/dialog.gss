@@ -1,0 +1,39 @@
+.infoText {
+    margin-bottom: 10px;
+}
+
+.buttonsPanel {
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+}
+
+.buttonsPanel {
+    padding-right: 5px;
+}
+
+.buttonsPanel button {
+    margin-bottom: 5px;
+}
+
+.buttonsPanel:empty {
+    display: none;
+    margin: 0;
+}
+
+.confirmationDialog {
+    background-color: white;
+}
+
+.confirmationDialogPanel {
+    display: inline-block;
+}
+
+.dialogButton {
+    max-width: 100%;
+    cursor: pointer;
+}
+
+.buttonsPanel>.dialogButton:not(:first-child) {
+    margin-left: 5px;
+}

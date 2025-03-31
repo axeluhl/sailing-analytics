@@ -1,0 +1,17 @@
+name: "Launch Metadata Creation Tool for REUSE"
+on:
+  workflow_dispatch: ~
+
+jobs:
+  create_metadata_proposal:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: "Metadata Creation Tool"
+    steps:
+      - uses: SAP/metadata-creation-tool-for-reuse@881317602f9e4df00d1c7073bf6f15cbade835c4 # main at 2025-01-29
+        with:
+          repository_url: "${{ github.server_url }}/${{ github.repository }}"
+          access_token: "${{ secrets.REUSE_ACCESS_TOKEN }}"
+          copyright_owner: "SAP SE or an SAP affiliate company"
+          upstream_contact: "Axel Uhl <axel.uhl@sap.com>"

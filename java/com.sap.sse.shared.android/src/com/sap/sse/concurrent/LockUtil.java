@@ -12,9 +12,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 
 /**
  * Supports lock management for {@link NamedReentrantReadWriteLock} which is a specialization of
@@ -86,7 +87,7 @@ public class LockUtil {
 
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
         acquireLockVirtuallyOrActually(lock, lock.writeLock(), ReadOrWrite.WRITE);
-        lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
+        lastTimeWriteLockWasObtained.put(lock, ApproximateTime.approximateNow());
     }
     
     private static void acquireLockVirtuallyOrActually(NamedReentrantReadWriteLock lock, final Lock readOrWriteLock, final ReadOrWrite readOrWrite) {
@@ -150,12 +151,12 @@ public class LockUtil {
                     + " to be unlocked but no time recorded for when it was last obtained.\n"
                     + "This is where the lock interaction happened:\n" + getCurrentStackTrace());
         } else {
-            TimePoint now = MillisecondsTimePoint.now();
-            final long heldWriteLockForMillis = now.asMillis() - timePointWriteLockWasObtained.asMillis();
-            if (heldWriteLockForMillis > 10000l) {
+            TimePoint now = ApproximateTime.approximateNow();
+            final Duration heldWriteLockForMillis = timePointWriteLockWasObtained.until(now);
+            if (heldWriteLockForMillis.compareTo(Duration.ONE_SECOND.times(10)) > 0) {
                 String stackTrace = getCurrentStackTrace();
-                logger.info("write lock " + lock.getName() + " was held for more than 10s (" + heldWriteLockForMillis
-                        + "ms). It got unlocked here: " + stackTrace);
+                logger.info("write lock " + lock.getName() + " was approximately held for more than 10s (" + heldWriteLockForMillis
+                        + "). It got unlocked here: " + stackTrace);
             }
         }
     }
@@ -416,5 +417,92 @@ public class LockUtil {
         message.append(formatStackTrace(stackTrace));
         message.append('\n');
     }
+
+    /**
+     * Convenience method to execute a {@link Runnable} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for read. Ensures, that unlock is done in a finally block.
+     */
+    public static void executeWithReadLock(NamedReentrantReadWriteLock lock, Runnable runnable) {
+        lockForRead(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
     
+    /**
+     * Convenience method to execute a {@link RunnableWithResult} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for read. Ensures, that unlock is done in a finally block.
+     */
+    public static <T> T executeWithReadLockAndResult(NamedReentrantReadWriteLock lock, RunnableWithResult<T> runnable) {
+        lockForRead(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
+
+    /**
+     * Convenience method to execute a {@link Runnable} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for write. Ensures, that unlock is done in a finally block.
+     */
+    public static void executeWithWriteLock(NamedReentrantReadWriteLock lock, Runnable runnable) {
+        lockForWrite(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    /**
+     * Convenience method to execute a {@link Runnable} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for write. Ensures, that unlock is done in a finally block.
+     */
+    public static <T> T executeWithWriteLockAndResult(NamedReentrantReadWriteLock lock, RunnableWithResult<T> runnable) {
+        lockForWrite(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithWriteLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
+        lockForWrite(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithWriteLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
+        lockForWrite(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
+    
+    public static <T, E extends Throwable> T executeWithReadLockAndResultExpectException(NamedReentrantReadWriteLock lock, RunnableWithResultAndException<T, E> runnable) throws E {
+        lockForRead(lock);
+        try {
+            return runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
+    
+    public static <E extends Throwable> void executeWithReadLockExpectException(NamedReentrantReadWriteLock lock, RunnableWithException<E> runnable) throws E {
+        lockForRead(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
 }

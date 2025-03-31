@@ -47,4 +47,6 @@ public interface SimulatorServiceAsync {
             AsyncCallback<SimulatorResultsDTO> callback);
 
     void getCompetitorsNames(int selectedRaceIndex, AsyncCallback<List<String>> asyncCallback);
+    
+    void getGoogleMapsLoaderAuthenticationParams(AsyncCallback<String> asyncCallback);
 }

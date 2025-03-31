@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Tipo di rotta"</string>
+    <string name="marks">"Segnali"</string>
+    <string name="set_position">"Imposta posizione"</string>
+    <string name="set_position_disabled_gps">"Abilita GPS\nper impostare Posizione"</string>
+    <string name="set_position_no_gps_yet">"In attesa di connessione GPS"</string>
+    <string name="reset_position">"Resetta posizione"</string>
+    <string name="getting_marks">"Acquisizione segnali gara..."</string>
+    <string name="set">"impostata"</string>
+    <string name="unknown">"n/a"</string>
+    <string name="not_set">"non impostata"</string>
+    <string name="mark_list_accuracy">"(Accuratezza ca. %1$sm)"</string>
+    <string name="accuracy_detail">"della posizione GPS"</string>
+    <string name="distance_detail">"dalla vecchia boa"</string>
+    
+    
+    <string name="accuracy">"Accuratezza GPS"</string>
+    <string name="distance">"Distanza dalla vecchia boa"</string>
+    <string name="position_set">"La posizione è stata impostata"</string>
+    <string name="no_information">"Nessuna informazione"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Posizionare il dispositivo in prossimità del segnale e premere \"imposta posizione\" per impostare la posizione del segnale. Utilizzare l\'indicatore di accuratezza per decidere se la posizione mostrata è sufficientemente buona. Attivare il GPS o attendere la disponibilità del GPS."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Parametrizzazione"</string>
+
+    <string name="server">"Polling"</string>
+    <string name="server_sync_settings">"Intervallo sondaggio (secondi)"</string>
+
+    <string name="options_menu_checkout">"Checkout"</string>
+    <string name="checkout_warning_message">"CONFERMARE il logout? Sarà necessario rieseguire la connessione con il codice QR fornito per accedere ai segnali."</string>
+
+    <string name="no_marks_message">"Nessun segnale"</string>
+
+</resources>

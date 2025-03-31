@@ -1,5 +1,12 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.Collections;
+import java.util.Map;
+
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogRegisteredCompetitorsAndBoatsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogUsesOwnCompetitorsAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -12,13 +19,6 @@ import com.sap.sse.common.Util;
 public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     private static final long serialVersionUID = -3590156714385187908L;
     private final RaceColumnListeners raceColumnListeners;
-
-    /**
-     * The factor by which a medal race score is multiplied by default in the overall point scheme.
-     * 
-     * @see #getFactor()
-     */
-    private static final double DEFAULT_MEDAL_RACE_FACTOR = 2.0;
 
     /**
      * If <code>null</code>, the {@link #getFactor() factor} defaults to 1 for non-medal and {@link #DEFAULT_MEDAL_RACE_FACTOR} for
@@ -59,11 +59,6 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
         return result;
     }
 
-    @Override
-    public double getFactor() {
-        return explicitFactor == null ? (isMedalRace() ? DEFAULT_MEDAL_RACE_FACTOR : 1.) : explicitFactor;
-    }
-    
     @Override
     public void setFactor(Double factor) {
         Double oldExplicitFactor = getExplicitFactor();
@@ -111,8 +106,35 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     }
 
     @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return false;
+    }
+
+    @Override
     public boolean hasSplitFleets() {
         return Util.size(getFleets()) > 1;
+    }
+    
+    @Override
+    public Map<Competitor, Boat> getCompetitorsRegisteredInRacelog(final Fleet fleet) {
+        RaceLog raceLog = getRaceLog(fleet);
+        if (raceLog == null) {
+            return Collections.emptyMap();
+        } else {
+            RaceLogRegisteredCompetitorsAndBoatsAnalyzer analyzer = new RaceLogRegisteredCompetitorsAndBoatsAnalyzer(raceLog);
+            return analyzer.analyze();
+        }
+    }
+    
+    @Override
+    public boolean isCompetitorRegistrationInRacelogEnabled(final Fleet fleet) {
+        RaceLog raceLog = getRaceLog(fleet);
+        if (raceLog == null) {
+            return false;
+        } else {
+            RaceLogUsesOwnCompetitorsAnalyzer analyzer = new RaceLogUsesOwnCompetitorsAnalyzer(raceLog);
+            return analyzer.analyze();
+        }
     }
 
 }

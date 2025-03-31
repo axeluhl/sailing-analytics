@@ -1,13 +1,14 @@
 package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.AbstractSpeedImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeedImpl implements SpeedWithBearing {
@@ -93,5 +94,10 @@ public abstract class AbstractSpeedWithAbstractBearingImpl extends AbstractSpeed
         double metersPerSecond = Math.sqrt(x*x+y*y);
         double directionRad = (2*Math.PI+Math.atan2(y, x))%(2*Math.PI);
         return new MeterPerSecondSpeedWithDegreeBearingImpl(metersPerSecond, new RadianBearingImpl(directionRad));
+    }
+    
+    @Override
+    public SpeedWithBearing scale(double d) {
+        return SpeedWithBearing.super.scale(d);
     }
 }

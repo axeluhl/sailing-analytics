@@ -17,7 +17,6 @@ public abstract class AbstractServerWithSingleServiceReplicationTest<ReplicableI
     protected ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator;
     protected ReplicationMasterDescriptor  masterDescriptor;
     
-    
     public AbstractServerWithSingleServiceReplicationTest(AbstractServerReplicationTestSetUp<ReplicableInterface, ReplicableImpl> testSetUp) {
         this.testSetUp = testSetUp;
     }
@@ -25,6 +24,10 @@ public abstract class AbstractServerWithSingleServiceReplicationTest<ReplicableI
     @Before
     public void setUp() throws Exception {
         testSetUp.setUp();
+        setUpDescriptorsFromTestSetup();
+    }
+
+    private void setUpDescriptorsFromTestSetup() {
         master = testSetUp.getMaster();
         replica = testSetUp.getReplica();
         replicaReplicator = testSetUp.getReplicaReplicator();
@@ -33,7 +36,10 @@ public abstract class AbstractServerWithSingleServiceReplicationTest<ReplicableI
     
     protected Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> basicSetUp(boolean dropDB,
             ReplicableImpl master, ReplicableImpl replica) throws Exception {
-        return testSetUp.basicSetUp(dropDB, master, replica);
+        final Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = testSetUp
+                .basicSetUp(dropDB, master, replica);
+        setUpDescriptorsFromTestSetup();
+        return result;
     }
     
     @After

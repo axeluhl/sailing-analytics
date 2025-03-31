@@ -5,12 +5,13 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceLogProtestStartTimeEventSerializer extends BaseRaceLogEventSerializer {
     
     public static final String VALUE_CLASS = RaceLogProtestStartTimeEvent.class.getSimpleName();
     public static final String FIELD_PROTEST_START_TIME = "protestStartTime";
+    public static final String FIELD_PROTEST_END_TIME = "protestEndTime";
 
     public RaceLogProtestStartTimeEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -25,7 +26,8 @@ public class RaceLogProtestStartTimeEventSerializer extends BaseRaceLogEventSeri
     public JSONObject serialize(RaceLogEvent object) {
         RaceLogProtestStartTimeEvent event = (RaceLogProtestStartTimeEvent) object;
         JSONObject result = super.serialize(event);
-        result.put(FIELD_PROTEST_START_TIME, event.getProtestStartTime().asMillis());
+        result.put(FIELD_PROTEST_START_TIME, event.getProtestTime().from().asMillis());
+        result.put(FIELD_PROTEST_END_TIME, event.getProtestTime().to().asMillis());
         return result;
     }
 

@@ -17,6 +17,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.google.gwt.maps.client.events.MapHandlerRegistration;
 import com.google.gwt.maps.client.events.click.ClickEventFormatter;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.dblclick.DblClickEventFormatter;
@@ -40,9 +41,9 @@ import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnAddHandl
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnRemoveHandler;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * The abstract base class for all canvas overlays.
@@ -75,7 +76,7 @@ public abstract class CanvasOverlayV3 {
     /**
      * the z-Index of the canvas
      */
-    protected int zIndex;
+    protected final int zIndex;
 
     protected MapCanvasProjection mapProjection;
     
@@ -87,20 +88,27 @@ public abstract class CanvasOverlayV3 {
      * with the time set on the canvas element style's <code>transition</code> CSS property.
      */
     private long transitionTimeInMilliseconds;
-
-    private final int minZoomLevel = 1;
-    private final int maxZoomLevel = 21;
     
+    /**
+     * Remembers the old drawing angle as passed to {@link #setCanvasRotation()} to minimize rotation angle upon
+     * the next update. The rotation property will always be animated according to the magnitude of the values. A
+     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
+     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
+     * goes through 0.<p>
+     */
+    private Double drawingAngle;
+
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
+        this.zIndex = zIndex;
         this.mapProjection = null;
         this.coordinateSystem = coordinateSystem;
         canvas = Canvas.createIfSupported();
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
         canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
-        if(canvasId != null) {
+        if (canvasId != null) {
             canvas.getElement().setId(canvasId);
         }
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());
@@ -114,18 +122,6 @@ public abstract class CanvasOverlayV3 {
         return canvas;
     }
 
-    /** 
-     * This method can be used to calculate a value in a min-max range according to the zoom level.
-     * Sample 1: minZoom = 1, maxZoom = 21, currentZoom = 21 will return maxValue
-     * Sample 2: minZoom = 1, maxZoom = 21, currentZoom = 1 will return minValue
-     * Sample 3: minZoom = 1, maxZoom = 21, currentZoom = 11, minValue = 1, maxValue = 2 will return 1.5
-     */
-    public double fitValueToMapZoom(double minValue, double maxValue) {
-        double dZoom = maxZoomLevel - minZoomLevel;
-        double zoomInPercentage = (map.getZoom() - minZoomLevel) / dZoom; 
-        return  minValue + (maxValue - minValue) * zoomInPercentage; 
-    }
-    
     public boolean isVisible() {
         return getCanvas() != null && getCanvas().isVisible();
     }
@@ -162,7 +158,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addClickHandler(ClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ClickEvent.getType(), 
                 handler, new ClickEventFormatter(), true);
     }
 
@@ -172,7 +168,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addDblClickHandler(DblClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), DoubleClickEvent.getType(), 
                 handler, new DblClickEventFormatter(), true);
     }
 
@@ -182,7 +178,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseDownHandler(MouseDownMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseDownEvent.getType(), 
                 handler, new MouseDownEventFormatter(), true);
     }
 
@@ -192,7 +188,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseMoveHandler(MouseMoveMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseMoveEvent.getType(), 
                 handler, new MouseMoveEventFormatter(), true);
     }
 
@@ -202,7 +198,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOutMoveHandler(MouseOutMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOutEvent.getType(), 
                 handler, new MouseOutEventFormatter(), true);
     }
 
@@ -212,7 +208,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseOverHandler(MouseOverMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseOverEvent.getType(), 
                 handler, new MouseOverEventFormatter(), true);
     }
 
@@ -222,7 +218,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addMouseUpHandler(MouseUpMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), MouseUpEvent.getType(), 
                 handler, new MouseUpEventFormatter(), true);
     }
 
@@ -232,7 +228,7 @@ public abstract class CanvasOverlayV3 {
      * @param handler
      */
     public final HandlerRegistration addRightClickHandler(RightClickMapHandler handler) {
-        return DomMapHandlerRegistration.addDomHandler(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
+        return MapHandlerRegistration.addEventListener(getCanvas().getCanvasElement(), ContextMenuEvent.getType(), 
                 handler, new RightClickEventFormatter(), true);
     }
     
@@ -246,10 +242,15 @@ public abstract class CanvasOverlayV3 {
 
     protected abstract void draw();
 
+    protected void onAttach() {
+    }
+
     protected OverlayViewOnAddHandler getOnAddHandler() {
         OverlayViewOnAddHandler result = new OverlayViewOnAddHandler() {
             @Override
             public void onAdd(OverlayViewMethods methods) {
+                methods.getPanes().getMapPane().appendChild(canvas.getElement());
+                CanvasOverlayV3.this.onAttach();
                 methods.getPanes().getOverlayMouseTarget().appendChild(canvas.getElement());
             }
         };
@@ -357,42 +358,70 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setLeft(x, Unit.PX);
         canvas.getElement().getStyle().setTop(y, Unit.PX);
     }
+
+    /**
+     * Updates {@link #drawingAngle} so that the CSS transition from the old {@link #drawingAngle} to
+     * <code>newBoatDrawingAngle</code> is minimal.
+     */
+    protected void updateDrawingAngleAndSetCanvasRotation(double newBoatDrawingAngle) {
+        if (drawingAngle == null) {
+            drawingAngle = newBoatDrawingAngle;
+        } else {
+            drawingAngle = getNewRotationWithMinimalDiff(newBoatDrawingAngle);
+        }
+        setCanvasRotation();
+    }
     
-    protected void setCanvasRotation(double rotationInDegrees) {
+    private void setCanvasRotation() {
         setProperty(canvas.getElement().getStyle(), "transformOrigin", "50% 50%");
-        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate("+Math.round(rotationInDegrees)+"deg)");
+        setProperty(canvas.getElement().getStyle(), "transform", "translateZ(0) rotate(" + drawingAngle + "deg)");
     }
 
-    protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, double lengthInMeter) {
-        Position translateRhumbX = centerPosition.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(lengthInMeter));
-        Position translateRhumbY = centerPosition.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(lengthInMeter));
+    protected double getNewRotationWithMinimalDiff(double desiredAngle) {
+        double desiredMinusCurrent;
+        double result = desiredAngle;
+        while (Math.abs(desiredMinusCurrent = result - drawingAngle) > 180) {
+            result -= Math.signum(desiredMinusCurrent)*360;
+        }
+        return drawingAngle+desiredMinusCurrent;
+    }
+
+    protected double calculateRadiusOfBoundingBoxInPixels(MapCanvasProjection projection, Position centerPosition, Distance length) {
+        Position translateRhumbX = centerPosition.translateRhumb(new DegreeBearingImpl(90), length);
+        Position translateRhumbY = centerPosition.translateRhumb(new DegreeBearingImpl(0), length);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(centerPosition));
-        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-        double diffX = Math.abs(pointX.getX() - pointCenter.getX());
-        double diffY = Math.abs(pointY.getY() - pointCenter.getY());
+        Point pointX = projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY = projection.fromLatLngToDivPixel(posWithDistanceY);
+        double diffX = getPointDistance(pointX, pointCenter);
+        double diffY = getPointDistance(pointY, pointCenter);
         return Math.min(diffX, diffY);  
     }
+    
+    /**
+     * Computes the Euklidian distance between the two points in their coordinate system
+     */
+    private double getPointDistance(Point a, Point b) {
+        return Math.sqrt((b.getX()-a.getX())*(b.getX()-a.getX()) + (b.getY()-a.getY())*(b.getY()-a.getY()));
+    }
 
-    protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, double distanceXInMeter) {
-        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
+    protected double calculateDistanceAlongX(MapCanvasProjection projection, Position pos, Distance distanceX) {
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), distanceX);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         Point point = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
         Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
         return Math.abs(pointX.getX() - point.getX());
     }
     
-    protected Size calculateBoundingBox(MapCanvasProjection projection, Position pos, double distanceXInMeter, double distanceYInMeter) {
-        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), new MeterDistance(distanceXInMeter));
-        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), new MeterDistance(distanceYInMeter));
+    protected Size calculateBoundingBox(MapCanvasProjection projection, Position pos, Distance distanceX, Distance distanceY) {
+        Position translateRhumbX = pos.translateRhumb(new DegreeBearingImpl(90), distanceX);
+        Position translateRhumbY = pos.translateRhumb(new DegreeBearingImpl(0), distanceY);
         LatLng posWithDistanceX = coordinateSystem.toLatLng(translateRhumbX);
         LatLng posWithDistanceY = coordinateSystem.toLatLng(translateRhumbY);
         Point pointCenter = projection.fromLatLngToDivPixel(coordinateSystem.toLatLng(pos));
-        Point pointX =  projection.fromLatLngToDivPixel(posWithDistanceX);
-        Point pointY =  projection.fromLatLngToDivPixel(posWithDistanceY);
-
+        Point pointX = projection.fromLatLngToDivPixel(posWithDistanceX);
+        Point pointY = projection.fromLatLngToDivPixel(posWithDistanceY);
         return Size.newInstance(Math.abs(pointX.getX() - pointCenter.getX()), Math.abs(pointY.getY() - pointCenter.getY()));
     }
     
@@ -407,5 +436,17 @@ public abstract class CanvasOverlayV3 {
 
     public MapCanvasProjection getMapProjection() {
         return mapProjection;
+    }
+
+    protected void updateTransition(long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionAndRotationTransition();
+        } else {
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
+        }
+    }
+
+    public int getZIndex() {
+        return zIndex;
     }
 }

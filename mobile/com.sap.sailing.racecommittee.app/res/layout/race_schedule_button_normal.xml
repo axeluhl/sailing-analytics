@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button
+    style="?attr/button"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/default_button_width"
+    android:layout_height="@dimen/default_button_height"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:layout_margin="@dimen/unscheduled_confirm_button_margin"
+    android:text="@string/race_setup_confirm"
+    android:textSize="@dimen/textSize_18"
+    android:textStyle="normal"/>

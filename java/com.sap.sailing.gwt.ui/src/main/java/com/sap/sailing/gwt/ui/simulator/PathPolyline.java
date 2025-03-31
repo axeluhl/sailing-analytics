@@ -18,11 +18,12 @@ import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewMethods;
 import com.google.gwt.maps.client.overlays.overlayhandlers.OverlayViewOnDrawHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.RequestTotalTimeDTO;
 import com.sap.sailing.gwt.ui.shared.ResponseTotalTimeDTO;
@@ -31,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDPoint;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDSegment;
 import com.sap.sailing.gwt.ui.simulator.racemap.TwoDVector;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
@@ -1098,20 +1100,16 @@ public class PathPolyline {
 
     private void getTotalTime() {
         List<Position> turnPointsAsPositionDTO = new ArrayList<>();
-
         for (LatLng point : this.turnPoints) {
             turnPointsAsPositionDTO.add(toPositionDTO(point));
         }
-
         RequestTotalTimeDTO requestData = new RequestTotalTimeDTO(new SimulatorUISelectionDTO(this.selectedBoatClassIndex, this.selectedRaceIndex,
                 this.selectedCompetitorIndex, this.selectedLegIndex), STEP_DURATION_MILLISECONDS, this.allPoints, turnPointsAsPositionDTO,
                 USE_REAL_AVERAGE_WIND);
-
         this.simulatorService.getTotalTime(requestData, new AsyncCallback<ResponseTotalTimeDTO>() {
-
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(StringMessages.INSTANCE.errorLoadingTotalTime(error.getMessage()));
             }
 
             @Override
@@ -1121,12 +1119,10 @@ public class PathPolyline {
                     errorReporter.reportError(notificationMessage, true);
                     warningAlreadyShown = true;
                 }
-
                 if (getTotalTimeFactor) {
                     totalTimeFactor = receiveData.factorSim2GPS;
                 }
                 long totalTime = Math.round(receiveData.totalTimeSeconds / totalTimeFactor);
-
                 simulatorMap.addLegendOverlayForPathPolyline(totalTime * 1000);
                 simulatorMap.redrawLegendCanvasOverlay();
             }
@@ -1140,13 +1136,11 @@ public class PathPolyline {
         this.selectedBoatClassIndex = boatClassIndex;
     }
 
-    private static final double FACTOR_KN2MPS = 0.514444;
-
     /**
      * Converts knots to meters per second
      */
     public static double knotsToMetersPerSecond(double knots) {
-        return knots * FACTOR_KN2MPS;
+        return knots * Mile.METERS_PER_SECOND_PER_KNOT;
     }
 
     private class Pair {

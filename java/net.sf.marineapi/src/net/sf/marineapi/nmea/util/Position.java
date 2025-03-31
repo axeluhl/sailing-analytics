@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -20,272 +20,278 @@
  */
 package net.sf.marineapi.nmea.util;
 
+import java.text.DecimalFormat;
+
 /**
- * Represents a geographic position. The default datum is WGS84, unless some
- * other datum is explicitly specified.
+ * Represents a geographic position. Default datum is WGS84 as generally in NMEA
+ * 0183. Notice that datum is only informative and it does not affect
+ * calculations or handling of other values.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  */
 public class Position {
 
-    // latitude degrees
-    private double latitude;
-    // longitude degrees
-    private double longitude;
-    // hemisphere of latitude
-    private CompassPoint lathem;
-    // hemisphere of longitude
-    private CompassPoint lonhem;
-    // altitude
-    private double altitude = -0.0;
-    // datum/coordinate system
-    private Datum datum = Datum.WGS84;
+	// latitude degrees
+	private double latitude;
+	// longitude degrees
+	private double longitude;
+	// altitude
+	private double altitude = 0.0;
+	// datum/coordinate system
+	private Datum datum = Datum.WGS84;
 
-    /**
-     * Creates a new instance of Position. Notice that altitude defaults to 0.0,
-     * unless set with {@link #setAltitude(double)} method.
-     * 
-     * @param lat Latitude degrees
-     * @param lath Hemisphere of latitude
-     * @param lon Longitude degrees
-     * @param lonh Hemisphere of longitude
-     */
-    public Position(double lat, CompassPoint lath, double lon, CompassPoint lonh) {
-        setLatitude(lat);
-        setLongitude(lon);
-        setLatHemisphere(lath);
-        setLonHemisphere(lonh);
-    }
+	/**
+	 * Creates a new instance of Position. Notice that altitude defaults to -0.0
+	 * and may be set later.
+	 * 
+	 * @param lat Latitude degrees
+	 * @param lon Longitude degrees
+	 * @see #setAltitude(double)
+	 */
+	public Position(double lat, double lon) {
+		setLatitude(lat);
+		setLongitude(lon);
+	}
 
-    /**
-     * Creates new instance of Position. Notice that altitude defaults to 0.0,
-     * unless set with {@link #setAltitude(double)} method.
-     * 
-     * @param lat Latitude degrees
-     * @param lath Hemisphere of latitude
-     * @param lon Longitude degrees
-     * @param lonh Hemisphere of longitude
-     * @param datum Datum
-     */
-    public Position(double lat, CompassPoint lath, double lon,
-            CompassPoint lonh, Datum datum) {
-        this(lat, lath, lon, lonh);
-        this.datum = datum;
-    }
+	/**
+	 * Creates a new instance of position with latitude, longitude and altitude.
+	 * 
+	 * @param lat Latitude degrees
+	 * @param lon Longitude degrees
+	 * @param alt Altitude value, in meters.
+	 */
+	public Position(double lat, double lon, double alt) {
+		this(lat, lon);
+		this.altitude = alt;
+	}
 
-    /**
-     * Calculates the distance to specified Position.
-     * <p>
-     * Calculation is done by using the <a
-     * href="http://en.wikipedia.org/wiki/Haversine_formula">Haversine
-     * formula</a>. The mean <a
-     * href="http://en.wikipedia.org/wiki/Earth_radius#Mean_radius">earth
-     * radius</a> used in calculation is <code>6371.009</code> km.
-     * <p>
-     * The implementation is based on example found at <a href=
-     * "http://www.codecodex.com/wiki/Calculate_Distance_Between_Two_Points_on_a_Globe"
-     * >codecodex.com</a>.
-     * 
-     * @param pos Position to which the distance is calculated.
-     * @return Distance to po<code>pos</code> in meters.
-     */
-    public double distanceTo(Position pos) {
-        return haversine(getLatitude(), getLongitude(), pos.getLatitude(), pos
-                .getLongitude());
-    }
+	/**
+	 * Creates new instance of Position with latitude, longitude and datum.
+	 * Notice that altitude defaults to -0.0 and may be set later.
+	 * 
+	 * @param lat Latitude degrees
+	 * @param lon Longitude degrees
+	 * @param datum Datum to set
+	 * @see #setAltitude(double)
+	 */
+	public Position(double lat, double lon, Datum datum) {
+		this(lat, lon);
+		this.datum = datum;
+	}
 
-    /**
-     * Gets the position altitude from mean sea level.
-     * 
-     * @return Altitude value in meters
-     */
-    public double getAltitude() {
-        return altitude;
-    }
+	/**
+	 * Creates new instance of Position with latitude, longitude, altitude and
+	 * datum.
+	 * 
+	 * @param lat Latitude degrees
+	 * @param lon Longitude degrees
+	 * @param datum Datum to set
+	 */
+	public Position(double lat, double lon, double alt, Datum datum) {
+		this(lat, lon, alt);
+		this.datum = datum;
+	}
 
-    /**
-     * Gets the datum, i.e. the coordinate system used to define geographic
-     * position. Default is {@link Datum#WGS84}, unless datum is specified in
-     * the constructor. Notice also that datum cannot be set afterwards.
-     * 
-     * @return Datum enum
-     */
-    public Datum getDatum() {
-        return datum;
-    }
+	/**
+	 * Calculates distance to specified <code>Position</code>.
+	 * <p>
+	 * The Distance is calculated using the <a
+	 * href="http://en.wikipedia.org/wiki/Haversine_formula">Haversine
+	 * formula</a>. Implementation is based on example found at <a href=
+	 * "http://www.codecodex.com/wiki/Calculate_Distance_Between_Two_Points_on_a_Globe"
+	 * >codecodex.com</a>.
+	 * <p>
+	 * Earth radius <a
+	 * href="http://en.wikipedia.org/wiki/Earth_radius#Mean_radius">earth
+	 * radius</a> used in calculation is <code>6366.70702</code> km, based on
+	 * the assumption that 1 degrees is exactly 60 NM.
+	 * 
+	 * @param pos Position to which the distance is calculated.
+	 * @return Distance to po<code>pos</code> in meters.
+	 */
+	public double distanceTo(Position pos) {
+		return haversine(getLatitude(), getLongitude(), pos.getLatitude(),
+			pos.getLongitude());
+	}
 
-    /**
-     * Get the hemisphere of latitude (North/South).
-     * 
-     * @return Direction.NORTH or Direction.SOUTH
-     */
-    public CompassPoint getLatHemisphere() {
-        return this.lathem;
-    }
+	/**
+	 * Gets the position altitude from mean sea level. Notice that most
+	 * sentences with position don't provide this value. When missing, the
+	 * default value in <code>Position</code> is 0.0.
+	 * 
+	 * @return Altitude value in meters
+	 */
+	public double getAltitude() {
+		return altitude;
+	}
 
-    /**
-     * Get latitude value of Position
-     * 
-     * @return latitude degrees
-     */
-    public double getLatitude() {
-        return this.latitude;
-    }
+	/**
+	 * Gets the datum, i.e. the coordinate system used to define geographic
+	 * position. Default is {@link Datum#WGS84}, unless datum is specified in
+	 * the constructor. Notice also that datum cannot be set afterwards.
+	 * 
+	 * @return Datum enum
+	 */
+	public Datum getDatum() {
+		return datum;
+	}
 
-    /**
-     * Get longitude value of Position
-     * 
-     * @return longitude degrees
-     */
-    public double getLongitude() {
-        return this.longitude;
-    }
+	/**
+	 * Get latitude value of Position
+	 * 
+	 * @return latitude degrees
+	 */
+	public double getLatitude() {
+		return this.latitude;
+	}
 
-    /**
-     * Get the hemisphere of longitude (East/West).
-     * 
-     * @return CompassPoint.E or CompassPoint.W
-     */
-    public CompassPoint getLonHemisphere() {
-        return this.lonhem;
-    }
+	/**
+	 * Get the hemisphere of latitude, North or South.
+	 * 
+	 * @return CompassPoint.NORTH or CompassPoint.SOUTH
+	 */
+	public CompassPoint getLatitudeHemisphere() {
+		return isLatitudeNorth() ? CompassPoint.NORTH : CompassPoint.SOUTH;
+	}
 
-    /**
-     * Sets the altitude of position above mean sea level. Defaults to zero.
-     * 
-     * @param altitude Altitude value to set, in meters.
-     */
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
+	/**
+	 * Get longitude value of Position
+	 * 
+	 * @return longitude degrees
+	 */
+	public double getLongitude() {
+		return this.longitude;
+	}
 
-    /**
-     * Set the hemisphere of latitude (North/South).
-     * 
-     * @param lathem The hemisphere to set
-     * @throws IllegalArgumentException If specified hemisphere is other than
-     *             NORTH or SOUTH.
-     */
-    public void setLatHemisphere(CompassPoint lathem) {
-        if (CompassPoint.NORTH.equals(lathem)
-                || CompassPoint.SOUTH.equals(lathem)) {
-            this.lathem = lathem;
-        } else {
-            throw new IllegalArgumentException(
-                    "Valid hemisphere for latitude is N or S");
-        }
-    }
+	/**
+	 * Get the hemisphere of longitude, East or West.
+	 * 
+	 * @return CompassPoint.EAST or CompassPoint.WEST
+	 */
+	public CompassPoint getLongitudeHemisphere() {
+		return isLongitudeEast() ? CompassPoint.EAST : CompassPoint.WEST;
+	}
 
-    /**
-     * Set the latitude degrees of Position
-     * 
-     * @param latitude the latitude to set
-     * @throws IllegalArgumentException If specified latitude value is out of
-     *             range 0..90 degrees.
-     */
-    public void setLatitude(double latitude) {
-        if (latitude < 0 || latitude > 90) {
-            throw new IllegalArgumentException(
-                    "Latitude out of bounds 0..90 degrees");
-        }
-        this.latitude = latitude;
-    }
+	/**
+	 * Tells if the latitude is on northern hemisphere.
+	 * 
+	 * @return true if northern, otherwise false (south).
+	 */
+	public boolean isLatitudeNorth() {
+		return getLatitude() >= 0.0;
+	}
 
-    /**
-     * Set the longitude degrees of Position
-     * 
-     * @param longitude the longitude to set
-     * @throws IllegalArgumentException If specified longitude value is out of
-     *             range 0..180 degrees.
-     */
-    public void setLongitude(double longitude) {
-        if (longitude < 0 || longitude > 180) {
-            throw new IllegalArgumentException(
-                    "Longitude out of bounds 0..180 degrees");
-        }
-        this.longitude = longitude;
-    }
+	/**
+	 * Tells if the longitude is on eastern hemisphere.
+	 * 
+	 * @return true if eastern, otherwise false (west).
+	 */
+	public boolean isLongitudeEast() {
+		return getLongitude() >= 0.0;
+	}
 
-    /**
-     * Set the hemisphere of longitude (East/West).
-     * 
-     * @param lonhem The hemisphere to set
-     * @throws IllegalArgumentException If specified hemisphere is other than
-     *             EAST or WEST.
-     */
-    public void setLonHemisphere(CompassPoint lonhem) {
-        if (CompassPoint.EAST.equals(lonhem)
-                || CompassPoint.WEST.equals(lonhem)) {
-            this.lonhem = lonhem;
-        } else {
-            throw new IllegalArgumentException(
-                    "Valid hemisphere for longitude is E or W");
-        }
-    }
+	/**
+	 * Sets the altitude of position above or below mean sea level. Defaults to
+	 * zero (-0.0).
+	 * 
+	 * @param altitude Altitude value to set, in meters.
+	 */
+	public void setAltitude(double altitude) {
+		this.altitude = altitude;
+	}
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append(String.format("%02.04f", getLatitude()));
-        sb.append(" ");
-        sb.append(getLatHemisphere().toChar());
-        sb.append(", ");
-        sb.append(String.format("%03.04f", getLongitude()));
-        sb.append(" ");
-        sb.append(getLonHemisphere().toChar());
-        sb.append(", ");
-        sb.append(getAltitude());
-        sb.append(" m]");
-        return sb.toString();
-    }
+	/**
+	 * Set the latitude degrees of Position
+	 * 
+	 * @param latitude the latitude to set
+	 * @throws IllegalArgumentException If specified latitude value is out of
+	 *             range 0..90 degrees.
+	 */
+	public void setLatitude(double latitude) {
+		if (latitude < -90 || latitude > 90) {
+			throw new IllegalArgumentException(
+				"Latitude out of bounds -90..90 degrees");
+		}
+		this.latitude = latitude;
+	}
 
-    /**
-     * Convenience method for creating a waypoint based in the Position.
-     * 
-     * @param id Waypoint ID or name
-     * @return the created Waypoint
-     */
-    public Waypoint toWaypoint(String id) {
-        return new Waypoint(id, getLatitude(), getLatHemisphere(),
-                getLongitude(), getLonHemisphere());
-    }
+	/**
+	 * Set the longitude degrees of Position
+	 * 
+	 * @param longitude the longitude to set
+	 * @throws IllegalArgumentException If specified longitude value is out of
+	 *             range 0..180 degrees.
+	 */
+	public void setLongitude(double longitude) {
+		if (longitude < -180 || longitude > 180) {
+			throw new IllegalArgumentException(
+				"Longitude out of bounds -180..180 degrees");
+		}
+		this.longitude = longitude;
+	}
 
-    /**
-     * Haversine formulae, implementation based on example at <a href=
-     * "http://www.codecodex.com/wiki/Calculate_Distance_Between_Two_Points_on_a_Globe"
-     * >codecodex</a>.
-     * 
-     * @param lat1 Origin latitude
-     * @param lon1 Origin longitude
-     * @param lat2 Destination latitude
-     * @param lon2 Destination longitude
-     * @return Distance in meters
-     */
-    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		DecimalFormat df = new DecimalFormat("00.0000000");
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		sb.append(df.format(Math.abs(getLatitude())));
+		sb.append(" ");
+		sb.append(getLatitudeHemisphere().toChar());
+		sb.append(", ");
+		df.applyPattern("000.0000000");
+		sb.append(df.format(Math.abs(getLongitude())));
+		sb.append(" ");
+		sb.append(getLongitudeHemisphere().toChar());
+		sb.append(", ");
+		sb.append(getAltitude());
+		sb.append(" m]");
+		return sb.toString();
+	}
 
-        // Meridional Earth radius
-        // final double earthRadius = 6367.4491;
-        // a bit tweaked radius seems to produce more accurate results..?
-        final double earthRadius = 6366.70702;
+	/**
+	 * Convenience method for creating a waypoint based in the Position.
+	 * 
+	 * @param id Waypoint ID or name
+	 * @return the created Waypoint
+	 */
+	public Waypoint toWaypoint(String id) {
+		return new Waypoint(id, getLatitude(), getLongitude());
+	}
 
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
+	/**
+	 * Haversine formulae, implementation based on example at <a href=
+	 * "http://www.codecodex.com/wiki/Calculate_Distance_Between_Two_Points_on_a_Globe"
+	 * >codecodex</a>.
+	 * 
+	 * @param lat1 Origin latitude
+	 * @param lon1 Origin longitude
+	 * @param lat2 Destination latitude
+	 * @param lon2 Destination longitude
+	 * @return Distance in meters
+	 */
+	private double haversine(double lat1, double lon1, double lat2, double lon2) {
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(Math.toRadians(lat1))
-                * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2)
-                * Math.sin(dLon / 2);
+		// Mean earth radius (IUGG) = 6371.009
+		// Meridional earth radius = 6367.4491
+		// Earth radius by assumption that 1 degree equals exactly 60 NM:
+		// 1.852 * 60 * 360 / (2 * Pi) = 6366.7 km
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		final double earthRadius = 6366.70702;
 
-        double result = earthRadius * c * 1000;
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLon = Math.toRadians(lon2 - lon1);
 
-        return result;
-    }
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+			+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+			* Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		return (earthRadius * c * 1000);
+	}
 }

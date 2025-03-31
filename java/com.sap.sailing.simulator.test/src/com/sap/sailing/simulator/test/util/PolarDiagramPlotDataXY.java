@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.NavigableMap;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 
 public class PolarDiagramPlotDataXY {
 

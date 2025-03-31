@@ -586,6 +586,20 @@ public class Legend extends Configurable<Legend> {
     }
 
     /**
+     * Convenience method for setting the 'symbolHeight' option of the lagend.  Equivalent to:
+     * <pre><code>
+     *     legend.setOption("symbolHeight", 25);
+     * </code></pre>
+     * The pixel height of the symbol for series types that use a rectangle in the legend. Defaults to 12.
+     * @param symbolHeight The pixel height of the symbol.
+     * @return A reference to this {@link Legend} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    public Legend setSymbolHeight(Number symbolHeight) {
+        return this.setOption("symbolHeight", symbolHeight);
+    }
+
+    /**
      * Convenience method for setting the 'symbolPadding' option of the legend.  Equivalent to:
      * <pre><code>
      *     legend.setOption("symbolPadding", 4);
@@ -597,6 +611,20 @@ public class Legend extends Configurable<Legend> {
      */
     public Legend setSymbolPadding(Number symbolPadding) {
         return this.setOption("symbolPadding", symbolPadding);
+    }
+
+    /**
+     * Convenience method for setting the 'symbolHeight' option of the lagend.  Equivalent to:
+     * <pre><code>
+     *     legend.setOption("symbolRadius", 5);
+     * </code></pre>
+     * The border radius of the symbol for series types that use a rectangle in the legend. Defaults to 2.
+     * @param symbolRadius The border radius of the symbol.
+     * @return A reference to this {@link Legend} instance for convenient method chaining.
+     * @since 1.7.0
+     */
+    public Legend setSymbolRadius(Number symbolRadius) {
+        return this.setOption("symbolHeight", symbolRadius);
     }
 
     /**

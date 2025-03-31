@@ -1,0 +1,65 @@
+.eventheader {
+  font-size: 1rem;
+  position: relative;
+  padding: 0.333333333333333em;
+  padding-bottom: 1em;
+  background: #f2f2f2;
+  -webkit-transition: top 0.3s ease-in-out;
+     -moz-transition: top 0.3s ease-in-out;
+          transition: top 0.3s ease-in-out;
+}
+.eventheader_with_logo{
+ padding-bottom: 0.5em;
+ position: relative;
+}
+.eventheader_info {
+  padding: 0.666666666666667em 0 0 0.666666666666667em;
+}
+.eventheader_info_title {
+  padding: 0;
+}
+.eventheader_info_title_text {
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+.eventheader_info_title_text_label {
+  margin-left: 1.25em;
+  text-transform: capitalize;
+}
+.eventheader_info_subtitle {
+  font-size: 0.866666666666667em;
+  line-height: 1.384615384615385em;
+  margin-top: 0.384615384615385em;
+}
+.eventheader_info_subtitlereduced {
+  display: none;
+}
+.eventheader_info_subtitle_logo {
+  width: 2.692307692307693em;
+  height: 2.692307692307693em;
+  display: inline-block;
+  vertical-align: top;
+  background: #f6f9fc;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.eventheader_info_subtitle_info {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 0.384615384615385em;
+  width: 80%;
+}
+.eventheader_info_subtitle_info_date {
+  visibility: visible;
+}
+.eventheader_info_subtitle_info_location {
+  visibility: visible;
+}
+
+.eventheader_info_subtitle_dataBy_logo_container{
+ position:absolute;
+ bottom:0.25em;
+ right:0.25em;
+}

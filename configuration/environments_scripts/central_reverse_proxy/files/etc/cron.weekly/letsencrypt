@@ -1,0 +1,4 @@
+#!/bin/bash
+# Check if sail-insight.com cert needs renewing
+/usr/bin/sudo -u certbot docker run --rm --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -v "/var/lib/letsencrypt:/var/lib/letsencrypt" -v "/home/trac/sail-insight-website/:/home/trac/sail-insight-website" certbot/certbot renew && service httpd reload
+exit 0

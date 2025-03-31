@@ -1,10 +1,12 @@
 package com.sap.sailing.manage2sail.resultimport;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -17,38 +19,27 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentProvider;
-import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
-import com.sap.sailing.xrr.resultimport.impl.XRRRegattaResultsAsScoreCorrections;
-import com.sap.sailing.xrr.schema.Division;
-import com.sap.sailing.xrr.schema.Event;
-import com.sap.sailing.xrr.schema.EventGender;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, ResultUrlProvider {
+public class ScoreCorrectionProviderImpl extends AbstractManage2SailProvider implements ScoreCorrectionProvider {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionProviderImpl.class.getName());
     private static final long serialVersionUID = 222663322974305822L;
 
-    public static final String NAME = "Manage2Sail XRR Result Importer";
-
-    private final ParserFactory parserFactory;
-    private final ResultUrlRegistry resultUrlRegistry;
     private final ResultDocumentProvider documentProvider;
     
     public ScoreCorrectionProviderImpl(ResultDocumentProvider documentProvider, ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(parserFactory, resultUrlRegistry);
         this.documentProvider = documentProvider;
-        this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
+        super(parserFactory, resultUrlRegistry);
         this.documentProvider = new Manage2SailResultDocumentProvider(this);
-        this.parserFactory = parserFactory;
-        this.resultUrlRegistry = resultUrlRegistry;
     }
 
     @Override
@@ -57,18 +48,18 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     @Override
-    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+    public Map<String, Set<Util.Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws URISyntaxException, SAXException, ParserConfigurationException {
         Map<String, Set<Util.Pair<String, TimePoint>>> result = new HashMap<String, Set<Util.Pair<String,TimePoint>>>();
         try {
             for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
                 String eventName = resultDocDescr.getEventName() != null ? resultDocDescr.getEventName() : resultDocDescr.getRegattaName();
                 String boatClass = resultDocDescr.getBoatClass();
-                if(boatClass != null && eventName != null) {
-                    if(resultDocDescr.getCompetitorGenderType() != null) {
+                if (boatClass != null && eventName != null) {
+                    if (resultDocDescr.getCompetitorGenderType() != null) {
                         boatClass += ", " + resultDocDescr.getCompetitorGenderType().name();
                     }
                     Set<Util.Pair<String, TimePoint>> eventResultsSet = result.get(eventName);
-                    if(eventResultsSet == null) {
+                    if (eventResultsSet == null) {
                         eventResultsSet = new HashSet<Util.Pair<String, TimePoint>>();
                         result.put(eventName, eventResultsSet);
                     }
@@ -83,34 +74,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
-            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
-        Parser parser = resolveParser(eventName, boatClassName);
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException, URISyntaxException {
+        final Parser parser = resolveParser(eventName, boatClassName, timePointPublished);
         try {
-            RegattaResults regattaResults = parser.parse();
-//            TimePoint timePoint = XRRParserUtil.calculateTimePointForRegattaResults(regattaResults);
-//            if ((timePoint == null && timePointPublished == null) || (timePoint != null && timePoint.equals(timePointPublished))) {
-                for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                    if (o instanceof Event) {
-                        Event event = (Event) o;
-                        if (event.getTitle().equals(eventName)) {
-                            for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                                if (eventO instanceof Division) {
-                                    Division division = (Division) eventO;
-                                    EventGender divisionGender = division.getGender();
-                                    String divisionBoatClassAndGender = parser.getBoatClassName(division);
-                                    if(divisionGender != null) {
-                                        divisionBoatClassAndGender += ", " + divisionGender.name();  
-                                    }
-                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
-                                        return new XRRRegattaResultsAsScoreCorrections(event, division, this,
-                                                parser);
-                                    }
-                                }
-                            }
-                        }
-                    }
-//                }
-            }
+            final RegattaResults regattaResults = parser.parse();
+            return parser.getRegattaScoreCorrections(regattaResults, /* scoreCorrectionProvider */ this,
+                    /* eventNameFilter */ Optional.of(eventName), /* boatClassNameFilter */ Optional.of(boatClassName));
         } catch (JAXBException e) {
             logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
             logger.throwing(ScoreCorrectionProviderImpl.class.getName(), "getHasResultsForBoatClassFromDateByEventName", e);
@@ -118,28 +87,27 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         return null;
     }
     
-    private Parser resolveParser(String eventName, String boatClassName) throws IOException {
+    @Override
+    public RegattaScoreCorrections getScoreCorrections(InputStream inputStream) throws Exception {
+        final Parser parser = getParserFactory().createParser(inputStream, inputStream.toString());
+        final RegattaResults regattaResults = parser.parse();
+        return parser.getRegattaScoreCorrections(regattaResults, this, /* eventNameFilter */ Optional.empty(),
+                /* boatClassNameFilter */ Optional.empty());
+    }
+
+    private Parser resolveParser(String eventName, String boatClassName, TimePoint timePointPublished) throws IOException, URISyntaxException, SAXException, ParserConfigurationException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
             String boatClassAndGenderType = resultDocDescr.getBoatClass();
-            if(resultDocDescr.getCompetitorGenderType() != null) {
+            if (resultDocDescr.getCompetitorGenderType() != null) {
                 boatClassAndGenderType += ", " + resultDocDescr.getCompetitorGenderType().name();
             }
-            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType)) {
-                result = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
+            if (eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType) &&
+                    Util.equalsWithNull(resultDocDescr.getLastModified(), timePointPublished)) {
+                result = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 break;
             }
         }
         return result;
-    }
-
-    @Override
-    public Iterable<URL> getUrls() {
-        return resultUrlRegistry.getResultUrls(NAME);
-    }
-
-    @Override
-    public String getOptionalSampleURL() {
-        return "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
     }
 }

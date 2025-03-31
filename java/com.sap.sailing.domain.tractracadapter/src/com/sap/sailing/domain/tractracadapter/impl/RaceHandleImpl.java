@@ -42,14 +42,7 @@ public class RaceHandleImpl implements RaceHandle {
 
     @Override
     public RaceDefinition getRace(long timeoutInMilliseconds) {
-        final RaceDefinition result;
-        final RaceDefinition raceDefinition = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds);
-        if (raceDefinition != null) { // may have time-outed
-            result = raceDefinition;
-        } else {
-            result = null;
-        }
-        return result;
+        return domainFactory.getAndWaitForRaceDefinition(tractracRace.getId(), timeoutInMilliseconds);
     }
     
 }

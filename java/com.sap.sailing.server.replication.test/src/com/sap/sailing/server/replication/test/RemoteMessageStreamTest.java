@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.junit.Test;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.sap.sse.replication.RabbitMQConnectionFactoryHelper;
 import com.sap.sse.replication.impl.RabbitInputStreamProvider;
 import com.sap.sse.replication.impl.RabbitOutputStream;
 
@@ -34,8 +36,8 @@ public class RemoteMessageStreamTest {
     private RabbitInputStreamProvider inputStream;
     
     @Before
-    public void setUp() throws IOException {
-        ConnectionFactory factory = new ConnectionFactory();
+    public void setUp() throws IOException, TimeoutException {
+        ConnectionFactory factory = RabbitMQConnectionFactoryHelper.getConnectionFactory();
         Connection connection = factory.newConnection();
         channel = connection.createChannel();
     }

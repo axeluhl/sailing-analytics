@@ -1,0 +1,2 @@
+#!/bin/bash
+aws ec2 describe-instances --filters Name=tag-key,Values=sailing-analytics-server | jq -r '.Reservations[].Instances[].NetworkInterfaces[].PrivateIpAddresses[].Association.PublicIp'

@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.json.simple.JSONArray;
 
@@ -22,25 +23,26 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.common.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
-import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrack;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
+import com.sap.sailing.shared.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**
@@ -121,8 +123,8 @@ public class PolarResource extends AbstractSailingServerResource {
         Speed windSpeed = new KnotSpeedImpl(wSpeed);
         try {
             PolarDataService service = getService().getPolarDataService();
-            SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithBearing(boatClass,
-                    windSpeed, legType, tack, true);
+            SpeedWithBearingWithConfidence<Void> speedWithBearing = service.getAverageSpeedWithTrueWindAngle(boatClass,
+                    windSpeed, legType, tack);
             String resultString = "Speed: " + speedWithBearing.getObject().getKnots() + "kn; Angle: "
                     + speedWithBearing.getObject().getBearing().getDegrees() + "°; Confidence: "
                     + speedWithBearing.getConfidence();
@@ -134,11 +136,12 @@ public class PolarResource extends AbstractSailingServerResource {
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
-        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     private Response getBadRaceErrorResponse(String regattaName, String raceName) {
-        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) +
+                "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET
@@ -150,6 +153,7 @@ public class PolarResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -158,8 +162,9 @@ public class PolarResource extends AbstractSailingServerResource {
                 JSONArray resultAsJson = new JSONArray();
                 WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
                 PolarDataService service = getService().getPolarDataService();
-                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                final ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
+                maneuverBasedWindEstimationTrackImpl.initialize();
                 maneuverBasedWindEstimationTrackImpl.lockForRead();
                 try {
                     for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
@@ -168,7 +173,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } finally {
                     maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
                 }
-                response = Response.ok(resultAsJson.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(streamingOutput(resultAsJson)).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -185,6 +190,7 @@ public class PolarResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -203,7 +209,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } else {
                     clusters = maneuverBasedWindEstimationTrackImpl.getClusters().stream();
                 }
-                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters, /* waitForLatest */ true),
+                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters),
                         MediaType.TEXT_PLAIN).build();
             }
         }

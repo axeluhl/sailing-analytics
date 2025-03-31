@@ -7,8 +7,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogRaceStatusEventSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class RaceStatusEventSerializerTest extends AbstractEventSerializerTest<RaceLogRaceStatusEvent> {
 

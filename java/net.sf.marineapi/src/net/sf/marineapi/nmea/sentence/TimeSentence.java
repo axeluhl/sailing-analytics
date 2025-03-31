@@ -3,7 +3,7 @@
  * Copyright (C) 2010 Kimmo Tuukkanen
  * 
  * This file is part of Java Marine API.
- * <http://sourceforge.net/projects/marineapi/>
+ * <http://ktuukkan.github.io/marine-api/>
  * 
  * Java Marine API is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -27,22 +27,21 @@ import net.sf.marineapi.nmea.util.Time;
  * contain only UTC time, while others may provide also date.
  * 
  * @author Kimmo Tuukkanen
- * @version $Revision$
  * @see net.sf.marineapi.nmea.sentence.DateSentence
  */
 public interface TimeSentence extends Sentence {
 
-    /**
-     * Get the time of day.
-     * 
-     * @return Time
-     */
-    Time getTime();
+	/**
+	 * Get the time of day.
+	 * 
+	 * @return Time
+	 */
+	Time getTime();
 
-    /**
-     * Set the time of day.
-     * 
-     * @param t Time to set
-     */
-    void setTime(Time t);
+	/**
+	 * Set the time of day.
+	 * 
+	 * @param t Time to set
+	 */
+	void setTime(Time t);
 }

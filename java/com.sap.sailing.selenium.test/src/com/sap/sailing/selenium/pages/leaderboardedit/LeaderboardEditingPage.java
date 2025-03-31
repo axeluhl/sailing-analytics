@@ -34,7 +34,7 @@ public class LeaderboardEditingPage extends HostPage {
      * @throws UnsupportedEncodingException 
      */
     public static LeaderboardEditingPage goToPage(String leaderboardName, WebDriver driver, String root) {
-        driver.get(root + "gwt/LeaderboardEditing.html?name=" + leaderboardName + "&" + getGWTCodeServer()); //$NON-NLS-1$
+        driver.get(root + "gwt/LeaderboardEditing.html?name=" + leaderboardName + "&" + getGWTCodeServerAndLocale()); //$NON-NLS-1$
         
         return new LeaderboardEditingPage(driver);
     }

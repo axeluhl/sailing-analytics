@@ -3,11 +3,13 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 public class CompetitorsRaceDataDTO implements IsSerializable {
     
@@ -19,14 +21,14 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     CompetitorsRaceDataDTO() {}
     
     public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime) {
+        this(detailType, requestedFromTime, requestedToTime, new HashMap<>());
+    }
+    
+    public CompetitorsRaceDataDTO(DetailType detailType, Date requestedFromTime, Date requestedToTime,
+            Map<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.detailType = detailType;
         this.requestedFromTime = requestedFromTime;
         this.requestedToTime = requestedToTime;
-        this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
-    }
-    
-    public CompetitorsRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
-        this.detailType = detailType;
         this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
     
@@ -50,7 +52,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     
     /**
      * Replaces the {@link CompetitorRaceDataDTO#markPassingsData} from the {@link CompetitorRaceDataDTO data} of the
-     * {@link CompetitorDTO} in <code>competitorData</code> with the markPassingsData in <code>competitorData</code>.<br />
+     * {@link CompetitorWithBoatDTO} in <code>competitorData</code> with the markPassingsData in <code>competitorData</code>.<br />
      * If the competitor is not contained, nothing happens.
      * 
      * @param competitorData
@@ -65,7 +67,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     
     /**
      * Adds all {@link CompetitorRaceDataDTO#raceData} in <code>competitorDataToAdd</code> to the existing data of the
-     * {@link CompetitorDTO} in <code>competitorDataToAdd</code>, if the {@link DetailType DetailTypes} fit.<br />
+     * {@link CompetitorWithBoatDTO} in <code>competitorDataToAdd</code>, if the {@link DetailType DetailTypes} fit.<br />
      * If the competitor is not contained, nothing happens.
      */
     public void addCompetitorRaceData(CompetitorRaceDataDTO competitorDataToAdd) {
@@ -101,7 +103,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
     public Date getOldestDateOfNewestData() {
         Date dateOfNewestData = null;
         for (CompetitorRaceDataDTO competitorRaceData : competitorsData.values()) {
-            Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
+            final Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
             if (dateOfNewestData == null) {
                 dateOfNewestData = raceDateOfNewestData;
             } else {
@@ -121,7 +123,7 @@ public class CompetitorsRaceDataDTO implements IsSerializable {
         return true;
     }
 
-    public boolean contains(CompetitorDTO competitor) {
+    public boolean contains(CompetitorWithBoatDTO competitor) {
         return competitorsData.containsKey(competitor);
     }
 

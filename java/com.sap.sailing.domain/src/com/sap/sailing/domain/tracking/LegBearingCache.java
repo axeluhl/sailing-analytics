@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -13,4 +15,6 @@ import com.sap.sse.common.TimePoint;
  */
 public interface LegBearingCache {
     Bearing getLegBearing(TrackedLeg trackedLeg, TimePoint timePoint);
+    
+    Position getApproximatePosition(TrackedRace trackedRace, Waypoint waypoint, TimePoint timePoint);
 }

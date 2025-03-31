@@ -5,6 +5,7 @@ import android.content.Context;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 
 /**
  * Base class for all data managers. Use {@link DataManager#create(Context)} for creating your {@link DataManager}.
@@ -13,7 +14,7 @@ public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
         DataStore dataStore = InMemoryDataStore.INSTANCE;
-        if (AppConstants.IS_DATA_OFFLINE) {
+        if (AppPreferences.on(context).isOfflineMode()) {
             return new OfflineDataManager(context, dataStore, dataStore.getDomainFactory());
         }
         return new OnlineDataManager(context, dataStore, dataStore.getDomainFactory());
@@ -39,4 +40,14 @@ public abstract class DataManager implements ReadonlyDataManager {
         return context;
     }
 
+    /**
+     * {@link InMemoryDataStore#clearRaces(Context)}, fires the {@link AppConstants#ACTION_CLEAR_RACES} intent which is expected to
+     * be handled by the {@link RaceStateService} which responds by unregistering all its races, stopping to listen on
+     * and poll their race logs and by clearing the data store's races collection.
+     * {@link InMemoryDataStore#reset()} resets the data store properly.
+     */
+    public void resetAll() {
+        InMemoryDataStore.INSTANCE.clearRaces(context);
+        InMemoryDataStore.INSTANCE.reset();
+    }
 }

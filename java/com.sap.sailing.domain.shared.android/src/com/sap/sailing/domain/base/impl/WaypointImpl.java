@@ -1,17 +1,18 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.UUID;
+
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sse.common.Bearing;
 
 public class WaypointImpl implements Waypoint {
     private static final long serialVersionUID = 1600863368078653897L;
     private final ControlPoint controlPoint;
-    private static int idCounter = 1;
-    private final int id;
+    private final UUID id;
     private final PassingInstruction passingInstructions; 
     private final Bearing fixedBearing;
 
@@ -24,13 +25,13 @@ public class WaypointImpl implements Waypoint {
     }
     
     public WaypointImpl(ControlPoint controlPoint, PassingInstruction passingInstructions, Bearing fixedBearing) {
-        if (passingInstructions == null){
+        if (passingInstructions == null) {
             throw new IllegalArgumentException("PassingInstructions cannot be null");
         }
         this.controlPoint = controlPoint;
         this.passingInstructions = passingInstructions;
-        this.fixedBearing=fixedBearing;
-        id = idCounter++;
+        this.fixedBearing = fixedBearing;
+        id = UUID.randomUUID();
     }
     
     @Override
@@ -45,7 +46,7 @@ public class WaypointImpl implements Waypoint {
 
     @Override
     public String toString() {
-        return getName();
+        return (getName()==null?"":getName()) + " ("+getPassingInstructions()+")";
     }
 
     @Override
@@ -54,12 +55,12 @@ public class WaypointImpl implements Waypoint {
     }
 
     @Override
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
     @Override
-    public Waypoint resolve(SharedDomainFactory domainFactory) {
+    public Waypoint resolve(SharedDomainFactory<?> domainFactory) {
         return domainFactory.getExistingWaypointByIdOrCache(this);
     }
 

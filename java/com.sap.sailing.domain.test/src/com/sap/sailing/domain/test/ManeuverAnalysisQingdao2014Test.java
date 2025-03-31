@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +11,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,15 +19,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.tractrac.model.lib.api.event.CreateModelException;
-import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTestCase {
     public ManeuverAnalysisQingdao2014Test() throws MalformedURLException, URISyntaxException {
@@ -43,7 +40,7 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
 
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, InterruptedException, ParseException, SubscriberInitializationException, CreateModelException {
+    public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/event_20140429_ESSQingdao-Race_4.mtb").getCanonicalPath().replace('\\', '/'));
         super.setUp(
@@ -68,12 +65,12 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
         Date toDate = dateFormat.parse("05/01/2014-09:10:00");
         assertNotNull(fromDate);
         assertNotNull(toDate);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
-        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
-
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
         assertManeuver(maneuvers, ManeuverType.JIBE, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:15")), 5000);
-        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:51")), 5000);
+        assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:56")), 5000);
         for (Maneuver maneuver : maneuvers) {
             // make sure there is no penalty detected in the time frame considered
             assertNotSame("Found an unexpected penalty "+maneuver, ManeuverType.PENALTY_CIRCLE, maneuver.getType());

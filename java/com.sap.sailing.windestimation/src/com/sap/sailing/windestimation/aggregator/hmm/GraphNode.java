@@ -1,0 +1,71 @@
+package com.sap.sailing.windestimation.aggregator.hmm;
+
+import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.windestimation.aggregator.graph.ElementWithQuality;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+
+/**
+ * Assumed maneuver type of a maneuver within {@link GraphLevelBase}.
+ *
+ */
+public class GraphNode<GL extends GraphLevelBase<GL>> implements ElementWithQuality {
+    private final GL graphLevel; 
+    private final WindCourseRange validWindRange;
+    private double confidence;
+    private final int indexInLevel;
+    private final ManeuverTypeForClassification maneuverType;
+    private final Tack tackAfter;
+
+    public GraphNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange validWindRange,
+            double confidence, int indexInLevel, GL graphLevel) {
+        this.maneuverType = maneuverType;
+        this.tackAfter = tackAfter;
+        this.validWindRange = validWindRange;
+        this.confidence = confidence;
+        this.indexInLevel = indexInLevel;
+        this.graphLevel = graphLevel;
+    }
+
+    public ManeuverTypeForClassification getManeuverType() {
+        return maneuverType;
+    }
+
+    public WindCourseRange getValidWindRange() {
+        return validWindRange;
+    }
+    
+    public GL getGraphLevel() {
+        return graphLevel;
+    }
+
+    /**
+     * @return the confidence computed by the classifier that the maneuver has the type returned by
+     *         {@link #getManeuverType()}
+     */
+    public double getConfidence() {
+        return confidence;
+    }
+
+    @Override
+    public double getQuality() {
+        return getConfidence();
+    }
+
+    public int getIndexInLevel() {
+        return indexInLevel;
+    }
+
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
+    }
+
+    public Tack getTackAfter() {
+        return tackAfter;
+    }
+
+    @Override
+    public String toString() {
+        return ""+maneuverType+" onto "+tackAfter+" tack, confidence=" + confidence +", estimated " + validWindRange;
+    }
+
+}

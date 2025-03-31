@@ -9,7 +9,7 @@
 	<inherits name='com.google.gwt.debug.Debug'/>
 
 	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<inherits name='com.sap.sse.gwt.Highcharts' />
 	
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
@@ -26,13 +26,10 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-        <inherits name="com.sap.sse.Security" />
+	<inherits name="com.sap.sse.security.ui.SecurityCommon" />
+	<inherits name="com.sap.sse.Security" />
+        <inherits name="com.sap.sailing.landscape.Landscape" />
     
-	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-	
 	<super-source path="jre" />
 
 	<entry-point class='com.sap.sailing.gwt.ui.adminconsole.AdminConsoleEntryPoint'/>
@@ -44,10 +41,9 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<extend-property name="locale" values="en,de" />
-	<set-property name="locale" value="en,de"/>
-	<set-property-fallback name="locale" value="en"/>
-	
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesSinglePermutation' />
+
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
 	<!-- Turning CSS obfuscation on, which is the default -->
@@ -63,6 +59,12 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceComponents'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceLeaderboard'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard'/>
+	
+    <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
+    
+    <set-configuration-property name="CssResource.enableGss" value="true" />
+    <set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
 	<source path='masterdataimport'/>
 	<source path='test'/>

@@ -15,7 +15,6 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.impl.RenamableImpl;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -24,38 +23,65 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.RenamableImpl;
 
+/**
+ * A series listens on its columns; however, a veto for column addition isn't done here but in a {@link RegattaLeaderboard}.
+ *
+ * @see #addRaceColumn(String, TrackedRegattaRegistry)
+ */
 public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
     private final List<Fleet> fleetsInAscendingOrder;
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
-    
+    private boolean oneAlwaysStaysOne;
+
+    /**
+     * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
+     * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
+     * qualification and a final series, when the second discard becomes available and the series don't define
+     * their own discarding rules, two discards may be picked from the qualification series, but at most one
+     * could be selected in the final even if another final race has a score worse than that of all
+     * qualification races.
+     */
+    private Integer maximumNumberOfDiscards;
+
     /**
      * If set, the series doesn't take over the scores from any previous series but starts with zero scores for all its
      * competitors
      */
     private boolean startsWithZeroScore;
-    
+
     /**
      * If set, the first race column is not discardable. This is usually very helpful if the series starts with a
      * carry-forward score from a previous series.
      */
     private boolean firstColumnIsNonDiscardableCarryForward;
-    
+
     /**
-     * When a column has more than one fleet, there are two different options for scoring it. Either the scoring scheme is applied
-     * to the sequence of competitors one gets when first ordering the competitors by fleets and then within each fleet by their
-     * rank in the fleet's race; or the scoring scheme is applied to each fleet separately, leading to the best score being awarded
-     * in the column as many times as there are fleets in the column. For the latter case, this field is <code>false</code> which is
-     * also the default.
+     * When a column has more than one fleet there are two different options for scoring it when the fleets have different ranks.
+     * Either the scoring scheme is applied to the sequence of competitors one gets when first ordering the competitors by fleets
+     * and then within each fleet by their rank in the fleet's race; or the scoring scheme is applied to each fleet separately,
+     * leading to the best score being awarded in the column as many times as there are fleets in the column.
+     * For the latter case, this field is <code>false</code> which is also the default.
      */
     private boolean hasSplitFleetContiguousScoring;
-    
+
+    /**
+     * When a column has more than one fleet there are two different options for scoring it when the fleets are of the
+     * same rank. Either the scoring scheme is applied to all fleets of the same rank at the same time and competitors
+     * compete across the fleets; or the scoring scheme is applied to each fleet separately, leading to the best score
+     * being awarded  as many times as there are fleets of the same rank. For the latter case, this field is
+     * <code>false</code> which is also the default.
+     */
+    private boolean hasCrossFleetMergedRanking;
+
     /**
      * @param fleets
      *            must be non-empty
@@ -66,7 +92,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+    public SeriesImpl(String name, boolean isMedal, boolean isFleetsCanRunInParallel, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         if (fleets == null || Util.isEmpty(fleets)) {
@@ -79,9 +105,9 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         fleetsInAscendingOrder = new ArrayList<Fleet>();
         Util.addAll(fleets, fleetsInAscendingOrder);
         Collections.sort(fleetsInAscendingOrder);
-        List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
-        this.raceColumns = myRaceColumns;
+        this.raceColumns = new ArrayList<RaceColumnInSeries>();
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -97,7 +123,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public void removeRaceColumnListener(RaceColumnListener listener) {
         raceColumnListeners.removeRaceColumnListener(listener);
     }
-    
+
     @Override
     public Regatta getRegatta() {
         return regatta;
@@ -105,7 +131,15 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setRegatta(Regatta regatta) {
+        if (this.regatta != null) {
+            detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns();
+        }
         this.regatta = regatta;
+        if (this.regatta != null) {
+            attachRaceExecutionOrderProviderToTrackedRacesInRaceColumns();
+        } else {
+            detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns();
+        }
     }
 
     public Iterable<? extends Fleet> getFleets() {
@@ -119,7 +153,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public Iterable<? extends RaceColumnInSeries> getRaceColumns() {
-        return raceColumns;
+        return new ArrayList<>(raceColumns);
     }
 
     /**
@@ -134,7 +168,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         return addRaceColumn(raceColumns.size(), raceColumnName, trackedRegattaRegistry);
     }
-    
+
     @Override
     public RaceColumnInSeries addRaceColumn(int insertIndex, String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -158,59 +192,30 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      */
     private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
         return new RaceColumnInSeriesImpl(
-                raceColumnName, 
-                this, 
+                raceColumnName,
+                this,
                 trackedRegattaRegistry);
     }
 
-    @Override
-    public void moveRaceColumnUp(String raceColumnName) {
-        boolean didFirstColumnChange = false; // if it changes and the series starts scoring with zero, notify the change
-        // start at second element because first can't be moved up
-        for (int i=1; i<raceColumns.size(); i++) {
-            RaceColumnInSeries rc = raceColumns.get(i);
-            if (rc.getName().equals(raceColumnName)) {
-                raceColumns.remove(i);
-                if (i==1) {
-                    didFirstColumnChange = true;
+    private void attachRaceExecutionOrderProviderToTrackedRacesInRaceColumns() {
+        for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
+            for (Fleet fleet : raceColumnInSeries.getFleets()) {
+                TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
+                if (trackedRace != null && regatta != null) {
+                    trackedRace.attachRaceExecutionProvider(regatta.getRaceExecutionOrderProvider());
                 }
-                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
-                raceColumns.add(i-1, rc);
-                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
-                break;
             }
-        }
-        if (didFirstColumnChange && startsWithZeroScore) {
-            notifyIsStartsWithZeroScoreChangedForFirstTwoColumns();
         }
     }
 
-    private void notifyIsStartsWithZeroScoreChangedForFirstTwoColumns() {
-        final RaceColumnInSeries first = raceColumns.get(0);
-        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(first, first.isStartsWithZeroScore());
-        final RaceColumnInSeries second = raceColumns.get(1);
-        raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(second, second.isStartsWithZeroScore());
-    }
-
-    @Override
-    public void moveRaceColumnDown(String raceColumnName) {
-        boolean didFirstColumnChange = false; // if it changes and the series starts scoring with zero, notify the change
-        // end at second-last element because last can't be moved down
-        for (int i=0; i<raceColumns.size()-1; i++) {
-            RaceColumnInSeries rc = raceColumns.get(i);
-            if (rc.getName().equals(raceColumnName)) {
-                raceColumns.remove(i);
-                if (i==0) {
-                    didFirstColumnChange = true;
+    private void detachRaceExecutionOrderProviderFromTrackedRacesInRaceColumns() {
+        for (RaceColumnInSeries raceColumnInSeries : raceColumns) {
+            for (Fleet fleet : raceColumnInSeries.getFleets()) {
+                TrackedRace trackedRace = raceColumnInSeries.getTrackedRace(fleet);
+                if (trackedRace != null && regatta != null && regatta.getRaceExecutionOrderProvider() != null) {
+                    trackedRace.detachRaceExecutionOrderProvider(regatta.getRaceExecutionOrderProvider());
                 }
-                raceColumnListeners.notifyListenersAboutRaceColumnRemovedFromContainer(rc);
-                raceColumns.add(i+1, rc);
-                raceColumnListeners.notifyListenersAboutRaceColumnAddedToContainer(rc);
-                break;
             }
-        }
-        if (didFirstColumnChange && startsWithZeroScore) {
-            notifyIsStartsWithZeroScoreChangedForFirstTwoColumns();
         }
     }
 
@@ -251,6 +256,22 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    @Override
+    public void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        boolean oldIsFleetsCanRunInParallel = this.isFleetsCanRunInParallel;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
+        if (oldIsFleetsCanRunInParallel != isFleetsCanRunInParallel) {
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, isFleetsCanRunInParallel);
+            }
+        }
+    }
+
+    @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
@@ -266,6 +287,10 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+    }
+    @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
     }
@@ -276,18 +301,13 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
-        raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
+    public void hasCrossFleetMergedRankingChanged(RaceColumn raceColumn, boolean hasCrossFleetMergedRanking) {
+        raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
     }
 
-    /**
-     * A series listens on its columns; individual columns, however, don't ask whether they can be added; the series itself does.
-     * 
-     * @see #addRaceColumn(String, TrackedRegattaRegistry)
-     */
     @Override
-    public boolean canAddRaceColumnToContainer(RaceColumn raceColumn) {
-        return true;
+    public void isFirstColumnIsNonDiscardableCarryForwardChanged(RaceColumn raceColumn, boolean firstColumnIsNonDiscardableCarryForward) {
+        raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(raceColumn, firstColumnIsNonDiscardableCarryForward);
     }
 
     @Override
@@ -306,8 +326,18 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public void raceColumnNameChanged(RaceColumn raceColumn, String oldName, String newName) {
+        raceColumnListeners.notifyListenersAboutRaceColumnNameChanged(raceColumn, oldName, newName);
+    }
+
+    @Override
     public void factorChanged(RaceColumn raceColumn, Double oldFactor, Double newFactor) {
         raceColumnListeners.notifyListenersAboutFactorChanged(raceColumn, oldFactor, newFactor);
+    }
+
+    @Override
+    public void oneAlwaysStaysOneChanged(RaceColumn raceColumn, boolean oneAlwaysStaysOne) {
+        raceColumnListeners.notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
     }
 
     @Override
@@ -318,6 +348,11 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule) {
         raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldDiscardingRule, newDiscardingRule);
+    }
+
+    @Override
+    public void maximumNumberOfDiscardsChanged(Integer oldMaximumNumberOfDiscards, Integer newMaximumNumberOfDiscards) {
+        raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, newMaximumNumberOfDiscards);
     }
 
     @Override
@@ -337,12 +372,26 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
 
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
+        final ThresholdBasedResultDiscardingRule oldResultDiscardingRule = this.resultDiscardingRule;
         if (!Util.equalsWithNull(oldResultDiscardingRule, resultDiscardingRule)) {
             this.resultDiscardingRule = resultDiscardingRule;
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
         }
         this.resultDiscardingRule = resultDiscardingRule;
+    }
+
+    @Override
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    @Override
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        final Integer oldMaximumNumberOfDiscards = getMaximumNumberOfDiscards();
+        if (!Util.equalsWithNull(oldMaximumNumberOfDiscards, maximumNumberOfDiscards)) {
+            this.maximumNumberOfDiscards = maximumNumberOfDiscards;
+            raceColumnListeners.notifyListenersAboutMaximumNumberOfDiscardsChanged(oldMaximumNumberOfDiscards, maximumNumberOfDiscards);
+        }
     }
 
     @Override
@@ -365,13 +414,13 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         }
         return result;
     }
-    
+
     @Override
     public void setStartsWithZeroScore(boolean startsWithZeroScore) {
         boolean oldStartsWithZeroScore = this.startsWithZeroScore;
         if (oldStartsWithZeroScore != startsWithZeroScore) {
             this.startsWithZeroScore = startsWithZeroScore;
-            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            final RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
             if (firstRaceColumnInSeries != null) {
                 raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(firstRaceColumnInSeries, startsWithZeroScore);
             }
@@ -389,7 +438,17 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
-    public boolean isFirstColumnIsNonDiscardableCarryForward() {
+    public void setCrossFleetMergedRanking(boolean hasCrossFleetMergedRanking) {
+        if (hasCrossFleetMergedRanking != this.hasCrossFleetMergedRanking) {
+            this.hasCrossFleetMergedRanking = hasCrossFleetMergedRanking;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutHasCrossFleetMergedRankingChanged(raceColumn, hasCrossFleetMergedRanking);
+            }
+        }
+    }
+
+    @Override
+    public boolean isFirstColumnNonDiscardableCarryForward() {
         return firstColumnIsNonDiscardableCarryForward;
     }
 
@@ -398,7 +457,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         boolean oldFirstColumnIsNonDiscardableCarryForward = this.firstColumnIsNonDiscardableCarryForward;
         if (oldFirstColumnIsNonDiscardableCarryForward != firstColumnIsNonDiscardableCarryForward) {
             this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
-            RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
+            final RaceColumn firstRaceColumnInSeries = getFirstRaceColumn();
             if (firstRaceColumnInSeries != null) {
                 raceColumnListeners.notifyListenersAboutIsFirstColumnIsNonDiscardableCarryForwardChanged(firstRaceColumnInSeries, firstColumnIsNonDiscardableCarryForward);
             }
@@ -409,5 +468,26 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
+    }
+
+    @Override
+    public boolean hasCrossFleetMergedRanking() {
+        return hasCrossFleetMergedRanking;
+    }
+
+    @Override
+    public boolean isOneAlwaysStaysOne() {
+        return oneAlwaysStaysOne;
+    }
+
+    @Override
+    public void setOneAlwaysStaysOne(boolean oneAlwaysStaysOne) {
+        boolean oldOneAlwaysStaysOne = this.oneAlwaysStaysOne;
+        if (oldOneAlwaysStaysOne != oneAlwaysStaysOne) {
+            this.oneAlwaysStaysOne = oneAlwaysStaysOne;
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutOneAlwaysStaysOneChanged(raceColumn, oneAlwaysStaysOne);
+            }
+        }
     }
 }

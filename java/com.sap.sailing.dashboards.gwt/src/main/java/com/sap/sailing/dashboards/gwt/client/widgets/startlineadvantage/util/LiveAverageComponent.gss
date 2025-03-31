@@ -1,0 +1,92 @@
+@require 'theme';
+
+.live_average_component {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	height: 110px;
+	background-color: WHITE;
+	z-index: 2;
+}
+
+.live_container {
+	position: absolute;
+	top: DASHBOARD_SPACE_VERY_SMALL;
+	bottom: 30%;
+	right: 52%;
+	left: 0%;
+}
+
+.average_container {
+	position: absolute;
+	top: DASHBOARD_SPACE_VERY_SMALL;
+	bottom: 30%;
+	right: 0%;
+	left: 52%;
+}
+
+.middle_line {
+	position: absolute;
+	top: 13px;
+	height: 30pt;
+	width: 1px;
+	left: 50%;
+	background-color: black;
+	z-index: 100;
+}
+
+.panel_value_number {
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-size: DASHBOARD_FONT_SIZE_VERY_LARGE;
+	height: DASHBOARD_FONT_SIZE_VERY_LARGE;
+}
+
+.panel_value_unit {
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+}
+
+.panel_value_unit_degrees {
+	position: absolute;
+	font-size: 20pt;
+	font-weight: lighter;
+}
+
+.value_panel {
+	margin: 0px;
+	width: 100%;
+	text-align: center;
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-weight: bolder;
+}
+
+.label_text {
+	margin: 0px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	color: LIGHT_TEXT_COLOR;
+	font-family: DASHBOARD_FONT_FAMILY;
+}
+
+.live_label_container {
+	position: absolute;
+	top: 56px;
+	left: 0px;
+	right: 50%;
+	height: 14px;
+	padding-left: DASHBOARD_SPACE_VERY_SMALL;
+	padding-right: DASHBOARD_SPACE_VERY_SMALL;
+}
+
+.average_label_container {
+	position: absolute;
+	top: 56px;
+	left: 50%;
+	right: 0px;
+	height: 14px;
+	padding-left: DASHBOARD_SPACE_VERY_SMALL;
+	padding-right: DASHBOARD_SPACE_VERY_SMALL;
+}

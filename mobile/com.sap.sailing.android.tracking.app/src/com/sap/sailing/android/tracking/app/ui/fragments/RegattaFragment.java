@@ -1,15 +1,18 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,16 +24,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
@@ -52,7 +60,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
         Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
@@ -60,6 +67,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
         showLeaderboardButton.setOnClickListener(this);
+
+        Button showEventButton = (Button) view.findViewById(R.id.show_event_button);
+        showEventButton.setOnClickListener(this);
 
         Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
         changePhotoButton.setOnClickListener(this);
@@ -73,12 +83,14 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         return view;
     }
 
-    private void checkAndSwitchToThankYouScreenIfRegattaOver() {
-        RegattaActivity regattaActivity = (RegattaActivity) getActivity();
-        long regattaEnd = regattaActivity.event.endMillis;
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        if (System.currentTimeMillis() > regattaEnd) {
-            switchToThankYouScreen();
+        AppPreferences prefs = new AppPreferences(getActivity());
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        if (prefs.hasFailedUpload(activity.leaderboard.name)) {
+            activity.showRetryUploadLayout();
         }
     }
 
@@ -95,11 +107,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
-            threeBoxesLayout.setVisibility(View.INVISIBLE);
+            threeBoxesLayout.setVisibility(View.GONE);
+            centerViewInParent(textView);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void centerViewInParent(View view) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        view.setLayoutParams(layoutParams);
     }
 
     public boolean isShowingBigCheckoutButton() {
@@ -107,7 +126,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void switchToThankYouScreen() {
         showingThankYouNote = true;
 
@@ -116,7 +135,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         Button startTrackingButton = (Button) getActivity().findViewById(R.id.start_tracking);
 
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             startTrackingButton.setBackgroundDrawable(getResources().getDrawable(R.drawable.rounded_btn_yellow));
         } else {
             startTrackingButton.setBackground(getResources().getDrawable(R.drawable.rounded_btn_yellow));
@@ -139,7 +158,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
         timer = new TimerRunnable();
         timer.start();
-        checkAndSwitchToThankYouScreenIfRegattaOver();
         checkAndHideCountdownIfRegattaIsInProgress();
     }
 
@@ -155,12 +173,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         case R.id.show_leaderboards_button:
             startLeaderboardActivity();
             break;
+        case R.id.show_event_button:
+            startEventActivity();
+            break;
         case R.id.start_tracking:
             if (showingThankYouNote) {
                 RegattaActivity regattaActivity = (RegattaActivity) getActivity();
                 regattaActivity.checkout();
-            } else {
+            } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
+            } else {
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
             break;
         case R.id.add_photo_button:
@@ -190,9 +213,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      * Ask user if he wants to take a new picture or select an existing one.
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.add_photo_select)
                 .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-                .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         pickExistingImage();
@@ -203,7 +226,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         showTakePhotoActivity();
                     }
                 }).create();
-
         dialog.show();
     }
 
@@ -215,8 +237,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void showTakePhotoActivity() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+        Uri file = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", photoFile);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, file);
         startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
     }
 
@@ -226,7 +250,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             RegattaActivity activity = (RegattaActivity) getActivity();
 
             if (requestCode == CAMERA_REQUEST_CODE) {
-                File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+                File photoFile = activity.getImageFile(CAMERA_TEMP_FILE);
                 Bitmap photo;
                 try {
                     photo = decodeUri(Uri.fromFile(photoFile));
@@ -240,7 +264,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
                     }
                 } finally {
-                    ((RegattaActivity) getActivity()).deleteFile(CAMERA_TEMP_FILE);
+                    activity.deleteFile(CAMERA_TEMP_FILE);
                 }
             } else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
                 Uri selectedImage = data.getData();
@@ -280,10 +304,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         int scale = 1;
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math.pow(
-                    2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
-                            / Math.log(0.5)));
+            scale = (int) Math.pow(2, (int) Math.ceil(
+                    Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -303,10 +325,20 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
 
-        getActivity().startActivity(intent);
+        startActivity(intent);
+    }
+
+    private void startEventActivity() {
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        AppPreferences preferences = new AppPreferences(getActivity());
+        EventInfo eventInfo = activity.event;
+        String url = eventInfo.server + preferences.getServerEventUrl(eventInfo.id);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
     }
 
     private void startTrackingActivity() {
+        prefs.setTrackingTimerStarted(MillisecondsTimePoint.now().asMillis());
         RegattaActivity regattaActivity = (RegattaActivity) getActivity();
         Intent intent = new Intent(getActivity(), TrackingActivity.class);
         String checkinDigest = regattaActivity.event.checkinDigest;
@@ -336,39 +368,21 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void setCountdownTime(int days, int hours, int minutes) {
-        TextView daysTextView = (TextView) getActivity().findViewById(R.id.starts_in_days);
-        TextView hoursTextView = (TextView) getActivity().findViewById(R.id.starts_in_hours);
-        TextView minutesTextView = (TextView) getActivity().findViewById(R.id.starts_in_minutes);
+        TextView daysTextView = getActivity().findViewById(R.id.starts_in_days);
+        TextView hoursTextView = getActivity().findViewById(R.id.starts_in_hours);
+        TextView minutesTextView = getActivity().findViewById(R.id.starts_in_minutes);
 
-        TextView daysTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_days_label);
-        TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
-        TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
-
-        daysTextView.setText(String.format("%02d", days));
-        hoursTextView.setText(String.format("%02d", hours));
-        minutesTextView.setText(String.format("%02d", minutes));
-
-        if (days == 1) {
-            daysTextViewLabel.setText(R.string.day);
-        } else {
-            daysTextViewLabel.setText(R.string.days);
-        }
-
-        if (hours == 1) {
-            hoursTextViewLabel.setText(R.string.hour);
-        } else {
-            hoursTextViewLabel.setText(R.string.hours);
-        }
-
-        if (minutes == 1) {
-            minutesTextViewLabel.setText(R.string.minute);
-        } else {
-            minutesTextViewLabel.setText(R.string.minutes);
-        }
+        daysTextView.setText(String.format("%02d", days, Locale.getDefault()));
+        hoursTextView.setText(String.format("%02d", hours, Locale.getDefault()));
+        minutesTextView.setText(String.format("%02d", minutes, Locale.getDefault()));
     }
 
     public void setFragmentWatcher(FragmentWatcher fWatcher) {
         watcher = fWatcher;
+    }
+
+    public interface FragmentWatcher {
+        public void onViewCreated();
     }
 
     private class TimerRunnable implements Runnable {
@@ -396,7 +410,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    ExLog.w(RegattaFragment.this.getActivity(), TAG, "Interrupted sleep");
                 }
             }
         }
@@ -405,10 +419,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             running = false;
         }
 
-    }
-
-    public interface FragmentWatcher {
-        public void onViewCreated();
     }
 
 }

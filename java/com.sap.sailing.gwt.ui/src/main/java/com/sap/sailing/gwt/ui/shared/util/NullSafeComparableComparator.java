@@ -4,28 +4,19 @@ import java.util.Comparator;
 
 public class NullSafeComparableComparator<T extends Comparable<T>> implements Comparator<T> {
 
-    private final boolean sortNullToTop;
+    private final Comparator<T> comparator;
 
     public NullSafeComparableComparator() {
         this(false);
     }
 
     public NullSafeComparableComparator(boolean sortNullToTop) {
-        this.sortNullToTop = sortNullToTop;
+        comparator = new NullSafeComparatorWrapper<>(new ComparableComparator<T>(), sortNullToTop);
     }
 
     @Override
     public int compare(T left, T right) {
-        if (left == right) {
-            return 0;
-        }
-        if (left == null) {
-            return sortNullToTop ? -1 : 1;
-        }
-        if (right == null) {
-            return sortNullToTop ? 1 : -1;
-        }
-        return left.compareTo(right);
+        return comparator.compare(left, right);
     }
 
 }

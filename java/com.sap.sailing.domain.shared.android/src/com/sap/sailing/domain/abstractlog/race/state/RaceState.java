@@ -4,21 +4,26 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+
+import java.util.UUID;
 
 /**
  * Extension to the {@link ReadonlyRaceState} allowing write-access to the state of a race.
  * 
- * All methods changing the state of the race (e.g. {@link RaceState#forceNewStartTime(TimePoint,TimePoint)}) map to a
+ * All methods changing the state of the race (e.g. {@link RaceState#forceNewStartTime(TimePoint, TimePoint, UUID)}) map to a
  * single add on the underlying {@link RaceLog}. You are in charge of advancing the pass identifier (
  * {@link RaceState#setAdvancePass(TimePoint)} ) at appropriate times.
  * 
@@ -69,27 +74,25 @@ public interface RaceState extends ReadonlyRaceState {
      * Forces a new start time without checking for any prerequisites to be fulfilled. Although there is no technical
      * reason for the prerequisites to be fulfilled before setting a start time event, there might be clients of this
      * {@link RaceState} that expect them to be. Therefore use this method with caution.
-     * 
+     *
      * @param now
      *            logical {@link TimePoint} the start time event should be attached to.
+     * @param courseAreaId
      */
-    void forceNewStartTime(TimePoint now, TimePoint startTime);
-
+    void forceNewStartTime(TimePoint now, TimePoint startTime, UUID courseAreaId);
+    
     /**
-     * Starts a request to set a new start time. Before the start time is set the
-     * {@link RacingProcedurePrerequisite.Resolver} must fulfill all prerequisites set by the currently active
-     * {@link RacingProcedure}.
-     * 
-     * @param now
-     *            logical {@link TimePoint} the start time event (and all events created due to fulfilled prerequisites)
-     *            should be attached to.
-     * @param startTime
-     *            start time to be set
-     * @param resolver
-     *            Object used to fulfill all {@link RacingProcedurePrerequisite}s. If you just want to use reasonable
-     *            defaults pass a {@link RacingProcedurePrerequisiteAutoResolver}.
+     * Forces a new dependent start time without checking for any prerequisites to be fulfilled. Although there is no technical
+     * reason for the prerequisites to be fulfilled before setting a start time event, there might be clients of this
+     * {@link RaceState} that expect them to be. Therefore use this method with caution.
+     *  @param now
+     *            logical {@link TimePoint} the start time event should be attached to.
+     * @param startTimeDifference
+     *            difference in startTime to dependentRace
+     * @param dependentRace
+     * @param courseAreaId
      */
-    void requestNewStartTime(TimePoint now, TimePoint startTime, RacingProcedurePrerequisite.Resolver resolver);
+    void forceNewDependentStartTime(TimePoint now, Duration startTimeDifference, SimpleRaceLogIdentifier dependentRace, UUID courseAreaId);
 
     /**
      * Sets the finishing time.
@@ -102,9 +105,9 @@ public interface RaceState extends ReadonlyRaceState {
     void setFinishedTime(TimePoint now);
 
     /**
-     * Sets the protest (start) time.
+     * Sets the protest time.
      */
-    void setProtestTime(TimePoint now, TimePoint protestStartTime);
+    void setProtestTime(TimePoint now, TimeRange protestTime);
 
     /**
      * Signals the abort of this race.
@@ -129,24 +132,44 @@ public interface RaceState extends ReadonlyRaceState {
     /**
      * Sets a new confirmed finishing list.
      */
-    void setFinishPositioningConfirmed(TimePoint now);
+    void setFinishPositioningConfirmed(TimePoint now, CompetitorResults positionedCompetitors);
 
     /**
      * Sets a new active course design.
+     * 
+     * @param courseDesignerMode
+     *            the type of course designer through which the course was created; this decides about whether the
+     *            waypoint specification will be considered at all. For example, the "By Marks" course designer does not
+     *            produce a valid waypoints list which therefore must be ignored instead of using it to update a
+     *            TrackedRace's course.
      */
-    void setCourseDesign(TimePoint now, CourseBase courseDesign);
+    void setCourseDesign(TimePoint now, CourseBase courseDesign, CourseDesignerMode courseDesignerMode);
 
     /**
      * Enters a new wind fix for this race.
      */
-    void setWindFix(TimePoint now, Wind wind);
+    void setWindFix(TimePoint now, Wind wind, boolean isMagnetic);
     
     /**
      * Marks this race state with a new {@link RaceLogAdditionalScoringInformationEvent} or revokes
      * an already existing one.
      */
     void setAdditionalScoringInformationEnabled(TimePoint creationTimePoint, boolean enable, AdditionalScoringInformationType informationType);
-
+    
     boolean isAdditionalScoringInformationEnabled(AdditionalScoringInformationType informationType);
 
+    /**
+     * forces a RaceStateUpdate
+     */
+    void forceUpdate();
+
+    /**
+     * Marks the results of the race to which this state belongs as official, using a
+     * {@link RaceLogResultsAreOfficialEvent}.
+     * 
+     * @param timePoint
+     *            the time point at which the results were declared official
+     * @see #isResultsAreOfficial()
+     */
+    void setResultsAreOfficial(TimePoint timePoint);
 }

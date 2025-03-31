@@ -1,0 +1,136 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:a="urn:import:com.sap.sailing.gwt.home.mobile.partials.accordion"
+        xmlns:s="urn:import:com.sap.sailing.gwt.home.mobile.partials.solutions"
+        xmlns:sb="urn:import:com.sap.sailing.gwt.home.shared.partials.storebadges">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="res_local" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
+    <a:Accordion>
+        <a:item>
+            <s:SolutionsItem title="{i18n.sapInSailing}"
+                    image="{res_local.sapInSailing}" showInitial="true">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentSapInSailing1}' />
+                        </p>
+                        <ul>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing2}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing3}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing4}' />
+                            </li>
+                        </ul>
+                        <p>
+                            <ui:text from='{i18n.contentSapInSailing5}' />
+                        </p>
+                        <ul>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing7}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing10}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing11}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing12}' />
+                            </li>
+                            <li>
+                                <ui:text from='{i18n.contentSapInSailing13}' />
+                            </li>
+                        </ul>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+        <a:item>
+            <s:SolutionsItem title="{i18n.sapSailingAnalyticsTitle}"
+                    image="{res_local.sapTrimmed}" showInitial="false">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentSapSailingAnalytics1}' />
+                        </p>
+                        <p>
+                            <ui:text from='{i18n.contentSapSailingAnalytics2}' />
+                        </p>
+                        <a class="{res.mainCss.button}" ui:field="sailingAnalyticsDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingAnalyticsReadMore}"/>
+                        </a>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+        <a:item>
+            <s:SolutionsItem title="{i18n.sapSailingRaceManager}"
+                    image="{res_local.race}" showInitial="false">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentSapSailingRaceManager}' />
+                        </p>
+                        <sb:PlayStoreBadge targetUrl="{i18n.playstoreRacecommitteeApp}"/>
+                        <a class="{res.mainCss.button}" ui:field="raceManagerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingRaceManagerReadMore}"/>
+                        </a>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+        <a:item>
+            <s:SolutionsItem title="{i18n.sapSailInSight}"
+                    image="{res_local.sapSailingInsight}" showInitial="false">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentSapSailInSight}' />
+                        </p>
+                        <sb:AppStoreBadge targetUrl="{i18n.appstoreSapSailInsight}"/>
+                        <sb:PlayStoreBadge targetUrl="{i18n.playstoreInsightApp}"/>
+                        <a class="{res.mainCss.button}" ui:field="sailInSightAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailInSightReadMore}"/>
+                        </a>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+        <a:item>
+            <s:SolutionsItem title="{i18n.sapSailingBuoyPinger}"
+                    image="{res_local.sapSailingBuoyPinger}" showInitial="false">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentSapSailingBuoyPinger}' />
+                        </p>
+                        <sb:PlayStoreBadge targetUrl="{i18n.playStoreBuoyPingerApp}"/>
+                        <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>
+                        </a>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+        <a:item>
+            <s:SolutionsItem title="{i18n.strategySimulator}"
+                    image="{res_local.simulatorTrimmed}" showInitial="false">
+                <s:content>
+                    <g:HTMLPanel>
+                        <p>
+                            <ui:text from='{i18n.contentStrategySimulator}' />
+                        </p>
+                        <a class="{res.mainCss.button}" ui:field="simulatorAppDetailsAnchor">
+                           <ui:text from="{i18n.strategySimulatorReadMore}"/>
+                        </a>
+                    </g:HTMLPanel>
+                </s:content>
+            </s:SolutionsItem>
+        </a:item>
+    </a:Accordion>
+</ui:UiBinder>

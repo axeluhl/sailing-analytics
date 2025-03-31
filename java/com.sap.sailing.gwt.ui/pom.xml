@@ -11,20 +11,15 @@
   <artifactId>com.sap.sailing.gwt.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <repositories>
-    <repository>
-      <id>sonatype</id>
-      <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <dependencies>
+		<!-- The following dependency needs re-declaration with the desired version 
+			because gwt-maps-api declares it with no version specifier which may be resolved 
+			to an incorrect version. -->
+    <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>${gwt.version}</version>
+    </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
@@ -40,9 +35,14 @@
       <!-- This dependency is required because the GWT Maven Plugin searches 
         other GWT modules only in Maven dependencies -->
       <groupId>com.github.branflake2267</groupId>
-      <artifactId>gwt-maps-api</artifactId>
-      <version>3.9.0-build-17</version>
-      <scope>provided</scope>
+      <artifactId>com.github.branflake2267.gwt-maps-api</artifactId>
+      <version>3.10.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.branflake2267</groupId>
+      <artifactId>com.github.branflake2267.gwt-maps-api</artifactId>
+      <version>3.10.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>org.moxieapps.gwt</groupId>
@@ -52,62 +52,98 @@
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.expeditionconnector.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sailing.domain.common</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.common</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.gwt</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-      <classifier>sources</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.sap.sailing</groupId>
-      <artifactId>com.sap.sse.gwt.theme</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.gwt.adminconsole</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sailing.datamining.shared</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.datamining.shared</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
-      <groupId>com.github.gwtbootstrap</groupId>
-      <artifactId>gwt-bootstrap</artifactId>
-      <version>2.3.2.0</version>
-      <scope>provided</scope>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.datamining.annotations</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.polars.datamining.shared</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.security.common</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>com.sap.sailing</groupId>
       <artifactId>com.sap.sse.security.ui</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+    	<groupId>com.sap.sailing</groupId>
+    	<artifactId>com.sap.sse.datamining.ui</artifactId>
+    	<version>${project.version}</version>
+    	<classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.landscape.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sse.landscape.aws.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.landscape.common</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.sap.sailing</groupId>
+      <artifactId>com.sap.sailing.landscape.ui</artifactId>
+      <version>${project.version}</version>
       <classifier>sources</classifier>
     </dependency>
   </dependencies>
@@ -117,37 +153,36 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>${gwt.version}</version>
+        <version>${gwt.plugin.version}</version>
         <executions>
           <!-- GWT version detected from dependencyManagement -->
           <execution>
             <configuration>
               <!-- <userAgents>chrome</userAgents> -->
               <modules>
-                <module>com.sap.sailing.gwt.Home</module>
-                <module>com.sap.sailing.gwt.AutoPlay</module>
+                <module>com.sap.sailing.gwt.home.Home</module>
+                <module>com.sap.sailing.gwt.autoplay.AutoPlay</module>
                 <module>com.sap.sailing.gwt.ui.AdminConsole</module>
+                <module>com.sap.sailing.gwt.managementconsole.ManagementConsole</module>
                 <module>com.sap.sailing.gwt.ui.Leaderboard</module>
                 <module>com.sap.sailing.gwt.ui.LeaderboardEditing</module>
                 <module>com.sap.sailing.gwt.ui.RaceBoard</module>
+                <module>com.sap.sailing.gwt.ui.EmbeddedMapAndWindChart</module>
                 <module>com.sap.sailing.gwt.ui.Spectator</module>
                 <module>com.sap.sailing.gwt.ui.DataMining</module>
                 <module>com.sap.sailing.gwt.ui.VideoPopup</module>
                 <module>com.sap.sailing.gwt.ui.YoutubePopup</module>
                 <module>com.sap.sailing.gwt.ui.Simulator</module>
+                <module>com.sap.sailing.gwt.ui.PairingList</module>
                 <module>com.sap.sailing.gwt.regattaoverview.RegattaOverview</module>
-                <module>com.sap.sailing.gwt.ui.PolarSheets</module>
               </modules>
-              <!-- uncomment the following for PRETTY-printed, non-obfuscated output format
-              <style>PRETTY</style>
-              -->
+							<!-- uncomment the following for PRETTY-printed, non-obfuscated output 
+								format <style>PRETTY</style> -->
               <gen>${basedir}/.generated</gen>
               <webappDirectory>${basedir}</webappDirectory>
               <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
               <!-- Uncomment the following to obtain details split-point reports
-              <compileReport>true</compileReport>
-              <detailedSoyc>true</detailedSoyc>
-              -->
+								<compileReport>true</compileReport> <detailedSoyc>true</detailedSoyc> -->
             </configuration>
             <goals>
               <goal>compile</goal>
@@ -180,7 +215,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.version}</version>
+            <version>${gwt.plugin.version}</version>
             <executions>
               <execution>
                 <configuration combine.self="override">

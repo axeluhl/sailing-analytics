@@ -9,11 +9,12 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Class to draw the legend for the different paths on the map.
@@ -22,6 +23,8 @@ import com.sap.sailing.simulator.util.SailingSimulatorConstants;
  *
  */
 public class PathLegendCanvasOverlay extends FullCanvasOverlay {
+    
+    private final StringMessages stringMessages;
 
     private List<PathCanvasOverlay> pathOverlays;
 
@@ -43,13 +46,17 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
     private String algorithmTimedOutText = "out-of-bounds";
     private String mixedLegText = "ambiguous wind";
 
-    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem) {
+    public PathLegendCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem,
+            StringMessages stringMessages) {
         super(map, zIndex, coordinateSystem);
+        this.stringMessages = stringMessages;
     	this.mode = mode;
     	if (this.mode == SailingSimulatorConstants.ModeEvent) {
     	    yOffset = 170;
     	}
         setPathOverlays(null);
+        this.algorithmTimedOutText = stringMessages.simulationLegendAlgorithmTimedOutText();
+        this.mixedLegText = stringMessages.simulationLegendMixedLegText();
     }
 
     @Override
@@ -57,8 +64,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         if (mapProjection != null && pathOverlays != null && pathOverlays.size() > 0) {
             boolean containsPolyline = false;
             for (PathCanvasOverlay overlay : this.pathOverlays) {
-                //TODO: Make course name a constant
-                if (overlay.getName().equals("What-If Course")) {
+                if (overlay.getName().equals(PathPolyline.END_USER_NAME)) {
                     containsPolyline = true;
                     break;
                 }
@@ -67,7 +73,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 List<PathCanvasOverlay> result = new ArrayList<PathCanvasOverlay>();
                 int indexOfPolyline = 0;
                 for (int index = 0; index < this.pathOverlays.size(); index++) {
-                    if (this.pathOverlays.get(index).getName().equals("What-If Course")) {
+                    if (this.pathOverlays.get(index).getName().equals(PathPolyline.END_USER_NAME)) {
                         indexOfPolyline = index;
                     } else {
                         result.add(this.pathOverlays.get(index));
@@ -119,7 +125,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 timewidth = newwidth;
             }
             for (PathCanvasOverlay path : pathOverlays) {
-                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
+                String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathDurationMillis())));
                 drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.getPathColor(),
                         path.getName(), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)));
                 index++;
@@ -138,7 +144,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 double cY = yOffset + (pathOverlays.size()-1) * rectHeight + 75.0;
                 context2d.setGlobalAlpha(0.80);
                 context2d.setFillStyle("white");
-                double bgWidth = 100.0;
+                double bgWidth = 120.0;
                 double bgHeight = 70.0;
                 if (this.curSpeed == 0.0) {
                 	bgHeight = 20.0;
@@ -148,7 +154,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 context2d.setFont(textFont);
                 context2d.setFillStyle(textColor);
                 //TextMetrics txtmet;
-                String cText = "Current: " + SimulatorMainPanel.formatSliderValue(curSpeed) + "kn";
+                String cText = stringMessages.current() + ": " + stringMessages.knotsValue(curSpeed);
                 txtmet = context2d.measureText(cText);
                 double txtwidth = txtmet.getWidth();
                 context2d.fillText(cText, cX-(txtwidth/2.0), cY-25);

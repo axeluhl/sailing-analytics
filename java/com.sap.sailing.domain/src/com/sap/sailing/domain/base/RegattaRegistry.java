@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.util.ConcurrentModificationException;
 
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 
 public interface RegattaRegistry {
     /**
@@ -14,4 +15,8 @@ public interface RegattaRegistry {
     Regatta getRegattaByName(String name);
     
     Regatta getRegatta(RegattaIdentifier regattaIdentifier);
+
+    void removeTrackedRegattaListener(TrackedRegattaListener listener);
+
+    void addTrackedRegattaListener(TrackedRegattaListener listener);
 }

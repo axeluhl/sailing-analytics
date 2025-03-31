@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -20,8 +18,9 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.util.XmlUtil;
 
 /**
  * Imports magnetic declination data for earth from NOAA (http://www.ngdc.noaa.gov)
@@ -29,8 +28,8 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  * 
  */
-public class NOAAImporter {
-    private static final String QUERY_URL = "http://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
+public class NOAAImporter extends DeclinationImporter {
+    private static final String QUERY_URL = "https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
     private static final String REGEXP_DECLINATION = "<p class=\"indent\"><b>Declination</b> = ([0-9]*)&deg; ([0-9]*)' *([EW])";
     private static final String REGEXP_ANNUAL_CHANGE = "changing by *([0-9]*)&deg; *([0-9]*)' ([EW])/year *</p>";
     
@@ -51,18 +50,21 @@ public class NOAAImporter {
         return annualChangePattern;
     }
 
+    @Override
     public Declination importRecord(Position position, TimePoint timePoint) throws IOException, ParserConfigurationException, SAXException {
         Declination result = null;
         Date date = timePoint.asDate();
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        URL url = new URL(QUERY_URL+"?lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
-                + (calendar.get(Calendar.MONTH) + 1) + "&startDay=" + calendar.get(Calendar.DAY_OF_MONTH)+"&resultFormat=xml");
+        final int year = calendar.get(Calendar.YEAR);
+        URL url = new URL(QUERY_URL+"?key=zNEw7&lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
+                + (calendar.get(Calendar.MONTH) + 1) + "&startDay=" + calendar.get(Calendar.DAY_OF_MONTH)+"&resultFormat=xml"
+                +(year < 2024 ? "&model=IGRF":"")); // WMM / WMMHR start only in 2024; earlier years need to be solved by the IGRF model
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         conn.setRequestProperty("Accept-Language", "en-US,en;q=0.8");
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.66 Safari/537.36");
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilder builder = XmlUtil.getSecureDocumentBuilderFactory().newDocumentBuilder();
         final InputStream inputStream = conn.getInputStream();
         Document doc = builder.parse(inputStream);
         Element maggridresultNode = (Element) doc.getFirstChild();
@@ -75,48 +77,6 @@ public class NOAAImporter {
         result = new DeclinationRecordImpl(position, timePoint, new DegreeBearingImpl(declinationAsDouble),
                 new DegreeBearingImpl(declinationAnnualChangeInDegreesAsDouble));
         return result;
-    }
-
-    /**
-     * Tries two things in parallel: fetch a more or less precise response from the online service and load
-     * the requested year's declination values from a stored resource to look up a value that comes close.
-     * The online lookup will be given preference. However, should it take longer than
-     * <code>timeoutForOnlineFetchInMilliseconds</code>, then the method will return whatever it found
-     * in the stored file, or <code>null</code> if no file exists for the year of <code>timePoint</code>.
-     * 
-     * @param timeoutForOnlineFetchInMilliseconds if 0, this means wait forever for the online result
-     * @throws ParseException 
-     * @throws ClassNotFoundException 
-     * @throws IOException 
-     */
-    public Declination getDeclination(final Position position, final TimePoint timePoint,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
-        final Declination[] result = new Declination[1];
-        Thread fetcher = new Thread("Declination fetcher for "+position+"@"+timePoint) {
-            @Override
-            public void run() {
-                try {
-                    Declination fetched = importRecord(position, timePoint);
-                    synchronized (result) {
-                        result[0] = fetched;
-                        result.notifyAll();
-                    }
-                } catch (IOException | ParserConfigurationException | SAXException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-        fetcher.start();
-        synchronized (result) {
-            if (result[0] == null) {
-                try {
-                    result.wait(timeoutForOnlineFetchInMilliseconds);
-                } catch (InterruptedException e) {
-                    // ignore; simply use value from file in this case
-                }
-            }
-        }
-        return result[0];
     }
 
 }

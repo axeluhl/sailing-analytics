@@ -29,9 +29,7 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
     public void testNullOnNoPreviousPass() {
         int passId = 0;
         RaceLogFlagEvent event1 = createAbortingEvent(passId);
-        
         raceLog.add(event1);
-        
         assertNull(analyzer.analyze());
     }
     
@@ -40,10 +38,8 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
         int passId = 0;
         RaceLogFlagEvent event1 = createNonAbortingEvent(passId);
         RaceLogFlagEvent event2 = createEvent(RaceLogFlagEvent.class, 1, passId + 1, UUID.randomUUID());
-        
         raceLog.add(event1);
         raceLog.add(event2);
-        
         assertNull(analyzer.analyze());
     }
     
@@ -53,11 +49,9 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
         RaceLogFlagEvent event1 = createAbortingEvent(passId);
         RaceLogFlagEvent event2 = createNonAbortingEvent(passId + 1);
         RaceLogFlagEvent event3 = createEvent(RaceLogFlagEvent.class, 1, passId + 2, UUID.randomUUID());
-        
         raceLog.add(event1);
         raceLog.add(event2);
         raceLog.add(event3);
-        
         assertNull(analyzer.analyze());
     }
     
@@ -66,10 +60,8 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
         int passId = 0;
         RaceLogFlagEvent event1 = createAbortingEvent(passId);
         RaceLogFlagEvent event2 = createEvent(RaceLogFlagEvent.class, 1, passId + 1, UUID.randomUUID());
-        
         raceLog.add(event1);
         raceLog.add(event2);
-        
         assertEquals(event1, analyzer.analyze());
     }
     
@@ -79,11 +71,9 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
         RaceLogFlagEvent event1 = createAbortingEvent(passId, 1);
         RaceLogFlagEvent event2 = createAbortingEvent(passId, 2);
         RaceLogFlagEvent event3 = createEvent(RaceLogFlagEvent.class, 1, passId + 1, UUID.randomUUID());
-        
         raceLog.add(event1);
         raceLog.add(event2);
         raceLog.add(event3);
-        
         assertEquals(event2, analyzer.analyze());
     }
     
@@ -93,11 +83,9 @@ public class AbortingFlagFinderTest extends RaceLogAnalyzerTest<AbortingFlagFind
         RaceLogFlagEvent event1 = createAbortingEvent(passId);
         RaceLogFlagEvent event2 = createAbortingEvent(passId + 1);
         RaceLogFlagEvent event3 = createEvent(RaceLogFlagEvent.class, 1, passId + 2, UUID.randomUUID());
-        
         raceLog.add(event1);
         raceLog.add(event2);
         raceLog.add(event3);
-        
         assertEquals(event2, analyzer.analyze());
     }
     

@@ -67,6 +67,34 @@ public abstract class Labels<T extends Labels> extends Configurable<T> {
 
     }
 
+    public enum VerticalAlign {
+
+        /**
+         * Align the data label to the top of the point
+         */
+        TOP("top"),
+
+        /**
+         * Align the data label to the middle of the point
+         */
+        MIDDLE("middle"),
+
+        /**
+         * Align the data label on the bottom of the point
+         */
+        BOTTOM("bottom");
+
+        private VerticalAlign(String optionValue) {
+            this.optionValue = optionValue;
+        }
+
+        private final String optionValue;
+
+        public String toString() {
+            return optionValue;
+        }
+    }
+
     /**
      * Convenience method for setting the 'align' option for the labels.  Equivalent to:
      * <pre><code>
@@ -141,6 +169,20 @@ public abstract class Labels<T extends Labels> extends Configurable<T> {
      */
     public T setStyle(Style style) {
         return this.setOption("style", style != null ? style.getOptions() : null);
+    }
+
+    /**
+     * Convenience method for setting the 'verticalAlign' option for the labels.  Equivalent to:
+     * <pre><code>
+     *     labels.setOption("verticalAlign", Labels.VerticalAlign.TOP);
+     * </code></pre>
+     * The vertical alignment of the data label compared to the point. Can be one of "top", "middle" or "bottom". Defaults to "center".
+     *
+     * @param verticalAlign The vertical alignment of the label compared to the point.
+     * @return A reference to this {@link org.moxieapps.gwt.highcharts.client.labels.Labels} instance for convenient method chaining.
+     */
+    public T setVerticalAlign(VerticalAlign verticalAlign) {
+        return this.setOption("verticalAlign", verticalAlign != null ? verticalAlign.toString() : null);
     }
 
     /**

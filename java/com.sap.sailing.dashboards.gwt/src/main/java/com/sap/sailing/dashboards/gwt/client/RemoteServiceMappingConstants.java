@@ -17,5 +17,5 @@ public interface RemoteServiceMappingConstants {
     public static final String WEB_CONTEXT_PATH = "dashboards";
 
     public static final String sailingServiceRemotePath = "service/sailing";
-    public static final String ribdashboardServiceRemotePath = "service/ribdashboard";
+    public static final String ribdashboardDispatchServiceRemotePath = "service/dispatch";
 }

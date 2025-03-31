@@ -1,0 +1,392 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.Displayer;
+import com.sap.sailing.gwt.ui.client.Refresher;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.UserService;
+
+/**
+ * This is the UI wizard to be executed after
+ * {@link com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImporter ExpeditionAllInOneImporter}
+ * succeeded running. This provides the functionality to add new {@link com.sap.sailing.domain.base.Competitor
+ * Competitors} to the {@link com.sap.sailing.domain.base.Regatta Regatta} and automatically maps the imported GPS and
+ * Bravo tracks to a selected {@link com.sap.sailing.domain.base.Competitor Competitor}. In addition, the
+ * {@link com.sap.sailing.domain.tracking.TrackedRace TrackedRace} is retracked after the process to ensure that newly
+ * added competitors are correctly visible afterwards. After the import finished successfully, a dialog is provided to
+ * the user that shows links to the event page and race board.
+ */
+public class ExpeditionAllInOneAfterImportHandler {
+    
+    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final UserService userService;
+    private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
+    private final String leaderboardGroupName;
+    private final UUID leaderboardGroupId;
+    protected EventDTO event;
+    private RegattaDTO regatta;
+    private StrippedLeaderboardDTO leaderboard;
+    private List<TrackFileImportDeviceIdentifierDTO> gpsFixesDeviceIDs;
+    private List<TrackFileImportDeviceIdentifierDTO> sensorFixesDeviceIDs;
+    private final String sensorImporterType;
+    private List<Triple<String, String, String>> raceEntries;
+    private String regattaName;
+    @SuppressWarnings("unused") // the following could become useful in order to show the start times used for a split
+    private Iterable<TimePoint> startTimes;
+
+    public ExpeditionAllInOneAfterImportHandler(UUID eventId, String regattaName, String leaderboardName,
+            String leaderboardGroupName, UUID leaderboardGroupId, List<Triple<String, String, String>> raceEntries,
+            List<String> gpsDeviceIds, List<String> sensorDeviceIds, String sensorImporterType,
+            Iterable<TimePoint> startTimes, final SailingServiceWriteAsync sailingServiceWrite,
+            final UserService userService, Refresher<CompetitorDTO> competitorsRefresher,
+            Refresher<BoatDTO> boatsRefresher, Refresher<RegattaDTO> regattasRefresher,
+            Refresher<EventDTO> eventsRefresher, Refresher<StrippedLeaderboardDTO> leaderboardsRefresher,
+            Refresher<LeaderboardGroupDTO> leaderboardGroupsRefresher, final ErrorReporter errorReporter,
+            final StringMessages stringMessages, Displayer<RegattaDTO> regattaOracleToRefresh) {
+        this.leaderboardGroupName = leaderboardGroupName;
+        this.leaderboardGroupId = leaderboardGroupId;
+        this.sensorImporterType = sensorImporterType;
+        this.sailingServiceWrite = sailingServiceWrite;
+        this.userService = userService;
+        this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
+        this.raceEntries = raceEntries;
+        this.regattaName = regattaName;
+        this.startTimes = startTimes;
+        // TODO from the start times, suggest the user to split the session into one session per start, with start tracking at n minutes before start
+        sailingServiceWrite.getEventById(eventId, false, new DataLoadingCallback<EventDTO>() {
+            @Override
+            public void onSuccess(EventDTO result) {
+                event = result;
+                eventsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
+                });
+                sailingServiceWrite.getRegattaByName(regattaName, new DataLoadingCallback<RegattaDTO>() {
+                    @Override
+                    public void onSuccess(RegattaDTO result) {
+                        regatta = result;
+                        regattasRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<RegattaDTO>() {
+                            @Override
+                            public boolean representSameEntity(RegattaDTO dto1, RegattaDTO dto2) {
+                                return dto1.getRegattaIdentifier().equals(dto2.getRegattaIdentifier());
+                            }
+                            @Override
+                            public int hashCode(RegattaDTO t) {
+                                return t.getRegattaIdentifier().hashCode();
+                            }
+                        });
+                        regattasRefresher.callFillAndReloadInitially(regattaOracleToRefresh);
+                        sailingServiceWrite.getLeaderboardWithSecurity(leaderboardName,
+                                new DataLoadingCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTO result) {
+                                leaderboard = result;
+                                leaderboardsRefresher.addIfNotContainedElseReplace(result, new EntityIdentityComparator<StrippedLeaderboardDTO>() {
+                                    @Override
+                                    public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
+                                        return dto1.getName().equals(dto2.getName());
+                                    }
+                                    @Override
+                                    public int hashCode(StrippedLeaderboardDTO t) {
+                                        return t.getName().hashCode();
+                                    }
+                                });
+                                sailingServiceWrite.getTrackFileImportDeviceIds(gpsDeviceIds,
+                                    new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                        @Override
+                                        public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                            gpsFixesDeviceIDs = result;
+                                            sailingServiceWrite.getTrackFileImportDeviceIds(sensorDeviceIds,
+                                                        new DataLoadingCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                                                @Override
+                                                public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                                                    sensorFixesDeviceIDs = result;
+                                                    showCompetitorRegistration(competitorsRefresher, boatsRefresher);
+                                                }
+                                            });
+                                        }
+                                    });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    private class RegattaLogCompetitorRegistrationAndSelectionDialog extends RegattaLogCompetitorRegistrationDialog {
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass,
+                SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+                StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+                boolean canBoatsOfCompetitorsChangePerRace) {
+            this(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                    errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace,
+                    new ValidatorForCompetitorRegistrationDialog(stringMessages),
+                    new CallbackForCompetitorRegistrationDialog());
+        }
+
+        public RegattaLogCompetitorRegistrationAndSelectionDialog(String boatClass,
+                SailingServiceWriteAsync sailingServiceWrite, final UserService userService,
+                Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher,
+                StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
+                boolean canBoatsOfCompetitorsChangePerRace, ValidatorForCompetitorRegistrationDialog validator,
+                CallbackForCompetitorRegistrationDialog callback) {
+            super(boatClass, sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages,
+                    errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, validator, callback);
+            validator.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
+            callback.setCompetitorRegistrationsPanel(competitorRegistrationsPanel);
+        }
+    }
+    
+    private static class ValidatorForCompetitorRegistrationDialog implements Validator<Set<CompetitorDTO>> {
+        private CompetitorRegistrationsPanel competitorRegistrationsPanel;
+        private StringMessages stringMessages;
+        public ValidatorForCompetitorRegistrationDialog(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+        @Override
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
+            if (competitorRegistrationsPanel == null || competitorRegistrationsPanel.getSelectedRegisteredCompetitors().size() != 1) {
+                return stringMessages.selectOneCompetitorToMapTheImportedData();
+            }
+            return null;
+        }
+        public void setCompetitorRegistrationsPanel(CompetitorRegistrationsPanel competitorRegistrationsPanel) {
+            this.competitorRegistrationsPanel = competitorRegistrationsPanel;
+        }
+    }
+    
+    private class CallbackForCompetitorRegistrationDialog extends CancelImportDialogCallback<Set<CompetitorDTO>> {
+        private CompetitorRegistrationsPanel competitorRegistrationsPanel;
+        
+        @Override
+        public void ok(Set<CompetitorDTO> competitors) {
+            if (competitors.isEmpty()) {
+                Notification.notify(stringMessages.importCanceledNoCompetitorAdded(), NotificationType.ERROR);
+            } else {
+                sailingServiceWrite.setCompetitorRegistrationsInRegattaLog(leaderboard.getName(),
+                    competitors, new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                                mapCompetitorsToGPSFixDeviceIds(competitorRegistrationsPanel == null ? competitors
+                                        : competitorRegistrationsPanel.getSelectedRegisteredCompetitors());
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Failed to register competitors!");
+                        }
+                    });
+            }
+        }
+        public void setCompetitorRegistrationsPanel(CompetitorRegistrationsPanel competitorRegistrationsPanel) {
+            this.competitorRegistrationsPanel = competitorRegistrationsPanel;
+        }
+    }
+
+    private void showCompetitorRegistration(Refresher<CompetitorDTO> competitorsRefresher, Refresher<BoatDTO> boatsRefresher) {
+        new RegattaLogCompetitorRegistrationAndSelectionDialog(regatta.boatClass == null ? null : regatta.boatClass.getName(),
+                sailingServiceWrite, userService, competitorsRefresher, boatsRefresher, stringMessages, errorReporter, true,
+                leaderboard.getName(), leaderboard.canBoatsOfCompetitorsChangePerRace).show();
+    }
+    
+    private void mapCompetitorsToGPSFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+        if (gpsFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
+            // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
+            final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = gpsFixesDeviceIDs.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            saveCompetitorGPSMapping(mappedCompetitors, Collections.singleton(new DeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null)));
+        } else {
+            new RegattaLogFixesAddMappingsDialog(sailingServiceWrite, userService, errorReporter, stringMessages,
+                    leaderboard.getName(), gpsFixesDeviceIDs,
+                    new CancelImportDialogCallback<Collection<DeviceMappingDTO>>() {
+                
+                @Override
+                public void ok(Collection<DeviceMappingDTO> mappings) {
+                    saveCompetitorGPSMapping(mappedCompetitors, mappings);
+                }
+            }).show();
+        }
+    }
+
+    private void saveCompetitorGPSMapping(final Set<CompetitorDTO> mappedCompetitors, final Collection<DeviceMappingDTO> mappings) {
+        new AddDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
+            mapCompetitorsToSensorFixDeviceIds(mappedCompetitors);
+        });
+    }
+
+    private final void mapCompetitorsToSensorFixDeviceIds(final Set<CompetitorDTO> mappedCompetitors) {
+        if (sensorFixesDeviceIDs.size() == 1 && mappedCompetitors.size() == 1) {
+            // If there is exactly one device and one Competitor, the mapping is automatically added without user interaction
+            final TrackFileImportDeviceIdentifierDTO deviceIdentifierDTO = sensorFixesDeviceIDs.iterator().next();
+            final CompetitorDTO competitor = mappedCompetitors.iterator().next();
+            saveCompetitorSensorFixMapping(Collections.singleton(new TypedDeviceMappingDTO(deviceIdentifierDTO, deviceIdentifierDTO.from, deviceIdentifierDTO.to, competitor, null, sensorImporterType)));
+        } else if (sensorFixesDeviceIDs.size() > 0) {
+            new RegattaLogSensorDataAddMappingsDialog(sailingServiceWrite, userService, errorReporter, stringMessages, leaderboard.getName(),
+                    sensorFixesDeviceIDs, sensorImporterType,
+                    new CancelImportDialogCallback<Collection<TypedDeviceMappingDTO>>() {
+    
+                @Override
+                public void ok(Collection<TypedDeviceMappingDTO> mappings) {
+                    saveCompetitorSensorFixMapping(mappings);
+                }
+            }).show();
+        } else {
+            // there can be zero sensor fix devices -> skipping the mapping step
+            continueWithMappedDevices();
+        }
+    }
+    
+    private void saveCompetitorSensorFixMapping(final Collection<TypedDeviceMappingDTO> mappings) {
+        new AddTypedDeviceMappingsToRegattaLog(leaderboard.getName(), mappings, () -> {
+            continueWithMappedDevices();
+        });
+    }
+
+    private final void continueWithMappedDevices() {
+        List<RegattaNameAndRaceName> racesToStopAndStartTrackingFor = new ArrayList<>();
+        final List<Triple<String, String, String>> leaderboardRaceColumnFleetNames = new ArrayList<>();
+        final List<Pair<String, String>> raceNames = new ArrayList<>();
+        for(Triple<String, String, String> race:raceEntries) {
+            String raceName = race.getA();
+            String raceColumnName = race.getB();
+            String fleetName= race.getC();
+            racesToStopAndStartTrackingFor.add(new RegattaNameAndRaceName(regattaName, raceName));
+            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.getName(), raceColumnName, fleetName));
+            raceNames.add(new Pair<String, String>(raceName, raceColumnName));
+        }
+        
+        sailingServiceWrite.removeAndUntrackRaces(racesToStopAndStartTrackingFor, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Failed to track race after import!");
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                sailingServiceWrite.startRaceLogTracking(leaderboardRaceColumnFleetNames, /* trackWind */ false,
+                        /* correctWindByDeclination */ true, new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                new ExpeditionAllInOneImportResultDialog(event.id, regatta.getName(),
+                                        raceNames, leaderboard.getName(), leaderboardGroupName, leaderboardGroupId)
+                                                .show();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorStartingTracking(
+                                        Util.toStringOrNull(leaderboardRaceColumnFleetNames), caught.getMessage()));
+                            }
+                        });
+            }
+        });
+    }
+
+    private class AddTypedDeviceMappingsToRegattaLog {
+        private int callCount = 0;
+        private final Runnable callback;
+        public AddTypedDeviceMappingsToRegattaLog(String leaderboardName, Collection<TypedDeviceMappingDTO> mappings, Runnable callback) {
+            this.callback = callback;
+            for (TypedDeviceMappingDTO mapping : mappings) {
+                callCount++;
+                sailingServiceWrite.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        callCount--;
+                        runCallbackIfNoCallIsRunning();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Failed to add device mappings!");
+                    }
+                });
+            }
+        }
+        private void runCallbackIfNoCallIsRunning() {
+            if (callCount == 0) {
+                callback.run();
+            }
+        }
+    }
+    
+    private class AddDeviceMappingsToRegattaLog {
+        private int callCount = 0;
+        private final Runnable callback;
+        public AddDeviceMappingsToRegattaLog(String leaderboardName, Collection<DeviceMappingDTO> mappings, Runnable callback) {
+            this.callback = callback;
+            for (DeviceMappingDTO mapping : mappings) {
+                callCount++;
+                sailingServiceWrite.addDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        callCount--;
+                        runCallbackIfNoCallIsRunning();
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Failed to add device mappings!");
+                    }
+                });
+            }
+        }
+        private void runCallbackIfNoCallIsRunning() {
+            if (callCount == 0) {
+                callback.run();
+            }
+        }
+    }
+
+    private abstract class DataLoadingCallback<T> implements AsyncCallback<T> {
+        @Override
+        public final void onFailure(Throwable caught) {
+            errorReporter.reportError("Failed loading importer data from server!");
+        }
+    }
+
+    private abstract class CancelImportDialogCallback<T> implements DialogCallback<T> {
+        @Override
+        public final void cancel() {
+            Notification.notify(stringMessages.importCanceledByUser(), NotificationType.WARNING);
+        }
+    }
+}

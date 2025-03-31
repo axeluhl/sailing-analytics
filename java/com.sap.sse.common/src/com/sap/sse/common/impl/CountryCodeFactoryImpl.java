@@ -39,6 +39,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("ARMENIA", "AM", "ARM", "am", "AM", "ARM", "051", "7"));
         add(new CountryCodeImpl("ARUBA", "AW", "ABW", "aw", null, "ARU", "533", "297"));
         add(new CountryCodeImpl("ASCENSION ISLAND", null, null, "ac", null, null, null, "247"));
+        add(new CountryCodeImpl("ATHLÈTE INDIVIDUEL NEUTRE", "AA", "AIN", null, null, "AIN", null, null));
         add(new CountryCodeImpl("AUSTRALIA", "AU", "AUS", "au", "AUS", "AUS", "036", "61"));
         add(new CountryCodeImpl("AUSTRIA", "AT", "AUT", "at", "A", "AUT", "040", "43"));
         add(new CountryCodeImpl("AZERBAIJAN", "AZ", "AZE", "az", "AZ", "AZE", "031", "994"));
@@ -99,7 +100,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("ESTONIA", "EE", "EST", "ee", "EST", "EST", "233", "372"));
         add(new CountryCodeImpl("ETHIOPIA", "ET", "ETH", "et", "ETH", "ETH", "231", "251"));
         add(new CountryCodeImpl("EUROPEAN UNION", null, null, "eu", null, null, null, null));
-        add(new CountryCodeImpl("FAEROE ISLANDS", "FO", "FRO", "fo", "FR", null, "234", "298"));
+        add(new CountryCodeImpl("FAEROE ISLANDS", "FO", "FRO", "fo", "FR", "FRO", "234", "298"));
         add(new CountryCodeImpl("FALKLAND ISLANDS (MALVINAS)", "FK", "FLK", "fk", null, null, "238", "500"));
         add(new CountryCodeImpl("FIJI", "FJ", "FJI", "fj", "FJI", "FIJ", "242", "679"));
         add(new CountryCodeImpl("FINLAND", "FI", "FIN", "fi", "FIN", "FIN", "246", "358"));
@@ -159,7 +160,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("LIECHTENSTEIN (Fürstentum Liechtenstein)", "LI", "LIE", "li", "FL", "LIE", "438", "423"));
         add(new CountryCodeImpl("LITHUANIA", "LT", "LTU", "lt", "LT", "LTU", "440", "370"));
         add(new CountryCodeImpl("LUXEMBOURG", "LU", "LUX", "lu", "L", "LUX", "442", "352"));
-        add(new CountryCodeImpl("MACAO (Special Administrative Region of China)", "MO", "MAC", "mo", null, null, "446", "853"));
+        add(new CountryCodeImpl("MACAO (Special Administrative Region of China)", "MO", "MAC", "mo", null, "MAC", "446", "853"));
         add(new CountryCodeImpl("MACEDONIA (Former Yugoslav Republic of Macedonia)", "MK", "MKD", "mk", "MK", "MKD", "807", "389"));
         add(new CountryCodeImpl("MADAGASCAR", "MG", "MDG", "mg", "RM", "MAD", "450", "261"));
         add(new CountryCodeImpl("MALAWI", "MW", "MWI", "mw", "MW", "MAW", "454", "265"));
@@ -213,6 +214,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("RÉUNION", "RE", "REU", "re", null, null, "638", "262"));
         add(new CountryCodeImpl("ROMANIA", "RO", "ROU", "ro", "RO", "ROU", "642", "40"));
         add(new CountryCodeImpl("RUSSIAN FEDERATION", "RU", "RUS", "ru", "RUS", "RUS", "643", "7"));
+        add(new CountryCodeImpl("RUSSIAN OLYMPIC COMMITTEE", "RC", "ROC", "rc", "ROC", "ROC", "643", "7"));
         add(new CountryCodeImpl("RWANDA", "RW", "RWA", "rw", "RWA", "RWA", "646", "250"));
         add(new CountryCodeImpl("SAINT BARTHÉLEMY", "BL", "BLM", "bl", null, null, "652", null));
         add(new CountryCodeImpl("SAINT HELENA", "SH", "SHN", "sh", null, null, "654", "290"));
@@ -229,7 +231,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SERBIA (Republic of Serbia)", "RS", "SRB", "rs", null, "SRB", "688", "381"));
         add(new CountryCodeImpl("SEYCHELLES", "SC", "SYC", "sc", "SY", "SEY", "690", "248"));
         add(new CountryCodeImpl("SIERRA LEONE", "SL", "SLE", "sl", "WAL", "SLE", "694", "232"));
-        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SIN", "702", "65"));
+        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SGP", "702", "65"));
         add(new CountryCodeImpl("SINT MAARTEN", "SX", "SXM", "sx", null, null, "534", "599"));
         add(new CountryCodeImpl("SLOVAKIA (Slovak Republic)", "SK", "SVK", "sk", "SK", "SVK", "703", "421"));
         add(new CountryCodeImpl("SLOVENIA", "SI", "SVN", "si", "SLO", "SLO", "705", "386"));
@@ -237,6 +239,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SOMALIA", "SO", "SOM", "so", "SO", "SOM", "706", "252"));
         add(new CountryCodeImpl("SOUTH AFRICA (Zuid Afrika)", "ZA", "ZAF", "za", "ZA", "RSA", "710", "27"));
         add(new CountryCodeImpl("SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS", "GS", "SGS", "gs", null, null, "239", null));
+        add(new CountryCodeImpl("SOUTH SUDAN", "SS", "SSD", "ss", "SSD", "SSD", "728", "211"));
         add(new CountryCodeImpl("SOVIET UNION (Internet code still used)", null, null, "su", null, null, null, null));
         add(new CountryCodeImpl("SPAIN (España)", "ES", "ESP", "es", "E", "ESP", "724", "34"));
         add(new CountryCodeImpl("SRI LANKA (formerly Ceylon)", "LK", "LKA", "lk", "CL", "SRI", "144", "94"));
@@ -256,7 +259,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("TOGO", "TG", "TGO", "tg", "TG", "TOG", "768", "228"));
         add(new CountryCodeImpl("TOKELAU", "TK", "TKL", "tk", null, null, "772", "690"));
         add(new CountryCodeImpl("TONGA", "TO", "TON", "to", null, "TGA", "776", "676"));
-        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TRI", "780", "1-868"));
+        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TTO", "780", "1-868"));
         add(new CountryCodeImpl("TUNISIA", "TN", "TUN", "tn", "TN", "TUN", "788", "216"));
         add(new CountryCodeImpl("TURKEY", "TR", "TUR", "tr", "TR", "TUR", "792", "90"));
         add(new CountryCodeImpl("TURKMENISTAN", "TM", "TKM", "tm", "TM", "TKM", "795", "993"));
@@ -306,27 +309,27 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
 
     @Override
     public CountryCode getFromIANAInternet(String ianaInternet) {
-        return byIanaInternet.get(ianaInternet.toLowerCase());
+        return ianaInternet==null?null:byIanaInternet.get(ianaInternet.toLowerCase());
     }
 
     @Override
     public CountryCode getFromUNVehicle(String unVehicle) {
-        return byUNVehicle.get(unVehicle.toUpperCase());
+        return unVehicle==null?null:byUNVehicle.get(unVehicle.toUpperCase());
     }
 
     @Override
     public CountryCode getFromThreeLetterISOName(String threeLetterISOName) {
-        return byThreeLetterISOName.get(threeLetterISOName.toUpperCase());
+        return threeLetterISOName==null?null:byThreeLetterISOName.get(threeLetterISOName.toUpperCase());
     }
 
     @Override
     public CountryCode getFromThreeLetterIOCName(String threeLetterIOCName) {
-        return byThreeLetterIOCName.get(threeLetterIOCName.toUpperCase());
+        return threeLetterIOCName==null?null:byThreeLetterIOCName.get(threeLetterIOCName.toUpperCase());
     }
 
     @Override
     public CountryCode getFromTwoLetterISOName(String twoLetterISOName) {
-        return byTwoLetterISOName.get(twoLetterISOName.toUpperCase());
+        return twoLetterISOName==null?null:byTwoLetterISOName.get(twoLetterISOName.toUpperCase());
     }
 
     @Override

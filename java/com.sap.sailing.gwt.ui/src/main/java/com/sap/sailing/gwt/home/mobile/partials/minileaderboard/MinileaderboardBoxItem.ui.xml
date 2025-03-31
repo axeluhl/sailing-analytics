@@ -1,0 +1,67 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+
+	<ui:style>
+		.minileaderboard_item {
+			margin: 0 !important;
+			position: relative;
+			padding: 1em 0.75em;
+	  		font-size: 0.866666666666667em;
+	  		min-height: 4.5em;
+		}
+		.minileaderboard_item_rank, .minileaderboard_item_flag, .minileaderboard_item_name, .minileaderboard_item_score {
+			position: absolute;
+			top: 50%;
+			-webkit-transform: translateY(-50%);
+			   -moz-transform: translateY(-50%);
+			    -ms-transform: translateY(-50%);
+			        transform: translateY(-50%);
+		}
+		.minileaderboard_item_rank {
+			width: 1.5em;
+	     	text-align: right;
+	     	font-weight: bold;
+		}
+		.minileaderboard_item_flag {
+			width: 2.25em;
+	     	margin-left: 2em;
+		}
+		.minileaderboard_item_name {
+	     	margin: 0 5em;
+		}
+		.minileaderboard_item_name > span:FIRST-CHILD {
+	     	font-weight: bold;
+		}
+		.minileaderboard_item_score {
+			right: 1em;
+			width: 3.75em;
+			text-align: center;
+			padding: 0.230769230769231em 0;
+			background: #ebebeb;
+			border: 1px solid #dedede;
+			border-radius: 0.384615384615385em;
+		}
+		.minileaderboard_item_points {
+			font-weight: bold;
+		}
+		.minileaderboard_item_racecount {
+			font-size: 0.866666666666667em;
+		}
+	</ui:style>
+
+	<div class="{res.mediaCss.grid} {style.minileaderboard_item}">
+		<div class="{style.minileaderboard_item_rank}" ui:field="competitorRankUi" />
+		<img class="{style.minileaderboard_item_flag}" ui:field="competitorFlagUi" />
+		<div class="{style.minileaderboard_item_name}"> 
+			<span ui:field="competitorCountryNameUi" />
+			<span ui:field="competitorNameUi" />
+		</div>			
+		<div class="{style.minileaderboard_item_score}">
+			<div class="{style.minileaderboard_item_points}" ui:field="competitorPointsUi" />
+			<div class="{style.minileaderboard_item_racecount}" ui:field="competitorRacesUi" />
+		</div>
+	</div>
+
+</ui:UiBinder>

@@ -5,12 +5,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public class UtilTest {
     private List<Integer> l;
@@ -41,5 +47,22 @@ public class UtilTest {
     public void testIndexOfWithNull() {
         assertEquals(0, Util.indexOf(l, 1));
         assertEquals(2, Util.indexOf(l, null));
+    }
+    
+    @Test
+    public void testGroup() {
+        Pair<String, String> a1 = new Pair<>("a", "a");
+        Pair<String, String> a2 = new Pair<>("a", "b");
+        Pair<String, String> a3 = new Pair<>("a", "c");
+        Pair<String, String> b1 = new Pair<>("b", "a");
+        Pair<String, String> b2 = new Pair<>("b", "b");
+        Pair<String, String> c1 = new Pair<>("c", "a");
+
+        Map<String, Iterable<Pair<String, String>>> expected = new HashMap<>();
+        expected.put("a", new HashSet<Pair<String, String>>(Arrays.asList(a1, a2, a3)));
+        expected.put("b", new HashSet<Pair<String, String>>(Arrays.asList(b1, b2)));
+        expected.put("c", new HashSet<Pair<String, String>>(Collections.singleton(c1)));
+
+        assertEquals(expected, Util.group(Arrays.asList(a1, b1, a2, c1, b2, a3), Pair::getA, HashSet::new));
     }
 }

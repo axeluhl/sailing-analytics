@@ -1,0 +1,37 @@
+.cellTable,
+.cellTableHeader,
+.cellTableFirstColumnHeader,
+.cellTableLastColumnHeader,
+.cellTableEvenRow,
+.cellTableOddRow,
+.cellTableSelectedRow,
+.cellTableSelectedRowCell,
+.cellTableHoveredRow,
+.cellTableHoveredRowCell,
+.cellTableKeyboardSelectedRow,
+.cellTableKeyboardSelectedRowCell,
+.cellTableKeyboardSelectedCell,
+.cellTableEvenRowCell,
+.cellTableFirstColumn,
+.cellTableFirstColumnFooter,
+.cellTableFooter,
+.cellTableLastColumn,
+.cellTableLastColumnFooter,
+.cellTableLoading,
+.cellTableOddRowCell,
+.cellTableSortableHeader,
+.cellTableSortedHeaderAscending,
+.cellTableSortedHeaderDescending,
+.cellTableWidget {
+	
+}
+
+.cellTableCell {
+    padding: 5px;
+    margin: 0;
+    vertical-align: top;
+}
+
+.cellTableCell > * {
+    max-height: 10vh;
+}

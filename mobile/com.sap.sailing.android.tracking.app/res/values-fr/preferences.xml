@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    
+    
+
+    <!-- override default values of android.shared -->
+    
+
+    
+
+    <string name="settings_category_energy_saving">"Mode d\'économie d\'énergie"</string>
+    
+    
+    
+    <string name="preference_energy_saving_sending_interval">"Sélectionnez la fréquence d\'envoi des mises à jour du GPS."</string> 
+    <string name="preference_energy_saving_sending_interval_summary">"Sélectionnez la valeur la plus élevée possible pour économiser la batterie tout en bénéficiant d\'une expérience satisfaisante du direct, en fonction de votre utilisation."</string>
+
+    <string name="preference_energy_saving_sending_interval_message">"Les mises à jour du GPS seront envoyées au serveur %1$s %2$s."</string>
+    
+    <string name="preference_energy_saving_sending_interval_message_every">"toutes les"</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>"immédiatement"</item>
+    	<item>"5 secondes"</item>
+    	<item>"10 secondes"</item>
+    	<item>"20 secondes"</item>
+    	<item>"60 secondes"</item>
+	</string-array>
+	
+
+    
+    
+    
+    
+    
+    
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">"Activé"</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">"Désactivé"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">"Afficher : magnétique"</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">"Afficher : vrai"</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">"En-tête"</string>
+</resources>

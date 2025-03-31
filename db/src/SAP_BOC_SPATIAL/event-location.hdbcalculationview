@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Calculation:scenario xmlns:Calculation="http://www.sap.com/ndb/BiModelCalculation.ecore" id="SAP_BOC_SPATIAL::event-location" applyPrivilegeType="NONE" dataCategory="DIMENSION" dimensionType="STANDARD" schemaVersion="3.0" outputViewType="Projection" cacheInvalidationPeriod="NONE" enforceSqlExecution="true">
+<descriptions defaultDescription="Event Location (by ST_POINT)"/>
+<localVariables/>
+<variableMappings/>
+<dataSources>
+  <DataSource id="Event">
+    <resourceUri>Event</resourceUri>
+  </DataSource>
+</dataSources>
+<calculationViews/>
+
+<logicalModel id="Event">
+  <attributes>
+    <attribute id="geo_eventID" key="true" order="1" displayAttribute="false" attributeHierarchyActive="false" descriptionColumnName="geo_eventName">
+      <descriptions defaultDescription="Event ID"/>
+      <keyMapping columnObjectName="Event" columnName="id"/>
+    </attribute>
+    <attribute id="geo_eventName" order="2" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Event Name"/>
+      <keyMapping columnObjectName="Event" columnName="name"/>
+    </attribute>
+    <attribute id="geo_eventLocation" order="3" displayAttribute="false" attributeHierarchyActive="false">
+      <descriptions defaultDescription="Event Location"/>
+      <keyMapping columnObjectName="Event" columnName="location"/>
+    </attribute>
+  </attributes>
+  <calculatedAttributes/>
+  <baseMeasures/>
+  <calculatedMeasures/>
+  <restrictedMeasures/>
+</logicalModel>
+<layout>
+  <shapes>
+    <shape expanded="true" modelObjectName="Output" modelObjectNameSpace="MeasureGroup">
+      <upperLeftCorner x="40" y="85"/>
+    </shape>
+    
+  </shapes>
+</layout>
+</Calculation:scenario>

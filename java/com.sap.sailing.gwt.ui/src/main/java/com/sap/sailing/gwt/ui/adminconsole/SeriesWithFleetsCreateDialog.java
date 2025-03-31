@@ -10,6 +10,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -21,11 +22,12 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
-    
+
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     private StringMessages stringMessages;
@@ -33,10 +35,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     protected final TextBox nameEntryField;
     protected CheckBox isMedalSeriesCheckbox;
+    protected CheckBox fleetsCanRunInParallelCheckbox;
     protected CheckBox startsWithZeroScoreCheckbox;
     protected CheckBox hasSplitFleetContiguousScoringCheckbox;
+    protected CheckBox hasCrossFleetMergedRankingCheckbox;
     protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
     protected CheckBox useSeriesResultDiscardingThresholdsCheckbox;
+    protected CheckBox oneAlwaysStaysOneCheckbox;
+    protected IntegerBox maximumNumberOfDiscardsBox;
     protected final DiscardThresholdBoxes discardThresholdBoxes;
     protected ListEditorComposite<FleetDTO> fleetListComposite;
 
@@ -102,14 +108,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
             DialogCallback<SeriesDTO> callback) {
         this(existingSeries, stringMessages, /* discard thresholds */ null, callback);
     }
-    
+
     /**
      * @param existingSeries
      *            used for validation for duplicate series names
      */
     protected SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringMessages,
             int[] discardThresholds, DialogCallback<SeriesDTO> callback) {
-        super(stringMessages.series(), null, stringMessages.ok(), stringMessages.cancel(),  
+        super(stringMessages.series(), null, stringMessages.ok(), stringMessages.cancel(),
                 new SeriesParameterValidator(stringMessages, existingSeries), callback);
         this.stringMessages = stringMessages;
         this.series = new SeriesDTO();
@@ -117,19 +123,29 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
-        
+
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
-        
+
+        fleetsCanRunInParallelCheckbox = createCheckbox(stringMessages.canFleetsRunInParallel());
+        fleetsCanRunInParallelCheckbox.setValue(true);
+        fleetsCanRunInParallelCheckbox.ensureDebugId("FleetsCanRaceInParallelSeriesCheckbox");
+
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startsWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
-        
+
         hasSplitFleetContiguousScoringCheckbox = createCheckbox(stringMessages.hasSplitFleetContiguousScoring());
         hasSplitFleetContiguousScoringCheckbox.ensureDebugId("HasSplitFleetContiguousScoringCheckbox");
-        
+
+        hasCrossFleetMergedRankingCheckbox = createCheckbox(stringMessages.hasCrossFleetMergedRanking());
+        hasCrossFleetMergedRankingCheckbox.ensureDebugId("HasCrossFleetMergedRankingCheckbox");
+
+        maximumNumberOfDiscardsBox = createIntegerBox(null, /* visibleLength */ 3);
+        maximumNumberOfDiscardsBox.ensureDebugId("maximumNumberOfDiscardsBox");
+
         firstColumnIsNonDiscardableCarryForwardCheckbox = createCheckbox(stringMessages.firstRaceIsNonDiscardableCarryForward());
         firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
-        
+
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
         useSeriesResultDiscardingThresholdsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -138,10 +154,11 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 SeriesWithFleetsCreateDialog.this.discardThresholdBoxes.getWidget().setVisible(event.getValue());
             }
         });
+        oneAlwaysStaysOneCheckbox = createCheckbox(stringMessages.oneAlwaysStaysOne());
+        oneAlwaysStaysOneCheckbox.ensureDebugId("OneAlwaysStaysOneCheckbox");
         Widget widget = discardThresholdBoxes.getWidget();
         widget.ensureDebugId("DiscardThresholdBoxes");
         widget.setVisible(false);
-        
         initializeFleetListComposite(stringMessages);
     }
 
@@ -152,7 +169,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<FleetDTO>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
     }
@@ -161,14 +178,18 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected SeriesDTO getResult() {
         series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
+        series.setFleetsCanRunInParallel(fleetsCanRunInParallelCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
+        series.setCrossFleetMergedRanking(hasCrossFleetMergedRankingCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
+        series.setMaximumNumberOfDiscards(maximumNumberOfDiscardsBox.getValue());
+        series.setOneAlwaysStaysOne(oneAlwaysStaysOneCheckbox.getValue());
     	series.setFleets(fleetListComposite.getValue());
         series.setDiscardThresholds(useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds() : null);
         return series;
     }
-    
+
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
@@ -176,17 +197,22 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(7, 2);
+        Grid formGrid = new Grid(11, 2);
         panel.add(formGrid);
-        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
-        formGrid.setWidget(0, 1, nameEntryField);
-        formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
-        formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
-        formGrid.setWidget(3, 1, hasSplitFleetContiguousScoringCheckbox);
-        formGrid.setWidget(4, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
-        formGrid.setWidget(5, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(6, 1, discardThresholdBoxes.getWidget());
-        
+        int row = 0;
+        formGrid.setWidget(row,  0, new Label(stringMessages.name() + ":"));
+        formGrid.setWidget(row++, 1, nameEntryField);
+        formGrid.setWidget(row++, 1, isMedalSeriesCheckbox);
+        formGrid.setWidget(row++, 1, fleetsCanRunInParallelCheckbox);
+        formGrid.setWidget(row++, 1, startsWithZeroScoreCheckbox);
+        formGrid.setWidget(row++, 1, hasSplitFleetContiguousScoringCheckbox);
+        formGrid.setWidget(row++, 1, hasCrossFleetMergedRankingCheckbox);
+        formGrid.setWidget(row++, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(row++, 1, oneAlwaysStaysOneCheckbox);
+        formGrid.setWidget(row, 0, new Label(stringMessages.maximumNumberOfDiscards()));
+        formGrid.setWidget(row++, 1, maximumNumberOfDiscardsBox);
+        formGrid.setWidget(row++, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(row++, 1, discardThresholdBoxes.getWidget());
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(fleetListComposite, stringMessages.fleets());
@@ -194,11 +220,9 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         panel.add(tabPanel);
         return panel;
     }
-    
-    @Override
-    public void show() {
-        super.show();
-        nameEntryField.setFocus(true);
-    }
 
+    @Override
+    protected Focusable getInitialFocusWidget() {
+        return nameEntryField;
+    }
 }

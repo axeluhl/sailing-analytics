@@ -1,0 +1,70 @@
+.box {
+	font-size: 1rem;
+	border: 1px solid #dedede;
+	border-radius: 0.333333333333333em;
+	overflow: hidden;
+}
+
+.box_header {
+	color: #333;
+	font-size: 30px;
+	font-weight: 700;
+	background: #f2f2f2;
+	padding: 1.111111111111111em;
+	border-bottom: 1px solid #dedede;
+}
+
+.box_content {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.box_content_item {
+	border-bottom: 1px solid #dedede;
+	margin-bottom: -1px;
+}
+
+.statisticsbox {
+	font-size: 1rem;
+}
+
+.statisticsbox_item {
+	line-height: 1.133333333333333em;
+	padding: 1em;
+	font-weight: 700;
+	font-size: 1em;
+	display: inline-block;
+}
+
+img.statisticsbox_item_icon {
+	width: 3em;
+	height: 3em;
+	vertical-align: middle;
+}
+
+.statisticsbox_item_name {
+	font-weight: 600;
+	line-height: 2em;
+	font-size: 2em;
+	color: #333;
+	margin-left: 1em;
+	vertical-align: middle;
+}
+
+.statisticsbox_item_value {
+	float: right;
+	font-weight: 600;
+	background: #f2f2f2;
+	color: #666;
+	padding: 0.2em;
+	border: 1px solid #dedede;
+	border-radius: .333333333333333em;
+	vertical-align: middle;
+	font-size: 3em;
+	line-height: 100%;
+}
+
+.qrHolder {
+    float: right;
+}

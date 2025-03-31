@@ -1,0 +1,3 @@
+#!/bin/bash
+helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+helm install incubator/aws-alb-ingress-controller --set autoDiscoverAwsRegion=true --set autoDiscoverAwsVpcID=true --set clusterName=sailingaws --set image.tag=v1.2.0-alpha.1 --name alb-ingress-controller --namespace kube-system

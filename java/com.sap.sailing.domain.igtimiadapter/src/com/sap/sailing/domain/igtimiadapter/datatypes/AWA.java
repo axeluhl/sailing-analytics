@@ -2,11 +2,11 @@ package com.sap.sailing.domain.igtimiadapter.datatypes;
 
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.Sensor;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Apparent wind angle, relative to the device's or vessel's orientation, in degrees from 0 to 360, with values 180-360
@@ -20,8 +20,12 @@ public class AWA extends Fix {
     private final Bearing apparentWindAngle;
     
     public AWA(TimePoint timePoint, Sensor sensor, Map<Integer, Object> valuesPerSubindex) {
+        this(timePoint, sensor, new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue()));
+    }
+
+    public AWA(TimePoint timePoint, Sensor sensor, Bearing apparentWindAngle) {
         super(sensor, timePoint);
-        apparentWindAngle = new DegreeBearingImpl(((Number) valuesPerSubindex.get(1)).doubleValue());
+        this.apparentWindAngle = apparentWindAngle;
     }
 
     public Bearing getApparentWindAngle() {

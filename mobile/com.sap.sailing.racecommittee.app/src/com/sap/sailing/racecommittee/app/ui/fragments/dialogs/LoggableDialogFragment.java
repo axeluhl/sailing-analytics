@@ -1,9 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import android.app.DialogFragment;
-import android.os.Bundle;
-
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
+
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 
 /**
  * Simple base class for {@link DialogFragment}'s to add some logging.
@@ -11,7 +12,7 @@ import com.sap.sailing.android.shared.logging.LifecycleLogger;
 public abstract class LoggableDialogFragment extends DialogFragment {
 
     private LifecycleLogger lifeLogger;
-    
+
     public LoggableDialogFragment() {
         this.lifeLogger = new LifecycleLogger();
     }
@@ -52,4 +53,13 @@ public abstract class LoggableDialogFragment extends DialogFragment {
         lifeLogger.onDestroy(this);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Fragment fragment = getTargetFragment();
+        if (fragment != null && !fragment.isAdded()) {
+            setTargetFragment(null, -1);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
 }

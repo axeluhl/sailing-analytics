@@ -1,0 +1,12 @@
+[Unit]
+Description=An unformatted /dev/nvme0n1 is turned into swap space
+Requires=-.mount
+After=-.mount
+
+[Install]
+RequiredBy=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/mountnvmeswap

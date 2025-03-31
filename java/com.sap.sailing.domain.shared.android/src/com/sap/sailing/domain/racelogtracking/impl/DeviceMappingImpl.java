@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -19,20 +19,24 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
     private final DeviceIdentifier device;
     private final TimeRange timeRange;
     private final List<Serializable> originalRaceLogEventIds = new ArrayList<Serializable>();
-
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange) {
+    private final Class<?> eventType;
+    
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, Class<?> eventType) {
         this.mappedTo = mappedTo;
         this.device = device;
         this.timeRange = timeRange;
+        this.eventType = eventType;
     }
 
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, Serializable originalRaceLogEventId) {
-        this(mappedTo, device, timeRange);
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange,
+            Serializable originalRaceLogEventId, Class<?> eventType) {
+        this(mappedTo, device, timeRange, eventType);
         if (originalRaceLogEventId != null) originalRaceLogEventIds.add(originalRaceLogEventId);
     }
 
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, List<? extends Serializable> originalRaceLogEventIds) {
-        this(mappedTo, device, timeRange);
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange,
+            List<? extends Serializable> originalRaceLogEventIds, Class<?> eventType) {
+        this(mappedTo, device, timeRange, eventType);
         if (originalRaceLogEventIds != null) this.originalRaceLogEventIds.addAll(originalRaceLogEventIds);
     }
 
@@ -56,9 +60,15 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
         return timeRange.from();
     }
     
-    public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(DeviceMappingEvent<?, T> event) {
-        return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(), new TimeRangeImpl(event.getFrom(), event.getTo()),
-                event.getId());
+    @Override
+    public Class<?> getEventType() {
+        return eventType;
+    }
+    
+    public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(RegattaLogDeviceMappingEvent<T> event) {
+        return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(),
+                new TimeRangeImpl(event.getFrom(), event.getToInclusive(), /* inclusive */ true),
+                event.getId(), event.getClass());
     }
     
     @Override

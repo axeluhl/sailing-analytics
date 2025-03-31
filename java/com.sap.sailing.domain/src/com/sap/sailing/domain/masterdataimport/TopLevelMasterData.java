@@ -2,6 +2,7 @@ package com.sap.sailing.domain.masterdataimport;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,36 +14,31 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.WithID;
-import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.common.Timed;
+import com.sap.sse.common.TransformationException;
+import com.sap.sse.common.Util;
 
 /**
  * Holds all information needed for a master data import.
@@ -60,49 +56,70 @@ public class TopLevelMasterData implements Serializable {
     private final Set<LeaderboardGroup> leaderboardGroups;
     private final Set<WindTrackMasterData> windTrackMasterData;
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
-    private final Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes;
+    private final Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes;
+    private final Iterable<DeviceConfiguration> deviceConfigurations;
+    private final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
-            final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks,
-            GPSFixStore gpsFixStore, boolean exportWind) {
-        this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
-        this.leaderboardGroups = groupsToExport;
-        this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(gpsFixStore);
-        if (exportWind) {
-            this.windTrackMasterData = fillWindMap(groupsToExport);
-        } else {
-            this.windTrackMasterData = new HashSet<WindTrackMasterData>();
-        }
-        this.eventForLeaderboardGroup = createEventMap(groupsToExport, allEvents);
-        this.filteredMediaTracks = new HashSet<MediaTrack>();
-        filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
+            final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
+            SensorFixStore sensorFixStore, boolean exportWind,
+            Iterable<DeviceConfiguration> raceManagerDeviceConfigurations, final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+        this(groupsToExport, createEventMap(groupsToExport, allEvents),
+                convertToRaceIdStringsForRegattaMap(regattaForRaceIdString),
+                filterMediaTracks(allMediaTracks, groupsToExport), getAllRelevantRaceLogTrackingFixes(sensorFixStore, groupsToExport),
+                exportWind ? fillWindMap(groupsToExport) : Collections.emptySet(), raceManagerDeviceConfigurations,
+                connectivityParametersToRestore);
+    }
+    
+    private TopLevelMasterData(final Set<LeaderboardGroup> leaderboardGroups,
+            Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup,
+            final Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta, final Set<MediaTrack> filteredMediaTracks,
+            Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes,
+            Set<WindTrackMasterData> windTrackMasterData,
+            Iterable<DeviceConfiguration> deviceConfigurations,
+            final Set<RaceTrackingConnectivityParameters> connectivityParametersToRestore) {
+        this.raceIdStringsForRegatta = raceIdStringsForRegatta;
+        this.leaderboardGroups = leaderboardGroups;
+        this.raceLogTrackingFixes = raceLogTrackingFixes;
+        this.windTrackMasterData = windTrackMasterData;
+        this.deviceConfigurations = deviceConfigurations;
+        this.eventForLeaderboardGroup = eventForLeaderboardGroup;
+        this.filteredMediaTracks = filteredMediaTracks;
+        this.connectivityParametersToRestore = connectivityParametersToRestore;
+    }
+    
+    public TopLevelMasterData copyAndStripOffDataNotNeededOnReplicas() {
+        return new TopLevelMasterData(leaderboardGroups, eventForLeaderboardGroup, raceIdStringsForRegatta, filteredMediaTracks,
+                /* strip off raceLogTrackingFixes */ Collections.emptyMap(),
+                /* strip off windTrackMasterData */ Collections.emptySet(),
+                /* strip off device configurations */ Collections.emptySet(),
+                /* strip off connectivity params */ Collections.emptySet());
     }
 
-    private Map<DeviceIdentifier, Set<GPSFix>> getAllRelevantRaceLogTrackingFixes(GPSFixStore gpsFixStore) {
-        Map<DeviceIdentifier, Set<GPSFix>> relevantFixes = new HashMap<>();
-        
-        //Add fixes for regatta log mappings
-        for (Regatta regatta : getAllRegattas()) {
-            RegattaLog regattaLog = regatta.getRegattaLog();
+    private static Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore, Set<LeaderboardGroup> groupsToExport) {
+        Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
+        // Add fixes for regatta log mappings
+        for (Regatta regatta : getAllRegattas(groupsToExport)) {
+            final RegattaLog regattaLog = regatta.getRegattaLog();
             try {
                 regattaLog.lockForRead();
                 for (RegattaLogEvent logEvent : regattaLog.getRawFixes()) {
-                    addAllFixesIfMappingEvent(gpsFixStore, relevantFixes, logEvent);
+                    addAllFixesIfMappingEvent(sensorFixStore, relevantFixes, logEvent);
                 }
             } finally {
                 regattaLog.unlockAfterRead();
             }
         }
-        //Add fixes for race log mapping
-        for (LeaderboardGroup group : leaderboardGroups) {
+        // Add fixes for race log mapping
+        for (LeaderboardGroup group : groupsToExport) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     for (Fleet fleet : raceColumn.getFleets()) {
-                        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                        final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                         try {
                             raceLog.lockForRead();
                             for (RaceLogEvent logEvent : raceLog.getRawFixes()) {
-                                addAllFixesIfMappingEvent(gpsFixStore, relevantFixes, logEvent);
+                                addAllFixesIfMappingEvent(sensorFixStore, relevantFixes, logEvent);
                             }
                         } finally {
                             raceLog.unlockAfterRead();
@@ -114,12 +131,13 @@ public class TopLevelMasterData implements Serializable {
         return relevantFixes;
     }
 
-    private void addAllFixesIfMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
+    private static void addAllFixesIfMappingEvent(SensorFixStore sensorFixStore,
+            Map<DeviceIdentifier, Set<Timed>> relevantFixes,
             AbstractLogEvent<?> logEvent) {
-        if (logEvent instanceof DeviceMappingEvent<?,?>) {
-            DeviceMappingEvent<?,?> mappingEvent = (DeviceMappingEvent<?,?>) logEvent;
+        if (logEvent instanceof RegattaLogDeviceMappingEvent<?>) {
+            RegattaLogDeviceMappingEvent<?> mappingEvent = (RegattaLogDeviceMappingEvent<?>) logEvent;
             try {
-                addAllFixesForMappingEvent(gpsFixStore, relevantFixes, mappingEvent);
+                addAllFixesForMappingEvent(sensorFixStore, relevantFixes, mappingEvent);
             } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                 logger.severe("Failed to add fixes to exportdata for mapping Event");
                 e.printStackTrace();
@@ -127,48 +145,23 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    private void addAllFixesForMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
-            DeviceMappingEvent<?, ?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DynamicGPSFixTrack<WithID, ?> track;
-        if (isMarkMappingEvent(mappingEvent)) {
-            track = new DynamicGPSFixTrackImpl<WithID>(mappingEvent.getMappedTo(), 10000);
-        } else {
-            track = new DynamicGPSFixMovingTrackImpl<WithID>(mappingEvent.getMappedTo(), 1000);
-        }
+    private static void addAllFixesForMappingEvent(SensorFixStore sensorFixStore,
+            Map<DeviceIdentifier, Set<Timed>> relevantFixes,
+            RegattaLogDeviceMappingEvent<?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
         DeviceIdentifier device = mappingEvent.getDevice();
-        gpsFixStore.loadTrack(track, new DeviceMappingImpl<WithID>(mappingEvent.getMappedTo(), device,
-                new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo())));
         if (!relevantFixes.containsKey(device)) {
             relevantFixes.put(device, new HashSet<>());
         }
-        Set<GPSFix> fixes = relevantFixes.get(device);
-        try {
-            track.lockForRead();
-            for (GPSFix fix : track.getRawFixes()) {
-                fixes.add(fix);
-            }
-        } finally {
-            track.unlockAfterRead();
-        }
-    }
-
-    private boolean isMarkMappingEvent(DeviceMappingEvent<?, ?> mappingEvent) {
-        boolean isMarkMappingEvent = false;
-        if (mappingEvent instanceof RaceLogDeviceMarkMappingEvent || mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
-            isMarkMappingEvent = true;
-        }
-        return isMarkMappingEvent;
+        Set<Timed> fixes = relevantFixes.get(device);
+        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getToInclusive(),
+                true);
     }
 
     /**
      * Workaround to look for the events connected to RegattaLeadeboards. There should be a proper connection between
-     * regatta and event soon. TODO
-     * 
-     * @param groupsToExport
-     * @param allEvents
-     * @return
+     * regatta and event soon. TODO See bugs 1896 and 1532
      */
-    private Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
+    private static Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
             Iterable<Event> allEvents) {
         Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<LeaderboardGroup, Set<Event>>();
         Map<CourseArea, Event> eventForCourseArea = new HashMap<CourseArea, Event>();
@@ -181,20 +174,18 @@ public class TopLevelMasterData implements Serializable {
             HashSet<Event> eventSet = new HashSet<Event>();
             eventsForLeaderboardGroup.put(leaderboardGroup, eventSet);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                CourseArea courseArea = leaderboard.getDefaultCourseArea();
-                if (courseArea != null) {
-                    Event event = eventForCourseArea.get(courseArea);
+                for (final CourseArea courseArea : leaderboard.getCourseAreas()) {
+                    final Event event = eventForCourseArea.get(courseArea);
                     if (event != null) {
                         eventSet.add(event);
                     }
                 }
             }
-
         }
         return eventsForLeaderboardGroup;
     }
 
-    private Map<RegattaIdentifier, Set<String>> convertToRaceIdStringsForRegattaMap(
+    private static Map<RegattaIdentifier, Set<String>> convertToRaceIdStringsForRegattaMap(
             Map<String, Regatta> regattaForRaceIdString) {
         Map<RegattaIdentifier, Set<String>> raceIdStringsForRegatta = new HashMap<RegattaIdentifier, Set<String>>();
         for (Entry<String, Regatta> entry : regattaForRaceIdString.entrySet()) {
@@ -209,7 +200,7 @@ public class TopLevelMasterData implements Serializable {
         return raceIdStringsForRegatta;
     }
 
-    private Set<WindTrackMasterData> fillWindMap(Set<LeaderboardGroup> groupsToExport) {
+    private static Set<WindTrackMasterData> fillWindMap(Set<LeaderboardGroup> groupsToExport) {
         Set<WindTrackMasterData> windTrackMasterDataSet = new HashSet<WindTrackMasterData>();
         for (LeaderboardGroup group : groupsToExport) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
@@ -223,7 +214,7 @@ public class TopLevelMasterData implements Serializable {
         return windTrackMasterDataSet;
     }
 
-    private void addWindTracksToSetIfExistantAndSourceCanBeStored(Set<WindTrackMasterData> windTrackMasterDataSet,
+    private static void addWindTracksToSetIfExistantAndSourceCanBeStored(Set<WindTrackMasterData> windTrackMasterDataSet,
             RaceColumn raceColumn, Fleet fleet) {
         TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         if (trackedRace != null) {
@@ -255,7 +246,15 @@ public class TopLevelMasterData implements Serializable {
     }
 
     public void setMasterDataExportFlagOnRaceColumns(boolean flagValue) {
-        for (LeaderboardGroup group : leaderboardGroups) {
+        // collect all leaderboard groups for all events that will be touched during serialization
+        final Set<LeaderboardGroup> allLeaderboardGroups = new HashSet<>();
+        allLeaderboardGroups.addAll(leaderboardGroups);
+        for (Entry<LeaderboardGroup, Set<Event>> i : eventForLeaderboardGroup.entrySet()) {
+            for (Event e : i.getValue()) {
+                Util.addAll(e.getLeaderboardGroups(), allLeaderboardGroups);
+            }
+        }
+        for (LeaderboardGroup group : allLeaderboardGroups) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     raceColumn.setMasterDataExportOngoingThreadFlag(true);
@@ -281,10 +280,14 @@ public class TopLevelMasterData implements Serializable {
         }
         return allEventsInMasterData.values();
     }
-
+    
     public Iterable<Regatta> getAllRegattas() {
+        return getAllRegattas(leaderboardGroups);
+    }
+
+    private static Iterable<Regatta> getAllRegattas(Iterable<LeaderboardGroup> groupsToExport) {
         Set<Regatta> regattas = new HashSet<>();
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+        for (LeaderboardGroup leaderboardGroup : groupsToExport) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard instanceof RegattaLeaderboard) {
                     RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -296,27 +299,28 @@ public class TopLevelMasterData implements Serializable {
     }
 
     /**
-     * Copies only those media tracks from allMediaTracks to filteredMediaTracks which are 
-     * assigned to races related to the exported LeaderboardGroup.
+     * Copies only those media tracks from {@code allMediaTracks} to {@code filteredMediaTracks} which are 
+     * assigned to races related to any of  exported {@link #leaderboardGroups}.
      */
-    private void filterMediaTracks(Collection<MediaTrack> allMediaTracks, Set<MediaTrack> filteredMediaTracks) {
-        Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport();
+    private static Set<MediaTrack> filterMediaTracks(final Iterable<MediaTrack> allMediaTracks, final Set<LeaderboardGroup> leaderboardGroups) {
+        final Set<MediaTrack> result = new HashSet<>();
+        final Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport(leaderboardGroups);
         for (MediaTrack mediaTrack : allMediaTracks) {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
-                    filteredMediaTracks.add(mediaTrack);
-                    continue;
+                    result.add(mediaTrack);
                 }
             }
         }
+        return result;
     }
 
     /**
-     * Returns the set of races (in form of raceIdentifiers) related to the exported LeaderboardGroup.
-     * 
+     * Returns the set of races (in the form of {@link RaceIdentifier}s) related to the exported
+     * {@link #leaderboardGroups}.
      */
-    private Set<RaceIdentifier> collectRaceIdentifiersForMediaExport() {
-        Set<RaceIdentifier> raceIdentifiers = new HashSet<>();
+    private static Set<RaceIdentifier> collectRaceIdentifiersForMediaExport(final Set<LeaderboardGroup> leaderboardGroups) {
+        final Set<RaceIdentifier> raceIdentifiers = new HashSet<>();
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -332,7 +336,15 @@ public class TopLevelMasterData implements Serializable {
         return raceIdentifiers;
     }
 
-    public Map<DeviceIdentifier, Set<GPSFix>> getRaceLogTrackingFixes() {
+    public Map<DeviceIdentifier, Set<Timed>> getRaceLogTrackingFixes() {
         return raceLogTrackingFixes;
+    }
+
+    public Iterable<DeviceConfiguration> getDeviceConfigurations() {
+        return deviceConfigurations;
+    }
+
+    public Set<RaceTrackingConnectivityParameters> getConnectivityParametersToRestore() {
+        return connectivityParametersToRestore;
     }
 }

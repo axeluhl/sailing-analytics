@@ -2,10 +2,12 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.net.Uri;
+import android.support.v7.preference.PreferenceManager;
 
-import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 
 /**
  * Helps you with maintaining preferences over different app builds
@@ -31,7 +33,7 @@ public class PreferenceHelper {
 
     private final Context context;
     private final String sharedPreferencesName;
-    
+
     public PreferenceHelper(Context context) {
         this(context, getDefaultSharedPreferencesName(context));
     }
@@ -54,21 +56,24 @@ public class PreferenceHelper {
         boolean hasSetDefaultsBefore = hasSetDefaultsBefore();
         boolean readAgain = forceReset || isCleared || !hasSetDefaultsBefore;
 
-        ExLog.i(context, TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}", isCleared,
-                hasSetDefaultsBefore, readAgain));
+        ExLog.i(context, TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}",
+                isCleared, hasSetDefaultsBefore, readAgain));
 
         resetPreferences(readAgain);
     }
 
     public void resetPreferences(boolean force) {
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_course_designer, force);
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_general, force);
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_regatta_defaults, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_course_designer, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_general, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_regatta_defaults, force);
     }
 
     public void clearPreferences() {
         SharedPreferences.Editor editor = getSharedPreferences(sharedPreferencesName).edit();
-        editor.clear().commit();
+        editor.clear().apply();
     }
 
     private boolean clearPreferencesIfNeeded(boolean forceReset) {
@@ -80,7 +85,7 @@ public class PreferenceHelper {
             clearPreferences();
 
             ExLog.i(context, TAG, String.format("Bumping preference version code to %d", LAST_COMPATIBLE_VERSION));
-            versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).commit();
+            versionPreferences.edit().putInt(HIDDEN_PREFERENCE_VERSION_CODE_KEY, LAST_COMPATIBLE_VERSION).apply();
             return true;
         }
         return false;
@@ -93,5 +98,10 @@ public class PreferenceHelper {
 
     private SharedPreferences getSharedPreferences(String preferenceName) {
         return context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+    }
+
+    public static String getRegattaPrefFileName(String regattaName) {
+        String fileName = PreferenceActivity.SPECIFIC_REGATTA_PREFERENCES_NAME + regattaName;
+        return Uri.encode(fileName);
     }
 }

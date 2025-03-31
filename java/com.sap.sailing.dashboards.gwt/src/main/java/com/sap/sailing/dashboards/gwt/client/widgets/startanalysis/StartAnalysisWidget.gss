@@ -1,0 +1,177 @@
+@require 'theme';
+
+.startanalysis {
+	position: absolute;
+	background-color: LIGHT_GREY;
+	left: 0pt;
+	right: 0pt;
+	top: 0pt;
+	bottom: 0pt;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+    overflow: hidden;
+    z-index: 5;
+}
+
+.current_start_panel {
+	position: absolute;
+	height: DASHBOARD_SPACE_MEDIUM;
+	top: DASHBOARD_SPACE_MEDIUM;
+	line-height: DASHBOARD_SPACE_MEDIUM;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	z-index: 4;
+}
+
+.controll_header_button {
+	position: absolute;
+	height: DASHBOARD_SPACE_VERY_LARGE;
+	width: DASHBOARD_SPACE_VERY_LARGE;
+	top: 50%;
+	background-color: WHITE;
+	z-index: 1;
+	opacity: 0.0;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+}
+
+.controll_header_button_visible {
+	opacity: 0.9;
+}
+
+.controll_header_button:active {
+	background-color: LIGHT_GREY;
+}
+
+.controll_header_button_image {
+	position: absolute;
+	width: 18px;
+	height: DASHBOARD_SPACE_SMALL;
+	top: 20px;
+	left: 27px;
+}
+
+.controll_header_button_left {
+	left: 31px;
+}
+
+.controll_header_button_right {
+	right: 31px;
+}
+
+.card_container {
+	position: absolute;
+	overflow: visible;
+	top: DASHBOARD_SPACE_MEDIUM;
+	bottom: 70px;
+	padding-top: DASHBOARD_SPACE_MEDIUM;
+	padding-bottom: DASHBOARD_SPACE_SMALL;
+	width: 100%;
+	left: 0%;
+	-webkit-transition: left 0.7s ease-in-out; /* For Safari 3.1 to 6.0 */
+	transition: left 0.7s ease-in-out;
+}
+
+.card {
+	position: absolute;
+	width: 75%;
+	height: 100%;
+	border-radius: DASHBOARD_BORDER_RADIUS !important;
+    overflow: hidden  !important;
+    /*
+    Chrome and Safari are having problems with border radius and animation.
+    http://stackoverflow.com/questions/14383632/webkit-border-radius-and-overflow-bug-when-using-any-animation-transition
+    Do not remove these 4 lines
+    */
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0)
+}
+
+.card_map_container {
+	position: absolute;
+	margin-top: 29px;
+    /*#4293DB old water color*/
+	background-color: #004384;
+	width: 100%;
+	height: 100%;
+}
+
+.card_table {
+	position: absolute;
+	bottom: 0pt;
+	right: 0pt;
+	left: 0pt;
+	background-color: WHITE;
+	z-index: 2;
+}
+
+.card_wind_line_data_container {
+	position: absolute;
+	top: 0pt;
+	left: 0;
+	width: 100%;
+	height: 30px;
+	z-index: 1;
+	background-color: WHITE;
+	color: LIGHT_TEXT_COLOR;
+}
+
+.card_data {
+	position: absolute;
+	right: 0pt;
+	width: 45pt;
+	height: DASHBOARD_SPACE_SMALL;
+	line-height: DASHBOARD_SPACE_SMALL;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
+	font-family: DASHBOARD_FONT_FAMILY;
+	font-weight: bold;
+	text-align: center;
+}
+
+.card_line_advantage {
+	top: 0pt;
+	left: 10px;
+	width: 215pt;
+	text-align: left;
+}
+
+.card_race_time{
+	position: absolute;
+	right: 10px;
+	width: 200px;
+	text-align: right;
+	line-height: DASHBOARD_SPACE_SMALL;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
+	font-family: DASHBOARD_FONT_FAMILY;
+}
+
+.card_line_data_geo {
+	top: 0pt;
+	left: 220pt;
+	width: 100pt;
+	text-align: left;
+	background-color: white;
+}
+
+.left_focus_panel {
+	position: absolute;
+	top: 0pt;
+	right: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}
+
+.right_focus_panel {
+	position: absolute;
+	top: 0pt;
+	left: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
+	xmlns:uh="urn:import:com.sap.sse.security.ui.userprofile.desktop.userheader"
+	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <g:HTMLPanel>
+    <c:TabPanel ui:field="tabPanelUi">
+      <c:header>
+        <uh:UserHeader ui:field="headerUi" />
+      </c:header>
+      <c:tabcontent title="{i18n.details}">
+        <s:detailstab.UserProfileDetailsTabView ui:field="detailsTabUi" />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.favoritesAndNotifications}">
+        <s:preferencestab.UserProfilePreferencesTabView ui:field="preferencesTabUi" />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.sailorProfiles}">
+        <s:sailorprofiletab.SailorProfileTabView ui:field="sailorProfileTabUi" />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.settings}">
+        <s:settingstab.UserProfileSettingsTabView ui:field="settingsTabUi" />
+      </c:tabcontent>
+      <c:tabcontent title="{i18n.subscription}">
+        <s:subscriptionstab.UserProfileSubscriptionsTabView ui:field="subscriptionTabUi" />
+      </c:tabcontent>
+    </c:TabPanel>
+  </g:HTMLPanel>
+</ui:UiBinder> 

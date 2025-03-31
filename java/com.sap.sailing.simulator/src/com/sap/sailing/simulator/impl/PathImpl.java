@@ -9,17 +9,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.windfield.WindField;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PathImpl implements Path, Serializable {
@@ -132,7 +132,8 @@ public class PathImpl implements Path, Serializable {
 
             if ((this.pathPoints.get(idx).getTimePoint().asMillis() >= nextTimePoint.asMillis())||(idx == this.pathPoints.size()-1)) {
 
-                if (idx == this.pathPoints.size()-1) {
+                // for the last step, next-time-point needs to be aligned to the time-range of the course
+                if (nextTimePoint.after(endTime)) {
                 	nextTimePoint = endTime;
                 }
                 
@@ -171,7 +172,7 @@ public class PathImpl implements Path, Serializable {
                 ArrayList<TimedPositionWithSpeed> maxPoint = new ArrayList<TimedPositionWithSpeed>();
                 maxPoint.add(path.get(0));
                 ArrayList<Double> maxDist = new ArrayList<Double>();
-                maxDist.add(new Double(0));
+                maxDist.add(Double.valueOf(0));
                 Bearing nextBear = prevPoint.getPosition().getBearingGreatCircle(nextPoint.getPosition());
                 for (int jdx = 0; jdx < points.size(); jdx++) {
 
@@ -182,7 +183,7 @@ public class PathImpl implements Path, Serializable {
                     double lineDist = Math.round(ptmp.getDistance(pcur).getMeters()*1000.0)/1000.0;
                     if (sideChange) {
                         maxCnt++;
-                        maxDist.add(new Double(0));
+                        maxDist.add(Double.valueOf(0));
                         maxPoint.add(path.get(0));
                     }
                     if (lineDist > maxDist.get(maxCnt)) {
@@ -376,24 +377,19 @@ public class PathImpl implements Path, Serializable {
     }
 
     public static boolean saveToGpxFile(Path path, String fileName) {
-
         if (path == null) {
             return false;
         }
-
         List<TimedPositionWithSpeed> pathPoints = path.getPathPoints();
         if (pathPoints == null || pathPoints.isEmpty()) {
             return false;
         }
-
         TimedPositionWithSpeed timedPoint = null;
         Position point = null;
         int noOfPoints = pathPoints.size();
         Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         StringBuffer buffer = new StringBuffer();
-
         buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\r\n<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\r\n\t<trk>\r\n\t\t<name>GPSPolyPath</name>\r\n\t\t<trkseg>");
-
         for (int index = 0; index < noOfPoints; index++) {
             timedPoint = pathPoints.get(index);
             point = timedPoint.getPosition();
@@ -401,23 +397,17 @@ public class PathImpl implements Path, Serializable {
                     + "\">\r\n\t\t\t\t<ele>0</ele>\r\n\t\t\t\t<time>"
                     + formatter.format(timedPoint.getTimePoint().asDate()) + "</time>\r\n\t\t\t</trkpt>");
         }
-
         buffer.append("\r\n\t\t</trkseg>\r\n\t</trk>\r\n</gpx>\r\n");
-
         String content = buffer.toString();
-
         try {
-
             FileWriter writer = new FileWriter(fileName);
             BufferedWriter output = new BufferedWriter(writer, 32768);
-
             try {
                 output.write(content);
             } finally {
                 output.close();
                 writer.close();
             }
-
         } catch (IOException e) {
             return false;
         }

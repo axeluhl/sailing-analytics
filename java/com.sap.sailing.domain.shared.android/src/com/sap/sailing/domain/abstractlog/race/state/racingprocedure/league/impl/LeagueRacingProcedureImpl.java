@@ -1,12 +1,11 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -33,8 +32,8 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     private final static Flags startmodeFlag = Flags.PAPA;
     
     public LeagueRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, LeagueConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+             LeagueConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
         update();
     }
 
@@ -44,20 +43,15 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     }
     
     @Override
-    public boolean hasIndividualRecall() {
-        boolean hasRecall = super.hasIndividualRecall();
-        if (!hasRecall) {
-            return false;
-        } else {
-            return hasRecall;
-        }
-    }
-    
-    @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
     
+    @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
@@ -86,7 +80,7 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         // Remark: We are reusing here CLASS_UP, STARTMODE_UP and STARTMODE_DOWN from the RRS26 procedure
         // The question is why there are no generic CLASS_UP, STARTMODE_UP and STARTMODE_DOWN events
         return Arrays.<RaceStateEvent> asList(

@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
@@ -9,6 +11,9 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.AddResult;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
@@ -40,6 +45,16 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
+    public void finishingTimeChanged(TimePoint oldFinishingTime, TimePoint newFinishingTime) {
+        defaultAction();
+    }
+
+    @Override
+    public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+        defaultAction();
+    }
+
+    @Override
     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
         defaultAction();
     }
@@ -50,12 +65,12 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void startOfTrackingChanged(TimePoint startOfTracking) {
+    public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
         defaultAction();
     }
 
     @Override
-    public void endOfTrackingChanged(TimePoint endOfTracking) {
+    public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
         defaultAction();
     }
 
@@ -65,7 +80,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
+    public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack, AddResult addedOrReplaced) {
         defaultAction();
     }
 
@@ -85,7 +100,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void competitorPositionChanged(GPSFixMoving fix, Competitor item) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor item, AddResult addedOrReplaced) {
         defaultAction();
     }
 
@@ -114,4 +129,33 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
         defaultAction();
     }
     
+    @Override
+    public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+        defaultAction();
+    }
+    
+    @Override
+    public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix, AddResult addedOrReplaced) {
+        defaultAction();
+    }
+    
+    @Override
+    public void regattaLogAttached(RegattaLog regattaLog) {
+        defaultAction();
+    }
+    
+    @Override
+    public void raceLogAttached(RaceLog raceLog) {
+        defaultAction();
+    }
+    
+    @Override
+    public void raceLogDetached(RaceLog raceLog) {
+        defaultAction();
+    }
+    
+    @Override
+    public void firstGPSFixReceived() {
+        defaultAction();
+    }
 }

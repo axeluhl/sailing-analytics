@@ -142,12 +142,10 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void draw() {
-        if(mapProjection != null && startPoint != null && endPoint != null) {
+        if (mapProjection != null && startPoint != null && endPoint != null) {
             setCanvasSettings();
             setStartEndPoint(startPoint, endPoint);
-            
             if (startPoint != null) {
-            	
                 Point point = mapProjection.fromLatLngToDivPixel(startPoint);
                 if (racecourseBuoySize > 0.0) {
                 	drawCircleWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), racecourseBuoySize,
@@ -173,9 +171,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
                      * });
                      */
                 }
-
             }
-
             if (endPoint != null) {
             	Point point = mapProjection.fromLatLngToDivPixel(endPoint);
             	if (racecourseBuoySize > 0.0) {
@@ -198,9 +194,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
                      * });
                      */
                 }
-
             }
-            
             drawLine(endPoint, racecourseColor);
         }
     }

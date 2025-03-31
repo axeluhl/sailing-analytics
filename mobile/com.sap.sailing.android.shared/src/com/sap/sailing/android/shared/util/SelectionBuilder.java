@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class SelectionBuilder {
 
@@ -133,8 +133,9 @@ public class SelectionBuilder {
 
     public Cursor query(SQLiteDatabase db, boolean distinct, String[] columns, String orderBy, String limit) {
         assertTable();
-        if (columns != null)
+        if (columns != null) {
             mapColumns(columns);
+        }
         ExLog.i(mContext, TAG, "query(columns=" + Arrays.toString(columns) + ", distinct=" + distinct + ") " + this);
         return db.query(distinct, mTable, columns, getSelection(), getSelectionArgs(), mGroupBy, mHaving, orderBy,
                 limit);

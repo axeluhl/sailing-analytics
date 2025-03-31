@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"Скан. QR-код"</string>
+    <string name="scan_hint">"QR-код находится на вашем подтверждении участия"</string>
+    <string name="no_qr_code">"Нет QR-кода?"</string>
+    <string name="start_tracking">"Начать отслеживание"</string>
+    <string name="stop_tracking">"Прекратить отслеживание"</string>
+    <string name="tracking_gps_accuracy">"Точность GPS"</string>
+    <string name="tracking_mode">"Режим"</string>
+    <string name="tracking_mode_live">"Активно"</string>
+    <string name="tracking_mode_battery_saving">"Экономия энергии"</string>
+    <string name="tracking_unsent_fixes">"Неотправленные сообщения"</string>
+    <string name="tracking_mode_caching">"Офлайн"</string>
+    <string name="tracking_mode_api_error">"Ошибка API"</string>
+    <string name="tracking_mode_no_attempt">"Инициализировать"</string>
+    <string name="tracking_time">"Время отслеживания"</string>
+    
+    <string name="tracking_status_tracking">"Отслеживание"</string>
+    <string name="tracking_status_no_gps_signal">"Нет изменений или сигнала GPS!"</string>
+    <string name="desc_regatta_user_image">"Изображение пользователя регаты"</string>
+    <string name="desc_add_photo_button">"Кнопка \'Добавить фото\'"</string>
+    <string name="tracking_status_gps_found">"Сигнал GPS обнаружен!"</string>
+</resources>

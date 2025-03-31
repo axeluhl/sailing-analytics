@@ -5,8 +5,8 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.common.Util;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class PositionedMarkJsonSerializer implements JsonSerializer<Util.Pair<Mark, Position>> {
     public static final String FIELD_MARK = "mark";

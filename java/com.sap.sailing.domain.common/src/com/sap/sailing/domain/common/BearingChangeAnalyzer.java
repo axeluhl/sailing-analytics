@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.BearingChangeAnalyzerImpl;
+import com.sap.sse.common.Bearing;
 
 /**
  * Helps analyze a change of a course over ground / {@link Bearing} and in particular can judge whether

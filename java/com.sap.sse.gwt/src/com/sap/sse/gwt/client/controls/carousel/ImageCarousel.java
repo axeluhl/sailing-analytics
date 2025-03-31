@@ -1,20 +1,24 @@
 package com.sap.sse.gwt.client.controls.carousel;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.media.ImageMetadataDTO;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
  * Image carousel that uses the open source "slick carousel".
@@ -52,11 +56,12 @@ import com.sap.sse.common.media.ImageMetadataDTO;
  *
  *      Created by pgtaboada on 10.11.14.
  */
-public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
+public class ImageCarousel<TYPE extends ImageDTO> extends Widget {
 
     private static SlickSliderUiBinder ourUiBinder = GWT.create(SlickSliderUiBinder.class);
 
-    private LinkedList<TYPE> currentImages = new LinkedList<>();
+    private final LinkedList<TYPE> currentImages = new LinkedList<>();
+    private final Map<String, TYPE> imageDataMap = new HashMap<>();
     /**
      * slick slider property: dots
      */
@@ -85,7 +90,7 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
     /**
      * The height of the images
      */
-    private int imagesHeight = 300;
+    private static final int IMAGES_HEIGHT = 300;
     private int currentSlideIndex = 0;
 
     private final String uniqueId;
@@ -97,16 +102,24 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
      */
     public ImageCarousel() {
         setElement(ourUiBinder.createAndBindUi(this));
-
         uniqueId = "slider_" + Document.get().createUniqueId();
         getElement().addClassName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
     }
 
-    public void onClick() {
-        GWT.log("Current slide: " + currentSlideIndex);
-        if (fsViewer != null) {
-            fsViewer.show(currentImages.get(currentSlideIndex), currentImages);
+    public void onClick(EventTarget eventTarget) {
+        if (fsViewer != null && Element.is(eventTarget)) {
+            // extract SRC URL for key of image data map
+            final String key = eventTarget.<Element>cast().getAttribute("src");
+            final TYPE imageData = imageDataMap.get(key);
+            if (imageData != null) {
+                fsViewer.show(imageData, currentImages);
+            }
         }
     }
 
@@ -125,22 +138,18 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
 		.on(
 			'click',
 			'.slick-slide',
-			function() {
-			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick()();
-			});
+			$entry(function(event) {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::onClick(Lcom/google/gwt/dom/client/EventTarget;)(event.target);
+			}));
 
 	slider
 		.on(
 			'afterChange',
-			function(event, index) {
+			$entry(function(event, index) {
 			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::currentSlideIndex = index.currentSlide;
-			});
+			}));
 
-	$wnd
-		.$(
-			'.'
-				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId))
-		.slick(
+	slider.slick(
 			{
 			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::showDots),
 			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::infiniteScrolling),
@@ -160,9 +169,7 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
 			'.'
 				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::uniqueId)
 				+ '>.slick-list>.slick-track')
-		.height(
-			sliderReference.@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::imagesHeight
-				+ 'px');
+		.height(@com.sap.sse.gwt.client.controls.carousel.ImageCarousel::IMAGES_HEIGHT + 'px');
     }-*/;
 
     /**
@@ -175,17 +182,18 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
         String url = image.getSourceRef();
         int height = image.getHeightInPx();
         int width = image.getWidthInPx();
-        
         DivElement imageHolder = Document.get().createDivElement();
         ImageElement imageElement = Document.get().createImageElement();
         imageElement.setAttribute("data-lazy", UriUtils.fromString(url).asString());
-
-        imageHolder.getStyle().setHeight(imagesHeight, Unit.PX);
-        imageHolder.getStyle().setWidth(Math.round(width * (imagesHeight / (double) height)), Unit.PX);
+        if (fsViewer != null) {
+            imageElement.getStyle().setCursor(Cursor.POINTER);
+        }
+        imageHolder.getStyle().setHeight(IMAGES_HEIGHT, Unit.PX);
+        imageHolder.getStyle().setWidth(Math.round(width * (IMAGES_HEIGHT / (double) height)), Unit.PX);
         imageHolder.appendChild(imageElement);
-
+        // persist image data in extra map with key 'image source URL' (SourceRef)
+        imageDataMap.put(image.getSourceRef(), image);
         getElement().appendChild(imageHolder);
-
         if (getElement().getChildCount() > 20) {
             setInfiniteScrolling(false);
             setShowDots(false);
@@ -281,21 +289,11 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
      */
     private void init() {
         final ImageCarousel<TYPE> reference = this;
-
         Scheduler.get().scheduleDeferred(new Command() {
-
             @Override
             public void execute() {
                 try {
                     setupSlider(reference);
-
-                    for (int childIndex = 0; childIndex < getElement().getChildCount(); childIndex++) {
-                        Element child = Element.as(getElement().getChild(childIndex));
-                        if (child.getClassName() != null && child.getClassName().contains("slick-track")) {
-
-                        }
-                    }
-
                 } catch (Exception e) {
                     GWT.log("Catched Exception on slider init", e);
                 }
@@ -309,7 +307,7 @@ public class ImageCarousel<TYPE extends ImageMetadataDTO> extends Widget {
 
     public interface FullscreenViewer<TYPE> {
         
-        public void show(TYPE selectedImage, List<TYPE> imageList);
+        public void show(TYPE selectedImage, Collection<TYPE> imageList);
     }
     
 }

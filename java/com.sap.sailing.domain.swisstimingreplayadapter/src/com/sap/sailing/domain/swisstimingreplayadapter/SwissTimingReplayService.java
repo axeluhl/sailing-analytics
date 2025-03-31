@@ -1,26 +1,57 @@
 package com.sap.sailing.domain.swisstimingreplayadapter;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.List;
 
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackerManager;
 
 public interface SwissTimingReplayService {
-
     List<SwissTimingReplayRace> parseJSONObject(InputStream inputStream, String swissTimingUrlText) throws IOException,
             ParseException, org.json.simple.parser.ParseException;
 
     List<SwissTimingReplayRace> listReplayRaces(String swissTimingUrlText);
 
-    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream) throws IOException,
+    SwissTimingRaceConfig loadRaceConfig(InputStream configDataStream, Charset charset) throws IOException,
             org.json.simple.parser.ParseException;
 
     DateFormat getStartTimeFormat();
+
+    /**
+     * @param regattaToAddTo
+     *            the regatta to which the race shall be added; if <code>null</code>, a default regatta will be
+     *            created/used based on the {@code regattaName} and {@code boatClassName} parameter values
+     * @param link
+     *            the URL without the implicit "http://" prefix, as obtained, e.g., from
+     *            {@link SwissTimingReplayRace#getLink()}.
+     * @param swissTimingUrl
+     *            the overview URL that lists the races that can be loaded; passed through in particular for
+     *            re-establishing after master data import
+     * @param raceID
+     *            the SwissTiming ID for the race
+     * @param useInternalMarkPassingAlgorithm
+     *            use our own instead of the SwissTiming-provided mark rounding / split times
+     * @param boatClassNameName
+     *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
+     *            regatta
+     */
+    void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String swissTimingUrl, String raceName,
+            String raceID, String boatClassName, TrackerManager trackerManager,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, MarkPassingRaceFingerprintRegistry markPassingRaceFingerprintRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * @param link
@@ -30,17 +61,6 @@ public interface SwissTimingReplayService {
      * @param replayListener
      *            the listener to receive all persing events
      */
-    void loadRaceData(String link, SwissTimingReplayListener replayListener);
-    
-    /**
-     * @param link
-     *            the URL without the implicit "http://" prefix, as obtained, e.g., from
-     *            {@link SwissTimingReplayRace#getLink()}.
-     * @param regatta
-     *            the regatta to which the race shall be added; if <code>null</code>, a default regatta will be
-     *            created/used
-     * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
-     */
-    void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm);
+    void loadRaceData(String link, SwissTimingReplayListener listener);
 
 }

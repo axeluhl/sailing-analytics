@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesInfoDTO implements IsSerializable {
@@ -14,11 +15,15 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public List<LegInfoDTO> legInfos;
 
     public List<MarkPassingTimesDTO> markPassingTimes;
-    
+
+    public List<TagDTO> tags;
+
     public Date startOfRace;
     public Date startOfTracking;
     public Date endOfTracking;
     public Date endOfRace;
+    public Date raceFinishingTime;
+    public Date raceFinishedTime;
     public Date newestTrackingEvent;
     
     /**
@@ -84,6 +89,14 @@ public class RaceTimesInfoDTO implements IsSerializable {
         return endOfRace;
     }
 
+    public Date getFinishingTime() {
+        return raceFinishingTime;
+    }
+
+    public Date getFinishedTime() {
+        return raceFinishedTime;
+    }
+
     public void setEndOfRace(Date endOfRace) {
         this.endOfRace = endOfRace;
     }
@@ -111,16 +124,21 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public void setMarkPassingTimes(List<MarkPassingTimesDTO> markPassingTimes) {
         this.markPassingTimes = markPassingTimes;
     }
-    
+
+    public List<TagDTO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
+
     @Override
-	public String toString() {
-		return "RaceTimesInfoDTO [raceIdentifier=" + raceIdentifier
-				+ ", legInfos=" + legInfos + ", markPassingTimes="
-				+ markPassingTimes + ", startOfRace=" + startOfRace
-				+ ", startOfTracking=" + startOfTracking + ", endOfTracking="
-				+ endOfTracking + ", endOfRace=" + endOfRace
-				+ ", newestTrackingEvent=" + newestTrackingEvent
-                                + ", currentServerTime=" + currentServerTime
-				+ ", delayToLiveInMs=" + delayToLiveInMs + "]";
-	}
+    public String toString() {
+        return "RaceTimesInfoDTO [raceIdentifier=" + raceIdentifier + ", legInfos=" + legInfos + ", markPassingTimes="
+                + markPassingTimes + ", tags=" + tags + ", startOfRace=" + startOfRace + ", startOfTracking="
+                + startOfTracking + ", endOfTracking=" + endOfTracking + ", endOfRace=" + endOfRace + ", finishedTime="
+                + raceFinishedTime + ", newestTrackingEvent=" + newestTrackingEvent + ", currentServerTime="
+                + currentServerTime + ", delayToLiveInMs=" + delayToLiveInMs + "]";
+    }
 }

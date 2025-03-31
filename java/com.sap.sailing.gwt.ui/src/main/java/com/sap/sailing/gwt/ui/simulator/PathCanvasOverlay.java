@@ -12,13 +12,16 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
-import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Mile;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
@@ -109,46 +112,17 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         this.endPoint = endPoint;
     }
 
-    /*
-    @Override
-    protected void drawWindField() {
-        logger.fine("In PathCanvasOverlay.drawWindField");
-        List<SimulatorWindDTO> windDTOList = wl.getMatrix();
-        drawWindField(windDTOList);
-    }
-     */
-    
     @Override
     protected void drawWindField(List<SimulatorWindDTO> windDTOList) {
-
         int numPoints = windDTOList.size();
         if (numPoints < 1) {
             return;
         }
-        String title = "Path at " + numPoints + " points.";
-        long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
-
-        //LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
-        //LatLng end = LatLng.newInstance(windDTOList.get(numPoints - 1).position.latDeg, windDTOList.get(numPoints - 1).position.latDeg);
-
+        Duration totalDuration = windDTOList.get(0).timepoint.until(windDTOList.get(numPoints - 1).timepoint);
         double distance = SphericalUtils.computeDistanceBetween(startPoint, endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
-
-        // Point startPx = getMap().convertLatLngToDivPixel(startPoint);
-        // Point endPx = getMap().convertLatLngToDivPixel(endPoint);
-        // double rcLengthPx = Math.sqrt(Math.pow(startPx.getX() - endPx.getX(), 2) + Math.pow(startPx.getY() -
-        // endPx.getY(), 2));
-        // System.out.println("Race Course Pixel Length: "+rcLengthPx);
-
-        // double arrowDistPx = 60;
-        // long arrowInterleave = Math.max(1, Math.round(arrowDistPx * numPoints / rcLengthPx));
-        // System.out.print("Arrow Interleave: "+arrowInterleave+"\n");
-        // arrowInterleave = 3;
-
         if (windDTOList != null && windDTOList.size() > 0) {
-
             Context2d context2d = canvas.getContext2d();
             context2d.setGlobalAlpha(0.8);
-
             Iterator<SimulatorWindDTO> windDTOIter = windDTOList.iterator();
             SimulatorWindDTO prevWindDTO = null;
             while (windDTOIter.hasNext()) {
@@ -158,43 +132,31 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
                 }
                 prevWindDTO = windDTO;
             }
-
             windDTOIter = windDTOList.iterator();
             int index = 0;
-            long startTime = windDTOList.get(0).timepoint;
-            prevWindDTO = null; //For the last time arrow was displayed
+            final TimePoint startTime = windDTOList.get(0).timepoint;
+            prevWindDTO = null; // For the last time arrow was displayed
             while (windDTOIter.hasNext()) {
                 SimulatorWindDTO windDTO = windDTOIter.next();
-
-                //if ((displayWindAlongPath) && ((index % arrowInterleave) == 0)) {
                 if (displayWindAlongPath) {
                     if (checkPointsAreFarEnough(windDTO,prevWindDTO)) {
                         AbstractBearing dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                        // System.out.print("index: "+index+"\n");
-
                         drawScaledArrow(windDTO, dbi.getRadians(), index, true);
                         prevWindDTO = windDTO;
                     }
                 }
                 index++;
-
                 long timeStep = windParams.getTimeStep().asMillis();
-                if ((windDTO.timepoint - startTime) % (timeStep) == 0) {
+                if (startTime.until(windDTO.timepoint).asMillis() % timeStep == 0) {
                     drawPoint(windDTO);
                 }
-
             }
-
             context2d.setGlobalAlpha(1.0);
-
-            // MeterDistance meterDistance = new MeterDistance(distance);
-            Date timeDiffDate = new Date(totalTime);
+            final Date timeDiffDate = new Date(totalDuration.asMillis());
             TimeZone gmt = TimeZone.createTimeZone(0);
-            title += " " + NumberFormat.getFormat("0.00").format(distance) + " nmi";
-            title += " in " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
-
-            // logger.info(title);
-            getCanvas().setTitle(title);
+            getCanvas().setTitle(StringMessages.INSTANCE.pathCanvasOverlayTitle(numPoints,
+                    NumberFormat.getFormat("0.00").format(distance),
+                    DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt)));
         }
     }
 
@@ -262,14 +224,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
         return mixedLeg;
     }
     
-    public long getPathTime() {
+    public long getPathDurationMillis() {
         if (totalTimeIsGiven) {
             return totalTimeMilliseconds;
         } else {
             List<SimulatorWindDTO> windDTOList = windFieldDTO.getMatrix();
             int numPoints = windDTOList.size();
-            long totalTime = windDTOList.get(numPoints - 1).timepoint - windDTOList.get(0).timepoint;
-            return totalTime;
+            final Duration totalTime = windDTOList.get(0).timepoint.until(windDTOList.get(numPoints - 1).timepoint);
+            return totalTime.asMillis();
         }
     }
 

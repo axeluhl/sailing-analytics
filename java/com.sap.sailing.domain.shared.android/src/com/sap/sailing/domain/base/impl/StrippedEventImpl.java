@@ -1,16 +1,13 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.tracking.TrackingConnectorInfo;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.media.ImageSize;
 
 /**
  * A simplified implementation of the {@link EventBase} interface which maintains an immutable collection of
@@ -21,20 +18,21 @@ import com.sap.sse.common.media.ImageSize;
  * 
  */
 public class StrippedEventImpl extends EventBaseImpl {
-    private static final long serialVersionUID = 5608501747499933988L;
+    private static final long serialVersionUID = -4443856327974643859L;
+    private final Set<TrackingConnectorInfo> trackingConnectorInfos;
     private final Iterable<LeaderboardGroupBase> leaderboardGroups;
-    private final Map<URL, ImageSize> imageSizes;
     
     public StrippedEventImpl(String name, TimePoint startDate, TimePoint endDate, String venueName,
-            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups) {
-        this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id, leaderboardGroups);
+            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, Set<TrackingConnectorInfo> trackingConnectorInfos) {
+        this(name, startDate, endDate, new VenueImpl(venueName), isPublic, id, leaderboardGroups, trackingConnectorInfos);
     }
 
     public StrippedEventImpl(String name, TimePoint startDate, TimePoint endDate, Venue venue,
-            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups) {
+            boolean isPublic, UUID id, Iterable<LeaderboardGroupBase> leaderboardGroups, Set<TrackingConnectorInfo> trackingConnectorInfos) {
         super(name, startDate, endDate, venue, isPublic, id);
         this.leaderboardGroups = leaderboardGroups;
-        this.imageSizes = new HashMap<URL, ImageSize>();
+        assert trackingConnectorInfos != null;
+        this.trackingConnectorInfos = trackingConnectorInfos;
     }
 
     @Override
@@ -42,12 +40,8 @@ public class StrippedEventImpl extends EventBaseImpl {
         return leaderboardGroups;
     }
 
-    public void setImageSize(URL imageURL, ImageSize imageSize) {
-        imageSizes.put(imageURL, imageSize);
-    }
-    
     @Override
-    public ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException {
-        return imageSizes.get(imageURL);
+    public Set<TrackingConnectorInfo> getTrackingConnectorInfos() {
+        return trackingConnectorInfos;
     }
 }

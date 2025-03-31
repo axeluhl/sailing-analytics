@@ -1,0 +1,15 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:widget="urn:import:com.sap.sailing.dashboards.gwt.client.widgets">
+
+	<ui:with field="resources"
+		type="com.sap.sailing.dashboards.gwt.client.popups.competitorselection.util.SettingsButtonWithSelectionIndicationLabelResources" />
+
+	<g:HTMLPanel>
+		<widget:ActionPanel ui:field="settingsButton" styleName="{resources.gss.settings_button}">
+			<g:Image ui:field="settingsButtonImage" styleName="{resources.gss.settings_button_image}"></g:Image>
+			<g:HTMLPanel ui:field="settingsIndicationLabel" styleName="{resources.gss.settings_indication_label}"></g:HTMLPanel>
+		</widget:ActionPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

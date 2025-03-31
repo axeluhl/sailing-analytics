@@ -22,13 +22,13 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
     private String leaderboardDisplayName;
     private String regattaName;
     private String boatClassName;
-    private EventBaseDTO event;
+    private Iterable<EventBaseDTO> events;
     private Iterable<LeaderboardGroupBaseDTO> leaderboardGroups;
     
     LeaderboardSearchResultDTO() {} // for GWT RPC serialization only
     
     public LeaderboardSearchResultDTO(String baseURL, boolean isOnRemoteServer, String leaderboardName, String leaderboardDisplayName,
-            String regattaName, String boatClassName, EventBaseDTO event,
+            String regattaName, String boatClassName, Iterable<EventBaseDTO> events,
             Iterable<LeaderboardGroupBaseDTO> leaderboardGroups) {
         super();
         this.baseURL = baseURL;
@@ -37,7 +37,7 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
         this.leaderboardDisplayName = leaderboardDisplayName;
         this.regattaName = regattaName;
         this.boatClassName = boatClassName;
-        this.event = event;
+        this.events = events;
         this.leaderboardGroups = leaderboardGroups;
     }
 
@@ -61,8 +61,8 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
         return boatClassName;
     }
 
-    public EventBaseDTO getEvent() {
-        return event;
+    public Iterable<EventBaseDTO> getEvents() {
+        return events;
     }
 
     public Iterable<LeaderboardGroupBaseDTO> getLeaderboardGroups() {
@@ -81,9 +81,9 @@ public class LeaderboardSearchResultDTO implements IsSerializable {
             sb.append(getLeaderboardDisplayName());
             sb.append(")");
         }
-        if (getEvent() != null) {
-            sb.append(", Event ");
-            sb.append(getEvent().getName());
+        if (getEvents() != null) {
+            sb.append(", Events ");
+            sb.append(getEvents());
         }
         sb.append(", ");
         sb.append("Boat class: ");

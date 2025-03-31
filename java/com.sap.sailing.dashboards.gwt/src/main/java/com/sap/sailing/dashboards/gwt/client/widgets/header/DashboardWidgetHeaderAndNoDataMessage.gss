@@ -1,0 +1,44 @@
+@require 'theme';
+
+.dashboard_widget_header {
+	position: absolute;
+	width: 100%;
+	height: DASHBOARD_SPACE_MEDIUM;
+	top: 0;
+	line-height: DASHBOARD_SPACE_MEDIUM;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_LARGE;
+	font-family: DASHBOARD_FONT_FAMILY;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+	background-color: WHITE;
+	border-bottom:solid LIGHT_GREY 1px;
+	z-index: 4;
+}
+
+.dashboard_widget_no_data_message_container {
+	position: absolute;
+	top: DASHBOARD_SPACE_MEDIUM;
+	bottom: 0px;
+	width: 100%;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	font-family: DASHBOARD_FONT_FAMILY;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: DASHBOARD_LINE_HEIGHT;
+}
+
+.dashboard_widget_no_data_message_header {
+	color: DARK_TEXT_COLOR;
+	font-weight: bold;
+	text-align: center;
+	display: inline-block;
+}
+
+.dashboard_widget_no_data_message {
+	color: LIGHT_TEXT_COLOR;
+    font-weight: normal;
+}

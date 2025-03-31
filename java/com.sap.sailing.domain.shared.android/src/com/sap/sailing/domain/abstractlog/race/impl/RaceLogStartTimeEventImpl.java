@@ -1,29 +1,39 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
 
 public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implements RaceLogStartTimeEvent {
-
     private static final long serialVersionUID = 8185811395997196162L;
     private final TimePoint startTime;
+    private final UUID courseAreaId;
 
-    public RaceLogStartTimeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint pTimePoint,
-            Serializable pId, List<Competitor> pInvolvedBoats, int pPassId, TimePoint pStartTime) {
-        super(createdAt, author, pTimePoint, pId, pInvolvedBoats, pPassId, RaceLogRaceStatus.SCHEDULED);
+    public RaceLogStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, int pPassId, TimePoint pStartTime, RaceLogRaceStatus nextStatus, UUID courseAreaId) {
+        super(createdAt, pTimePoint, author, pId, pPassId, nextStatus);
         this.startTime = pStartTime;
+        this.courseAreaId = courseAreaId;
+    }
+
+    public RaceLogStartTimeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
+            TimePoint pStartTime, UUID courseAreaId) {
+        this(now(), logicalTimePoint, author, randId(), pPassId, pStartTime, RaceLogRaceStatus.SCHEDULED, courseAreaId);
     }
 
     @Override
     public TimePoint getStartTime() {
         return startTime;
+    }
+
+    @Override
+    public UUID getCourseAreaId() {
+        return courseAreaId;
     }
 
     @Override
@@ -33,7 +43,7 @@ public class RaceLogStartTimeEventImpl extends RaceLogRaceStatusEventImpl implem
 
     @Override
     public String getShortInfo() {
-        return "startTime=" + startTime;
+        return "startTime=" + startTime+(getCourseAreaId()==null?"":(", course area ID="+getCourseAreaId().toString()));
     }
 
 }

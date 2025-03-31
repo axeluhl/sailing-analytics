@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"QR コードのスキャン"</string>
+    <string name="scan_hint">"参加の確認について QR コードを見つけることができました。"</string>
+    <string name="no_qr_code">"QR コードがありませんか。"</string>
+    <string name="start_tracking">"追跡開始"</string>
+    <string name="stop_tracking">"追跡停止"</string>
+    <string name="tracking_gps_accuracy">"GPS 精度"</string>
+    <string name="tracking_mode">"モード"</string>
+    <string name="tracking_mode_live">"ライブ"</string>
+    <string name="tracking_mode_battery_saving">"バッテリー節約"</string>
+    <string name="tracking_unsent_fixes">"未送信メッセージ"</string>
+    <string name="tracking_mode_caching">"オフライン"</string>
+    <string name="tracking_mode_api_error">"API エラー"</string>
+    <string name="tracking_mode_no_attempt">"初期化"</string>
+    <string name="tracking_time">"追跡時間"</string>
+    
+    <string name="tracking_status_tracking">"追跡"</string>
+    <string name="tracking_status_no_gps_signal">"GPS 変更内容または信号がありません"</string>
+    <string name="desc_regatta_user_image">"レガッタユーザ画像"</string>
+    <string name="desc_add_photo_button">"写真ボタン追加"</string>
+    <string name="tracking_status_gps_found">"GPS 信号が見つかりました"</string>
+</resources>

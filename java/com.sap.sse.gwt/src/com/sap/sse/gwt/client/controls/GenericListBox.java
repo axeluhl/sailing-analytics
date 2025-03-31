@@ -12,6 +12,7 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
     private final List<T> items;
     private final ValueBuilder<T> valueBuilder;
     
+    @FunctionalInterface
     public interface ValueBuilder<T> {
         String getValue(T item);
     }
@@ -43,6 +44,13 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
             setSelectedIndex(i);
         }
     }
+    
+    public void setValues(List<T> values) {
+        int i = 0;
+        for (T item : items) {
+            setItemSelected(i++, values.contains(item));
+        }
+    }
 
     @Override
     public T getValue() {
@@ -51,6 +59,17 @@ public class GenericListBox<T> extends ListBox implements TakesValue<T> {
             return null;
         }
         return items.get(i);
+    }
+    
+    public ArrayList<T> getValues() {
+        ArrayList<T> result = new ArrayList<>();
+        int i = 0;
+        for (T item : items) {
+            if (isItemSelected(i++)) {
+                result.add(item);
+            }
+        }
+        return result;
     }
     
     @Override

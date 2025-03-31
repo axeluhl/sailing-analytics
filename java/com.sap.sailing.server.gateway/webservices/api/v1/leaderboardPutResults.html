@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboard/{name}/results</h2>
+
+<b>Description:</b>
+<p>The service is used to upload score corrections for a leaderboard. The user must be authenticated and must
+have the <tt>UPDATE</tt> permission on the leaderboard identified by <tt>{name}</tt>. A comprehensive result
+document is produced that lets the client understand if the import went OK, or if it was rejected because
+it was incomplete, and if (even only partially) successful, which parts were matched and imported, and which
+parts were unmatched and couldn't be associated with the leaderboard structure.</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td><b>scoreCorrectionProvider</b>: the name of a score correction provider. Currently understood score correction provider names are<ul>
+		<li>"ISAF XML Regatta Result (XRR) Importer"</li>
+		<li>"Yachtscoring XRR Result Importer"</li>
+		<li>"Sailwave CSV result importer"</li>
+		<li>"Velum CSV result importer"</li>
+		<li>"Manage2Sail XRR Result Importer"</li>
+		<li>"Extreme Sailing Series 40 Scores from SailRacer.org"</li>
+		<li>"Kieler Woche Official Results by b+m"</li>
+		<li>"Barbados 2013 505 Worlds Excel Result Importer"</li>
+		<li>"FREG HTML Score Importer"</li>
+		</ul>Needless to say that URL encoding is required for this query parameter.</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td><b>allowRaceDefaultsByOrder</b>: (default: false) If <tt>true</tt>, the race numbers in the score correction document
+		    will be matched against the leaderboard's race column names in the order in which they appear, without checking
+		    that the race number/name provided in the results document matches the race column name exactly.
+		    Note that with this option enabled an unusual leaderboard format such as one that contains carry-over columns,
+		    e.g., between a qualification and a final series may cause mismatches in how the results are associated.
+		    Always validate the output!<p>
+		    <b>allowPartialImport</b>: (default: false) If <tt>true</tt>, a result document will be applied even if not all
+		    race numbers / names in the result document have been matched to existing race columns in the leaderboard,
+		    or if not all sail IDs / numbers in the result document were matched to existing competitor sail numbers in
+		    the leaderboard. Use this with caution and check the output which provides insights into what was matched
+		    and what wasn't.<p>
+		    <b>timePointOfLastCorrectionValidityMillis</b>: a time stamp in Unix time (milliseconds since 1970-01-01T00:00:00+0000)
+		    that tells the time stamp to set for this score correction. This will be shown on the leaderboard visualization.<p>
+		    <b>comment</b>: a comment to display with the leaderboard; this could for example hint at the status (official,
+		    preliminary, protests pending, based on tracking only, ...)<p>
+		    <b>sailId</b>: multiple occurrences of this parameter are allowed; used together with <b>competitorId</b> to specify
+		    how sail IDs/numbers are to be matched to competitors from the leaderboard during the import. The multiplicities
+		    of <b>sailId</b> and <b>competitorId</b> must match.<p>
+		    <b>competitorId</b>: see <b>sailId</b>; used to specify the competitor IDs to which to map the <b>sailId</b> at the
+		    corresponding parameter index; order matters<p>
+		    <b>raceNumber</b>: multiple occurrences of this parameter are allowed; used together with <b>raceColumnName</b> to specify
+		    how race numbers / names are to be matched to race column names from the leaderboard during the import. The multiplicities
+		    of <b>raceNumber</b> and <b>raceColumnName</b> must match.<p>
+		    <b>raceColumnName</b>: see <b>raceNumber</b>; used to specify the race column name to which to map the <b>raceNumber</b> at the
+		    corresponding parameter index; order matters<p>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>PUT</td>
+	</tr>
+	<tr>
+		<td>Payload:</td>
+		
+		<td>A result document in the format required by the provider selected with the <b>scoreCorrectionProvider</b> parameter,
+		e.g., an XRR document for the "ISAF XML Regatta Result (XRR) Importer" provider
+		</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -H 'Authorization: Bearer b+AfqiyGh6LySer4J4F/P9dU4MSPRt6PuJbFwwzCpo8=' -H 'Content-Type: application/octet-stream' -X PUT --data-binary @/path/to/XRR.xml "http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/SomeLeaderboard/results?scoreCorrectionProvider=ISAF%20XML%20Regatta%20Result%20(XRR)%20Importer&sailId=GER%202098&competitorId=bc883750-4b79-0137-d3a6-60a44ce903c3&allowRaceDefaultsByOrder=true&allowPartialImport=true&comment=Preliminary"</a><br/>
+		Response: Status 200
+		<pre>
+		{
+		  "complete": false,
+		  "allowPartialImport": true,
+		  "matchedSailIds": [
+		    {
+		      "sailId": "GER 2098",
+		      "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3"
+		    }
+		  ],
+		  "matchedRaceNumbers": [
+		    {
+		      "raceNumber": "1",
+		      "raceColumnName": "R1"
+		    },
+		    {
+		      "raceNumber": "2",
+		      "raceColumnName": "R2"
+		    },
+		    {
+		      "raceNumber": "3",
+		      "raceColumnName": "R3"
+		    },
+		    {
+		      "raceNumber": "4",
+		      "raceColumnName": "R4"
+		    },
+		    {
+		      "raceNumber": "5",
+		      "raceColumnName": "R5"
+		    },
+		    {
+		      "raceNumber": "6",
+		      "raceColumnName": "R6"
+		    }
+		  ],
+		  "unmatchedSailIds": [
+		    "GER 1031",
+		    "GER 1230",
+		    "DEN 1583",
+		    "GER 1861",
+		    "DEN 1500",
+		    "GER 2038",
+		    "GER 1103",
+		    "DEN 63",
+		    "GER 2091",
+		    "DEN 1736",
+		    "GER 2106",
+		    "GER 606",
+		    "GER 1911",
+		    "GER 1912"
+		  ],
+		  "unmatchedRaceNumbers": [
+		    "7",
+		    "8"
+		  ],
+		  "applyResult": [
+		    {
+		      "raceNumber": "1",
+		      "raceColumnName": "R1",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 27,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    },
+		    {
+		      "raceNumber": "2",
+		      "raceColumnName": "R2",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 11,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    },
+		    {
+		      "raceNumber": "3",
+		      "raceColumnName": "R3",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 15,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    },
+		    {
+		      "raceNumber": "4",
+		      "raceColumnName": "R4",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 28,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    },
+		    {
+		      "raceNumber": "5",
+		      "raceColumnName": "R5",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 29,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    },
+		    {
+		      "raceNumber": "6",
+		      "raceColumnName": "R6",
+		      "competitors": [
+		        {
+		          "sailId": "GER 2098",
+		          "competitorId": "bc883750-4b79-0137-d3a6-60a44ce903c3",
+		          "score": 27,
+		          "maxPointsReason": "NONE"
+		        }
+		      ]
+		    }
+		  ]
+		}
+		</pre>
+		</tr>
+	</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

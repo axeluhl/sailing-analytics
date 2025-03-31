@@ -1,40 +1,50 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
+public abstract class AbstractLeaderboardDialog<LD extends LeaderboardDescriptor> extends DataEntryDialog<LD> {
     protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
     protected TextBox displayNameTextBox;
-    protected LeaderboardDescriptor leaderboardDescriptor;
+    protected LD leaderboardDescriptor;
 
     protected DiscardThresholdBoxes discardThresholdBoxes;
-    protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDescriptor, StringMessages stringMessages,
-            Validator<LeaderboardDescriptor> validator,  DialogCallback<LeaderboardDescriptor> callback) {
+    public AbstractLeaderboardDialog(String title, LD leaderboardDescriptor, StringMessages stringMessages,
+            Validator<LD> validator, DialogCallback<LD> callback) {
         super(title, null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        nameTextBox = createTextBox(leaderboardDescriptor.getName());
+        nameTextBox.setVisibleLength(50);
+        nameTextBox.ensureDebugId("NameTextBox");
+        nameTextBox.setEnabled(false); // name is not editable; see also bug5282
         this.stringMessages = stringMessages;
         this.leaderboardDescriptor = leaderboardDescriptor;
     }
 
     @Override
-    protected LeaderboardDescriptor getResult() {
-        leaderboardDescriptor.setName(nameTextBox.getValue());
+    protected LD getResult() {
+        // setting the name is relevant only for the FlexibleLeaderboard and RegattaLeaderboardWithElimination creation:
+        leaderboardDescriptor.setName(nameTextBox.getValue().trim()); // avoid trailing blank issues; leaderboard names may appear in URLs
         leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboardDescriptor.setDiscardThresholds(discardThresholdBoxes==null?null:discardThresholdBoxes.getDiscardThresholds());
         return leaderboardDescriptor;
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameTextBox.setFocus(true);
+    protected Focusable getInitialFocusWidget() {
+        return nameTextBox;
     }
 
     protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
@@ -55,6 +65,28 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
                     result = scoringSchemeType;
                     break;
                 }
+            }
+        }
+        return result;
+    }
+    
+    protected ListBox createSortedRegattaLeaderboardsListBox(Collection<StrippedLeaderboardDTO> existingLeaderboards, String preSelectedRegattaName) {
+        ListBox result = createListBox(false);
+        // sort the regatta names
+        List<StrippedLeaderboardDTO> sortedRegattaLeaderboards = new ArrayList<>();
+        for (StrippedLeaderboardDTO leaderboard : existingLeaderboards) {
+            sortedRegattaLeaderboards.add(leaderboard);
+        }
+        Collections.sort(sortedRegattaLeaderboards, (rl1, rl2) -> rl1.getName().compareTo(rl2.getName()));
+        result.addItem(stringMessages.pleaseSelectARegatta());
+        int i=1;
+        for (StrippedLeaderboardDTO leaderboard : sortedRegattaLeaderboards) {
+            if (leaderboard.type.isRegattaLeaderboard()) {
+                result.addItem(leaderboard.getName(), leaderboard.getName());
+                if (preSelectedRegattaName != null && leaderboard.getName().equals(preSelectedRegattaName)) {
+                    result.setSelectedIndex(i);
+                }
+                i++;
             }
         }
         return result;

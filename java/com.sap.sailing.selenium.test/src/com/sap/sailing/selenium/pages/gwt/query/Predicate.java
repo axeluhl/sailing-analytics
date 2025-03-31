@@ -1,7 +1,5 @@
 package com.sap.sailing.selenium.pages.gwt.query;
 
-import com.sap.sailing.selenium.pages.gwt.query.Expression;
-
 /**
  * <p>Predicate is the common interface for Boolean typed expressions.</p>
  * 

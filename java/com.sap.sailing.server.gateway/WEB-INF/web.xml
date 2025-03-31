@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
-	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1">
 
 	<!-- Disable directory listing: -->
 	<servlet>
@@ -16,39 +15,49 @@
 		</init-param>
 	</servlet>
 
-  <!-- Apache Shiro -->
-  <context-param>
-    <param-name>shiroEnvironmentClass</param-name>
-    <param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
-  </context-param>
-  <listener>
-    <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
-  </listener>
-  <filter>
-    <filter-name>ShiroFilter</filter-name>
-    <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
-  </filter>
-  <!-- Make sure any request you want accessible to Shiro is filtered. "/*" 
-    catches all requests. Usually this filter mapping is defined first (before all 
-    others) to ensure that Shiro works in subsequent filters in the filter chain: -->
-  <filter-mapping>
-    <filter-name>ShiroFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-    <dispatcher>REQUEST</dispatcher>
-    <dispatcher>FORWARD</dispatcher>
-    <dispatcher>INCLUDE</dispatcher>
-    <dispatcher>ERROR</dispatcher>
-  </filter-mapping>
-  
-   	<servlet>
-		<servlet-name>AdminApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>AdminApp</servlet-name>
-		<url-pattern>/admin</url-pattern>
-	</servlet-mapping>
-	
+    <!-- CORS filter -->
+    <filter>
+        <filter-name>CORSFilter</filter-name>
+        <filter-class>com.sap.sse.rest.CORSFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CORSFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
+	  <!-- Apache Shiro -->
+	  <context-param>
+	    <param-name>shiroEnvironmentClass</param-name>
+	    <param-value>org.apache.shiro.web.env.IniWebEnvironment</param-value>
+	  </context-param>
+	  <listener>
+	    <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	  </listener>
+	  <filter>
+	    <filter-name>ShiroFilter</filter-name>
+	    <filter-class>com.sap.sse.security.shiro.ShiroFilterForAllButOptionsRequests</filter-class>
+	  </filter>
+	  <!-- Make sure any request you want accessible to Shiro is filtered. "/*" 
+	    catches all requests. Usually this filter mapping is defined first (before all 
+	    others) to ensure that Shiro works in subsequent filters in the filter chain: -->
+	  <filter-mapping>
+	    <filter-name>ShiroFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	    <dispatcher>REQUEST</dispatcher>
+	    <dispatcher>FORWARD</dispatcher>
+	    <dispatcher>INCLUDE</dispatcher>
+	    <dispatcher>ERROR</dispatcher>
+	  </filter-mapping>
+	  
+	  <filter>
+	      <filter-name>DefaultTenantFilter</filter-name>
+	      <filter-class>com.sap.sse.security.impl.DefaultTenantRequestFilter</filter-class>
+	  </filter>
+	  <filter-mapping>
+	      <filter-name>DefaultTenantFilter</filter-name>
+	      <url-pattern>/api/*</url-pattern>
+	  </filter-mapping>
+
 	<servlet>
 		<servlet-name>RCConfiguration</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.ConfigurationJsonGetServlet</servlet-class>
@@ -111,18 +120,15 @@
 		<servlet-name>RCCompetitors</servlet-name>
 		<url-pattern>/rc/competitors</url-pattern>
 	</servlet-mapping>
-		
+    <servlet>
+        <servlet-name>RCCompetitorsAndBoats</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.rc.CompetitorsAndBoatsJsonExportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RCCompetitorsAndBoats</servlet-name>
+        <url-pattern>/rc/competitorsAndBoats</url-pattern>
+    </servlet-mapping> 	
 	<!-- RACE COMMITTEE END -->
-
-	<servlet>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<url-pattern>/moderator</url-pattern>
-	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
@@ -133,97 +139,53 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>EventsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EventsJsonGetServlet</servlet-name>
-		<url-pattern>/events</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EventRaceStatesServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventRaceStatesJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EventRaceStatesServlet</servlet-name>
-		<url-pattern>/eventRaceStates</url-pattern>
-	</servlet-mapping>
-		
-	<servlet>
-		<servlet-name>RegattasJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattasJsonGetServlet</servlet-name>
-		<url-pattern>/regattas</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>RegattaJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattaJsonGetServlet</servlet-name>
-		<url-pattern>/regatta</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboards</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboard</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboardgroup</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboardgroups</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<url-pattern>/wind</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>WindImportServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.expeditionimport.WindImportServlet</servlet-class>
+		<servlet-class>com.sap.sailing.server.gateway.windimport.expedition.WindImportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>WindImportServlet</servlet-name>
 		<url-pattern>/expedition-import</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
+    <servlet>
+        <servlet-name>GribWindImportServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.windimport.grib.GribWindImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GribWindImportServlet</servlet-name>
+        <url-pattern>/grib-wind-import</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>NmeaWindImportServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.windimport.nmea.NmeaWindImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>NmeaWindImportServlet</servlet-name>
+        <url-pattern>/nmea-wind-import</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>RouteconverterWindImportServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.windimport.routeconverter.RouteconverterWindImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RouteconverterWindImportServlet</servlet-name>
+        <url-pattern>/routeconverter-wind-import</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>BravoWindImportServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.windimport.bravo.BravoWindImportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>BravoWindImportServlet</servlet-name>
+        <url-pattern>/bravo-wind-import</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+	<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
+	<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionWindMeasureStatusGetServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ExpeditionWindMeasureStatusGetServlet</servlet-name>
@@ -231,11 +193,11 @@
 	</servlet-mapping>
 			
 	<servlet>
-		<servlet-name>WindStatusServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusServlet</servlet-class>
+		<servlet-name>WindStatusHtmlServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusHtmlServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>WindStatusServlet</servlet-name>
+		<servlet-name>WindStatusHtmlServlet</servlet-name>
 		<url-pattern>/windStatus</url-pattern>
 	</servlet-mapping>
 	<servlet>
@@ -255,6 +217,22 @@
 		<url-pattern>/trackfiles/import</url-pattern>
 	</servlet-mapping>
 	<servlet>
+		<servlet-name>SensorDataImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.SensorDataImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SensorDataImportServlet</servlet-name>
+		<url-pattern>/sensordata/import</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>ExpeditionAllInOneImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.ExpeditionAllInOneImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionAllInOneImportServlet</servlet-name>
+		<url-pattern>/expedition/import</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>FileUploadServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.FileUploadServlet</servlet-class>
 	</servlet>
@@ -262,50 +240,88 @@
 		<servlet-name>FileUploadServlet</servlet-name>
 		<url-pattern>/fileupload</url-pattern>
 	</servlet-mapping>
-	
     <servlet>
-        <servlet-name>websockettest</servlet-name>
-        <servlet-class>com.sap.sailing.server.gateway.impl.WebSocketTestServlet</servlet-class>
+        <servlet-name>ProgressServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.impl.ProgressServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
-        <servlet-name>websockettest</servlet-name>
-        <url-pattern>/websockettest</url-pattern>
+        <servlet-name>ProgressServlet</servlet-name>
+        <url-pattern>/fileupload/progress</url-pattern>
     </servlet-mapping>
+	<servlet>
+		<servlet-name>ORCCertificateImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.orc.ORCCertificateImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ORCCertificateImportServlet</servlet-name>
+		<url-pattern>/orc-certificate-import</url-pattern>
+	</servlet-mapping>
 	
-    <servlet>
-    	<servlet-name>Jersey REST API</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+	<servlet>
+		<servlet-name>Jersey REST API</servlet-name>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
-        		<param-name>javax.ws.rs.Application</param-name>
-        		<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
-   		</init-param>
-		<init-param>
-   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
-		</init-param>   
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.api.RestApiApplication</param-value>
+		</init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+            <param-value>true</param-value>
+        </init-param>
 		<load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    	<servlet-name>Jersey REST API</servlet-name>
-    	<url-pattern>/api/*</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    	<servlet-name>Jersey REST SPI</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.jaxrs.RestServletContainer</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Jersey REST API</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>Jersey REST SPI</servlet-name>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
 		<init-param>
-       		<param-name>javax.ws.rs.Application</param-name>
-       		<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
-   		</init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.spi.RestSpiApplication</param-value>
+		</init-param>
 		<init-param>
-   			<param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-   			<param-value>com.sap.sailing.server.gateway.jaxrs.AccessControlAndEncodingResponseFilter</param-value>
-		</init-param>   
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs</param-value>
+		</init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+            <param-value>true</param-value>
+        </init-param>
 		<load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    	<servlet-name>Jersey REST SPI</servlet-name>
-    	<url-pattern>/spi/*</url-pattern>
-  </servlet-mapping>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Jersey REST SPI</servlet-name>
+		<url-pattern>/spi/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <servlet-class>com.sap.sailing.server.gateway.subscription.SubscriptionWebHookServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubscriptionWebhookServlet</servlet-name>
+        <url-pattern>/subscription/hooks/*</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>SharingApi</servlet-name>
+		<servlet-class>com.sap.sailing.shared.server.gateway.jaxrs.RestServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>com.sap.sailing.server.gateway.jaxrs.sharing.SharingApiApplication</param-value>
+		</init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+            <param-value>true</param-value>
+        </init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SharingApi</servlet-name>
+		<url-pattern>/shared/*</url-pattern>
+	</servlet-mapping>
  </web-app>
  

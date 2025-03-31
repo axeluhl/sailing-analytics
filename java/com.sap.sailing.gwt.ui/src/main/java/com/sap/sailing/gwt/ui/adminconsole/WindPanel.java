@@ -1,32 +1,36 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.AccessControlledActionsColumn.create;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
-import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -45,28 +49,40 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindImportConstants;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.WindImportResult.RaceEntry;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.adminconsole.places.AdminConsoleView.Presenter;
+import com.sap.sailing.gwt.ui.client.Displayer;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.fileupload.FileUploadUtil;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
+import com.sap.sse.gwt.adminconsole.FilterablePanelProvider;
+import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 
 /**
  * Displays a table of currently tracked races. The user can configure whether a race
@@ -76,68 +92,91 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements RegattasDisplayer, WindShower, RaceSelectionChangeListener {
-
-    private static final String EXPEDITON_IMPORT_PARAMETER_RACES = "races";
-
-    private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
-
+public class WindPanel extends FormPanel implements FilterablePanelProvider<RaceDTO> {
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
+    private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
+    private static final String URL_SAILINGSERVER_NMEA_IMPORT = "/../../sailingserver/nmea-wind-import";
+    private static final String URL_SAILINGSERVER_ROUTECONVERTER_IMPORT = "/../../sailingserver/routeconverter-wind-import";
+    private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
-    private final SailingServiceAsync sailingService;
+    private final SailingServiceWriteAsync sailingServiceWrite;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-    private final IdentityColumn<WindDTO> removeColumn;
     private final TextColumn<WindDTO> timeColumn;
     private final TextColumn<WindDTO> speedInKnotsColumn;
     private final TextColumn<WindDTO> windDirectionInDegColumn;
     private final TextColumn<WindDTO> positionColumn;
     private final TrackedRacesListComposite trackedRacesListComposite;
-    private final RaceSelectionProvider raceSelectionProvider;
+    private final RefreshableMultiSelectionModel<RaceDTO> refreshableRaceSelectionModel;
     private final WindSourcesToExcludeSelectorPanel windSourcesToExcludeSelectorPanel;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final CaptionPanel windCaptionPanel;
+    private final Button addWindFixButton;
     private final VerticalPanel windFixesDisplayPanel;
     private final Label windSourceLabel;
     private final ListDataProvider<WindDTO> rawWindFixesDataProvider;
     private final CellTable<WindDTO> rawWindFixesTable;
     private final VerticalPanel windFixPanel;
-
-    public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
-            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
+    private final Predicate<RaceDTO> userPermission;
+    private final Displayer<RegattaDTO> regattasDisplayer;
+    
+    /**
+     * Composite pattern over the {@link RegattasDisplayer} interface. Calls to {@link #fillRegattas(Iterable)}
+     * will be forwarded to those objects contained in this collection.
+     */
+    private final Set<Displayer<RegattaDTO>> containedRegattaDisplayers;
+    private CaptionPanel expeditionImportPanel;
+    private CaptionPanel gribImportPanel;
+    private CaptionPanel nmeaImportPanel;
+    private CaptionPanel bravoImportPanel;
+    private CaptionPanel igtimiImportPanel;
+    private CaptionPanel routeconverterImportPanel;
+    private CaptionPanel expeditionAllInOneImporterPanel;
+    
+    public WindPanel(final Presenter presenter, final StringMessages stringMessages) {
+        this.ensureDebugId("WindPanel");
+        this.regattasDisplayer = result->fillRegattas(result);
+        this.userPermission = race -> presenter.getUserService().hasPermission(race, UPDATE);
+        this.sailingServiceWrite = presenter.getSailingService();
+        this.userService = presenter.getUserService();
+        this.containedRegattaDisplayers = new HashSet<>();
+        this.errorReporter = presenter.getErrorReporter();
         this.stringMessages = stringMessages;
-        this.raceSelectionProvider = new RaceSelectionModel();
-        windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages, errorReporter);
-
+        this.windSourcesToExcludeSelectorPanel = new WindSourcesToExcludeSelectorPanel(sailingServiceWrite, stringMessages,
+                errorReporter);
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSize("100%", "100%");
         this.setWidget(mainPanel);
-
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher, 
-                raceSelectionProvider, stringMessages, /*multiselection*/true);
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, presenter, stringMessages, /* multiselection */true,
+                /* actionButtonsEnabled */ false);
+        containedRegattaDisplayers.add(trackedRacesListComposite.getRegattasDisplayer());
+        trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
         mainPanel.add(trackedRacesListComposite);
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
-
+        refreshableRaceSelectionModel = (RefreshableMultiSelectionModel<RaceDTO>) trackedRacesListComposite.getSelectionModel();
+        refreshableRaceSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                updateWindDisplay();
+                updateVisibilityStateForPanels();
+            }
+        });
         windCaptionPanel = new CaptionPanel(stringMessages.wind());
         windCaptionPanel.setVisible(false);
         mainPanel.add(windCaptionPanel);
-
         TabPanel tabPanel = new TabPanel();
         tabPanel.setAnimationEnabled(true);
         windCaptionPanel.add(tabPanel);
-        tabPanel.setSize("95%", "95%");
-
+        tabPanel.setWidth("100%");
         windFixesDisplayPanel = new VerticalPanel();
-        Button addWindFixButton = new Button(stringMessages.actionAddWindData() + "...");
+        addWindFixButton = new Button(stringMessages.actionAddWindData() + "...");
         addWindFixButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 RegattaAndRaceIdentifier selectedRace = getSelectedRace();
                 if (selectedRace != null) {
                     final RaceDTO race = trackedRacesListComposite.getRaceByIdentifier(selectedRace);
-                    sailingService.getCoursePositions(selectedRace, race.trackedRace.startOfTracking, new AsyncCallback<CoursePositionsDTO>() {
+                    sailingServiceWrite.getCoursePositions(selectedRace, race.trackedRace.startOfTracking, new AsyncCallback<CoursePositionsDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             showWindSettingDialog(race, null);
@@ -152,51 +191,41 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         windFixesDisplayPanel.add(addWindFixButton);
-
         final VerticalPanel windSourcesPanel = new VerticalPanel();
         windSourcesPanel.setSpacing(10);
         tabPanel.add(windSourcesPanel, stringMessages.windSourcesUsed());
-        tabPanel.add(windFixesDisplayPanel, "Wind fixes");
+        tabPanel.add(windFixesDisplayPanel, stringMessages.windFixes());
         tabPanel.selectTab(0);
-
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
         windSourcesPanel.add(raceIsKnownToStartUpwindBox);
-
         windSourcesPanel.add(windSourcesToExcludeSelectorPanel);
-        raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setRaceIsKnownToStartUpwind();
-            }
-        });
-
+        raceIsKnownToStartUpwindBox.addValueChangeHandler(event -> setRaceIsKnownToStartUpwind());
         windFixPanel = new VerticalPanel();
         windSourcesPanel.add(windFixPanel);
-
         windSourceLabel = new Label();
         windFixesDisplayPanel.add(windSourceLabel);
-
         // table for the raw wind fixes
-        removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
-            @Override
-            public void execute(final WindDTO wind) {
-                List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-                final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
-                sailingService.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        // remove row from underlying list:
-                        rawWindFixesDataProvider.getList().remove(wind);
-                    }
+        final AccessControlledActionsColumn<WindDTO, DefaultActionsImagesBarCell> actionsColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService,
+                item -> trackedRacesListComposite.getRaceByIdentifier(getSelectedRace()));
+        actionsColumn.addAction(DefaultActionsImagesBarCell.ACTION_DELETE, UPDATE, wind -> {
+            List<RaceDTO> selectedRaces = new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet());
+            final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1)
+                    .getRaceIdentifier();
+            sailingServiceWrite.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    // remove row from underlying list:
+                    rawWindFixesDataProvider.getList().remove(wind);
+                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        WindPanel.this.errorReporter.reportError(WindPanel.this.stringMessages.errorSettingWindForRace() 
-                                + " " + raceIdentifier + ": " + caught.getMessage());
-                    }
-                });
-            }
-        }));
+                @Override
+                public void onFailure(Throwable caught) {
+                    WindPanel.this.errorReporter.reportError(WindPanel.this.stringMessages.errorSettingWindForRace()
+                            + " " + raceIdentifier + ": " + caught.getMessage());
+                }
+            });
+        });
         timeColumn = new TextColumn<WindDTO>() {
             @Override
             public String getValue(WindDTO object) {
@@ -228,24 +257,81 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         timeColumn.setSortable(true);
         speedInKnotsColumn.setSortable(true);
         windDirectionInDegColumn.setSortable(true);
-
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        rawWindFixesTable = new CellTable<WindDTO>(/* pageSize */10000, tableRes);
-        rawWindFixesTable.addColumn(timeColumn, "Time");
-        rawWindFixesTable.addColumn(speedInKnotsColumn, "Speed (kn)");
-        rawWindFixesTable.addColumn(windDirectionInDegColumn, "From (deg)");
-        rawWindFixesTable.addColumn(positionColumn, "Position");
-        rawWindFixesTable.addColumn(removeColumn, stringMessages.actions());
+        rawWindFixesTable = new BaseCelltable<WindDTO>(/* pageSize */10000, tableRes);
+        rawWindFixesTable.addColumn(timeColumn, stringMessages.time());
+        rawWindFixesTable.addColumn(speedInKnotsColumn, stringMessages.speedInKnots());
+        rawWindFixesTable.addColumn(windDirectionInDegColumn, stringMessages.fromDeg());
+        rawWindFixesTable.addColumn(positionColumn, stringMessages.position());
+        rawWindFixesTable.addColumn(actionsColumn, stringMessages.actions());
         rawWindFixesDataProvider = new ListDataProvider<WindDTO>();
         rawWindFixesDataProvider.addDataDisplay(rawWindFixesTable);
         Handler columnSortHandler = getWindTableColumnSortHandler(rawWindFixesDataProvider.getList(), timeColumn, speedInKnotsColumn, windDirectionInDegColumn);
         rawWindFixesTable.addColumnSortHandler(columnSortHandler);
         rawWindFixesTable.getColumnSortList().push(timeColumn);
         windFixesDisplayPanel.add(rawWindFixesTable);
+        // Expedition import
+        expeditionImportPanel = createExpeditionWindImportPanel();
+        gribImportPanel = createGribWindImportPanel();
+        nmeaImportPanel = createNmeaWindImportPanel();
+        routeconverterImportPanel = createRouteconverterWindImportPanel();
+        bravoImportPanel = createBravoWindImportPanel();
+        igtimiImportPanel = igtimiImportPanel(mainPanel);
+        mainPanel.add(expeditionImportPanel);
+        mainPanel.add(gribImportPanel);
+        mainPanel.add(nmeaImportPanel);
+        mainPanel.add(routeconverterImportPanel);
+        mainPanel.add(bravoImportPanel);
+        mainPanel.add(igtimiImportPanel);
+        // Expedition all in one import
+        final Pair<CaptionPanel, ExpeditionAllInOneImportPanel> expeditionAllInOneRootAndImportPanel = createExpeditionAllInOneImportPanel(presenter);
+        expeditionAllInOneImporterPanel = expeditionAllInOneRootAndImportPanel.getA();
+        mainPanel.add(expeditionAllInOneImporterPanel);
+        containedRegattaDisplayers.add(expeditionAllInOneRootAndImportPanel.getB().getRegattasDisplayer());
+        updateVisibilityStateForPanels();
+        this.userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                updateVisibilityStateForPanels();
+            }
+        });
+    }
 
-        mainPanel.add(createExpeditionWindImportPanel());
-        mainPanel.add(createIgtimiWindImportPanel(mainPanel));
+    private void updateVisibilityStateForPanels() {
+        Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
+        if (selectedRaces.isEmpty()) {
+            // they could potentially hit all races, we don't have enough information to check here
+            expeditionImportPanel.setVisible(true);
+            gribImportPanel.setVisible(true);
+            nmeaImportPanel.setVisible(true);
+            bravoImportPanel.setVisible(true);
+            igtimiImportPanel.setVisible(true);
+        } else {
+            boolean canUpdateAll = true;
+            for (RaceDTO race : refreshableRaceSelectionModel.getSelectedSet()) {
+                if (!userPermission.test(race)) {
+                    canUpdateAll = false;
+                }
+            }
+            expeditionImportPanel.setVisible(canUpdateAll);
+            gribImportPanel.setVisible(canUpdateAll);
+            nmeaImportPanel.setVisible(canUpdateAll);
+            bravoImportPanel.setVisible(canUpdateAll);
+            igtimiImportPanel.setVisible(canUpdateAll);
+        }
 
+        boolean canCreateEvent = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.EVENT);
+        boolean canCreateRegatta = userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.REGATTA);
+        boolean canCreateRace = userService
+                .hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.TRACKED_RACE);
+        boolean canCreateLeaderboard = userService
+                .hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD);
+        expeditionAllInOneImporterPanel
+                .setVisible(canCreateEvent && canCreateLeaderboard && canCreateRace && canCreateRegatta);
+    }
+
+    private CaptionPanel igtimiImportPanel(VerticalPanel mainPanel) {
+        return createIgtimiWindImportPanel(mainPanel);
     }
 
     private CaptionPanel createIgtimiWindImportPanel(VerticalPanel mainPanel) {
@@ -254,20 +340,23 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         igtimiWindImportRootPanel.add(contentPanel);
         contentPanel.add(new Label(stringMessages.seeIgtimiTabForAccountSettings()));
         final CheckBox correctByDeclination = new CheckBox(stringMessages.declinationCheckbox());
+        correctByDeclination.setValue(true); // by default this is desirable because the Igtimi connector reads uncorrected magnetic values
         final Button importButton = new Button(stringMessages.importWindFromIgtimi());
+        importButton.ensureDebugId("ImportWindFromIgtimi");
         final HTML resultReport = new HTML();
+        resultReport.ensureDebugId("IgtimiImportResultReport");
         importButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 final String warningMessage;
-                if (trackedRacesListComposite.getSelectedRaces().isEmpty()) {
+                if (refreshableRaceSelectionModel.getSelectedSet().isEmpty()) {
                     warningMessage = stringMessages.windImport_AllRacesWarning();
                 } else {
-                    warningMessage = stringMessages.windImport_SelectedRacesWarning(trackedRacesListComposite.getSelectedRaces().size());
+                    warningMessage = stringMessages.windImport_SelectedRacesWarning(refreshableRaceSelectionModel.getSelectedSet().size());
                 }
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
-                    sailingService.importWindFromIgtimi(trackedRacesListComposite.getSelectedRaces(),
+                    sailingServiceWrite.importWindFromIgtimi(new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet()),
                             correctByDeclination.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -298,30 +387,56 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         contentPanel.add(resultReport);
         return igtimiWindImportRootPanel;
     }
-
-    private CaptionPanel createExpeditionWindImportPanel() {
+    
+    private static class WindImportFileUploadForm {
+        private final FormPanel formPanel;
+        private final VerticalPanel formContentPanel;
+        private final FileUpload fileUpload;
+        private final Button submitButton;
+        public WindImportFileUploadForm(FormPanel formPanel, VerticalPanel formContentPanel, FileUpload fileUpload, Button submitButton) {
+            super();
+            this.formPanel = formPanel;
+            this.formContentPanel = formContentPanel;
+            this.fileUpload = fileUpload;
+            this.submitButton = submitButton;
+        }
+        public FormPanel getFormPanel() {
+            return formPanel;
+        }
+        public FileUpload getFileUpload() {
+            return fileUpload;
+        }
+        public Button getSubmitButton() {
+            return submitButton;
+        }
+        public VerticalPanel getFormContentPanel() {
+            return formContentPanel;
+        }
+    }
+    /**
+     * Creates a file upload form that works with {@code AbstractWindImportServlet} on the server side. In particular,
+     * the race selection is managed in a hidden field named {@link #WIND_IMPORT_PARAMETER_RACES}, and the
+     * {@code upload} element is the MIME multipart file upload form element. The form uses {@code POST} as its method.
+     * 
+     * The submit button is initially disabled. Callers can implement their own logic based, e.g., on event handlers they
+     * add to the form panel or other elements that enable it.
+     */
+    private WindImportFileUploadForm createWindImportFileUploadForm(String relativeUploadUrl, boolean multi,
+            Optional<String> submitButtonDebugId, Optional<String> uploadFormDebugId,
+            Optional<String> importResultPanelDebugId) {
         /*
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
          */
-        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
-        VerticalPanel windImportContentPanel = new VerticalPanel();
-        windImportRootPanel.add(windImportContentPanel);
         final FormPanel form = new FormPanel();
-        windImportContentPanel.add(form);
         VerticalPanel formContentPanel = new VerticalPanel();
         form.add(formContentPanel);
-        HorizontalPanel inputPanel = new HorizontalPanel();
-        formContentPanel.add(inputPanel);
         final Panel importResultPanel = new VerticalPanel();
-        windImportContentPanel.add(importResultPanel);
-
+        formContentPanel.add(importResultPanel);
+        importResultPanelDebugId.map(id->{ importResultPanel.ensureDebugId(id); return null; });
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
-        form.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_IMPORT);
-
-        final TextBox boatIdTextBox = new TextBox();
-        boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+        form.setAction(GWT.getHostPageBaseURL() + relativeUploadUrl);
         final Button submitButton = new Button(stringMessages.windImport_Upload(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -330,63 +445,33 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         submitButton.setEnabled(false);
-
+        submitButtonDebugId.map(id->{ submitButton.ensureDebugId(id); return null; });
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
-        fileUpload.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(ChangeEvent event) {
-                importResultPanel.clear();
-                String fileName = fileUpload.getFilename();
-                boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
-                submitButton.setEnabled(isValidFileName);
-
-                String boatId = "";
-                if (isValidFileName) {
-                    RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
-                    MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
-                    if (match.getGroupCount() > 0) {
-                        boatId = match.getGroup(1);
-                    }
-                }
-                boatIdTextBox.setText(boatId);
-
-            }
-        });
-
-        inputPanel.add(fileUpload);
-
-        Label boatIdLabel = new Label(stringMessages.windImport_BoatId());
-        inputPanel.add(boatIdLabel);
-        inputPanel.add(boatIdTextBox);
-        boatIdLabel.setWordWrap(false);
-        inputPanel.setSpacing(5);
-        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
-        inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
-
-        final Hidden hiddenRacesField = new Hidden(EXPEDITON_IMPORT_PARAMETER_RACES);
-        inputPanel.add(hiddenRacesField);
-
+        uploadFormDebugId.map(id->{ fileUpload.ensureDebugId(id); return null; });
+        if (multi) {
+            fileUpload.getElement().setAttribute("multiple", "multiple");
+        }
+        final Hidden hiddenRacesField = new Hidden(WindImportConstants.WIND_IMPORT_PARAMETER_RACES);
+        formContentPanel.add(hiddenRacesField);
+        formContentPanel.add(fileUpload);
         formContentPanel.add(submitButton);
-
         form.addSubmitHandler(new FormPanel.SubmitHandler() {
             public void onSubmit(SubmitEvent event) {
                 if ((fileUpload.getFilename() != null) && (fileUpload.getFilename().trim().length() > 0)) {
-                    List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+                    Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
                     String warningMessage;
-                    if (selectedRaces.size() > 0) {
+                    if (!selectedRaces.isEmpty()) {
                         warningMessage = stringMessages.windImport_SelectedRacesWarning(selectedRaces.size());
-                        RaceSelection raceSelection = RaceSelection.create();
-                        for (int i = 0; i < selectedRaces.size(); i++) {
-                            RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(i);
-                            RaceSelection.RaceEntry raceEntry = RaceSelection.RaceEntry.create();
-                            raceEntry.setRaceName(raceIdentifier.getRaceName());
-                            raceEntry.setRegatteName(raceIdentifier.getRegattaName());
-                            raceSelection.addRace(raceEntry);
+                        JSONArray raceSelection = new JSONArray();
+                        for (RaceDTO race : selectedRaces) {
+                            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+                            JSONObject raceEntry = new JSONObject();
+                            raceEntry.put(WindImportConstants.WIND_IMPORT_PARAMETER_RACE_NAME, new JSONString(raceIdentifier.getRaceName()));
+                            raceEntry.put(WindImportConstants.WIND_IMPORT_PARAMETER_REGATTA_NAME, new JSONString(raceIdentifier.getRegattaName()));
+                            raceSelection.set(raceSelection.size(), raceEntry);
                         }
-                        hiddenRacesField.setValue(raceSelection.toJson());
+                        hiddenRacesField.setValue(raceSelection.toString());
                     } else {
                         warningMessage = stringMessages.windImport_AllRacesWarning();
                         hiddenRacesField.setValue(null);
@@ -402,28 +487,131 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 importResultPanel.clear();
-                String windImportResultJson = event.getResults();
-
-                WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
-                JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
-                Label resultHeader = new Label(stringMessages.windImport_ResultHeader(String.valueOf(windImportResult.getFirst()), 
-                        String.valueOf(windImportResult.getLast()), raceEntries.length()));
-                importResultPanel.add(resultHeader);
-                if (windImportResult.getError() != null) {
-                    Label errorText = new Label(stringMessages.windImport_ResultError(windImportResult.getError()));
-                    importResultPanel.add(errorText);
-                }
-                for (int i = 0; i < raceEntries.length(); i++) {
-                    RaceEntry raceEntry = raceEntries.get(i);
-                    Label entryText = new Label(stringMessages.windImport_ResultEntry(raceEntry.getRaceName(), raceEntry.getRegattaName(), 
-                            raceEntry.getCount(), String.valueOf(raceEntry.getFirst()), String.valueOf(raceEntry.getLast())));
-                    importResultPanel.add(entryText);
+                String windImportResultJson = FileUploadUtil.getApplicationJsonContentFromHtml(event.getResults());
+                try {
+                    WindImportResult windImportResult = WindImportResult.fromJson(windImportResultJson);
+                    JsArray<RaceEntry> raceEntries = windImportResult.getRaceEntries();
+                    Label resultHeader = new Label(stringMessages.windImport_ResultHeader(String.valueOf(windImportResult.getFirst()), 
+                            String.valueOf(windImportResult.getLast()), raceEntries.length()));
+                    importResultPanel.add(resultHeader);
+                    if (windImportResult.getError() != null) {
+                        Label errorText = new Label(stringMessages.windImport_ResultError(windImportResult.getError()));
+                        importResultPanel.add(errorText);
+                    }
+                    for (int i = 0; i < raceEntries.length(); i++) {
+                        RaceEntry raceEntry = raceEntries.get(i);
+                        Label entryText = new Label(stringMessages.windImport_ResultEntry(raceEntry.getRaceName(), raceEntry.getRegattaName(), 
+                                raceEntry.getCount(), String.valueOf(raceEntry.getFirst()), String.valueOf(raceEntry.getLast())));
+                        importResultPanel.add(entryText);
+                    }
+                } catch (Exception e) {
+                    errorReporter.reportError(stringMessages.windImport_ResultError(e.getMessage()));
                 }
             }
         });
+        return new WindImportFileUploadForm(form, formContentPanel, fileUpload, submitButton);
+    }
+
+    private Pair<CaptionPanel, ExpeditionAllInOneImportPanel> createExpeditionAllInOneImportPanel(Presenter presenter) {
+        final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
+        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, presenter);
+        rootPanel.add(expeditionAllInOneImportPanel);
+        return new Pair<>(rootPanel, expeditionAllInOneImportPanel);
+    }
+
+    private CaptionPanel createExpeditionWindImportPanel() {
+        /*
+         * To style the "browse" button of the file upload widget
+         * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
+         */
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_EXPEDITION_IMPORT, /* multi */ true,
+                Optional.empty(), Optional.empty(), Optional.empty());
+        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
+        VerticalPanel windImportContentPanel = new VerticalPanel();
+        windImportRootPanel.add(windImportContentPanel);
+        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
+        windImportContentPanel.add(form);
+        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
+        HorizontalPanel inputPanel = new HorizontalPanel();
+        formContentPanel.add(inputPanel);
+        final Panel importResultPanel = new VerticalPanel();
+        windImportContentPanel.add(importResultPanel);
+
+        final TextBox boatIdTextBox = new TextBox();
+        boatIdTextBox.setName(WindImportConstants.EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+        final Button submitButton = formAndFileUploadAndSubmitButton.getSubmitButton();
+
+        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
+        fileUpload.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                importResultPanel.clear();
+                String fileName = fileUpload.getFilename();
+                boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
+                submitButton.setEnabled(isValidFileName);
+                String boatId = "";
+                if (isValidFileName) {
+                    RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
+                    MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
+                    if (match != null && match.getGroupCount() > 0) {
+                        boatId = match.getGroup(1);
+                    }
+                }
+                boatIdTextBox.setText(boatId);
+            }
+        });
+        Label boatIdLabel = new Label(stringMessages.windImport_BoatId());
+        inputPanel.add(boatIdLabel);
+        inputPanel.add(boatIdTextBox);
+        boatIdLabel.setWordWrap(false);
+        inputPanel.setSpacing(5);
+        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+        inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
         return windImportRootPanel;
     }
 
+    private CaptionPanel createNmeaWindImportPanel() {
+        final String importServletUrl = URL_SAILINGSERVER_NMEA_IMPORT;
+        final String title = stringMessages.nmeaWindImport_Title();
+        return createWindImportPanel(title, importServletUrl, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    private CaptionPanel createRouteconverterWindImportPanel() {
+        final String importServletUrl = URL_SAILINGSERVER_ROUTECONVERTER_IMPORT;
+        final String title = stringMessages.routeconverterWindImport_Title();
+        return createWindImportPanel(title, importServletUrl, Optional.of("ImportWindFromRouteconverterSubmit"), Optional.of("ImportWindFromRouteconverterUpload"), Optional.of("ImportWindFromRouteconverterResults"));
+    }
+    
+    private CaptionPanel createGribWindImportPanel() {
+        return createWindImportPanel(stringMessages.gribWindImport_Title(), URL_SAILINGSERVER_GRIB_IMPORT, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    private CaptionPanel createBravoWindImportPanel() {
+        return createWindImportPanel(stringMessages.bravoWindImport_Title(), URL_SAILINGSERVER_BRAVO_IMPORT, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    private CaptionPanel createWindImportPanel(final String title, final String importServletUrl,
+            Optional<String> submitButtonDebugId, Optional<String> uploadFormDebugId,
+            Optional<String> importResultPanelDebugId) {
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(importServletUrl, /* multi */ true, submitButtonDebugId, uploadFormDebugId, importResultPanelDebugId);
+        CaptionPanel windImportRootPanel = new CaptionPanel(title);
+        VerticalPanel windImportContentPanel = new VerticalPanel();
+        windImportRootPanel.add(windImportContentPanel);
+        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
+        windImportContentPanel.add(form);
+        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
+        HorizontalPanel inputPanel = new HorizontalPanel();
+        formContentPanel.add(inputPanel);
+        final Panel importResultPanel = new VerticalPanel();
+        windImportContentPanel.add(importResultPanel);
+        formAndFileUploadAndSubmitButton.getSubmitButton().setEnabled(true);
+        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
+        inputPanel.setSpacing(5);
+        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+        return windImportRootPanel;
+    }
+    
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
         AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, new DialogCallback<WindDTO>() {
             @Override
@@ -432,43 +620,50 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
             @Override
             public void ok(final WindDTO result) {
-                addWindFix(result);
+                addWindFix(result, race);
             }
         });
         windSettingDialog.show();
     }
 
-    private void addWindFix(final WindDTO wind) {
+    private void addWindFix(final WindDTO wind, final RaceDTO race) {
         final RegattaAndRaceIdentifier raceIdentifier = getSelectedRace();
-        sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
+        sailingServiceWrite.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                showWind(raceIdentifier);
+                showWind(raceIdentifier, race);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error adding a wind fix for race " + raceIdentifier + ": " + caught.getMessage());
+                errorReporter.reportError(stringMessages.errorAddingWindFixForRace(Util.toStringOrNull(raceIdentifier), caught.getMessage()));
             }
         });
     }
-
-    @Override
-    public void fillRegattas(Iterable<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
+    
+    public Displayer<RegattaDTO> getRegattasDisplayer() {
+        return regattasDisplayer;
     }
 
-    @Override
-    public void showWind(final RegattaAndRaceIdentifier raceIdentifier) {
-        sailingService.getWindSourcesInfo(raceIdentifier, new AsyncCallback<WindInfoForRaceDTO>() {
+    public void fillRegattas(Iterable<RegattaDTO> result) {
+        for (final Displayer<RegattaDTO> containedRegattaDisplayer : containedRegattaDisplayers) {
+            containedRegattaDisplayer.fill(result);
+        }
+    }
+
+    public void showWind(final RegattaAndRaceIdentifier raceIdentifier, final RaceDTO race) {
+        sailingServiceWrite.getWindSourcesInfo(raceIdentifier, new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onSuccess(final WindInfoForRaceDTO result) {
                 if (result != null) {
                     updateWindSourcesToExclude(result, raceIdentifier);
                     raceIsKnownToStartUpwindBox.setValue(result.raceIsKnownToStartUpwind);
-
+                    final boolean userHasPermission = userPermission.test(race);
+                    addWindFixButton.setVisible(userHasPermission);
+                    raceIsKnownToStartUpwindBox.setEnabled(userHasPermission);
+                    windSourcesToExcludeSelectorPanel.setEnabled(userHasPermission);
                     // load the raw wind fixes
-                    sailingService.getRawWindFixes(raceIdentifier, null, new AsyncCallback<WindInfoForRaceDTO>() {
+                    sailingServiceWrite.getRawWindFixes(raceIdentifier, null, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
@@ -482,10 +677,9 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error reading wind fixes: " + caught.getMessage());
+                            errorReporter.reportError(stringMessages.errorReadingWindFixes(caught.getMessage()));
                         }
                     });
-
                 } else {
                     // no wind sources known for untracked race
                     clearWindSources();
@@ -543,7 +737,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     private void setRaceIsKnownToStartUpwind() {
         final RegattaAndRaceIdentifier selectedRace = getSelectedRace();
-        sailingService.setRaceIsKnownToStartUpwind(selectedRace, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
+        sailingServiceWrite.setRaceIsKnownToStartUpwind(selectedRace, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(WindPanel.this.stringMessages.errorWhileTryingToSetWindSourceForRace() + " " + selectedRace + ": " + caught.getMessage());
@@ -556,12 +750,12 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     }
 
     private RegattaAndRaceIdentifier getSelectedRace() {
-        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        Set<RaceDTO> selectedRaces = refreshableRaceSelectionModel.getSelectedSet();
         if (selectedRaces.isEmpty() || selectedRaces.size() > 1) {
             return null;
         }
 
-        return selectedRaces.get(0);
+        return selectedRaces.iterator().next().getRaceIdentifier();
     }
 
     private void clearWindSources() {
@@ -572,62 +766,60 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private void clearWindFixes() {
     }
 
-    private void showWindFixesList(RegattaAndRaceIdentifier selectedRace, RaceDTO raceDTO) {
+    private void showWindFixesList(final RegattaAndRaceIdentifier raceIdentifier, final RaceDTO race) {
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        sailingService.getAveragedWindInfo(selectedRace, raceDTO.startOfRace, 30000L, 100, windSourceTypeNames,
-                /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(WindInfoForRaceDTO result) {
-                windFixPanel.clear();
-                for (WindSourceType input : new WindSourceType[] { WindSourceType.COMBINED }) {
-                    windFixPanel.add(new HTML("&nbsp;"));
-                    windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
-                    WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
-                    if (windTrackInfo != null && windTrackInfo.windFixes.size() >= 7) {
-                        NumberFormat formatter = NumberFormat.getFormat(".##");
-                        for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+        addWindFixButton.setVisible(userPermission.test(race));
+        if (race.startOfRace != null) {
+            sailingServiceWrite.getAveragedWindInfo(raceIdentifier, race.startOfRace, 30000L, 100, windSourceTypeNames,
+                    /* onlyUpToNewestEvent==true means to only use data "based on facts" */ true, /* includeCombinedWindForAllLegMiddles */ false, new AsyncCallback<WindInfoForRaceDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+    
+                @Override
+                public void onSuccess(WindInfoForRaceDTO result) {
+                    windFixPanel.clear();
+                    for (WindSourceType input : new WindSourceType[] { WindSourceType.COMBINED }) {
+                        windFixPanel.add(new HTML("&nbsp;"));
+                        windFixPanel.add(new Label(stringMessages.windFixListingDescription() + " " + input.name()));
+                        WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(new WindSourceImpl(input));
+                        if (windTrackInfo != null && windTrackInfo.windFixes.size() >= 7) {
+                            NumberFormat formatter = NumberFormat.getFormat(".##");
+                            for (WindDTO windFix : windTrackInfo.windFixes.subList(0, 3)) {
+                                windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            }
+                            // These fixes must not necessarily be the real last ones. This especially holds for long races.
+                            for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size() - 4, windTrackInfo.windFixes.size() - 1)) {
+                                windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
+                            }
+                        } else {
+                            windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
                         }
-                        // These fixes must not necessarily be the real last ones. This especially holds for long races.
-                        for (WindDTO windFix : windTrackInfo.windFixes.subList(windTrackInfo.windFixes.size() - 4, windTrackInfo.windFixes.size() - 1)) {
-                            windFixPanel.add(new Label("" + formatter.format(windFix.trueWindFromDeg) + " (deg) " + formatter.format(windFix.trueWindSpeedInKnots) + " (kt) " + formatter.format(windFix.position.getLatDeg()) + " (lat) " + formatter.format(windFix.position.getLngDeg()) + " (lng) " + new Date(windFix.measureTimepoint)));
-                        }
-                    } else {
-                        windFixPanel.add(new Label(stringMessages.noWindFixesAvailable()));
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void updateWindDisplay() {
-        RegattaAndRaceIdentifier selectedRace = getSelectedRace();
-        RaceDTO raceDTO = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
-
-        if (selectedRace != null && raceDTO != null && raceDTO.trackedRace != null) {
+        final RegattaAndRaceIdentifier selectedRace = getSelectedRace();
+        final RaceDTO race = selectedRace != null ? trackedRacesListComposite.getRaceByIdentifier(selectedRace) : null;
+        if (selectedRace != null && race != null && race.trackedRace != null) {
             windCaptionPanel.setVisible(true);
-            windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + selectedRace.getRaceName());
-
-            showWind(selectedRace);
-            showWindFixesList(selectedRace, raceDTO);
+            windCaptionPanel.setCaptionText(stringMessages.wind() + ": " + race.getName());
+            showWind(selectedRace, race);
+            showWindFixesList(selectedRace, race);
         } else {
             windCaptionPanel.setVisible(false);
             windCaptionPanel.setCaptionText(stringMessages.wind());
-
             clearWindSources();
             clearWindFixes();
         }
-
     }
 
     @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        updateWindDisplay();
+    public AbstractFilterablePanel<RaceDTO> getFilterablePanel() {
+        return trackedRacesListComposite.filterablePanelRaces;
     }
 }

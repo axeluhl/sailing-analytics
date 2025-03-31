@@ -31,11 +31,11 @@ public class DateUtil {
     }
 
     public static boolean isSameDayOfMonth(Date date1, Date date2) {
-        return getMonth(date1) == getMonth(date2);
+        return isSameMonth(date1, date2) && getDayOfMonth(date1) == getDayOfMonth(date2);
     }
 
     public static boolean isSameMonth(Date date1, Date date2) {
-        return getMonth(date1) == getMonth(date2);
+        return isSameYear(date1, date2) && getMonth(date1) == getMonth(date2);
     }
 
     public static boolean isSameYear(Date date1, Date date2) {
@@ -59,8 +59,14 @@ public class DateUtil {
     }
     
     public static int daysFromNow(Date date) {
-        long day = date.getTime() / DAY_IN_MILLIS;
-        long today= new Date().getTime() / DAY_IN_MILLIS;
-        return (int) (day - today);
+        return (int) (getDayCount(date) - getDayCount(new Date()));
+    }
+
+    public static int daysUntilNow(Date date) {
+        return (int) (getDayCount(new Date()) - getDayCount(date));
+    }
+
+    private static long getDayCount(Date date) {
+        return date.getTime() / DAY_IN_MILLIS;
     }
 }

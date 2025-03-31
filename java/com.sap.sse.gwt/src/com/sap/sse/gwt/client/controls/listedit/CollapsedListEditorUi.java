@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * {@link ListEditorComposite} with the respective {@link ExpandedListEditorUi} strategy that will be passed through
  * from this class's constructor to the {@link #createExpandedUi(List, ExpandedListEditorUi)} method.<p>
  * 
- * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved()} method(s)
+ * Implementing subclasses may choose to override the {@link #onRowAdded()} and/or the {@link #onRowRemoved(int)} method(s)
  * to be notified of changes to the list.
  * 
  * @author Lukas Niemeier
@@ -98,7 +98,6 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
     }
 
     private class PopupEditDialog extends DataEntryDialog<List<ValueType>> {
-
         private ListEditorComposite<ValueType> expandedComposite;
         
         public PopupEditDialog(Iterable<ValueType> initialValues, ExpandedListEditorUi<ValueType> ui, String dialogTitle,
@@ -123,7 +122,11 @@ public abstract class CollapsedListEditorUi<ValueType> extends ListEditorUi<Valu
     }
 
     @Override
-    public void onRowRemoved() {
+    public void onRowRemoved(int rowIndex) {
+    }
+
+    public void setEnabled(final boolean enabled) {
+        collapsedEditButton.setEnabled(enabled);
     }
 }
 

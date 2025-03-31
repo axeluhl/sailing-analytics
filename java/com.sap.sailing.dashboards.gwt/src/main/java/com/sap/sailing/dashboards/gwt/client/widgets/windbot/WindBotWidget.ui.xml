@@ -1,0 +1,37 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
+	xmlns:util="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util"
+	xmlns:windchart="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot.charts"
+	xmlns:compass="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot.compass"
+	xmlns:header="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.header">
+
+	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidgetResources"/>
+
+	<g:HTMLPanel styleName="{resources.gss.wind_bot_widget}">
+	    <header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage"></header:DashboardWidgetHeaderAndNoDataMessage>
+		<g:HTMLPanel ui:field="contentContainer">
+		<compass:LocationPointerCompass ui:field="locationPointerCompass"></compass:LocationPointerCompass>
+		<div ui:field="totalWindSpeedHeader" class="{resources.gss.live_average_header} {resources.gss.left}"></div>
+		<div ui:field="totalWindDirectionHeader" class="{resources.gss.live_average_header} {resources.gss.right}"></div>
+		<g:HTMLPanel
+			styleName="{resources.gss.live_average_container} {resources.gss.left}">
+			<util:LiveAverageComponent ui:field="trueWindSpeedLiveAverageComponent"></util:LiveAverageComponent>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{resources.gss.live_average_container} {resources.gss.right}">
+			<util:LiveAverageComponent ui:field="trueWindDirectionLiveAverageComponent"></util:LiveAverageComponent>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{resources.gss.windchart_container} {resources.gss.left}">
+			<windchart:VerticalWindChart ui:field="trueWindSpeedVerticalWindChart"
+				styleName="{resources.gss.windchart}"></windchart:VerticalWindChart>
+		</g:HTMLPanel>
+		<g:HTMLPanel
+			styleName="{resources.gss.windchart_container} {resources.gss.right}">
+			<windchart:VerticalWindChart ui:field="trueWindDirectionVerticalWindChart"
+				styleName="{resources.gss.windchart}"></windchart:VerticalWindChart>
+		</g:HTMLPanel>
+		</g:HTMLPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

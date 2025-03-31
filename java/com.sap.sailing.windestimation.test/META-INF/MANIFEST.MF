@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Wind estimation test
+Bundle-SymbolicName: com.sap.sailing.windestimation.test
+Fragment-Host: com.sap.sailing.windestimation
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.junit;bundle-version="4.8.2",
+ com.sap.sailing.domain.test,
+ com.sap.sailing.domain.tractracadapter,
+ com.tractrac.clientmodule
+Automatic-Module-Name: com.sap.sailing.windestimation.test

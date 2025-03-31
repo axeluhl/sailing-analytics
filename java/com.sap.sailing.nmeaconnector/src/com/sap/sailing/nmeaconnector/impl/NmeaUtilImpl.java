@@ -1,24 +1,60 @@
 package com.sap.sailing.nmeaconnector.impl;
 
-import net.sf.marineapi.nmea.sentence.MWVSentence;
-import net.sf.marineapi.nmea.util.Units;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.nmeaconnector.NmeaUtil;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+
+import net.sf.marineapi.nmea.parser.SentenceFactory;
+import net.sf.marineapi.nmea.parser.SentenceParser;
+import net.sf.marineapi.nmea.sentence.MWVSentence;
+import net.sf.marineapi.nmea.util.Units;
 
 public class NmeaUtilImpl implements NmeaUtil {
-
+    private static Map<String, Class<? extends SentenceParser>> proprietaryParsers;
+    
+    static {
+        proprietaryParsers = new HashMap<>();
+        proprietaryParsers.put("BAT", BATParser.class);
+        proprietaryParsers.put("AAM", AAMParser.class);
+        proprietaryParsers.put("GLC", GLCParser.class);
+        proprietaryParsers.put("BWC", BWCParser.class);
+        proprietaryParsers.put("BWR", BWRParser.class);
+    }
+    
+    @Override
+    public void registerAdditionalParsers() {
+        SentenceFactory sentenceFactory = SentenceFactory.getInstance();
+        for (Entry<String, Class<? extends SentenceParser>> e : proprietaryParsers.entrySet()) {
+            if (!sentenceFactory.hasParser(e.getKey())) {
+                sentenceFactory.registerParser(e.getKey(), e.getValue());
+            }
+        }
+    }
+    
+    @Override
+    public void unregisterAdditionalParsers() {
+        SentenceFactory sentenceFactory = SentenceFactory.getInstance();
+        for (Entry<String, Class<? extends SentenceParser>> e : proprietaryParsers.entrySet()) {
+            if (!sentenceFactory.hasParser(e.getKey())) {
+                sentenceFactory.unregisterParser(e.getValue());
+            }
+        }
+    }
+    
     @Override
     public Wind getWind(TimePoint timePoint, Position position, MWVSentence mwvSentence) {
         return new WindImpl(position, timePoint, new KnotSpeedWithBearingImpl(mwvSentence.getSpeed(),

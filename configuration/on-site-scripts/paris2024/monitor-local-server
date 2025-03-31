@@ -1,0 +1,29 @@
+#!/bin/bash
+SERVER_DIRECTORY=$1
+LAST_UNHEALTHY_TIMESTAMP_FILE=${SERVER_DIRECTORY}/UNHEALTHY_TIMESTAMP
+cd ${SERVER_DIRECTORY}
+if ! ${SERVER_DIRECTORY}/status; then
+  # Server is unhealthy; compute time difference to first unhealthy test
+  current_time=$( date +%s )
+  if [ -f "${LAST_UNHEALTHY_TIMESTAMP_FILE}" ]; then
+    last_unhealthy=$(cat "${LAST_UNHEALTHY_TIMESTAMP_FILE}")
+    if [ -z "${last_unhealthy}" ]; then
+      last_unhealthy=0
+    fi
+  else
+    last_unhealthy=0
+  fi
+  unhealthy_duration_in_seconds=$(( $current_time - $last_unhealthy ))
+  echo "Unhealthy duration in seconds: ${unhealthy_duration_in_seconds}"
+  if [  $last_unhealthy -eq 0 -o $unhealthy_duration_in_seconds -gt 300 ]; then
+    logger -t sailing "Server at ${SERVER_DIRECTORY} not healthy!"
+    echo "Server at ${SERVER_DIRECTORY} not healthy" | notify-operators "Server at ${SERVER_DIRECTORY} not healthy"
+    echo "${current_time}" >${LAST_UNHEALTHY_TIMESTAMP_FILE}
+    exit 1
+  fi
+else
+  # Server is healthy; remove timestamp
+  if [ -f "${LAST_UNHEALTHY_TIMESTAMP_FILE}" ]; then
+    rm "${LAST_UNHEALTHY_TIMESTAMP_FILE}"
+  fi
+fi

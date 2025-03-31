@@ -1,0 +1,6 @@
+#encoding=UTF-8
+#version=1
+org.apache.shiro.core.source,1.2.2,file:/Users/udowessels/git/java/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.apache.shiro.core.source_1.2.2.jar,-1,false
+org.apache.shiro.ehcache.source,1.2.3,file:/Users/udowessels/git/java/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.apache.shiro.ehcache.source_1.2.3.jar,-1,false
+org.apache.shiro.web.source,1.2.2,file:/Users/udowessels/git/java/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.apache.shiro.web.source_1.2.2.jar,-1,false
+org.mongodb.mongo-java-driver.source,3.6.4,file:/Users/udowessels/git/java/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins/org.mongodb.mongo-java-driver.source_3.6.4.jar,-1,false

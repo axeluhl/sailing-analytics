@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/mark/searchMarksByMarkPropertiesObject/{markPropertiesId}</h2>
+
+<b>Description:</b>
+<p>Searches for Marks, that originated from a specified MarkProperties object.</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Intput format:</td>
+        <td>path and query parameters</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>
+            <ul>
+                <li>
+                    markPropertiesId: <br>
+                    The id of the MarkProperties object to of which the returned Marks should have originated from.
+                </li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>
+            <ul>
+                <li>
+                    eventIds: <br>
+                    A set of Ids, representing Events to which the returned Marks should belong to. Will serve as filter. <br>
+                    If both "eventIds" and "regattaNames" is set and no intersection is found, no Marks will be returned.
+                </li>
+                <li>
+                    regattaNames: <br>
+                    A set of names, representing Regattas to which the returned Marks should belong to. Will serve as filter. <br>
+                    If both "eventIds" and "regattaNames" is set and no intersection is found, no Marks will be returned.
+                </li>
+                <li>
+                    onlyCurrentlyActive: <br>
+                    A boolean value. Will narrow the results to only include Marks belonging to currently active Regattas/Events. 
+                    An Event/Regatta is considered "currently active" if it's enddate is before the current date in time. 
+                </li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            Request: 
+            <pre>
+                GET: http://127.0.0.1:8888/sailingserver/api/v1/mark/searchMarksByMarkPropertiesObject/020c11b7-8b2d-48d3-9f51-968cf2d7e832? <br>
+                regattaNames=MarkTestRegattaWithoutEvent&eventIds=0ade3e41-985e-453f-b6e2-fc95003ad64f&onlyCurrentlyActive=true
+            </pre>
+            <pre>
+                Response:
+                  [
+                      {
+                          "mark": {
+                              "@class": "Mark",
+                              "name": "testMark2",
+                              "shortName": null,
+                              "id": "9e0b6cf4-0187-4602-9ea5-2670ccbba453",
+                              "originatingMarkPropertiesId": "020c11b7-8b2d-48d3-9f51-968cf2d7e832"
+                          },
+                          "events": [
+                              {
+                                  "eventId": 0ade3e41-985e-453f-b6e2-fc95003ad64f,
+                                  "name": "MarkTestEventWithRegatta"
+                              }
+                          ],
+                          "regatta": {
+                              "regattaName": "MarkTestRegattaBelongingToEvent"
+                          }
+                      },
+                      {
+                          "mark": {
+                          "@class": "Mark",
+                          "name": "testMark2",
+                          "shortName": null,
+                          "id": "e8e6226c-4512-4e78-8ce8-8ee05368721f",
+                          "originatingMarkPropertiesId": "020c11b7-8b2d-48d3-9f51-968cf2d7e832"
+                          },
+                          "events": [
+                             {
+                                 "eventId": 0ade3e41-985e-453f-b6e2-fc95003ad64f,
+                                 "name": "MarkTestEventWithRegatta"
+                              }
+                          ],
+                          "regatta": {
+                             "regattaName": "MarkTestRegattaBelongingToEvent"
+                          }
+                      }
+                  ]
+            </pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

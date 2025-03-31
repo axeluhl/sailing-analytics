@@ -7,8 +7,9 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
- * Only can provide the service for a single {@code type}, e.g. on smartphones with no OSGi context.
- * Optionally, a {@link #setFallbackService(Object) fallback} can be set.
+ * Only can provide the service for a single {@code type}, e.g. on smartphones with no OSGi context. Optionally, a
+ * {@link #setFallbackService(Object) fallback} can be set.
+ * 
  * @author Fredrik Teschke
  */
 public class SingleTypeBasedServiceFinderImpl<ServiceType> implements
@@ -30,9 +31,21 @@ TypeBasedServiceFinder<ServiceType> {
     @Override
     public ServiceType findService(String type)
             throws NoCorrespondingServiceRegisteredException {
-        if (this.type.equals(type)) return service;
-        if (fallback != null) return fallback;
+        if (this.type.equals(type)) {
+            return service;
+        }
+        if (fallback != null) {
+            return fallback;
+        }
         throw new NoCorrespondingServiceRegisteredException("Only one service registered", type, service.getClass().getSimpleName());
+    }
+
+    @Override
+    public void applyServiceWhenAvailable(String type, Callback<ServiceType> callback) {
+        final ServiceType service = findService(type);
+        if (service != null) {
+            callback.withService(service);
+        }
     }
 
     @Override

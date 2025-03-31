@@ -9,10 +9,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Cloner;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Reduces the transmission size of a {@link LeaderboardDTO} by comparing this object to a previous version of
@@ -38,8 +40,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     
     /**
      * If <code>null</code>, {@link #competitors} is filled and must not be touched; otherwise, the size of the array tells the new size
-     * of {@link #competitors}, and for each index it either tells the index of the {@link CompetitorDTO} object to use in the previous
-     * leaderboard's {@link #competitors} list, or holds -1, meaning that the next {@link CompetitorDTO} object is to be used from
+     * of {@link #competitors}, and for each index it either tells the index of the {@link CompetitorWithBoatDTO} object to use in the previous
+     * leaderboard's {@link #competitors} list, or holds -1, meaning that the next {@link CompetitorWithBoatDTO} object is to be used from
      * {@link #addedCompetitors} which only needs to hold a valid collection if at least one new competitor exists.
      */
     private int[] competitorIndexesInPreviousCompetitorsList;
@@ -54,8 +56,10 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     private boolean competitorDisplayNamesUnchanged;
     private boolean regattaNameUnchanged;
     private boolean displayNameUnchanged;
-    private boolean defaultCourseAreaIdAsStringUnchanged;
-    private boolean defaultCourseAreaNameUnchanged;
+    private boolean courseAreasUnchanged;
+    private boolean boatClassUnchanged;
+    private boolean aclUnchanged;
+    private boolean ownershipUnchanged;
     
     /**
      * If a {@link LeaderboardEntryDTO} in {@link LeaderboardRowDTO#fieldsByRaceColumnName} is unchanged, this field
@@ -174,16 +178,20 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
 
         /**
-         * @param previousVersion needed because after serialization/deserialization, the transient {@link #previousLeaderboard} will be <code>null</code>
+         * @param previousVersion
+         *            needed because after serialization/deserialization, the transient {@link #previousLeaderboard}
+         *            will be <code>null</code>.
+         * @return a map whose keys are the {@link CompetitorWithBoatDTO#getIdAsString()} of the competitors for which the value
+         *         tells the set of keys that are unchanged
          */
-        public Set<com.sap.sse.common.Util.Pair<CompetitorDTO, K>> getAllUnchangedCompetitorsAndKeys(LeaderboardDTO previousVersion) {
-            Set<com.sap.sse.common.Util.Pair<CompetitorDTO, K>> result = new HashSet<com.sap.sse.common.Util.Pair<CompetitorDTO,K>>();
+        public Map<String, Set<K>> getAllUnchangedCompetitorIdsAsStringAndKeys(LeaderboardDTO previousVersion) {
+            Map<String, Set<K>> result = new HashMap<>();
             for (Map.Entry<K, long[]> raceColumnNameAndBitSet : unchanged.entrySet()) {
                 final long[] bitset = raceColumnNameAndBitSet.getValue();
                 if (bitset == null) {
                     // this means that all entries for the column are unchanged for all competitors
                     for (CompetitorDTO competitor : previousVersion.competitors) {
-                        result.add(new com.sap.sse.common.Util.Pair<CompetitorDTO, K>(competitor, raceColumnNameAndBitSet.getKey()));
+                        Util.add(result, competitor.getIdAsString(), raceColumnNameAndBitSet.getKey());
                     }
                 } else {
                     int competitorNumber = 0;
@@ -191,7 +199,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                         long bitValue = 1;
                         for (int bit=0; bit<Long.SIZE; bit++) {
                             if ((bitset[arrayIndex] & bitValue) != 0) {
-                                result.add(new com.sap.sse.common.Util.Pair<CompetitorDTO, K>(previousVersion.competitors.get(competitorNumber), raceColumnNameAndBitSet.getKey()));
+                                Util.add(result, previousVersion.competitors.get(competitorNumber).getIdAsString(), raceColumnNameAndBitSet.getKey());
                             }
                             bitValue <<= 1;
                             competitorNumber++;
@@ -252,7 +260,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     /**
      * A specialized, bit set-based structure for marking leg details that haven't changed. The key is a composite of
      * the race column name and the zero-based leg index. If <code>null</code> is used for the leg index in a call to
-     * {@link #unchanged(CompetitorDTO, Object)}, this means that all leg details in that race were unchanged for the
+     * {@link #unchanged(CompetitorWithBoatDTO, Object)}, this means that all leg details in that race were unchanged for the
      * competitor, e.g., because they were <code>null</code> both in the old and new version.
      * 
      * @author Axel Uhl (d043530)
@@ -304,10 +312,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
     }
     
-    IncrementalLeaderboardDTO() {}
+    @Deprecated
+    IncrementalLeaderboardDTO() {} // for GWT serialization only
 
     public IncrementalLeaderboardDTO(String id, Cloner cloner) {
-        super(id);
+        super(id, /* boatClass */ null);
         this.cloner = cloner;
     }
 
@@ -321,6 +330,14 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
     }
 
     private void applyThisToPreviousVersionByUpdatingThis(LeaderboardDTO previousVersion) {
+        // As a performance improvement for the GWT-compiled version of this class, try to avoid key types
+        // other than strings when there is a map or set to be implemented that has a lot of strain on the
+        // put / add / contains methods. For this, we use the competitor's getIdAsString() result that
+        // identifies them reasonably well.
+        final Map<String, CompetitorDTO> competitorsOfPreviousVersionByIdAsString = new HashMap<>();
+        for (final CompetitorDTO c : previousVersion.competitors) {
+            competitorsOfPreviousVersionByIdAsString.put(c.getIdAsString(), c);
+        }
         if (this.updatedFromPreviousVersionWithId != null) {
             if (!this.updatedFromPreviousVersionWithId.equals(previousVersion.getId())) {
                 throw new IllegalStateException("This incremental leaderboard DTO was already applied to a different previous version. It cannot be applied multiple times.");
@@ -336,11 +353,8 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             if (this.commentUnchanged) {
                 this.setComment(previousVersion.getComment());
             }
-            if (this.defaultCourseAreaIdAsStringUnchanged) {
-                this.defaultCourseAreaId = previousVersion.defaultCourseAreaId;
-            }
-            if (this.defaultCourseAreaNameUnchanged) {
-                this.defaultCourseAreaName = previousVersion.defaultCourseAreaName;
+            if (this.courseAreasUnchanged) {
+                this.courseAreas = previousVersion.courseAreas;
             }
             if (this.displayNameUnchanged) {
                 this.displayName = previousVersion.displayName;
@@ -348,8 +362,11 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             if (this.regattaNameUnchanged) {
                 this.regattaName = previousVersion.regattaName;
             }
+            if (this.boatClassUnchanged) {
+                this.setBoatClass(previousVersion.getBoatClass());
+            }
             if (this.competitorIndexesInPreviousCompetitorsList != null) {
-                this.competitors = new ArrayList<CompetitorDTO>(competitorIndexesInPreviousCompetitorsList.length);
+                this.competitors = new ArrayList<>(competitorIndexesInPreviousCompetitorsList.length);
                 Iterator<CompetitorDTO> addedCompetitorsIter = null;
                 for (int i=0; i<competitorIndexesInPreviousCompetitorsList.length; i++) {
                     if (competitorIndexesInPreviousCompetitorsList[i] == -1) {
@@ -362,7 +379,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     }
                 }
             }
-            List<CompetitorDTO> suppressedCompetitors = new ArrayList<CompetitorDTO>();
+            List<CompetitorDTO> suppressedCompetitors = new ArrayList<>();
             if (suppressedCompetitorsUnchanged) {
                 Util.addAll(previousVersion.getSuppressedCompetitors(), suppressedCompetitors);
             } else {
@@ -374,7 +391,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             if (competitorDisplayNamesUnchanged) {
                 competitorDisplayNames = previousVersion.competitorDisplayNames;
             } else {
-                Map<CompetitorDTO, String> expandedCompetitorDisplayNames = new HashMap<CompetitorDTO, String>();
+                Map<CompetitorDTO, String> expandedCompetitorDisplayNames = new HashMap<>();
                 for (Map.Entry<CompetitorDTO, String> e : competitorDisplayNames.entrySet()) {
                     expandedCompetitorDisplayNames.put(e.getKey().getCompetitorFromPrevious(previousVersion), e.getValue());
                 }
@@ -401,72 +418,95 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 }
             }
             if (rows == null) {
-                rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+                rows = new HashMap<>();
             }
             // expand all keys and remove values from compact keys and re-enter with expanded keys; expand their competitor field
-            for (CompetitorDTO compactCompetitor : new ArrayList<CompetitorDTO>(rows.keySet())) {
+            for (CompetitorDTO compactCompetitor : new ArrayList<>(rows.keySet())) {
                 final CompetitorDTO expandedCompetitor = compactCompetitor.getCompetitorFromPrevious(previousVersion);
                 final LeaderboardRowDTO row = rows.remove(compactCompetitor);
                 row.competitor = expandedCompetitor;
                 rows.put(expandedCompetitor, row);
             }
-            final Set<CompetitorDTO> rowsUnchangedForCompetitors = new HashSet<CompetitorDTO>();
+            final Set<String> rowsUnchangedForCompetitorsWithIdAsString = new HashSet<>();
             if (rowsUnchanged != null) {
-                for (com.sap.sse.common.Util.Pair<CompetitorDTO, Void> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorsAndKeys(previousVersion)) {
-                    rowsUnchangedForCompetitors.add(rowUnchanged.getA());
-                    rows.put(rowUnchanged.getA(), previousVersion.rows.get(rowUnchanged.getA()));
+                for (Entry<String, Set<Void>> rowUnchanged : rowsUnchanged.getAllUnchangedCompetitorIdsAsStringAndKeys(previousVersion).entrySet()) {
+                    rowsUnchangedForCompetitorsWithIdAsString.add(rowUnchanged.getKey());
+                    final CompetitorDTO previousCompetitor = competitorsOfPreviousVersionByIdAsString.get(rowUnchanged.getKey());
+                    rows.put(previousCompetitor, previousVersion.rows.get(previousCompetitor));
                 }
             }
-            final Set<com.sap.sse.common.Util.Pair<CompetitorDTO, String>> allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames =
-                    unchangedLeaderboardEntries == null ? new HashSet<com.sap.sse.common.Util.Pair<CompetitorDTO,String>>() :
-                        unchangedLeaderboardEntries.getAllUnchangedCompetitorsAndKeys(previousVersion);
+            final Map<String, Set<String>> allUnchangedLeaderboardEntriesAsCompetitorIdsAsStringAndColumnNames =
+                    unchangedLeaderboardEntries == null ? new HashMap<String, Set<String>>() :
+                        unchangedLeaderboardEntries.getAllUnchangedCompetitorIdsAsStringAndKeys(previousVersion);
             if (unchangedLeaderboardEntries != null) {
-                for (com.sap.sse.common.Util.Pair<CompetitorDTO, String> competitorAndColumnName : allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames) {
-                    CompetitorDTO previousCompetitor = competitorAndColumnName.getA();
-                    if (!rowsUnchangedForCompetitors.contains(previousCompetitor)) { // only care if not the entire row was marked unchanged
-                        LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(
-                                competitorAndColumnName.getB());
-                        final LeaderboardRowDTO row = rows.get(previousCompetitor);
-                        if (row != null) { // may be null if the competitor disappeared, e.g., because of suppression
-                            row.fieldsByRaceColumnName.put(competitorAndColumnName.getB(), previousEntry);
+                for (Entry<String, Set<String>> competitorAndColumnNames : allUnchangedLeaderboardEntriesAsCompetitorIdsAsStringAndColumnNames.entrySet()) {
+                    CompetitorDTO previousCompetitor = competitorsOfPreviousVersionByIdAsString.get(competitorAndColumnNames.getKey());
+                    for (final String columnName : competitorAndColumnNames.getValue()) {
+                        if (!rowsUnchangedForCompetitorsWithIdAsString.contains(competitorAndColumnNames.getKey())) { // only care if not the entire row was marked unchanged
+                            LeaderboardEntryDTO previousEntry = previousVersion.rows.get(previousCompetitor).fieldsByRaceColumnName.get(columnName);
+                            final LeaderboardRowDTO row = rows.get(previousCompetitor);
+                            if (row != null) { // may be null if the competitor disappeared, e.g., because of suppression
+                                row.fieldsByRaceColumnName.put(columnName, previousEntry);
+                            }
                         }
                     }
                 }
             }
             if (legDetailsUnchanged != null) {
-                for (com.sap.sse.common.Util.Pair<CompetitorDTO, com.sap.sse.common.Util.Pair<String, Integer>> competitorInPreviosAndColumnNameAndLegDetailsIndex : legDetailsUnchanged
-                        .getAllUnchangedCompetitorsAndKeys(previousVersion)) {
-                    CompetitorDTO previousCompetitor = competitorInPreviosAndColumnNameAndLegDetailsIndex.getA();
-                    final String raceColumnName = competitorInPreviosAndColumnNameAndLegDetailsIndex.getB().getA();
-                    // if it's already clear that the entire LeaderboardEntryDTO was unchanged, the entry in legDetailsUnchanged was
-                    // merely a hint for column compression within legDetailsUnchanged and doesn't need to be handled here
-                    if (!allUnchangedLeaderboardEntriesAsCompetitorsAndColumnNames
-                            .contains(new com.sap.sse.common.Util.Pair<CompetitorDTO, String>(previousCompetitor, raceColumnName))) {
-                        final LeaderboardRowDTO leaderboardRowDTO = rows.get(previousCompetitor);
-                        LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO == null ? null
-                                : leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                        if (leaderboardEntry != null) {
-                            final LeaderboardRowDTO previousLeaderboardRowDTO = previousVersion.rows
-                                    .get(previousCompetitor);
-                            final LeaderboardEntryDTO previousLeaderboardEntryDTO = previousLeaderboardRowDTO == null ? null
-                                    : previousLeaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
-                            final List<LegEntryDTO> previousLegDetails = previousLeaderboardEntryDTO == null ? null
-                                    : previousLeaderboardEntryDTO.legDetails;
-                            if (previousLegDetails == null) {
-                                // the leg index can only be null if the previous leg details are null
-                                leaderboardEntry.legDetails = null;
-                            } else {
-                                // here, the leg index cannot be null
-                                if (leaderboardEntry.legDetails == null) {
-                                    leaderboardEntry.legDetails = new ArrayList<LegEntryDTO>();
+                for (Entry<String, Set<Pair<String, Integer>>> competitorInPreviosAndColumnNameAndLegDetailsIndex :
+                        legDetailsUnchanged.getAllUnchangedCompetitorIdsAsStringAndKeys(previousVersion).entrySet()) {
+                    CompetitorDTO previousCompetitor = competitorsOfPreviousVersionByIdAsString.get(competitorInPreviosAndColumnNameAndLegDetailsIndex.getKey());
+                    for (final Pair<String, Integer> columnNameAndLegDetailsIndex : competitorInPreviosAndColumnNameAndLegDetailsIndex.getValue()) {
+                        final String raceColumnName = columnNameAndLegDetailsIndex.getA();
+                        // if it's already clear that the entire LeaderboardEntryDTO was unchanged, the entry in legDetailsUnchanged was
+                        // merely a hint for column compression within legDetailsUnchanged and doesn't need to be handled here
+                        final Set<String> unchangedRaceColumnNamesForCompetitor;
+                        if ((unchangedRaceColumnNamesForCompetitor=allUnchangedLeaderboardEntriesAsCompetitorIdsAsStringAndColumnNames.get(competitorInPreviosAndColumnNameAndLegDetailsIndex.getKey())) == null
+                         || !unchangedRaceColumnNamesForCompetitor.contains(raceColumnName)) {
+                            final LeaderboardRowDTO leaderboardRowDTO = rows.get(previousCompetitor);
+                            LeaderboardEntryDTO leaderboardEntry = leaderboardRowDTO == null ? null
+                                    : leaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                            if (leaderboardEntry != null) {
+                                final LeaderboardRowDTO previousLeaderboardRowDTO = previousVersion.rows.get(previousCompetitor);
+                                final LeaderboardEntryDTO previousLeaderboardEntryDTO = previousLeaderboardRowDTO == null ? null
+                                        : previousLeaderboardRowDTO.fieldsByRaceColumnName.get(raceColumnName);
+                                final List<LegEntryDTO> previousLegDetails = previousLeaderboardEntryDTO == null ? null
+                                        : previousLeaderboardEntryDTO.legDetails;
+                                if (previousLegDetails == null) {
+                                    // the leg index can only be null if the previous leg details are null
+                                    leaderboardEntry.legDetails = null;
+                                } else {
+                                    // here, the leg index cannot be null
+                                    if (leaderboardEntry.legDetails == null) {
+                                        leaderboardEntry.legDetails = new ArrayList<LegEntryDTO>();
+                                    }
+                                    final Integer pos = columnNameAndLegDetailsIndex.getB();
+                                    ensureSize(leaderboardEntry.legDetails, pos + 1);
+                                    leaderboardEntry.legDetails.set(pos, previousLegDetails.get(pos));
                                 }
-                                final Integer pos = competitorInPreviosAndColumnNameAndLegDetailsIndex.getB().getB();
-                                ensureSize(leaderboardEntry.legDetails, pos + 1);
-                                leaderboardEntry.legDetails.set(pos, previousLegDetails.get(pos));
                             }
                         }
                     }
                 }
+            }
+            // replace null values of Regatta specific competitor handicap values with the respective competitor's
+            // default values
+            for (LeaderboardRowDTO row : rows.values()) {
+                if (row != null) {
+                    if (row.effectiveTimeOnDistanceAllowancePerNauticalMile == null) {
+                        row.effectiveTimeOnDistanceAllowancePerNauticalMile = row.competitor
+                                .getTimeOnDistanceAllowancePerNauticalMile();
+                    }
+                    if (row.effectiveTimeOnTimeFactor == null) {
+                        row.effectiveTimeOnTimeFactor = row.competitor.getTimeOnTimeFactor();
+                    }
+                }
+            }
+            if (aclUnchanged) {
+                this.setAccessControlList(previousVersion.getAccessControlList());
+            }
+            if (ownershipUnchanged) {
+                this.setOwnership(previousVersion.getOwnership());
             }
         }
     }
@@ -496,31 +536,40 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             this.displayName = null;
             this.displayNameUnchanged = true;
         }
-        if (Util.equalsWithNull(this.defaultCourseAreaId, previousVersion.defaultCourseAreaId)) {
-            this.defaultCourseAreaId = null;
-            this.defaultCourseAreaIdAsStringUnchanged = true;
+        if (Util.equalsWithNull(this.courseAreas, previousVersion.courseAreas)) {
+            this.courseAreas = null;
+            this.courseAreasUnchanged = true;
         }
-        if (Util.equalsWithNull(this.defaultCourseAreaName, previousVersion.defaultCourseAreaName)) {
-            this.defaultCourseAreaName = null;
-            this.defaultCourseAreaNameUnchanged = true;
+        if (Util.equalsWithNull(this.getBoatClass(), previousVersion.getBoatClass())) {
+            this.setBoatClass(null);
+            this.boatClassUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.getAccessControlList(), previousVersion.getAccessControlList())) {
+            this.setAccessControlList(null);
+            this.aclUnchanged = true;
+        }
+        if (Util.equalsWithNull(this.getOwnership(), previousVersion.getOwnership())) {
+            this.setOwnership(null);
+            this.ownershipUnchanged = true;
         }
         competitorIndexesInPreviousCompetitorsList = new int[competitors.size()];
         // for this stripping run, remembers the mapping of real CompetitorDTO objects to the compact form that only holds an int as reference to the
         // previous version's competitors list; those will be used to replace the real CompetitorDTO objects where possible and will be replaced the other
         // way in applyThisToPreviousVersionByUpdatingThis(...).
-        Map<CompetitorDTO, CompetitorDTO> compactCompetitorMap = new HashMap<CompetitorDTO, CompetitorDTO>();
+        Map<CompetitorDTO, CompetitorDTO> compactCompetitorMap = new HashMap<>();
         int i=0;
         for (CompetitorDTO competitor : competitors) {
             int indexInPrevious = previousVersion.competitors.indexOf(competitor);
             competitorIndexesInPreviousCompetitorsList[i++] = indexInPrevious;
             if (indexInPrevious == -1) {
                 if (addedCompetitors == null) {
-                    addedCompetitors = new ArrayList<CompetitorDTO>();
+                    addedCompetitors = new ArrayList<>();
                 }
                 addedCompetitors.add(competitor);
                 compactCompetitorMap.put(competitor, competitor);
             } else {
-                CompetitorDTO compactReplacementCompetitor = new PreviousCompetitorDTOImpl(indexInPrevious);
+                CompetitorDTO compactReplacementCompetitor = competitor.hasBoat() ?
+                        new PreviousCompetitorWithBoatDTOImpl(indexInPrevious) : new PreviousCompetitorDTOImpl(indexInPrevious);
                 compactCompetitorMap.put(competitor, compactReplacementCompetitor);
             }
         }
@@ -529,7 +578,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             suppressedCompetitorsUnchanged = true;
             setSuppressedCompetitors(null);
         } else {
-            List<CompetitorDTO> compactSuppressedCompetitors = new ArrayList<CompetitorDTO>();
+            List<CompetitorDTO> compactSuppressedCompetitors = new ArrayList<>();
             for (CompetitorDTO suppressedCompetitor : getSuppressedCompetitors()) {
                 final int indexOfSuppressedCompetitorInPreviousSuppressed = Util.indexOf(previousVersion.getSuppressedCompetitors(), suppressedCompetitor);
                 if (indexOfSuppressedCompetitorInPreviousSuppressed == -1) {
@@ -558,7 +607,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
             competitorDisplayNames = compactCompetitorDisplayNames;
         }
         raceColumnNamesForWhichCompetitorOrderingPerRaceUnchanged = new HashSet<String>();
-        final HashMap<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName = new HashMap<String, List<CompetitorDTO>>(getCompetitorOrderingPerRaceColumnName());
+        final HashMap<String, List<CompetitorDTO>> competitorOrderingPerRaceColumnName = new HashMap<>(getCompetitorOrderingPerRaceColumnName());
         for (RaceColumnDTO raceColumn : this.getRaceList()) {
             List<CompetitorDTO> competitorsFromBestToWorstForRaceColumn = getCompetitorsFromBestToWorst(raceColumn.getName());
             List<CompetitorDTO> previousCompetitorsFromBestToWorstForRaceColumn = previousVersion.getCompetitorsFromBestToWorst(raceColumn.getName());
@@ -567,7 +616,7 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                 competitorOrderingPerRaceColumnName.remove(raceColumn.getName());
             } else {
                 // try at least partial compaction
-                List<CompetitorDTO> compactedCompetitorsFromBestToWorstForRaceColumn = new ArrayList<CompetitorDTO>();
+                List<CompetitorDTO> compactedCompetitorsFromBestToWorstForRaceColumn = new ArrayList<>();
                 for (CompetitorDTO competitor : competitorsFromBestToWorstForRaceColumn) {
                     compactedCompetitorsFromBestToWorstForRaceColumn.add(compactCompetitorMap.get(competitor));
                 }
@@ -576,18 +625,29 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
         }
         setCompetitorOrderingPerRace(competitorOrderingPerRaceColumnName);
         // now clone the rows map to enable stripping the LeaderboardEntryDTOs inside
-        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
+        HashMap<CompetitorDTO, LeaderboardRowDTO> newRows = new HashMap<>();
         for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> competitorAndRow : rows.entrySet()) {
-            LeaderboardRowDTO previousRowDTO = previousVersion.rows.get(competitorAndRow.getKey());
+            final CompetitorDTO competitorDTO = competitorAndRow.getKey();
+            final LeaderboardRowDTO previousRowDTO = previousVersion.rows.get(competitorDTO);
             if (Util.equalsWithNull(competitorAndRow.getValue(), previousRowDTO)
                     // can only compress for competitors that existed in the previous version
                     && previousVersion.competitors.contains(competitorAndRow.getKey())) {
                 entireRowUnchanged(previousVersion, competitorAndRow.getKey());
-                // And don't enter into newRows. Mark all entries and all leg details in this row as unchanged for compaction of those structures:
+                // And don't enter into newRows. Mark all entries and all leg details in this row as unchanged for
+                // compaction of those structures:
             } else {
                 LeaderboardRowDTO newRowDTO = new LeaderboardRowDTO();
                 cloner.clone(competitorAndRow.getValue(), newRowDTO);
-                CompetitorDTO compactCompetitor = compactCompetitorMap.get(competitorAndRow.getKey());
+                // if the Regatta specific competitor handicap values are equal to the competitor's default values they
+                // do not need to be transfered reduntantly
+                if (newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile != null && newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile
+                        .equals(competitorDTO.getTimeOnDistanceAllowancePerNauticalMile())) {
+                    newRowDTO.effectiveTimeOnDistanceAllowancePerNauticalMile = null;
+                }
+                if (newRowDTO.effectiveTimeOnTimeFactor != null && newRowDTO.effectiveTimeOnTimeFactor.equals(competitorDTO.getTimeOnTimeFactor())) {
+                    newRowDTO.effectiveTimeOnTimeFactor = null;
+                }
+                CompetitorDTO compactCompetitor = compactCompetitorMap.get(competitorDTO);
                 newRowDTO.competitor = compactCompetitor;
                 newRows.put(compactCompetitor, newRowDTO);
                 HashMap<String, LeaderboardEntryDTO> newFieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
@@ -599,12 +659,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                     if (previousEntryDTO != null
                             && Util.equalsWithNull(raceColumnNameAndLeaderboardEntry.getValue(), previousEntryDTO)
                             // can only compress for competitors that existed in the previous version
-                            && previousVersion.competitors.contains(competitorAndRow.getKey())) {
-                        getUnchangedLeaderboardEntries(previousVersion).unchanged(competitorAndRow.getKey(),
+                            && previousVersion.competitors.contains(competitorDTO)) {
+                        getUnchangedLeaderboardEntries(previousVersion).unchanged(competitorDTO,
                                 raceColumnNameAndLeaderboardEntry.getKey());
                         // also mark all leg details for the competitor for this column as unchanged; this will ensure
                         // that column compression can work for leg details
-                        getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
+                        getLegDetailsUnchanged(previousVersion).unchanged(competitorDTO,
                                 new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
                     } else {
                         LeaderboardEntryDTO newLeaderboardEntryDTO = new LeaderboardEntryDTO();
@@ -623,9 +683,9 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                                         && Util.equalsWithNull(legDetails,
                                                 previousEntryDTO.legDetails.get(legDetailsIndex))
                                         // can only compress for competitors that existed in the previous version
-                                        && previousVersion.competitors.contains(competitorAndRow.getKey())) {
+                                        && previousVersion.competitors.contains(competitorDTO)) {
                                     getLegDetailsUnchanged(previousVersion).unchanged(
-                                            competitorAndRow.getKey(),
+                                            competitorDTO,
                                             new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(),
                                                     legDetailsIndex));
                                     newLeaderboardEntryDTO.legDetails.set(legDetailsIndex, null);
@@ -634,12 +694,12 @@ public class IncrementalLeaderboardDTO extends LeaderboardDTO implements Increme
                         } else {
                             if ((previousEntryDTO == null || previousEntryDTO.legDetails == null)
                                     // can only compress for competitors that existed in the previous version
-                                    && previousVersion.competitors.contains(competitorAndRow.getKey())) {
+                                    && previousVersion.competitors.contains(competitorDTO)) {
                                 // old and new entry are null; no need to set the legDetails in the new version to null
                                 // as it already consumes no space;
                                 // however, mark the legDetails as unchanged in legDetailsUnchanged so as to allow for
                                 // all-column compression
-                                getLegDetailsUnchanged(previousVersion).unchanged(competitorAndRow.getKey(),
+                                getLegDetailsUnchanged(previousVersion).unchanged(competitorDTO,
                                         new com.sap.sse.common.Util.Pair<String, Integer>(raceColumnNameAndLeaderboardEntry.getKey(), null));
                             }
                         }

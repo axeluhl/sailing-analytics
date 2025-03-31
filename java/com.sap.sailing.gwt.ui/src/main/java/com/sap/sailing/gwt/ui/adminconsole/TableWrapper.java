@@ -1,102 +1,46 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.SimplePager;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
-import com.sap.sse.common.Util;
+import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
 /**
- * Implementing classes still have to add the table to the main panel. The table created and wrapped by this object
- * offers already a {@link ListHandler} for sorting. Subclasses can obtain the table's default column sort handler
- * created by this class's constructor by calling {@link #getColumnSortHandler}.
+ * Simplifies the use of a pager by offering a {@link #DEFAULT_PAGING_SIZE} of 100, and by remembering a
+ * {@link SailingServiceWriteAsync} instance for use by the subclasses.
  */
-public abstract class TableWrapper<T, S extends SelectionModel<T>> implements IsWidget {
-    protected final CellTable<T> table;
-    private final S selectionModel;
-    protected final ListDataProvider<T> dataProvider;
-    protected VerticalPanel mainPanel;
-    protected final SailingServiceAsync sailingService;
-    protected final ErrorReporter errorReporter;
+public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>>
+extends com.sap.sse.gwt.client.celltable.TableWrapper<T, S, StringMessages, AdminConsoleTableResources> {
+    protected static final int DEFAULT_PAGING_SIZE = 100;
+    protected final SailingServiceWriteAsync sailingServiceWrite;
 
-    private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-    private final ListHandler<T> columnSortHandler;
-    
-    @Override
-    public Widget asWidget() {
-        return mainPanel;
-    }
-
-    public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        table = new CellTable<T>(10000, tableRes);
-        this.dataProvider = new ListDataProvider<T>();
-        this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
-        table.addColumnSortHandler(this.columnSortHandler);
-        if (multiSelection) {
-            SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
-                    tableRes.cellTableStyle().cellTableCheckboxSelected(),
-                    tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
-                        @Override
-                        protected ListDataProvider<T> getListDataProvider() {
-                            return dataProvider;
-                        }
-            };
-            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
-            @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
-            selectionModel = typedSelectionModel;
-            table.setSelectionModel(selectionModel, selectionCheckboxColumn.getSelectionManager());
-            table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        } else {
-            @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) new SingleSelectionModel<T>();
-            selectionModel = typedSelectionModel;
-            table.setSelectionModel(selectionModel);
-        }
-        mainPanel = new VerticalPanel();
-        dataProvider.addDataDisplay(table);
-        mainPanel.add(table);
-        if (enablePager) {
-            table.setPageSize(8);
-            SimplePager pager = new SimplePager();
-            pager.setDisplay(table);
-            mainPanel.add(pager);
-        }
-    }
-    
-    public ListHandler<T> getColumnSortHandler() {
-        return columnSortHandler;
+    /**
+     * @param enablePager if {@code true}, a paging control will be shown; this constructor, other than
+     * {@link #TableWrapper(SailingServiceAsync, StringMessages, ErrorReporter, boolean, boolean, int, EntityIdentityComparator)},
+     * uses a {@link #DEFAULT_PAGING_SIZE} of 100 elements shown. If the {@code enablePager} parameter is
+     * {@code false}, no pager will be shown and the paging size will be set to {@link Integer#MAX_VALUE}.
+     */
+    public TableWrapper(SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager,
+            EntityIdentityComparator<T> entityIdentityComparator) {
+        this(sailingServiceWrite, stringMessages, errorReporter, multiSelection, enablePager,
+                enablePager ? DEFAULT_PAGING_SIZE : Integer.MAX_VALUE /* if no pager, show all */,
+                entityIdentityComparator);
     }
 
-    public CellTable<T> getTable() {
-        return table;
-    }
-    
-    public S getSelectionModel() {
-        return selectionModel;
-    }
-    
-    public ListDataProvider<T> getDataProvider() {
-        return dataProvider;
-    }
-    
-    public void refresh(Iterable<T> newItems) {
-        dataProvider.getList().clear();
-        Util.addAll(newItems, dataProvider.getList());
-        dataProvider.flush();
+    /**
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
+     */
+    public TableWrapper(SailingServiceWriteAsync sailingServiceWrite, final StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, int pagingSize,
+            EntityIdentityComparator<T> entityIdentityComparator) {
+        super(stringMessages, errorReporter, multiSelection, enablePager, entityIdentityComparator, GWT.create(AdminConsoleTableResources.class));
+        this.sailingServiceWrite = sailingServiceWrite;
+        table.setPageSize(pagingSize);
     }
 }

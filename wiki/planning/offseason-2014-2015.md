@@ -42,7 +42,7 @@ Reaching a broader audience with the SAP Sailing Analytics will mainly happen th
 
 ## Data Quality (Christopher)
 
-See [http://wiki.sapsailing.com/wiki/data-quality](http://wiki.sapsailing.com/wiki/data-quality). We think that transparency needs to be the first step. Therefore, we should start working on internal analyses, probably with the help of the DataMining framework (see below), to produce reports that show us all the facts about the data quality so far. Only then can we decide how much to invest into cleansing and outlier detection and how much to spend on advanced aggregation techniques that live with sparse and lossy data.
+See [https://wiki.sapsailing.com/wiki/info/misc/data-quality](https://wiki.sapsailing.com/wiki/info/misc/data-quality). We think that transparency needs to be the first step. Therefore, we should start working on internal analyses, probably with the help of the DataMining framework (see below), to produce reports that show us all the facts about the data quality so far. Only then can we decide how much to invest into cleansing and outlier detection and how much to spend on advanced aggregation techniques that live with sparse and lossy data.
 
 ## Data Mining and Polar Sheets (Lennart, Frederik)
 We have made good progress with the DataMining framework and corresponding branch. The PolarSheet calculations are to be migrated to the DataMining framework. We want to implement a first set of analysis "models" with a prototypical UI that allows us to test the DataMining framework's maturity. Only if this works out well can we continue with UI/UX design.

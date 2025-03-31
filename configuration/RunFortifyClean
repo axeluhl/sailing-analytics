@@ -1,0 +1,2 @@
+#!/bin/bash
+sourceanalyzer -b com.sap.sailing.domain -clean

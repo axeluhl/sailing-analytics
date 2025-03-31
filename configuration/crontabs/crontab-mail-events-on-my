@@ -1,0 +1,1 @@
+0 10 1 * *      export PATH=/bin:/usr/bin:/usr/local/bin; mail-events-on-my >/dev/null 2>/dev/null

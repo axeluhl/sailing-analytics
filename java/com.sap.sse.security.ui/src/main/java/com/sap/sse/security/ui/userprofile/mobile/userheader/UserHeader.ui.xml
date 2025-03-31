@@ -1,0 +1,28 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:with field="res" type="com.sap.sse.gwt.common.CommonSharedResources" />
+  <ui:with field="local_res" type="com.sap.sse.security.ui.userprofile.mobile.userheader.UserHeaderResources" />
+  <g:HTMLPanel>
+    <div class="{local_res.css.userheader}">
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <div class="{local_res.css.eventheader}">
+            <div class="{local_res.css.eventheader_info} {res.mediaCss.small12}">
+              <div class="{local_res.css.eventheader_info_title}">
+                <h3 class="{local_res.css.eventheader_info_title_text}" ui:field="titleUi">
+                </h3>
+              </div>
+              <div class="{local_res.css.eventheader_info_subtitle}">
+                <div class="{local_res.css.eventheader_info_subtitle_logo}" ui:field="imageUi"></div>
+                <div class="{local_res.css.eventheader_info_subtitle_info}">
+                  <div class="{local_res.css.eventheader_info_subtitle_info_date}" ui:field="subtitleUi">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

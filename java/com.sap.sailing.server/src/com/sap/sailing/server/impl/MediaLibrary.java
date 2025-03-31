@@ -34,28 +34,9 @@ class MediaLibrary {
      * result in case a MediaTrack is being removed from the library or changes values such that it needs to be removed
      * from the cache.
      */
-
     private final ConcurrentMap<RegattaAndRaceIdentifier, Set<MediaTrack>> mediaTracksByRace = new ConcurrentHashMap<RegattaAndRaceIdentifier, Set<MediaTrack>>();
 
-    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */
-    false);
-
-    // /**
-    // * Sort in reverse order of start time! For equal start times compare dbId to distinguish different instances.
-    // */
-    // private static final Comparator<MediaTrack> COMPARATOR_BY_REVERSE_STARTTIME = new Comparator<MediaTrack>() {
-    //
-    // @Override
-    // public int compare(MediaTrack mediaTrack1, MediaTrack mediaTrack2) {
-    // int result = compareDatesAllowingNull(mediaTrack2.startTime, mediaTrack1.startTime);
-    // if (result == 0) {
-    // return mediaTrack1.dbId.compareTo(mediaTrack2.dbId);
-    // } else {
-    // return result;
-    // }
-    // }
-    //
-    // };
+    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock(MediaLibrary.class.getName(), /* fair */ false);
 
     /**
      * NOTE: The implementation of this lookup using simple linear search is a trade off between development effort and
@@ -74,7 +55,6 @@ class MediaLibrary {
      * 
      */
     Collection<MediaTrack> findMediaTracksForRace(RegattaAndRaceIdentifier race) {
-
         if (race != null) {
             LockUtil.lockForRead(lock);
             try {
@@ -87,14 +67,12 @@ class MediaLibrary {
             } finally {
                 LockUtil.unlockAfterRead(lock);
             }
-
         }
         // else
         return Collections.emptySet();
     }
 
     Collection<MediaTrack> findMediaTracksInTimeRange(TimePoint startTime, TimePoint endTime) {
-
         LockUtil.lockForRead(lock);
         try {
             List<MediaTrack> result = new ArrayList<MediaTrack>();
@@ -135,7 +113,7 @@ class MediaLibrary {
         addMediaTracks(Collections.singleton(mediaTrack));
     }
 
-    void addMediaTracks(Collection<MediaTrack> mediaTracks) {
+    void addMediaTracks(Iterable<MediaTrack> mediaTracks) {
         LockUtil.lockForWrite(lock);
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
@@ -150,7 +128,7 @@ class MediaLibrary {
     void deleteMediaTrack(MediaTrack mediaTrackToBeDeleted) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack deletedMediaTrack = getMediaTrackForClone(mediaTrackToBeDeleted);
+            MediaTrack deletedMediaTrack = resolveClone(mediaTrackToBeDeleted);
             mediaTracksByDbId.remove(deletedMediaTrack);
             updateMapByRace_Remove(deletedMediaTrack);
         } finally {
@@ -161,7 +139,7 @@ class MediaLibrary {
     void titleChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.title = changedMediaTrack.title;
             }
@@ -173,7 +151,7 @@ class MediaLibrary {
     void urlChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.url = changedMediaTrack.url;
             }
@@ -185,7 +163,7 @@ class MediaLibrary {
     void mimeTypeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.mimeType = changedMediaTrack.mimeType;
             }
@@ -197,7 +175,7 @@ class MediaLibrary {
     void startTimeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.startTime = changedMediaTrack.startTime;
             }
@@ -209,7 +187,7 @@ class MediaLibrary {
     void durationChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.duration = changedMediaTrack.duration;
             }
@@ -221,7 +199,7 @@ class MediaLibrary {
     void assignedRacesChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 updateMapByRace_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.assignedRaces.clear();
@@ -235,11 +213,19 @@ class MediaLibrary {
         }
     }
 
-    private MediaTrack getMediaTrackForClone(MediaTrack mediaTrackClone) {
+    /**
+     * A {@link MediaTrack} is used on the server and in the GWT client and travels through
+     * GWT RPC calls. When received as a parameter it is never identical to any server-side
+     * {@link MediaTrack} object. This method resolves a clone such as those received as a
+     * GWT RPC method call parameter to a {@link MediaTrack} object known by the server,
+     * based on its {@link Object#hashCode()} and {@link Object#equals(Object)} method that
+     * is based on the {@link MediaTrack#dbId} field.<p>
+     * 
+     * It is also permissible to pass a server-side object to this method in which case it may
+     * be returned unchanged.
+     */
+    private MediaTrack resolveClone(MediaTrack mediaTrackClone) {
         MediaTrack mediaTrack = mediaTracksByDbId.get(mediaTrackClone);
-        if (mediaTrack == mediaTrackClone) {
-            throw new IllegalArgumentException("Media track and clone must not be identical.");
-        }
         return mediaTrack;
     }
 
@@ -247,16 +233,15 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Add(MediaTrack mediaTrack) {
+        assert lock.isWriteLocked();
         if (mediaTrack.assignedRaces != null) {
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
-                if (mediaTracksByRace.containsKey(assignedRace)) {
-                    mediaTracksByRace.get(assignedRace).add(mediaTrack);
-                } else {
-                    Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
-                    mediaTracks.add(mediaTrack);
+                Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
+                if (mediaTracks == null) {
+                    mediaTracks = new HashSet<MediaTrack>();
                     mediaTracksByRace.put(assignedRace, mediaTracks);
                 }
-
+                mediaTracks.add(mediaTrack);
             }
         }
     }
@@ -265,7 +250,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Remove(MediaTrack mediaTrack) {
-
+        assert lock.isWriteLocked();
         for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
             Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
             if (mediaTracks != null) {
@@ -314,7 +299,6 @@ class MediaLibrary {
     }
 
     public MediaTrack lookupMediaTrack(MediaTrack mediaTrack) {
-        return getMediaTrackForClone(mediaTrack);
+        return resolveClone(mediaTrack);
     }
-
 }

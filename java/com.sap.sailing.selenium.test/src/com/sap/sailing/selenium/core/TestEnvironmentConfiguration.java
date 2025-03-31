@@ -131,67 +131,51 @@ public class TestEnvironmentConfiguration {
         if (TestEnvironmentConfiguration.instance != null) {
             return TestEnvironmentConfiguration.instance;
         }
-        
         Document document = readTestConfiguration();
-        
         Element testEnvironmentNode = document.getDocumentElement();
         testEnvironmentNode.normalize();
-        
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         String screenshotsFolder = XMLHelper.getContentTextNS(testEnvironmentNode, SCREENSHOTS_FOLDER, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
         List<DriverDefinition> driverDefinitions = createDriverDefinitions(testEnvironmentNode);
-        
         return new TestEnvironmentConfiguration(contextRoot, screenshotsFolder, systemProperties, driverDefinitions);
     }
     
     private static synchronized Document readTestConfiguration() throws ParserConfigurationException,
             SAXException, IOException {
-        String path = System.getProperty(TEST_ENVIRONMENT_CONFIGURATION);
-        
+        String path = System.getProperty(TEST_ENVIRONMENT_CONFIGURATION, "local-test-environment.xml");
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(new StreamSource(TEST_ENVIRONMENT_SCHEMA));
-        
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
         builderFactory.setSchema(schema);
-        
         DocumentBuilder builder = builderFactory.newDocumentBuilder();
         InputSource source = new InputSource(new FileInputStream(path));
-        
         return builder.parse(source);
     }
     
     private static Map<String, String> createSystemProperties(Element testEnvironmentNode) {
         Element systemPropertiesNode = XMLHelper.getElementNS(testEnvironmentNode, SYSTEM_PROPERTIES, NAMESPACE_URI);
-        
         if (systemPropertiesNode == null) {
             return Collections.emptyMap();
         }
-        
         Map<String, String> properties = new HashMap<>();
         List<Element> systemPropertyNodes = XMLHelper.getElementsNS(systemPropertiesNode, SYSTEM_PROPERTY,
                 NAMESPACE_URI);
-        
         for(Element systemPropertyNode : systemPropertyNodes) {
             String propertyName = XMLHelper.getContentTextNS(systemPropertyNode, PARAMETER_NAME, NAMESPACE_URI);
             String propertyValue = XMLHelper.getContentTextNS(systemPropertyNode, PARAMETER_VALUE, NAMESPACE_URI);
-            
             properties.put(propertyName, propertyValue);
         }
-        
         return properties;
     }
     
     private static List<DriverDefinition> createDriverDefinitions(Element testEnvironmentNode) {
         List<DriverDefinition> definitions = new LinkedList<>();
-        
         List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION, NAMESPACE_URI);
-        
         for (Element driverDefinitionNode : driverDefinitionNodes) {
             definitions.add(createDriverDefinition(driverDefinitionNode));
         }
-        
         return definitions;
     }
     

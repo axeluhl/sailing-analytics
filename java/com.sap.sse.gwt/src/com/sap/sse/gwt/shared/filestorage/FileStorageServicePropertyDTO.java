@@ -7,14 +7,17 @@ public class FileStorageServicePropertyDTO implements Serializable {
     public boolean isRequired;
     public String name;
     public String value;
+    public boolean isPassword;
     public String description;
 
     // for GWT
+    @Deprecated
     FileStorageServicePropertyDTO() {
     }
 
-    public FileStorageServicePropertyDTO(boolean isRequired, String name, String value, String description) {
+    public FileStorageServicePropertyDTO(boolean isRequired, boolean isPassword, String name, String value, String description) {
         this.isRequired = isRequired;
+        this.isPassword = isPassword;
         this.name = name;
         this.value = value;
         this.description = description;

@@ -2,19 +2,25 @@
 	clip: rect(auto auto auto auto);
 }
 
+.dialogTopCenterInner {
+  height: 28px;
+}
+
 .gwt-extras-WindowBox .dialogTopCenterInner {
-  background-color: #bbb;
+  background-color: transparent;
 }
 
 .gwt-extras-WindowBox .Caption {
-   background: transparent;
-   border: none;
+    background: #fff;
+    border: none;
     padding: 4px 45px 0px 5px;
     width: auto;
     max-width: 25em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 1.5em;
+    color: #555;
 }
 
 .gwt-extras-WindowBox .dialogMiddleCenter {
@@ -60,6 +66,11 @@
 	background: url(images/resize_arrow.png) center center no-repeat;
 }
 
+.gwt-extras-WindowBox .dialogBottomLeftInner {
+    width: 10px;
+    height: 10px;
+}
+
 .gwt-extras-WindowBox .media-synch-control {
 	background: #efefef;
 	padding: 10px;
@@ -103,4 +114,3 @@
     width: 100%;
     margin-bottom: 10px;
 }
-

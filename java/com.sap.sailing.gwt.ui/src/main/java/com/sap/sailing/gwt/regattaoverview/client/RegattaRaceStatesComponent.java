@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -19,12 +18,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -51,15 +46,16 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -67,19 +63,27 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.DateTimeUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * This component shows a table displaying the current state of races for a given event. Which races are shown depends
  * on the setting {@link RegattaRaceStatesSettings}. Each entry shows what flags are currently displayed, what start
  * time the race has and additional information, e.g. for Gate start.
  */
-public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings>,
-        EventAndRaceGroupAvailabilityListener {
+public class RegattaRaceStatesComponent extends AbstractCompositeComponent<RegattaRaceStatesSettings> {
     public interface EntryHandler {
         void onEntryClicked(RegattaOverviewEntryDTO entry);
 
@@ -101,10 +105,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> fleetNameColumn;
     private final RegattaRaceStatesSettings settings;
     private final RaceStateFlagsInterpreter flagInterpreter;
-    private final String localStorageRegattaOverviewEventKey;
     private final Timer timerToSynchronize;
     private static RegattaRaceStatesTableResources tableRes = GWT.create(RegattaRaceStatesTableResources.class);
-    private final static String LOCAL_STORAGE_REGATTA_OVERVIEW_KEY = "sailingAnalytics.regattaOverview.settings.";
     private EntryHandler entryClickedHandler;
     private TextColumn<RegattaOverviewEntryDTO> courseAreaColumn;
     private Column<RegattaOverviewEntryDTO, Anchor> regattaNameColumn;
@@ -112,9 +114,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private Column<RegattaOverviewEntryDTO, SafeHtml> raceCourseColumn;
     private TextColumn<RegattaOverviewEntryDTO> boatClass;
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
+    private TextColumn<RegattaOverviewEntryDTO> finishingTimeColumn;
+    private TextColumn<RegattaOverviewEntryDTO> finishedTimeColumn;
     private SimplePanel tableHolder = new SimplePanel();
-    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 60 /* hour */;
-    private final long HIDE_COL_TIME_THRESHOLD = _1_HOUR * 12;
+    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 1 /* hour */;
+    private final long HIDE_COL_TIME_THRESHOLD = _1_HOUR;
     private TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn;
     private TextColumn<RegattaOverviewEntryDTO> endOfProtestTime;
     private TextColumn<RegattaOverviewEntryDTO> raceAdditionalInformationColumn;
@@ -135,35 +139,31 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
      *            Whenever this component makes a service call and receives an update on the current server time, the
      *            timer passed for this argument will be synchronized.
      */
-    public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings,
+    public RegattaRaceStatesComponent(Component<?> parent, ComponentContext<?> componentContext,
+            final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
+            final StringMessages stringMessages, UUID eventId, EventDTO eventDTO, List<RaceGroupDTO> raceGroupDTOs, RegattaRaceStatesSettings settings,
             Timer timerToSynchronize) {
+        super(parent, componentContext);
+        this.eventId = eventId;
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.eventId = eventId;
         this.allEntries = new ArrayList<RegattaOverviewEntryDTO>();
         this.timerToSynchronize = timerToSynchronize;
         this.eventDTO = null;
         this.raceGroupDTOs = null;
-        this.localStorageRegattaOverviewEventKey = LOCAL_STORAGE_REGATTA_OVERVIEW_KEY + eventId.toString();
         this.flagInterpreter = new RaceStateFlagsInterpreter(stringMessages);
         this.settings = new RegattaRaceStatesSettings();
-        loadAndSetSettings(settings);
         mainPanel = new VerticalPanel();
         mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
-        getElement().getStyle().setWidth(100, Unit.PCT);
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         // regattaOverviewTable = createRegattaTable(true);
         createColumns();
         mainPanel.add(tableHolder);
-        setWidget(mainPanel);
-    }
-
-    private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
-        RegattaRaceStatesSettings loadedSettings = loadRegattaRaceStatesSettings();
-        if (loadedSettings != null) {
-            settings = loadedSettings;
-        }
+        initWidget(mainPanel);
+        getElement().getStyle().setWidth(100, Unit.PCT);
+        this.eventDTO = eventDTO;
+        setRaceGroups(raceGroupDTOs);
         updateSettings(settings);
     }
 
@@ -174,9 +174,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     @SuppressWarnings("unchecked")
     private void updateTable(List<RegattaOverviewEntryDTO> newEntries) {
         allEntries = newEntries;
-        String lastCourseAreaName = null;
-        String lastRegattaName = null;
-        String lastCourseName = null;
+        String firstCourseAreaName = null;
+        String firstRegattaName = null;
+        String firstCourseName = null;
+        RaceInfoDTO firstCourseRegattaOverviewEntry = null;
+        RegattaOverviewEntryDTO firstRegattaNameEntry = null;
         String lastBoatClass = null;
         boolean canRemoveCourseArea = true;
         boolean canRemoveCourse = true;
@@ -184,68 +186,76 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         boolean canRemoveBoatClass = true;
         boolean canRemoveLastUpdate = true;
         boolean canRemoveProtestTime = true;
-        boolean isAppending = false;
-        RegattaOverviewEntryDTO firstEntry = null;
-        for (RegattaOverviewEntryDTO entryDTO : allEntries) {
-            if (firstEntry == null) {
-                firstEntry = entryDTO;
-            }
-            if (lastRegattaName == null) {
-                lastRegattaName = entryDTO.regattaDisplayName;
-            } else if (canRemoveRegatta && !lastRegattaName.equals(entryDTO.regattaDisplayName)) {
-                canRemoveRegatta = false;
-            }
-            if (canRemoveLastUpdate && timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
+        boolean canRemoveFinishingTime = true;
+        boolean canRemoveFinishedTime = true;
+        boolean first = true;
+        for (RegattaOverviewEntryDTO loopEntryDTO : allEntries) {
+            final RaceInfoDTO loopRaceInfo = loopEntryDTO.raceInfo;
+            if (canRemoveLastUpdate && timePassedInSeconds(loopRaceInfo.lastUpdateTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveLastUpdate = false;
             }
-            if (canRemoveProtestTime && entryDTO.raceInfo.protestFinishTime != null
-                    && timePassedInSeconds(entryDTO.raceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
+            if (canRemoveFinishingTime && loopRaceInfo.finishingTime != null
+                    && timePassedInSeconds(loopRaceInfo.finishingTime) <= HIDE_COL_TIME_THRESHOLD) {
+                canRemoveFinishingTime = false;
+                canRemoveFinishedTime = false;
+            }
+            if (canRemoveFinishedTime && loopRaceInfo.finishedTime != null) {
+                canRemoveFinishedTime = false;
+            }
+            if (canRemoveProtestTime && loopRaceInfo.protestFinishTime != null
+                    && timePassedInSeconds(loopRaceInfo.protestFinishTime) <= HIDE_COL_TIME_THRESHOLD) {
                 canRemoveProtestTime = false;
             }
-            if (lastCourseAreaName == null) {
-                lastCourseAreaName = entryDTO.courseAreaName;
-            } else if (canRemoveCourseArea && !lastCourseAreaName.equals(entryDTO.courseAreaName)) {
-                canRemoveCourseArea = false;
+            if (first) {
+                firstRegattaName = loopEntryDTO.regattaDisplayName;
+                firstRegattaNameEntry = loopEntryDTO;
+                firstCourseAreaName = loopEntryDTO.courseAreaName;
+                firstCourseName = loopRaceInfo.lastCourseName;
+                firstCourseRegattaOverviewEntry = loopRaceInfo;
+                lastBoatClass = loopEntryDTO.boatClassName;
+            } else {
+                if (canRemoveRegatta && !Util.equalsWithNull(firstRegattaName, loopEntryDTO.regattaDisplayName)) {
+                    canRemoveRegatta = false;
+                }
+                if (canRemoveCourseArea && !Util.equalsWithNull(firstCourseAreaName, loopEntryDTO.courseAreaName)) {
+                    canRemoveCourseArea = false;
+                }
+                // a course must be shown individually for a race if its name or its course design differs
+                if (canRemoveCourse && (!Util.equalsWithNull(firstCourseName, loopRaceInfo.lastCourseName)
+                        || !Util.equalsWithNull(firstCourseRegattaOverviewEntry.lastCourseDesign,
+                                loopRaceInfo.lastCourseDesign))) {
+                    canRemoveCourse = false;
+                }
+                if (canRemoveBoatClass && !Util.equalsWithNull(lastBoatClass, loopEntryDTO.boatClassName)) {
+                    canRemoveBoatClass = false;
+                }
             }
-            if (lastCourseName == null) {
-                lastCourseName = entryDTO.raceInfo.lastCourseName;
-            } else if (canRemoveCourse && !lastCourseName.equals(entryDTO.raceInfo.lastCourseName)) {
-                canRemoveCourse = false;
-            }
-
-            if (lastBoatClass == null) {
-                lastBoatClass = entryDTO.boatClassName;
-            } else if (canRemoveBoatClass && !lastBoatClass.equals(entryDTO.boatClassName)) {
-                canRemoveBoatClass = false;
-            }
+            first = false;
         }
-        final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
+        // final RegattaOverviewEntryDTO entryForRepeatedInfos = firstEntry;
         repeatedInfoLabel.clear();
-        isAppending = collectRepeatedInfos(stringMessages.regatta(), lastRegattaName, canRemoveRegatta,
+        boolean isAppending = false;
+        final RegattaOverviewEntryDTO finalFirstRegattaNameEntry = firstRegattaNameEntry;
+        isAppending |= collectRepeatedInfos(stringMessages.regatta(), firstRegattaName, canRemoveRegatta,
                 repeatedInfoLabel, isAppending, new Command() {
                     @Override
                     public void execute() {
-                        Window.open(createRegattaLink(entryForRepeatedInfos), "_blank", "");
+                        Window.open(createRegattaLink(finalFirstRegattaNameEntry), "_blank", "");
                     }
                 });
-        // private boolean collectRepeatedInfos(String label, String info,
-        // boolean canRemove, FlowPanel panel, boolean append,
-        // final Command linkAction) {
-        isAppending = collectRepeatedInfos(stringMessages.courseArea(), lastCourseAreaName, canRemoveCourseArea,
-                repeatedInfoLabel,
-                isAppending, null);
-        isAppending = collectRepeatedInfos(stringMessages.course(), lastCourseName, canRemoveCourse, repeatedInfoLabel,
-                isAppending, new Command() {
+        isAppending |= collectRepeatedInfos(stringMessages.courseArea(), firstCourseAreaName, canRemoveCourseArea,
+                repeatedInfoLabel, isAppending, null);
+        final RaceInfoDTO _lastCourseEntry = firstCourseRegattaOverviewEntry;
+        isAppending |= collectRepeatedInfos(stringMessages.course(), firstCourseName, canRemoveCourse,
+                repeatedInfoLabel, isAppending, new Command() {
                     @Override
                     public void execute() {
-                        raceCourseClicked(entryForRepeatedInfos);
+                        raceCourseClicked(_lastCourseEntry);
                     }
                 });
-        isAppending = collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
+        isAppending |= collectRepeatedInfos(stringMessages.boatClass(), lastBoatClass, canRemoveBoatClass,
                 repeatedInfoLabel,
                 isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveLastUpdate, repeatedInfoLabel, isAppending, null);
-        isAppending = collectRepeatedInfos("", "", canRemoveProtestTime, repeatedInfoLabel, isAppending, null);
         LinkedList<ColumnSortInfo> sortInfos = new LinkedList<ColumnSortList.ColumnSortInfo>();
         if (table != null) {
             ColumnSortList columnSortList = table.getColumnSortList();
@@ -256,8 +266,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+            regattaOverviewDataProvider.removeDataDisplay(table);
+        } else {
+            sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
-        table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
+        table = new BaseCelltable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
         tableHolder.setWidget(table);
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.addDataDisplay(table);
@@ -287,6 +300,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             table.addColumn(lastUpdateColumn, stringMessages.lastUpdate());
         }
         table.addColumn(startTimeColumn, stringMessages.startTime());
+        if (!canRemoveFinishingTime) {
+            table.addColumn(finishingTimeColumn, stringMessages.finishingTime());
+        }
+        table.addColumn(finishedTimeColumn, stringMessages.finishTimeString());
         if (!canRemoveProtestTime) {
             table.addColumn(endOfProtestTime, stringMessages.protestTime());
         }
@@ -321,10 +338,26 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         ColumnSortEvent.fire(table, table.getColumnSortList());
     }
 
+    /**
+     * @param info
+     *            the text to append; if {@code null} or {@link String#isEmpty() empty}, nothing will be appended, not
+     *            even a ", " if {@code append==true}.
+     * @param canRemove
+     *            only when this is {@code true} will {@code info} be appended, and only if it's not {@code null} and
+     *            not {@link String#isEmpty() empty}.
+     * @param panel
+     *            whether to append a ", " to the string before appending the actual {@code info}; use
+     *            {@code append==true} to append any but the first element.
+     * @param linkAction
+     *            if non-{@code null}, the {@code info} will be rendered as an anchor that, when clicked, will execute
+     *            this action
+     * @return whether we're now appending, or in other words, returns {@code false} when the next call to this method
+     *         will still be producing the first element because this call was not {@code append}ing and didn't append
+     *         anything either; {@code true} otherwise
+     */
     private boolean collectRepeatedInfos(String label, String info, boolean canRemove, FlowPanel panel, boolean append,
             final Command linkAction) {
         if (canRemove && info != null && !info.isEmpty()) {
-            
             if (append) {
                 panel.add(new InlineLabel(", "));
             }
@@ -340,21 +373,22 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     }
                 });
                 panel.add(anchor);
-                
             }
             return true;
         }
-        return false;
+        return append;
     }
 
     protected void loadAndUpdateEventLog() {
-        if (eventId == null || eventDTO == null || raceGroupDTOs == null) {
+        if (eventDTO == null || raceGroupDTOs == null) {
             return;
         }
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getRaceStateEntriesForRaceGroup(eventId, settings.getVisibleCourseAreas(), settings
-                .getVisibleRegattas(), settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(),
-                new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
+        final Duration clientTimeZoneOffset = DateTimeUtil.getClientTimezoneOffsetFromUTC();
+        sailingService.getRaceStateEntriesForRaceGroup(eventId, Util.asList(settings.getVisibleCourseAreas()),
+                Util.asList(settings.getVisibleRegattas()), settings.isShowOnlyCurrentlyRunningRaces(), settings
+                .isShowOnlyRacesOfSameDay(),
+                clientTimeZoneOffset, new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {
@@ -430,6 +464,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         : entryDTO.raceInfo.seriesName;
             }
         };
+        seriesNameColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(seriesNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.raceInfo.seriesName, right.raceInfo.seriesName);
+            }
+        });
         // seriesNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         fleetNameColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -438,6 +480,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         : entryDTO.raceInfo.fleetName;
             }
         };
+        fleetNameColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(fleetNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.raceInfo.fleetName, right.raceInfo.fleetName);
+            }
+        });
         // fleetNameColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
         AnchorCell raceCell = new AnchorCell();
         raceNameColumn = new Column<RegattaOverviewEntryDTO, Anchor>(raceCell) {
@@ -452,8 +502,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 }
                 return result;
             }
-
-
         };
         raceNameColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(raceNameColumn, new Comparator<RegattaOverviewEntryDTO>() {
@@ -488,6 +536,52 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return result;
             }
         });
+        finishingTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return formatTime(entryDTO.raceInfo.finishingTime);
+            }
+        };
+        finishingTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(finishingTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.finishingTime != null && right.raceInfo.finishingTime != null) {
+                    result = left.raceInfo.finishingTime.compareTo(right.raceInfo.finishingTime);
+                } else if (left.raceInfo.finishingTime == null && right.raceInfo.finishingTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.finishingTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.finishingTime == null) {
+                    result = -1;
+                }
+                return result;
+            }
+        });
+        finishedTimeColumn = new TextColumn<RegattaOverviewEntryDTO>() {
+            @Override
+            public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                return formatTime(entryDTO.raceInfo.finishedTime);
+            }
+        };
+        finishedTimeColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(finishedTimeColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                int result = 0;
+                if (left.raceInfo.finishedTime != null && right.raceInfo.finishedTime != null) {
+                    result = left.raceInfo.finishedTime.compareTo(right.raceInfo.finishedTime);
+                } else if (left.raceInfo.finishedTime == null && right.raceInfo.finishedTime == null) {
+                    result = 0;
+                } else if (left.raceInfo.finishedTime == null) {
+                    result = 1;
+                } else if (right.raceInfo.finishedTime == null) {
+                    result = -1;
+                }
+                return result;
+            }
+        });
         raceStatusColumn = new Column<RegattaOverviewEntryDTO, SafeHtml>(new ClickableSafeHtmlCell()) {
             @Override
             public SafeHtml getValue(final RegattaOverviewEntryDTO entryDTO) {
@@ -504,7 +598,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceStatusColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                entryClickedHandler.onEntryClicked(object);
+                if (entryClickedHandler != null) {
+                    entryClickedHandler.onEntryClicked(object);
+                }
             }
         });
         raceStatusColumn.setSortable(true);
@@ -534,7 +630,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         raceCourseColumn.setFieldUpdater(new FieldUpdater<RegattaOverviewEntryDTO, SafeHtml>() {
             @Override
             public void update(int index, RegattaOverviewEntryDTO object, SafeHtml value) {
-                raceCourseClicked(object);
+                raceCourseClicked(object.raceInfo);
             }
         });
         // raceCourseColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -569,6 +665,16 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                         tooltip);
             }
         };
+        flagColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(flagColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                NaturalComparator comp = new NaturalComparator();
+                int upper = comp.compare(o1.raceInfo.lastUpperFlag.name(), o2.raceInfo.lastUpperFlag.name());
+                return upper != 0 ? upper : comp.compare(o1.raceInfo.lastLowerFlag.name(), o2.raceInfo.lastLowerFlag.name());
+            }
+            
+        });
         flagColumn.setCellStyleNames(tableRes.cellTableStyle().flagColumn());
         boatClass = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
@@ -576,11 +682,23 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return entryDTO.boatClassName;
             }
         };
+        boatClass.setSortable(true);
+        regattaOverviewListHandler.setComparator(boatClass, new Comparator<RegattaOverviewEntryDTO>() {
+
+            @Override
+            public int compare(RegattaOverviewEntryDTO left, RegattaOverviewEntryDTO right) {
+                return new NaturalComparator().compare(left.boatClassName, right.boatClassName);
+            }
+            
+        });
         lastUpdateColumn = new TextColumn<RegattaOverviewEntryDTO>() {
             private final NumberFormat FMT = NumberFormat.getFormat("00");
 
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                if (entryDTO.raceInfo.lastUpdateTime == null) {
+                    return "-";
+                }
                 final long lastUpdateInSeconds = timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime);
                 if (lastUpdateInSeconds > HIDE_COL_TIME_THRESHOLD) {
                     return timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
@@ -591,8 +709,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 } else if (lastUpdateInSeconds < _1_HOUR) {
                     sb.append(lastUpdateInSeconds / 60).append("m");
                 } else {
-                    long hours = lastUpdateInSeconds / 3600;
-                    long minutes = (lastUpdateInSeconds - (hours * 3600)) / 60;
+                    long hours = lastUpdateInSeconds / _1_HOUR;
+                    long minutes = (lastUpdateInSeconds - (hours * _1_HOUR)) / 60;
                     if (hours > HIDE_COL_TIME_THRESHOLD) {
                         return "";
                     }
@@ -601,6 +719,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return sb.toString();
             }
         };
+        lastUpdateColumn.setDefaultSortAscending(false);
         lastUpdateColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
@@ -640,13 +759,27 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append("Finished at: "
-                            + (timeFormatter.format(entryDTO.raceInfo.finishedTime)));
+                    final Duration finishDuration;
+                    if (entryDTO.raceInfo.finishingTime != null) {
+                        finishDuration = new MillisecondsDurationImpl(
+                                entryDTO.raceInfo.finishedTime.getTime()
+                                        - entryDTO.raceInfo.finishingTime.getTime());
+                    } else {
+                        finishDuration = new MillisecondsDurationImpl(0);
+                    }
+                    additionalInformation.append(stringMessages.finishDuration(formatDuration(finishDuration)));
                     isInfoBefore = true;
                 }
                 return additionalInformation.toString();
             }
         };
+        raceAdditionalInformationColumn.setSortable(true);
+        regattaOverviewListHandler.setComparator(raceAdditionalInformationColumn, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                return new NaturalComparator().compare(raceAdditionalInformationColumn.getValue(o1), raceAdditionalInformationColumn.getValue(o2));
+            }
+        });
         endOfProtestTime = new TextColumn<RegattaOverviewEntryDTO>() {
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
@@ -665,10 +798,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return additionalInformation.toString();
             }
         };
-    }
-
-    public List<RegattaOverviewEntryDTO> getAllRaces() {
-        return allEntries;
+        endOfProtestTime.setSortable(true);
+        regattaOverviewListHandler.setComparator(endOfProtestTime, new Comparator<RegattaOverviewEntryDTO>() {
+            @Override
+            public int compare(RegattaOverviewEntryDTO o1, RegattaOverviewEntryDTO o2) {
+                return new NaturalComparator().compare(o1.raceInfo.protestFinishTime.toString(), o2.raceInfo.protestFinishTime.toString());
+            }
+        });
     }
 
     @Override
@@ -677,34 +813,26 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     @Override
-    public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent() {
-        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages, eventId,
-                Collections.unmodifiableList(eventDTO.venue.getCourseAreas()),
+    public SettingsDialogComponent<RegattaRaceStatesSettings> getSettingsDialogComponent(RegattaRaceStatesSettings settings) {
+        return new RegattaRaceStatesSettingsDialogComponent(settings, stringMessages,
+                Collections.unmodifiableList(eventDTO.getVenue().getCourseAreas()),
                 Collections.unmodifiableList(raceGroupDTOs));
     }
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        if (settings.getVisibleCourseAreas().isEmpty()
-                || !settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
-            settings.getVisibleCourseAreas().clear();
-            settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
-            fillVisibleCourseAreasInSettingsIfEmpty();
-        }
-        if (settings.getVisibleRegattas().isEmpty()
-                || !settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
-            settings.getVisibleRegattas().clear();
-            settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
-            fillVisibleRegattasInSettingsIfEmpty();
-        }
-        if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
-            settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
-        }
-        if (settings.isShowOnlyCurrentlyRunningRaces() != newSettings.isShowOnlyCurrentlyRunningRaces()) {
-            settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
-        }
+        setDefaultCourseAreas();
+        settings.setVisibleCourseAreas(newSettings.getVisibleCourseAreas());
+        setDefaultRegattas();
+        settings.setVisibleRegattas(newSettings.getVisibleRegattas());
+        settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
+        settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
         refreshTableWithNewSettings();
-        storeRegattaRaceStatesSettings(settings);
+    }
+
+    @Override
+    public RegattaRaceStatesSettings getSettings() {
+        return settings;
     }
 
     private void refreshTableWithNewSettings() {
@@ -713,19 +841,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
     }
 
-    private void fillVisibleRegattasInSettingsIfEmpty() {
-        if (settings.getVisibleRegattas().isEmpty() && raceGroupDTOs != null) {
-            for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                settings.getVisibleRegattas().add(raceGroup.getName());
-            }
-        }
+    private void setDefaultRegattas() {
+        settings.setDefaultRegattas(raceGroupDTOs);
     }
 
-    private void fillVisibleCourseAreasInSettingsIfEmpty() {
-        if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
-            for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.getVisibleCourseAreas().add(courseArea.id);
-            }
+    private void setDefaultCourseAreas() {
+        if (eventDTO != null) {
+            settings.setDefaultCourseAreas(eventDTO.getVenue().getCourseAreas());
         }
     }
 
@@ -739,15 +861,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return this;
     }
 
-    @Override
-    public void onEventUpdated(EventDTO event) {
-        eventDTO = event;
-        fillVisibleCourseAreasInSettingsIfEmpty();
-        refreshTableWithNewSettings();
-    }
-
-    @Override
-    public void onRaceGroupsUpdated(List<RaceGroupDTO> raceGroups) {
+    private void setRaceGroups(List<RaceGroupDTO> raceGroups) {
         raceGroupDTOs = raceGroups;
         GWT.log("onRaceGroupsUpdated");
         if (raceGroupDTOs != null) {
@@ -770,47 +884,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 }
             }
         }
-        // if (!hasAnyRaceGroupASeries) {
-        // if (regattaOverviewTable.getColumnIndex(seriesNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(seriesNameColumn);
-        // }
-        // }
-        // if (!hasAnyRaceGroupAFleet) {
-        // if (regattaOverviewTable.getColumnIndex(fleetNameColumn) >= 0) {
-        // regattaOverviewTable.removeColumn(fleetNameColumn);
-        // }
-        // }
-        // regattaOverviewTable.redraw();
-        fillVisibleRegattasInSettingsIfEmpty();
-        refreshTableWithNewSettings();
-    }
-
-    private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null && eventId != null) {
-            // delete old value
-            localStorage.removeItem(localStorageRegattaOverviewEventKey);
-            // store settings
-            GwtJsonDeSerializer<RegattaRaceStatesSettings> serializer = new RegattaRaceStatesSettingsJsonDeSerializer();
-            JSONObject settingsAsJson = serializer.serialize(settings);
-            localStorage.setItem(localStorageRegattaOverviewEventKey, settingsAsJson.toString());
-        }
-    }
-
-    private RegattaRaceStatesSettings loadRegattaRaceStatesSettings() {
-        RegattaRaceStatesSettings loadedSettings = null;
-        Storage localStorage = Storage.getLocalStorageIfSupported();
-        if (localStorage != null) {
-            String jsonAsLocalStore = localStorage.getItem(localStorageRegattaOverviewEventKey);
-            if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                GwtJsonDeSerializer<RegattaRaceStatesSettings> deserializer = new RegattaRaceStatesSettingsJsonDeSerializer();
-                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                if (value.isObject() != null) {
-                    loadedSettings = deserializer.deserialize((JSONObject) value);
-                }
-            }
-        }
-        return loadedSettings;
     }
 
     private DialogBox createCourseViewDialogBox(RaceInfoDTO raceInfoDTO) {
@@ -846,10 +919,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return result;
     }
 
-    private void raceCourseClicked(RegattaOverviewEntryDTO object) {
-        RaceCourseDTO courseDTO = object.raceInfo.lastCourseDesign;
+    private void raceCourseClicked(RaceInfoDTO raceInfo) {
+        RaceCourseDTO courseDTO = raceInfo.lastCourseDesign;
         if (courseDTO != null && courseDTO.waypoints.size() > 0) {
-            DialogBox courseViewDialogBox = createCourseViewDialogBox(object.raceInfo);
+            DialogBox courseViewDialogBox = createCourseViewDialogBox(raceInfo);
             courseViewDialogBox.center();
             courseViewDialogBox.setGlassEnabled(true);
             courseViewDialogBox.setAnimationEnabled(true);
@@ -859,6 +932,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
+        case Single_Unknown:
+            return stringMessages.toSide() + " " + stringMessages.unknown();
         case Port:
             return stringMessages.toSide() + " " + stringMessages.portSide();
         case Starboard:
@@ -880,6 +955,36 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         return (new Date().getTime() - dateTime.getTime()) / 1000;
     }
 
+    private String formatDuration(Duration duration) {
+        long seconds = (long) Math.round(duration.asSeconds());
+        final long days = seconds / (long) Duration.ONE_DAY.asSeconds();
+        seconds %= 24 * 3600;
+        final long hours = seconds / (long) Duration.ONE_HOUR.asSeconds();
+        seconds %= 3600;
+        final long minutes = seconds / (long) Duration.ONE_MINUTE.asSeconds();
+        seconds %= 60;
+        final StringJoiner sj = new StringJoiner(":");
+        if (days > 0) {
+            sj.add(String.valueOf(days));
+        }
+        if (days > 0 && hours < 10) {
+            sj.add("0" + String.valueOf(hours));
+        } else {
+            sj.add(String.valueOf(hours));
+        }
+        if (minutes < 10) {
+            sj.add("0" + String.valueOf(minutes));
+        } else {
+            sj.add(String.valueOf(minutes));
+        }
+        if (seconds < 10) {
+            sj.add("0" + String.valueOf(seconds));
+        } else {
+            sj.add(String.valueOf(seconds));
+        }
+        return sj.toString();
+    }
+
     @Override
     public String getDependentCssClassName() {
         return "regattaRaceStates";
@@ -887,24 +992,30 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            Map<String, String> raceLinkParameters = new HashMap<String, String>();
-            raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
-            raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
-            raceLinkParameters.put("canReplayDuringLiveRaces", "true");
-            raceLinkParameters.put("regattaName", entryDTO.regattaName);
-            return EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.raceInfo.raceIdentifier.getRegattaName(),
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.leaderboardName, null, null, null, null);
+            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                    .createDefaultWithCanReplayDuringLiveRaces(true);
+            
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                    perspectiveOwnSettings, Collections.emptyMap());
+
+            return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
         }
         return null;
     }
+
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
-        Map<String, String> leaderboardLinkParameters = new HashMap<String, String>();
-        leaderboardLinkParameters.put("name", entryDTO.regattaName);
-        leaderboardLinkParameters.put("showRaceDetails", String.valueOf(true));
-        leaderboardLinkParameters.put("displayName", entryDTO.regattaDisplayName);
-        String leaderboardLink = EntryPointLinkFactory.createLeaderboardLink(leaderboardLinkParameters);
+        String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.leaderboardName);
         return leaderboardLink;
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
         this.repeatedInfoLabel = repeatedInfoLabel;
     }
+
+    @Override
+    public String getId() {
+        return RegattaRaceStatesComponentLifecycle.ID;
+    }
+
 }

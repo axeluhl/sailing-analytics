@@ -25,7 +25,7 @@ public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
      */
     public static final String CATEGORY_GLOBAL = ""; //$NON-NLS-1$
     
-    private static final String JAVASCRIPT = "return (window.PENDING_AJAX_CALLS.numberOfPendingCalls(arguments[0]) === 0)"; //$NON-NLS-1$
+    private static final String JAVASCRIPT = "return window.PENDING_AJAX_CALLS && (window.PENDING_AJAX_CALLS.numberOfPendingCalls(arguments[0]) === 0)"; //$NON-NLS-1$
     
     private String category;
     
@@ -60,7 +60,7 @@ public class AjaxCallsComplete implements ExpectedCondition<Boolean> {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         boolean result = false;
         try {
-            result = (Boolean) executor.executeScript(JAVASCRIPT, this.category);
+            result = Boolean.TRUE.equals(executor.executeScript(JAVASCRIPT, this.category));
         } catch (WebDriverException e) {
             logger.log(Level.WARNING, "Exception looking for PENDING_AJAX_CALLS variable. Telling caller that not all AJAX calls have finished yet.", e);
         }

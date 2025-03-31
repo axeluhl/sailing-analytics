@@ -1,0 +1,12 @@
+#!/bin/bash
+# Expects an ephemeral volume to have been mounted at /ephemeral/data and
+# mounts that with a "bind" mount to /home/hudson/workspace.
+# The directory is then chown/chgrp'ed to hudson
+if [ -e /dev/nvme1n1 ]; then
+  mkfs.ext4 /dev/nvme1n1
+  mount /dev/nvme1n1 /home/hudson/workspace
+else
+  mount -o bind /ephemeral/data /home/hudson/workspace
+fi
+chgrp hudson /home/hudson/workspace
+chown hudson /home/hudson/workspace

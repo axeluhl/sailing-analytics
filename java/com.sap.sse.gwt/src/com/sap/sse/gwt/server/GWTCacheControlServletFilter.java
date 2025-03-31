@@ -23,22 +23,21 @@ public class GWTCacheControlServletFilter implements Filter {
     public void init(FilterConfig config) throws ServletException {
     }
 
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException,
-            ServletException {
-
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String requestURI = httpRequest.getRequestURI();
-
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
         if (requestURI.contains(".nocache.")) {
             Date now = new Date();
-            HttpServletResponse httpResponse = (HttpServletResponse) response;
             httpResponse.setDateHeader("Date", now.getTime());
             // one day old
             httpResponse.setDateHeader("Expires", now.getTime() - 86400000L);
             httpResponse.setHeader("Pragma", "no-cache");
             httpResponse.setHeader("Cache-control", "no-cache, no-store, must-revalidate");
+        } else if (requestURI.contains(".cache.")) {
+            httpResponse.setHeader("Cache-Control", "max-age=2592000");
         }
-
         filterChain.doFilter(request, response);
     }
 }

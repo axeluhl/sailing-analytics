@@ -1,58 +1,47 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
-    private static class ComponentAndValidator<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, Validator<SettingsType>> {
-        private static final long serialVersionUID = -4190322565836849861L;
-
-        public ComponentAndValidator(Component<SettingsType> a, Validator<SettingsType> b) {
-            super(a, b);
-        }
-    }
     
-    private final Iterable<ComponentAndValidator<?>> validators;
+    private final Map<String, Validator<?>> validatorsMappedByComponent;
 
-    public CompositeValidator(Component<?>[] components) {
-        ArrayList<ComponentAndValidator<?>> v = new ArrayList<ComponentAndValidator<?>>();
-        for (Component<?> component : components) {
-            v.add(getComponentAndValidator(component));
+    public CompositeValidator(Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
+        validatorsMappedByComponent = new HashMap<>();
+        for (ComponentAndDialogComponent<?> component : componentsAndDialogComponents) {
+            validatorsMappedByComponent.put(component.getA().getId(), component.getB().getValidator());
         }
-        validators = v;
-    }
-
-    private <SettingsType extends Settings> ComponentAndValidator<SettingsType> getComponentAndValidator(Component<SettingsType> component) {
-        return new ComponentAndValidator<SettingsType>(component, component.getSettingsDialogComponent().getValidator());
     }
 
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
-        StringBuilder result = new StringBuilder();
-        for (ComponentAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        final StringBuilder result = new StringBuilder();
+        for (Entry<String, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
-            if (errorMessage != null) {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
-                result.append("; ");
             }
         }
         return result.toString();
     }
 
-    private <SettingsType extends AbstractSettings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
-        for (ComponentAndValidator<?> componentAndValidator : validators) {
-            if (componentAndValidator.getA() == componentAndSettings.getA()) {
-                @SuppressWarnings("unchecked")
-                final Validator<SettingsType> validator = (Validator<SettingsType>) componentAndValidator.getB();
-                return validator.getErrorMessage(componentAndSettings.getB());
+    private <SettingsType extends Settings> String getErrorMessage(Entry<String, SettingsType> componentIdAndSettings) {
+        String errorMessage = null;
+        @SuppressWarnings("unchecked")
+        final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());
+        if (validator != null) {
+            errorMessage = validator.getErrorMessage(componentIdAndSettings.getValue());
+            if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
+                errorMessage += "; ";
             }
         }
-        return null;
+        return errorMessage;
     }
 
 }

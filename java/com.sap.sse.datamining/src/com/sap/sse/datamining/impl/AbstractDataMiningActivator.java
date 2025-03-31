@@ -6,20 +6,23 @@ import org.osgi.framework.ServiceReference;
 
 import com.sap.sse.datamining.DataMiningBundleService;
 
-public abstract class AbstractDataMiningActivator implements BundleActivator {
+public abstract class AbstractDataMiningActivator implements BundleActivator, DataMiningBundleService {
 
     private ServiceReference<DataMiningBundleService> dataMiningBundleServiceReference;
     
     @Override
     public void start(BundleContext context) throws Exception {
-        dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, getDataMiningBundleService(), null).getReference();
+        dataMiningBundleServiceReference = context.registerService(DataMiningBundleService.class, this, null).getReference();
     }
-
-    protected abstract DataMiningBundleService getDataMiningBundleService();
 
     @Override
     public void stop(BundleContext context) throws Exception {
         context.ungetService(dataMiningBundleServiceReference);
+    }
+    
+    @Override
+    public ClassLoader getClassLoader() {
+        return this.getClass().getClassLoader();
     }
 
 }

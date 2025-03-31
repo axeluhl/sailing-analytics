@@ -108,4 +108,40 @@ public class Pane extends Configurable<Pane> {
         return this.setOption("endAngle", endAngle);
     }
 
+    /**
+     * Convenience method for setting the 'size' option of the pane.  Equivalent to:
+     * <pre><code>
+     *     pane.setOption("size", 140);
+     * </code></pre>
+     * The size of the pane, either as a number defining pixels, or a percentage defining a percentage of the plot are.
+     * Defaults to 85%.
+     * Note that this method is used for defining the size as a number. For defining the size as a percentage of the plot
+     * area use {@link Pane#setSize(String)}
+     * @param size A Number defining the size of the pane in pixels.
+     * @return @return A reference to this {@link Pane} instance for convenient method chaining.
+     * @since 1.7.0
+     * @see Pane#setSize(String)
+     */
+    public Pane setSize(Number size) {
+        return this.setOption("size", size);
+    }
+
+    /**
+     * Convenience method for setting the 'size' option of the pane.  Equivalent to:
+     * <pre><code>
+     *     pane.setOption("size", "90%");
+     * </code></pre>
+     * The size of the pane, either as a number defining pixels, or a percentage defining a percentage of the plot are.
+     * Defaults to 85%.
+     * Note that this method is used for defining the size as a percentage of the plot area.
+     * For defining the size as a specific number of pixels use {@link Pane#setSize(Number)}
+     * @param size A String defining the size of the pane in pixels.
+     * @return @return A reference to this {@link Pane} instance for convenient method chaining.
+     * @since 1.7.0
+     * @see Pane#setSize(String)
+     */
+    public Pane setSize(String size) {
+        return this.setOption("size", size);
+    }
+
 }

@@ -1,0 +1,4 @@
+.busy {
+    margin: 2em auto 10em;
+    display: block;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"扫描二维码"</string>
+    <string name="scan_hint">"二维码可在确认参与时找到"</string>
+    <string name="no_qr_code">"没有二维码？"</string>
+    <string name="start_tracking">"开始跟踪"</string>
+    <string name="stop_tracking">"停止跟踪"</string>
+    <string name="tracking_gps_accuracy">"GPS 准确度"</string>
+    <string name="tracking_mode">"模式"</string>
+    <string name="tracking_mode_live">"实况"</string>
+    <string name="tracking_mode_battery_saving">"省电"</string>
+    <string name="tracking_unsent_fixes">"未发送的消息"</string>
+    <string name="tracking_mode_caching">"离线"</string>
+    <string name="tracking_mode_api_error">"API 错误"</string>
+    <string name="tracking_mode_no_attempt">"初始化"</string>
+    <string name="tracking_time">"跟踪时间"</string>
+    
+    <string name="tracking_status_tracking">"跟踪"</string>
+    <string name="tracking_status_no_gps_signal">"无 GPS 更改或信号！"</string>
+    <string name="desc_regatta_user_image">"比赛用户图像"</string>
+    <string name="desc_add_photo_button">"添加照片按钮"</string>
+    <string name="tracking_status_gps_found">"找到 GPS 信号！"</string>
+</resources>

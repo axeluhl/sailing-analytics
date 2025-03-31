@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder">
+  <ui:with field="local_res" type="com.sap.sse.gwt.client.controls.dropdown.DropdownResources" />
+  <ui:style>
+  .important {
+    font-weight: bold;
+  }
+  </ui:style>
+    <a ui:field="link">
+      <div ui:field="title">
+        <!-- regatta.name -->
+      </div>
+    </a>
+</ui:UiBinder>

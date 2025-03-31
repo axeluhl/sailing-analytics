@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resources>
+
+    
+    
+    
+    
+    <string name="course_type">"Tipo de rumbo"</string>
+    <string name="marks">"Marcas"</string>
+    <string name="set_position">"Posicionar"</string>
+    <string name="set_position_disabled_gps">"Habilitar GPS\npara configurar la posición"</string>
+    <string name="set_position_no_gps_yet">"Esperando a la conexión del GPS"</string>
+    <string name="reset_position">"Restablecer posición"</string>
+    <string name="getting_marks">"Obteniendo marcas de la carrera..."</string>
+    <string name="set">"fijado"</string>
+    <string name="unknown">"n/a"</string>
+    <string name="not_set">"sin fijar"</string>
+    <string name="mark_list_accuracy">"(Exactitud aprox. %1$sm)"</string>
+    <string name="accuracy_detail">"de la posición de GPS"</string>
+    <string name="distance_detail">"a la boya antigua"</string>
+    
+    
+    <string name="accuracy">"Exactitud del GPS"</string>
+    <string name="distance">"Distancia a la antigua boya"</string>
+    <string name="position_set">"La posición se ha fijado"</string>
+    <string name="no_information">"Sin información"</string>
+    <string name="title_activity_settings">@string/settings</string>
+    <string name="error_message_no_position">"Posiciones el dispositivo cerca de la marca y pulse \"Fijar posición\" para fijar la posición de la marca. Utilice el indicador de exactitud para decidir si la posición mostrada es lo suficientemente buena. Active el GPS o espera que esté disponible."</string>
+    <string name="action_settings">@string/settings</string>
+    <string name="settings">"Opciones"</string>
+
+    <string name="server">"Sondeo"</string>
+    <string name="server_sync_settings">"Intervalo de sondeo (segundos)"</string>
+
+    <string name="options_menu_checkout">"Check out"</string>
+    <string name="checkout_warning_message">"¿Desea REALMENTE cerrar la sesión? Tendrá que volver a iniciar la sesión con el código QR facilitado para acceder a sus marcas."</string>
+
+    <string name="no_marks_message">"Sin marcas"</string>
+
+</resources>

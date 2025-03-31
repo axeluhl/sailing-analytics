@@ -1,10 +1,17 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.CentralAngleDistance;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.util.RoundingUtil;
 
 public class AbstractPosition implements Position {
     private static final long serialVersionUID = -3057027562787541064L;
@@ -16,6 +23,8 @@ public class AbstractPosition implements Position {
     public boolean equals(Object o) {
         if (o == null) {
             return false;
+        } if (this == o) {
+            return true;
         } else {
             return o instanceof Position && getLatRad() == ((Position) o).getLatRad()
                     && getLngRad() == ((Position) o).getLngRad();
@@ -80,15 +89,17 @@ public class AbstractPosition implements Position {
 
     @Override
     public Bearing getBearingGreatCircle(Position p) {
-        Bearing bearing = null;
+        final Bearing bearing;
         if (p != null) {
             double result = Math.atan2(Math.sin(p.getLngRad() - getLngRad()) * Math.cos(p.getLatRad()),
-                    Math.cos(getLatRad()) * Math.sin(p.getLatRad()) - Math.sin(getLatRad()) * Math.cos(p.getLatRad())
-                            * Math.cos(p.getLngRad() - getLngRad()));
+                    Math.cos(getLatRad()) * Math.sin(p.getLatRad())
+                            - Math.sin(getLatRad()) * Math.cos(p.getLatRad()) * Math.cos(p.getLngRad() - getLngRad()));
             if (result < 0) {
                 result = result + 2 * Math.PI;
             }
             bearing = new RadianBearingImpl(result);
+        } else {
+            bearing = null;
         }
         return bearing;
     }
@@ -104,14 +115,12 @@ public class AbstractPosition implements Position {
         double lat1 = getLatRad();
         double lon1 = getLngRad();
         double bearingRad = bearing.getRadians();
-
         double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceRad) + Math.cos(lat1) * Math.sin(distanceRad)
                 * Math.cos(bearingRad));
         double lon2 = lon1
                 + Math.atan2(Math.sin(bearingRad) * Math.sin(distanceRad) * Math.cos(lat1), Math.cos(distanceRad)
                         - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI; // normalize to -180..+180
-
         return new DegreePosition(lat2 / Math.PI * 180., lon2 / Math.PI * 180.);
     }
 
@@ -145,20 +154,27 @@ public class AbstractPosition implements Position {
 
     @Override
     public Distance alongTrackDistance(Position from, Bearing bearing) {
-        double direction = Math.signum(Math.cos(from.getBearingGreatCircle(this).getRadians() - bearing.getRadians()));
-        // Test if denominator gets ridiculously small; if so, the cross-track error is about 90� central angle.
-        // This means that the cross-track error is maximized, and that there is no way to determine how far along
-        // the great circle described by pos2 and bearing we should travel. This is an exception which will
-        // surface as a division-by-zero exception or a NaN result
-        return new CentralAngleDistance(direction
-                * Math.acos(Math.cos(from.getCentralAngleRad(this))
-                        / Math.cos(crossTrackError(from, bearing).getCentralAngleRad())));
+        final Distance result;
+        if (from != null && bearing != null) {
+            double direction = Math.signum(Math.cos(from.getBearingGreatCircle(this).getRadians() - bearing.getRadians()));
+            // Test if denominator gets ridiculously small; if so, the cross-track error is about 90� central angle.
+            // This means that the cross-track error is maximized, and that there is no way to determine how far along
+            // the great circle described by pos2 and bearing we should travel. This is an exception which will
+            // surface as a division-by-zero exception or a NaN result
+            result = new CentralAngleDistance(direction
+                    * Math.acos(Math.cos(from.getCentralAngleRad(this))
+                            / Math.cos(crossTrackError(from, bearing).getCentralAngleRad())));
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
     public Distance getDistanceToLine(Position left, Position right) {
         final Distance result;
-        final int factor = this.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters()>0?1:-1;
+        final Distance crossTrackError = this.crossTrackError(left, left.getBearingGreatCircle(right));
+        final int factor = crossTrackError.getMeters()>0?1:-1;
         double toLeft = Math.abs(left.getBearingGreatCircle(this).getDifferenceTo(left.getBearingGreatCircle(right))
                 .getDegrees());
         double toRight = Math.abs(right.getBearingGreatCircle(this).getDifferenceTo(right.getBearingGreatCircle(left))
@@ -166,9 +182,9 @@ public class AbstractPosition implements Position {
         if (toLeft > 90) {
             result = this.getDistance(left).scale(factor);
         } else if (toRight > 90) {
-                result = this.getDistance(right).scale(factor);
-            } else {
-                result = this.crossTrackError(left, left.getBearingGreatCircle(right));
+            result = this.getDistance(right).scale(factor);
+        } else {
+            result = crossTrackError;
         }
         return result;
     }
@@ -212,6 +228,14 @@ public class AbstractPosition implements Position {
         return sumOfDistances1.compareTo(sumOfDistances2) < 0 ? intersectionPosition1 : intersectionPosition2;
     }
 
+    @Override
+    public SpeedWithBearing getSpeedWithBearingToReachOnGreatCircle(Position to, Duration inTime) {
+        final Bearing bearing = getBearingGreatCircle(to);
+        final Distance distance = getDistance(to);
+        final Speed speed = distance.inTime(inTime);
+        return new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
+    }
+
     private Position cartesianVectorToPosition(double[] vector) {
         double lat = Math.atan2(vector[2], Math.sqrt(vector[0]*vector[0] + vector[1]*vector[1]));
         double lng = Math.atan2(vector[1], vector[0]);
@@ -234,4 +258,27 @@ public class AbstractPosition implements Position {
         return greatCircle;
     }
 
+    @Override
+    public String getAsDegreesAndDecimalMinutesWithCardinalPoints() {
+        final String lat = (getLatDeg()>=0 ? "N" : "S") + getDegreesAndDecimalMinutesOfNonNegativeAngle(Math.abs(getLatDeg()), /* degreePlaces */ 2, /* minuteDecimals */ 3);
+        final String lng = (getLngDeg()>=0 ? "E" : "W") + getDegreesAndDecimalMinutesOfNonNegativeAngle(Math.abs(getLngDeg()), /* degreePlaces */ 3, /* minuteDecimals */ 3);
+        return lat+" "+lng;
+    }
+    
+    private String getDegreesAndDecimalMinutesOfNonNegativeAngle(double nonNegativeAngle, int degreePlaces, int minuteDecimals) {
+        final double abs = Math.abs(nonNegativeAngle);
+        int integerDegrees = (int) nonNegativeAngle;
+        double minutes = RoundingUtil.format((abs-(int) abs)*60.0, 3);
+        if (minutes >= 60.0) {
+            minutes -= 60.0;
+            integerDegrees++;
+        }
+        return Util.padPositiveValue(integerDegrees, degreePlaces, 0, /* round */ true) + "°"+
+                Util.padPositiveValue(minutes, 2, minuteDecimals, /* round */ true)+"'";
+    }
+    
+    @Override
+    public String getAsSignedDecimalDegrees() {
+        return "("+getLatDeg()+", "+getLngDeg()+")";
+    }
 }

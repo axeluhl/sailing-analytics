@@ -36,9 +36,19 @@ public class MetaLeaderboardScoreCorrection extends ScoreCorrectionImpl {
      * These redefinitions are required for scoping reasons, to make the method visible also to other classes in this package.
      */
     @Override
-    protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-            MaxPointsReason newMaxPointsReason) {
-        super.notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+    protected void notifyListenersAboutIncrementalScoreChange(Competitor competitor, RaceColumn raceColumn,
+            Double oldScoreOffsetInPoints, Double newScoreOffsetInPoints) {
+        super.notifyListenersAboutIncrementalScoreChange(competitor, raceColumn, oldScoreOffsetInPoints,
+                newScoreOffsetInPoints);
+    }
+
+    /**
+     * These redefinitions are required for scoping reasons, to make the method visible also to other classes in this package.
+     */
+    @Override
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn,
+            MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+        super.notifyListeners(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
     }
     
     @Override

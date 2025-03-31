@@ -8,10 +8,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -22,11 +24,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
-import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.server.interfaces.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -34,6 +37,8 @@ import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sse.common.Util;
 
 public class ServerReplicationTest extends AbstractServerReplicationTest {
+    private static final String LEADERBOARDNAME = "TESTLEADERBOARD";
+
     @Test
     public void testBasicInitialLoad() throws Exception {
         assertNotSame(master, replica);
@@ -63,23 +68,25 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
 
     @Test
     public void testLeaderboardRemovalReplication() throws InterruptedException {
-        final String leaderboardName = LeaderboardNameConstants.DEFAULT_LEADERBOARD_NAME;
-        assertNotNull(replica.getLeaderboardByName(leaderboardName));
-        assertNotNull(master.getLeaderboardByName(leaderboardName));
-        RemoveLeaderboard removeDefaultLeaderboard = new RemoveLeaderboard(leaderboardName);
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME,null, new int[] { 5 },
+                new LowPoint(), null);
+        master.apply(addLeaderboardOp);
+        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
+        assertNotNull(replica.getLeaderboardByName(LEADERBOARDNAME));
+        assertNotNull(master.getLeaderboardByName(LEADERBOARDNAME));
+        RemoveLeaderboard removeDefaultLeaderboard = new RemoveLeaderboard(LEADERBOARDNAME);
         master.apply(removeDefaultLeaderboard);
-        final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
+        final Leaderboard masterLeaderboard = master.getLeaderboardByName(LEADERBOARDNAME);
         assertNull(masterLeaderboard);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
-        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(LEADERBOARDNAME);
         assertNull(replicaLeaderboard);
     }
 
     @Test
     public void testWaypointRemovalReplication() throws InterruptedException {
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory; see bug 592
-        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addRegattaOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName,
@@ -87,8 +94,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         Regatta regatta = master.apply(addRegattaOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass,
-                new ArrayList<Competitor>());
+        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.<Competitor,Boat>emptyMap());
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));

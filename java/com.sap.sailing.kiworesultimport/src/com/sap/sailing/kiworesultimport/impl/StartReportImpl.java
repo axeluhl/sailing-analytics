@@ -38,7 +38,9 @@ public class StartReportImpl extends AbstractNodeWrapper implements StartReport 
     @Override
     public TimePoint getTimePoint() throws ParseException {
         String datum = getDateAsString();
-        return datum == null || datum.trim().length() == 0 ? null : new MillisecondsTimePoint(df.parse(datum));
+        synchronized (df) {
+            return datum == null || datum.trim().length() == 0 ? null : new MillisecondsTimePoint(df.parse(datum));
+        }
     }
 
     @Override

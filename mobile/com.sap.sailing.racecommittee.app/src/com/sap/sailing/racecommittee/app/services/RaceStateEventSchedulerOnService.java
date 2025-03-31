@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.services;
 
-import java.util.Collection;
-
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -18,7 +16,7 @@ public class RaceStateEventSchedulerOnService implements RaceStateEventScheduler
     }
 
     @Override
-    public void scheduleStateEvents(Collection<RaceStateEvent> stateEvents) {
+    public void scheduleStateEvents(Iterable<RaceStateEvent> stateEvents) {
         for (RaceStateEvent stateEvent : stateEvents) {
             service.setAlarm(race, stateEvent);
         }

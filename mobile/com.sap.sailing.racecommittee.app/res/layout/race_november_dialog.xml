@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/abort_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="16dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:text="@string/abort_hint"
+        android:textAppearance="?attr/textSmall" />
+
+    <TextView
+        android:id="@+id/abort_summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        tools:text="Lorem ipsum dolor sit amet, consetetur sadipscing elitr..." />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/abort_list"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_above="@id/abort_summary"
+        android:layout_below="@id/abort_hint"
+        android:scrollbars="vertical"
+        android:textAppearance="?attr/textSmall" />
+
+</RelativeLayout>

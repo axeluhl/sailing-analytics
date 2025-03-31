@@ -23,7 +23,7 @@ body {
 	background-color: #333333;
 	border-bottom: 4px solid #f0ab00;
 	color: white;
-	position: relative
+	position: relative;
 }
 
 .registrationform_header_appname {
@@ -32,7 +32,7 @@ body {
 	margin: 0;
 	position: absolute;
 	top: 50%;
-	transform: translate(0, -50%)
+	transform: translate(0, -50%);
 }
 
 .registrationform_content {

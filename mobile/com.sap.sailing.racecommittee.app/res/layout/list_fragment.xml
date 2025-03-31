@@ -2,21 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/welter_extralight_gray_transparent">
+    android:background="?attr/sap_gray_black_30"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txt_listHeader"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:textColor="?attr/black"
+        android:textIsSelectable="false"
+        android:textSize="22sp"
+        android:visibility="gone" />
 
     <ListView
-        android:id="@id/android:list"
+        android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:divider="@null"
         android:drawSelectorOnTop="true" />
-
-    <TextView
-        android:id="@id/android:empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textIsSelectable="false"
-        android:visibility="gone"/>
-
 </LinearLayout>

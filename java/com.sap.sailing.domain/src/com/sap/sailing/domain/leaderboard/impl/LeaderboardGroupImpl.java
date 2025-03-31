@@ -113,6 +113,11 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
     }
 
     @Override
+    public String getOverallLeaderboardName() {
+        return hasOverallLeaderboard() ? getOverallLeaderboard().getName() : null;
+    }
+
+    @Override
     public void setOverallLeaderboard(Leaderboard overallLeaderboard) {
         this.overallLeaderboard = overallLeaderboard;
     }
@@ -139,6 +144,9 @@ public class LeaderboardGroupImpl extends LeaderboardGroupBaseImpl implements Le
 
     @Override
     public void addLeaderboard(Leaderboard leaderboard) {
+        if (leaderboard == overallLeaderboard) {
+            throw new IllegalArgumentException("Cannot insert the overall leaderboard into its own leaderboard group");
+        }
         LockUtil.lockForWrite(leaderboardsLock);
         try {
             addLeaderboardAt(leaderboard, leaderboards.size());

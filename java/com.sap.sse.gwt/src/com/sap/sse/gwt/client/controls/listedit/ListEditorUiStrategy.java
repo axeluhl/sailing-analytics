@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
  * {@link ListEditorComposite#getValue() values} of the context editor that was passed to
  * {@link #setContext(ListEditorComposite)} during editor initialization.<p>
  * 
- * Objects will receive calls to {@link #onRowAdded()} when a value was added to the list, and {@link #onRowRemoved()} when
+ * Objects will receive calls to {@link #onRowAdded()} when a value was added to the list, and {@link #onRowRemoved(int)} when
  * a value was removed from the list.<p>
  * 
  * There are two default implementations of this interface: {@link CollapsedListEditorUi} and {@link ExpandedListEditorUi}.
@@ -54,6 +54,7 @@ public interface ListEditorUiStrategy<ValueType> {
     /**
      * Called by the framework after a value was removed from the list. Note that this is not the place for this UI
      * strategy to actually implement the UI changes. Those are expected to already have happened before.
+     * @param rowIndex The index of the removed row
      */
-    void onRowRemoved();
+    void onRowRemoved(int rowIndex);
 }

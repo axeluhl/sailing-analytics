@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -33,16 +35,18 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceAsWaypointList;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.TrackedRegattaImpl;
 import com.sap.sse.common.Util;
 
 import difflib.DiffUtils;
@@ -73,14 +77,18 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         removeCalls = new HashMap<>();
         course = new CourseImpl("Test Course", waypoints);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Test Regatta",
-                new BoatClassImpl("505", BoatClassMasterdata._5O5), /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
-                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
-        TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
-        RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor>emptySet());
+                new BoatClassImpl(BoatClassMasterdata._5O5), 
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null),
+                /* registrationLinkSecret */ UUID.randomUUID().toString());
+        TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
+        RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
-                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+                EmptyWindStore.INSTANCE, 
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */
-                7000, /*useMarkPassingCalculator*/ false) {
+                7000, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
+                mock(RaceLogAndTrackedRaceResolver.class), /* trackingConnectorInfo */ null, /* markPassingRaceFingerprintRegistry */ null) {
             private static final long serialVersionUID = 9114777576548711763L;
 
             @Override
@@ -157,6 +165,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(deserializedCourse.getWaypoints()));
@@ -179,6 +188,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-2, Util.size(deserializedCourse.getWaypoints()));
@@ -200,6 +210,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one more waypoint
         assertEquals(Util.size(course.getWaypoints())+1, Util.size(deserializedCourse.getWaypoints()));
@@ -222,6 +233,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())+2, Util.size(deserializedCourse.getWaypoints()));
@@ -245,6 +257,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         ObjectInputStream ois = new ObjectInputStream(bis);
         Course deserializedCourse = (Course) ois.readObject();
         TrackedRaceImpl deserializedTrackedRace = (TrackedRaceImpl) ois.readObject();
+        deserializedTrackedRace.initializeAfterDeserialization();
         ois.close();
         assertFalse(course.getWaypoints().equals(deserializedCourse.getWaypoints())); // the deserialized course is expected to have one fewer waypoint
         assertEquals(Util.size(course.getWaypoints())-1, Util.size(deserializedCourse.getWaypoints()));

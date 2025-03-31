@@ -17,6 +17,8 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -38,18 +40,23 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 
 /**
  * 
@@ -60,7 +67,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml anchor(String url, String displayName);
+        SafeHtml anchor(SafeUri url, String displayName);
     }
 
     public static final String STYLE_NAME_PREFIX = "groupOverviewPanel-";
@@ -227,12 +234,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Spectator.html?"+
-                        (showRaceDetails ? "showRaceDetails=true&" : "") +
-                        "leaderboardGroupName=" + group.getName() + "&root=overview"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(link, group.getName());
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>(
+                        new SpectatorContextDefinition(group.getId().toString()))
+                                .createUrl(new SpectatorSettings(showRaceDetails));
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), group.getName().toString());
             }
         };
         groupsNameColumn.setSortable(true);
@@ -246,7 +251,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     if (!first) {
                         sb.append(", ");
                     }
-                    sb.append(leaderboard.name);
+                    sb.append(leaderboard.getName());
                     first = false;
                 }
                 return sb.toString();
@@ -264,7 +269,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         groupsStartDateColumn.setSortable(true);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableResources);
+        groupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000, tableResources);
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -357,11 +362,11 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
-                        + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + "&leaderboardGroupName=" + selectedGroup.getName() + "&root=overview"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.anchor(link, leaderboard.name);
+                String link = "/gwt/Leaderboard.html?name=" + URLEncoder.encodeQueryString(leaderboard.getName())
+                        + (showRaceDetails ? "&showRaceDetails=true" : "") + "&root=overview" + "&leaderboardGroupId="
+                        + selectedGroup.getId().toString()
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + URLEncoder.encodeQueryString(debugParam) : "");
+                return ANCHORTEMPLATE.anchor(UriUtils.fromString(link), leaderboard.getName());
             }
         };
         
@@ -390,7 +395,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
+        leaderboardsTable = new BaseCelltable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -450,12 +455,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                         StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
-                        String link = URLEncoder.encode("/gwt/RaceBoard.html?leaderboardName="
-                                + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
-                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.getName()
+                        String link = RaceBoardPanel.RACEBOARD_PATH+"?leaderboardName="
+                                + URLEncoder.encodeQueryString(selectedLeaderboard.getName()) + "&raceName=" + URLEncoder.encodeQueryString(raceId.getRaceName()) + "&regattaName="
+                                + URLEncoder.encodeQueryString(raceId.getRegattaName()) + "&leaderboardGroupId=" + selectedGroup.getId().toString()
                                 + "&root=overview"
-                                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                        name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
+                                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + URLEncoder.encodeQueryString(debugParam) : "");
+                        name = ANCHORTEMPLATE.anchor(UriUtils.fromString(link), raceDisplayName);
                     } else {
                         name = new SafeHtmlBuilder().appendHtmlConstant(raceDisplayName).toSafeHtml();
                     }
@@ -515,7 +520,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingLeaderBoardGroups(t.getMessage()));
             }
         });
     }
@@ -545,7 +550,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
     
     private void fillGroupDetails(LeaderboardGroupDTO group) {
-        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
+        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.getDescription()).toSafeHtml());
         leaderboardsDataProvider.getList().clear();
         leaderboardsDataProvider.getList().addAll(group.leaderboards);
     }

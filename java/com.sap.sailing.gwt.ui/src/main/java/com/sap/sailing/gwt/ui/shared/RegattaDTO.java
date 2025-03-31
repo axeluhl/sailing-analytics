@@ -3,20 +3,30 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 
-public class RegattaDTO extends NamedDTO {
+public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     private static final long serialVersionUID = -4594784946348402759L;
     /**
      * May be <code>null</code> in case the boat class is not known
@@ -24,15 +34,22 @@ public class RegattaDTO extends NamedDTO {
     public BoatClassDTO boatClass;
     public Date startDate;
     public Date endDate;
-    public List<RaceWithCompetitorsDTO> races;
+    public List<RaceWithCompetitorsAndBoatsDTO> races;
     public List<SeriesDTO> series;
     public ScoringSchemeType scoringScheme;
-    public UUID defaultCourseAreaUuid;
-    public String defaultCourseAreaName;
+    public List<CourseAreaDTO> courseAreas = new ArrayList<>();
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
-
-    public RegattaDTO() {}
+    public boolean controlTrackingFromStartAndFinishTimes = false;
+    public boolean autoRestartTrackingUponCompetitorSetChange = false;
+    public boolean canBoatsOfCompetitorsChangePerRace = false;
+    public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
+    public RankingMetrics rankingMetricType;
+    public Double buoyZoneRadiusInHullLengths;
+    public String registrationLinkSecret;
+    
+    @Deprecated
+    RegattaDTO() {} // for GWT RPC serialization only
     
     public RegattaDTO(String name, ScoringSchemeType scoringScheme) {
         super(name);
@@ -55,10 +72,16 @@ public class RegattaDTO extends NamedDTO {
             this.series.add(new SeriesDTO(otherSeries)); // clone the series; clients may replace / alter their fields
         }
         this.scoringScheme = other.scoringScheme;
-        this.defaultCourseAreaUuid = other.defaultCourseAreaUuid;
-        this.defaultCourseAreaName = other.defaultCourseAreaName;
+        this.courseAreas = other.courseAreas;
+        this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.autoRestartTrackingUponCompetitorSetChange = other.autoRestartTrackingUponCompetitorSetChange;
+        this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
+        this.competitorRegistrationType = other.competitorRegistrationType;
+        this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = other.registrationLinkSecret;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
@@ -115,6 +138,12 @@ public class RegattaDTO extends NamedDTO {
         return false;
     }
 
+    public Distance getCalculatedBuoyZoneRadius() {
+        Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
+        double hullLengthFactor = this.buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : this.buoyZoneRadiusInHullLengths;
+        return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS : boatHullLength.scale(hullLengthFactor);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -142,4 +171,19 @@ public class RegattaDTO extends NamedDTO {
             return false;
         return true;
     }
+    
+    @Override
+    public HasPermissions getPermissionType() {
+        return SecuredDomainType.REGATTA;
+    }
+    
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getPermissionType().getQualifiedObjectIdentifier(getTypeRelativeObjectIdentifier());
+    }
+
+    public TypeRelativeObjectIdentifier getTypeRelativeObjectIdentifier() {
+        return new TypeRelativeObjectIdentifier(getName());
+    }
+
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="10171" systemVersion="15G31" minimumToolsVersion="Xcode 4.3">
+    <entity name="Competitor" representedClassName="Competitor" syncable="YES">
+        <attribute name="boatClassName" attributeType="String" syncable="YES"/>
+        <attribute name="competitorID" attributeType="String" indexed="YES" elementID="competitorId" syncable="YES"/>
+        <attribute name="countryCode" attributeType="String" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="nationality" attributeType="String" syncable="YES"/>
+        <attribute name="sailID" attributeType="String" elementID="sailId" syncable="YES"/>
+        <relationship name="regatta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Regatta" inverseName="competitor" inverseEntity="Regatta" elementID="checkIn" syncable="YES"/>
+    </entity>
+    <entity name="Event" representedClassName="Event" syncable="YES">
+        <attribute name="endDate" attributeType="Date" syncable="YES"/>
+        <attribute name="eventID" attributeType="String" indexed="YES" elementID="eventId" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="startDate" attributeType="Date" syncable="YES"/>
+        <relationship name="regatta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Regatta" inverseName="event" inverseEntity="Regatta" elementID="checkIn" syncable="YES"/>
+    </entity>
+    <entity name="GPSFix" representedClassName="GPSFix" syncable="YES">
+        <attribute name="course" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="latitude" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="speed" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="timestamp" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <relationship name="regatta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Regatta" inverseName="gpsFixes" inverseEntity="Regatta" elementID="checkIn" syncable="YES"/>
+    </entity>
+    <entity name="Leaderboard" representedClassName="Leaderboard" elementID="LeaderBoard" syncable="YES">
+        <attribute name="name" attributeType="String" indexed="YES" syncable="YES"/>
+        <relationship name="regatta" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Regatta" inverseName="leaderboard" inverseEntity="Regatta" elementID="checkIn" syncable="YES"/>
+    </entity>
+    <entity name="Regatta" representedClassName="Regatta" elementID="CheckIn" syncable="YES">
+        <attribute name="serverURL" attributeType="String" elementID="serverUrl" syncable="YES"/>
+        <attribute name="teamImageData" optional="YES" attributeType="Binary" elementID="userImage" syncable="YES"/>
+        <attribute name="teamImageRetry" attributeType="Boolean" defaultValueString="NO" syncable="YES"/>
+        <attribute name="teamImageURL" optional="YES" attributeType="String" elementID="imageUrl" syncable="YES"/>
+        <relationship name="competitor" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Competitor" inverseName="regatta" inverseEntity="Competitor" syncable="YES"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Event" inverseName="regatta" inverseEntity="Event" syncable="YES"/>
+        <relationship name="gpsFixes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="GPSFix" inverseName="regatta" inverseEntity="GPSFix" syncable="YES"/>
+        <relationship name="leaderboard" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Leaderboard" inverseName="regatta" inverseEntity="Leaderboard" elementID="leaderBoard" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Competitor" positionX="-9" positionY="81" width="128" height="150"/>
+        <element name="Event" positionX="-63" positionY="27" width="128" height="120"/>
+        <element name="GPSFix" positionX="-63" positionY="-18" width="128" height="135"/>
+        <element name="Leaderboard" positionX="-36" positionY="72" width="128" height="75"/>
+        <element name="Regatta" positionX="-36" positionY="90" width="128" height="165"/>
+    </elements>
+</model>

@@ -1,9 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import android.app.AlertDialog.Builder;
-import android.os.Bundle;
-
 import com.sap.sailing.racecommittee.app.R;
+
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 
 public class LoadFailedDialog extends FragmentAttachedDialogFragment {
     private static final String ARGS_ERROR_MSG = LoadFailedDialog.class.getName() + ".errorMessage";
@@ -29,12 +29,8 @@ public class LoadFailedDialog extends FragmentAttachedDialogFragment {
     }
 
     @Override
-    protected Builder createDialog(Builder builder) {
-        return builder
-                .setMessage(String.format(
-                        getString(R.string.generic_load_failure), 
-                        getArguments().getString(ARGS_ERROR_MSG)))
-                        .setTitle(getString(R.string.loading_failure))
-                        .setIcon(R.drawable.ic_dialog_alert_holo_light);
+    protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
+        return builder.setMessage(getString(R.string.generic_load_failure, getArguments().getString(ARGS_ERROR_MSG)))
+                .setTitle(getString(R.string.loading_failure));
     }
 }

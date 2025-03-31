@@ -18,11 +18,6 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
-    /*
-     * For testing, consider using the following URLs:
-     *   allUrls.add(new URL("http://www.axel-uhl.de/freg/freg_html_export_sample.html"));
-     *   allUrls.add(new URL("http://www.axel-uhl.de/freg/eurocup_29er_29e.htm"));
-     */
     public void start(BundleContext bundleContext) throws Exception {
         String scanDirPath = bundleContext.getProperty(SCAN_DIR_PATH_PROPERTY_NAME);
         if (scanDirPath == null) {
@@ -30,21 +25,16 @@ public class Activator implements BundleActivator {
         }
         logger.info("Scanning " + scanDirPath + " for official result lists of "
                 + ScoreCorrectionProviderImpl.PROVIDER_NAME);
-
         resultUrlRegistryServiceTracker = new ServiceTracker<>(bundleContext, ResultUrlRegistry.class,
                 new ResultUrlRegistryServiceTrackerCustomizer(bundleContext) {
-
                     @Override
                     protected ScoreCorrectionProvider configureScoreCorrectionProvider(
                             ResultUrlRegistry resultUrlRegistry) {
                         final ScoreCorrectionProviderImpl service = new ScoreCorrectionProviderImpl(resultUrlRegistry);
                         return service;
                     }
-
                 });
-
         resultUrlRegistryServiceTracker.open();
-
     }
 
     public void stop(BundleContext bundleContext) throws Exception {

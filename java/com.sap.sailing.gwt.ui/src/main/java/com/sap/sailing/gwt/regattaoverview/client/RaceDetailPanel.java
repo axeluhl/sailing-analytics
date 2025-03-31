@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RaceDetailPanel extends SimplePanel {
@@ -51,8 +51,10 @@ public class RaceDetailPanel extends SimplePanel {
     private final Label startDateLabel = new Label();
     private final Label finishTimeLabel = new Label();
     private final Label finishDurationLabel = new Label();
-    private final Label protestTimeLabel = new Label();
-    private final Label protestDateLabel = new Label();
+    private final Label protestStartTimeLabel = new Label();
+    private final Label protestFinishTimeLabel = new Label();
+    private final Label protestStartDateLabel = new Label();
+    private final Label protestFinishDateLabel = new Label();
     private final Label updateTimeLabel = new Label();
     private final Label updateDateLabel = new Label();
     private final Label vesselPositionLabel = new Label();
@@ -88,17 +90,20 @@ public class RaceDetailPanel extends SimplePanel {
 
         int cellSpacing = 3;
 
-        Grid basicsGrid = new Grid(3, 3);
+        Grid basicsGrid = new Grid(4, 3);
         basicsGrid.setCellSpacing(cellSpacing);
         basicsGrid.setWidget(0, 0, new Label(stringMessages.startAt()));
         basicsGrid.setWidget(1, 0, new Label(stringMessages.finishAt()));
-        basicsGrid.setWidget(2, 0, new Label(stringMessages.protestEndsAt()));
+        basicsGrid.setWidget(2, 0, new Label(stringMessages.protestStartsAt()));
+        basicsGrid.setWidget(3, 0, new Label(stringMessages.protestEndsAt()));
         basicsGrid.setWidget(0, 1, startTimeLabel);
         basicsGrid.setWidget(1, 1, finishTimeLabel);
-        basicsGrid.setWidget(2, 1, protestTimeLabel);
+        basicsGrid.setWidget(2, 1, protestStartTimeLabel);
+        basicsGrid.setWidget(3, 1, protestFinishTimeLabel);
         basicsGrid.setWidget(0, 2, startDateLabel);
         basicsGrid.setWidget(1, 2, finishDurationLabel);
-        basicsGrid.setWidget(2, 2, protestDateLabel);
+        basicsGrid.setWidget(2, 2, protestStartDateLabel);
+        basicsGrid.setWidget(3, 2, protestFinishDateLabel);
 
         Grid managementGrid = new Grid(3, 3);
         managementGrid.setCellSpacing(cellSpacing);
@@ -129,7 +134,7 @@ public class RaceDetailPanel extends SimplePanel {
 
     private void resetProcedureGrid() {
         procedureGrid.removeAllRows();
-        procedureGrid.setWidget(0, 0, new Label("Start procedure"));
+        procedureGrid.setWidget(0, 0, new Label(stringMessages.startProcedure()));
         procedureGrid.setWidget(0, 1, startProcedureLabel);
     }
 
@@ -139,67 +144,62 @@ public class RaceDetailPanel extends SimplePanel {
     }
 
     private void updateUi() {
-        if (data == null) {
-            return;
-        }
-        String statusText = flagInterpreter.getMeaningOfRaceStateAndFlags(data.raceInfo.lastStatus,
-                data.raceInfo.lastUpperFlag, data.raceInfo.lastLowerFlag, data.raceInfo.lastFlagsAreDisplayed);
-        String headerLabelText = data.regattaDisplayName + " " + data.raceInfo.fleetName + " " + data.raceInfo.raceName
-                + " (" + statusText + ")";
-        headerLabel.setText(stringMessages.showingDetailsOfRace(headerLabelText));
-
-        String startTimeLabelText = data.raceInfo.startTime == null ? "-" : timeFormatter
-                .format(data.raceInfo.startTime);
-        startTimeLabel.setText(startTimeLabelText);
-
-        String startDateLabelText = data.raceInfo.startTime == null ? "" : dateFormatter
-                .format(data.raceInfo.startTime);
-        startDateLabel.setText(startDateLabelText);
-
-        String finishTimeText = data.raceInfo.finishedTime == null ? "-" : timeFormatter
-                .format(data.raceInfo.finishedTime);
-        finishTimeLabel.setText(finishTimeText);
-
-        String finishDurationText = "";
-        if (data.raceInfo.finishedTime != null && data.raceInfo.startTime != null) {
-            finishDurationText = "(" + durationFormatter.format(data.raceInfo.startTime, data.raceInfo.finishedTime)
-                    + ")";
-        }
-        finishDurationLabel.setText(finishDurationText);
-
-        String protestTimeText = data.raceInfo.protestFinishTime == null ? "-" : timeFormatter
-                .format(data.raceInfo.protestFinishTime);
-        protestTimeLabel.setText(protestTimeText);
-
-        String protestDateText = data.raceInfo.protestFinishTime == null ? "" : dateFormatter
-                .format(data.raceInfo.protestFinishTime);
-        protestDateLabel.setText(protestDateText);
-
-        String updateTimeText = data.raceInfo.lastUpdateTime == null ? "-" : timeFormatter
-                .format(data.raceInfo.lastUpdateTime);
-        updateTimeLabel.setText(updateTimeText);
-
-        String updateDateText = data.raceInfo.lastUpdateTime == null ? "" : dateFormatter
-                .format(data.raceInfo.lastUpdateTime);
-        updateDateLabel.setText(updateDateText);
-
-        String vesselPositionText = stringMessages.unknown();
-        String windText = stringMessages.unknown();
-        if (data.raceInfo.lastWind != null) {
-            if (data.raceInfo.lastWind.position != null) 
-            {
-                vesselPositionText = new HTML(
-                        getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLatDeg()) + " "
-                                + getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLngDeg()) + " ")
-                        .getHTML();
+        if (data != null) {
+            String statusText = flagInterpreter.getMeaningOfRaceStateAndFlags(data.raceInfo.lastStatus,
+                    data.raceInfo.lastUpperFlag, data.raceInfo.lastLowerFlag, data.raceInfo.lastFlagsAreDisplayed);
+            String headerLabelText = data.regattaDisplayName + " " + data.raceInfo.fleetName + " " + data.raceInfo.raceName
+                    + " (" + statusText + ")";
+            headerLabel.setText(stringMessages.showingDetailsOfRace(headerLabelText));
+            String startTimeLabelText = data.raceInfo.startTime == null ? "-" : timeFormatter
+                    .format(data.raceInfo.startTime);
+            startTimeLabel.setText(startTimeLabelText);
+            String startDateLabelText = data.raceInfo.startTime == null ? "" : dateFormatter
+                    .format(data.raceInfo.startTime);
+            startDateLabel.setText(startDateLabelText);
+            String finishTimeText = data.raceInfo.finishedTime == null ? "-" : timeFormatter
+                    .format(data.raceInfo.finishedTime);
+            finishTimeLabel.setText(finishTimeText);
+            String finishDurationText = "";
+            if (data.raceInfo.finishedTime != null && data.raceInfo.startTime != null) {
+                finishDurationText = "(" + durationFormatter.format(data.raceInfo.startTime, data.raceInfo.finishedTime)
+                        + ")";
             }
-            windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
-                    + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
+            finishDurationLabel.setText(finishDurationText);
+            String protestStartTimeText = data.raceInfo.protestStartTime == null ? "-" : timeFormatter
+                    .format(data.raceInfo.protestStartTime);
+            protestStartTimeLabel.setText(protestStartTimeText);
+            String protestFinishTimeText = data.raceInfo.protestFinishTime == null ? "-" : timeFormatter
+                    .format(data.raceInfo.protestFinishTime);
+            protestFinishTimeLabel.setText(protestFinishTimeText);
+            String protestStartDateText = data.raceInfo.protestStartTime == null ? "" : dateFormatter
+                    .format(data.raceInfo.protestStartTime);
+            protestStartDateLabel.setText(protestStartDateText);
+            String protestFinishDateText = data.raceInfo.protestFinishTime == null ? "" : dateFormatter
+                    .format(data.raceInfo.protestFinishTime);
+            protestFinishDateLabel.setText(protestFinishDateText);
+            String updateTimeText = data.raceInfo.lastUpdateTime == null ? "-" : timeFormatter
+                    .format(data.raceInfo.lastUpdateTime);
+            updateTimeLabel.setText(updateTimeText);
+            String updateDateText = data.raceInfo.lastUpdateTime == null ? "" : dateFormatter
+                    .format(data.raceInfo.lastUpdateTime);
+            updateDateLabel.setText(updateDateText);
+            String vesselPositionText = stringMessages.unknown();
+            String windText = stringMessages.unknown();
+            if (data.raceInfo.lastWind != null) {
+                if (data.raceInfo.lastWind.position != null) 
+                {
+                    vesselPositionText = new HTML(
+                            getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLatDeg()) + " "
+                                    + getDegMinSecFormatForDecimalDegree(data.raceInfo.lastWind.position.getLngDeg()) + " ")
+                            .getHTML();
+                }
+                windText = new HTML(decimalFormat.format(data.raceInfo.lastWind.trueWindFromDeg) + "&deg; "
+                        + decimalFormat.format(data.raceInfo.lastWind.trueWindSpeedInKnots) + "knts").getHTML();
+            }
+            vesselPositionLabel.setText(vesselPositionText);
+            windLabel.setText(windText);
+            updateUiStartProcedureSpecifics();
         }
-        vesselPositionLabel.setText(vesselPositionText);
-        windLabel.setText(windText);
-
-        updateUiStartProcedureSpecifics();
     }
 
     private void updateUiStartProcedureSpecifics() {
@@ -209,10 +209,13 @@ public class RaceDetailPanel extends SimplePanel {
             if (data.raceInfo.startProcedureDTO != null) {
                 switch (data.raceInfo.startProcedure) {
                 case RRS26:
-                    RRS26InfoDTO rrsInfo = (RRS26InfoDTO) data.raceInfo.startProcedureDTO;
+                case RRS26_3MIN:
+                case SWC:
+                case SWC_4MIN:
+                    LineStartInfoDTO rrsInfo = (LineStartInfoDTO) data.raceInfo.startProcedureDTO;
                     if (rrsInfo != null) {
                         if (rrsInfo.startModeFlag != null) {
-                            showProcedureInfo("Start mode", rrsInfo.startModeFlag.toString());
+                            showProcedureInfo(stringMessages.startMode(), rrsInfo.startModeFlag.toString());
                         }
                     }
                     break;
@@ -223,7 +226,7 @@ public class RaceDetailPanel extends SimplePanel {
                             showProcedureInfo("Pathfinder", gateInfo.pathfinderId);
                         }
                         if (gateInfo.gateLineOpeningTime != null) {
-                            showProcedureInfo("Gate Opening Time", (int) (gateInfo.gateLineOpeningTime / 1000. / 60.)
+                            showProcedureInfo(stringMessages.gateOpeningTime(), (int) (gateInfo.gateLineOpeningTime / 1000. / 60.)
                                     + "min");
                         }
                     }
@@ -268,9 +271,8 @@ public class RaceDetailPanel extends SimplePanel {
         if (left == null || right == null) {
             return false;
         }
-
         return bothNullOrEquals(left.courseAreaIdAsString, right.courseAreaIdAsString)
-                && bothNullOrEquals(left.regattaName, right.regattaName)
+                && bothNullOrEquals(left.leaderboardName, right.leaderboardName)
                 && bothNullOrEquals(left.raceInfo.seriesName, right.raceInfo.seriesName)
                 && bothNullOrEquals(left.raceInfo.fleetName, right.raceInfo.fleetName)
                 && bothNullOrEquals(left.raceInfo.raceName, right.raceInfo.raceName);

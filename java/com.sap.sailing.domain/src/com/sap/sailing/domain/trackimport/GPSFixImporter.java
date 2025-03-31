@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.trackimport;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 
 /**
@@ -30,31 +30,42 @@ import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
  * @author Fredrik Teschke
  * 
  */
-public interface GPSFixImporter {    
+public interface GPSFixImporter {
+    public static final String EXPEDITION_TYPE = "Expedition";
+    
     String FILE_EXTENSION_PROPERTY = "fileExt";
     
     /**
-     * Callback through which fixes found in the source stream are passed back.
+     * Callback through which fixes found in the source stream are passed back. Implementing classes may choose to
+     * override {@link #addFixes(Iterable, TrackFileImportDeviceIdentifier)} in case they have a better way to process a
+     * whole set of fixes from the same device than adding one by one.
+     * 
      * @author Fredrik Teschke
      *
      */
     interface Callback {
         void addFix(GPSFix fix, TrackFileImportDeviceIdentifier device);
+        
+        default void addFixes(Iterable<GPSFix> fixes, TrackFileImportDeviceIdentifier device) {
+            fixes.forEach(fix->addFix(fix, device));
+        }
     }
 
     /**
-     * Retrieves the fixes from the {@code inputStream}, and calls the
-     * {@code callback} with every new fix.
-     * @param inferSpeedAndBearing Should speed and bearing be inferred by looking
-     * at the previous fix, if that data is not directly present within the file?
-     * @throws FormatNotSupportedException If the input format cannot be read. The import process
-     * might then decide to try attempt importing fixes using the next suitable importer.
+     * Retrieves the fixes from the {@code inputStream}, and calls the {@code callback} with every new fix.
+     * @param inferSpeedAndBearing
+     *            Should speed and bearing be inferred by looking at the previous fix, if that data is not directly
+     *            present within the file?
+     * @param sourceName
+     *            some name that identifies the source, e.g. the file name if a file
      * 
-     * @param sourceName some name that identifies the source, e.g. the file name if a file
+     * @throws FormatNotSupportedException
+     *             If the input format cannot be read. The import process might then decide to try attempt importing
+     *             fixes using the next suitable importer.
+     * 
+     * @return returns if import was succesful or not
      */
-    void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
-            String sourceName)
-            throws FormatNotSupportedException, IOException;
+    boolean importFixes(InputStream inputStream, Charset charset, Callback callback, boolean inferSpeedAndBearing, String sourceName) throws Exception;
 
     /**
      * Return the file extensions supported by this importer. If the importer is not intended

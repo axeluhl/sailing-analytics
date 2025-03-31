@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"Scanner code QR"</string>
+    <string name="scan_hint">"Vous trouverez le code QR sur votre confirmation de participation."</string>
+    <string name="no_qr_code">"Aucun code QR ?"</string>
+    <string name="start_tracking">"Lancer le suivi"</string>
+    <string name="stop_tracking">"Arrêter le suivi"</string>
+    <string name="tracking_gps_accuracy">"Exactitude du GPS"</string>
+    <string name="tracking_mode">"Mode"</string>
+    <string name="tracking_mode_live">"En direct"</string>
+    <string name="tracking_mode_battery_saving">"Mode d\'économie d\'énergie"</string>
+    <string name="tracking_unsent_fixes">"Messages non envoyés"</string>
+    <string name="tracking_mode_caching">"Hors ligne"</string>
+    <string name="tracking_mode_api_error">"Erreur API"</string>
+    <string name="tracking_mode_no_attempt">"Initialiser"</string>
+    <string name="tracking_time">"Durée du suivi"</string>
+    
+    <string name="tracking_status_tracking">"Suivi"</string>
+    <string name="tracking_status_no_gps_signal">"Aucun signal ou aucune modification GPS !"</string>
+    <string name="desc_regatta_user_image">"Image de l\'utilisateur de la régate"</string>
+    <string name="desc_add_photo_button">"Bouton Ajouter photo"</string>
+    <string name="tracking_status_gps_found">"Signal GPS trouvé !"</string>
+</resources>

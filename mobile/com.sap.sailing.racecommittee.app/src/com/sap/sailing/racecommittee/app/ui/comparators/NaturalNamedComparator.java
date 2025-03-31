@@ -2,10 +2,10 @@ package com.sap.sailing.racecommittee.app.ui.comparators;
 
 import java.util.Comparator;
 
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.util.NaturalComparator;
 
-public class NaturalNamedComparator implements Comparator<Named> {
+public class NaturalNamedComparator<T extends Named> implements Comparator<T> {
 
     private Comparator<String> comparator;
 
@@ -21,7 +21,7 @@ public class NaturalNamedComparator implements Comparator<Named> {
      * @return the comparison result (see String.compareTo)
      */
     @Override
-    public int compare(Named left, Named right) {
+    public int compare(T left, T right) {
         return comparator.compare(left.getName(), right.getName());
     }
 

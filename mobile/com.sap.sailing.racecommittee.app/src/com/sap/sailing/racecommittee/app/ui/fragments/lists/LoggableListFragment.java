@@ -1,14 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
-import android.app.ListFragment;
-import android.os.Bundle;
-
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
+
 public abstract class LoggableListFragment extends ListFragment {
-    
-private LifecycleLogger lifeLogger;
-    
+
+    private LifecycleLogger lifeLogger;
+
     public LoggableListFragment() {
         this.lifeLogger = new LifecycleLogger();
     }
@@ -49,4 +50,13 @@ private LifecycleLogger lifeLogger;
         lifeLogger.onDestroy(this);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Fragment fragment = getTargetFragment();
+        if (fragment != null && !fragment.isAdded()) {
+            setTargetFragment(null, -1);
+        }
+
+        super.onSaveInstanceState(outState);
+    }
 }

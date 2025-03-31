@@ -1,5 +1,12 @@
 package com.sap.sailing.selenium.pages;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.StringJoiner;
+
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -9,30 +16,79 @@ import org.openqa.selenium.WebDriver;
  * @author
  *   D049941
  */
-public class HostPage extends PageObject {
+public abstract class HostPage extends PageObject {
     protected static final String GWT_CODE_SERVER_PARAMETER_NAME = "gwt.codesvr"; //$NON-NLS-1$
     
     protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
     
     /**
-     * </p>The default timeout of 60 seconds for the initialization of the page object.</p>
+     * </p>The default timeout of 120 seconds for the initialization of the page object.</p>
      */
-    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT = 60;
+    protected static final int DEFAULT_PAGE_LOAD_TIMEOUT_IN_SECONDS = 120;
     
-    public static final String getGWTCodeServer() {
+    public static final String getGWTCodeServerAndLocale() {
+        StringBuilder queryBuilder = new StringBuilder("locale=en");
         String codeServer = System.getProperty(GWT_CODE_SERVER_PARAMETER_NAME);
-        if (codeServer == null) {
-            return NO_CODE_SERVER_PARAMTER_VALUE;
+        if (codeServer != null) {
+            queryBuilder.append("&").append(GWT_CODE_SERVER_PARAMETER_NAME).append("=").append(codeServer);
         }
-        return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
+        return queryBuilder.toString();
+    }
+    
+    protected final static <T extends HostPage> T goToUrl(HostPageSupplier<T> supplier, WebDriver driver, String url) {
+        try {
+            goToPage(driver, new URI(url));
+            return supplier.get(driver); 
+        } catch (URISyntaxException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
+
+    private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
+        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost();
+        String path = uri.getPath(),
+                query = getGWTCodeServerAndLocale() + (uri.getQuery() != null ? "&" + uri.getQuery() : ""),
+                fragment = uri.getFragment();
+        driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
+    }
+    
+    protected final static <T extends HostPage> T goToPlace(HostPageSupplier<T> supplier, WebDriver driver, String url, String place, String... parameters) {
+        try {
+            URI uri = new URI(url);
+            String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost();
+            String placeParameters = parameters == null ? ":" : getUrlParametersAsString(parameters);
+            String path = uri.getPath(),
+                    query = getGWTCodeServerAndLocale() + (uri.getQuery() != null ? "&" + uri.getQuery() : ""),
+                    fragment = uri.getFragment();
+            driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString() + "#" + place + placeParameters);
+            return supplier.get(driver); 
+        } catch (URISyntaxException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
+
+    private static String getUrlParametersAsString(String... parameters) {
+        Iterator<String> iterableParameters = Arrays.asList(parameters).iterator();
+        StringJoiner placeParameters = new StringJoiner("&", ":", "");
+        while (iterableParameters.hasNext()) {          
+            String key = iterableParameters.next();
+            String keyValuePair = key;
+            if (iterableParameters.hasNext()) {
+                keyValuePair += "=" + iterableParameters.next();
+            }
+            placeParameters.add(keyValuePair);
+        }
+        return placeParameters.toString();
     }
     
     /**
-     * <p>Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in
-     *   which the code for the application is executed, whereby the page is represented by the web driver.</p>
+     * <p>
+     * Creates a new page object with the given web driver. In GWT an entry point is connected to a HTML page in which
+     * the code for the application is executed, whereby the page is represented by the web driver.
+     * </p>
      * 
      * @param driver
-     *   The web driver to use.
+     *            The web driver to use.
      */
     public HostPage(WebDriver driver) {
         super(driver);
@@ -45,12 +101,23 @@ public class HostPage extends PageObject {
      */
     @Override
     protected void initElements() {
-        waitForAjaxRequests(getPageLoadTimeOut(), 5);
-        
+        waitForAjaxRequests(getPageLoadTimeOutInSeconds(), 10 /* seconds */);
         super.initElements();
     }
     
-    protected int getPageLoadTimeOut() {
-        return DEFAULT_PAGE_LOAD_TIMEOUT;
+    protected int getPageLoadTimeOutInSeconds() {
+        return DEFAULT_PAGE_LOAD_TIMEOUT_IN_SECONDS;
+    }
+    
+    protected interface HostPageSupplier<T extends HostPage> {
+        T get(WebDriver driver);
+    }
+    
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
+
+    protected void scrollToTop() {
+        ((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0);");
     }
 }

@@ -11,14 +11,12 @@ import android.content.Context;
 public class HttpGetRequest extends HttpRequest {
 
     public HttpGetRequest(URL requestUrl, Context context) {
-        super(requestUrl, context);
+        super(context, requestUrl);
     }
 
     public HttpGetRequest(URL url, HttpRequestProgressListener listener, Context context) {
-        super(url, listener, context);
+        super(context, url, listener);
     }
-
-
 
     @Override
     protected BufferedInputStream doRequest(HttpURLConnection connection) throws IOException {

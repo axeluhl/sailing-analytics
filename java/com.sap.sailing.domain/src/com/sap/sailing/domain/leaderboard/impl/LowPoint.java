@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -27,10 +28,23 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        final int effectiveRank;
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         final Double result;
-        int competitorFleetOrdering;
+        final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
+        result = effectiveRank == 0 ? null : (double) effectiveRank;
+        return result;
+    }
+
+    /**
+     * Considers contiguous scoring for split-fleet columns, finding out in which fleet the <code>competitor</code> races
+     * in the <code>raceColumn</code> and figuring out how many competitors race in better fleets. For non-contiguous
+     * scoring, the effective rank equals the <code>rank</code> in the competitor's fleet.
+     */
+    protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+        final int competitorFleetOrdering;
+        final int effectiveRank;
         if (rank == 0) {
             effectiveRank = 0;
         } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
@@ -39,18 +53,26 @@ public class LowPoint extends AbstractScoringSchemeImpl {
         } else {
             effectiveRank = rank;
         }
-        result = effectiveRank == 0 ? null : (double) effectiveRank;
-        return result;
+        return effectiveRank;
     }
 
+    /**
+     * For an {@link MaxPointsReason#STP} penalty, the uncorrected score is obtained from the
+     * {@code uncorrectedScoreProvider} and incremented by 1.0; otherwise, the number of competitors plus one is used.
+     */
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
-            Integer numberOfCompetitorsInRace, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+            Integer numberOfCompetitorsInRace,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint,
+            Leaderboard leaderboard, Supplier<Double> uncorrectedScoreProvider) {
         Double result;
-        if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
-            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard()+1);
+        if (maxPointsReason == MaxPointsReason.STP) { // TODO bug5873: this is where other incremental IRMs need to be considered, too, with configurable increments
+            final Double uncorrectedScore = uncorrectedScoreProvider.get();
+            result = uncorrectedScore == null ? null : uncorrectedScore + 1.0;
+        } else if (numberOfCompetitorsInRace == null || raceColumn.hasSplitFleetContiguousScoring()) {
+            result = (double) (numberOfCompetitorsInLeaderboardFetcher.getNumberOfCompetitorsInLeaderboard() + 1);
         } else {
-            result = (double) (numberOfCompetitorsInRace+1);
+            result = (double) (numberOfCompetitorsInRace + 1);
         }
         return result;
     }
@@ -61,7 +83,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
 

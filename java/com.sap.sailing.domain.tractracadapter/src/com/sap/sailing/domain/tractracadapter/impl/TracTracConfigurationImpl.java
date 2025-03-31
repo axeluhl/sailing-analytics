@@ -3,21 +3,25 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 
 public class TracTracConfigurationImpl implements TracTracConfiguration {
+    private static final long serialVersionUID = 1L;
     private final String name;
     private final String jsonURL;
     private final String liveDataURI;
     private final String storedDataURI;
-    private final String courseDesignUpdateURI;
+    private final String updateURI;
     private final String tracTracUsername;
     private final String tracTracPassword;
+    private final String creatorName;
 
-    public TracTracConfigurationImpl(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, 
+    public TracTracConfigurationImpl(String creatorName, String name, String jsonURL, String liveDataURI,
+            String storedDataURI, String courseDesignUpdateURI,
             String tracTracUsername, String tracTracPassword) {
+        this.creatorName = creatorName;
         this.name = name;
         this.jsonURL = jsonURL;
         this.liveDataURI = liveDataURI;
         this.storedDataURI = storedDataURI;
-        this.courseDesignUpdateURI = courseDesignUpdateURI;
+        this.updateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
     }
@@ -52,8 +56,8 @@ public class TracTracConfigurationImpl implements TracTracConfiguration {
     }
 
     @Override
-    public String getCourseDesignUpdateURI() {
-        return courseDesignUpdateURI;
+    public String getUpdateURI() {
+        return updateURI;
     }
 
     @Override
@@ -64,6 +68,10 @@ public class TracTracConfigurationImpl implements TracTracConfiguration {
     @Override
     public String getTracTracPassword() {
         return tracTracPassword;
+    }
+
+    public String getCreatorName() {
+        return creatorName;
     }
 
 }

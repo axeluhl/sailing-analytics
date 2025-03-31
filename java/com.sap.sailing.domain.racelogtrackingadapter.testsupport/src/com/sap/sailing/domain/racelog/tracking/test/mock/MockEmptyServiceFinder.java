@@ -4,9 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.TypeBasedServiceFinder;
 
-public class MockEmptyServiceFinder<ServiceType> implements TypeBasedServiceFinder<ServiceType> {
+public class MockEmptyServiceFinder<ServiceType> extends AbstractTypeBasedServiceFinder<ServiceType> {
     private ServiceType fallback;
 
     @Override

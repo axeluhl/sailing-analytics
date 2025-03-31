@@ -3,21 +3,28 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
+import com.sap.sailing.domain.base.impl.RegattaLogEventAdditionForwarder;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -31,14 +38,30 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
+import com.sap.sse.metering.CPUMeter;
+import com.sap.sse.metering.CompositeCPUMetrics;
 
 /**
- * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
- * the columns belonging to the same regatta or even boat class.<p>
+ * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be
+ * observed regarding the columns belonging to the same regatta or even boat class.
+ * <p>
  * 
- * The flexible leaderboard listens as {@link RaceColumnListener} on all its {@link RaceColumn}s and forwards all events to
- * all {@link RaceColumnListener}s subscribed with this leaderboard.
+ * The flexible leaderboard listens as {@link RaceColumnListener} on all its {@link RaceColumn}s and forwards all events
+ * to all {@link RaceColumnListener}s subscribed with this leaderboard.
+ * <p>
+ * 
+ * This class also implements the {@link IsRegattaLike} interface, emulating several aspects that otherwise would be
+ * found on a {@link Regatta} that is modeled properly with its series and fleets. In particular, the
+ * {@link IsRegattaLike} interface requires this leaderboard to provide a {@link RegattaLog} and to grant access to its
+ * {@link RaceColumn}s by name. A {@link BaseRegattaLikeImpl} is used as a delegate to implement the {@link IsRegattaLike}
+ * interface.<p>
+ * 
+ * {@link RaceColumnListener}s will be {@link RaceColumnListener#regattaLogEventAdded(RegattaLogEvent) notified} about events
+ * added to the {@link RegattaLog} that belongs to this leaderboard.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -50,9 +73,20 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
     private final ScoringScheme scoringScheme;
-    private String name;
+    private final String name;
     private transient RaceLogStore raceLogStore;
-    private CourseArea courseArea;
+    
+    /**
+     * The CPU metrics of a flexible leaderboard are composed of a {@link CPUMeter} for CPU usage by code in this
+     * class, and further {@link Regatta} CPU meters for each regatta of which a race 
+     */
+    private transient CompositeCPUMetrics cpuMeter;
+    
+    /**
+     * A synchronized list; obtain the object monitor in order to iterate over the contents!
+     */
+    private List<CourseArea> courseAreas;
+    private RaceExecutionOrderProvider raceExecutionOrderProvider;
     
     /**
      * @see RegattaLog for the reason why the leaderboard manages a {@code RegattaLog}
@@ -68,30 +102,65 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
             ScoringScheme scoringScheme, CourseArea courseArea) {
+        this(raceLogStore, regattaLogStore, name, resultDiscardingRule, scoringScheme,
+                courseArea == null ? Collections.emptySet() : Collections.singleton(courseArea));
+    }
+    
+    public FlexibleLeaderboardImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            String name, ThresholdBasedResultDiscardingRule resultDiscardingRule,
+            ScoringScheme scoringScheme, Iterable<CourseArea> courseAreas) {
         super(resultDiscardingRule);
+        assert courseAreas != null;
+        this.cpuMeter = CompositeCPUMetrics.create();
         this.scoringScheme = scoringScheme;
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }
         this.name = name;
-        this.races = new ArrayList<FlexibleRaceColumn>();
+        this.races = new ArrayList<>();
         this.raceLogStore = raceLogStore;
-        this.courseArea = courseArea;
-        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore);
-    }
+        this.courseAreas = Collections.synchronizedList(new ArrayList<>());
+        Util.addAll(courseAreas, this.courseAreas);
+        this.regattaLikeHelper = new BaseRegattaLikeImpl(new FlexibleLeaderboardAsRegattaLikeIdentifier(this), regattaLogStore) {
+            private static final long serialVersionUID = 4082392360832548953L;
 
+            @Override
+            public RaceColumn getRaceColumnByName(String raceColumnName) {
+                return getRaceColumnByName(raceColumnName);
+            }
+
+            @Override
+            public void setFleetsCanRunInParallelToTrue() {
+                // no need to do anything; a FlexibleLeaderboard only has one (default) fleet
+            }
+        };
+        this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
+        this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
+    }
+    
     /**
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
      * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is
-     * assembled for this empty race log and applied to all columns. 
+     * assembled for this empty race log store and applied to all columns. 
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceLogStore = EmptyRaceLogStore.INSTANCE;
+        cpuMeter = CompositeCPUMetrics.create();
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            final TrackedRace trackedRace = column.getTrackedRace(defaultFleet);
+            if (trackedRace != null) {
+                cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
+            }
         }
+        regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
+    }
+    
+    protected Object readResolve() throws ObjectStreamException {
+        raceExecutionOrderProvider.triggerUpdate();
+        return this;
     }
 
     @Override
@@ -99,21 +168,23 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return name;
     }
 
-    /**
-     * @param newName must not be <code>null</code>
-     */
-    public void setName(String newName) {
-        if (newName == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        this.name = newName;
+    @Override
+    public CPUMeter getCPUMeter() {
+        return cpuMeter;
     }
 
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        super.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        cpuMeter.add(trackedRace.getTrackedRegatta().getCPUMeter());
+    }
+
+    @Override
+    public FlexibleRaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
         FlexibleRaceColumn column = addRaceColumn(columnName, medalRace, /* logAlreadyExistingColumn */false);
         column.setTrackedRace(defaultFleet, race); // triggers listeners because this object was registered above as
                                                    // race column listener on the column
+        cpuMeter.add(race.getTrackedRegatta().getCPUMeter());
         return column;
     }
 
@@ -125,13 +196,16 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private FlexibleRaceColumn addRaceColumn(String name, boolean medalRace, boolean logAlreadyExistingColumn) {
         FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
-            final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
-            logger.severe(msg);
+            if (logAlreadyExistingColumn) {
+                final String msg = "Trying to create race column with duplicate name " + name + " in leaderboard " + getName();
+                logger.severe(msg);
+            }
         } else {
             column = createRaceColumn(name, medalRace);
             column.addRaceColumnListener(this);
             races.add(column);
-            column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            column.setRaceLogInformationAndLoad(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
+            column.setRegattaLikeHelper(regattaLikeHelper);
             getRaceColumnListeners().notifyListenersAboutRaceColumnAddedToContainer(column);
         }
         return column;
@@ -159,6 +233,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         if (raceColumn != null) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 raceLogStore.removeRaceLog(raceColumn.getRaceLogIdentifier(fleet));
+                if (raceColumn.getTrackedRace(fleet) != null) {
+                    raceColumn.getTrackedRace(fleet).detachRaceExecutionOrderProvider(raceExecutionOrderProvider);
+                }
             }
             races.remove(raceColumn);
             getRaceColumnListeners().notifyListenersAboutRaceColumnRemovedFromContainer(raceColumn);
@@ -168,11 +245,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        final Iterable<RaceColumn> result;
+        if (races != null) {
+            result = Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     protected RaceColumnImpl createRaceColumn(String column, boolean medalRace) {
-        return new RaceColumnImpl(column, medalRace);
+        return new RaceColumnImpl(column, medalRace, raceExecutionOrderProvider);
     }
 
     protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
@@ -245,14 +328,21 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return scoringScheme;
     }
 
+    /**
+     * Callers need to {@code synchronize} on the result when iterating the elements in order to
+     * be safe regarding concurrent modifications through {@link #setCourseAreas(Iterable)}.
+     */
     @Override
-    public CourseArea getDefaultCourseArea() {
-        return courseArea;
+    public Iterable<CourseArea> getCourseAreas() {
+        return courseAreas;
     }
 
     @Override
-    public void setDefaultCourseArea(CourseArea newCourseArea) {
-        this.courseArea = newCourseArea;
+    public void setCourseAreas(Iterable<CourseArea> newCourseAreas) {
+        synchronized (this.courseAreas) {
+            this.courseAreas.clear();
+            Util.addAll(newCourseAreas, this.courseAreas);
+        }
     }
     
     @Override
@@ -281,14 +371,64 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
     
     @Override
-    public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
-        for (Competitor c : super.getAllCompetitors()) {
-            result.add(c);
+    public Double getTimeOnTimeFactor(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnTimeFactor(competitor, changeCallback);
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile(Competitor competitor, Optional<Runnable> changeCallback) {
+        return regattaLikeHelper.getTimeOnDistanceAllowancePerNauticalMile(competitor, changeCallback);
+    }
+
+    private class RaceExecutionOrderCache extends AbstractRaceExecutionOrderProvider {
+        private static final long serialVersionUID = 652833386555762661L;
+
+        public RaceExecutionOrderCache() {
+            super();
+            addRaceColumnListener(this);
         }
-        //consider {@link RegattaLog}
-        Set<Competitor> viaLog = new RegisteredCompetitorsAnalyzer<>(regattaLikeHelper.getRegattaLog()).analyze();
-        result.addAll(viaLog);
-        return result;
+
+        @Override
+        protected Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries() {
+            final Map<Fleet, Iterable<? extends RaceColumn>> result = new HashMap<>();
+            result.put(FlexibleLeaderboardImpl.defaultFleet, getRaceColumns());
+            return result;
+        }
+    }
+    
+    @Override
+    public LeaderboardType getLeaderboardType() {
+        return LeaderboardType.FlexibleLeaderboard;
+    }
+
+    @Override
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return false;
+    }
+    
+
+    @Override
+    public CompetitorRegistrationType getCompetitorRegistrationType() {
+        return CompetitorRegistrationType.CLOSED;
+    }
+
+    /**
+     * In addition to invoking the superclass implementation, a flexible leaderboard also
+     * detaches all race logs from any tracked race currently linked to any of the race columns
+     * of this leaderboard.
+     */
+    @Override
+    public void destroy() {
+        super.destroy();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.setTrackedRace(fleet, null); // this will in particular detach the race log
+            }
+        }
+    }
+
+    @Override
+    public void setFleetsCanRunInParallelToTrue() {
+        // no need to do anything because a FlexibleLeaderboard only has one (default) fleet
     }
 }

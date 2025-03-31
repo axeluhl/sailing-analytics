@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,11 +11,12 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -26,14 +29,14 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * 
  * @author Axel Uhl (d043530)
  */
-public class WindSourcesToExcludeSelectorPanel extends VerticalPanel {
+public class WindSourcesToExcludeSelectorPanel extends VerticalPanel implements HasEnabled {
     private final LinkedHashMap<WindSource, CheckBox> checkboxesByWindSource;
     private final StringMessages stringMessages;
-    private final SailingServiceAsync service;
+    private final SailingServiceWriteAsync service;
     private final ErrorReporter errorReporter;
     private RegattaAndRaceIdentifier raceIdentifier;
 
-    public WindSourcesToExcludeSelectorPanel(SailingServiceAsync service,
+    public WindSourcesToExcludeSelectorPanel(SailingServiceWriteAsync service,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -86,14 +89,24 @@ public class WindSourcesToExcludeSelectorPanel extends VerticalPanel {
         });
     }
 
-    private Iterable<WindSource> getWindSourcesToExclude() {
-        Set<WindSource> result = new HashSet<WindSource>();
+    private List<WindSource> getWindSourcesToExclude() {
+        List<WindSource> result = new ArrayList<WindSource>();
         for (Map.Entry<WindSource, CheckBox> e : checkboxesByWindSource.entrySet()) {
             if (!e.getValue().getValue()) {
                 result.add(e.getKey());
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return checkboxesByWindSource.values().stream().allMatch(CheckBox::isEnabled);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        checkboxesByWindSource.values().forEach(checkBox -> checkBox.setEnabled(enabled));
     }
 
 }

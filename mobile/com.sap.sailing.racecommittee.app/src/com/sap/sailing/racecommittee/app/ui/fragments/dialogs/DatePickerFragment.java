@@ -2,81 +2,79 @@ package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.DatePicker;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 
-import com.sap.sailing.racecommittee.app.R;
+import java.util.Calendar;
 
-public class DatePickerFragment extends LoggableDialogFragment implements DatePickerDialog.OnDateSetListener,
-        DatePickerDialog.OnDismissListener {
-    
+public class DatePickerFragment extends DialogFragment {
+
+    public static final String TAG = DatePickerFragment.class.getSimpleName();
+    private static final String KEY_YEAR = "year";
+    private static final String KEY_MONTH = "month";
+    private static final String KEY_DAY_OF_MONTH = "day_of_month";
+    private static final String KEY_MIN_DATE = "min_date";
+    private static final String KEY_MAX_DATE = "max_date";
+
     private DatePickerDialog.OnDateSetListener listener;
-    private int currentYear;
-    private int currentMonth;
-    private int currentDay;
-    
+
+    public static DatePickerFragment newInstance(int year, int month, int dayOfMonth) {
+        return newInstance(year, month, dayOfMonth, null, null);
+    }
+
+    public static DatePickerFragment newInstance(int year, int month, int dayOfMonth,
+                                                 @Nullable Long minDate, @Nullable Long maxDate) {
+        final DatePickerFragment fragment = new DatePickerFragment();
+        final Bundle args = new Bundle();
+        args.putInt(KEY_YEAR, year);
+        args.putInt(KEY_MONTH, month);
+        args.putInt(KEY_DAY_OF_MONTH, dayOfMonth);
+        if (minDate != null) {
+            args.putLong(KEY_MIN_DATE, minDate);
+        }
+        if (maxDate != null) {
+            args.putLong(KEY_MAX_DATE, maxDate);
+        }
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     public void setOnDateSetListener(DatePickerDialog.OnDateSetListener listener) {
         this.listener = listener;
     }
 
-    public int getCurrentYear() {
-        return currentYear;
-    }
-
-    public void setCurrentYear(int currentYear) {
-        this.currentYear = currentYear;
-    }
-
-    public int getCurrentMonth() {
-        return currentMonth;
-    }
-
-    public void setCurrentMonth(int currentMonth) {
-        this.currentMonth = currentMonth;
-    }
-
-    public int getCurrentDay() {
-        return currentDay;
-    }
-
-    public void setCurrentDay(int currentDay) {
-        this.currentDay = currentDay;
-    }
-
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // There is a bug in DatePickerDialog preventing it from correctly passing its onDateSet and onDismiss event
-        // See https://code.google.com/p/android/issues/detail?id=34833
-        // Therefore we will do all the event handling on our own.
-        DatePickerDialog dialog = new DatePickerDialog(getActivity(), null, currentYear, currentMonth, currentDay);
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.choose), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                DatePickerDialog dialog = (DatePickerDialog) dialogInterface;
-                DatePicker picker = dialog.getDatePicker();
-                DatePickerFragment.this.onDateSet(picker, picker.getYear(), picker.getMonth(), picker.getDayOfMonth());
-            }
-        });
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                DatePickerFragment.this.onDismiss(dialogInterface);
-            }
-        });
+        final Calendar calendar = Calendar.getInstance();
+
+        final Bundle args = getArguments();
+        if (args != null) {
+            final int year = args.getInt(KEY_YEAR, calendar.get(Calendar.YEAR));
+            final int month = args.getInt(KEY_MONTH, calendar.get(Calendar.MONTH));
+            final int dayOfMonth = args.getInt(KEY_DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
+            calendar.set(year, month, dayOfMonth);
+        }
+
+        //Use the current date as the default date in the picker
+        final int year = calendar.get(Calendar.YEAR);
+        final int month = calendar.get(Calendar.MONTH);
+        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+        //Create a new instance of DatePickerDialog and return it
+        final DatePickerDialog dialog = new DatePickerDialog(requireContext(), listener, year, month, dayOfMonth);
+
+        //Consider min date
+        if (args != null && args.containsKey(KEY_MIN_DATE)) {
+            dialog.getDatePicker().setMinDate(args.getLong(KEY_MIN_DATE));
+        }
+        //Consider max date
+        if (args != null && args.containsKey(KEY_MAX_DATE)) {
+            dialog.getDatePicker().setMaxDate(args.getLong(KEY_MAX_DATE));
+        }
+
         return dialog;
     }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int day) {
-        this.currentYear = year;
-        this.currentMonth = month;
-        this.currentDay = day;
-        if (listener != null) {
-            listener.onDateSet(view, year, month, day);
-        }
-    }
-
 }

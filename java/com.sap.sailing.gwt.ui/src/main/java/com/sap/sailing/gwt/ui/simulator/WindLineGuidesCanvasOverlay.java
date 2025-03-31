@@ -15,14 +15,14 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
-import com.sap.sailing.domain.common.AbstractBearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**
@@ -80,7 +80,6 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
     @Override
     public void removeFromMap() {
         super.removeFromMap();
-        
         if (timer != null) {
             timer.removeTimeListener(this);
         }
@@ -88,14 +87,13 @@ public class WindLineGuidesCanvasOverlay extends FullCanvasOverlay implements Ti
     
     public void setWindField(final WindFieldDTO windField) {
         this.windFieldDTO = windField;
-
         timePointWindDTOMap.clear();
         if (windField != null) {
             for(final SimulatorWindDTO w : windField.getMatrix()) {
-                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
-                    timePointWindDTOMap.put(w.timepoint, new LinkedList<SimulatorWindDTO>());
+                if (!timePointWindDTOMap.containsKey(w.timepoint.asMillis())) {
+                    timePointWindDTOMap.put(w.timepoint.asMillis(), new LinkedList<SimulatorWindDTO>());
                 }
-                timePointWindDTOMap.get(w.timepoint).add(w);
+                timePointWindDTOMap.get(w.timepoint.asMillis()).add(w);
             }
         }
     }

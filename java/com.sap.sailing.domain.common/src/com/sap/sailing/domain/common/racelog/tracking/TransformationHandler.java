@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
+import com.sap.sse.common.TransformationException;
+
 /**
  * Handle transformation between two types. Most likely use-case is serialization,
  * e.g. for JSON documents or database persistence.

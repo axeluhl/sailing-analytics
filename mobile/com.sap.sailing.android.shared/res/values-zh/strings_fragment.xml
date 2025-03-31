@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><resources>
+    <string name="scan_qr">"扫描二维码"</string>
+    <string name="scan_hint">"二维码可在确认参与时找到"</string>
+    <string name="no_qr_code">"没有二维码？"</string>
+</resources>

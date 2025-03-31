@@ -8,6 +8,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.server.trackfiles.common.GPSFixImporterRegistration;
+import com.sap.sailing.server.trackfiles.common.SensorDataImporterRegistration;
 
 public class Activator implements BundleActivator {
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
@@ -15,6 +16,12 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         registrations.addAll(GPSFixImporterRegistration.register(new RouteConverterGPSFixImporterImpl(), context));
+        registrations.addAll(SensorDataImporterRegistration.register(
+                new BravoDataImporterImpl(), context));
+        registrations.addAll(SensorDataImporterRegistration
+                .register(new BravoExtendedDataImporterImpl(), context));
+        registrations.addAll(SensorDataImporterRegistration
+                .register(new ExpeditionExtendedDataImporterImpl(), context));
     }
 
     @Override

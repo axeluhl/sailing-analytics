@@ -1,25 +1,36 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import com.sap.sse.common.Util;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.SettingsMap;
+import com.sap.sse.gwt.client.shared.perspective.Perspective;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
-public class CompositeSettings extends AbstractSettings {
-    public static class ComponentAndSettingsPair<SettingsType extends AbstractSettings> extends Util.Pair<Component<SettingsType>, SettingsType> {
-        private static final long serialVersionUID = -569811233041583043L;
+/**
+ * Groups settings for multiple {@link Component}s. This can be of particular interest when working with
+ * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.<p>
+ * 
+ * No synchronization is required here because when the constructor returns, the map used internally
+ * will no longer be modified.
+ */
+public class CompositeSettings extends AbstractSettings implements SettingsMap {
+    private final Map<String, Settings> settingsPerComponentId;
 
-        public ComponentAndSettingsPair(Component<SettingsType> a, SettingsType b) {
-            super(a, b);
-        }
+    public CompositeSettings(Map<String, Settings> settingsPerComponentId) {
+        this.settingsPerComponentId = new HashMap<>(settingsPerComponentId);
     }
     
-    private final Iterable<ComponentAndSettingsPair<?>> settingsPerComponent;
-
-    public CompositeSettings(Iterable<ComponentAndSettingsPair<?>> settingsPerComponent) {
-        this.settingsPerComponent = settingsPerComponent;
+    @Override
+    public Map<String, Settings> getSettingsPerComponentId() {
+        return Collections.unmodifiableMap(settingsPerComponentId);
     }
-
-    public Iterable<ComponentAndSettingsPair<?>> getSettingsPerComponent() {
-        return settingsPerComponent;
+    
+    @SuppressWarnings("unchecked")
+    public <S extends Settings> S findSettingsByComponentId(String componentId) {
+        return (S) settingsPerComponentId.get(componentId);
     }
-
 }

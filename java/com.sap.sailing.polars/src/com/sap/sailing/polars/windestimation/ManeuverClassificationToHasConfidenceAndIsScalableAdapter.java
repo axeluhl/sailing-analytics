@@ -6,26 +6,25 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
- * {@link ManeuverClassification}s need to be aggregated for different figures based on their confidence
- * of being a maneuver of a specific {@link ManeuverType type}. This can conveniently be done using a
- * {@link ConfidenceBasedAverager} and by adapting the {@link ManeuverClassification} objects to
- * what the averaged needs: a {@link HasConfidenceAndIsScalable} implementation.<p>
+ * {@link ManeuverClassification}s need to be aggregated for different figures based on their confidence of being a
+ * maneuver of a specific {@link ManeuverType type}. This can conveniently be done using a
+ * {@link ConfidenceBasedAverager} and by adapting the {@link ManeuverClassification} objects to what the averaged
+ * needs: a {@link HasConfidenceAndIsScalable} implementation.
+ * <p>
  * 
- * This abstract class only contributes determining the confidence based on the likelihood for the
- * maneuver to be of the type specified. Subclasses need to add the logic for extracting the 
+ * This abstract class only contributes determining the confidence based on the likelihood for the maneuver to be of the
+ * type specified. Subclasses need to add the logic for extracting the
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType, BaseType> implements
-        Function<ManeuverClassification, HasConfidenceAndIsScalable<ValueType, BaseType, Void>> {
+public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType, BaseType>
+        implements Function<ManeuverClassification, HasConfidenceAndIsScalable<ValueType, BaseType, Void>> {
     private final Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper;
     private final ManeuverType maneuverType;
-    private final PolarDataService polarService;
 
     /**
      * @param maneuverType
@@ -37,12 +36,11 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
      *            averaged by a {@link ConfidenceBasedAverager}.
      */
     public ManeuverClassificationToHasConfidenceAndIsScalableAdapter(ManeuverType maneuverType,
-            Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper, PolarDataService polarService) {
+            Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper) {
         this.maneuverType = maneuverType;
         this.mapper = mapper;
-        this.polarService = polarService;
     }
-    
+
     @Override
     public HasConfidenceAndIsScalable<ValueType, BaseType, Void> apply(final ManeuverClassification t) {
         return new HasConfidenceAndIsScalable<ValueType, BaseType, Void>() {
@@ -55,8 +53,7 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
 
             @Override
             public double getConfidence() {
-                return polarService.getManeuverLikelihoodAndTwsTwa(t.getCompetitor().getBoat().getBoatClass(),
-                        t.getSpeedAtManeuverStart(), t.getManeuverAngleDeg(), maneuverType).getA();
+                return t.getLikelihoodForManeuverType(maneuverType);
             }
 
             @Override

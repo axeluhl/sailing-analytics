@@ -3,17 +3,18 @@ package com.sap.sse.datamining.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 
-import com.sap.sse.datamining.shared.data.Unit;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public interface Function<ReturnType> {
 
     public Class<?> getDeclaringType();
     public Iterable<Class<?>> getParameters();
+    public boolean needsLocalizationParameters();
     public Class<ReturnType> getReturnType();
 
     public boolean isDimension();
     
+    // TODO bug4789 add useful Javadoc, especially for compound functions where the simple name is not so simple after all
     public String getSimpleName();
     
     /**
@@ -43,8 +44,6 @@ public interface Function<ReturnType> {
      *         {@link IllegalAccessException} or {@link IllegalArgumentException} was thrown.
      */
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider);
-    
-    public Unit getResultUnit();
     
     public int getResultDecimals();
     

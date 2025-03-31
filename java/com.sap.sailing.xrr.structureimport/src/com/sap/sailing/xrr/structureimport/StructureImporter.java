@@ -16,6 +16,9 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -30,8 +33,12 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.FleetColors;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -50,7 +57,9 @@ import com.sap.sailing.xrr.structureimport.buildstructure.Series;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -60,6 +69,7 @@ public class StructureImporter {
     private LinkedHashMap<String, Boat> boatForPerson;
     private final DomainFactory baseDomainFactory;
     private final SetRacenumberStrategy setRacenumberStrategy;
+    private final static String UNKNOWN_BOATCLASS_NAME = "?";
 
     public StructureImporter(SetRacenumberStrategy setRacenumber, DomainFactory baseDomainFactory) {
         this.setRacenumberStrategy = setRacenumber;
@@ -79,12 +89,12 @@ public class StructureImporter {
     }
 
     public Iterable<Regatta> getRegattas(Iterable<RegattaJSON> regattas) {
-        Iterable<RegattaResults> parsedRegattas = parseRegattas(regattas);
+        Iterable<Pair<RegattaJSON, RegattaResults>> parsedRegattas = parseRegattas(regattas);
         Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
-        for (RegattaResults result : parsedRegattas) {
+        for (Pair<RegattaJSON, RegattaResults> result : parsedRegattas) {
             List<Race> races = new ArrayList<Race>();
             // assuming that the last element in getPersonOrBoatOrTeam is an event
-            Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1);
+            Event event = (Event) result.getB().getPersonOrBoatOrTeam().get(result.getB().getPersonOrBoatOrTeam().size() - 1);
             Iterable<Object> raceOrDivisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
             for (Object raceOrDivisionOrRegattaSeriesResult : raceOrDivisionOrRegattaSeriesResults) {
                 if (raceOrDivisionOrRegattaSeriesResult instanceof Race) {
@@ -94,26 +104,37 @@ public class StructureImporter {
             BuildStructure buildStructure = new BuildStructure(races);
             final TimePoint startDate = null; // TODO can regatta start time be inferred from XRR document?
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
-            RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
-                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(((Division) event.getRaceOrDivisionOrRegattaSeriesResult()
-                            .get(0)).getTitle()), startDate, endDate, getSeries(buildStructure), false,
-                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
+            final String regattaName = RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
+                    .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle());
+            final String boatClassName;
+            if (result.getA().getBoatClass() != null) {
+                boatClassName = result.getA().getBoatClass();
+            } else {
+                // we need a boat class; use some default
+                logger.warning("No boat class set in regatta to import: "+regattaName+". Setting to \""+UNKNOWN_BOATCLASS_NAME+"\"");
+                boatClassName = UNKNOWN_BOATCLASS_NAME;
+            }
+            RegattaImpl regatta = new RegattaImpl(regattaName,
+                    baseDomainFactory.getOrCreateBoatClass(boatClassName), 
+                    /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                    startDate, endDate, getSeries(buildStructure), false,
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null,
+                    OneDesignRankingMetric::new, /* registrationLinkSecret */ UUID.randomUUID().toString());
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
     }
 
-    private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
-        final Set<RegattaResults> result = Collections.synchronizedSet(new HashSet<RegattaResults>());
+    private Iterable<Pair<RegattaJSON, RegattaResults>> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
+        final Set<Pair<RegattaJSON, RegattaResults>> result = Collections.synchronizedSet(new HashSet<Pair<RegattaJSON, RegattaResults>>());
         Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
             Thread thread = new Thread("XRR Importer " + selectedRegatta.getName()) {
                 @Override
                 public void run() {
                     try {
-                        result.add(parseRegattaXML(selectedRegatta.getXrrEntriesUrl()));
-                    } catch (JAXBException | IOException e) {
+                        result.add(new Pair<>(selectedRegatta, parseRegattaXML(selectedRegatta.getXrrEntriesUrl())));
+                    } catch (JAXBException | IOException | SAXException | ParserConfigurationException e) {
                         logger.info("Parse error during XRR import. Ignoring document " + selectedRegatta.getName());
                     }
                 }
@@ -142,7 +163,7 @@ public class StructureImporter {
             for (Series raceType : regattaStructure.getSeries()) {
                 List<com.sap.sailing.domain.base.Fleet> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
-                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
+                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), true, fleets, raceType.getRaceNames(), null));
             }
         }
         return series;
@@ -160,7 +181,7 @@ public class StructureImporter {
         GuessFleetOrderingStrategy fleetOrderingStrategy = new GuessFleetOrderingFromFleetName();
         String fleetColor = "";
         if (fleets.size() <= 1) {
-            fleetColor = "Default";
+            fleetColor = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
             FleetImpl fleetImpl = new FleetImpl(fleetColor, 0, getColorFromString(fleetColor));
             fleetsImpl.add(fleetImpl);
         } else {
@@ -184,9 +205,6 @@ public class StructureImporter {
         if (result == null) {
             result = AbstractColor.getColorByLowercaseNameStatic(colorString.toLowerCase());
         }
-        if (result == null) {
-            result = Color.BLACK;
-        }
         return result;
     }
 
@@ -201,6 +219,7 @@ public class StructureImporter {
                     Person person = (Person) obj;
                     String idAsString = person.getPersonID();
                     String name = person.getGivenName() + " " + person.getFamilyName();
+                    String shortName = null; // Can we get a short name from Manage2Sail?
                     Color color = null;
                     String email = null;
                     URI flagImage = null;
@@ -208,7 +227,8 @@ public class StructureImporter {
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
+                            UUID.fromString(idAsString), name, shortName, color, email, flagImage, boatAndTeam.getTeam(),
+                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true));
                 } else {
                     break;
                 }
@@ -270,7 +290,7 @@ public class StructureImporter {
     }
 
     private DynamicBoat createBoat(String name, Boat boat, BoatClass boatClass) {
-        DynamicBoat boat1 = new BoatImpl(name + " boat", boatClass, boat.getSailNumber());
+        DynamicBoat boat1 = new BoatImpl(name + " boat", name + " boat", boatClass, boat.getSailNumber());
         return boat1;
     }
 
@@ -280,12 +300,12 @@ public class StructureImporter {
         return team;
     }
 
-    private RegattaResults parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException {
+    private RegattaResults parseRegattaXML(String url) throws FileNotFoundException, JAXBException, IOException, SAXException, ParserConfigurationException {
         return ParserFactory.INSTANCE.createParser(getInputStream(url), "").parse();
     }
 
     private InputStream getInputStream(String url) throws FileNotFoundException, IOException {
-        URLConnection connection = new URL(url).openConnection();
+        URLConnection connection = HttpUrlConnectionHelper.redirectConnection(new URL(url));
         return connection.getInputStream();
     }
 }

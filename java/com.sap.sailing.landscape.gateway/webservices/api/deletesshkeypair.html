@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API</h1>
+<h2>URL: /landscape/api/landscape/delete_ssh_key</h2>
+
+<b>Description:</b>
+ <p>Deletes an SSH key pair from a region. It is removed from the AWS key pair store as well as from
+ the user's persistent key pair store.
+ </p>
+ <br />
+ <table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>DELETE</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>json</td>
+    </tr>
+    <tr>
+        <td>Mandatory form parameters:</td>
+        <td>
+            <div><tt>region</tt>, the ID of the region in which to create the key</div>
+            <div><tt>key_name</tt>, name of the key; must be unique in the region within the AWS account</div>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>DELETE</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td><pre>
+           curl -d 'region=eu-west-2' -d 'key_name=Axel' \
+            -H 'Authorization: Bearer mkCZcm02pjAeQRwBD1RkKo582joVMDTPsb0SXF8lSTc=' \
+            -X DELETE https://security-service.sapsailing.com/landscape/api/landscape/delete_ssh_key</pre><br>
+        produces a 200 status code with output
+        <pre>
+            {
+              "name": "Axel",
+              "regionId": "eu-west-2",
+              "creatorName": "admin",
+              "creationTimeMillis": 1645439343022,
+              "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAABbBIwAAAIEAu+eA2345ox7s9yir93P8MQ8HRXah3tD739N4qjTa7ustnYfwOBxsVghke3CUT+6m66fgQijkG6Qd3Dt7IXR5Ja3wLIdFa/HCsvN4gtL6Q65o7/XyiPRc98Eaf937H+Cux+ieZsB+NoNFehdOyb2Ri7LhpKdPh3d7X9lhwbVIvEU= uhl@here"
+            }</pre>
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

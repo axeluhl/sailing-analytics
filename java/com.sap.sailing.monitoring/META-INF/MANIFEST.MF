@@ -11,3 +11,4 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: org.hyperic.sigar;bundle-version="1.6.4.1",
  com.sun.mail.javax.mail;bundle-version="1.4.5"
+Automatic-Module-Name: com.sap.sailing.monitoring

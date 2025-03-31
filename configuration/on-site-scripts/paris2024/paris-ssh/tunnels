@@ -1,0 +1,5 @@
+#!/bin/bash
+killall autossh
+sleep 2
+# Tunnel to rabbit-eu-west-3.sapsailing.com
+autossh -M 20510 -f -A -N -L 15673:localhost:15672 -L 5673:localhost:5672 ec2-user@rabbit-eu-west-3.sapsailing.com

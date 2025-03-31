@@ -1,14 +1,18 @@
 package com.sap.sailing.server.replication.test;
 
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl.ConstructorParameters;
+import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractServerReplicationTest extends com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest<RacingEventService, RacingEventServiceImpl> {
@@ -35,24 +39,49 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
         protected void persistenceSetUp(boolean dropDB) {
             mongoDBService = MongoDBService.INSTANCE;
             if (dropDB) {
-                mongoDBService.getDB().dropDatabase();
+                mongoDBService.getDB().drop();
             }
-            mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoDBService);
+            mongoObjectFactory = PersistenceFactory.INSTANCE.getMajorityMongoObjectFactory(mongoDBService);
         }
 
         @Override
         public RacingEventServiceImpl createNewMaster() {
-            return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
-                    DomainFactory.INSTANCE), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
-                    EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+            return new RacingEventServiceImpl((final RaceLogAndTrackedRaceResolver raceLogResolver)-> {
+                return new ConstructorParameters() {
+                    private final DomainFactory baseDomainFactory = new DomainFactoryImpl(raceLogResolver);
+                    @Override public DomainObjectFactory getDomainObjectFactory() { return PersistenceFactory.INSTANCE.getMajorityDomainObjectFactory(mongoDBService, baseDomainFactory); }
+                    @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+                    @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
+                    @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
+                };
+            }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
+                    EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null,
+                    /* trackedRaceStatisticsCache */ null, /* restoreTrackedRaces */ false,
+                    /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
 
         @Override
         public RacingEventServiceImpl createNewReplica() {
-            return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoDBService,
-                    // replica gets its own base DomainFactory:
-                    new DomainFactoryImpl()), mongoObjectFactory, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService),
-                    EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+            return new RacingEventServiceImpl(
+                    (final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
+                        return new RacingEventServiceImpl.ConstructorParameters() {
+                            private final DomainObjectFactory domainObjectFactory =
+                                    PersistenceFactory.INSTANCE.getMajorityDomainObjectFactory(mongoDBService,
+                                            // replica gets its own base DomainFactory:
+                                            new DomainFactoryImpl(raceLogResolver));
+                            @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
+                            @Override public MongoObjectFactory getMongoObjectFactory() { return mongoObjectFactory; }
+                            @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
+                            @Override public CompetitorAndBoatStore getCompetitorAndBoatStore() { return getBaseDomainFactory().getCompetitorAndBoatStore(); }
+                        };
+                    }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE,
+                    EmptySensorFixStore.INSTANCE, /* serviceFinderFactory */ null, null,
+                    /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null,
+                    /* restoreTrackedRaces */ false, /* security service tracker */ null, /* sharedSailingData */ null, /* replicationServiceTracker */ null,
+                    /* scoreCorrectionProviderServiceTracker */ null, /* competitorProviderServiceTracker */ null,
+                    /* resultUrlRegistryServiceTracker */ null);
         }
     }
 }

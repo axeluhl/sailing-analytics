@@ -8,36 +8,36 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiJsonHandler;
 import com.sap.sailing.domain.racelogtracking.test.AbstractJsonOverHttpTest;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceAndSessionIdentifierWithGPSFixesSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSerializer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PostFixes extends AbstractJsonOverHttpTest {
-    protected static final SmartphoneImeiIdentifier device = new SmartphoneImeiIdentifier("a");
+    protected static final SmartphoneImeiIdentifierImpl device = new SmartphoneImeiIdentifierImpl("a");
 
-    private final DeviceAndSessionIdentifierWithGPSFixesSerializer<SmartphoneImeiIdentifier, GPSFixMoving> fixSerializer =
+    private final DeviceAndSessionIdentifierWithGPSFixesSerializer<SmartphoneImeiIdentifierImpl, GPSFixMoving> fixSerializer =
             new DeviceAndSessionIdentifierWithGPSFixesSerializer<>(DeviceIdentifierJsonSerializer.create(
-                    new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE), new GPSFixMovingNmeaDTOJsonSerializer());
+                    new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifierImpl.TYPE), new GPSFixMovingJsonSerializer());
 
             private void recordFix(GPSFixMoving... fix) throws IOException {
                 String request = fixSerializer.serialize(
-                        new Util.Triple<SmartphoneImeiIdentifier, Serializable, List<GPSFixMoving>>(
+                        new Util.Triple<SmartphoneImeiIdentifierImpl, Serializable, List<GPSFixMoving>>(
                                 device, null, Arrays.asList(fix))).toJSONString();
 
                 executeRequest("POST", getUrl(URL_TR + "/recordFixes"), request);
@@ -88,7 +88,7 @@ public class PostFixes extends AbstractJsonOverHttpTest {
                         lastFix = fix;
 
                         try {
-                            recordFix(new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speed));
+                            recordFix(new GPSFixMovingImpl(fix.getPosition(), fix.getTimePoint(), speed, /* optionalTrueHeading */ null));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

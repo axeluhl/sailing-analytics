@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Position;
 
-
 public class WindLatticeDTO implements Serializable {
 
 	/**
@@ -19,7 +18,7 @@ public class WindLatticeDTO implements Serializable {
 	public void setMatrix( Position [][] matrix ) {
 		this.matrix = matrix;
 	}
-	
+
 	public Position[][] getMatrix() {
 		return matrix;
 	}

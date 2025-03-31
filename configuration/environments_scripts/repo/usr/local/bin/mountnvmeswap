@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Script to deploy on an instance that has an ephemeral volume as /dev/nvme0n1 (adjust env var EPHEMERAL_VOLUME if different)
+# Ensures the partition is xfs-formatted, any existing partition contents will be overwritten if formatted otherwise.
+# An existing xfs partition will be left alone. 
+. imageupgrade_functions.sh
+EPHEMERAL_VOLUME_NAME=$(identify_suitable_partition_for_ephemeral_volume)
+if [[ -n "${EPHEMERAL_VOLUME_NAME}" ]]; then
+  EPHEMERAL_VOLUME=/dev/${EPHEMERAL_VOLUME_NAME}
+  if awk '{print $1;}' /proc/mounts | grep "${EPHEMERAL_VOLUME}"; then
+    echo "Partition ${PARTITION} already mounted; not formatting/mounting volume"
+  else
+    FSTYPE=$(blkid -p $EPHEMERAL_VOLUME -s TYPE -o value)
+    if [ "$FSTYPE" = "" ]; then
+        echo FSTYPE was empty, creating swap partition
+        mkswap $EPHEMERAL_VOLUME
+        swapon --priority 2 -a $EPHEMERAL_VOLUME
+    else
+        echo "FSTYPE was $FSTYPE, not touching"
+    fi
+  fi
+else
+  echo "No ephemeral partition found. Not creating any swap partition."
+fi

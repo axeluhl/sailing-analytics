@@ -13,6 +13,7 @@ import com.google.gwt.dom.client.ScriptElement;
  *   D049941
  */
 public class JavaScriptInjector {
+    // TODO: why not simply use com.google.gwt.core.client.ScriptInjector? Is there specific functionality that isn't provided by the GWT class?
     private static HeadElement head;
 
     /**

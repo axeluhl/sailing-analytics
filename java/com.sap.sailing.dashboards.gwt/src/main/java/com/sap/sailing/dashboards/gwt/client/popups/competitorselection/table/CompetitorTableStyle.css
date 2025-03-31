@@ -1,0 +1,33 @@
+
+.cellTableHeader {
+	height: 0pt;
+	overflow: hidden;
+	background-color: white;
+	border-bottom: none;
+}
+
+.cellTableCell {
+	padding: 10px;
+	overflow: hidden;
+	font-size: 14px;
+	color: black;
+	background-color: #E0E0E0;
+	border-width: 0px 8px 8px 8px;
+	border-color: white;
+}
+
+.cellTableSelectedRow {
+	background: #848484 !important;
+	backrgound-color: #848484 !important;
+	color: white !important;
+	border-width: 0px 8px 8px 8px;
+	border-color: white;
+}
+
+.cellTableSelectedRowCell {
+	background: #848484 !important;
+	backrgound-color: #848484 !important;
+	color: white !important;
+	border-width: 0px 8px 8px 8px;
+	border-color: white;
+}

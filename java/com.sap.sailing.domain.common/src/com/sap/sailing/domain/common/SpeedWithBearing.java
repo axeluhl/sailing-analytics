@@ -1,10 +1,16 @@
 package com.sap.sailing.domain.common;
 
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.datamining.annotations.Statistic;
 
 
 
 public interface SpeedWithBearing extends Speed {
+    @Statistic(messageKey="bearing", resultDecimals=1)
     Bearing getBearing();
 
     /**
@@ -13,6 +19,10 @@ public interface SpeedWithBearing extends Speed {
      * applied in reverse.
      */
     Position travelTo(Position pos, TimePoint from, TimePoint to);
+    
+    default Position travelTo(Position from, Duration duration) {
+        return from.translateGreatCircle(getBearing(), travel(duration));
+    }
 
     /**
      * Computes the minimal (in terms of bearing change) course and speed change required to reach the
@@ -35,4 +45,8 @@ public interface SpeedWithBearing extends Speed {
      * Adds two directed speeds onto each other using vector addition.
      */
     SpeedWithBearing add(SpeedWithBearing other);
+    
+    default SpeedWithBearing scale(double d) {
+        return new KnotSpeedWithBearingImpl(getKnots(), getBearing());
+    }
 }

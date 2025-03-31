@@ -1,30 +1,36 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import com.sap.sailing.domain.abstractlog.race.FixedMarkPassingEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCCertificateAssignmentEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCImpliedWindSourceEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCLegDataEvent;
+import com.sap.sailing.domain.abstractlog.orc.RaceLogORCScratchBoatEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogExcludeWindSourcesEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogResultsAreOfficialEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
-import com.sap.sailing.domain.abstractlog.race.SuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 /**
  * Base class implementing {@link RaceLogEventVisitor}. Every method is implemented as a no-op.
@@ -48,11 +54,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
 
     }
 
@@ -97,16 +98,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     }
     
     @Override
-    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-    	
-    }
-    
-    @Override
-    public void visit(RaceLogDeviceMarkMappingEvent event) {
-    	
-    }
-    
-    @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
     	
     }
@@ -125,29 +116,74 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogRegisterCompetitorEvent event) {
 
     }
-    
-    @Override
-    public void visit(RaceLogDefineMarkEvent event) {
-         
-    }
 
-    @Override
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
-        
-    }
-    
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent event) {
         
     }
     
     @Override
-    public void visit(FixedMarkPassingEvent event){
+    public void visit(RaceLogFixedMarkPassingEvent event){
         
     }
 
     @Override
-    public void visit(SuppressedMarkPassingsEvent event) {
+    public void visit(RaceLogSuppressedMarkPassingsEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogEndOfTrackingEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogStartOfTrackingEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogTagEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogORCLegDataEvent orcLegDataEventImpl) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogORCCertificateAssignmentEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogORCScratchBoatEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogORCImpliedWindSourceEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogResultsAreOfficialEvent event) {
+        
+    }
+
+    @Override
+    public void visit(RaceLogExcludeWindSourcesEvent event) {
         
     }
 }

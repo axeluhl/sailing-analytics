@@ -1,7 +1,7 @@
 package com.sap.sse.datamining.impl.components;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class TestParallelExtractionProcessor {
 
     @Test
     public void testValueExtraction() {
-        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, getCrossSumFunction);
+        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getSharedExecutor(), receivers, getCrossSumFunction);
         Collection<GroupedDataEntry<Number>> elements = createElements();
         ConcurrencyTestsUtil.processElements(processor, elements);
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
@@ -81,7 +81,7 @@ public class TestParallelExtractionProcessor {
     
     @Test
     public void testValueExtractionWithInvalidFunction() {
-        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getExecutor(), receivers, invalidFunction);
+        Processor<GroupedDataEntry<Number>, GroupedDataEntry<Integer>> processor = new ParallelGroupedElementsValueExtractionProcessor<Number, Integer>(ConcurrencyTestsUtil.getSharedExecutor(), receivers, invalidFunction);
         ConcurrencyTestsUtil.processElements(processor, createElements());
         ConcurrencyTestsUtil.sleepFor(100); //Giving the processor time to finish the instructions
         assertThat("Values have been received, but the processor function is invalid.", receivedValues.isEmpty(), is(true));

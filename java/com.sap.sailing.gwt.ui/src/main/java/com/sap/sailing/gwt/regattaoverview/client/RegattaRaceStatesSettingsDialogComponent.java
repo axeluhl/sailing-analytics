@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -17,8 +16,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -29,7 +29,6 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
-    private final UUID eventId;
     private final List<CourseAreaDTO> courseAreas;
     private final List<RaceGroupDTO> raceGroups;
 
@@ -37,26 +36,24 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
     private final Map<UUID, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
-    private final Anchor resultingLink;
     private Button courseAreaDeselectButton;
     private Button regattaDeselectButton;
     
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            UUID eventId, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
+            List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
-        this.eventId = eventId;
         this.courseAreas = courseAreas;
         this.raceGroups = raceGroups;
         this.courseAreaCheckBoxMap = new HashMap<UUID, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
-        this.resultingLink = new Anchor(stringMessages.asLink());
     }
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
+        flowPanel.ensureDebugId("CourseAreaPanel");
         flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingCourseAreas(), true));
         FlowPanel courseAreaPanel = new FlowPanel();
@@ -77,10 +74,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         boolean allCheckboxesSelected = true;
         for (CourseAreaDTO courseAreaDTO : courseAreas) {
             CheckBox checkBox = dialog.createCheckbox(courseAreaDTO.getName());
-            boolean isCourseAreaVisible = Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.id);
+            boolean isCourseAreaVisible = Util.contains(initialSettings.getVisibleCourseAreas(), courseAreaDTO.getId());
             allCheckboxesSelected &= isCourseAreaVisible;
             checkBox.setValue(isCourseAreaVisible);
-            courseAreaCheckBoxMap.put(courseAreaDTO.id, checkBox);
+            courseAreaCheckBoxMap.put(courseAreaDTO.getId(), checkBox);
             
             courseAreaGrid.setWidget(rowIndex, columnIndex++, checkBox);
             if(columnIndex == maxCourseAreasPerRow) {
@@ -90,6 +87,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         }
         
         courseAreaDeselectButton = new Button();
+        courseAreaDeselectButton.addStyleName("btn-secondary");
         setTextOfDeselectButton(courseAreaDeselectButton, allCheckboxesSelected);
         courseAreaDeselectButton.addClickHandler(new ClickHandler() {
 
@@ -116,11 +114,11 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private FlowPanel fillRegattaNamesWidget(DataEntryDialog<?> dialog) {
         FlowPanel flowPanel = new FlowPanel();
+        flowPanel.ensureDebugId("RegattaNamesPanel");
         flowPanel.addStyleName(SETTINGS_DIALOG_COMPONENT);
         flowPanel.add(dialog.createHeadline(stringMessages.showFollowingRegattas(), true));
         FlowPanel regattaNamesPanel = new FlowPanel();
         flowPanel.add(regattaNamesPanel);
-        
         int maxRegattasPerRow = 4;
         int numberOfRegattas = raceGroups.size();
         int numberOfRequiredRows = numberOfRegattas / maxRegattasPerRow;
@@ -129,10 +127,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         }
         int rowIndex = 0;
         int columnIndex = 0;
-        
         Grid regattaGrid = new Grid(numberOfRequiredRows, maxRegattasPerRow);
         regattaNamesPanel.add(regattaGrid);
-        
         boolean allCheckboxesSelected = true;
         for (RaceGroupDTO raceGroup : raceGroups) {
             CheckBox checkBox = dialog.createCheckbox(raceGroup.displayName);
@@ -147,11 +143,10 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
                 columnIndex = 0;
             }
         }
-        
         regattaDeselectButton = new Button();
+        regattaDeselectButton.addStyleName("btn-secondary");
         setTextOfDeselectButton(regattaDeselectButton, allCheckboxesSelected);
         regattaDeselectButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 if (regattaDeselectButton.getText().equals(stringMessages.deselectAll())) {
@@ -166,10 +161,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
                     regattaDeselectButton.setText(stringMessages.deselectAll());
                 }
             }
-            
         });
         flowPanel.add(regattaDeselectButton);
-        
         return flowPanel;
     }
     
@@ -183,12 +176,14 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     
     private CheckBox getShowOnlyRacesOfSameDayWidget(DataEntryDialog<?> dialog) {
         showOnlyRacesOfSameDayCheckBox = dialog.createCheckbox(stringMessages.showOnlyRacesOfSameDay());
+        showOnlyRacesOfSameDayCheckBox.ensureDebugId("ShowOnlyRacesOfSameDayCheckBox");
         showOnlyRacesOfSameDayCheckBox.setValue(initialSettings.isShowOnlyRacesOfSameDay());
         return showOnlyRacesOfSameDayCheckBox;
     }
     
     private CheckBox getShowOnlyCurrentlyRunningRacesWidget(DataEntryDialog<?> dialog) {
         showOnlyCurrentlyRunningRacesCheckBox = dialog.createCheckbox(stringMessages.showOnlyCurrentlyRunningRaces());
+        showOnlyCurrentlyRunningRacesCheckBox.ensureDebugId("ShowOnlyCurrentlyRunningRacesCheckBox");
         showOnlyCurrentlyRunningRacesCheckBox.setValue(initialSettings.isShowOnlyCurrentlyRunningRaces());
         return showOnlyCurrentlyRunningRacesCheckBox;
     }
@@ -209,11 +204,11 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel verticalPanel = new VerticalPanel();
+        dialog.ensureDebugId("RegattaRacesStatesSettingsDialog");
         
         verticalPanel.add(fillCourseAreaWidget(dialog));
         verticalPanel.add(fillRegattaNamesWidget(dialog));
         verticalPanel.add(getAdditionalSettingsWidget(dialog));
-        verticalPanel.add(resultingLink);
         
         return verticalPanel;
     }
@@ -240,7 +235,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         boolean isShowOnlyRacesOfSameDay = showOnlyRacesOfSameDayCheckBox.getValue();
         boolean isShowOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRacesCheckBox.getValue();
-        return new RegattaRaceStatesSettings(selectedCourseAreas, selectedRegattas, isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
+        return new RegattaRaceStatesSettings(this.courseAreas, selectedCourseAreas, this.raceGroups, selectedRegattas,
+                isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
     }
 
     @Override
@@ -248,11 +244,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         return new Validator<RegattaRaceStatesSettings>() {
             @Override
             public String getErrorMessage(RegattaRaceStatesSettings settings) {
-                String errorMessage = null;
-                if (errorMessage == null) {
-                    updateLinkUrl(eventId, settings);
-                }
-                return errorMessage;
+                return null;
             }
         };
     }
@@ -261,17 +253,4 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     public FocusWidget getFocusWidget() {
         return null;
     }
-    
-    private void updateLinkUrl(UUID eventId, RegattaRaceStatesSettings settings) {
-        boolean isSetVisibleCourseAreasInUrl = true;
-        boolean isSetVisibleRegattasInUrl = true;
-        if (settings.getVisibleCourseAreas().size() == courseAreas.size()) {
-            isSetVisibleCourseAreasInUrl = false;
-        }
-        if (settings.getVisibleRegattas().size() == raceGroups.size()) {
-            isSetVisibleRegattasInUrl = false;
-        }
-        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
-    }
-
 }

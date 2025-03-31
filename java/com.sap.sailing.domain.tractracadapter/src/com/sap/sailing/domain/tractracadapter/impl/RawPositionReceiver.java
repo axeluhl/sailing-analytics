@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -25,8 +24,9 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     private final IPositionListener listener;
 
     public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            DomainFactory domainFactory, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            DomainFactory domainFactory, Simulator simulator, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IPositionListener() {
             @Override
             public void gotPosition(IRaceCompetitor controlPoint, IPosition position) {
@@ -48,25 +48,27 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
 
     @Override
     protected void handleEvent(Triple<IRaceCompetitor, IPosition, Void> event) {
-        if (received++ % 1000 == 0) {
-            System.out.print("P");
-            if ((received / 1000 + 1) % 80 == 0) {
-                System.out.println();
+        if (!event.getA().getCompetitor().isNonCompeting()) {
+            if (received++ % 1000 == 0) {
+                System.out.print("P");
+                if ((received / 1000 + 1) % 80 == 0) {
+                    System.out.println();
+                }
             }
-        }
-        IRace race = event.getA().getRace();
-        DynamicTrackedRace trackedRace = getTrackedRace(race);
-        if (trackedRace != null) {
-            GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
-            if (getSimulator() != null) {
-                fix = new GPSFixMovingImpl(fix.getPosition(), getSimulator().delay(
-                        fix.getTimePoint()), fix.getSpeed());
+            IRace race = event.getA().getRace();
+            DynamicTrackedRace trackedRace = getTrackedRace(race);
+            if (trackedRace != null) {
+                final GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
+                Competitor competitor = getDomainFactory().resolveCompetitor(event.getA().getCompetitor());
+                if (getSimulator() != null) {
+                    getSimulator().scheduleCompetitorPosition(competitor, fix);
+                } else {
+                    trackedRace.recordFix(competitor, fix);
+                }
+            } else {
+                logger.warning("Couldn't find tracked race for race " + race.getName()
+                        + ". Dropping raw position event " + event);
             }
-            Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
-            trackedRace.recordFix(competitor, fix);
-        } else {
-            logger.warning("Couldn't find tracked race for race " + race.getName()
-                    + ". Dropping raw position event " + event);
         }
     }
 }

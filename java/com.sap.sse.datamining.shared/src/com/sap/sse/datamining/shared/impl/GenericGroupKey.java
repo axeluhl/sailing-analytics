@@ -1,5 +1,8 @@
 package com.sap.sse.datamining.shared.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.sap.sse.datamining.shared.GroupKey;
 
 
@@ -23,18 +26,18 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     }
 
     @Override
-    public boolean hasSubKey() {
+    public boolean hasSubKeys() {
         return false;
     }
     
     @Override
-    public GroupKey getMainKey() {
-        return this;
+    public int size() {
+        return 1;
     }
 
     @Override
-    public GroupKey getSubKey() {
-        return null;
+    public List<? extends GroupKey> getKeys() {
+        return Collections.singletonList(this);
     }
     
     @Override

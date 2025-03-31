@@ -4,8 +4,8 @@ import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
-import com.sap.sailing.server.gateway.serialization.ExtensionJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.shared.json.ExtensionJsonSerializer;
+import com.sap.sse.shared.json.JsonSerializer;
 
 public class SeriesWithRowsOfRaceGroupSerializer extends ExtensionJsonSerializer<RaceGroup, SeriesWithRows> {
     public static final String FIELD_SERIES = "series";

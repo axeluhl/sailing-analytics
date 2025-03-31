@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -9,14 +8,17 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFleetsDialog {
     protected CheckBox regattaConfigurationCheckbox;
@@ -24,19 +26,25 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
+    protected static class RegattaParameterValidator extends AbstractRegattaParameterValidator {
+        public RegattaParameterValidator(StringMessages stringMessages) {
+            super(stringMessages);
+        }
+    }
+    
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, regatta.series, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                null, callback);
+            Iterable<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            UserService userService, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(),
+                stringMessages.ok(), sailingService, userService, stringMessages, new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
-
         nameEntryField.setEnabled(false);
         boatClassEntryField.setEnabled(false);
+        canBoatsOfCompetitorsChangePerRaceCheckBox.setEnabled(false);
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
-        courseAreaListBox.setEnabled(true);
-
+        courseAreaSelection.setEnabled(true);
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
         regattaConfigurationCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -74,23 +82,19 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    public void show() {
-        super.show();
-        courseAreaListBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return this.nameEntryField;
     }
 
     @Override
-    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel) {
-        super.setupAdditionalWidgetsOnPanel(panel);
+    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid) {
+        super.setupAdditionalWidgetsOnPanel(panel, formGrid);
         VerticalPanel content = new VerticalPanel();
-
         Grid proceduresGrid = new Grid(1, 2);
         proceduresGrid.setWidget(0, 0, regattaConfigurationCheckbox);
         proceduresGrid.setWidget(0, 1, regattaConfigurationButton);
-
         content.add(proceduresGrid);
         panel.add(content);
-
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());

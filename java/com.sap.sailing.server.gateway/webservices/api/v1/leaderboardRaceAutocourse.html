@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../fontface.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboards/{name}/autocourse?race_column={name}&amp;fleet={name}</h2>
+
+<b>Description:</b>
+<p>
+     Sets an inferred course in the race log for the race identified by the leaderboardName,
+     raceColumnName and fleetName, using a RaceLogCourseDesignChangedEvent. The
+     RaceLogRaceTracker will take the event and update a TrackedRace's course accordingly.
+     <p>
+     
+     <b>Note:</b> An existing course layout for the race identified will be replaced by the new, automatic
+     course layout. New marks will be added. Repeated execution for the same race, while possible, is not
+     recommended as it will lead to multiple marks with the same name.<p>
+     
+     Several "magical" and heuristic rules are applied to find a course that is better than no course. For this, the
+     method looks for tracks recorded in the TrackedRace. If no track is found for any of the competitors, no
+     course design is created and no corresponding race log event is added. If one or more tracks are found, the
+     tracks are analyzed.
+     <p>
+     
+     <b>Start:</b> When a race start time or at least a
+     tracking start time has been set for the race, the tracks are analyzed
+     around that time. A start line is defined as the course's first waypoint such that a majority of the tracks
+     cross that start line, with a "start boat" on the starboard side of the line when viewed in crossing
+     direction, and oriented such that it is perpendicular to the average course of those tracks that cross
+     it.<p>
+     
+     <b>Finish:</b> When no end of race, finish time
+     nor a tracking end time has been set, a hypothetical finish
+     line is "guessed" as 12h after the start time, spanning the tracks at that time with the leader just crossing it.<p>
+     
+     <b>Other course marks:</b> If a wind direction is known from a source other than the race course-based
+     estimation, e.g., a maneuver-based wind estimation, a manual entry, or a sensor measurement, transitions
+     between upwind, downwind, and reaching sections will be separated by adding a ControlPoint with a
+     corresponding Waypoint such that the waypoint is passed at the leg type transition. This will allow
+     for better analysis of legs split by their type.<p>
+
+</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>race_column, fleet</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>http://127.0.0.1:8888/sailingserver/api/v1/leaderboards/TracTrac%20Virtual%20Course%20Marks%20Test/autocourse?race_column=R1&fleet=Default<br>
+		delivers <pre>
+		{"race":{"regatta":"Croatia Test 2017-08-31","race":"Croatia Test 2017-08-31 R1 Default"},"course":{"course":{"name":"Auto-Course","waypoints":[{"name":"Auto Start Line","passingInstruction":"Line","controlPoint":{"@class":"ControlPointWithTwoMarks","name":"Auto Start Line","id":"d1ee476f-6ca3-4d1e-b3cd-6305a97ebeba","left":{"@class":"Mark","name":"Auto Pin End","id":"14e168d5-3bf1-48fe-a194-2078d47d995d"},"right":{"@class":"Mark","name":"Auto Start Boat","id":"304a325b-12f7-4880-b7fe-1bf6d3a5cd1a"}}},{"name":"Auto Start Line","passingInstruction":"Line","controlPoint":{"@class":"ControlPointWithTwoMarks","name":"Auto Start Line","id":"c8d64a6b-4017-45c9-998a-dad0db4e5951","left":{"@class":"Mark","name":"Auto Pin End","id":"fa11cc7a-48a4-4c1c-8a70-4a3535496754"},"right":{"@class":"Mark","name":"Auto Start Boat","id":"bd761c9c-aa64-4c1d-86b6-56d3b0a934ee"}}}]}}}
+		</pre></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

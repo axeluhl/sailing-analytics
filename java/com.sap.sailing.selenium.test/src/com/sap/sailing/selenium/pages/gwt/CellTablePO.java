@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -28,9 +30,6 @@ import com.sap.sailing.selenium.pages.common.CSSConstants;
  *   The type of the data entries the table contains.
  */
 public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
-    /**
-     * <p></p>
-     */
     public enum SortingOrder {
         Ascending,
         Descending,
@@ -52,9 +51,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
     private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
-    
-    protected static final String SELECTED_ROW_CSS_CLASS = "GCGQJ2NDCQ"; //$NON-NLS-1$
-    
+
     private static final String LOADING_ANIMATION_IMAGE = "data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
             "vYWQuaW5mbwAh+QQJCgAAACwAAAAAKwALAAACMoSOCMuW2diD88UKG95W88uF4DaGWFmhZid93pq+pwxnLUnXh8" +  //$NON-NLS-1$
@@ -73,6 +70,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             "iVBORw0KGgoAAAANSUhEUgAAAAsAAAAHCAYAAADebrddAAAAiklEQVR42mPIrewMya3oup5X2XkeiC/nVXRezgV" +  //$NON-NLS-1$
             "iEDu3vPMskH0BROeVdqkyJNTXcwAlDgDxfwxcAaWrOpsYYCC/qlUcKPgMLlnZBcWd/4E272BAB0DdjkDJf2AFFR" +  //$NON-NLS-1$
             "BTgfTj4uIeEQZsAKigHmE6EJd32DDgA0DF20FOyK/sqmIgBEDWAhVPwyYHAJAqZIiNwsHKAAAAAElFTkSuQmCC\")"; //$NON-NLS-1$
+    public static final String ARIA_ROLE_SELECTED = "aria-selected";
     
 //    @FindBy(how = ByTagName.class, using = HEAD_TAG_NAME)
 //    private WebElement head;
@@ -117,33 +115,31 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      *   A string representation for all columns.
      */
     public List<String> getColumnHeaders() {
-        List<String> headers = new ArrayList<>();
-        
-        for(WebElement header : findGWTHeaders()) {
+        final List<String> headers = new ArrayList<>();
+        for (WebElement header : findGWTHeaders()) {
             headers.add(header.getText());
         }
-        
         return headers;
     }
     
-    /**
-     * <p></p>
-     * 
-     * @param column
-     *   
-     * @param order
-     *   
-     */
+    public boolean containsColumnHeader(String headerToCheck) {
+        for (String header : getColumnHeaders()) {
+            if(header.contains(headerToCheck)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public void sortByColumn(int column, SortingOrder order) {
-        List<WebElement> headers = this.context.findElements(By.xpath(TABLE_HEADER_XPATH));
-        WebElement header = headers.get(column);
-        String role = header.getAttribute(GWTConstants.ROLE_ATTRIBUTE_NAME);
-        
-        if(header.isDisplayed() && GWTConstants.ROLE_BUTTON.equals(role)) {
-            if(order == SortingOrder.None && getSortingOrder(column) != SortingOrder.None)
+        final List<WebElement> headers = this.context.findElements(By.xpath(TABLE_HEADER_XPATH));
+        final WebElement header = headers.get(column);
+        final String role = header.getAttribute(GWTConstants.ROLE_ATTRIBUTE_NAME);
+        if (header.isDisplayed() && GWTConstants.ROLE_BUTTON.equals(role)) {
+            if (order == SortingOrder.None && getSortingOrder(column) != SortingOrder.None) {
                 throw new IllegalArgumentException("Can't change sorting order back to NONE");
-            
-            while(order != getSortingOrder(column)) {
+            }
+            while (order != getSortingOrder(column)) {
                 header.click();
             }
         }
@@ -154,24 +150,24 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     public SortingOrder getSortingOrder(int column) {
-        List<WebElement> headers = this.context.findElements(By.xpath(TABLE_HEADER_XPATH));
-        WebElement header = headers.get(column);
-        
+        final List<WebElement> headers = this.context.findElements(By.xpath(TABLE_HEADER_XPATH));
+        final WebElement header = headers.get(column);
         // NOTE: We use "findElements", since "findElement" throws an exception if there is no image (not sorted)
-        List<WebElement> images = header.findElements(By.xpath(SORTING_INDICATOR_XPATH));
-        
-        if(images.size() == 0)
-            return SortingOrder.None;
-        
-        String image = images.get(0).getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
-        
-        if(ASCENDING_IMAGE.equals(image))
-            return SortingOrder.Ascending;
-        
-        if(DESCENDING_IMAGE.equals(image))
-            return SortingOrder.Descending;
-        
-        throw new RuntimeException("Unkown sorting indicator");
+        final List<WebElement> images = header.findElements(By.xpath(SORTING_INDICATOR_XPATH));
+        final SortingOrder result;
+        if (images.size() == 0) {
+            result = SortingOrder.None;
+        } else {
+            final String image = images.get(0).getCssValue(CSSConstants.CSS_BACKGROUND_IMAGE);
+            if (ASCENDING_IMAGE.equals(image)) {
+                result = SortingOrder.Ascending;
+            } else if (DESCENDING_IMAGE.equals(image)) {
+                result = SortingOrder.Descending;
+            } else {
+                throw new RuntimeException("Unkown sorting indicator");
+            }
+        }
+        return result;
     }
     
     public SortingOrder getSortingOrder(String header) {
@@ -179,34 +175,29 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     public List<T> getEntries() {
-        List<T> entries = new ArrayList<>();
-        
-        for(WebElement row : getRows()) {
+        final List<T> entries = new ArrayList<>();
+        for (WebElement row : getRows()) {
             entries.add(createDataEntry(row));
         }
-        
         return entries;
     }
     
     public T getEntry(Object identifier) {
-        for(T entry : getEntries()) {
-            if(Objects.equals(identifier, entry.getIdentifier())) {
+        for (T entry : getEntries()) {
+            if (Objects.equals(identifier, entry.getIdentifier())) {
                 return entry;
             }
         }
-        
         return null;
     }
     
     public List<T> getEntries(List<?> identifiers) {
-        List<T> entries = new ArrayList<>();
-        
-        for(T entry : getEntries()) {
-            if(identifiers.contains(entry.getIdentifier())) {
+        final List<T> entries = new ArrayList<>();
+        for (T entry : getEntries()) {
+            if (identifiers.contains(entry.getIdentifier())) {
                 entries.add(entry);
             }
         }
-        
         return entries;
     }
     
@@ -219,7 +210,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      *   The entry to select.
      */
     public void selectEntry(T entry) {
-        if(this.getWebElement().equals(entry.table.getWebElement())) {
+        if (this.getWebElement().equals(entry.table.getWebElement())) {
             entry.select();
         }
     }
@@ -245,14 +236,41 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectEntries(Predicate<T> toSelectPredicate, BooleanSupplier canAbort) {
+        for (T entry : getEntries()) {
+            if(toSelectPredicate.test(entry)) {
+                entry.appendToSelection();
+            } else {
+                entry.deselect();
+            }
+            if (canAbort.getAsBoolean()) {
+                break;
+            }
+        }
+    }
+    
+    /**
+     * <p>Selects entries based on the given Predicate.</p>
+     * 
+     * <p>Note: If an entry is not contained in the table it will not be selected.</p>
+     */
+    public void selectAllEntries() {
+        selectEntries(e -> true, Boolean.FALSE::booleanValue);
+    }
+    
+    /**
      * <p>Returns all currently selected entries. If no entry is selected, an empty list is returned.</p>
      * 
      * @return
      *   All currently selected entries.
      */
     public List<T> getSelectedEntries() {
-        List<T> entries = getEntries();
-        Iterator<T> iterator = entries.iterator();
+        final List<T> entries = getEntries();
+        final Iterator<T> iterator = entries.iterator();
         while (iterator.hasNext()) {
             T entry = iterator.next();
             if (!entry.isSelected()) {
@@ -268,28 +286,26 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     @Override
     protected void verify() {
-        WebElement element = getWebElement();
-        String tagName = element.getTagName();
-        
-        if(!TABLE_TAG_NAME.equalsIgnoreCase(tagName) /*|| !CSSHelper.hasCSSClass(element, CELL_TABLE_CSS_CLASS)*/)
+        final WebElement element = getWebElement();
+        final String tagName = element.getTagName();
+        if (!TABLE_TAG_NAME.equalsIgnoreCase(tagName) /* || !CSSHelper.hasCSSClass(element, CELL_TABLE_CSS_CLASS) */) {
             throw new IllegalArgumentException("WebElement does not represent a CellTable");
+        }
     }
-    
+
     protected List<WebElement> findGWTHeaders() {
         return this.context.findElements(By.xpath("./thead/tr//*[@__gwt_header]"));
     }
     
     protected List<WebElement> getRows() {
-        List<WebElement> rows = this.context.findElements(By.xpath("./tbody/tr"));
-        Iterator<WebElement> iterator = rows.iterator();
-            
-        while(iterator.hasNext()) {
-            WebElement row = iterator.next();
-            
-            if(!row.isDisplayed() || isRowForLoadingIndicatorOrEmptyTableWidget(row))
+        final List<WebElement> rows = this.context.findElements(By.xpath("./tbody/tr"));
+        final Iterator<WebElement> iterator = rows.iterator();
+        while (iterator.hasNext()) {
+            final WebElement row = iterator.next();
+            if (!row.isDisplayed() || isRowForLoadingIndicatorOrEmptyTableWidget(row)) {
                 iterator.remove();
+            }
         }
-        
         return rows;
     }
     
@@ -301,13 +317,25 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
      * @return
      */
     private boolean isRowForLoadingIndicatorOrEmptyTableWidget(WebElement row) {
-        List<WebElement> images = row.findElements(By.xpath(LOADING_ANIMATION_XPATH));
-        
-        if(images.size() != 1)
-            return false;
-        
-        String image = images.get(0).getAttribute("src");
-        
-        return LOADING_ANIMATION_IMAGE.equals(image);
+        final List<WebElement> images = row.findElements(By.xpath(LOADING_ANIMATION_XPATH));
+        final boolean result;
+        if (images.size() != 1) {
+            result = false;
+        } else {
+            final String image = images.get(0).getAttribute("src");
+            result = LOADING_ANIMATION_IMAGE.equals(image);
+        }
+        return result;
+    }
+    
+    public void waitForTableToShowData() {
+        waitUntil(() -> {
+            try {
+                return !getRows().isEmpty();
+            } catch (Exception e) {
+                // This can fail while the table is just updating
+                return false;
+            }
+        });
     }
 }

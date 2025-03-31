@@ -8,32 +8,32 @@ public abstract class RaceStateFlagsInterpretationTemplate {
     public String getMeaningOfRaceStateAndFlags(RaceLogRaceStatus status, Flags upperFlag, Flags lowerFlag, boolean isDisplayed) {
         String statusText = "";
         
-        if (status.equals(RaceLogRaceStatus.RUNNING)) {
+        if (status == RaceLogRaceStatus.RUNNING) {
             statusText = getTextForRunningRace();
-        } else if (status.equals(RaceLogRaceStatus.FINISHING)) {
+        } else if (status == RaceLogRaceStatus.FINISHING) {
             statusText = getTextForFinishingRace();
-        } else if (status.equals(RaceLogRaceStatus.FINISHED)) {
+        } else if (status == RaceLogRaceStatus.FINISHED) {
             statusText = getTextForFinishedRace();
-        } else if (status.equals(RaceLogRaceStatus.SCHEDULED)) {
+        } else if (status == RaceLogRaceStatus.SCHEDULED) {
             statusText = getTextForScheduledRace();
-        } else if (status.equals(RaceLogRaceStatus.STARTPHASE)) {
+        } else if (status == RaceLogRaceStatus.STARTPHASE) {
             statusText = getTextForRaceInStartphase();
-        } else if (status.equals(RaceLogRaceStatus.UNSCHEDULED)) {
+        } else if (status == RaceLogRaceStatus.UNSCHEDULED || status == RaceLogRaceStatus.PRESCHEDULED) {
             statusText = getTextForUnscheduledRace();
             if (upperFlag != null) {
-                if (upperFlag.equals(Flags.FIRSTSUBSTITUTE)) {
+                if (upperFlag == Flags.FIRSTSUBSTITUTE) {
                     statusText = getTextForFirstSubstituteFlag();
-                } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.ALPHA) && isDisplayed) {
+                } else if (upperFlag == Flags.AP && lowerFlag == Flags.ALPHA && isDisplayed) {
                     statusText = getTextForAnsweringPennantWithAlphaFlags();
-                } else if (upperFlag.equals(Flags.AP) && lowerFlag.equals(Flags.HOTEL) && isDisplayed) {
+                } else if (upperFlag == Flags.AP && lowerFlag == Flags.HOTEL && isDisplayed) {
                     statusText = getTextForAnsweringPennantWithHotelFlags();
-                } else if (upperFlag.equals(Flags.AP) && isDisplayed) {
+                } else if (upperFlag == Flags.AP && isDisplayed) {
                     statusText = getTextForAnsweringPennantFlag();
-                } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.ALPHA) && isDisplayed) {
+                } else if (upperFlag == Flags.NOVEMBER && lowerFlag == Flags.ALPHA && isDisplayed) {
                     statusText = getTextForNovemberWithAlphaFlags();
-                } else if (upperFlag.equals(Flags.NOVEMBER) && lowerFlag.equals(Flags.HOTEL) && isDisplayed) {
+                } else if (upperFlag == Flags.NOVEMBER && lowerFlag == Flags.HOTEL && isDisplayed) {
                     statusText = getTextForNovemberWithHotelFlags();
-                } else if (upperFlag.equals(Flags.NOVEMBER) && isDisplayed) {
+                } else if (upperFlag == Flags.NOVEMBER && isDisplayed) {
                     statusText = getTextForNovemberFlag();
                 }
             }

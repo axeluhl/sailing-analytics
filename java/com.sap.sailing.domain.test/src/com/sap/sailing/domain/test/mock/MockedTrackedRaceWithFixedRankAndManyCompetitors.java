@@ -1,23 +1,21 @@
 package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrackedRaceWithFixedRank {
     private static final long serialVersionUID = -6189437610363552577L;
-    private final Set<Competitor> competitors;
-    private final RaceDefinition raceDefinition;
     
-    public MockedTrackedRaceWithFixedRankAndManyCompetitors(Competitor competitor, int rank, boolean started) {
-        super(competitor, rank, started);
-        competitors = new HashSet<Competitor>();
-        competitors.add(competitor);
+    public MockedTrackedRaceWithFixedRankAndManyCompetitors(CompetitorWithBoat competitorWithBoat, int rank, boolean started) {
+        super(competitorWithBoat, rank, started);
         this.raceDefinition = new RaceDefinition() {
             private static final long serialVersionUID = 8878878939443845646L;
             @Override
@@ -30,11 +28,19 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             }
             @Override
             public Iterable<Competitor> getCompetitors() {
-                return competitors;
+                return competitorsAndBoats.keySet();
+            }
+            @Override
+            public Iterable<Boat> getBoats() {
+                return competitorsAndBoats.values();
+            }
+            @Override
+            public Map<Competitor, Boat> getCompetitorsAndTheirBoats() {
+                return competitorsAndBoats;
             }
             @Override
             public Competitor getCompetitorById(Serializable competitorID) {
-                for (Competitor competitor : competitors) {
+                for (Competitor competitor : competitorsAndBoats.keySet()) {
                     if (competitorID.equals(competitor.getId())) {
                         return competitor;
                     }
@@ -50,11 +56,23 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             public Serializable getId() {
                 return null;
             }
+            @Override
+            public Boat getBoatOfCompetitor(Competitor competitor) {
+                return competitorsAndBoats.get(competitor);
+            }
+            @Override
+            public byte[] getCompetitorMD5() {
+                return null;
+            }
         };
     }
     
-    public void addCompetitor(Competitor competitor) {
-        competitors.add(competitor);
+    /**
+     * Uses as rank the maximum rank so far plus one.
+     */
+    public void addCompetitorWithBoat(CompetitorWithBoat competitorWithBoat) {
+        competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        ranks.put(competitorWithBoat, ranks.isEmpty() ? 1 : Collections.max(ranks.values())+1);
     }
 
     @Override

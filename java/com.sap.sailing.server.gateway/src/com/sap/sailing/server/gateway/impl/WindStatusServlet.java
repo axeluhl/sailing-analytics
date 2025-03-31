@@ -1,22 +1,25 @@
 package com.sap.sailing.server.gateway.impl;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
@@ -26,9 +29,12 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
-import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. Currently Expedition and Igtimi are supported.
@@ -36,21 +42,29 @@ import com.sap.sailing.server.gateway.SailingServerHttpServlet;
  * @author Simon Marcel Pamies
  *
  */
-public class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
+public abstract class WindStatusServlet extends SailingServerHttpServletWithPostBasedContentReplacing implements IgtimiWindListener, BulkFixReceiver {
+    private static final Logger logger = Logger.getLogger(WindStatusServlet.class.getName());
     private static final long serialVersionUID = -6791613843435003810L;
     
-    private static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+    protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
+    protected static final String REFRESHING_CONTENT_DIV_ID = "refreshingContent";
 
-    private final int NUMBER_OF_MESSAGES_TO_SHOW=20;
-    
+    protected final int NUMBER_OF_MESSAGES_TO_SHOW=100;
+    protected final int NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW=10;
+
+    protected static final DecimalFormat decimalFormatter2Digits = new DecimalFormat("#.##");
+    protected static final DecimalFormat decimalFormatter1Digit = new DecimalFormat("#.#");
+    protected static final DecimalFormat latLngDecimalFormatter = new DecimalFormat("#.######");
+    protected static final DateFormat dateTimeFormatter = DateFormat.getTimeInstance(DateFormat.LONG);
+            
     private static List<ExpeditionMessageInfo> lastExpeditionMessages;
     
     private static Object lock = new Object();
     private static int igtimiRawMessageCount;
-    private static List<IgtimiMessageInfo> lastIgtimiMessages;
+    private static Map<String, Deque<IgtimiMessageInfo>> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
-    private static LiveDataConnection liveDataConnection;
-
+    private static Map<LiveDataConnection, IgtimiConnectionInfo> igtimiConnections;
+    
     private static boolean isExpeditionListenerRegistered;
     private static boolean isIgtimiListenerRegistered;
     
@@ -58,9 +72,22 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         super();
         isExpeditionListenerRegistered = false;
         isIgtimiListenerRegistered = false;
+        igtimiConnections = new LinkedHashMap<>();
     }
     
-    private void initializeWindReceiver(boolean reinitialize) {
+    protected int getIgtimiMessagesRawCount() {
+        return igtimiRawMessageCount;
+    }
+    
+    protected Map<String, Deque<IgtimiMessageInfo>> getLastIgtimiMessages() {
+        return lastIgtimiMessages;
+    }
+    
+    protected List<ExpeditionMessageInfo> getLastExpeditionMessages() {
+        return lastExpeditionMessages;
+    }
+    
+    protected void initializeWindReceiver(boolean reinitialize) {
         synchronized (lock) {
             if (!isExpeditionListenerRegistered || reinitialize) {
                 isExpeditionListenerRegistered = registerExpeditionListener();
@@ -70,81 +97,28 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         synchronized (lock) {
             if (!isIgtimiListenerRegistered || reinitialize) {
                 if (reinitialize) {
-                    try {
-                        if (liveDataConnection != null) {
-                            liveDataConnection.stop();
-                            liveDataConnection.removeListener(igtimiWindReceiver);
-                            liveDataConnection.removeListener(this);
+                    if (!igtimiConnections.isEmpty()) {
+                        for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
+                            LiveDataConnection igtimiConnection = entry.getKey();
+                            try {
+                                if (igtimiConnection != null) {
+                                    igtimiConnection.stop();
+                                    igtimiConnection.removeListener(igtimiWindReceiver);
+                                    igtimiConnection.removeListener(this);
+                                    
+                                }
+                            } catch (Exception e) {
+                                logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
+                            }
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        igtimiConnections.clear();
                     }
                 }
+                lastIgtimiMessages = new HashMap<String, Deque<IgtimiMessageInfo>>();
                 isIgtimiListenerRegistered = registerIgtimiListener();
-                lastIgtimiMessages = new ArrayList<WindStatusServlet.IgtimiMessageInfo>();
                 igtimiRawMessageCount = 0;
             }
         }
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String reinitializeWindReceiverParameter = req.getParameter(PARAM_RELOAD_WIND_RECEIVER);
-        initializeWindReceiver(reinitializeWindReceiverParameter != null && reinitializeWindReceiverParameter.equalsIgnoreCase("true"));
-        resp.setContentType("text/html");
-        PrintWriter out = resp.getWriter();
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Wind Status</title>");
-        out.println("<meta http-equiv=refresh content='10; url="+req.getRequestURI()+"'>");
-        out.println("</head>");
-        out.println("<body>");
-        out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
-        out.println("<h3>Igtimi Wind Status ("+igtimiRawMessageCount+" raw messages received)</h3>");
-        if (lastIgtimiMessages != null && !lastIgtimiMessages.isEmpty()) {
-            final List<IgtimiMessageInfo> copyOfLastIgtimiMessages;
-            synchronized (lastIgtimiMessages) {
-                copyOfLastIgtimiMessages = new ArrayList<>(WindStatusServlet.lastIgtimiMessages);
-            }
-            int counter = 0;
-            for (ListIterator<IgtimiMessageInfo> iterator = copyOfLastIgtimiMessages.listIterator(copyOfLastIgtimiMessages.size()); iterator.hasPrevious();) {
-                counter++;
-                IgtimiMessageInfo message = iterator.previous();
-                out.println(message);
-                out.println("<br/>");
-                if (counter >= NUMBER_OF_MESSAGES_TO_SHOW) {
-                    break;
-                }
-            }
-        } else {
-            if (igtimiRawMessageCount == 0) {
-                out.println("<i>No Igtimi messages received so far!</i>");
-            } else {
-                out.println("<i>"+igtimiRawMessageCount+" Igtimi message bunch has been received but not enough messages to generate wind information.</i>");
-            }
-        }
-        out.println("<h3>Expedition Wind Status</h3>");
-        if (lastExpeditionMessages != null && !lastExpeditionMessages.isEmpty()) {
-            final List<ExpeditionMessageInfo> copyOfLastExpeditionMessages;
-            synchronized (lastExpeditionMessages) {
-                copyOfLastExpeditionMessages = new ArrayList<>(WindStatusServlet.lastExpeditionMessages);
-            }
-            int expeditionMsgCounter = 0;
-            for (ListIterator<ExpeditionMessageInfo> iterator = copyOfLastExpeditionMessages.listIterator(copyOfLastExpeditionMessages.size()); iterator.hasPrevious();) {
-                expeditionMsgCounter++;
-                ExpeditionMessageInfo message = iterator.previous();
-                out.println(message);
-                out.println("<br/>");
-                if (expeditionMsgCounter >= NUMBER_OF_MESSAGES_TO_SHOW) {
-                    break;
-                }
-            }
-        } else {
-            out.println("<i>No Expedition messages received so far!</i>");
-        }
-        out.println("</body>");
-        out.println("</html>");
-        out.close();
     }
 
     private boolean registerIgtimiListener() {
@@ -154,18 +128,21 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         IgtimiConnectionFactory igtimiConnectionFactory = igtimiServiceTracker.getService();
         igtimiWindReceiver = new IgtimiWindReceiver(DeclinationService.INSTANCE);
         igtimiWindReceiver.addListener(this);
-        for (Account account : igtimiConnectionFactory.getAllAccounts()) {
-            if (account.getUser() != null) {
-                IgtimiConnection igtimiConnection = igtimiConnectionFactory.connect(account);
-                try {
-                    liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
-                    liveDataConnection.addListener(igtimiWindReceiver);
-                    liveDataConnection.addListener(this);
-                    result = true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        IgtimiConnection igtimiConnection = igtimiConnectionFactory
+                .getOrCreateConnection(() -> getSecurityService().getCurrentUser() == null ? null
+                        : getSecurityService().getAccessToken(getSecurityService().getCurrentUser().getName()));
+        try {
+            final LiveDataConnection newIgtimiConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
+            result = newIgtimiConnection != null;
+            if (result) {
+                newIgtimiConnection.addListener(igtimiWindReceiver);
+                newIgtimiConnection.addListener(this);
+                IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo(
+                        newIgtimiConnection, igtimiConnection.getWindDevices());
+                igtimiConnections.put(newIgtimiConnection, newIgtimiConnectionInfo);
             }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
         }
         return result;
     }
@@ -173,8 +150,8 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     private boolean registerExpeditionListener() {
         boolean result = false;
         try {
-            ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> expeditionServiceTracker = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
-                    getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+            ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionServiceTracker = new ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory>(
+                    getContext(), ExpeditionTrackerFactory.class.getName(), null);
             expeditionServiceTracker.open();
             UDPExpeditionReceiver receiver = expeditionServiceTracker.getService().getOrCreateWindReceiverOnDefaultPort();
             receiver.addListener(new ExpeditionListener() {
@@ -198,8 +175,29 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         }
         return result;
     }
-    
-    private class ExpeditionMessageInfo {
+
+    protected class IgtimiConnectionInfo {
+        private final LiveDataConnection igtimiLiveConnection;
+        private final Iterable<String> deviceIDs;
+        
+        public IgtimiConnectionInfo(LiveDataConnection newIgtimiConnection, Iterable<String> deviceIDs) {
+            super();
+            this.igtimiLiveConnection = newIgtimiConnection;
+            final List<String> deviceIDsList = new ArrayList<>();
+            this.deviceIDs = deviceIDsList;
+            Util.addAll(deviceIDs, deviceIDsList);
+        }
+
+        public InetSocketAddress getRemoteAddress() {
+            return igtimiLiveConnection.getRemoteAddress();
+        }
+
+        public Iterable<String> getDeviceIDs() {
+            return deviceIDs;
+        }
+    }
+
+    protected class ExpeditionMessageInfo {
         Integer boatID;
         ExpeditionMessage message;
         Date messageReceivedAt;
@@ -216,41 +214,78 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         }
     }
     
-    private class IgtimiMessageInfo {
-        private Wind wind;
-        private String deviceSerialInfo;
+    protected class IgtimiMessageInfo {
+        private final Wind wind;
+        private final Set<Fix> fixesUsed;
         
-        public IgtimiMessageInfo(Wind wind, String deviceSerialInfo) {
+        public IgtimiMessageInfo(Wind wind, Set<Fix> fixesUsed) {
             this.wind = wind;
-            this.deviceSerialInfo = deviceSerialInfo;
+            this.fixesUsed = fixesUsed;
+        }
+        
+        public Wind getWind() {
+            return wind;
         }
         
         public String toString() {
-            return deviceSerialInfo + ":" + wind.toString();
+            final StringBuilder formattedInfo = new StringBuilder();
+            if (wind.getTimePoint() != null) {
+                formattedInfo.append("Time: " + dateTimeFormatter.format(wind.getTimePoint().asDate()));
+            }
+            if (wind.getPosition() != null) {
+                formattedInfo.append(", Pos: " + latLngDecimalFormatter.format(wind.getPosition().getLatDeg()) + " "
+                        + latLngDecimalFormatter.format(wind.getPosition().getLngDeg()));
+            }
+            formattedInfo.append(", Wind: " + decimalFormatter2Digits.format(wind.getKnots()) + "kn");
+            if (wind.getFrom() != null) {
+                formattedInfo.append(" from " + decimalFormatter1Digit.format(wind.getFrom().getDegrees()) + "&deg;");
+            }
+            final Iterable<Fix> sortedFixes = fixesUsed.stream().sorted((f1, f2)->f1.toString().compareTo(f2.toString()))::iterator;
+            formattedInfo.append(Util.joinStrings(", ", sortedFixes));
+            return formattedInfo.toString();
         }
     }
 
     @Override
-    public void windDataReceived(Wind wind, String deviceSerialNumber) {
-        lastIgtimiMessages.add(new IgtimiMessageInfo(wind, deviceSerialNumber));
+    public void windDataReceived(Wind wind, Set<Fix> fixesUsed, String deviceSerialNumber) {
+        Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
+        if (messagesPerDevice == null) {
+            messagesPerDevice = new ArrayDeque<>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
+            lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
+        }
+        synchronized (messagesPerDevice) {
+            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind, fixesUsed));
+            if (messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+                messagesPerDevice.pollLast();
+            }
+        }
     }
     
     @Override
     public void destroy() {
-        if (liveDataConnection != null) {
+        for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
+            LiveDataConnection igtimiConnection = entry.getKey();
             try {
-                liveDataConnection.stop();
+                igtimiConnection.stop();
             } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                liveDataConnection = null;
-                isIgtimiListenerRegistered = false;
+                logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
             }
         }
+        igtimiConnections.clear();
+        isIgtimiListenerRegistered = false;
     }
 
     @Override
     public void received(Iterable<Fix> fixes) {
         igtimiRawMessageCount += 1;
+    }
+
+    protected static String getPermissionToReload() {
+        return SecuredSecurityTypes.SERVER.getStringPermissionForTypeRelativeIdentifier(
+                SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, new TypeRelativeObjectIdentifier(ServerInfo.getName()));
+    }
+
+    public static Map<LiveDataConnection, IgtimiConnectionInfo> getIgtimiConnections() {
+        return igtimiConnections;
     }
 }

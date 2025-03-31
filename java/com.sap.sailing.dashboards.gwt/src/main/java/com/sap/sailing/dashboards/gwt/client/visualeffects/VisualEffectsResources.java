@@ -4,6 +4,6 @@ import com.google.gwt.resources.client.ClientBundle;
 
 public interface VisualEffectsResources extends ClientBundle{
 
-    @Source("BlurEffect.css")
-    BlurEffectStyle blurEffectStyle();
+    @Source("DarkeningEffect.css")
+    DarkeningEffectStyle darkeningEffectStyle();
 }

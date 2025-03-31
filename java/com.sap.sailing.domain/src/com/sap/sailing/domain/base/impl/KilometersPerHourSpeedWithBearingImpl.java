@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.base.impl;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseChange;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 
 public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpeedImpl implements SpeedWithBearing {
@@ -43,10 +43,15 @@ public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpee
     public CourseChange getCourseChangeRequiredToReach(SpeedWithBearing targetSpeedWithBearing) {
         return AbstractSpeedWithBearingImpl.getCourseChangeRequiredToReach(this, targetSpeedWithBearing);
     }
-
+    
+    @Override
+    public SpeedWithBearing scale(double d) {
+        return SpeedWithBearing.super.scale(d);
+    }
+    
     @Override
     public String toString() {
-        return super.toString()+" to "+getBearing().getDegrees()+"�";
+        return super.toString()+" to "+getBearing().getDegrees()+"°";
     }
 
     @Override

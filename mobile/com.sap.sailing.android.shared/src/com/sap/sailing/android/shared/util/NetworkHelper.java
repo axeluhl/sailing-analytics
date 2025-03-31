@@ -3,16 +3,21 @@ package com.sap.sailing.android.shared.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.os.AsyncTask;
-
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
+
+import android.content.Context;
+import android.os.AsyncTask;
 
 public class NetworkHelper {
 
@@ -21,24 +26,54 @@ public class NetworkHelper {
     protected static NetworkHelper mInstance;
     protected static Context mContext;
 
+    private NetworkHelper(Context context) {
+        mContext = context.getApplicationContext();
+    }
+
     public static NetworkHelper getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new NetworkHelper();
-            mContext = context.getApplicationContext();
+            mInstance = new NetworkHelper(context);
         }
 
         return mInstance;
     }
 
-    protected NetworkHelper() {
-        super();
+    public String[] getLocalIpAddress() {
+        ArrayList<String> addresses = new ArrayList<>();
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        addresses.add(intf.getDisplayName() + " -> " + inetAddress.getHostAddress());
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            ExLog.e(mContext, TAG, ex.toString());
+        }
+        return addresses.toArray(new String[addresses.size()]);
     }
 
-    public void executeHttpJsonRequestAsnchronously(HttpRequest request, NetworkHelperSuccessListener successListener,
+    public void executeHttpJsonRequestAsync(HttpRequest request, NetworkHelperSuccessListener successListener,
             NetworkHelperFailureListener failureListener) {
-
         NetworkRequestTask task = new NetworkRequestTask(successListener, failureListener);
         task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, request);
+    }
+
+    /**
+     * perfomAction called in case of network request success
+     */
+    public interface NetworkHelperSuccessListener {
+        public void performAction(JSONObject response);
+    }
+
+    /**
+     * perfomAction called in case of network request failure
+     */
+    public interface NetworkHelperFailureListener {
+        public void performAction(NetworkHelperError e);
     }
 
     private class NetworkRequestTask extends AsyncTask<HttpRequest, Void, Void> {
@@ -62,13 +97,10 @@ public class NetworkHelper {
             try {
                 stream = request.execute();
                 String responseStr = readStream(stream);
-
                 response = null;
-
                 if (responseStr.length() > 0) {
                     response = new JSONObject(responseStr);
                 }
-
                 isSuccess = true;
             } catch (IOException e) {
                 error = new NetworkHelperError(e.getMessage());
@@ -76,7 +108,6 @@ public class NetworkHelper {
                 error = new NetworkHelperError(e.getMessage());
                 ExLog.e(mContext, TAG, "Failed to parse JSON: " + e.getMessage());
             }
-
             return null;
         }
 
@@ -98,20 +129,6 @@ public class NetworkHelper {
             }
             return new String(baos.toByteArray(), Charset.defaultCharset());
         }
-    }
-
-    /**
-     * perfomAction called in case of network request success
-     */
-    public interface NetworkHelperSuccessListener {
-        public void performAction(JSONObject response);
-    }
-
-    /**
-     * perfomAction called in case of network request failure
-     */
-    public interface NetworkHelperFailureListener {
-        public void performAction(NetworkHelperError e);
     }
 
     /**

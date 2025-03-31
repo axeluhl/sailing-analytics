@@ -19,6 +19,11 @@ public class ConcurrentHashBag<T> extends AbstractCollection<T> {
     public boolean contains(Object o) {
         return map.containsKey(o);
     }
+    
+    public int count(Object o) {
+        final Integer result = map.get(o);
+        return result == null ? 0 : result;
+    }
 
     @Override
     public boolean remove(Object o) {
@@ -51,6 +56,16 @@ public class ConcurrentHashBag<T> extends AbstractCollection<T> {
     @Override
     public java.util.Iterator<T> iterator() {
         return new Iterator();
+    }
+    
+    @Override
+    public int hashCode() {
+        return map.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ConcurrentHashBag && map.equals(((ConcurrentHashBag<?>) o).map);
     }
 
     @Override

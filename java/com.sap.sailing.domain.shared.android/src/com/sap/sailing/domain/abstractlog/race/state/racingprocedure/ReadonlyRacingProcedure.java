@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventProcessor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -52,9 +53,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     void removeChangedListener(RacingProcedureChangedListener listener);
 
     /**
-     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current time and start time.
-     * @param startTime start time to be used to determine whether the start phase is active or not.
-     * @param now {@link TimePoint} used as the current time on determining whether the start phase is active or not.
+     * Returns <code>true</code> if the start phase of this {@link ReadonlyRacingProcedure is active given the current
+     * time and start time.
+     * 
+     * @param startTime
+     *            start time to be used to determine whether the start phase is active or not. Must not be {@code null}
+     * @param now
+     *            {@link TimePoint} used as the current time on determining whether the start phase is active or not.
      */
     boolean isStartphaseActive(TimePoint startTime, TimePoint now);
 
@@ -62,6 +67,11 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
      * Returns <code>true</code> if this {@link ReadonlyRacingProcedure} should allow signaling individual recalls.
      */
     boolean hasIndividualRecall();
+
+    /**
+     * Returns {@code true} if this racing procedure allows users to enter scores in the app
+     */
+    boolean isResultEntryEnabled();
 
     /**
      * Returns <code>true</code> if there is an individual recall signaled in the {@link RaceLog} right now.
@@ -79,7 +89,9 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     TimePoint getIndividualRecallDisplayedTime();
 
     /**
-     * Gets the time the individual recall flag was removed (or <code>null</code>).
+     * Gets the time the individual recall flag was or shall be removed (or <code>null</code> if it hasn't been set or no
+     * race start time is known). When the flag is currently set, the removal time can either be specified by an explicit
+     * race log event or is automatically triggered four minutes after the race start time.
      */
     TimePoint getIndividualRecallRemovalTime();
 
@@ -110,6 +122,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
      */
     RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             RacingProcedurePrerequisite.FulfillmentFunction function);
+
+
+    /**
+     * Delivers the time points and types of the events around the start, each optionally
+     * leading to a change in race status.
+     */
+    Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime);
 
     /**
      * This method is called by the framework. You don't need to call it.

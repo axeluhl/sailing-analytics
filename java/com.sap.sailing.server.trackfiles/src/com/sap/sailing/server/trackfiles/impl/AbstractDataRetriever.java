@@ -148,14 +148,12 @@ public abstract class AbstractDataRetriever implements DataRetriever {
             boolean rawFixes, WaypointCreator<F> creator, Iterable<E> elements, NameReader<E> nameReader,
             TrackReaderRetriever<E, F> trackRetriever) throws FormatNotSupportedException, IOException {
         List<GpxRoute> routes = new ArrayList<>();
+        final TimePoint start = race.getStartOfRace() != null ? race.getStartOfRace() : race.getStartOfTracking();
+        final TimePoint end = race.getEndOfRace() != null ? race.getEndOfRace() : race.getEndOfTracking();
         for (E element : elements) {
-            TimePoint start = race.getStartOfRace() != null ? race.getStartOfRace() : race.getStartOfTracking();
-            TimePoint end = race.getEndOfRace() != null ? race.getEndOfRace() : race.getEndOfTracking();
-
             String name = nameReader.getName(element);
             GpxRoute route = new GpxRoute(new Gpx11Format(), RouteCharacteristics.Track, name,
                     Collections.<String> emptyList(), new ArrayList<GpxPosition>());
-
             TrackReader<E, F> trackReader = trackRetriever.retrieveTrackReader(element);
             trackReader.getLocker().lock();
             try {
@@ -179,7 +177,6 @@ public abstract class AbstractDataRetriever implements DataRetriever {
             } finally {
                 trackReader.getLocker().unlock();
             }
-
             if (!route.getPositions().isEmpty()) {
                 routes.add(route);
             }

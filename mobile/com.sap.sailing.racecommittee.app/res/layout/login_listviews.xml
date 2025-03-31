@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/sap_gray">
+
+    <LinearLayout
+        android:id="@+id/events"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/event_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/selector_header_height">
+
+            <TextView
+                android:id="@+id/label_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:text="@string/label_login_events"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size"/>
+
+            <ImageView
+                android:id="@+id/icon_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:src="?attr/arrow_drop_down_24dp"/>
+
+            <TextView
+                android:id="@+id/selected_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/icon_event"
+                android:layout_toRightOf="@+id/label_event"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size_small"
+                tools:text="Test-Event"/>
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/event_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?attr/black"/>
+
+        <FrameLayout
+            android:id="@+id/event_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="?attr/sap_gray_black_30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/areas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/events"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/area_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/selector_header_height">
+
+            <TextView
+                android:id="@+id/label_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:text="@string/label_login_course_area"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size"/>
+
+            <ImageView
+                android:id="@+id/icon_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:src="?attr/arrow_drop_down_24dp"/>
+
+            <TextView
+                android:id="@+id/selected_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/icon_area"
+                android:layout_toRightOf="@id/label_area"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size_small"
+                tools:text="Selected Area"/>
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/area_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?attr/black"/>
+
+        <FrameLayout
+            android:id="@+id/area_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="?attr/sap_gray_black_30"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/positions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/areas"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/position_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/selector_header_height">
+
+            <TextView
+                android:id="@+id/label_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:text="@string/label_login_position"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size"/>
+
+            <ImageView
+                android:id="@+id/icon_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/side_padding"
+                android:src="?attr/arrow_drop_down_24dp"/>
+
+            <TextView
+                android:id="@+id/selected_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/icon_position"
+                android:layout_toRightOf="@id/label_position"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/login_text_size_small"
+                tools:text="Viewer"/>
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/position_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:background="?attr/black"/>
+
+        <FrameLayout
+            android:id="@+id/position_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="?attr/sap_gray_black_30"/>
+    </LinearLayout>
+
+    <include layout="@layout/login_listviews_button"/>
+</RelativeLayout>

@@ -1,0 +1,78 @@
+.eventheader_sharing {
+  text-align: right;
+  padding: 1.333333333333333em 0 !important;
+  display: inline-block;
+  float: right;
+}
+.eventheader_sharing_item {
+  display: inline-block;
+  height: 2.666666666666667em;
+  width: 2.666666666666667em;
+  margin-left: 0.333333333333333em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+}
+.eventheader_sharing_itememail {
+  background-color: #f0ab00;
+  background-image: resourceUrl("email");
+}
+.eventheader_sharing_itememail:hover,
+.eventheader_sharing_itememail:focus {
+  background-color: #d89a00;
+}
+.eventheader_sharing_itemtwitter {
+  background-color: #32b5e2;
+  background-image: resourceUrl("twitter");
+  background-size: 20px auto;
+}
+.eventheader_sharing_itemtwitter:hover,
+.eventheader_sharing_itemtwitter:focus {
+  background-color: #1faada;
+}
+.eventheader_sharing_itemfacebook {
+  position: relative;
+  background-color: #3b5998;
+}
+.eventheader_sharing_itemfacebook:after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background-image: resourceUrl("facebook");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.eventheader_sharing_itemfacebook:hover,
+.eventheader_sharing_itemfacebook:focus {
+  background-color: #355089;
+}
+
+.eventheader_sharing_itemcopytoclipboard {
+  float: right;
+  position: relative;
+  margin-left: 0.5em;
+  font-size: 1rem;
+  background-color: #737373 ;
+}
+.eventheader_sharing_itemcopytoclipboard:after {
+  content: "";
+  position: absolute;
+  width: 55%;
+  height: 55%;
+  top: 22.5%;
+  left: 22.5%;
+  background-image: resourceUrl("copyIcon");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+}
+
+.eventheader_sharing_itemcopytoclipboard:hover,
+.eventheader_sharing_itemcopytoclipboard:focus {
+  background-color: #808080;
+}

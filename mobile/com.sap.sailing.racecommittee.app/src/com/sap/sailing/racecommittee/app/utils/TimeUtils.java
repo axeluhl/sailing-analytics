@@ -1,52 +1,106 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import android.text.format.DateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DatePickerFragment;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class TimeUtils {
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.widget.DatePicker;
+import android.widget.NumberPicker;
+import android.widget.TimePicker;
 
-    public static long timeUntil(TimePoint targetTime) {
-        return targetTime.asMillis() - MillisecondsTimePoint.now().asMillis();
-    }
-    
+public class TimeUtils extends com.sap.sailing.android.shared.util.TimeUtils {
+
     /**
-     * Formats your time to 'kk:mm:ss'.
-     * @param timePoint timestamp to format
+     * Shows a {@link DatePicker} in a {@link DialogFragment}.
+     *
+     * @param manager {@link FragmentManager}
+     * @param calendar {@link Calendar} used for the selected year, month and day of month
+     * @param event Optional {@link EventBase} wit minimum and maximum date
      */
-    public static String formatTime(TimePoint timePoint) {
-        return formatTime(timePoint, "kk:mm:ss");
-    }
-    
-    /**
-     * Formats your time with the help of {@link DateFormat}.
-     * @param timePoint timestamp to format
-     * @param format format as defined by {@link DateFormat}
-     * @return timestamp formatted as {@link String}
-     */
-    public static String formatTime(TimePoint timePoint, String format) {
-        return DateFormat.format(format, timePoint.asDate()).toString();
+    public static void showDatePickerDialog(@NonNull final FragmentManager manager, @NonNull final Calendar calendar,
+                                            @Nullable final EventBase event) {
+        final int year = calendar.get(Calendar.YEAR);
+        final int month = calendar.get(Calendar.MONTH);
+        final int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        Long minDate = null, maxDate = null;
+        if (event != null) {
+            final TimePoint startDate = event.getStartDate();
+            final TimePoint endDate = event.getEndDate();
+            if (startDate != null) {
+                minDate = startDate.asMillis();
+            }
+            if (endDate != null) {
+                maxDate = endDate.asMillis();
+            }
+        }
+        final DialogFragment fragment = DatePickerFragment.newInstance(year, month, dayOfMonth, minDate, maxDate);
+        fragment.show(manager, DatePickerFragment.TAG);
     }
 
-    public static String formatDurationSince(long milliseconds) {
-        int secondsTillStart = (int) Math.floor(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
+    /**
+     * Shows a {@link DatePicker} in a {@link DialogFragment}.
+     *
+     * @param manager {@link FragmentManager}
+     * @param time {@link TimePoint} used for the selected year, month and day of month
+     * @param event Optional {@link EventBase} wit minimum and maximum date
+     */
+    public static void showDatePickerDialog(@NonNull final FragmentManager manager, @NonNull final TimePoint time,
+                                            @Nullable final EventBase event) {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(time.asDate());
+        showDatePickerDialog(manager, calendar, event);
     }
-    
-    public static String formatDurationUntil(long milliseconds) {
-        int secondsTillStart = (int) Math.ceil(milliseconds / 1000f);
-        return formatDuration(secondsTillStart);
-    }
-    
-    private static String formatDuration(int secondsTillStart) {
-        int hours = secondsTillStart / 3600;
-        int minutes = (secondsTillStart % 3600) / 60;
-        int seconds = (secondsTillStart % 60);
-        String timePattern = "%s:%s:%s";
-        String secondsString = seconds < 10 ? "0" + seconds : "" + seconds;
-        String minutesString = minutes < 10 ? "0" + minutes : "" + minutes;
-        String hoursString = hours < 10 ? "0" + hours : "" + hours;
-        return String.format(timePattern, hoursString, minutesString, secondsString);
+
+    public static void initTimePickerWithSeconds(Context context, final Calendar time,
+            @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {
+        int textColor = ThemeHelper.getColor(context, R.attr.white);
+        int dividerColor = ThemeHelper.getColor(context, R.attr.sap_yellow_1);
+        if (timePicker != null) {
+            ViewHelper.disableSave(timePicker);
+            ThemeHelper.setPickerColor(context, timePicker, textColor, dividerColor);
+            timePicker.setIs24HourView(true);
+            timePicker.setCurrentHour(time.get(Calendar.HOUR_OF_DAY));
+        }
+        if (secondPicker != null) {
+            ViewHelper.disableSave(secondPicker);
+            ThemeHelper.setPickerColor(context, secondPicker, textColor, dividerColor);
+            secondPicker.setMinValue(0);
+            secondPicker.setMaxValue(59);
+            secondPicker.setFormatter(new NumberPicker.Formatter() {
+                @Override
+                public String format(int value) {
+                    return String.format(Locale.US, "%02d", value);
+                }
+            });
+            secondPicker.setValue(time.get(Calendar.SECOND));
+            secondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    if (timePicker != null) {
+                        Calendar pickerTime = (Calendar) time.clone();
+                        pickerTime.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
+                        pickerTime.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+                        if (oldVal == 0 && newVal == 59) {
+                            pickerTime.add(Calendar.MINUTE, -1);
+                        }
+                        if (oldVal == 59 && newVal == 0) {
+                            pickerTime.add(Calendar.MINUTE, 1);
+                        }
+                        timePicker.setCurrentHour(pickerTime.get(Calendar.HOUR_OF_DAY));
+                        timePicker.setCurrentMinute(pickerTime.get(Calendar.MINUTE));
+                    }
+                }
+            });
+        }
     }
 }
