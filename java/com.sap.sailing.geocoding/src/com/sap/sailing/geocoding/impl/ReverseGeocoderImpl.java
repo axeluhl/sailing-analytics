@@ -352,6 +352,6 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
 
     final String GEONAMES_USER = "sailtracking";
     private String getGeonamesUser() {
-        return GEONAMES_USER+new Random().nextInt(10);
+        return GEONAMES_USER+(10+new Random().nextInt(10));
     }
 }
