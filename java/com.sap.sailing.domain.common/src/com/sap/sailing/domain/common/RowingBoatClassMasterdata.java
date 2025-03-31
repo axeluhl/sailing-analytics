@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 
 
 public enum RowingBoatClassMasterdata {

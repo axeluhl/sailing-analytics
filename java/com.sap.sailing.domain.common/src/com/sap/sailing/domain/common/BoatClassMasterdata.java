@@ -170,7 +170,7 @@ public enum BoatClassMasterdata {
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
 
     // Rowing:    
-    ROWING_BOAT("Rowing", false, 8.00, 0.80, BoatHullType.MONOHULL, false, "RowingBoat");
+    ROWING_BOAT("Rowing", false, 8.00, 0.80, BoatHullType.MONOHULL, false, "RowingBoat"),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
     PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),

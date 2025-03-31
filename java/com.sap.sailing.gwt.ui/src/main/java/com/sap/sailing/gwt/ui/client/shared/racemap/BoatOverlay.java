@@ -8,6 +8,7 @@ import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
+import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Distance;
@@ -39,47 +40,23 @@ public abstract class BoatOverlay extends CanvasOverlayV3 {
 
     protected Color color; 
 
-    private Map<Long, Util.Pair<Size, Size>> boatScaleAndSizePerWorldWidthCache; 
+    protected Map<Long, Util.Pair<Size, Size>> boatScaleAndSizePerWorldWidthCache; 
 
-    private Size lastScale;
-    private DisplayMode lastDisplayMode;
-    
+    private final BoatClassVectorGraphics boatVectorGraphics;
+
     public static enum DisplayMode { DEFAULT, SELECTED, NOT_SELECTED };
     private DisplayMode displayMode;
-    /**
-     * Remembers the old drawing angle as passed to {@link #setCanvasRotation(double)} to minimize rotation angle upon
-     * the next update. The rotation property will always be animated according to the magnitude of the values. A
-     * transition from 5 to 355 will go through 180 and not from 5 to 0==360 and back to 355! Therefore, with 5 being
-     * the last rotation angle, the new rotation angle of 355 needs to be converted to -5 to ensure that the transition
-     * goes through 0.<p>
-     */
-    protected Double boatDrawingAngle;
 
     public BoatOverlay(final MapWidget map, int zIndex, final BoatDTO boatDTO, Color color, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
         this.boatClass = boatDTO.getBoatClass();
         this.color = color;
         boatScaleAndSizePerWorldWidthCache = new HashMap<>();
+        boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }
     
-    protected abstract Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass);
-            final long worldWidth = (long) mapProjection.getWorldWidth();
-            final Util.Pair<Size, Size> boatScaleAndSize = boatScaleAndSizePerWorldWidthCache.computeIfAbsent(worldWidth, z->getBoatScaleAndSize(boatClass));
-            final Size boatSizeScaleFactor = boatScaleAndSize.getA();
-            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor,
-                    color, displayMode)) {
-                boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, getDisplayMode(), 
-                lastDisplayMode = displayMode;
-            final double trueHeadingInDegrees = boatFix.optionalTrueHeading != null
-                    ? boatFix.optionalTrueHeading.getDegrees()
-                    : (boatFix.speedWithBearing == null ? 0 : boatFix.speedWithBearing.bearingInDegrees);
-            updateDrawingAngleAndSetCanvasRotation(coordinateSystem.mapDegreeBearing(trueHeadingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
-    
+    @Override
     protected abstract void draw();
-            Size scaleFactor, Color color, DisplayMode displayMode) {
-                || lastHeight == null || lastHeight != height || lastScale == null || !lastScale.equals(scaleFactor)
-                || lastColor == null || !lastColor.equals(color) || lastDisplayMode == null
-                || !lastDisplayMode.equals(displayMode);
     
     public void setBoatFix(GPSFixDTOWithSpeedWindTackAndLegType boatFix, long timeForPositionTransitionMillis) {
         updateTransition(timeForPositionTransitionMillis);
@@ -102,12 +79,16 @@ public abstract class BoatOverlay extends CanvasOverlayV3 {
         changeBoatSizeIfTooShortHull(boatSizeInPixel, hullLength, hullBeam);
         changeBoatSizeIfTooNarrowBeam(boatSizeInPixel, hullLength, hullBeam);
         return boatSizeInPixel;
+    }
+
     private void changeBoatSizeIfTooShortHull(Size boatSizeInPixel, Distance hullLength, Distance hullBeam) {
         // the minimum boat length is related to the hull of the boat, not the overall length
+        double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
         if (boatSizeInPixel.getWidth() < minBoatHullLengthInPx) {
             double ratioBeamHullLength = hullBeam.divide(hullLength);
             boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioBeamHullLength);
             boatSizeInPixel.setWidth(minBoatHullLengthInPx);
+        }
     }
 
     private void changeBoatSizeIfTooNarrowBeam(Size boatSizeInPixel, Distance hullLength, Distance hullBeam) {

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.RowingBoatClassMasterdata;
 import com.sap.sse.common.Color;
 
@@ -54,11 +54,11 @@ public abstract class RowingBoatClassVectorGraphics {
     protected abstract void drawOars(Context2d ctx, boolean isPullingOars, String color);
 
     public void drawRowingBoatToCanvas(Context2d ctx, boolean isPullingOars, boolean isSelected, double width,
-            double height, double scaleFactor, Color color) {
+            double height, Size scaleFactor, Color color) {
         ctx.save();
         ctx.clearRect(0, 0, width, height);
         ctx.translate(width / 2.0, height / 2.0);
-        ctx.scale(scaleFactor, scaleFactor);
+        ctx.scale(scaleFactor.getWidth(), scaleFactor.getHeight());
         ctx.translate(-hullLengthInPx / 2.0, -beamInPx / 2.0);
         drawBoat(ctx, isSelected, color.getAsHtml());
         drawOars(ctx, isPullingOars, color.getAsHtml());
@@ -74,7 +74,7 @@ public abstract class RowingBoatClassVectorGraphics {
     }
 
     public boolean isBoatClassNameCompatible(String boatClassName) {
-        return compatibleBoatClasses.contains(BoatClassMasterdata.resolveBoatClass(boatClassName));
+        return compatibleBoatClasses.contains(RowingBoatClassMasterdata.resolveBoatClass(boatClassName));
     }
 
     public double getMinHullLengthInPx() {

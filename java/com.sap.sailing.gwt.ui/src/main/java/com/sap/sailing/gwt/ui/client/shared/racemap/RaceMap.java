@@ -2670,12 +2670,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void registerAllCourseMarkInfoWindowClickHandlers() {
         for (String markDTOIdAsString : markDTOs.keySet()) {
             registerCourseMarkInfoWindowClickHandler(markDTOIdAsString);
-            boatCanvas = new RowingBoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO),
-                    coordinateSystem);
-        } else {
-            boatCanvas = new SailingBoatOverlay(map, zIndex, competitorDTO,
-                    competitorSelection.getColor(competitorDTO), coordinateSystem);
-        }
         }
     }
     
@@ -2698,12 +2692,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             GWT.log("Error: no boat found for competitor "+competitorDTO.getName()+". Not showing on map.");
             boatCanvas = null;
         } else {
-            if (competitorDTO.getBoatClass().getName().equals(RowingBoatClassMasterdata.ROWING_BOAT.name())) {
-                boatCanvas = new RowingBoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO),
-                        coordinateSystem);
+            final BoatDTO boat = competitorSelection.getBoat(competitorDTO);
+            if (boat.getBoatClass().getName().equals(RowingBoatClassMasterdata.ROWING_BOAT.name())) {
+                boatCanvas = new RowingBoatOverlay(map, zIndex, competitorDTO, competitorSelection.getColor(competitorDTO), coordinateSystem);
             } else {
-                boatCanvas = new SailingBoatOverlay(map, zIndex, competitorDTO,
-                        competitorSelection.getColor(competitorDTO), coordinateSystem);
+                boatCanvas = new SailingBoatOverlay(map, zIndex, boat, competitorSelection.getColor(competitorDTO), coordinateSystem);
             }
             boatCanvas.setDisplayMode(displayMode);
             boatCanvas.addClickHandler(event -> {
