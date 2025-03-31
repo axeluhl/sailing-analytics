@@ -137,3 +137,6 @@ fi
 if [ -n "${POLAR_DATA_BEARER_TOKEN}" ]; then
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dpolardata.source.bearertoken=${POLAR_DATA_BEARER_TOKEN}"
 fi
+if [ -n "${GEONAMES_ORG_USERNAMES}" ]; then
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dgeonames.org.usernames=${GEONAMES_ORG_USERNAMES}"
+fi
