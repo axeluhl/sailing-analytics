@@ -37,9 +37,10 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
     private static final Logger logger = Logger.getLogger(FileUploadServlet.class.getName());
 
     /**
-     * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
+     * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes).
+     * Currently set to 5GB. This allows for malware scanning by services such as AWS GuardDuty.
      */
-    private static final long MAX_SIZE_IN_MB = 8192;
+    private static final long MAX_SIZE_IN_MB = 5000;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
