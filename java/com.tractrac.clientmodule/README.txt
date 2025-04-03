@@ -16,6 +16,19 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+        TracAPI 4.0.3
+********************************************
+This is the final version.  It keeps the backward compatibility. The new parameter files will be encoded in UTF-8,
+and the first line will contain "utf8:true". If the file does not start with this line, TracAPI will assume the
+file is an older version and will read it using the ISO-8859 encoding.
+
+  Release date: 03/04/2025
+
+ 1) Feature
+
+ - Support for UTF-8 (Requested by Jorge Piera, 01/04/2025)
+
+********************************************
         TracAPI 4.0.2
 ********************************************
 This is a final version. It keeps the backward compatibility.
