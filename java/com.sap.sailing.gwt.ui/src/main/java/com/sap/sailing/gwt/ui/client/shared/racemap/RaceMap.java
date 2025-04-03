@@ -50,8 +50,6 @@ import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
-import com.google.gwt.maps.client.events.zoom.ZoomChangeMapEvent;
-import com.google.gwt.maps.client.events.zoom.ZoomChangeMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.maptypes.StyledMapType;
 import com.google.gwt.maps.client.maptypes.StyledMapTypeOptions;
@@ -885,42 +883,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map.getMapTypeRegistry().set(SAILING_ANALYTICS_MAP_TYPE_ID, styledMapType);
                 map.setMapTypeId(getMapTypeId(/* wind up */ false, showSatelliteLayer));
                 map.setSize("100%", "100%");
-                map.addZoomChangeHandler(new ZoomChangeMapHandler() {
-                    @Override
-                    public void onEvent(ZoomChangeMapEvent event) {
-                        if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
-                            // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
-                            // restore old settings
-                            final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                            RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
-                                    settings.getZoomSettings().isZoomToSelectedCompetitors());
-                            settings = new RaceMapSettings
-                                    .RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
-                                    .withZoomSettings(clearedZoomSettings)
-                                    .build();
-                            simulationOverlay.setVisible(false);
-                            showLayoutsAfterAnimationFinishes();
-                        }
-                        if (streamletOverlay != null
-                                && settings.isShowWindStreamletOverlay()
-                                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
-                            streamletOverlay.setCanvasSettings();
-                            streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
-                        }
-                        advantageLineLength = getMapDiagonalVisibleDistance();
-                        showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
-                    }
-
-                    private void showLayoutsAfterAnimationFinishes() {
-                        new com.google.gwt.user.client.Timer() {
-                            @Override
-                            public void run() {
-                                simulationOverlay.setVisible(settings.isShowSimulationOverlay()
-                                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
-                            }
-                        }.schedule(500);
-                    }
-                });
+                map.addZoomChangeHandler(e->afterZoomOrHeadingChanged());
+                map.addHeadingChangeHandler(e->afterZoomOrHeadingChanged());
                 map.addDragEndHandler(new DragEndMapHandler() {
                     @Override
                     public void onEvent(DragEndMapEvent event) {
@@ -2176,6 +2140,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     final WindDTO windFix = windDataForLegMiddle.windFixes.get(0);
                     if (windLadder == null) {
                         windLadder = new WindLadder(map, 0 /* TODO z-index */, coordinateSystem);
+                    } else {
+                        windLadder.swap();
                     }
                     windLadder.update(windFix, bestVisibleCompetitorPosition.position, timeForPositionTransitionMillis);
                     if (!windLadder.isVisible()) {
@@ -3319,14 +3285,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 courseAreaCirclesToShow.clear();
             }
         }
-        final boolean needtoUpdateWindLadder;
+        final boolean needToUpdateWindLadder;
         if (newSettings.isShowWindLadder() != settings.isShowWindLadder()) {
             if (windLadder != null) {
                 windLadder.setVisible(newSettings.isShowWindLadder());
             }
-            needtoUpdateWindLadder = newSettings.isShowWindLadder();
+            needToUpdateWindLadder = newSettings.isShowWindLadder();
         } else {
-            needtoUpdateWindLadder = false;
+            needToUpdateWindLadder = false;
         }
         this.settings = newSettings;
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
@@ -3334,7 +3300,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 maneuverMarkersAndLossIndicators.updateManeuverMarkersAfterSettingsChanged();
             }
         }
-        if (needtoUpdateWindLadder) {
+        if (needToUpdateWindLadder) {
             showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
         }
         if (requiresUpdateCoordinateSystem) {
@@ -3802,6 +3768,36 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private Distance getMapDiagonalVisibleDistance() {
         return coordinateSystem.getPosition(currentMapBounds.getSouthWest()).getDistance(coordinateSystem.getPosition(currentMapBounds.getNorthEast())); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+    }
+
+    private void afterZoomOrHeadingChanged() {
+        new com.google.gwt.user.client.Timer() {
+            @Override
+            public void run() {
+                if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
+                    // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
+                    // restore old settings
+                    final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                    RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList,
+                            settings.getZoomSettings().isZoomToSelectedCompetitors());
+                    settings = new RaceMapSettings
+                            .RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
+                            .withZoomSettings(clearedZoomSettings)
+                            .build();
+                    simulationOverlay.setVisible(false);
+                    simulationOverlay.setVisible(settings.isShowSimulationOverlay()
+                            && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.SIMULATOR, raceMapLifecycle.getRaceDTO()));
+                }
+                if (streamletOverlay != null
+                        && settings.isShowWindStreamletOverlay()
+                        && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
+                    streamletOverlay.setCanvasSettings();
+                    streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
+                }
+                advantageLineLength = getMapDiagonalVisibleDistance();
+                showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
+            }
+        }.schedule(500);
     }
 }
 
