@@ -69,7 +69,7 @@ public class ReverseGeocoderTest {
     @Test
     public void getPlacemarkBestTest() {
         Position abroad = new DegreePosition(54.429758, 10.289335);
-        Placemark firstByDistance = new PlacemarkImpl("Wendtorfer Strand", "DE", new DegreePosition(54.41212, 10.28952), 1139);
+        Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.41212, 10.28952), 1139);
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
             Assert.assertEquals(KIEL.getName(), p.getName());
