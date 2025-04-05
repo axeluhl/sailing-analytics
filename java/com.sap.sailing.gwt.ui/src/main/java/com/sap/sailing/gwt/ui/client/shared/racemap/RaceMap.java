@@ -3771,6 +3771,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void afterZoomOrHeadingChanged() {
+        GWT.log("Zoom or Heading Changed");
         new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
