@@ -2516,7 +2516,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void zoomMapToNewBounds(PixelBounds newBounds) {
         if (newBounds != null) {
             int newZoomLevel = getZoomLevel(newBounds.getLatLngBounds(getMap().getProjection()));
-            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) { // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 if (newZoomLevel != map.getZoom()) {
@@ -3655,6 +3655,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapOptions.setFullscreenControl(false);
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
+        mapOptions.setIsFractionalZoomEnabled(true);
         return mapOptions;
     }
 
