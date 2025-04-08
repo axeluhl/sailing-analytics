@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.maptypes.Projection;
@@ -23,13 +22,6 @@ public class PixelBounds {
         this.lowerRight = lowerRight;
     }
     
-    /**
-     * Creates a zero-size pixel bounds object by first mapping {@code singlePoint} through the {@link Projection}.
-     */
-    public PixelBounds(Projection projection, LatLng singlePoint) {
-        this(projection.fromLatLngToPoint(singlePoint, Point.newInstance(0, 0)));
-    }
-
     public PixelBounds(Point singlePoint) {
         this(singlePoint, singlePoint);
     }
@@ -63,19 +55,10 @@ public class PixelBounds {
                                  (getUpperLeft().getY()+getLowerRight().getY())/2.0);
     }
     
-    public LatLng getLatLngCenter(Projection projection) {
-        return projection.fromPointToLatLng(getCenter(), /* nowrap */ false);
-    }
-
     public boolean contains(PixelBounds other) {
         return other.getUpperLeft().getX() >= this.getUpperLeft().getX()
             && other.getUpperLeft().getY() >= this.getUpperLeft().getY()
             && other.getLowerRight().getX() <= this.getLowerRight().getX()
             && other.getLowerRight().getX() <= this.getLowerRight().getX();
-    }
-
-    public LatLngBounds getLatLngBounds(Projection projection) {
-        return LatLngBounds.newInstance(projection.fromPointToLatLng(getLowerLeft(), /* nowrap */ false),
-                                        projection.fromPointToLatLng(getUpperRight(), /* nowrap */ false));
     }
 }

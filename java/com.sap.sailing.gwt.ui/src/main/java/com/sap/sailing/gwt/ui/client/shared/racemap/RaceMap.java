@@ -35,7 +35,6 @@ import com.google.gwt.maps.client.MapTypeId;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.RenderingType;
 import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.controls.MapTypeStyle;
@@ -52,6 +51,7 @@ import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
+import com.google.gwt.maps.client.maptypes.Projection;
 import com.google.gwt.maps.client.maptypes.StyledMapType;
 import com.google.gwt.maps.client.maptypes.StyledMapTypeOptions;
 import com.google.gwt.maps.client.mvc.MVCArray;
@@ -919,7 +919,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (autoZoomOut) {
                             // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                            map.panTo(autoZoomPixelBounds.getLatLngCenter(getMap().getProjection()));
+                            map.panTo(getLatLng(autoZoomPixelBounds.getCenter()));
                             autoZoomOut = false;
                         }
                         if (streamletOverlay != null 
@@ -1024,7 +1024,53 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new PixelBounds(Point.newInstance(0, 0),
                                Point.newInstance(getMap().getOffsetWidth(), getMap().getOffsetHeight()));
     }
-
+    
+    private LatLng getLatLng(Point pixelPointOnMap) {
+        final Projection projection = getMap().getProjection();
+        // zoom scaling factor (one zoom level means doubling the size)
+        final double scale = Math.pow(2, getMap().getZoom());
+        // compute offset from map viewport center:
+        final double offsetX = pixelPointOnMap.getX() - getMap().getOffsetWidth() / 2.0;
+        final double offsetY = pixelPointOnMap.getY() - getMap().getOffsetHeight() / 2.0;
+        // scale to Google Maps world coordinates:
+        final double worldX = offsetX / scale;
+        final double worldY = offsetY / scale;
+        // Get the map's center and its world coordinates
+        final Point mapCenterInWorldCoordinates = projection.fromLatLngToPoint(getMap().getCenter(), Point.newInstance(0, 0));
+        // Get the map's current heading (rotation) in degrees and convert to radians
+        final double headingDeg = (double) map.getHeading() / 180.0 * Math.PI;
+        // Rotate the point back to its original position (before rotation)
+        final double rotatedWorldCoordinateX = worldX * Math.cos(headingDeg) + worldY * Math.sin(headingDeg);
+        final double rotatedWorldCoordinateY = -worldX * Math.sin(headingDeg) + worldY * Math.cos(headingDeg);
+        // Convert the rotated world coordinates back to LatLng
+        return projection.fromPointToLatLng(Point.newInstance(rotatedWorldCoordinateX + mapCenterInWorldCoordinates.getX(),
+                                                              rotatedWorldCoordinateY + mapCenterInWorldCoordinates.getY()),
+                                            /* nowrap */ false);
+    }
+    
+    /**
+     * Maps the {@code latlng} to a Google Maps "world coordinate" through the map's {@link Projection}
+     * and computes the offset from the map's {@link MapWidget#getCenter() center}, also converted to the
+     * world coordinate space. Then, rotates the vector by the map's {@link MapWidget#getHeading() heading}
+     * and scales it according to the {@link MapWidget#getZoom() zoom level}. Each zoom level means a doubling
+     * of the scale. The scale is multiplied by half the map's div offset height/width to obtain the final
+     * pixel position relative to the map's div element.
+     */
+    private Point getPixelPoint(LatLng latLng) {
+        final Projection projection = getMap().getProjection();
+        final Point latLngInWorldCoordinates = projection.fromLatLngToPoint(latLng, Point.newInstance(0, 0));
+        final Point mapCenterInWorldCoordinates = projection.fromLatLngToPoint(getMap().getCenter(), Point.newInstance(0, 0));
+        final double headingRad = (double) getMap().getHeading() / 180.0 * Math.PI;
+        final double offsetX = latLngInWorldCoordinates.getX() - mapCenterInWorldCoordinates.getX();
+        final double offsetY = latLngInWorldCoordinates.getY() - mapCenterInWorldCoordinates.getY();
+        final double rotatedX = offsetX * Math.cos(-headingRad) - offsetY * Math.sin(-headingRad);
+        final double rotatedY = offsetX * Math.sin(-headingRad) + offsetY * Math.cos(-headingRad);
+        final double scale = Math.pow(2, getMap().getZoom());
+        final double pixelX = rotatedX * scale + getMap().getOffsetWidth() / 2.0;
+        final double pixelY = rotatedY * scale + map.getOffsetHeight() / 2.0;
+        return Point.newInstance(pixelX, pixelY);
+    }
+    
     private void createAdvancedFunctionsButtonGroup(boolean showMapControls) {
         final VerticalPanel sharingAndVideoPanel = new VerticalPanel();
         sharingAndVideoPanel.add(advancedFunctionsButton);
@@ -1599,7 +1645,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                              * As a consequence the mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
                         }
-                        zoomMapToNewBounds(zoomToBounds); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                        zoomMapToNewBounds(zoomToBounds);
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     } else {
                         GWT.log("Dropped result from getRaceMapData(...) except for boat positions with detail type "+detailType+
@@ -2487,38 +2533,41 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    // Google scales coordinates so that the globe-tile has mercator-latitude [-pi, +pi], i.e. tile height of 2*pi
-    // mercator-latitude pi corresponds to geo-latitude of approx. 85.0998 (where Google cuts off the map visualization)
-    // official documentation: https://developers.google.com/maps/documentation/javascript/coordinates#tile-coordinates
-    private double getMercatorLatitude(double latDeg) {
-        // cutting-off for latitudes close to +-90 degrees is recommended (to avoid division by zero)
-        double sine = Math.max(-0.9999, Math.min(0.9999, Math.sin(Math.PI * latDeg / 180)));
-        return Math.log((1 + sine) / (1 - sine)) / 2;
-    }
-
-    public int getZoomLevel(LatLngBounds bounds) {
-        int GLOBE_PXSIZE = 256; // a constant in Google's map projection
-        int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
-        double LOG2 = Math.log(2.0);
-        double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
-        double deltaLat = getMercatorLatitude(bounds.getNorthEast().getLatitude()) - getMercatorLatitude(bounds.getSouthWest().getLatitude());
-        if ((deltaLng == 0) && (deltaLat == 0)) {
-            return MAX_ZOOM;
+    /**
+     * Computes a new zoom level for the map, based on pixel-based bounds measured in the pixel coordinates of the map
+     * at its current zoom level and heading. These {@code pixelBounds} are compared to the map's viewport size
+     * ({@link MapWidget#getOffsetWidth()} / {@link MapWidget#getOffsetHeight()}). In each of the two dimensions
+     * we can calculate a scaling factor: greater than one means we can zoom in; less than one means we need to zoom
+     * out. The minimum is selected because we need to find a zoom level such that the bounds fit into the map's
+     * viewport.<p>
+     * 
+     * This base-2 logarithm of the scaling factor is then computed which gives the number of zoom levels to add to
+     * or subtract from the current map's zoom level.
+     */
+    private final static double LOG2 = Math.log(2.0);
+    private final static int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
+    private int getZoomLevel(PixelBounds pixelBounds) {
+        final int result;
+        final double deltaX = pixelBounds.getLowerRight().getX() - pixelBounds.getUpperLeft().getX();
+        final double deltaY = pixelBounds.getLowerRight().getY() - pixelBounds.getUpperLeft().getY();
+        if ((deltaX == 0) && (deltaY == 0)) {
+            result = MAX_ZOOM;
+        } else {
+            int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() / deltaX) / LOG2);
+            int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() / deltaY) / LOG2);
+            result = getMap().getZoom() + Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
         }
-        if (deltaLng < 0) {
-            deltaLng += 360;
-        }
-        int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2);
-        int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 2 * Math.PI / deltaLat / GLOBE_PXSIZE) / LOG2);
-        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
+        return result;
     }
 
     private void zoomMapToNewBounds(PixelBounds newBounds) {
         if (newBounds != null) {
-            int newZoomLevel = getZoomLevel(newBounds.getLatLngBounds(getMap().getProjection()));
+            int newZoomLevel = getZoomLevel(newBounds);
             if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
+                // Important: compute lat/lng of pixel-based newBounds *before* changing zoom
+                final LatLng latLngCenterOfNewBounds = getLatLng(newBounds.getCenter());
                 if (newZoomLevel != map.getZoom()) {
                     // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
                     // appears different on the screen due to map-animations
@@ -2529,12 +2578,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
                     if (autoZoomIn) {
-                        map.panTo(newBounds.getLatLngCenter(getMap().getProjection()));
+                        map.panTo(latLngCenterOfNewBounds);
                     } else {
                         map.setZoom(autoZoomLevel);
                     }
                 } else {
-                    map.panTo(newBounds.getLatLngCenter(getMap().getProjection()));
+                    map.panTo(latLngCenterOfNewBounds);
                 }
                 autoZoomPixelBounds = newBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings,
@@ -3362,11 +3411,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     Position competitorPosition = competitorFix != null ? competitorFix.position : null;
                     if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = new PixelBounds(forMap.getMap().getProjection(),
-                                    forMap.coordinateSystem.toLatLng(competitorPosition));
+                            newBounds = new PixelBounds(forMap.getPixelPoint(forMap.coordinateSystem.toLatLng(competitorPosition)));
                         } else {
-                            newBounds = newBounds.extend(new PixelBounds(forMap.getMap().getProjection(),
-                                    forMap.coordinateSystem.toLatLng(competitorPosition)));
+                            newBounds = newBounds.extend(new PixelBounds(forMap.getPixelPoint(forMap.coordinateSystem.toLatLng(competitorPosition))));
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -3390,10 +3437,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
                 if (tail != null && tail.getLength() >= 1) {
-                    bounds = new PixelBounds(racemap.getMap().getProjection(), tail.getPath().get(0));
+                    bounds = new PixelBounds(racemap.getPixelPoint(tail.getPath().get(0)));
                     for (int i = 1; i < tail.getLength(); i++) {
-                        bounds = bounds.extend(new PixelBounds(racemap.getMap().getProjection(),
-                                tail.getPath().get(i)));
+                        bounds = bounds.extend(new PixelBounds(racemap.getPixelPoint(tail.getPath().get(i))));
                     }
                 }
                 if (bounds != null) {
@@ -3416,11 +3462,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
                     if (newBounds == null) {
-                        newBounds = new PixelBounds(forMap.getMap().getProjection(),
-                                forMap.coordinateSystem.toLatLng(markDTO.position));
+                        newBounds = new PixelBounds(forMap.getPixelPoint(forMap.coordinateSystem.toLatLng(markDTO.position)));
                     } else {
-                        newBounds = newBounds.extend(new PixelBounds(forMap.getMap().getProjection(),
-                                forMap.coordinateSystem.toLatLng(markDTO.position)));
+                        newBounds = newBounds.extend(new PixelBounds(forMap.getPixelPoint(forMap.coordinateSystem.toLatLng(markDTO.position))));
                     }
                 }
             }
@@ -3437,11 +3481,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
                     final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
                     if (Objects.nonNull(latLngPosition) && BoundsUtil.getAsPosition(latLngPosition) != null) {
-                        PixelBounds bounds = new PixelBounds(forMap.getMap().getProjection(), latLngPosition);
+                        PixelBounds bounds = new PixelBounds(forMap.getPixelPoint(latLngPosition));
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(new PixelBounds(forMap.getMap().getProjection(), latLngPosition));
+                            newBounds = newBounds.extend(new PixelBounds(forMap.getPixelPoint(latLngPosition)));
                         }
                     }
                 }
@@ -3775,9 +3819,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private Distance getMapDiagonalVisibleDistance() {
         return coordinateSystem.getPosition(
-                getMap().getProjection().fromPointToLatLng(currentMapBounds.getUpperLeft(), /* nowrap */ false))
-                    .getDistance(coordinateSystem.getPosition(getMap().getProjection().fromPointToLatLng(
-                            currentMapBounds.getLowerRight(), /* nowrap */ false)));
+                getLatLng(currentMapBounds.getUpperLeft()))
+                    .getDistance(coordinateSystem.getPosition(getLatLng(
+                            currentMapBounds.getLowerRight())));
     }
 
     private void afterZoomOrHeadingChanged() {
