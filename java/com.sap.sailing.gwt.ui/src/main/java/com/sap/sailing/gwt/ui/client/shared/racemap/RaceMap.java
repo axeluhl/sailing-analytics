@@ -429,11 +429,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
     private NonCardinalBounds currentMapBounds; // bounds to which bounds-changed-handler compares, in real-world coordinates
-    private int currentZoomLevel;               // zoom-level to which bounds-changed-handler compares
+    private double currentZoomLevel;            // zoom-level to which bounds-changed-handler compares
     
     private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
     private boolean autoZoomOut = false; // flags auto-zoom-out in progress
-    private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
+    private double autoZoomLevel;        // zoom-level to which auto-zoom-in/-out is zooming
     NonCardinalBounds autoZoomBounds;    // bounds to which auto-zoom-in/-out is panning&zooming, in real-world coordinates
     
     private RaceSimulationOverlay simulationOverlay;
@@ -932,7 +932,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showAdvantageLineAndUpdateWindLadder(getCompetitorsToShow(), getTimer().getTime(), /* timeForPositionTransitionMillis */ -1 /* (no transition) */);
                         refreshMapWithoutAnimation();
                         if (!mapFirstZoomDone) {
-                            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this)); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
                             redraw();
                         }
                         if (!isMapInitialized) {
@@ -948,7 +948,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
                     @Override
                     public void onEvent(BoundsChangeMapEvent event) {
-                        int newZoomLevel = map.getZoom();
+                        double newZoomLevel = map.getZoom();
                         if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                             removeTransitions();
                         }
@@ -1575,18 +1575,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         NonCardinalBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
-                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             if (zoomToBounds == null && !mapFirstZoomDone) {
                                 // the user-specified zoom couldn't find what it was looking for; try defaults once
-                                zoomToBounds = getDefaultZoomBounds(); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                                zoomToBounds = getDefaultZoomBounds();
                             }
                         }
                         if (!mapFirstZoomDone) {
                             // Zoom once to the marks if marks exist
-                            zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                            zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
                             if (zoomToBounds == null) {
                                 // use default zoom, e.g.,
-                                zoomToBounds = getDefaultZoomBounds(); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                                zoomToBounds = getDefaultZoomBounds();
                             }
                             /*
                              * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was
@@ -1594,7 +1594,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                              * As a consequence the mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
                         }
-                        zoomMapToNewBounds(zoomToBounds); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                        zoomMapToNewBounds(zoomToBounds);
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     } else {
                         GWT.log("Dropped result from getRaceMapData(...) except for boat positions with detail type "+detailType+
@@ -2482,7 +2482,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    public int getZoomLevel(NonCardinalBounds viewportBounds) {
+    public double getZoomLevel(NonCardinalBounds viewportBounds) {
         final LatLngBounds bounds = BoundsUtil.getAsBounds(coordinateSystem.toLatLng(viewportBounds.getLowerLeft()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getUpperLeft()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getLowerRight()))
@@ -2498,17 +2498,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (deltaLng < 0) {
             deltaLng += 360;
         }
-        final double lngLog2 = Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2;
-        int zoomLng = (int) Math.floor(lngLog2);
-        final double latlog2 = Math.log((map.getDiv().getClientHeight()-60) /* subtract the transparent margin at the top of the map*/
-                * 2*85 /* Google's Mercator projection covers the world only from 85S to 85N */ / deltaLat / GLOBE_PXSIZE) / LOG2;
-        int zoomLat = (int) Math.floor(latlog2);
-        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM)-1;
+        double zoomLng = Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2 - 0.5;
+        double zoomLat = Math.log((map.getDiv().getClientHeight()-60) /* subtract the transparent margin at the top of the map*/
+                * 2*85 /* Google's Mercator projection covers the world only from 85S to 85N */ / deltaLat / GLOBE_PXSIZE) / LOG2 - 0.5;
+        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
     }
 
     private void zoomMapToNewBounds(NonCardinalBounds newBounds) {
         if (newBounds != null) {
-            int newZoomLevel = getZoomLevel(newBounds);
+            double newZoomLevel = getZoomLevel(newBounds);
             if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -2541,7 +2539,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private boolean mapNeedsToPanOrZoom(NonCardinalBounds newBounds, int newZoomLevel) {
+    private boolean mapNeedsToPanOrZoom(NonCardinalBounds newBounds, double newZoomLevel) {
         // we never updated, update now
         if (currentMapBounds == null) {
             return true;
@@ -2550,8 +2548,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!currentMapBounds.contains(newBounds)) {
             return true;
         }
-        // we do fit the required bounds, however we might be to far zoomed out, check if we can zoom to a better level
-        if (newZoomLevel != map.getZoom()) {
+        // we do fit the required bounds, however we might be too far zoomed out, check if we can zoom to a better level
+        if (Math.abs(newZoomLevel - map.getZoom()) > 0.5) {
             return true;
         }
         return false;
@@ -3171,7 +3169,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
-            zoomMapToNewBounds(zoomSettings.getNewBounds(this)); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+            zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
     }
 
@@ -3236,12 +3234,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.isShowSelectedCompetitorsInfo() != settings.isShowSelectedCompetitorsInfo()) {
             requiresRedraw = true;
         }
-        if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            if (!newSettings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
-                removeTransitions();
-                zoomMapToNewBounds(newSettings.getZoomSettings().getNewBounds(this)); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
-            }
-        }
+        final boolean requiresZoom = !newSettings.getZoomSettings().equals(settings.getZoomSettings()) && !newSettings.getZoomSettings().containsZoomType(ZoomTypes.NONE);
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
             requiresRedraw = true;
         }
@@ -3293,7 +3286,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             needToUpdateWindLadder = false;
         }
+        // now the settings will actually be updated:
         this.settings = newSettings;
+        if (requiresZoom) {
+            removeTransitions();
+            zoomMapToNewBounds(newSettings.getZoomSettings().getNewBounds(this));
+        }
         if (maneuverTypeSelectionChanged || showManeuverLossChanged) {
             if (timer.getPlayState() != PlayStates.Playing) {
                 maneuverMarkersAndLossIndicators.updateManeuverMarkersAfterSettingsChanged();
@@ -3458,7 +3456,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (map != null) {
             map.triggerResize();
             if (isMapInitialized) {
-                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this)); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
             }
         }
         // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
@@ -3648,6 +3646,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapOptions.setFullscreenControl(false);
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
+        mapOptions.setIsFractionalZoomEnabled(true);
         return mapOptions;
     }
 
@@ -3770,7 +3769,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void afterZoomOrHeadingChanged() {
-        GWT.log("Zoom or Heading Changed");
+        final boolean resetAutoZoomSettings = !autoZoomIn && !autoZoomOut && !orientationChangeInProgress;
         if (streamletOverlay != null
                 && settings.isShowWindStreamletOverlay()
                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
@@ -3779,7 +3778,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
-                if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
+                if (resetAutoZoomSettings) {
                     // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
                     // restore old settings
                     final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();

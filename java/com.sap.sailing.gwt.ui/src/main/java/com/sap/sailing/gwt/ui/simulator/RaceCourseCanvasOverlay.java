@@ -126,7 +126,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
     }
 
     public void setStartEndPoint(LatLng startPoint, LatLng endPoint) {
-    	int zoomLevel = map.getZoom();
+    	double zoomLevel = map.getZoom();
     	racecourseBuoySize = 1.0 + (5.0 - 1.0)*(zoomLevel - 10.0)/(14.0 - 10.0);
         setStartPoint(startPoint);
         setEndPoint(endPoint);        

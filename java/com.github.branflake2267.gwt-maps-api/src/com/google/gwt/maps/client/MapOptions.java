@@ -275,6 +275,24 @@ public class MapOptions extends JavaScriptObject {
   }-*/;
 
   /**
+   * Vector maps support fractional zoom, which lets you zoom using fractional values instead of integers. While both
+   * raster and vector maps support fractional zoom, fractional zoom is on by default for vector maps, and off by
+   * default for raster maps. Use the isFractionalZoomEnabled map option to turn fractional zoom on and off.
+   */
+  public final native boolean getIsFractionalZoomEnabled() /*-{
+    return isFractionalZoomEnabled;
+  }-*/;
+
+  /**
+   * Vector maps support fractional zoom, which lets you zoom using fractional values instead of integers. While both
+   * raster and vector maps support fractional zoom, fractional zoom is on by default for vector maps, and off by
+   * default for raster maps. Use the isFractionalZoomEnabled map option to turn fractional zoom on and off.
+   */
+  public final native void setIsFractionalZoomEnabled(boolean isFractionalZoomEnabled) /*-{
+    this.isFractionalZoomEnabled = isFractionalZoomEnabled;
+  }-*/;
+
+  /**
    * get If false, prevents the map from being controlled by the keyboard. Keyboard shortcuts are enabled by default.
    * 
    * @return boolean

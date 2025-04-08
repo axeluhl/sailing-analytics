@@ -15,7 +15,7 @@ import com.sap.sse.common.Util;
 public class FixOverlay extends CanvasOverlayV3 {
     private GPSFixDTO fix;
     private final FixVectorGraphics fixVectorGraphics;
-    private final HashMap<Integer, Util.Pair<Double,Size>> fixScaleAndSizePerZoomCache;
+    private final HashMap<Double, Util.Pair<Double,Size>> fixScaleAndSizePerZoomCache;
     
     private Double lastWidth;
     private Double lastHeight;
@@ -25,7 +25,7 @@ public class FixOverlay extends CanvasOverlayV3 {
         super(map, zIndex, coordinateSystem);
         fix = fixDTO;
         fixVectorGraphics = new FixVectorGraphics(type, color);
-        fixScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        fixScaleAndSizePerZoomCache = new HashMap<>();
         setCanvasSize(50, 50);
         getCanvas().setTitle(tooltip);
     }
@@ -33,7 +33,7 @@ public class FixOverlay extends CanvasOverlayV3 {
     @Override
     protected void draw() {
         if (getMapProjection() != null && fix != null) {
-            int zoom = map.getZoom();
+            double zoom = map.getZoom();
             Util.Pair<Double, Size> fixScaleAndSize = fixScaleAndSizePerZoomCache.get(zoom);
             if (fixScaleAndSize == null) {
                 fixScaleAndSize = getFixScaleAndSize();

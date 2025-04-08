@@ -42,7 +42,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     private final MarkVectorGraphics markVectorGraphics;
 
-    private Map<Integer, Util.Pair<Double, Size>> markScaleAndSizePerZoomCache; 
+    private Map<Double, Util.Pair<Double, Size>> markScaleAndSizePerZoomCache; 
     
     private Double lastWidth;
     private Double lastHeight;
@@ -60,7 +60,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         this.position = markDTO.position;
         this.buoyZoneRadius = new MeterDistance(0.0);
         this.showBuoyZone = false;
-        this.markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        this.markScaleAndSizePerZoomCache = new HashMap<>();
         this.markVectorGraphicsFactory = new MarkVectorGraphicsFactory();
         this.markVectorGraphics = markVectorGraphicsFactory.getMarkVectorGraphics(markDTO);
         setCanvasSize(50, 50);
@@ -69,7 +69,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     @Override
     protected void draw() {
         if (getMapProjection() != null && mark != null && position != null) {
-            int zoom = map.getZoom();
+            double zoom = map.getZoom();
             Util.Pair<Double, Size> markScaleAndSize = markScaleAndSizePerZoomCache.get(zoom);
             if (markScaleAndSize == null) {
                 markScaleAndSize = getMarkScaleAndSize(position);
