@@ -27,7 +27,7 @@ public class PixelBounds {
      * Creates a zero-size pixel bounds object by first mapping {@code singlePoint} through the {@link Projection}.
      */
     public PixelBounds(Projection projection, LatLng singlePoint) {
-        this(projection.fromLatLngToPoint(singlePoint, /* point */ null));
+        this(projection.fromLatLngToPoint(singlePoint, Point.newInstance(0, 0)));
     }
 
     public PixelBounds(Point singlePoint) {
