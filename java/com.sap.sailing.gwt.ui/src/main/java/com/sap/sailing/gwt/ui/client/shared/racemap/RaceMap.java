@@ -3772,6 +3772,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void afterZoomOrHeadingChanged() {
         GWT.log("Zoom or Heading Changed");
+        if (streamletOverlay != null
+                && settings.isShowWindStreamletOverlay()
+                && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
+            streamletOverlay.onDragStart();
+        }
         new com.google.gwt.user.client.Timer() {
             @Override
             public void run() {
@@ -3792,6 +3797,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (streamletOverlay != null
                         && settings.isShowWindStreamletOverlay()
                         && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {
+                    streamletOverlay.onDragEnd();
                     streamletOverlay.setCanvasSettings();
                     streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
                 }
