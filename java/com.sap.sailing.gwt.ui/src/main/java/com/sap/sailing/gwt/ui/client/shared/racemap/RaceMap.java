@@ -434,7 +434,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
     private boolean autoZoomOut = false; // flags auto-zoom-out in progress
     private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
-    PixelBounds autoZoomPixelBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
+    LatLng autoZoomCenter;               // bounds to which auto-zoom-in/-out is panning&zooming
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
@@ -919,7 +919,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (autoZoomOut) {
                             // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                            map.panTo(getLatLng(autoZoomPixelBounds.getCenter()));
+                            map.panTo(autoZoomCenter);
                             autoZoomOut = false;
                         }
                         if (streamletOverlay != null 
@@ -2582,10 +2582,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     } else {
                         map.setZoom(autoZoomLevel);
                     }
+                    // This will be completed by corresponding panTo/setZoom actions in the IdleMapHandler
                 } else {
                     map.panTo(latLngCenterOfNewBounds);
                 }
-                autoZoomPixelBounds = newBounds;
+                autoZoomCenter = latLngCenterOfNewBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings,
                         settings.getZoomSettings().isZoomToSelectedCompetitors());
                 settings = new RaceMapSettings.RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
@@ -3394,7 +3395,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
+    public static class BoatsBoundsCalculator extends PixelBoundsCalculatorForSelected {
         @Override
         public PixelBounds calculateNewBounds(RaceMap forMap) {
             PixelBounds newBounds = null;
@@ -3425,7 +3426,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
     
-    public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
+    public static class TailsBoundsCalculator extends PixelBoundsCalculatorForSelected {
         @Override
         public PixelBounds calculateNewBounds(RaceMap racemap) {
             PixelBounds newBounds = null;
@@ -3825,7 +3826,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void afterZoomOrHeadingChanged() {
-        GWT.log("Zoom or Heading Changed");
         if (streamletOverlay != null
                 && settings.isShowWindStreamletOverlay()
                 && paywallResolver.hasPermission(SecuredDomainType.TrackedRaceActions.VIEWSTREAMLETS, raceMapLifecycle.getRaceDTO())) {

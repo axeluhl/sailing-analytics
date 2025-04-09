@@ -76,7 +76,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
         if (typesToConsiderOnZoom != null) {
             for (ZoomTypes type : typesToConsiderOnZoom.getValues()) {
                 // Calculate the new bounds and extend the result
-                PixelBounds calculatedBounds = type.calculateNewBounds(forMap); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                PixelBounds calculatedBounds = type.calculateNewBounds(forMap);
                 if (calculatedBounds != null) {
                     if (newBounds == null) {
                         newBounds = calculatedBounds;
