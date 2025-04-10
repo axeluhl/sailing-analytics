@@ -6,7 +6,14 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 
 public class NonCardinalBoundsImpl implements NonCardinalBounds {
-
+    /**
+     * Computing spherical trigonometry with double precision can lead to numerical errors. When bounds are to be
+     * extended to include a position, the new border is calculated to end up exactly on that position. However, due to
+     * lack of numerical precision, in some cases the position may still be a tiny little bit outside of the new bounds.
+     * Adding the maximum of {@link #verticalSize} and {@link #horizontalSize}, scaled by this epsilon, to the extension
+     * distance is intended to include a new position safely when {@link #extend(Position) extending} bounds.
+     */
+    private static final double EPSILON = 0.1;
     private final Position lowerLeft;
     private final Bearing verticalBearing;
     private final Distance verticalSize;
@@ -47,26 +54,28 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
             if (horizontalDistanceFromLeft.compareTo(Distance.NULL) < 0) {
                 // left of left border; extend to the left by projecting p down to the bottom and adjust horizontal distance
                 final Distance verticalDistanceToBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
-                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom);
-                newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromLeft.scale(-1));
+                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom.scale(1.0+EPSILON))
+                                .translateGreatCircle(getHorizontalBearing().reverse(), getHorizontalSize().scale(EPSILON));
+                newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromLeft.scale(-1.0-2*EPSILON));
             } else {
                 final Distance horizontalDistanceFromRight = p.crossTrackError(getLowerRight(), getVerticalBearing());
                 if (horizontalDistanceFromRight.compareTo(Distance.NULL) > 0) {
                     // right of right border; extend to the right by adjusting horizontal distance
-                    newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromRight);
+                    newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromRight.scale(1.0+EPSILON));
                 }            
             }
             final Distance verticalDistanceFromBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
             if (verticalDistanceFromBottom.compareTo(Distance.NULL) > 0) {
                 // below bottom; extend to the bottom by projecting p down to the bottom and adjust vertical distance
                 final Distance horizontalDistanceToLeft = p.crossTrackError(getLowerLeft(), getVerticalBearing());
-                newLowerLeft = p.translateGreatCircle(getHorizontalBearing().reverse(), horizontalDistanceToLeft);
-                newVerticalSize = getVerticalSize().add(verticalDistanceFromBottom);
+                newLowerLeft = p.translateGreatCircle(getHorizontalBearing().reverse(), horizontalDistanceToLeft.scale(1.0+EPSILON))
+                                .translateGreatCircle(getVerticalBearing().reverse(), getVerticalSize().scale(EPSILON));
+                newVerticalSize = getVerticalSize().add(verticalDistanceFromBottom.scale(1.0+2*EPSILON));
             } else {
                 final Distance verticalDistanceFromTop = p.crossTrackError(getUpperLeft(), getHorizontalBearing());
                 if (verticalDistanceFromTop.compareTo(Distance.NULL) < 0) {
                     // above top; extend to the top by adjusting vertical distance
-                    newVerticalSize = getVerticalSize().add(verticalDistanceFromTop.scale(-1));
+                    newVerticalSize = getVerticalSize().add(verticalDistanceFromTop.scale(-1.0-EPSILON));
                 }
             }
             result = NonCardinalBounds.create(newLowerLeft, getVerticalBearing(), newVerticalSize, newHorizontalSize);
