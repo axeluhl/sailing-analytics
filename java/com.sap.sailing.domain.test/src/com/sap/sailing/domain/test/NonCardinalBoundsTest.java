@@ -43,4 +43,23 @@ public class NonCardinalBoundsTest {
         final NonCardinalBounds extendedBounds = bounds.extend(leftOutside);
         assertTrue(extendedBounds.contains(leftOutside));
     }
+
+    @Test
+    public void testExtendByOtherBounds() {
+        final NonCardinalBounds bounds1 = NonCardinalBounds.create(
+                new DegreePosition(49, 8),
+                new DegreeBearingImpl(30),
+                /* verticalSize */ new NauticalMileDistance(1),
+                /* horizontalSize */ new NauticalMileDistance(1));
+        final NonCardinalBounds bounds2 = NonCardinalBounds.create(
+                new DegreePosition(49, 8),
+                new DegreeBearingImpl(60),
+                /* verticalSize */ new NauticalMileDistance(1),
+                /* horizontalSize */ new NauticalMileDistance(1));
+        assertFalse(bounds1.contains(bounds2));
+        assertFalse(bounds2.contains(bounds1));
+        final NonCardinalBounds extendedBounds = bounds1.extend(bounds2);
+        assertTrue(extendedBounds.contains(bounds1));
+        assertTrue(extendedBounds.contains(bounds2));
+    }
 }

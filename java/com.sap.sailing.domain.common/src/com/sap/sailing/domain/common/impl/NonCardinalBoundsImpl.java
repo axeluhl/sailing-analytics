@@ -7,13 +7,13 @@ import com.sap.sse.common.Distance;
 
 public class NonCardinalBoundsImpl implements NonCardinalBounds {
     /**
-     * Computing spherical trigonometry with double precision can lead to numerical errors. When bounds are to be
-     * extended to include a position, the new border is calculated to end up exactly on that position. However, due to
-     * lack of numerical precision, in some cases the position may still be a tiny little bit outside of the new bounds.
-     * Adding the maximum of {@link #verticalSize} and {@link #horizontalSize}, scaled by this epsilon, to the extension
-     * distance is intended to include a new position safely when {@link #extend(Position) extending} bounds.
+     * Computing spherical trigonometry with double precision can lead to numerical errors. When judging whether a
+     * {@link Position} is {@link #contains(Position) contained} in some bounds, a bit of a "leeway" is assumed, to the
+     * benefit of a position to be contained in a bounds object. This leeway is a factor multiplied with the size in the
+     * dimension being checked ({@link #getHorizontalSize()} for left/right checks, {@link #getVerticalSize()} for
+     * top/bottom checks).
      */
-    private static final double EPSILON = 0.1;
+    private static final double EPSILON = 0.001;
     private final Position lowerLeft;
     private final Bearing verticalBearing;
     private final Distance verticalSize;
@@ -54,42 +54,55 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
             if (horizontalDistanceFromLeft.compareTo(Distance.NULL) < 0) {
                 // left of left border; extend to the left by projecting p down to the bottom and adjust horizontal distance
                 final Distance verticalDistanceToBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
-                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom.scale(1.0+EPSILON))
-                                .translateGreatCircle(getHorizontalBearing().reverse(), getHorizontalSize().scale(EPSILON));
-                newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromLeft.scale(-1.0-2*EPSILON));
+                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom)
+                                .translateGreatCircle(getHorizontalBearing().reverse(), getHorizontalSize());
+                newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromLeft.scale(-1.0));
             } else {
                 final Distance horizontalDistanceFromRight = p.crossTrackError(getLowerRight(), getVerticalBearing());
                 if (horizontalDistanceFromRight.compareTo(Distance.NULL) > 0) {
                     // right of right border; extend to the right by adjusting horizontal distance
-                    newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromRight.scale(1.0+EPSILON));
+                    newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromRight);
                 }            
             }
             final Distance verticalDistanceFromBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
             if (verticalDistanceFromBottom.compareTo(Distance.NULL) > 0) {
                 // below bottom; extend to the bottom by projecting p down to the bottom and adjust vertical distance
                 final Distance horizontalDistanceToLeft = p.crossTrackError(getLowerLeft(), getVerticalBearing());
-                newLowerLeft = p.translateGreatCircle(getHorizontalBearing().reverse(), horizontalDistanceToLeft.scale(1.0+EPSILON))
-                                .translateGreatCircle(getVerticalBearing().reverse(), getVerticalSize().scale(EPSILON));
-                newVerticalSize = getVerticalSize().add(verticalDistanceFromBottom.scale(1.0+2*EPSILON));
+                newLowerLeft = p.translateGreatCircle(getHorizontalBearing().reverse(), horizontalDistanceToLeft);
+                newVerticalSize = getVerticalSize().add(verticalDistanceFromBottom);
             } else {
                 final Distance verticalDistanceFromTop = p.crossTrackError(getUpperLeft(), getHorizontalBearing());
                 if (verticalDistanceFromTop.compareTo(Distance.NULL) < 0) {
                     // above top; extend to the top by adjusting vertical distance
-                    newVerticalSize = getVerticalSize().add(verticalDistanceFromTop.scale(-1.0-EPSILON));
+                    newVerticalSize = getVerticalSize().add(verticalDistanceFromTop.scale(-1.0));
                 }
             }
             result = NonCardinalBounds.create(newLowerLeft, getVerticalBearing(), newVerticalSize, newHorizontalSize);
         }
+        assert result.contains(p);
         return result;
     }
 
     @Override
     public NonCardinalBounds extend(NonCardinalBounds other) {
-        return this
+        assert contains(this.getLowerLeft());
+        assert contains(this.getLowerRight());
+        assert contains(this.getUpperLeft());
+        assert contains(this.getUpperRight());
+        final NonCardinalBounds result = this
                 .extend(other.getLowerLeft())
                 .extend(other.getLowerRight())
                 .extend(other.getUpperLeft())
                 .extend(other.getUpperRight());
+        assert result.contains(this.getLowerLeft());
+        assert result.contains(this.getLowerRight());
+        assert result.contains(this.getUpperLeft());
+        assert result.contains(this.getUpperRight());
+        assert result.contains(other.getLowerLeft());
+        assert result.contains(other.getLowerRight());
+        assert result.contains(other.getUpperLeft());
+        assert result.contains(other.getUpperRight());
+        return result;
     }
 
     /**
@@ -98,10 +111,10 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
      */
     @Override
     public boolean contains(Position p) {
-        return p.crossTrackError(getLowerLeft(), getVerticalBearing()).compareTo(Distance.NULL) >= 0
-            && p.crossTrackError(getLowerLeft(), getHorizontalBearing()).compareTo(Distance.NULL) <= 0
-            && p.crossTrackError(getUpperLeft(), getHorizontalBearing()).compareTo(Distance.NULL) >= 0
-            && p.crossTrackError(getLowerRight(), getVerticalBearing()).compareTo(Distance.NULL) <= 0;
+        return p.crossTrackError(getLowerLeft(), getVerticalBearing()).compareTo(getVerticalSize().scale(-EPSILON)) >= 0
+            && p.crossTrackError(getLowerLeft(), getHorizontalBearing()).compareTo(getHorizontalSize().scale(EPSILON)) <= 0
+            && p.crossTrackError(getUpperLeft(), getHorizontalBearing()).compareTo(getHorizontalSize().scale(-EPSILON)) >= 0
+            && p.crossTrackError(getLowerRight(), getVerticalBearing()).compareTo(getVerticalSize().scale(EPSILON)) <= 0;
     }
 
     @Override
