@@ -45,14 +45,6 @@ public class BoundsUtil {
      * four 90deg intervals for the heading, with special treatment when very close (see {@link #SECTOR_BOUNDARY_LIMIT_DEGREES})
      * to the sector boundary where the resulting bounds <em>are</em> rectlinear and cardinally aligned again.
      * <p>
-     * 
-     * TODO bug6098-rotatedbounds: this calculation currently only works for headings between 0-90deg, assuming the
-     * lower left corner of the resulting non-cardinal bounds lies on the western edge of the map bounds. The 90deg
-     * special case is already handled; but as headings fall into the range of (90deg, 180deg), the lower left corner
-     * travels on the map bounds' NORTHERN edge, requiring a different mapping, probably by subtracting 90deg from the
-     * heading and using the same calculation pattern, only adjusting to
-     * fromNorthWestOfMapBoundsToLowerLeftOfViewportBounds and flipping horizontalMapBoundsSize and
-     * verticalMapBoundsSize in the calculations. The same again for the two other quadrants...
      */
     public static NonCardinalBounds getMapBounds(LatLngBounds mapBounds, Bearing mapHeading, CoordinateSystem coordinateSystem) {
         final Position mapBoundsSouthWest = coordinateSystem.getPosition(mapBounds.getSouthWest());
@@ -64,44 +56,35 @@ public class BoundsUtil {
         Distance horizontalSizeViewport = null;
         Distance verticalSizeViewport = null;
         Position viewportLowerLeft = null;
-        Bearing currentMapBoundsEdgeBearing = Bearing.NORTH;
         final Position[] mapBoundsCornersClockwise = new Position[] { mapBoundsSouthWest, mapBoundsNorthWest, mapBoundsNorthEast, mapBoundsSouthEast };
-        Bearing heading = mapHeading;
         // normalize heading to degree angles in range [0..360)
-        while (heading.getDegrees() < 0) {
-            heading = heading.add(new DegreeBearingImpl(360)); // translate to a positive angle
+        while (mapHeading.getDegrees() < 0) {
+            mapHeading = mapHeading.add(new DegreeBearingImpl(360)); // translate to a positive angle
         }
-        if (heading.getDegrees() < SECTOR_BOUNDARY_LIMIT_DEGREES) {
+        if (mapHeading.getDegrees() < SECTOR_BOUNDARY_LIMIT_DEGREES) {
             // not rotated; use map bounds
             viewportLowerLeft = mapBoundsSouthWest;
             horizontalSizeViewport = horizontalMapBoundsSize;
             verticalSizeViewport = verticalMapBoundsSize;
         } else {
-            // scan the four sectors
-            int sectorIndex = 0;
-            Distance lengthOfMapBoundsEdgeHoldingLowerLeft = verticalMapBoundsSize;
-            Distance lengthOfMapBoundsEdgeNotHoldingLowerLeft = horizontalMapBoundsSize;
-            while (viewportLowerLeft == null) {
-                if (heading.getDegrees() < 90 - SECTOR_BOUNDARY_LIMIT_DEGREES) {
-                    final double tangensHeading = Math.tan(heading.getRadians());
-                    final Distance fromMapBoundsCornerToLowerLeftOfViewportBounds = lengthOfMapBoundsEdgeHoldingLowerLeft.scale(tangensHeading*tangensHeading).add(lengthOfMapBoundsEdgeNotHoldingLowerLeft.scale(-tangensHeading))
-                            .scale(1.0 / (tangensHeading * tangensHeading + 1));
-                    horizontalSizeViewport = fromMapBoundsCornerToLowerLeftOfViewportBounds.scale(1.0/Math.sin(heading.getRadians()));
-                    verticalSizeViewport = lengthOfMapBoundsEdgeHoldingLowerLeft.add(fromMapBoundsCornerToLowerLeftOfViewportBounds.scale(-1.0)).scale(1.0/Math.cos(heading.getRadians()));
-                    viewportLowerLeft = mapBoundsCornersClockwise[sectorIndex].translateGreatCircle(currentMapBoundsEdgeBearing, fromMapBoundsCornerToLowerLeftOfViewportBounds);
-                } else if (heading.getDegrees() < 90 + SECTOR_BOUNDARY_LIMIT_DEGREES) {
-                    // rotated 90deg clockwise
-                    viewportLowerLeft = mapBoundsCornersClockwise[(sectorIndex+1)%mapBoundsCornersClockwise.length];
-                    horizontalSizeViewport = lengthOfMapBoundsEdgeHoldingLowerLeft;
-                    verticalSizeViewport = lengthOfMapBoundsEdgeNotHoldingLowerLeft;
-                }
-                heading = heading.add(new DegreeBearingImpl(-90));
-                // swap the two map bounds sizes for next sector's calculations:
-                final Distance swap = lengthOfMapBoundsEdgeHoldingLowerLeft;
-                lengthOfMapBoundsEdgeHoldingLowerLeft = lengthOfMapBoundsEdgeNotHoldingLowerLeft;
-                lengthOfMapBoundsEdgeNotHoldingLowerLeft = swap;
-                currentMapBoundsEdgeBearing = currentMapBoundsEdgeBearing.add(new DegreeBearingImpl(90));
-                sectorIndex++;
+            // determine the sector out of the four possible ones:
+            final int sectorIndex = (int) ((mapHeading.getDegrees() - SECTOR_BOUNDARY_LIMIT_DEGREES) / 90.0);
+            final Bearing heading = new DegreeBearingImpl(mapHeading.getDegrees() - sectorIndex * 90.0);
+            final Bearing currentMapBoundsEdgeBearing = Bearing.NORTH.add(new DegreeBearingImpl(sectorIndex * 90.0));
+            Distance lengthOfMapBoundsEdgeHoldingLowerLeft = sectorIndex % 2 == 0 ? verticalMapBoundsSize : horizontalMapBoundsSize;
+            Distance lengthOfMapBoundsEdgeNotHoldingLowerLeft = sectorIndex % 2 == 0 ? horizontalMapBoundsSize : verticalMapBoundsSize;
+            if (heading.getDegrees() < 90 - SECTOR_BOUNDARY_LIMIT_DEGREES) {
+                final double tangensHeading = Math.tan(heading.getRadians());
+                final Distance fromMapBoundsCornerToLowerLeftOfViewportBounds = lengthOfMapBoundsEdgeHoldingLowerLeft.scale(tangensHeading*tangensHeading).add(lengthOfMapBoundsEdgeNotHoldingLowerLeft.scale(-tangensHeading))
+                        .scale(1.0 / (tangensHeading * tangensHeading + 1));
+                horizontalSizeViewport = fromMapBoundsCornerToLowerLeftOfViewportBounds.scale(1.0/Math.sin(heading.getRadians()));
+                verticalSizeViewport = lengthOfMapBoundsEdgeHoldingLowerLeft.add(fromMapBoundsCornerToLowerLeftOfViewportBounds.scale(-1.0)).scale(1.0/Math.cos(heading.getRadians()));
+                viewportLowerLeft = mapBoundsCornersClockwise[sectorIndex].translateGreatCircle(currentMapBoundsEdgeBearing, fromMapBoundsCornerToLowerLeftOfViewportBounds);
+            } else if (heading.getDegrees() < 90 + SECTOR_BOUNDARY_LIMIT_DEGREES) {
+                // rotated 90deg clockwise
+                viewportLowerLeft = mapBoundsCornersClockwise[(sectorIndex+1)%mapBoundsCornersClockwise.length];
+                horizontalSizeViewport = lengthOfMapBoundsEdgeHoldingLowerLeft;
+                verticalSizeViewport = lengthOfMapBoundsEdgeNotHoldingLowerLeft;
             }
         }
         return NonCardinalBounds.create(viewportLowerLeft, mapHeading, verticalSizeViewport, horizontalSizeViewport);

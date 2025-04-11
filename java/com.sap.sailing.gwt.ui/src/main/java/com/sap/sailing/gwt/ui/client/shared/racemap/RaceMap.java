@@ -2482,26 +2482,30 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
+    private static final int GLOBE_PXSIZE = 256; // a constant in Google's map projection
+    private static final int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
+    private static final double LOG2 = Math.log(2.0);
+    private static final double ZOOM_BORDER_LEEWAY = 0.4; // a bit of border room to leave to not squeeez content into viewport
     public double getZoomLevel(NonCardinalBounds viewportBounds) {
+        final double result;
         final LatLngBounds bounds = BoundsUtil.getAsBounds(coordinateSystem.toLatLng(viewportBounds.getLowerLeft()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getUpperLeft()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getLowerRight()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getUpperRight()));
-        int GLOBE_PXSIZE = 256; // a constant in Google's map projection
-        int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
-        double LOG2 = Math.log(2.0);
         double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
         double deltaLat = bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude();
         if ((deltaLng == 0) && (deltaLat == 0)) {
-            return MAX_ZOOM;
+            result = MAX_ZOOM;
+        } else {
+            if (deltaLng < 0) {
+                deltaLng += 360;
+            }
+            double zoomLng = Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2 - ZOOM_BORDER_LEEWAY;
+            double zoomLat = Math.log((map.getDiv().getClientHeight()-60) /* subtract the transparent margin at the top of the map*/
+                    * 2*85 /* Google's Mercator projection covers the world only from 85S to 85N */ / deltaLat / GLOBE_PXSIZE) / LOG2 - ZOOM_BORDER_LEEWAY;
+            result = Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
         }
-        if (deltaLng < 0) {
-            deltaLng += 360;
-        }
-        double zoomLng = Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2 - 0.5;
-        double zoomLat = Math.log((map.getDiv().getClientHeight()-60) /* subtract the transparent margin at the top of the map*/
-                * 2*85 /* Google's Mercator projection covers the world only from 85S to 85N */ / deltaLat / GLOBE_PXSIZE) / LOG2 - 0.5;
-        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
+        return result;
     }
 
     private void zoomMapToNewBounds(NonCardinalBounds newBounds) {

@@ -88,7 +88,7 @@ public class MapOptions extends JavaScriptObject {
   private static void setDefaults(MapOptions options) {
     options.setCenter(LatLng.newInstance(DEFAULT_LATLNG_LAT, DEFAULT_LATLNG_LNG));
     options.setMapTypeId(MapTypeId.ROADMAP);
-    options.setZoom(0);
+    options.setZoom(0.0);
     options.setDisableDefaultUi(false);
     options.setDisableDoubleClickZoom(false);
     options.setDraggable(true);
@@ -727,7 +727,7 @@ public class MapOptions extends JavaScriptObject {
    * 
    * @param zoom
    */
-  public final native void setZoom(int zoom) /*-{
+  public final native void setZoom(double zoom) /*-{
     this.zoom = zoom;
   }-*/;
 
@@ -736,7 +736,7 @@ public class MapOptions extends JavaScriptObject {
    * 
    * @return int
    */
-  public final native int getZoom() /*-{
+  public final native double getZoom() /*-{
     return this.zoom;
   }-*/;
 
