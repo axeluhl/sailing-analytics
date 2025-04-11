@@ -82,8 +82,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
                     if (newBounds == null) {
                         newBounds = calculatedBounds;
                     } else {
-                        newBounds.extend(calculatedBounds);
-                        newBounds.extend(calculatedBounds);
+                        newBounds = newBounds.extend(calculatedBounds);
                     }
                 }
             }
