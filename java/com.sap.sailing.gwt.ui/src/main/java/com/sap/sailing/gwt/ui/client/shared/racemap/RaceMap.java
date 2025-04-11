@@ -78,6 +78,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NonCardinalBounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -427,13 +428,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
-    private LatLngBounds currentMapBounds; // bounds to which bounds-changed-handler compares  // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
-    private int currentZoomLevel;          // zoom-level to which bounds-changed-handler compares
+    private NonCardinalBounds currentMapBounds; // bounds to which bounds-changed-handler compares, in real-world coordinates
+    private int currentZoomLevel;               // zoom-level to which bounds-changed-handler compares
     
     private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
     private boolean autoZoomOut = false; // flags auto-zoom-out in progress
     private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
-    LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
+    NonCardinalBounds autoZoomBounds;    // bounds to which auto-zoom-in/-out is panning&zooming, in real-world coordinates
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
@@ -918,7 +919,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (autoZoomOut) {
                             // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                            map.panTo(autoZoomLatLngBounds.getCenter());
+                            map.panTo(coordinateSystem.toLatLng(autoZoomBounds.getCenter()));
                             autoZoomOut = false;
                         }
                         if (streamletOverlay != null 
@@ -951,7 +952,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                             removeTransitions();
                         }
-                        currentMapBounds = map.getBounds(); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+                        currentMapBounds = BoundsUtil.getMapBounds(map.getBounds(), new DegreeBearingImpl(map.getHeading()), coordinateSystem);
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         advantageLineLength = getMapDiagonalVisibleDistance();
@@ -1571,7 +1572,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
                         // Rezoom the map
-                        LatLngBounds zoomToBounds = null;
+                        NonCardinalBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
                             zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
@@ -2490,7 +2491,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return Math.log((1 + sine) / (1 - sine)) / 2;
     }
 
-    public int getZoomLevel(LatLngBounds bounds) {
+    public int getZoomLevel(NonCardinalBounds viewportBounds) {
+        final LatLngBounds bounds = BoundsUtil.getAsBounds(coordinateSystem.toLatLng(viewportBounds.getLowerLeft()))
+                .extend(coordinateSystem.toLatLng(viewportBounds.getUpperLeft()))
+                .extend(coordinateSystem.toLatLng(viewportBounds.getLowerRight()))
+                .extend(coordinateSystem.toLatLng(viewportBounds.getUpperRight()));
         int GLOBE_PXSIZE = 256; // a constant in Google's map projection
         int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
         double LOG2 = Math.log(2.0);
@@ -2507,7 +2512,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
     }
 
-    private void zoomMapToNewBounds(LatLngBounds newBounds) {
+    private void zoomMapToNewBounds(NonCardinalBounds newBounds) {
         if (newBounds != null) {
             int newZoomLevel = getZoomLevel(newBounds);
             if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) { // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
@@ -2523,14 +2528,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
                     if (autoZoomIn) {
-                        map.panTo(newBounds.getCenter());
+                        map.panTo(coordinateSystem.toLatLng(newBounds.getCenter()));
                     } else {
                         map.setZoom(autoZoomLevel);
                     }
                 } else {
-                    map.panTo(newBounds.getCenter());
+                    map.panTo(coordinateSystem.toLatLng(newBounds.getCenter()));
                 }
-                autoZoomLatLngBounds = newBounds;
+                autoZoomBounds = newBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings,
                         settings.getZoomSettings().isZoomToSelectedCompetitors());
                 settings = new RaceMapSettings.RaceMapSettingsBuilder(settings, raceMapLifecycle.getRaceDTO(), paywallResolver)
@@ -2542,13 +2547,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private boolean mapNeedsToPanOrZoom(LatLngBounds newBounds, int newZoomLevel) {
+    private boolean mapNeedsToPanOrZoom(NonCardinalBounds newBounds, int newZoomLevel) {
         // we never updated, update now
         if (currentMapBounds == null) {
             return true;
         }
         // we do not fit the required bounds, update now
-        if (!BoundsUtil.contains(currentMapBounds, newBounds)) { // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+        if (!currentMapBounds.contains(newBounds)) {
             return true;
         }
         // we do fit the required bounds, however we might be to far zoomed out, check if we can zoom to a better level
@@ -3346,24 +3351,24 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
-            Iterable<CompetitorDTO> selectedCompetitors = forMap.competitorSelection.getSelectedCompetitors();
-            Iterable<CompetitorDTO> competitors = new ArrayList<>();
+        public NonCardinalBounds calculateNewBounds(RaceMap forMap) {
+            NonCardinalBounds newBounds = null;
+            final Iterable<CompetitorDTO> selectedCompetitors = forMap.competitorSelection.getSelectedCompetitors();
+            final Iterable<CompetitorDTO> competitors;
             if (selectedCompetitors == null || !selectedCompetitors.iterator().hasNext()) {
                 competitors = forMap.getCompetitorsToShow();
             } else {
                 competitors = isZoomOnlyToSelectedCompetitors(forMap) ? selectedCompetitors : forMap.getCompetitorsToShow();
             }
-            for (CompetitorDTO competitor : competitors) {
+            for (final CompetitorDTO competitor : competitors) {
                 try {
                     GPSFixDTOWithSpeedWindTackAndLegType competitorFix = forMap.getBoatFix(competitor, forMap.timer.getTime());
                     Position competitorPosition = competitorFix != null ? competitorFix.position : null;
                     if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = BoundsUtil.getAsBounds(forMap.coordinateSystem.toLatLng(competitorPosition));
+                            newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(competitorPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
                         } else {
-                            newBounds = newBounds.extend(forMap.coordinateSystem.toLatLng(competitorPosition));
+                            newBounds = newBounds.extend(forMap.coordinateSystem.map(competitorPosition));
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -3377,26 +3382,26 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap racemap) {
-            LatLngBounds newBounds = null;
+        public NonCardinalBounds calculateNewBounds(RaceMap racemap) {
+            NonCardinalBounds newBounds = null;
             Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(racemap) ? racemap.competitorSelection.getSelectedCompetitors() : racemap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
                 Colorline tail = racemap.fixesAndTails.getTail(competitor);
-                LatLngBounds bounds = null;
+                NonCardinalBounds bounds = null;
                 // TODO: Find a replacement for missing Polyline function getBounds() from v2
                 // see also http://stackoverflow.com/questions/3284808/getting-the-bounds-of-a-polyine-in-google-maps-api-v3; 
                 // optionally, consider providing a bounds cache with two sorted sets that organize the LatLng objects for O(1) bounds calculation and logarithmic add, ideally O(1) remove
                 if (tail != null && tail.getLength() >= 1) {
-                    bounds = BoundsUtil.getAsBounds(tail.getPath().get(0));
+                    bounds = NonCardinalBounds.create(racemap.getCoordinateSystem().getPosition(tail.getPath().get(0)), new DegreeBearingImpl(racemap.getMap().getHeading()));
                     for (int i = 1; i < tail.getLength(); i++) {
-                        bounds = bounds.extend(tail.getPath().get(i));
+                        bounds = bounds.extend(racemap.getCoordinateSystem().getPosition(tail.getPath().get(i)));
                     }
                 }
                 if (bounds != null) {
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds = newBounds.union(bounds);
+                        newBounds = newBounds.extend(bounds);
                     }
                 }
             }
@@ -3404,17 +3409,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    public static class CourseMarksBoundsCalculator implements LatLngBoundsCalculator {
+    public static class CourseMarksBoundsCalculator implements NonCardinalBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
-            Iterable<MarkDTO> marksToZoom = forMap.markDTOs.values();
+        public NonCardinalBounds calculateNewBounds(RaceMap forMap) {
+            NonCardinalBounds newBounds = null;
+            final Iterable<MarkDTO> marksToZoom = forMap.markDTOs.values();
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
                     if (newBounds == null) {
-                        newBounds = BoundsUtil.getAsBounds(forMap.coordinateSystem.toLatLng(markDTO.position));
+                        newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(markDTO.position), new DegreeBearingImpl(forMap.getMap().getHeading()));
                     } else {
-                        newBounds = newBounds.extend(forMap.coordinateSystem.toLatLng(markDTO.position));
+                        newBounds = newBounds.extend(forMap.coordinateSystem.map(markDTO.position));
                     }
                 }
             }
@@ -3422,20 +3427,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    public static class WindSensorsBoundsCalculator implements LatLngBoundsCalculator {
+    public static class WindSensorsBoundsCalculator implements NonCardinalBoundsCalculator {
         @Override
-        public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            LatLngBounds newBounds = null;
+        public NonCardinalBounds calculateNewBounds(RaceMap forMap) {
+            NonCardinalBounds newBounds = null;
             Collection<WindSensorOverlay> marksToZoom = forMap.windSensorOverlays.values();
             if (marksToZoom != null) {
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
                     final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
-                    if (Objects.nonNull(latLngPosition) && BoundsUtil.getAsPosition(latLngPosition) != null) {
-                        LatLngBounds bounds = BoundsUtil.getAsBounds(latLngPosition);
+                    if (Objects.nonNull(latLngPosition)) {
+                        NonCardinalBounds bounds = NonCardinalBounds.create(BoundsUtil.getAsPosition(latLngPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(latLngPosition);
+                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(latLngPosition));
                         }
                     }
                 }
@@ -3632,7 +3637,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * The default zoom bounds are defined by the boats
      */
-    private LatLngBounds getDefaultZoomBounds() {
+    private NonCardinalBounds getDefaultZoomBounds() {
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
     
@@ -3767,7 +3772,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * NW/SE lat/lng "rectangle" that contains the possibly rotated visible area.
      */
     private Distance getMapDiagonalVisibleDistance() {
-        return coordinateSystem.getPosition(currentMapBounds.getSouthWest()).getDistance(coordinateSystem.getPosition(currentMapBounds.getNorthEast())); // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+        return currentMapBounds.getLowerLeft().getDistance(currentMapBounds.getUpperRight());
     }
 
     private void afterZoomOrHeadingChanged() {

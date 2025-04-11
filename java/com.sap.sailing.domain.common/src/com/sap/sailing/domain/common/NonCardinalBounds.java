@@ -27,6 +27,13 @@ public interface NonCardinalBounds {
         return new NonCardinalBoundsImpl(lowerLeft, verticalBearing, verticalSize, horizontalSize);
     }
     
+    /**
+     * Produces a bounds object with zero size that only contains the position {@code p}.
+     */
+    static NonCardinalBounds create(Position p, Bearing verticalBearing) {
+        return create(p, verticalBearing, Distance.NULL, Distance.NULL);
+    }
+    
     Position getLowerLeft();
 
     default Position getUpperLeft() {
