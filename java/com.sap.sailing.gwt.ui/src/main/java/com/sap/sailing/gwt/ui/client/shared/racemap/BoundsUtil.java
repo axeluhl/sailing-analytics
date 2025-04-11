@@ -54,7 +54,7 @@ public class BoundsUtil {
      * fromNorthWestOfMapBoundsToLowerLeftOfViewportBounds and flipping horizontalMapBoundsSize and
      * verticalMapBoundsSize in the calculations. The same again for the two other quadrants...
      */
-    public static NonCardinalBounds getMapBounds(LatLngBounds mapBounds, Bearing heading, CoordinateSystem coordinateSystem) {
+    public static NonCardinalBounds getMapBounds(LatLngBounds mapBounds, Bearing mapHeading, CoordinateSystem coordinateSystem) {
         final Position mapBoundsSouthWest = coordinateSystem.getPosition(mapBounds.getSouthWest());
         final Position mapBoundsNorthEast = coordinateSystem.getPosition(mapBounds.getNorthEast());
         final Position mapBoundsNorthWest = new DegreePosition(mapBoundsNorthEast.getLatDeg(), mapBoundsSouthWest.getLngDeg());
@@ -66,6 +66,7 @@ public class BoundsUtil {
         Position viewportLowerLeft = null;
         Bearing currentMapBoundsEdgeBearing = Bearing.NORTH;
         final Position[] mapBoundsCornersClockwise = new Position[] { mapBoundsSouthWest, mapBoundsNorthWest, mapBoundsNorthEast, mapBoundsSouthEast };
+        Bearing heading = mapHeading;
         // normalize heading to degree angles in range [0..360)
         while (heading.getDegrees() < 0) {
             heading = heading.add(new DegreeBearingImpl(360)); // translate to a positive angle
@@ -103,7 +104,7 @@ public class BoundsUtil {
                 sectorIndex++;
             }
         }
-        return NonCardinalBounds.create(viewportLowerLeft, heading, verticalSizeViewport, horizontalSizeViewport);
+        return NonCardinalBounds.create(viewportLowerLeft, mapHeading, verticalSizeViewport, horizontalSizeViewport);
     }
     
     public static Bounds getAsBounds(LatLngBounds latLngBounds) {
