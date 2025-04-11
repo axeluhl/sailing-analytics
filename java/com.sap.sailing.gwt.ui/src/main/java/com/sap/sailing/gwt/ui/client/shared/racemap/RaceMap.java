@@ -428,7 +428,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     /**
      * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
-    private NonCardinalBounds currentMapBounds; // bounds to which bounds-changed-handler compares, in real-world coordinates
+    private NonCardinalBounds currentMapBounds; // bounds of the visible part of the map to which bounds-changed-handler compares, in real-world coordinates
     private double currentZoomLevel;            // zoom-level to which bounds-changed-handler compares
     
     private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
