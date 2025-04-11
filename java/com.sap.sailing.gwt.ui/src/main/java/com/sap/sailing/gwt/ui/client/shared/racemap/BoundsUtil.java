@@ -17,6 +17,9 @@ import com.sap.sse.common.Distance;
  * @author Axel Uhl (D043530)
  */
 public class BoundsUtil {
+    private final static double TANGENS_LIMIT = 0.00001;
+    private final static double SIN_LIMIT = 0.00001;
+
     /**
      * When calling {@link MapWidget#getBounds()}, the result is the smallest rectlinear bounding box aligned with
      * cardinal direction (N/S/E/W) that contains the map's viewport. For a map with {@code heading} being true-north
@@ -34,8 +37,6 @@ public class BoundsUtil {
      * The {@link CoordinateSystem} is used to transform the map's {@link LatLng} coordinates to real-world
      * {@link Position} coordinates. 
      */
-    private final static double TANGENS_LIMIT = 89.9999;
-    private final static double SIN_LIMIT = 0.00001;
     public static NonCardinalBounds getMapBounds(LatLngBounds mapBounds, Bearing heading, CoordinateSystem coordinateSystem) {
         final Position mapBoundsSouthWest = coordinateSystem.getPosition(mapBounds.getSouthWest());
         final Position mapBoundsNorthEast = coordinateSystem.getPosition(mapBounds.getNorthEast());
@@ -45,7 +46,7 @@ public class BoundsUtil {
         final Distance fromSouthWestOfMapBoundsToLowerLeftOfViewportBounds;
         final Distance horizontalSizeViewport;
         final Distance verticalSizeViewport;
-        if (heading.getDegrees() > TANGENS_LIMIT) {
+        if (Math.abs(Math.abs(heading.getDegrees())-90.0) < TANGENS_LIMIT) {
             fromSouthWestOfMapBoundsToLowerLeftOfViewportBounds = horizontalMapBoundsSize;
             horizontalSizeViewport = verticalMapBoundsSize;
             verticalSizeViewport = horizontalMapBoundsSize;
@@ -53,7 +54,7 @@ public class BoundsUtil {
             final double tangensHeading = Math.tan(heading.getRadians());
             fromSouthWestOfMapBoundsToLowerLeftOfViewportBounds = horizontalMapBoundsSize.scale(tangensHeading*tangensHeading).add(horizontalMapBoundsSize.scale(-tangensHeading))
                                                                              .scale(1.0 / (tangensHeading * tangensHeading + 1));
-            if (heading.getDegrees() < SIN_LIMIT) {
+            if (Math.abs(heading.getDegrees()) < SIN_LIMIT) {
                 horizontalSizeViewport = horizontalMapBoundsSize;
                 verticalSizeViewport = verticalMapBoundsSize;
             } else {

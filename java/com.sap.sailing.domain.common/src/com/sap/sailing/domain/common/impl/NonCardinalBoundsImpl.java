@@ -54,8 +54,7 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
             if (horizontalDistanceFromLeft.compareTo(Distance.NULL) < 0) {
                 // left of left border; extend to the left by projecting p down to the bottom and adjust horizontal distance
                 final Distance verticalDistanceToBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
-                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom)
-                                .translateGreatCircle(getHorizontalBearing().reverse(), getHorizontalSize());
+                newLowerLeft = p.translateGreatCircle(getVerticalBearing(), verticalDistanceToBottom);
                 newHorizontalSize = getHorizontalSize().add(horizontalDistanceFromLeft.scale(-1.0));
             } else {
                 final Distance horizontalDistanceFromRight = p.crossTrackError(getLowerRight(), getVerticalBearing());
@@ -67,11 +66,12 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
             final Distance verticalDistanceFromBottom = p.crossTrackError(getLowerLeft(), getHorizontalBearing());
             if (verticalDistanceFromBottom.compareTo(Distance.NULL) > 0) {
                 // below bottom; extend to the bottom by projecting p down to the bottom and adjust vertical distance
-                final Distance horizontalDistanceToLeft = p.crossTrackError(getLowerLeft(), getVerticalBearing());
+                final Distance horizontalDistanceToLeft = p.crossTrackError(newLowerLeft, getVerticalBearing());
                 newLowerLeft = p.translateGreatCircle(getHorizontalBearing().reverse(), horizontalDistanceToLeft);
                 newVerticalSize = getVerticalSize().add(verticalDistanceFromBottom);
             } else {
-                final Distance verticalDistanceFromTop = p.crossTrackError(getUpperLeft(), getHorizontalBearing());
+                final Position newUppperLeft = newLowerLeft.translateGreatCircle(getVerticalBearing(), newVerticalSize);
+                final Distance verticalDistanceFromTop = p.crossTrackError(newUppperLeft, getHorizontalBearing());
                 if (verticalDistanceFromTop.compareTo(Distance.NULL) < 0) {
                     // above top; extend to the top by adjusting vertical distance
                     newVerticalSize = getVerticalSize().add(verticalDistanceFromTop.scale(-1.0));

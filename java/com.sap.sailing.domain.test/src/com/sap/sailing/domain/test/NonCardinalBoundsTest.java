@@ -62,4 +62,15 @@ public class NonCardinalBoundsTest {
         assertTrue(extendedBounds.contains(bounds1));
         assertTrue(extendedBounds.contains(bounds2));
     }
+    
+    @Test
+    public void testExtendsByAnotherPosition() {
+        final Position p = new DegreePosition(54.432300981134176, 10.18096293322742);
+        final Bearing heading = new DegreeBearingImpl(247);
+        final NonCardinalBounds bounds = NonCardinalBounds.create(p, heading);
+        final DegreePosition extensionPosition = new DegreePosition(54.43435299675912, 10.19982498139143);
+        final NonCardinalBounds extendedBounds = bounds.extend(extensionPosition);
+        assertTrue(extendedBounds.contains(extensionPosition));
+        assertTrue(extendedBounds.contains(p));
+    }
 }

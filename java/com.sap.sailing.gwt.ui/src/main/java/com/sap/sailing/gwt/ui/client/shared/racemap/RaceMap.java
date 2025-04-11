@@ -2482,15 +2482,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    // Google scales coordinates so that the globe-tile has mercator-latitude [-pi, +pi], i.e. tile height of 2*pi
-    // mercator-latitude pi corresponds to geo-latitude of approx. 85.0998 (where Google cuts off the map visualization)
-    // official documentation: http://developers.google.com/maps/documentation/javascript/maptypes#TileCoordinates
-    private double getMercatorLatitude(double lat) {
-        // cutting-off for latitudes close to +-90 degrees is recommended (to avoid division by zero)
-        double sine = Math.max(-0.9999, Math.min(0.9999, Math.sin(Math.PI * lat / 180)));
-        return Math.log((1 + sine) / (1 - sine)) / 2;
-    }
-
     public int getZoomLevel(NonCardinalBounds viewportBounds) {
         final LatLngBounds bounds = BoundsUtil.getAsBounds(coordinateSystem.toLatLng(viewportBounds.getLowerLeft()))
                 .extend(coordinateSystem.toLatLng(viewportBounds.getUpperLeft()))
@@ -2500,22 +2491,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         int MAX_ZOOM = 18; // maximum zoom-level that should be automatically selected
         double LOG2 = Math.log(2.0);
         double deltaLng = bounds.getNorthEast().getLongitude() - bounds.getSouthWest().getLongitude();
-        double deltaLat = getMercatorLatitude(bounds.getNorthEast().getLatitude()) - getMercatorLatitude(bounds.getSouthWest().getLatitude());
+        double deltaLat = bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude();
         if ((deltaLng == 0) && (deltaLat == 0)) {
             return MAX_ZOOM;
         }
         if (deltaLng < 0) {
             deltaLng += 360;
         }
-        int zoomLng = (int) Math.floor(Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2);
-        int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 2 * Math.PI / deltaLat / GLOBE_PXSIZE) / LOG2);
-        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
+        final double lngLog2 = Math.log(map.getDiv().getClientWidth() * 360 / deltaLng / GLOBE_PXSIZE) / LOG2;
+        int zoomLng = (int) Math.floor(lngLog2);
+        final double latlog2 = Math.log((map.getDiv().getClientHeight()-60) /* subtract the transparent margin at the top of the map*/
+                * 2*85 /* Google's Mercator projection covers the world only from 85S to 85N */ / deltaLat / GLOBE_PXSIZE) / LOG2;
+        int zoomLat = (int) Math.floor(latlog2);
+        return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM)-1;
     }
 
     private void zoomMapToNewBounds(NonCardinalBounds newBounds) {
         if (newBounds != null) {
             int newZoomLevel = getZoomLevel(newBounds);
-            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) { // FIXME bug6098: MapWidget.getBounds() is no longer what we can use, with rotated VECTOR maps
+            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 if (newZoomLevel != map.getZoom()) {
