@@ -452,6 +452,9 @@ EOF
 "
     sudo dnf -y update
     sudo dnf -y install mongodb-org-server mongodb-org-tools mongodb-mongosh-shared-openssl3
+    # ensure that logrotate can work nicely with SIGUSR1:
+    sudo sed -i -e 's/^  logAppend: true/  logAppend: true\n  logRotate: reopen/' /etc/mongod.conf
+
 }
 
 # Copies the /root/secrets and /root/mail.properties file to the local instance, ensuring only root can read it
