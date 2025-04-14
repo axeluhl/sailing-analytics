@@ -39,7 +39,7 @@ replication:
   replSetName: replica
 EOF
 "
-    sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' /etc/mongod.conf
+    sudo sed -i -e 's/bindIp: *[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/bindIp: 0.0.0.0/' -e 's/^  logAppend: true/  logAppend: true\n  logRotate: reopen/' /etc/mongod.conf
     build_crontab_and_setup_files sailing_server
     # Create an SSH key pair with empty passphrase for ec2-user, deploy it to trac@sapsailing.com
     # and then move it to the sailing user's .ssh directory
