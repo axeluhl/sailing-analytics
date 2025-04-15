@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Pair;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -147,7 +148,7 @@ public class RaceStateService extends Service {
                     String eventName = intent.getStringExtra(AppConstants.EXTRA_EVENT_NAME);
                     RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint),
                             RaceStateEvents.valueOf(eventName));
-                    ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
+                    ExLog.i(this, TAG, String.format("Processing %s", event));
                     race.getState().processStateEvent(event);
                     clearAlarmByName(race, event.getEventName());
                     break;
@@ -221,10 +222,10 @@ public class RaceStateService extends Service {
     }
 
     private void updateNotification() {
-        int numRaces = managedIntents.keySet().size();
+        int numRaces = managedIntents.size();
         String content = getString(R.string.service_text_num_races, numRaces);
         Notification notification = setupNotification(content);
-        startForeground(NotificationHelper.getNotificationId(), notification);
+        NotificationManagerCompat.from(getApplicationContext()).notify(NotificationHelper.getNotificationId(), notification);
     }
 
     private void registerRace(ManagedRace race) {
