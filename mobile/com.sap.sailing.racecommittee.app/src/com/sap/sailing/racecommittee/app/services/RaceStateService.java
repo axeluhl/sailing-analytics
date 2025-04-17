@@ -53,6 +53,7 @@ public class RaceStateService extends Service {
     private ReadonlyDataManager dataManager;
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
     private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
+    private EventScheduler eventScheduler;
 
     /**
      * Abstracts the differences between different Android versions when it comes to scheduling
@@ -66,15 +67,36 @@ public class RaceStateService extends Service {
      * the method scheduling it.
      */
     private interface EventScheduler {
+        @FunctionalInterface
         public interface Handle {
             void cancel();
         }
+
+        void registerRace(ManagedRace race);
+
+        boolean isRaceRegistered(ManagedRace race);
+
+        void cancelAllEvents();
+
+        void cancelAllEventsForRace(String id);
+
         Handle schedule(ManagedRace race, RaceStateEvent event);
+
+        int getNumberOfMonitoredRaces();
+
+        void clearByEventName(ManagedRace race, RaceStateEvents stateEventName);
+
+        void clearAllAlarms(String raceId);
     }
 
-    private abstract class AlarmManagerEventScheduler {
+    private abstract class AlarmManagerEventScheduler implements EventScheduler {
+
         private final AlarmManager alarmManager;
         private int alarmManagerRequestCode;
+
+        /**
+         * keys are the race IDs
+         */
         private final Map<String, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
 
         protected AlarmManagerEventScheduler() {
@@ -82,26 +104,190 @@ public class RaceStateService extends Service {
             this.managedIntents = new HashMap<>();
             this.alarmManagerRequestCode = 0;
         }
-        // TODO
+
+        protected PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
+            Intent intent = new Intent().setClass(RaceStateService.this, RaceStateService.class);
+            intent.setAction(AppConstants.ACTION_ALARM_ACTION);
+            intent.putExtra(AppConstants.EXTRA_RACE_ID, managedRace.getId());
+            intent.putExtra(AppConstants.EXTRA_TIME_POINT_MILLIS, event.getTimePoint().asMillis());
+            intent.putExtra(AppConstants.EXTRA_EVENT_NAME, event.getEventName().name());
+            int flags;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+            } else {
+                flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            }
+            return PendingIntent.getService(RaceStateService.this, alarmManagerRequestCode++, intent, flags);
+        }
+
+        protected List<Pair<PendingIntent, RaceStateEvents>> getManagedIntents(ManagedRace race) {
+            return managedIntents.get(race.getId());
+        }
+
+        protected AlarmManager getAlarmManager() {
+            return alarmManager;
+        }
+
+        @Override
+        public void cancelAllEvents() {
+            for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
+                for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                    alarmManager.cancel(intentPair.first);
+                }
+            }
+            managedIntents.clear();
+        }
+
+        @Override
+        public void cancelAllEventsForRace(String raceId) {
+            List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(raceId);
+            if (intents != null) {
+                for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                    alarmManager.cancel(intentPair.first);
+                }
+                managedIntents.remove(raceId);
+            } else {
+                ExLog.w(RaceStateService.this, TAG, "Couldn't find any managed intents for race " + raceId);
+            }
+        }
+
+        @Override
+        public void clearByEventName(ManagedRace race, RaceStateEvents stateEventName) {
+            final List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
+            Pair<PendingIntent, RaceStateEvents> toBeRemoved = null;
+            if (intents != null) {
+                for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                    if (intentPair.second.equals(stateEventName)) {
+                        toBeRemoved = intentPair;
+                        break;
+                    }
+                }
+            }
+            if (toBeRemoved != null) {
+                alarmManager.cancel(toBeRemoved.first);
+                intents.remove(toBeRemoved);
+                ExLog.i(RaceStateService.this, TAG, String.format("Removed alarm for event named %s.", stateEventName));
+            } else {
+                ExLog.i(RaceStateService.this, TAG, String.format("Unable to remove alarm for event named %s (not found).", stateEventName));
+            }
+        }
+
+        @Override
+        public int getNumberOfMonitoredRaces() {
+            return managedIntents.size();
+        }
+
+        @Override
+        public void registerRace(ManagedRace race) {
+            managedIntents.put(race.getId(), new ArrayList<>());
+        }
+
+        @Override
+        public boolean isRaceRegistered(ManagedRace race) {
+            return managedIntents.containsKey(race.getId());
+        }
+
+        @Override
+        public void clearAllAlarms(String raceId) {
+            List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(raceId);
+            if (intents == null) {
+                ExLog.w(RaceStateService.this, TAG, "There are no intents for race " + raceId);
+                return;
+            }
+            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+                alarmManager.cancel(intentPair.first);
+            }
+            intents.clear();
+            ExLog.w(RaceStateService.this, TAG, "All intents cleared for race " + raceId);
+        }
     }
 
     private class ExactAlarmManagerEventScheduler extends AlarmManagerEventScheduler {
-        // TODO
+        @Override
+        public Handle schedule(ManagedRace race, RaceStateEvent event) {
+            final PendingIntent intent = createAlarmPendingIntent(race, event);
+            final List<Pair<PendingIntent, RaceStateEvents>> intents = getManagedIntents(race);
+            if (intents != null) {
+                intents.add(Pair.create(intent, event.getEventName()));
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                getAlarmManager().setExact(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+            }
+            ExLog.i(RaceStateService.this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+            return ()->getAlarmManager().cancel(intent);
+        }
+
     }
 
     private class NonExactAlarmManagerEventScheduler extends AlarmManagerEventScheduler {
-        // TODO
+        @Override
+        public Handle schedule(ManagedRace race, RaceStateEvent event) {
+            PendingIntent intent = createAlarmPendingIntent(race, event);
+            final List<Pair<PendingIntent, RaceStateEvents>> intents = getManagedIntents(race);
+            if (intents != null) {
+                intents.add(Pair.create(intent, event.getEventName()));
+            }
+            getAlarmManager().set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
+            ExLog.i(RaceStateService.this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+            return ()->getAlarmManager().cancel(intent);
+        }
     }
 
-    private class HandlerEventScheduler {
+    private class HandlerEventScheduler implements EventScheduler {
         private final Handler mHandler;
 
-        @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.P)
         public HandlerEventScheduler() {
-            mHandler = Handler.createAsync(Looper.getMainLooper());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                mHandler = Handler.createAsync(Looper.getMainLooper());
+            } else {
+                mHandler = null;
+            }
         }
 
-        // TODO
+        @Override
+        public Handle schedule(ManagedRace race, RaceStateEvent event) {
+            final long inHowManyMillis = TimePoint.now().until(event.getTimePoint()).asMillis();
+            mHandler.postAtTime(()->processAlarm(race, event), SystemClock.uptimeMillis() + inHowManyMillis);
+            ExLog.i(RaceStateService.this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+            return null; // TODO
+        }
+
+        @Override
+        public void registerRace(ManagedRace race) {
+            // TODO
+        }
+
+        @Override
+        public boolean isRaceRegistered(ManagedRace race) {
+            return false;
+            // TODO
+        }
+
+        @Override
+        public void cancelAllEventsForRace(String id) {
+            // TODO
+        }
+
+        @Override
+        public void cancelAllEvents() {
+            // TODO
+        }
+
+        @Override
+        public int getNumberOfMonitoredRaces() {
+            // TODO
+            return 0;
+        }
+
+        @Override
+        public void clearByEventName(ManagedRace race, RaceStateEvents stateEventName) {
+            // TODO
+        }
+
+        @Override
+        public void clearAllAlarms(String raceId) {
+            // TODO
+        }
     }
 
     @Override
@@ -161,10 +347,8 @@ public class RaceStateService extends Service {
 
     @Override
     public void onDestroy() {
-        if (!managedIntents.isEmpty()) {
-            unregisterAllRaces();
-        }
-        stopForeground(true);
+        unregisterAllRaces();
+        stopForeground(true); // TODO is this still needed if we don't call startForeground anymore?
     }
 
     private void handleStartCommand(Intent intent, int startId) {
@@ -216,12 +400,7 @@ public class RaceStateService extends Service {
             entry.getKey().getState().setStateEventScheduler(null);
         }
         registeredStateEventSchedulers.clear();
-        for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
-            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-                alarmManager.cancel(intentPair.first);
-            }
-        }
-        managedIntents.clear();
+        eventScheduler.cancelAllEvents();
         ExLog.i(this, TAG, "All races unregistered.");
     }
 
@@ -234,15 +413,7 @@ public class RaceStateService extends Service {
         registeredLogListeners.remove(race);
         race.getState().setStateEventScheduler(null);
         registeredStateEventSchedulers.remove(race);
-        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
-        if (intents != null) {
-            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-                alarmManager.cancel(intentPair.first);
-            }
-            managedIntents.remove(race.getId());
-        } else {
-            ExLog.w(this, TAG, "Couldn't find any managed intents for race " + race.getId());
-        }
+        eventScheduler.cancelAllEventsForRace(race.getId());
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
         updateNotification();
     }
@@ -266,7 +437,7 @@ public class RaceStateService extends Service {
     }
 
     private void updateNotification() {
-        int numRaces = managedIntents.size();
+        int numRaces = eventScheduler.getNumberOfMonitoredRaces();
         String content = getString(R.string.service_text_num_races, numRaces);
         Notification notification = setupNotification(content);
         NotificationManagerCompat.from(getApplicationContext()).notify(NotificationHelper.getNotificationId(), notification);
@@ -274,9 +445,9 @@ public class RaceStateService extends Service {
 
     private void registerRace(ManagedRace race) {
         ExLog.i(this, TAG, "Trying to register race " + race.getId());
-        if (!managedIntents.containsKey(race.getId())) {
+        if (!eventScheduler.isRaceRegistered(race)) {
             RaceState state = race.getState();
-            managedIntents.put(race.getId(), new ArrayList<>());
+            eventScheduler.registerRace(race);
             // Register on event additions...
             JsonSerializer<RaceLogEvent> eventSerializer = RaceLogEventSerializer
                     .create(new CompetitorJsonSerializer());
@@ -302,37 +473,9 @@ public class RaceStateService extends Service {
         updateNotification();
     }
 
-    private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
-        Intent intent = new Intent().setClass(this, RaceStateService.class);
-        intent.setAction(AppConstants.ACTION_ALARM_ACTION);
-        intent.putExtra(AppConstants.EXTRA_RACE_ID, managedRace.getId());
-        intent.putExtra(AppConstants.EXTRA_TIME_POINT_MILLIS, event.getTimePoint().asMillis());
-        intent.putExtra(AppConstants.EXTRA_EVENT_NAME, event.getEventName().name());
-        int flags;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
-        } else {
-            flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        }
-        return PendingIntent.getService(this, alarmManagerRequestCode++, intent, flags);
-    }
-
     @TargetApi(Build.VERSION_CODES.KITKAT)
-        /* package */ void setAlarm(ManagedRace race, RaceStateEvent event) {
-        PendingIntent intent = createAlarmPendingIntent(race, event);
-        final List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
-        if (intents != null) {
-            intents.add(Pair.create(intent, event.getEventName()));
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            final long inHowManyMillis = TimePoint.now().until(event.getTimePoint()).asMillis();
-            mHandler.postAtTime(()->processAlarm(race, event), SystemClock.uptimeMillis() + inHowManyMillis);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
-        } else {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
-        }
-        ExLog.i(this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+    void setAlarm(ManagedRace race, RaceStateEvent event) {
+        eventScheduler.schedule(race, event);
     }
 
     private void processAlarm(ManagedRace race, RaceStateEvent event) {
@@ -341,36 +484,11 @@ public class RaceStateService extends Service {
         clearAlarmByName(race, event.getEventName());
     }
 
-    /* package */ void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
-        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
-        Pair<PendingIntent, RaceStateEvents> toBeRemoved = null;
-        if (intents != null) {
-            for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-                if (intentPair.second.equals(stateEventName)) {
-                    toBeRemoved = intentPair;
-                    break;
-                }
-            }
-        }
-        if (toBeRemoved != null) {
-            alarmManager.cancel(toBeRemoved.first);
-            intents.remove(toBeRemoved);
-            ExLog.i(this, TAG, String.format("Removed alarm for event named %s.", stateEventName));
-        } else {
-            ExLog.i(this, TAG, String.format("Unable to remove alarm for event named %s (not found).", stateEventName));
-        }
+    void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
+        eventScheduler.clearByEventName(race, stateEventName);
     }
 
-    /* package */ void clearAllAlarms(ManagedRace race) {
-        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
-        if (intents == null) {
-            ExLog.w(this, TAG, "There are no intents for race " + race.getId());
-            return;
-        }
-        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
-            alarmManager.cancel(intentPair.first);
-        }
-        intents.clear();
-        ExLog.w(this, TAG, "All intents cleared for race " + race.getId());
+    void clearAllAlarms(ManagedRace race) {
+        eventScheduler.clearAllAlarms(race.getId());
     }
 }
