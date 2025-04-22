@@ -196,7 +196,7 @@ public class MapImpl extends MVCObject<MapImpl> {
   /**
    * get zoom
    */
-  public final native int getZoom() /*-{
+  public final native double getZoom() /*-{
     return this.getZoom();
   }-*/;
 
@@ -312,7 +312,7 @@ public class MapImpl extends MVCObject<MapImpl> {
    * 
    * @param zoom
    */
-  public final native void setZoom(int zoom) /*-{
+  public final native void setZoom(double zoom) /*-{
     this.setZoom(zoom);
   }-*/;
 
