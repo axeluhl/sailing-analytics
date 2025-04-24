@@ -49,10 +49,9 @@ Then terminate your instance used only for image creation and launch from the AM
 
 ## Steps to Perform to Activate the New Server
 
+* Tag the new instance with the `sailing-analytics-server` tag and value `DEV`
 * Replace the old "Build/Test/Dev" instance in the "Hudson" and "S-DEV" and "S-DEV-m" target groups with the new one
-* Switch the elastic IP ``52.17.217.83`` to the new instance, too
 * Change the ``dev.internal.sapsailing.com`` Route53 DNS entry from the old instance's internal IP address to the new instance's internal IP address
-
 
 ## Testing the New and Terminating the Old Instance
 

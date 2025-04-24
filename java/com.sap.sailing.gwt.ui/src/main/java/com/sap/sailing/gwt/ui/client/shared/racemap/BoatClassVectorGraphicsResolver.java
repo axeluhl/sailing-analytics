@@ -35,7 +35,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.IQFOIL_MEN, BoatClassMasterdata.IQFOIL_WOMEN, BoatClassMasterdata.IQFOIL_YOUTH, 
                 BoatClassMasterdata.SPLASH_BLUE, BoatClassMasterdata.SPLASH_RED, BoatClassMasterdata.SPLASH_GREEN,
                 BoatClassMasterdata.STAR, BoatClassMasterdata.TECHNO_293, BoatClassMasterdata.TECHNO_293_PLUS,
-                BoatClassMasterdata.WINGFOIL);
+                BoatClassMasterdata.WINGFOIL, BoatClassMasterdata.ZOOM8);
         BoatClassVectorGraphics _49er = new _49erVectorGraphics(BoatClassMasterdata._49ER, BoatClassMasterdata._49ERFX,
                 BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer, BoatClassMasterdata.WASZP);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,

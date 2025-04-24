@@ -40,6 +40,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkApiTest extends AbstractSeleniumTest {
 
+    private static final String DONALDS_PASSWORD = "da)(&$0897KFDisy0815";
     private static String EVENT_NAME = "MarkApiTestEvent";
     private static String BOAT_CLASS = "Flying Dutchman";
     private static String FLEET = "Default";
@@ -252,8 +253,8 @@ public class MarkApiTest extends AbstractSeleniumTest {
     public void testAddMarkToRegattaWithoutPermission() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final ApiContext ownerCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext readerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext readerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         
         eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
         markApi.addMarkToRegatta(readerCtx, EVENT_NAME, "Startboat");

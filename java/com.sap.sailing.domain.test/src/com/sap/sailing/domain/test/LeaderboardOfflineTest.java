@@ -358,7 +358,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 assertEquals(expected, leaderboard.getNetPoints(competitorWithBoat, raceColumn, now), 0.000000001);
                 assertEquals(expected, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
                 assertEquals(expected, leaderboard.getEntry(competitorWithBoat, raceColumn, now).getNetPoints(), 0.000000001);
-                netPoints += leaderboard.getContent(now).get(key).getNetPoints();
+                netPoints += leaderboard.getContent(now).get(key).getNetPoints().intValue();
             } else {
                 assertEquals(0, leaderboard.getTrackedRank(competitorWithBoat, raceColumn, now));
                 assertNull(leaderboard.getTotalPoints(competitorWithBoat, raceColumn, now));

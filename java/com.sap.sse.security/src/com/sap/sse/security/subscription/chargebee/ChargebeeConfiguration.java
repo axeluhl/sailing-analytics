@@ -28,8 +28,8 @@ public class ChargebeeConfiguration {
 
     public static ChargebeeConfiguration getInstance() {
         if (instance == null) {
-            String site = System.getProperty(CHARGEBEE_SITE);
-            String apiKey = System.getProperty(CHARGEBEE_APIKEY);
+            final String site = System.getProperty(CHARGEBEE_SITE);
+            final String apiKey = System.getProperty(CHARGEBEE_APIKEY);
             logger.info("Chargebee site: " + site);
             if (Util.hasLength(site) && Util.hasLength(apiKey)) {
                 instance = new ChargebeeConfiguration(site, apiKey);

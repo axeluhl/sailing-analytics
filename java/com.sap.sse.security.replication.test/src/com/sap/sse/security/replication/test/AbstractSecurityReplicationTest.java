@@ -39,8 +39,8 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(null, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            SecurityServiceImpl result = new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             return result;
         }
 
@@ -51,8 +51,8 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            return new SecurityServiceImpl(/* mailServiceTracker */ null, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            return new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
         }
     }
 }

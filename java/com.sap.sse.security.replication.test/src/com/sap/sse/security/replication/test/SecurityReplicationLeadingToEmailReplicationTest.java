@@ -63,8 +63,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             userStore.ensureDefaultRolesExist();
             userStore.loadAndMigrateUsers();
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             result.initialize();
             return result;
         }
@@ -77,8 +77,8 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
             doReturn(replicaMailService).when(trackerMock).getService();
             final UserStoreImpl userStore = new UserStoreImpl("TestDefaultTenant");
             final AccessControlStore accessControlStore = new AccessControlStoreImpl(userStore);
-            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, userStore, accessControlStore,
-                    SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
+            SecurityServiceImpl result = new SecurityServiceImpl(trackerMock, /* corsFilterConfigurationTracker */ null, userStore,
+                    accessControlStore, SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             userStore.ensureDefaultRolesExist();
             userStore.ensureServerGroupExists();
             result.initialize();
@@ -120,7 +120,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         masterSecurityService.createSimpleUser(username, email, password, 
-                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null, /* clientIP */ null, /* enforce strong password */ false);
         masterSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
@@ -146,7 +146,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         replicaSecurityService.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL, null, /* clientIP */ null, /* enforce strong password */ false);
         replicaSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();

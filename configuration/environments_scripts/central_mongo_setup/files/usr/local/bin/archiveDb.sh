@@ -38,7 +38,7 @@ if [ -n "${ORIGINAL_HASH}" -a -n "${ARCHIVE_HASH}" -a $ORIGINAL_HASH = $ARCHIVE_
   echo "Don't forget to switch your server's env.sh so it has MONGODB_URI=\"mongodb://dbserver.internal.sapsailing.com:10202/${DB}\""
   exit 0
 else
-  echo "Hashes of old and new are empty of differ: ${ORIGINAL_HASH} and ${ARCHIVE_HASH}"
+  echo "Hashes of old and new are empty or differ: ${ORIGINAL_HASH} and ${ARCHIVE_HASH}"
   exit 1
 fi
 rm -rf ${DUMPBASEDIR}"

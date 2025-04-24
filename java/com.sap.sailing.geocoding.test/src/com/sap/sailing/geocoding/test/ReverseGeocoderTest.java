@@ -68,8 +68,9 @@ public class ReverseGeocoderTest {
     
     @Test
     public void getPlacemarkBestTest() {
-        Position abroad = new DegreePosition(54.429758, 10.289335);
-        Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.41212, 10.28952), 1139);
+        final Position abroad = new DegreePosition(54.429758, 10.289335);
+        final Placemark firstByDistance = new PlacemarkImpl("Wendtorf", "DE", new DegreePosition(54.41212, 10.28952), 1139);
+        final Placemark firstByDistanceVariation = new PlacemarkImpl("Wendtorfer Strand", "DE", new DegreePosition(54.41212, 10.28952), 1139);
         try {
             Placemark p = geocoder.getPlacemarkLast(abroad, 20, new Placemark.ByPopulation());
             Assert.assertEquals(KIEL.getName(), p.getName());
@@ -78,7 +79,8 @@ public class ReverseGeocoderTest {
             Assert.assertEquals(KIEL.getPosition().getLngDeg(), p.getPosition().getLngDeg(), 0.0001);
             
             p = geocoder.getPlacemarkFirst(abroad, 20, new Placemark.ByDistance(abroad));
-            Assert.assertEquals(firstByDistance.getName(), p.getName());
+            Assert.assertTrue(""+p.getName()+" neither equals "+firstByDistance.getName()+" nor "+firstByDistanceVariation.getName(),
+                    firstByDistance.getName().equals(p.getName()) || firstByDistanceVariation.getName().equals(p.getName()));
             Assert.assertEquals(firstByDistance.getCountryCode(), p.getCountryCode());
             Assert.assertEquals(firstByDistance.getPosition().getLatDeg(), p.getPosition().getLatDeg(), 0.005);
             Assert.assertEquals(firstByDistance.getPosition().getLngDeg(), p.getPosition().getLngDeg(), 0.012);

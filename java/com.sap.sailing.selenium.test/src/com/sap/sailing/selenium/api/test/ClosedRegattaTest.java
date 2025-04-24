@@ -27,6 +27,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class ClosedRegattaTest extends AbstractSeleniumTest {
 
+    private static final String DONALDS_PASSWORD = "dai0725-0OH:LJH'']]sy0815";
     private ApiContext ownerCtx;
     private ApiContext unregisteredCtx;
 
@@ -42,8 +43,8 @@ public class ClosedRegattaTest extends AbstractSeleniumTest {
         clearState(getContextRoot());
         super.setUp();
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         unregisteredCtx = createAnonymousApiContext(getContextRoot(), SERVER_CONTEXT);
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);

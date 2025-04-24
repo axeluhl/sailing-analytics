@@ -18,6 +18,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.junit.Test;
 
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -39,7 +40,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
     public void testSimpleReplicationOfUserCreation() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         assertNull(master.getUserByName(ERNIE));
         User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND, ERNIE_S_FULL_NAME, ERNIE_S_COMPANY, Locale.ENGLISH,
-                HTTP_ME_TO_BACK_COM, null);
+                HTTP_ME_TO_BACK_COM, null, /* clientIP */ null, /* enforce strong password */ false);
         assertNotNull(user);
         assertSame(user, master.getUserByName(ERNIE));
         assertTrue(master.checkPassword(ERNIE, BERT_MY_FRIEND));
@@ -64,7 +65,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
     @Test
     public void testSimpleReplicationOfUserEmailChange() throws InterruptedException, UserManagementException, MailException, IllegalAccessException, UserGroupManagementException {
         User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND, ERNIE_S_FULL_NAME, ERNIE_S_COMPANY, Locale.ENGLISH,
-                HTTP_ME_TO_BACK_COM, master.getDefaultTenantForCurrentUser());
+                HTTP_ME_TO_BACK_COM, master.getDefaultTenantForCurrentUser(), /* clientIP */ null, /* enforce strong password */ false);
         user.setFullName(ERNIE_S_FULL_NAME);
         user.setCompany(ERNIE_S_COMPANY);
         final String emailValidationSecretAfterCreation = user.getValidationSecret();
@@ -88,7 +89,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String newPassword = "ErnieAndBert";
         master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, HTTP_ME_TO_BACK_COM,
-                null);
+                null, /* clientIP */ null, /* enforce strong password */ false);
         master.updateSimpleUserPassword(ERNIE, newPassword);
         assertTrue(master.checkPassword(ERNIE, newPassword));
         replicaReplicator.waitUntilQueueIsEmpty();
@@ -97,6 +98,9 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertNotNull(replicatedErnie);
         assertEquals(ERNIE, replicatedErnie.getName());
         assertFalse(replica.checkPassword(ERNIE, BERT_MY_FRIEND));
+        // checking with incorrect password locks user for some time; wait long enough before retrying with correct password
+        final TimePoint lockedUntil = replicatedErnie.getLockingAndBanning().getLockedUntil();
+        Thread.sleep(Math.max(0, TimePoint.now().until(lockedUntil).asMillis()+10));
         assertTrue(replica.checkPassword(ERNIE, newPassword));
     }
 
@@ -106,7 +110,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String passwordResetBaseURL = "http://me.to.back.com/passwordreset";
         User user = master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL,
-                null);
+                null, /* clientIP */ null, /* enforce strong password */ false);
         master.validateEmail(ERNIE, user.getValidationSecret());
         assertTrue(user.isEmailValidated());
         master.resetPassword(ERNIE, passwordResetBaseURL);
@@ -127,7 +131,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final Set<WildcardPermission> permissions = Collections.singleton(permission);
         master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, null,
-                null);
+                null, /* clientIP */ null, /* enforce strong password */ false);
         final RoleDefinition roleDefinition = master.createRoleDefinition(roleDefinitionUUID, roleDefinitionName);
         roleDefinition.setPermissions(permissions);
         master.updateRoleDefinition(roleDefinition);
@@ -147,7 +151,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final Set<WildcardPermission> permissions = Collections.singleton(permission);
         master.createSimpleUser(ERNIE, ERNIE_SESAME_STREET_COM, BERT_MY_FRIEND,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, null,
-                null);
+                null, /* clientIP */ null, /* enforce strong password */ false);
         final RoleDefinition roleDefinition = master.createRoleDefinition(roleDefinitionUUID, roleDefinitionName);
         roleDefinition.setPermissions(permissions);
         master.updateRoleDefinition(roleDefinition);

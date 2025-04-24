@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -106,6 +107,10 @@ public interface UserManagementWriteService extends UserManagementService {
      */
     void unsetPreference(String username, String key)
             throws UserManagementException, UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
+    
+    void setCORSFilterConfigurationToWildcard();
+
+    void setCORSFilterConfigurationAllowedOrigins(ArrayList<String> allowedOrigins);
 
     // ------------------------------------------------ OAuth Interface
     // --------------------------------------------------------------

@@ -47,7 +47,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
+      -Dfile.encoding=UTF-8 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx8192m -XX:+UseG1GC
@@ -89,6 +89,8 @@
         <module>org.hamcrest.core</module>
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
+        <module>com.sap.sse.aicore</module>
+        <module>com.sap.sse.aicore.test</module>
         <module>com.sap.sse.landscape.common</module>
         <module>com.sap.sse.landscape</module>
         <module>com.sap.sse.landscape.aws</module>
@@ -147,16 +149,24 @@
         <module>com.sap.sailing.domain.expeditionadapter</module>
         <module>com.sap.sailing.domain.tractracadapter</module>
         <module>com.sap.sailing.domain.tractracadapter.persistence</module>
+        <module>com.sap.sailing.domain.vakarosadapter</module>
+        <module>com.sap.sailing.domain.vakarosadapter.test</module>
         <module>com.sap.sailing.domain.windfinderadapter</module>
         <module>com.sap.sailing.domain.windfinderadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter</module>
+        <module>com.sap.sailing.domain.igtimiadapter.server</module>
         <module>com.sap.sailing.domain.igtimiadapter.gateway</module>
         <module>com.sap.sailing.domain.igtimiadapter.persistence</module>
+        <module>com.sap.sailing.domain.queclinkadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.testsupport</module>
         <module>com.sap.sailing.domain.swisstimingadapter</module>
         <module>com.sap.sailing.domain.swisstimingadapter.persistence</module>
         <module>com.sap.sailing.domain.swisstimingreplayadapter</module>
+        <module>com.sap.sailing.aiagent.interfaces</module>
+        <module>com.sap.sailing.aiagent</module>
+        <module>com.sap.sailing.aiagent.persistence</module>
+        <module>com.sap.sailing.aiagent.gateway</module>
         <module>com.sap.sailing.news</module>
         <module>com.sap.sailing.declination</module>
         <module>com.sap.sailing.udpconnector</module>
@@ -219,6 +229,8 @@
         <module>com.sap.sailing.datamining.test</module>
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
         <module>com.sap.sailing.domain.igtimiadapter.test</module>
+        <module>com.sap.sailing.domain.igtimiadapter.persistence.test</module>
+        <module>com.sap.sailing.domain.queclinkadapter.test</module>
         <module>com.sap.sailing.domain.racelogtrackingadapter.test</module>
         <module>com.sap.sailing.xrr.resultimport.test</module>
         <module>com.sap.sailing.domain.shared.android.test</module>
@@ -243,6 +255,8 @@
         <module>com.sap.sailing.velum.resultimport.test</module>
         <module>com.sap.sailing.sailwave.resultimport</module>
         <module>com.sap.sailing.sailwave.resultimport.test</module>
+        <module>com.sap.sailing.sailwave.html.resultimport</module>
+        <module>com.sap.sailing.sailwave.html.resultimport.test</module>
         <module>com.sap.sailing.manage2sail</module>
         <module>com.sap.sailing.manage2sail.resultimport</module>
         <module>com.sap.sailing.manage2sail.resultimport.test</module>

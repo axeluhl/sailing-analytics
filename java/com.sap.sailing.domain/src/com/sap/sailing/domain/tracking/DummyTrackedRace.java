@@ -845,4 +845,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public UUID getCourseAreaId() {
         return null;
     }
+
+    @Override
+    public Double getPercentTargetBoatSpeed(Competitor competitor, TimePoint timePoint,
+            WindLegTypeAndLegBearingAndORCPerformanceCurveCache cache) {
+        return null;
+    }
 }

@@ -20,9 +20,21 @@ Require-Bundle: org.hamcrest;bundle-version="2.2.0",
  com.sap.sse.security
 Bundle-ClassPath: .
 Automatic-Module-Name: com.sap.sailing.selenium.test
-Import-Package: com.sap.sailing.server.security,
+Import-Package: com.google.protobuf;version="[4.28.0,5.0.0)",
+ com.sap.sailing.domain.igtimiadapter,
+ com.sap.sailing.domain.igtimiadapter.datatypes,
+ com.sap.sailing.domain.igtimiadapter.impl,
+ com.sap.sailing.domain.igtimiadapter.server.riot,
+ com.sap.sailing.domain.igtimiadapter.websocket,
+ com.sap.sailing.domain.tracking,
+ com.sap.sailing.server.security,
  javax.ws.rs.core;version="1.1.1",
  javax.xml.bind,
  org.apache.http.client;version="4.5.5",
+ org.eclipse.jetty.util.component;version="9.4.54",
+ org.eclipse.jetty.websocket.api;version="9.4.54",
+ org.eclipse.jetty.websocket.api.annotations;version="9.4.54",
+ org.eclipse.jetty.websocket.client;version="9.4.54",
+ org.eclipse.jetty.websocket.common.scopes;version="9.4.54",
  org.json.simple,
  org.json.simple.parser

@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -57,6 +58,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.env.BasicIniEnvironment;
 import org.apache.shiro.env.Environment;
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.env.IniWebEnvironment;
@@ -81,15 +83,25 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.nulabinc.zxcvbn.StandardDictionaries;
+import com.nulabinc.zxcvbn.StandardKeyboards;
+import com.nulabinc.zxcvbn.Strength;
+import com.nulabinc.zxcvbn.Zxcvbn;
+import com.nulabinc.zxcvbn.ZxcvbnBuilder;
+import com.nulabinc.zxcvbn.io.ClasspathResource;
+import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
+import com.sap.sse.rest.CORSFilterConfiguration;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.GithubApi;
@@ -169,6 +181,8 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.LockingAndBanning;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -182,6 +196,7 @@ import com.sap.sse.security.shared.subscription.SubscriptionPlanRole;
 import com.sap.sse.security.shared.subscription.SubscriptionPrice;
 import com.sap.sse.security.util.RemoteServerUtil;
 import com.sap.sse.shared.classloading.ClassLoaderRegistry;
+import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -209,6 +224,14 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      */
     private final ReplicatingCacheManager cacheManager;
     
+    /**
+     * Keys are the replica set's server names. Values are {@link Pair}s whose {@link Pair#getA() first} component is a
+     * boolean telling whether the CORS filter for the replica set identified by the key uses the "wildcard" (*) to
+     * allow REST requests from all possible origins, and the {@link Pair#getB() second} component lists the allowed
+     * origins in case it's not a wildcard configuration. For wildcard configurations, the second component is ignored.
+     */
+    private final ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName;
+    
     private final UserStore store;
     private final AccessControlStore accessControlStore;
     
@@ -216,6 +239,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private boolean isNewServer;
     
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
+    
+    private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
@@ -236,7 +261,35 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final PermissionChangeListeners permissionChangeListeners;
     
     private final ClassLoaderRegistry initialLoadClassLoaderRegistry = ClassLoaderRegistry.createInstance();
+    
+    /**
+     * Contains locking objects keyed by client IP addresses that describe which client IPs are currently locked
+     * from bearer token-based authentication due to previously failing requests. Requests for which a client
+     * IP address could not be determined are keyed with the {@link #CLIENT_IP_NULL_ESCAPE} key.<p>
+     * 
+     * When entering values into this map, the method entering it is responsible for also scheduling a background
+     * task that a while after lock expiry the record is expunged again from the map to avoid garbage piling up.
+     * 
+     * @see #failedBearerTokenAuthentication(String)
+     * @see #successfulBearerTokenAuthentication(String)
+     * @see #isClientIPLockedForBearerTokenAuthentication(String)
+     */
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    private final static String CLIENT_IP_NULL_ESCAPE = UUID.randomUUID().toString();
 
+    /**
+     * Contains locking objects keyed by client IP addresses ({@code null} not allowed) that describe which client IPs
+     * are locked for {@link User} creation, e.g., through the
+     * {@link #createSimpleUser(String, String, String, String, String, Locale, String, UserGroup, String, boolean)
+     * createSimpleUser} method.<p>
+     * 
+     * When entering values into this map, the method entering it is responsible for also scheduling a background
+     * task that a while after lock expiry the record is expunged again from the map to avoid garbage piling up.
+     */
+    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+
+    private final Zxcvbn passwordValidator;
+    
     /**
      * When working with a user's subscriptions, such as first reading, then changing and updating a user's subscription
      * based on what was read, a user-specific write lock must be obtained to ensure that no writes can cut in between.
@@ -255,7 +308,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * Creates a security service that is not shared across subdomains, therefore leading to the use of the full
      * domain through which its services are requested for {@code Document.domain} and hence for the browser local
      * storage, session storage and the Shiro {@code JSESSIONID} cookie's domain.
-     * 
      * @param setAsActivatorSecurityService
      *            when <code>true</code>, the {@link Activator#setSecurityService(com.sap.sse.security.SecurityService)}
      *            will be called with this new instance as argument so that the cache manager can already be accessed
@@ -263,10 +315,12 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            activator's security service and passes it to the cache entries created. They need it, in turn, for
      *            replication.
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, userStore, accessControlStore, hasPermissionsProvider, subscriptionPlanProvider,
-                /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker,
+            ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
+            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            SubscriptionPlanProvider subscriptionPlanProvider) {
+        this(mailServiceTracker, corsFilterConfigurationTracker, userStore, accessControlStore, hasPermissionsProvider,
+                subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -275,14 +329,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * the browser local and session store shall be shared and for which sessions identified by the {@code JSESSIONID} cookie shall
      * be shared as well.
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore,
-            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
-            String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
+            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
+        this.clientIPBasedLockingAndBanningForBearerTokenAuthentication = new ConcurrentHashMap<>();
+        this.clientIPBasedLockingAndBanningForUserCreation = new ConcurrentHashMap<>();
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.subscriptionPlanProvider = subscriptionPlanProvider;
@@ -290,8 +346,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.store = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
+        this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
-        cacheManager = loadReplicationCacheManagerContents();
+        this.cacheManager = loadReplicationCacheManagerContents();
+        this.corsFilterConfigurationsByReplicaSetName = loadCORSFilterConfigurations();
         logger.info("Loaded shiro.ini file from: classpath:shiro.ini");
         final StringBuilder logMessage = new StringBuilder("[urls] section from Shiro configuration:");
         final Section urlsSection = shiroConfiguration.getSection("urls");
@@ -310,6 +368,20 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         SecurityUtils.setSecurityManager(securityManager);
         this.securityManager = securityManager;
         aclResolver = new SecurityServiceAclResolver(accessControlStore);
+        try {
+            passwordValidator = createPasswordValidator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private Zxcvbn createPasswordValidator() throws IOException {
+        final ZxcvbnBuilder builder = new ZxcvbnBuilder();
+        builder.dictionaries(StandardDictionaries.loadAllDictionaries());
+        builder.keyboards(StandardKeyboards.loadAllKeyboards());
+        return builder
+                .keyboard(new SlantedKeyboardLoader("qwertz", new ClasspathResource("qwertz-keyboard.txt")).load())
+                .build();
     }
     
     @Override
@@ -338,6 +410,21 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return result;
     }
     
+    private ConcurrentMap<String, Pair<Boolean, Set<String>>> loadCORSFilterConfigurations() {
+        logger.info("Loading CORS filter configurations");
+        final ConcurrentMap<String, Pair<Boolean, Set<String>>> result = new ConcurrentHashMap<>();
+        result.putAll(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory().loadCORSFilterConfigurationsForReplicaSetNames());
+        if (result.containsKey(ServerInfo.getName())) {
+            final Pair<Boolean, Set<String>> thisServersCORSFilterConfig = result.get(ServerInfo.getName());
+            if (thisServersCORSFilterConfig.getA()) {
+                getCORSFilterConfiguration().setWildcard();
+            } else {
+                getCORSFilterConfiguration().setOrigins(thisServersCORSFilterConfig.getB());
+            }
+        }
+        return result;
+    }
+    
     @Override
     public Iterable<? extends HasPermissions> getAllHasPermissions() {
         return hasPermissionsProvider.getAllHasPermissions();
@@ -358,8 +445,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         SubscriptionPlan result = null;
         final Map<Serializable, SubscriptionPlan> allSubscriptionPlans = getAllSubscriptionPlans();
         for (SubscriptionPlan plan : allSubscriptionPlans.values()) {
-            for(SubscriptionPrice price : plan.getPrices()) {
-                if(itemPriceId.equals(price.getPriceId())) {
+            for (SubscriptionPrice price : plan.getPrices()) {
+                if (itemPriceId.equals(price.getPriceId())) {
                     result = plan;
                 }
             }
@@ -389,7 +476,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 final User adminUser = createSimpleUser(UserStore.ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
-                        null);
+                        null, /* clientIP */ null, /* enforce strong password */ false);
                 setOwnership(adminUser.getIdentifier(), adminUser, null);
                 Role adminRole = new Role(adminRoleDefinition, /* transitive */ true);
                 addRoleForUserAndSetUserAsOwner(adminUser, adminRole);
@@ -447,6 +534,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         return mailServiceTracker == null ? null : mailServiceTracker.getService();
     }
 
+    private CORSFilterConfiguration getCORSFilterConfiguration() {
+        return corsFilterConfigurationTracker == null ? null : corsFilterConfigurationTracker.getService();
+    }
+
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
         final User user = getUserByName(username);
@@ -473,6 +564,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new UserManagementException(UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL);
         }
         final String passwordResetSecret = user.createRandomSecret();
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is starting password reset for user "+username);
         apply(new ResetPasswordOperation(username, passwordResetSecret));
         Map<String, String> urlParameters = new HashMap<>();
         try {
@@ -589,6 +681,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * @param id Has to be globally unique
      */
     private SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is clearing ACL of object with ID "+idOfAccessControlledObjectAsString);
         apply(new SetEmptyAccessControlListOperation(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
@@ -623,6 +716,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             }
             final UUID userGroupId = userGroup == null ? null : userGroup.getId();
             // avoid the UserGroup object having to be serialized with the operation by using the ID
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting the ACL for "+idOfAccessControlledObject+" with actions "+actionsToSet);
             apply(new AclPutPermissionsOperation(idOfAccessControlledObject, userGroupId, actionsToSet));
         }
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
@@ -645,14 +739,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group == null ? null : group.getId();
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+action+" for group with ID "+groupId+" to the ACL for "+idOfAccessControlledObject);
         apply(new AclAddPermissionOperation(idOfAccessControlledObject, groupId, action));
         return accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
     }
 
     @Override
-    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String permission) {
+    public Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action) {
         permissionChangeListeners.aclChanged(idOfAccessControlledObject);
-        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), permission);
+        accessControlStore.addAclPermission(idOfAccessControlledObject, getUserGroup(groupId), action);
         return null;
     }
 
@@ -665,6 +760,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObject) != null) {
             final UUID groupId = group == null ? null : group.getId();
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permission+" for group with ID "+groupId+" from the ACL for "+idOfAccessControlledObject);
             apply(new AclRemovePermissionOperation(idOfAccessControlledObject, groupId, permission));
             result = accessControlStore.getAccessControlList(idOfAccessControlledObject).getAnnotation();
         } else {
@@ -683,6 +779,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
         if (getAccessControlList(idOfAccessControlledObject) != null) {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting the ACL of object "+idOfAccessControlledObject);
             apply(new DeleteAclOperation(idOfAccessControlledObject));
         }
     }
@@ -730,6 +827,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             && existingTenantOwner == tenantOwner) {
             result = existingOwnership.getAnnotation();
         } else {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is setting ownership of object "+objectId+" to group with ID "+tenantId+" and user "+userOwnerName);
             result = apply(new SetOwnershipOperation(objectId, userOwnerName, tenantId,
                     displayNameOfOwnedObject));
         }
@@ -746,6 +844,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void deleteOwnership(QualifiedObjectIdentifier objectId) {
         if (getOwnership(objectId) != null) {
+            logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting ownership information from object with ID "+objectId);
             apply(new DeleteOwnershipOperation(objectId));
         }
     }
@@ -788,7 +887,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     private UserGroup createUserGroupWithInitialUser(UUID id, String name, User initialUser) {
-        logger.info("Creating user group " + name + " with ID " + id);
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is creating user group " + name + " with ID " + id);
         apply(new CreateUserGroupOperation(id, name));
         final UserGroup userGroup = store.getUserGroup(id);
         if (initialUser != null) {
@@ -991,8 +1090,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser)
-            throws UserManagementException, MailException, UserGroupManagementException {
+            String company, Locale locale, final String validationBaseURL, UserGroup groupOwningUser,
+            String requestClientIP, boolean enforceStrongPassword) throws UserManagementException, MailException, UserGroupManagementException {
+        if (requestClientIP != null) {
+            checkAndRecordUserCreationFromClientIP(requestClientIP);
+        }
         logger.info("Creating user "+username);
         if (store.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
@@ -1000,7 +1102,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         if (username == null || username.length() < 3) {
             throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (password == null || password.length() < 5) {
+        } else if (enforceStrongPassword && !isPasswordGoodEnough(password)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -1017,6 +1119,48 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         updateUserProperties(username, fullName, company, locale);
         // email has been set during creation already; the following call will trigger the e-mail validation process
         updateSimpleUserEmail(username, email, validationBaseURL);
+        return result;
+    }
+
+    private boolean isPasswordGoodEnough(String password) {
+        final boolean result;
+        if (password == null) {
+            result = false;
+        } else {
+            final Strength strength = passwordValidator.measure(password);
+            result = strength.getGuessesLog10() > 8;
+        }
+        return result;
+    }
+    
+    /**
+     * Checks if the {@code clientIP} is currently blocked for user creation, and if so, throws a
+     * {@link UserManagementException}. If the check is successful, it records a locking record for
+     * this client IP, similar to the locking/banning that happens for failer bearer token
+     * authentication requests (see {@link #failedBearerTokenAuthentication(String)}).
+     */
+    private void checkAndRecordUserCreationFromClientIP(String clientIP) throws UserManagementException {
+        assert clientIP != null;
+        // synchronize to ensure that no two threads can enter values into the map concurrently;
+        // still the use of a ConcurrentMap is justified because there may be concurrent write access
+        // through replication
+        synchronized (clientIPBasedLockingAndBanningForUserCreation) {
+            final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForUserCreation.get(clientIP);
+            if (lockingAndBanning == null || !lockingAndBanning.isAuthenticationLocked()) {
+                apply(s->s.internalRecordUserCreationFromClientIP(clientIP));
+            } else {
+                throw new UserManagementException("Client IP "+clientIP+" locked for user creation: "+lockingAndBanning);
+            }
+        }
+    }
+    
+    @Override
+    public LockingAndBanning internalRecordUserCreationFromClientIP(String clientIP) {
+        final LockingAndBanning result = new LockingAndBanningImpl(TimePoint.now().plus(DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION),
+                DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION);
+        clientIPBasedLockingAndBanningForUserCreation.put(clientIP, result);
+        scheduleCleanUpTask(clientIP, result, clientIPBasedLockingAndBanningForUserCreation,
+                "client IPs locked for user creation");
         return result;
     }
 
@@ -1055,7 +1199,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
-        final User result = store.createUser(username, email, accounts); // TODO: get the principal as owner
+        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts); // TODO: get the principal as owner
         return result;
     }
 
@@ -1073,7 +1217,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     private void updateSimpleUserPassword(final User user, String newPassword) throws UserManagementException {
-        if (newPassword == null || newPassword.length() < 5) {
+        if (!isPasswordGoodEnough(newPassword)) {
             throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
         }
         // for non-admins, check that the old password is correct
@@ -1090,6 +1234,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
+        store.updateUser(user);
         return null;
     }
 
@@ -1118,11 +1263,126 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
+        if (user.getLockingAndBanning().isAuthenticationLocked()) {
+            throw new UserManagementException("Password authentication is locked for user "+username);
+        }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
-        return Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
+        final boolean result = Util.equalsWithNull(hashedOldPassword, account.getSaltedPassword());
+        if (!result) {
+            logger.info("Failed password check for user "+username);
+            apply(s->s.internalFailedPasswordAuthentication(username));
+        } else {
+            apply(s->s.internalSuccessfulPasswordAuthentication(username));
+        }
+        return result;
     }
     
+    @Override
+    public LockingAndBanning failedPasswordAuthentication(User user) {
+        return apply(s->s.internalFailedPasswordAuthentication(user.getName()));
+    }
+
+    @Override
+    public LockingAndBanning internalFailedPasswordAuthentication(String username) {
+        final User user = getUserByName(username);
+        final LockingAndBanning lockingAndBanning;
+        if (user != null) {
+            lockingAndBanning = user.getLockingAndBanning();
+            lockingAndBanning.failedPasswordAuthentication();
+            store.updateUser(user);
+        } else {
+            lockingAndBanning = null;
+        }
+        return lockingAndBanning;
+    }
+
+    @Override
+    public void successfulPasswordAuthentication(User user) {
+        apply(s->s.internalSuccessfulPasswordAuthentication(user.getName()));
+    }
+    
+    @Override
+    public Void internalSuccessfulPasswordAuthentication(String username) {
+        final User user = getUserByName(username);
+        if (user != null) {
+            if (user.getLockingAndBanning().successfulPasswordAuthentication()) {
+                store.updateUser(user);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
+        return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+    }
+    
+    @Override
+    public LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
+        lockingAndBanning.failedPasswordAuthentication();
+        scheduleCleanUpTask(clientIP, lockingAndBanning, clientIPBasedLockingAndBanningForBearerTokenAuthentication,
+                "client IPs locked for bearer token authentication");
+        return lockingAndBanning;
+    }
+
+    /**
+     * Schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects; schedule it in two times the
+     * locking expiry pf {@code lockingAndBanning} because if no authentication failure occurs for that IP/user agent
+     * combination, we will entirely remove the {@link LockingAndBanning} from the map, effectively resetting that IP to
+     * a short default locking duration again; this way, if during the double expiration time another failed attempt is
+     * registered, we can still grow the locking duration because we have kept the {@link LockingAndBanning} object
+     * available for a bit longer. Furthermore, for authentication requests, the responsible {@link Realm} will let
+     * authentication requests get to here only if not locked, so if we were to expunge entries immediately as they
+     * unlock, the locking duration could never grow.
+     */
+    private void scheduleCleanUpTask(final String clientIPOrNull,
+            final LockingAndBanning lockingAndBanning,
+            final ConcurrentMap<String, LockingAndBanning> mapToRemoveFrom,
+            final String nameOfMapForLog) {
+        final long millisUntilLockingExpiry = 2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis();
+        if (millisUntilLockingExpiry > 0) {
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                    ()->{
+                        final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
+                        if (lab != null && !lab.isAuthenticationLocked()) {
+                            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
+                            logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
+                                    +mapToRemoveFrom.size()
+                                    +" locked client IP(s) remaining");
+                        }
+                    },
+                    millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
+        } else { // a bit weird because we just locked it; suggests very slow execution; yet, let's clean up...
+            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
+        }
+    }
+
+    private String escapeNullClientIP(String clientIP) {
+        return clientIP==null?CLIENT_IP_NULL_ESCAPE:clientIP;
+    }
+
+    @Override
+    public void successfulBearerTokenAuthentication(String clientIP) {
+        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP));
+    }
+    
+    @Override
+    public Void internalSuccessfulBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.remove(escapeNullClientIP(clientIP));
+        if (lockingAndBanning != null) {
+            logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isClientIPLockedForBearerTokenAuthentication(String clientIP) {
+        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.get(escapeNullClientIP(clientIP));
+        return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
+    }
+
     @Override
     public boolean checkPasswordResetSecret(String username, String passwordResetSecret) throws UserManagementException {
         final User user = store.getUserByName(username);
@@ -1138,7 +1398,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        logger.info("Changing e-mail address of user " + username + " to " + newEmail);
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is changing e-mail address of user " + username + " to " + newEmail);
         final String validationSecret = user.createRandomSecret();
         apply(new UpdateSimpleUserEmailOperation(username, newEmail, validationSecret));
         if (validationBaseURL != null && newEmail != null && !newEmail.trim().isEmpty()) {
@@ -1161,6 +1421,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final User user = getUserByName(username);
         user.setEmail(newEmail);
         user.startEmailValidation(validationSecret);
+        store.updateUser(user);
         return null;
     }
 
@@ -1234,6 +1495,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public RoleDefinition createRoleDefinition(UUID roleId, String name) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" created role "+name+" with ID "+roleId);
         return apply(new CreateRoleDefinitionOperation(roleId, name));
     }
 
@@ -1244,6 +1506,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void deleteRoleDefinition(RoleDefinition roleDefinition) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" deleted role "+roleDefinition);
         final UUID roleId = roleDefinition.getId();
         apply(new DeleteRoleDefinitionOperation(roleId));
     }
@@ -1258,6 +1521,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" updated role "+roleDefinitionWithNewProperties);
         apply(new UpdateRoleDefinitionOperation(roleDefinitionWithNewProperties));
     }
 
@@ -1295,6 +1559,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void addRoleForUser(String username, Role role) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" added role "+role+" to user "+username);
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
@@ -1319,6 +1584,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void removeRoleFromUser(String username, Role role) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" removed role "+role+" to user "+username);
         final UUID roleDefinitionId = role.getRoleDefinition().getId();
         final UUID idOfTenantQualifyingRole = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getId();
         final String nameOfUserQualifyingRole = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
@@ -1338,6 +1604,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void removePermissionFromUser(String username, WildcardPermission permissionToRemove) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is removing permission "+permissionToRemove+" from user "+username);
         apply(new RemovePermissionForUserOperation(username, permissionToRemove));
     }
 
@@ -1350,6 +1617,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void addPermissionForUser(String username, WildcardPermission permissionToAdd) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is adding permission "+permissionToAdd+" to user "+username);
         apply(new AddPermissionForUserOperation(username, permissionToAdd));
     }
 
@@ -1362,6 +1630,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is deleting user "+username);
         final User userToDelete = store.getUserByName(username);
         if (userToDelete == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
@@ -1791,6 +2060,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public String createAccessToken(String username) {
+        logger.info("Subject "+SecurityUtils.getSubject().getPrincipal()+" is requesting a new access token for user "+username);
         User user = getUserByName(username);
         final String token;
         if (user != null) {
@@ -1806,8 +2076,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public void removeAccessToken(String username) {
-        Subject subject = SecurityUtils.getSubject();
+        final Subject subject = SecurityUtils.getSubject();
         if (hasCurrentUserUpdatePermission(getUserByName(username))) {
+            logger.info("Subject "+subject.getPrincipal()+" is removing the access token for user "+username);
             apply(new RemoveAccessTokenOperation(username));
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
@@ -1959,12 +2230,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     /**
      * Special case for user creation, as no currentUser might exist when registering anonymous, and since a user always
      * should own itself as userOwner
-     * 
-     * @return
      */
     @Override
-    public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
-            Callable<User> createActionReturningCreatedObject) {
+    public User checkPermissionForUserCreationAndRevertOnErrorForUserCreation(String username,
+            Callable<User> createActionReturningCreatedObject) throws UserManagementException {
         QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER
                 .getQualifiedObjectIdentifier(UserImpl.getTypeRelativeObjectIdentifier(username));
         User result = null;
@@ -1973,6 +2242,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             result = createActionReturningCreatedObject.call();
         } catch (AuthorizationException e) {
             logger.warning("Unauthorized request to create user with name \""+username+"\": "+e.getMessage());
+            throw e;
+        } catch (UserManagementException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -2022,9 +2293,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier identifier) {
-        logger.info("Deleting ownerships for " + identifier);
         deleteOwnership(identifier);
-        logger.info("Deleting acls for " + identifier);
         deleteAccessControlList(identifier);
     }
 
@@ -2162,12 +2431,56 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         }
         return result;
     }
+    
+    @Override
+    public void setCORSFilterConfigurationToWildcard(String serverName) {
+        apply(s->s.internalSetCORSFilterConfigurationToWildcard(serverName));
+    }
+    
+    @Override
+    public Void internalSetCORSFilterConfigurationToWildcard(String serverName) {
+        if (Util.equalsWithNull(serverName, ServerInfo.getName())) {
+            getCORSFilterConfiguration().setWildcard();
+        }
+        corsFilterConfigurationsByReplicaSetName.put(serverName, new Pair<>(true, Collections.emptySet()));
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeCORSFilterConfigurationIsWildcard(serverName);
+        return null;
+    }
+    
+    @Override
+    public void setCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) throws IllegalArgumentException {
+        for (final String allowedOrigin : allowedOrigins) {
+            if (!HttpHeaderUtil.isValidOriginHeaderValue(allowedOrigin)) {
+                throw new IllegalArgumentException("\""+allowedOrigin+"\" is not a valid format for a CORS origin");
+            }
+        }
+        apply(s->s.internalSetCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins));
+    }
+
+    @Override
+    public Void internalSetCORSFilterConfigurationAllowedOrigins(String serverName, String... allowedOrigins) {
+        final Iterable<String> allowedOriginsAsList = allowedOrigins == null ? Collections.emptyList() : Arrays.asList(allowedOrigins);
+        if (Util.equalsWithNull(serverName, ServerInfo.getName())) {
+            getCORSFilterConfiguration().setOrigins(allowedOriginsAsList);
+        }
+        corsFilterConfigurationsByReplicaSetName.put(serverName, new Pair<>(false, Util.asNewSet(allowedOriginsAsList)));
+        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().storeCORSFilterConfigurationAllowedOrigins(serverName, allowedOrigins);
+        return null;
+    }
+    
+    @Override
+    public Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName) {
+        return corsFilterConfigurationsByReplicaSetName.get(serverName);
+    }
 
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
         store.clear();
         accessControlStore.clear();
+        corsFilterConfigurationsByReplicaSetName.clear();
+        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
+        clientIPBasedLockingAndBanningForUserCreation.clear();
     }
 
     @Override
@@ -2245,6 +2558,18 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         logger.info("Reading baseUrlForCrossDomainStorage...");
         baseUrlForCrossDomainStorage = (String) is.readObject();
         logger.info("...as "+baseUrlForCrossDomainStorage);
+        logger.info("Reading CORS filter configurations and possibly more...");
+        final SecurityServiceInitialLoadExtensionsDTO initialLoadExtensions = (SecurityServiceInitialLoadExtensionsDTO) is.readObject();
+        final ConcurrentMap<String, Pair<Boolean, Set<String>>> newCORSFilterConfigurations = initialLoadExtensions.getCorsFilterConfigurationsByReplicaSetName();
+        corsFilterConfigurationsByReplicaSetName.putAll(newCORSFilterConfigurations);
+        if (initialLoadExtensions.getClientIPBasedLockingAndBanningForBearerTokenAuthentication() != null) {
+            // checking for null for backward compatibility; an older primary/master may not have known this field yet
+            clientIPBasedLockingAndBanningForBearerTokenAuthentication.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForBearerTokenAuthentication());
+        }
+        if (initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation() != null) {
+            // checking for null for backward compatibility; an older primary/master may not have known this field yet
+            clientIPBasedLockingAndBanningForUserCreation.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation());
+        }
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
@@ -2257,6 +2582,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(accessControlStore);
         objectOutputStream.writeObject(sharedAcrossSubdomainsOf);
         objectOutputStream.writeObject(baseUrlForCrossDomainStorage);
+        objectOutputStream.writeObject(new SecurityServiceInitialLoadExtensionsDTO(
+                corsFilterConfigurationsByReplicaSetName,
+                clientIPBasedLockingAndBanningForBearerTokenAuthentication,
+                clientIPBasedLockingAndBanningForUserCreation));
     }
 
     @Override
@@ -2563,6 +2892,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
     // permission-vertical
     public void clearState() throws Exception {
+        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
+        clientIPBasedLockingAndBanningForUserCreation.clear();
     }
 
     @Override
@@ -3000,7 +3331,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         for (SubscriptionPlan subscriptionPlan : allSubscriptionPlans.values()) {
             for (SubscriptionPrice subscriptionPrice : subscriptionPlan.getPrices()) {
                 final BigDecimal updatedPrice = updatedItemPrices.get(subscriptionPrice.getPriceId());
-                if(updatedPrice != null) {
+                if (updatedPrice != null) {
                     logger.log(Level.INFO, "Setting ItemPrice for SubscriptionPrice " + subscriptionPrice.getPriceId());
                     subscriptionPrice.setPrice(updatedPrice);
                 }

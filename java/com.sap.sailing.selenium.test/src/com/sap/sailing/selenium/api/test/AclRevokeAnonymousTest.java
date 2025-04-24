@@ -24,6 +24,8 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
 
+    private static final String DONALDS_PASSWORD = "daisy_LUYjl82.0815";
+
     private ApiContext ownerCtx;
 
     private final SecurityApi securityApi = new SecurityApi();
@@ -38,8 +40,8 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
         clearState(getContextRoot());
         super.setUp();
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", "daisy0815");
+        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        ownerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
         adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
         eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "Some special place");

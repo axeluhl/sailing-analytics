@@ -71,6 +71,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     private transient TimeRangeCache<Pair<Double, Long>> expeditionRateOfTurnCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionTimeToBurnToLineCache;
     private transient TimeRangeCache<Pair<Double, Long>> expeditionDistanceBelowLineInMetersCache;
+    private transient TimeRangeCache<Pair<Double, Long>> expeditionKickerTensionCache;
     
     /**
      * If a GPS track was provided at construction time, remember it non-transiently. It is needed when restoring
@@ -489,6 +490,17 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
                 ScalableDouble::new);
     }
     
+    @Override
+    public Double getExpeditionKickerTensionIfAvailable(TimePoint timePoint) {
+        return getValueFromExtendedFixSkippingNullValues(timePoint, BravoExtendedFix::getExpeditionKickerTension,
+                ScalableDouble::new);
+    }
+
+    @Override
+    public Double getAverageExpeditionKickerTensionIfAvailable(TimePoint start, TimePoint endTimePoint) {
+        return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionKickerTension, expeditionKickerTensionCache);
+    }
+
     @Override
     public Double getAverageExpeditionAWAIfAvailable(TimePoint start, TimePoint endTimePoint){
         return getAverageOfBravoExtenededFixValueWithCachingForDouble(start, endTimePoint, BravoExtendedFix::getExpeditionAWA, expeditionAWACache);

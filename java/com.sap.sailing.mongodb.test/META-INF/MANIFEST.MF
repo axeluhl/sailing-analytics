@@ -49,6 +49,7 @@ Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.racelog.tracking,
  com.sap.sailing.domain.common.tracking,
  com.sap.sailing.domain.common.tracking.impl,
- com.sap.sailing.domain.tractracadapter.persistence.impl
+ com.sap.sailing.domain.tractracadapter.persistence.impl,
+ org.apache.commons.math;version="2.1.0"
 Automatic-Module-Name: com.sap.sailing.mongodb.test
 

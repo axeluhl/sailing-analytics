@@ -46,7 +46,7 @@ public class StatefulBlockingInstruction<ResultType> extends StatefulProcessorIn
         }
         return result;
     }
-
+    
     protected void actionBeforeBlock() { }
     protected void actionBeforeAbort() { }
     protected void actionAfterBlock() { }
@@ -58,5 +58,4 @@ public class StatefulBlockingInstruction<ResultType> extends StatefulProcessorIn
     public boolean computeResultWasAborted() {
         return computeResultWasAborted;
     }
-    
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
@@ -89,4 +90,6 @@ public interface UserManagementService extends RemoteService {
     ArrayList<HasPermissions> getAllHasPermissions();
 
     SecuredDTO addSecurityInformation(SecuredDTO securedDTO);
+    
+    Pair<Boolean, ArrayList<String>> getCORSFilterConfiguration();
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.landscape.aws.common.shared.SecuredAwsLandscapeType;
@@ -102,4 +103,6 @@ public interface UserManagementServiceAsync {
      * in the {@code callback} passed.
      */
     void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<SecuredDTO> callback);
+    
+    void getCORSFilterConfiguration(AsyncCallback<Pair<Boolean, ArrayList<String>>> callback);
 }

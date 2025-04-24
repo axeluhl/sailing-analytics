@@ -26,7 +26,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException,
-            SubscriberInitializationException, CreateModelException, URISyntaxException {
+            SubscriberInitializationException, CreateModelException {
 
         LoggerLocator.getLoggerManager().init(1, "println");
 
@@ -38,6 +38,8 @@ public class Main {
         IEventFactory eventFactory = ModelLocator.getEventFactory();
         IRace race = eventFactory.createRace(paramURI);
         IEvent event = race.getEvent();
+
+        event.getPositionedItems().forEach(positionedItem -> System.out.println(positionedItem.getMetadata().getText()));
 
         // Create the subscriber
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
@@ -53,19 +55,19 @@ public class Main {
         eventSubscriber.subscribeConnectionStatus(listener);
         eventSubscriber.subscribeEventMessages(listener);
         eventSubscriber.subscribeRaces(listener);
-        eventSubscriber.subscribeControls(listener);
+        eventSubscriber.subscribeMapItems(listener);
         eventSubscriber.subscribeCompetitors(listener);
 
         IRaceSubscriber raceSubscriber = subscriberFactory.createRaceSubscriber(
                 race
         );
         raceSubscriber.subscribeConnectionStatus(listener);
-        raceSubscriber.subscribeControlPositions(listener);
-        raceSubscriber.subscribePositions(listener);
+        raceSubscriber.subscribePositionedItemPositions(listener);
+        //raceSubscriber.subscribePositions(listener);
         //raceSubscriber.subscribePositionsSnapped(listener);
         raceSubscriber.subscribeControlPassings(listener);
-        raceSubscriber.subscribeCompetitorSensorData(listener);
-        raceSubscriber.subscribeRaceMessages(listener);
+        //raceSubscriber.subscribeCompetitorSensorData(listener);
+        //raceSubscriber.subscribeRaceMessages(listener);
         raceSubscriber.subscribeRaceTimesChanges(listener);
         raceSubscriber.subscribeRouteChanges(listener);
         raceSubscriber.subscribeRaceCompetitor(listener);

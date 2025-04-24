@@ -1,7 +1,7 @@
 #!/bin/bash
-# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2 AMI with
-# 16GB of root partition size and the "Database and Messaging" security group
-# using an SSH key for which you have a working private key available.
+# Usage: Launch an Amazon EC2 instance from an Amazon Linux 2023 AMI with
+# type m5.large and 16GB of root partition size and the "Database and Messaging"
+# security group using an SSH key for which you have a working private key available.
 # Make sure to launch it in the same AZ as your current "MongoDB Central"
 # instance, or you won't be able to attach the existing data volumes!
 # Then, run this script on your local computer, using the external IP address
@@ -25,20 +25,22 @@ else
   if ec2-metadata | grep -q instance-id; then
     echo "Running on an AWS EC2 instance as user ${USER} / $(whoami), starting setup..."
     # Install standard packages:
-    sudo yum -y update
-    sudo yum -y install nvme-cli chrony cronie cronie-anacron jq mailx
+    sudo dnf -y --best --allowerasing --releasever=latest upgrade
+    sudo dnf -y install nvme-cli chrony cronie cronie-anacron jq mailx whois iptables
     # Copy imageupgrade_function.sh
     scp -o StrictHostKeyChecking=no -p root@sapsailing.com:/home/wiki/gitwiki/configuration/environments_scripts/repo/usr/local/bin/imageupgrade_functions.sh .
     sudo mv imageupgrade_functions.sh /usr/local/bin
     # build-crontab
     . imageupgrade_functions.sh
+    # Install MongoDB 5.0 and configure as replica set "live"
+    setup_mongo_7_0_on_AL2023
+    setup_mail_sending
+    setup_fail2ban
     build_crontab_and_setup_files central_mongo_setup
     # obtain root SSH key from key vault:
     setup_keys "central_mongo_setup"
     # Create some swap space for the case mountnvmeswap hasn't created any
     setup_swap 6000
-    # Install MongoDB 4.4 and configure as replica set "live"
-    setup_mongo_5_0
     # Disable default mongod service unit derived from /etc/init.d/mongod:
     sudo systemctl disable mongod.service
     # Prepare for the MongoDB volume mounts:

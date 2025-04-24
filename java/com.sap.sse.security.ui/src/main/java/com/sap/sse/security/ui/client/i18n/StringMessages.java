@@ -223,4 +223,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorPollingCheckoutResults();
     String paymentUnfinished();
     String paymentFinished();
+    String lockedUntil();
 }
