@@ -105,6 +105,10 @@ Both these branches derive from the branch ``hyperspace`` which is more like a p
 - The MoMa Assembly ID is set in the ``momaAssemblyId`` property
 - In ``fastlane/Fastfile`` the path to the ``gradle.properties`` file into which to patch the version code update is adjusted to the respective app folder, e.g., ``mobile/com.sap.sailing.android.buoy.positioning.app/gradle.properties``
 
+After at most 90 days, the vault secret expire. Then, under [https://hyperspace.tools.sap/pipelines/29049/vault](https://hyperspace.tools.sap/pipelines/29049/vault) we can click the "Refresh SecretID" button. The build pipeline supposedly fetches the new secret automatically afterwards, which should then be good to go for another 90 days. Note: when your build pipeline failed for the lack of a valid secret ID, with the error message reading something like
+```Couldn't fetch secret at 'piper/PIPELINE-GROUP-5565/PIPELINE-29049/cumulus' - Error making API request```
+see also [here](https://pages.github.tools.sap/SAPMobile/Documentation/Support/faq/#my-pipeline-fails-with-invalid-secret-id-or-invalid-role-id). 
+
 Our points of contact for the Hyperspace / Azure Pipeline migration are Marc Bormeth (marc.bormeth@sap.com), Maurice Breit (maurice.breit@sap.com) and Philipp Resch (philipp.resch@sap.com).
 
 ### Running a Build / Release / Promote Cycle
