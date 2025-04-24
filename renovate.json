@@ -23,5 +23,11 @@
   ],
   "azure-pipelines": {
     "enabled": true
+  },
+  "gradle": {
+    "enabled": false
+  },
+  "maven": {
+    "enabled": false
   }
 }
