@@ -1439,7 +1439,7 @@ public class LandscapeServiceImpl implements LandscapeService {
         return Wait.wait(()->hasHealthyAutoScalingReplica(master, autoScalingGroup), healthyReplica->healthyReplica != null,
                 /* retryOnException */ true,
                 Landscape.WAIT_FOR_HOST_TIMEOUT, Duration.ONE_SECOND.times(5), Level.INFO,
-                "Waiting for auto-scaling group to produce healthy replica");
+                "Waiting for auto-scaling group "+autoScalingGroup.getName()+" to produce healthy replica");
     }
 
     /**
