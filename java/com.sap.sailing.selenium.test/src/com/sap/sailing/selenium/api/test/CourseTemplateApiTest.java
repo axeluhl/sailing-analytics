@@ -32,6 +32,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class CourseTemplateApiTest extends AbstractSeleniumTest {
+    private static final String DONALDS_PASSWORD = "dai982734(*^(sy0815";
     private final CourseTemplateApi courseTemplateApi = new CourseTemplateApi();
     private final MarkRoleApi markRoleApi = new MarkRoleApi();
     private ApiContext ctx;
@@ -55,8 +56,8 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     @Test
     public void cantUseOthersMarkTemplatesTest() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        new SecurityApi().createUser(adminSecurityCtx, "donald", "Donald Duck", null, "daisy0815");
-        final ApiContext otherUserCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", "daisy0815");
+        new SecurityApi().createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+        final ApiContext otherUserCtx = createApiContext(getContextRoot(), SHARED_SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
 
         try {
             courseTemplateApi.createCourseTemplate(otherUserCtx, ctdf.constructCourseTemplate());

@@ -75,13 +75,13 @@ public class ParserTest {
     }
 
     @Test
-    public void testSimpleParsingSomeLaserDocument() throws JAXBException, IOException {
+    public void testSimpleParsingSomeLaserDocument() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_LASER), SAMPLE_INPUT_NAME_LASER).parse();
         assertNotNull(o);
     }
 
     @Test
-    public void testSimpleParsingSomeStarDocument() throws JAXBException, IOException {
+    public void testSimpleParsingSomeStarDocument() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults o = ParserFactory.INSTANCE.createParser(getInputStream(SAMPLE_INPUT_NAME_STAR), SAMPLE_INPUT_NAME_STAR).parse();
         assertNotNull(o);
     }

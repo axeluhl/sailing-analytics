@@ -22,7 +22,7 @@ mkdir /var/log/old
 echo "logfiles.internal.sapsailing.com:/var/log/old   /var/log/old    nfs     tcp,intr,timeo=100,retry=0" >> /etc/fstab
 mount -a
 # update instance
-dnf upgrade -y --releasever=latest
+dnf upgrade -y --best --allowerasing --releasever=latest
 dnf install -y httpd mod_proxy_html tmux nfs-utils git whois jq cronie iptables nmap
 sudo systemctl enable crond.service
 # setup other users and crontabs to keep repo updated
@@ -32,6 +32,7 @@ scp -o StrictHostKeyChecking=no -p "root@sapsailing.com:/home/wiki/gitwiki/confi
 . imageupgrade_functions.sh
 setup_keys "${IMAGE_TYPE}"
 setup_cloud_cfg_and_root_login
+setup_swap 5000
 # setup files and crontab for the required users, both dependent on the environment type.
 build_crontab_and_setup_files "${IMAGE_TYPE}"
 # setup mail
@@ -53,8 +54,6 @@ setup_fail2ban
 # goaccess and apachetop
 setup_goaccess
 setup_apachetop
-# mount nvme if available
-mountnvmeswap
 # setup logrotate.d/httpd 
 mkdir /var/log/logrotate-target
 echo "Patching $HTTP_LOGROTATE_ABSOLUTE so that old logs go to /var/log/old/$IP" >>/var/log/sailing.out

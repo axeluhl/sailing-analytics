@@ -42,8 +42,7 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
 
     @Override
     protected String getExpectedEventName() {
-        // don't worry about the missing "r" at the end of "Kiele"; this is what we're getting from TracTrac
-        return "Kiele Woche 2014 - Olympic Week";
+        return "Kieler Woche 2014 - Olympic Week";
     }
 
     @Before
@@ -65,11 +64,10 @@ public class PhilippBuhlsDoublePenaltyCircleAtKielerWoche2014Test extends Abstra
      */
     @Test
     public void testDoublePenaltyForPhilippAndTobiasAndMaximAndDharmender() throws ParseException, NoWindException {
-        assertTwoPenalties("Philipp Buhl",        "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:30", "06/21/2014-13:03:40");
-        assertTwoPenalties("Dharmender SINGH",    "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:10");
-        // note the typo in Tobias's name; this is how we get it from TracTrac...
-        assertTwoPenalties("Tolbias SCHADEWALDT", "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:10", "06/21/2014-12:47:19");
-        assertTwoPenalties("Maxim NIKOLAEV",      "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:37", "06/21/2014-12:49:52");
+        assertTwoPenalties("Buhl",             "06/21/2014-13:03:18", "06/21/2014-13:03:47", "06/21/2014-13:03:30", "06/21/2014-13:03:40");
+        assertTwoPenalties("Dharmender Singh", "06/21/2014-12:51:40", "06/21/2014-12:52:40", "06/21/2014-12:52:01", "06/21/2014-12:52:10");
+        assertTwoPenalties("Schadewaldt",      "06/21/2014-12:46:50", "06/21/2014-12:47:30", "06/21/2014-12:47:10", "06/21/2014-12:47:19");
+        assertTwoPenalties("Maxim Nikolaev",   "06/21/2014-12:49:22", "06/21/2014-12:50:13", "06/21/2014-12:49:37", "06/21/2014-12:49:52");
     }
 
     private void assertTwoPenalties(String competitorName, final String from, final String to,

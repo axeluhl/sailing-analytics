@@ -53,6 +53,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDataAccessWindowWithSecurityDTO;
+import com.sap.sailing.gwt.ui.shared.IgtimiDeviceWithSecurityDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
@@ -125,8 +127,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void addResultImportUrl(String resultProviderName, UrlDTO url, AsyncCallback<Void> callback) throws UnauthorizedException/*, Exception*/;
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
-            AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
+            String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            TimePoint raceTimepoint, AsyncCallback<SuccessInfo> callback) throws UnauthorizedException;
 
     void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorWithBoatDTO>> callback)
             throws UnauthorizedException;
@@ -574,12 +576,44 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
 
     void removeDeviceConfiguration(UUID deviceConfigurationId, AsyncCallback<Boolean> asyncCallback);
 
-    void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
+    void addIgtimiDataAccessWindow(String deviceSerialNumber, Date from, Date to, AsyncCallback<IgtimiDataAccessWindowWithSecurityDTO> asyncCallback);
 
-    void removeIgtimiAccount(String eMailOfAccountToRemove, AsyncCallback<Void> asyncCallback);
+    void removeIgtimiDataAccessWindow(long id, AsyncCallback<Void> asyncCallback);
+
+    void updateIgtimiDevice(IgtimiDeviceWithSecurityDTO editedObject, AsyncCallback<Void> asyncCallback);
+
+    void removeIgtimiDevice(String deviceSerialNumber, AsyncCallback<Void> asyncCallback);
 
     void importWindFromIgtimi(List<RaceDTO> selectedRaces, boolean correctByDeclination,
             AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>> asyncCallback);
+
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
+    void sendGPSOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
+    void sendGPSOnCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
+    void sendPowerOffCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    /**
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber}
+     * was found on the local Igtimi Riot service; if {@code false}, the message may still have been delivered
+     * through another replica to which the device maintains a live connection.
+     */
+    void sendRestartCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
@@ -615,7 +649,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
             AsyncCallback<Void> callback);
 
     void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+            String comment, String hiddenInfo, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
 
     void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
             AsyncCallback<SuccessInfo> asyncCallback);
@@ -694,4 +728,25 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      *            configuration object is {@code null}, this means that the original password is to be left unchanged.
      */
     void updateYellowBrickConfiguration(YellowBrickConfigurationWithSecurityDTO editedObject, AsyncCallback<Void> callback);
+    
+    void startAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void stopAICommentingOnEvent(UUID eventId, AsyncCallback<Void> callback);
+    
+    void getIdsOfEventsWithAICommenting(AsyncCallback<List<EventDTO>> callback);
+
+    /**
+     * If {@code null} is returned to the callback's {@link AsyncCallback#onSuccess(Object) onSuccess} method, this
+     * means that the AI agent hasn't been initialized properly. The typical reason for this will be missing AI Core
+     * credentials but may also be issues with finding a valid deployment of a language model to use. In any case, if
+     * this method has delivered a {@code null} model name then the
+     * {@link #startAICommentingOnEvent(UUID, AsyncCallback)}, {@link #stopAICommentingOnEvent(UUID, AsyncCallback)} and
+     * {@link #getIdsOfEventsWithAICommenting(AsyncCallback)} methods must not be called, or you may see exceptions
+     * being thrown.
+     */
+    void getAIAgentLanguageModelName(AsyncCallback<String> callback);
+    
+    void hasAIAgentCredentials(AsyncCallback<Boolean> callback);
+    
+    void setAIAgentCredentials(String credentials, AsyncCallback<Void> callback);
 }

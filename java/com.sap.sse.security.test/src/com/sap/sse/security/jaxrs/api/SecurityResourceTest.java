@@ -66,21 +66,21 @@ public class SecurityResourceTest {
             store.ensureServerGroupExists();
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
-            service = new SecurityServiceImpl(/* mailServiceTracker */ null, store, accessControlStore,
-                    /* hasPermissionsProvider */SecuredSecurityTypes::getAllInstances,
-                    SSESubscriptionPlan::getAllInstances);
+            service = new SecurityServiceImpl(/* mailServiceTracker */ null, /* corsFilterConfigurationTracker */ null, store,
+                    accessControlStore,
+                    /* hasPermissionsProvider */SecuredSecurityTypes::getAllInstances, SSESubscriptionPlan::getAllInstances);
             service.initialize();
             Activator.setSecurityService(service);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
-                    /* validation URL */ Locale.ENGLISH, null, null);
+                    /* validation URL */ Locale.ENGLISH, null, null, /* clientIP */ null, /* enforce strong password */ false);
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken(USERNAME, PASSWORD));
             Session session = authenticatedAdmin.getSession();
             assertNotNull(session);
             servlet = new SecurityResource() {
                 @Override
-                public SecurityService getService() {
+                public SecurityService getSecurityService() {
                     return service;
                 }
             };
@@ -90,6 +90,15 @@ public class SecurityResourceTest {
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
+    }
+    
+    @Test
+    public void testNullClientIP() {
+        assertFalse(service.isClientIPLockedForBearerTokenAuthentication(null)); // ensure there is no exception being thrown
+        service.failedBearerTokenAuthentication(null);
+        assertTrue(service.isClientIPLockedForBearerTokenAuthentication(null));
+        service.successfulBearerTokenAuthentication(null);
+        assertFalse(service.isClientIPLockedForBearerTokenAuthentication(null));
     }
     
     @Test
@@ -269,7 +278,7 @@ public class SecurityResourceTest {
         assertNotNull(user);
         assertEquals(USERNAME, user.getName());
         final Subject subject = SecurityUtils.getSubject();
-        subject.login(new BearerAuthenticationToken(accessToken));
+        subject.login(new BearerAuthenticationToken(accessToken, /* clientIP */ null, /* userAgent */ null));
         assertTrue(subject.isAuthenticated());
         assertEquals(USERNAME, subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));

@@ -12,3 +12,4 @@ Require-Bundle: com.sap.sailing.server,
  org.junit;bundle-version="4.8.2",
  com.sap.sse.common
 Automatic-Module-Name: com.sap.sailing.expeditionconnector.test
+Import-Package: org.apache.commons.math

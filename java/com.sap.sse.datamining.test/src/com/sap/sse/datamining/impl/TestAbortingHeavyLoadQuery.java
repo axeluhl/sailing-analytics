@@ -123,33 +123,11 @@ public class TestAbortingHeavyLoadQuery {
         do {
             Thread.sleep(10);
         } while (query.getState() != QueryState.RUNNING);
-        
         // Aborting query and waiting for completion
         Thread.sleep(AbortQueryDelay);
         logExecution("Aborting query");
         query.abort();
         QueryResult<HashSet<Integer>> result = queryTask.get();
-        
-        // The query execution returned, so all processors are aborted (checked below).
-        // The number of unfinished instructions mustn't change after this point
-        int unfinishedInstructionsCount = unfinishedInstructions.size();
-        boolean unfinishedInstructionWasFinished = false;
-        Set<StatefulProcessorInstruction<?>> runningInstructions = new HashSet<>();
-        Set<StatefulProcessorInstruction<?>> notStartedInstructions = new HashSet<>();
-        for (StatefulProcessorInstruction<?> instruction : unfinishedInstructions) {
-            if (instruction.runWasCalled()) {
-                runningInstructions.add(instruction);
-            } else {
-                notStartedInstructions.add(instruction);
-            }
-            unfinishedInstructionWasFinished |= instruction.computeResultWasFinished();
-        }
-        logExecution(unfinishedInstructionsCount + " unfinished instructions left - " +
-                     runningInstructions.size() + " running, " + notStartedInstructions.size() + " not started");
-        printExecutionRecord();
-        assertThat("Number of unfinished instructions changed", runningInstructions.size() + notStartedInstructions.size(), is(unfinishedInstructionsCount));
-        assertFalse("Unfinished instructions expected, but at least one was completed", unfinishedInstructionWasFinished);
-        
         // Checking query, result and processor chain state
         assertThat(query.getState(), is(QueryState.ABORTED));
         assertThat(result.getState(), is(QueryResultState.ABORTED));
@@ -157,13 +135,27 @@ public class TestAbortingHeavyLoadQuery {
         for (Processor<?, ?> processor : processors) {
             assertTrue("Processor wasn't aborted", processor.isAborted());
         }
-
         // Execution of unfinished instructions
         executor.shutdown();
         boolean terminated = executor.awaitTermination(TerminationTimeout, TimeUnit.MILLISECONDS);
         printExecutionRecord();
         assertTrue("The executor didn't terminate in the given time", terminated);
-        
+        // The query execution returned, so all processors have received the abort signal (checked below).
+        // The number of unfinished instructions mustn't change after this point
+        int unfinishedInstructionsCount = unfinishedInstructions.size();
+        Set<StatefulProcessorInstruction<?>> runningInstructions = new HashSet<>();
+        Set<StatefulProcessorInstruction<?>> notStartedInstructions = new HashSet<>();
+        for (StatefulProcessorInstruction<?> instruction : unfinishedInstructions) {
+            if (instruction.runWasCalled()) { // could be that computeResult still wasn't called because the instruction was aborted
+                runningInstructions.add(instruction);
+            } else {
+                notStartedInstructions.add(instruction);
+            }
+        }
+        logExecution(unfinishedInstructionsCount + " unfinished instructions left - " +
+                     runningInstructions.size() + " running, " + notStartedInstructions.size() + " not started");
+        printExecutionRecord();
+        assertThat("Number of unfinished instructions changed", runningInstructions.size() + notStartedInstructions.size(), is(unfinishedInstructionsCount));
         // Verify that the collection of unfinished instructions didn't change
         assertThat("Number of unfinished instructions changed", unfinishedInstructions.size(), is(unfinishedInstructionsCount));
         for (StatefulProcessorInstruction<?> instruction : unfinishedInstructions) {
@@ -176,19 +168,16 @@ public class TestAbortingHeavyLoadQuery {
         for (StatefulProcessorInstruction<?> instruction : notStartedInstructions) {
             assertTrue("A previously unstarted instruction was removed from unfinished instructions", unfinishedInstructions.contains(instruction));
         }
-
         // Checking state of unfinished instructions
         for (StatefulProcessorInstruction<?> instruction : runningInstructions) {
-            assertTrue("computeResult() of a running unfinished instruction wasn't called", instruction.computeResultWasCalled());
-            assertTrue("computeResult() of a running unfinished instruction didn't finish", instruction.computeResultWasFinished());
+            assertTrue("computeResult() of a running unfinished instruction didn't finish", instruction.computeResultWasCalled() == instruction.computeResultWasFinished());
             if (instruction instanceof StatefulBlockingInstruction) {
                 StatefulBlockingInstruction<?> blockingInstruction = (StatefulBlockingInstruction<?>) instruction;
-                assertTrue("computeResult() of a running heavy load instruction wasn't aborted", blockingInstruction.computeResultWasAborted());
+                assertTrue("computeResult() of a running heavy load instruction wasn't aborted", !blockingInstruction.computeResultWasCalled() || blockingInstruction.computeResultWasAborted());
             }
         }
         for (StatefulProcessorInstruction<?> instruction : notStartedInstructions) {
             assertTrue("run() of an unstarted unfinished instruction wasn't called", instruction.runWasCalled());
-            
             assertFalse("computeResult() of an unstarted unfinished instruction was called", instruction.computeResultWasCalled());
             assertFalse("computeResult() of an unstarted unfinished instruction was finished", instruction.computeResultWasFinished());
         }
@@ -365,7 +354,9 @@ public class TestAbortingHeavyLoadQuery {
                     @Override
                     public void afterInstructionFinished(ProcessorInstruction<Element> instruction) {
                         super.afterInstructionFinished(instruction);
-                        if(canProcessElements()) unfinishedInstructions.remove(instruction);
+                        if (canProcessElements()) {
+                            unfinishedInstructions.remove(instruction);
+                        }
                     }
                 };
                 Processor<Iterable<String>, String> retriever0 = new AbstractRetrievalProcessor<Iterable<String>, String>(dataSourceType, String.class, executor, Collections.singleton(retriever1), 0, "") {

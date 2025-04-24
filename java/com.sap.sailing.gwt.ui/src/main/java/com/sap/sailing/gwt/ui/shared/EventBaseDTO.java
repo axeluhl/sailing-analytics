@@ -28,7 +28,7 @@ import com.sap.sse.security.shared.dto.NamedDTO;
 public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
-    public VenueDTO venue;
+    private VenueDTO venue;
     public Date startDate;
     public Date endDate;
     public boolean isPublic;
@@ -224,5 +224,13 @@ public class EventBaseDTO extends NamedDTO implements WithID, IsSerializable {
      */
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
+    }
+
+    public VenueDTO getVenue() {
+        return venue;
+    }
+
+    public void setVenue(VenueDTO venue) {
+        this.venue = venue;
     }
 }

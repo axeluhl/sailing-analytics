@@ -80,6 +80,8 @@ securityManager.sessionManager.sessionDAO = $sessionDAO
 
 cacheManager = com.sap.sse.security.SessionCacheManager
 securityManager.cacheManager = $cacheManager
+authenticationStrategy = com.sap.sse.security.AtLeastOneSuccessfulStrategyWithLockingAndBanning
+securityManager.authenticator.authenticationStrategy = $authenticationStrategy
 
 [urls]
 /security/ui/UserManagement.html = roles[admin]

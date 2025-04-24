@@ -137,6 +137,9 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
      * One important difference to {@link #apply(OperationWithResult)} is that the operation will be applied immediately
      * in any case whereas {@link #apply(OperationWithResult)} will check first if this is a replica and in that case
      * forward the operation to the master for first execution instead of initiating the execution on the replica.
+     * 
+     * @return the result of applying the operation locally; results of applying the operation on other nodes of the
+     *         replica set are not considered
      */
     <T> T applyReplicated(O operation);
     

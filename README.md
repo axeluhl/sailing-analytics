@@ -1,4 +1,4 @@
-# SAP Sailing Analytics
+# Sailing Analytics
 
 ## About this Project
 
@@ -6,15 +6,17 @@ The Sailing Analytics, formerly known as the "SAP Sailing Analytics," are a solu
 
 ## Description
 
-This is the software running the SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com)
+This is the software running the SAP Sailing Analytics platform as seen on [sapsailing.com](https://sapsailing.com). By having this under an open-source license, all interested parties can use this software, extend or modify it, host it in their cloud or on-premise environments, use it to run beautiful events with it, and keep it available to the sailing community.
 
-Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
+Sailing provided the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:
 
 - Help sailors analyze performance and optimize strategy
 - Bring fans closer to the action
 - Provide the media with information and insights to deliver a greater informed commentary
 
-SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas.
+SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas. Highlights were two Olympic Summer Games (Tokyo/Enoshima 2020/2021, Paris/Marseille 2024) where the solution saw close to a million unique visitors.
+
+More background information is available in the project's Wiki which is currently hosted at [https://wiki.sapsailing.com](https://wiki.sapsailing.com). The Wiki's contents can also be found in the ``wiki/`` folder in the root of this repository.
 
 ## Quick Start with Docker Compose
 
@@ -39,7 +41,7 @@ To use Java 17, use the ``docker-compose-17.yml`` file instead:
 
 ## Requirements
 
-The software can be run on any Linux or Windows machine with ``bash`` installed; it has also been compiled successfully for the ARM platform and was deployed to a Raspberry Pi computer. As a database, MongoDB is required, tested with releases 4.4, 5.0, and 6.0. For use in a replicated scenario (scale-out, high availability), RabbitMQ is required. A simple Docker Compose set-up can be used to tie these three components together, e.g., for a quick local test and to familiarize yourself with the application, as Docker images are produced on a regular basis.
+The software can be run on any Linux or Windows machine with ``bash`` installed; it has also been compiled successfully for the ARM platform and was deployed to a Raspberry Pi computer. As a database, MongoDB is required, tested with releases 4.4, 5.0, 6.0, and 7.0. For use in a replicated scenario (scale-out, high availability), RabbitMQ is required. A simple Docker Compose set-up can be used to tie these three components together, e.g., for a quick local test and to familiarize yourself with the application, as Docker images are produced on a regular basis.
 
 Compute node and database sizing depends on several aspects of your workloads, such as whether live or replay data is to be served, how many different classes with separate leaderboard are racing concurrently, how many competitors are racing in each class, or how many concurrent viewers produce how many requests and which type (e.g., analytical, data mining, or watching a live race).
 
@@ -55,7 +57,7 @@ A single node typically handles up to 500-1000 concurrent viewers for live event
 
 To start contributing, read the onboarding document at the following URL: [https://wiki.sapsailing.com/wiki/howto/onboarding](https://wiki.sapsailing.com/wiki/howto/onboarding). Further documentation can be found in our Wiki at [https://wiki.sapsailing.com](https://wiki.sapsailing.com), serving the content from this repo's ``wiki/`` folder.
 
-The project welcomes contributions in the form of pull requests, for example, enhancements of the Data Mining functionality, including any sailing-specific metric or dimension you may think of and that you find is still missing so far; or additional features for the race viewer; or a map visualization that does not require a Google Map but uses Open Street Map / Open Layers; landscape automation; improved start sequence analytics; major UI improvements for the administrative layer ("AdminConsole"), etc.
+The project welcomes contributions in the form of pull requests, for example, enhancements of the Data Mining functionality, including any sailing-specific metric or dimension you may think of and that you find is still missing so far; or new connectors to exciting new tracking systems; or additional features for the race viewer; or a map visualization that does not require a Google Map but uses Open Street Map / Open Layers; landscape automation; improved start sequence analytics; major UI improvements for the administrative layer ("AdminConsole"), etc.
 
 The issue tracker at [https://bugzilla.sapsailing.com](https://bugzilla.sapsailing.com) is currently used for any sort of issue and enhancement request tracking. Help to migrate this smoothly to Github Issues would be much appreciated, ideally keeping issue numbers stable due to many references to those Bugzilla bug numbers, be it in the source code, the Wiki, or the build infrastructure.
 
@@ -113,6 +115,7 @@ In addition to the necessary ``MONGODB_URI`` variable you may need to inject a f
 - ``MANAGE2SAIL_ACCESS_TOKEN`` access token for result and regatta structure import from the Manage2Sail regatta management system
 - ``IGTIMI_CLIENT_ID`` / ``IGTIMI_CLIENT_SECRET`` credentials for ``igtimi.com`` in case you have one or more WindBot devices that you would like to integrate with
 - ``GOOGLE_MAPS_AUTHENTICATION_PARAMS`` as in ``"key=..."`` or ``"client=..."``, required to display the Google Map in the race viewer. Obtain a Google Maps key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
+- ``YOUTUBE_API_KEY`` as in ``"key=..."``, required to analyze time stamps and durations of YouTube videos when linking to races. Obtain a YouTube API key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
 
 In the ``configuration/mail.properties`` file make the necessary adjustments in case you would like to enable the application to send out e-mails, e.g., for user notifications or invitations.
 
@@ -137,7 +140,16 @@ As explained above for the non-Docker scenario, add any variable assignments for
 
 Do a "docker ps" to figure out the port exposing the web application:
 
-CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES 79f6faf19b6a docker.sapsailing.com/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds 0.0.0.0:32782->6666/tcp, 0.0.0.0:32781->7091/tcp, 0.0.0.0:32780->8000/tcp, 0.0.0.0:32779->8888/tcp, 0.0.0.0:32778->14888/tcp modest_dhawan
+```
+CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES
+79f6faf19b6a docker.sapsailing.com/sapsailing:latest "/home/sailing/serve…" 33 seconds ago Up 32 seconds
+0.0.0.0:32782->6666/tcp,
+0.0.0.0:32781->7091/tcp,
+0.0.0.0:32780->8000/tcp,
+0.0.0.0:32779->8888/tcp,
+0.0.0.0:32778->14888/tcp
+modest_dhawan
+```
 
 In this example, find your web application at http://localhost:32779 which is where the port 8888 exposed by the application is exposed at on your host. In the example with telnet port 14888 mapped to localhost:32788 do a
 ```

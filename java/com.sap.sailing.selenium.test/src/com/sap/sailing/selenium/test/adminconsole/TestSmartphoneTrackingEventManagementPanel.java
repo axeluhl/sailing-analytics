@@ -30,7 +30,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestSmartphoneTrackingEventManagementPanel extends AbstractSeleniumTest {
     private static final String IDM_5O5_2013_JSON_URL =
-            "http://traclive.dk/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
+            "https://event.tractrac.com/events/event_20130917_IDMO/jsonservice.php"; //$NON-NLS-1$
     
     private static final String REGATTA = "IDM 2013"; //$NON-NLS-1$
     

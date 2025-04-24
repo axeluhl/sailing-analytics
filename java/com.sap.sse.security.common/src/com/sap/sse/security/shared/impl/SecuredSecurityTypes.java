@@ -100,11 +100,21 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         /**
          * Access to the {@code ThreadManager} API, e.g., as RESTlet under {@code /threadmanager/api/threads}
          */
-        THREADS;
+        THREADS,
+        /**
+         * Access to the AI Agent and its configuration
+         */
+        CONFIGURE_AI_AGENT,
+        /**
+         * Access to the CORS configuration that controls through which URLs web browser clients may
+         * access this server's REST APIs. See also {@code CORSFilter}.
+         */
+        CONFIGURE_CORS_FILTER
+        ;
 
         private static final Action[] ALL_ACTIONS = new Action[] { CONFIGURE_FILE_STORAGE, CONFIGURE_LOCAL_SERVER,
                 CONFIGURE_REMOTE_INSTANCES, CREATE_OBJECT, CAN_IMPORT_MASTERDATA, CAN_EXPORT_MASTERDATA, DATA_MINING,
-                REPLICATE, START_REPLICATION, READ_REPLICATOR, THREADS,
+                REPLICATE, START_REPLICATION, READ_REPLICATOR, THREADS, CONFIGURE_AI_AGENT, CONFIGURE_CORS_FILTER,
                 DefaultActions.CHANGE_OWNERSHIP, DefaultActions.CHANGE_ACL, DefaultActions.CREATE, DefaultActions.DELETE,
                 DefaultActions.READ, DefaultActions.UPDATE };
     }

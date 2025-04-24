@@ -63,9 +63,9 @@ import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneImeiIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTrackerManager;
 import com.sap.sailing.domain.racelogtracking.test.RaceLogTrackingTestHelper;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -218,7 +218,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         Boat boat1 = new BoatImpl("id12345", "boat1", boatClass, /* sailID */ null);
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", "c", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, /* storePersistently */ true);
-        DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
+        DeviceIdentifier dev1 = new SmartphoneImeiIdentifierImpl("dev1");
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(0), t(10)));
         addFixes0(dev1);
         raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(t(), author, t(), UUID.randomUUID(), 0));
@@ -295,7 +295,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         Boat boat1 = new BoatImpl("id12345", "boat1", boatClass, /* sailID */ null);
         CompetitorWithBoat comp1 = DomainFactory.INSTANCE.getOrCreateCompetitorWithBoat("comp1", "comp1", "c1", null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null, (DynamicBoat) boat1, /* storePersistently */ true);
-        DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
+        DeviceIdentifier dev1 = new SmartphoneImeiIdentifierImpl("dev1");
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(0), t(10)));
         addFixes0(dev1);

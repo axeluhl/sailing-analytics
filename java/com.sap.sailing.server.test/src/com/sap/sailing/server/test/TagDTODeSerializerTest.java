@@ -28,18 +28,20 @@ public class TagDTODeSerializerTest {
         logger.entering(getClass().getName(), "testSerializeSingleTag");
         final String title = "Tag Title";
         final String comment = "Comment";
+        final String hiddenInfo = "this is a hidden info\nthat comes in two lines";
         final String imageURL = "";
         final String username = "user";
         final TimePoint raceTimePoint = new MillisecondsTimePoint(1234);
         final TimePoint createdAt = MillisecondsTimePoint.now();
         final TimePoint revokedAt = new MillisecondsTimePoint(5678);
 
-        final TagDTO tag = new TagDTO(title, comment, imageURL, imageURL, false, username, raceTimePoint, createdAt);
-        final TagDTO revokedTag = new TagDTO(title, comment, imageURL, imageURL, false, username, raceTimePoint, createdAt,
-                revokedAt);
+        final TagDTO tag = new TagDTO(title, comment, hiddenInfo, imageURL, imageURL, false, username, raceTimePoint, createdAt);
+        final TagDTO revokedTag = new TagDTO(title, comment, hiddenInfo, imageURL, imageURL, false, username, raceTimePoint,
+                createdAt, revokedAt);
         final JSONObject tagJson = serializer.serialize(tag);
         assertEquals("title equals serialized title", title, tagJson.get(TagDTODeSerializer.FIELD_TAG));
         assertEquals("comment equals serialized comment", comment, tagJson.get(TagDTODeSerializer.FIELD_COMMENT));
+        assertEquals("hidden info equals serialized hidden info", hiddenInfo, tagJson.get(TagDTODeSerializer.FIELD_HIDDEN_INFO));
         assertEquals("imageURL equals serialized imageURL", imageURL, tagJson.get(TagDTODeSerializer.FIELD_ORIGINAL_IMAGE_URL));
         assertEquals("username equals serialized username", username, tagJson.get(TagDTODeSerializer.FIELD_USERNAME));
         assertEquals("raceTimepoint equals serialized raceTimepoint", raceTimePoint.asMillis(),
@@ -59,6 +61,7 @@ public class TagDTODeSerializerTest {
         logger.entering(getClass().getName(), "testSerializeMultipleTags");
         final String title = "Tag Title";
         final String comment = "Comment";
+        final String hiddenInfo = null;
         final String imageURL = "";
         final String resizedImageURL = "";
         final String username = "user";
@@ -66,10 +69,10 @@ public class TagDTODeSerializerTest {
         final TimePoint createdAt = MillisecondsTimePoint.now();
         final TimePoint revokedAt = new MillisecondsTimePoint(5678);
 
-        final TagDTO tag1 = new TagDTO(title + "1", comment, imageURL, resizedImageURL, false, username, raceTimePoint, createdAt);
+        final TagDTO tag1 = new TagDTO(title + "1", comment, hiddenInfo, imageURL, resizedImageURL, false, username, raceTimePoint, createdAt);
         final JSONObject tag1Json = serializer.serialize(tag1);
-        final TagDTO tag2 = new TagDTO(title + "2", comment, imageURL, resizedImageURL, true, username, raceTimePoint, createdAt,
-                revokedAt);
+        final TagDTO tag2 = new TagDTO(title + "2", comment, hiddenInfo, imageURL, resizedImageURL, true, username, raceTimePoint,
+                createdAt, revokedAt);
         final JSONObject tag2Json = serializer.serialize(tag2);
         final List<TagDTO> tags = Arrays.asList(tag1, tag2);
         final JSONArray tagsJson = serializer.serialize(tags);
@@ -85,6 +88,7 @@ public class TagDTODeSerializerTest {
         logger.entering(getClass().getName(), "testDeserializeSingleTag");
         final String title = "Tag Title";
         final String comment = "Comment";
+        final String hiddenInfo = "some hidden info";
         final String imageURL = "";
         final String resizedImageURL = "";
         final String username = "user";
@@ -92,11 +96,12 @@ public class TagDTODeSerializerTest {
         final TimePoint raceTimePoint = new MillisecondsTimePoint(1234);
         final TimePoint createdAt = MillisecondsTimePoint.now();
         final TimePoint revokedAt = new MillisecondsTimePoint(5678);
-        final TagDTO tag = new TagDTO(title, comment, imageURL, imageURL, visibileForPublic, username, raceTimePoint, createdAt,
-                revokedAt);
+        final TagDTO tag = new TagDTO(title, comment, hiddenInfo, imageURL, imageURL, visibileForPublic, username, raceTimePoint,
+                createdAt, revokedAt);
         final JSONObject tagJson = new JSONObject();
         tagJson.put(TagDTODeSerializer.FIELD_TAG, title);
         tagJson.put(TagDTODeSerializer.FIELD_COMMENT, comment);
+        tagJson.put(TagDTODeSerializer.FIELD_HIDDEN_INFO, hiddenInfo);
         tagJson.put(TagDTODeSerializer.FIELD_ORIGINAL_IMAGE_URL, imageURL);
         tagJson.put(TagDTODeSerializer.FIELD_RESIZED_IMAGE_URL, resizedImageURL);
         tagJson.put(TagDTODeSerializer.FIELD_USERNAME, username);
@@ -114,6 +119,7 @@ public class TagDTODeSerializerTest {
         logger.entering(getClass().getName(), "testDeserializeMultipleTags");
         final String title = "Tag Title";
         final String comment = "Comment";
+        final String hiddenInfo = "hiddenInfo";
         final String imageURL = "";
         final String resizedImageURL = "";
         final String username = "user";
@@ -121,16 +127,18 @@ public class TagDTODeSerializerTest {
         final TimePoint raceTimePoint = new MillisecondsTimePoint(1234);
         final TimePoint createdAt = MillisecondsTimePoint.now();
         final TimePoint revokedAt = new MillisecondsTimePoint(5678);
-        final TagDTO tag1 = new TagDTO(title + "1", comment, imageURL, resizedImageURL, visibileForPublic, username, raceTimePoint,
-                createdAt, revokedAt);
-        final TagDTO tag2 = new TagDTO(title + "2", comment, imageURL, resizedImageURL, visibileForPublic, username, raceTimePoint,
-                createdAt, revokedAt);
+        final TagDTO tag1 = new TagDTO(title + "1", comment, hiddenInfo, imageURL, resizedImageURL, visibileForPublic, username,
+                raceTimePoint, createdAt, revokedAt);
+        final TagDTO tag2 = new TagDTO(title + "2", comment, hiddenInfo, imageURL, resizedImageURL, visibileForPublic, username,
+                raceTimePoint, createdAt, revokedAt);
         final JSONObject tag1Json = new JSONObject();
         final JSONObject tag2Json = new JSONObject();
         tag1Json.put(TagDTODeSerializer.FIELD_TAG, title + "1");
         tag2Json.put(TagDTODeSerializer.FIELD_TAG, title + "2");
         tag1Json.put(TagDTODeSerializer.FIELD_COMMENT, comment);
         tag2Json.put(TagDTODeSerializer.FIELD_COMMENT, comment);
+        tag1Json.put(TagDTODeSerializer.FIELD_HIDDEN_INFO, hiddenInfo);
+        tag2Json.put(TagDTODeSerializer.FIELD_HIDDEN_INFO, hiddenInfo);
         tag1Json.put(TagDTODeSerializer.FIELD_ORIGINAL_IMAGE_URL, imageURL);
         tag2Json.put(TagDTODeSerializer.FIELD_RESIZED_IMAGE_URL, resizedImageURL);
         tag1Json.put(TagDTODeSerializer.FIELD_USERNAME, username);

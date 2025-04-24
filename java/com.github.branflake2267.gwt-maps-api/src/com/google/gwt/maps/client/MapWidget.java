@@ -224,7 +224,7 @@ public class MapWidget extends MVCObjectWidget<MapImpl> {
   /**
    * get zoom
    */
-  public int getZoom() {
+  public double getZoom() {
     return impl.getZoom();
   };
 
@@ -336,7 +336,7 @@ public class MapWidget extends MVCObjectWidget<MapImpl> {
    * 
    * @param zoom
    */
-  public void setZoom(int zoom) {
+  public void setZoom(double zoom) {
     impl.setZoom(zoom);
   };
 

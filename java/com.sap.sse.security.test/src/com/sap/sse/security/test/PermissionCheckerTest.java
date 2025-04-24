@@ -39,6 +39,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.HasPermissionsImpl;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
@@ -93,7 +94,7 @@ public class PermissionCheckerTest {
             userStore.deleteUser("jonas");
         }
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
-        user = userStore.createUser("jonas", "jonas@dann.io");
+        user = userStore.createUser("jonas", "jonas@dann.io", new LockingAndBanningImpl());
         userTenant.add(user);
         userStore.updateUserGroup(userTenant);
         ownership = new Ownership(user, userTenant);

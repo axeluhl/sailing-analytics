@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.registration;
 
+import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
+
 import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
@@ -17,6 +19,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
@@ -93,13 +96,15 @@ public class RegisterView extends Composite {
                 new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
+                final String message = caught.getMessage();
                 if (caught instanceof UserManagementException) {
-                    String message = ((UserManagementException) caught).getMessage();
-                    if (UserManagementException.USER_ALREADY_EXISTS.equals(message)) {
+                    if (Util.hasLength(message) && message.equals(USER_ALREADY_EXISTS)) {
                         Notification.notify(stringMessages.userAlreadyExists(usernameTextBox.getText()), NotificationType.ERROR);
+                    } else {
+                        Notification.notify(stringMessages.errorCreatingUser(usernameTextBox.getText(), message==null?"":message), NotificationType.ERROR);
                     }
                 } else {
-                    Notification.notify(stringMessages.errorCreatingUser(usernameTextBox.getText(), caught.getMessage()), NotificationType.ERROR);
+                    Notification.notify(stringMessages.errorCreatingUser(usernameTextBox.getText(), message), NotificationType.ERROR);
                 }
             }
 

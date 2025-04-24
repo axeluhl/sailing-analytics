@@ -47,12 +47,12 @@ public class TagModificationPanel extends FlowPanel {
             public void ok(TagDTO editedObject) {
                 if (taggingComponent.getCurrentState().equals(State.EDIT_TAG)) {
                     taggingComponent.updateTag(taggingComponent.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
-                            inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
+                            inputPanel.getHiddenInfo(), inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
                     resetState();
                 } else {
                     if (taggingComponent.isLoggedInAndRaceLogAvailable()) {
-                        taggingComponent.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
-                                inputPanel.isVisibleForPublic());
+                        taggingComponent.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getHiddenInfo(),
+                                inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
                         // TODO: Add callback to saveTag() to clear fields only if tag got really added
                         inputPanel.clearAllValues();
                     }

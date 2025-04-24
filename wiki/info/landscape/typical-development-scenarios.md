@@ -171,6 +171,7 @@ TODO
 * Add the project to the com.sap.sailing.feature project's feature.xml descriptor in the Plug-ins tab. This ensures the bundle will be added to the product built based on the raceanalysis.product descriptor.
 * Add a pom.xml file to integrate the bundle with the maven build. You may start by copying a pom.xml file from a similar project. Note that the pom.xml's <packaging> specification varies between test and non-test bundles. Test bundles use "eclipse-test-plugin" as their packaging type, all other bundles use "eclipse-plugin" here. Adjust the version and artifactId tags correspondingly.
 * Add an entry to the parent pom.xml in the java/ folder
+* If you need the bundle to get started explicitly during OSGi container start-up (e.g., a web bundle that wouldn't start otherwise), add the bundle to the ``raceanalysis.product`` specification with the appropriate start level, then run ``java/com.sap.sailing.feature.p2build/scripts/updateAll.sh`` to adjust all launch configurations and the Selenium product start-up configuration accordingly.
 
 ## Adding a Column to the Leaderboard
 It is a typical request to have a new column with a new key figure added to the leaderboard structure. A number of things need to be considered to implement this.

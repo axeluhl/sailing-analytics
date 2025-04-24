@@ -24,9 +24,12 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
   * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
   * [[User Management|wiki/info/landscape/usermanagement]]
+  * [[Igtimi Windbot Riot Connector|wiki/info/landscape/igtimi-riot]]
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Internationalization (i18n)|wiki/howto/development/i18n]]
+  * [[AI Agent|wiki/info/landscape/ai-agent]]
+  * [[Malware Scanning|wiki/info/landscape/malware-scanning]]
   * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 * [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
   * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
@@ -160,6 +163,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
 * [[Consolidating User Stores (bug 4006 / 4018)|wiki/projects/consolidating-user-stores]]
 * [[Cloud Infrastructure Orchestration|wiki/projects/cloud-orchestrator]]
+* [[Management Console for Easier Administration|wiki/howto/development/management-console]]
 
 ## Events and Planning
 * [[Project Planning (bigger development)|wiki/events/planning]]

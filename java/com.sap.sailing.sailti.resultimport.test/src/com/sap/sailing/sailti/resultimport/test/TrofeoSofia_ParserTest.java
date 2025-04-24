@@ -29,13 +29,13 @@ import com.sap.sse.common.Util;
 
 public class TrofeoSofia_ParserTest extends AbstractTrofeoSofiaTest {
     @Test
-    public void testSimpleParsingSomeSailtiDocuments470Men() throws JAXBException, IOException {
+    public void testSimpleParsingSomeSailtiDocuments470Men() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_MEN), TROFEO_SOFIA_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }
 
     @Test
-    public void testSimpleParsingSomeSailtiDocuments470Women() throws JAXBException, IOException {
+    public void testSimpleParsingSomeSailtiDocuments470Women() throws JAXBException, IOException, SAXException, ParserConfigurationException {
         RegattaResults regattaResults = ParserFactory.INSTANCE.createParser(getInputStream(TROFEO_SOFIA_TESTFILE_XRR_470_WOMEN), TROFEO_SOFIA_EVENT_NAME).parse();
         assertNotNull(regattaResults);
     }

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.test;
 
-import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 
 import org.junit.Before;
@@ -28,6 +29,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManeuverLossOnPenaltyCircleTest extends OnlineTracTracBasedTest {
+    private static final Logger logger = Logger.getLogger(ManeuverLossOnPenaltyCircleTest.class.getName());
 
     public ManeuverLossOnPenaltyCircleTest() throws MalformedURLException, URISyntaxException {
     }
@@ -48,10 +50,11 @@ public class ManeuverLossOnPenaltyCircleTest extends OnlineTracTracBasedTest {
     }
     
     @Test
-    public void testPenaltyLossForCanottieri() throws NoWindException {
+    public void testPenaltyLossForCanottieri() throws NoWindException, InterruptedException {
         Competitor canottieri = getCompetitorByName("Club Canottieri Roggero di Lauria");
         final Iterable<Maneuver> maneuversCanottieri = getTrackedRace().getManeuvers(canottieri, getTrackedRace().getStartOfRace(), getTrackedRace().getEndOfRace(), /* waitForLatest */ true);
         final Optional<Maneuver> penaltyCircleCanottieri = StreamSupport.stream(maneuversCanottieri.spliterator(), /* parallel */ false).filter(m->m.getType()==ManeuverType.PENALTY_CIRCLE).findAny();
-        assertThat(penaltyCircleCanottieri.get().getManeuverLoss().getProjectedDistanceLost(), greaterThan(new MeterDistance(30)));
+        assertThat("Maneuver loss of "+penaltyCircleCanottieri.get()+" too small", penaltyCircleCanottieri.get().getManeuverLoss().getProjectedDistanceLost(), greaterThan(new MeterDistance(30)));
+        logger.info("Maneuver loss of "+penaltyCircleCanottieri.get()+" was greater than 30m. Good.");
     }
 }

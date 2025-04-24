@@ -275,7 +275,7 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         if (hdg != null) {
             trueHeading = hdg;
         } else {
-            Bearing hdgm = hdgmTrack.getInterpolatedValue(timePoint, h->new ScalableBearing(h.getMagnetigHeading()));
+            Bearing hdgm = hdgmTrack.getInterpolatedValue(timePoint, h->new ScalableBearing(h.getMagneticHeading()));
             if (hdgm != null) {
                 if (declinationService == null) {
                     trueHeading = hdgm;

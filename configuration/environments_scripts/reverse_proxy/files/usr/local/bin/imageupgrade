@@ -2,10 +2,6 @@
 
 . imageupgrade_functions.sh
 
-get_ec2_user_data() {
-  /bin/ec2-metadata -d | sed -e 's/^user-data: //'
-}
-
 METADATA=$( get_ec2_user_data )
 echo "Metadata: ${METADATA}"
 if echo "${METADATA}" | grep -q "^image-upgrade$"; then

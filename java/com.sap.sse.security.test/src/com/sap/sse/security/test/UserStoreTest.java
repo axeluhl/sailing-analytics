@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.sap.sse.security.interfaces.UserStore;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class UserStoreTest {
@@ -25,7 +26,7 @@ public class UserStoreTest {
     
     @Before
     public void setUp() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser(username, email);
+        userStore.createUser(username, email, new LockingAndBanningImpl());
         userStore.setAccessToken(username, accessToken);
         userStore.setPreference(username, prefKey, prefValue);
     }

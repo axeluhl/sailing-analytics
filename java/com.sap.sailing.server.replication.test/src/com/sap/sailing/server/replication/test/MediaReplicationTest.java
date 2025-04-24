@@ -1,9 +1,9 @@
 package com.sap.sailing.server.replication.test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -65,6 +65,7 @@ import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.PublicReadableActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
@@ -254,7 +255,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
-        User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null);
+        User currentUser = new UserImpl("test", "email@test", Collections.emptyMap(), null, new LockingAndBanningImpl());
         SecurityService securityService = Mockito.mock(SecurityService.class);
         Mockito.doReturn(defaultTenant).when(securityService).getServerGroup();
         Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
