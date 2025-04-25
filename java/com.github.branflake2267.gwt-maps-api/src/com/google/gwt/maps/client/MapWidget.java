@@ -46,6 +46,7 @@ import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.events.projection.ProjectionChangeMapHandler;
+import com.google.gwt.maps.client.events.renderingtype.RenderingTypeChangeMapHandler;
 import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
 import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.events.tiles.TilesLoadedMapHandler;
@@ -189,6 +190,15 @@ public class MapWidget extends MVCObjectWidget<MapImpl> {
    */
   public final MapTypeId getMapTypeId() {
     return impl.getMapTypeId();
+  }
+
+  /**
+   * gets {@link RenderingType}
+   * 
+   * @return {@link RenderingType}
+   */
+  public final RenderingType getRenderingType() {
+    return impl.getRenderingType();
   }
 
   /**
@@ -654,6 +664,16 @@ public class MapWidget extends MVCObjectWidget<MapImpl> {
    */
   public HandlerRegistration addZoomChangeHandler(ZoomChangeMapHandler handler) {
     return impl.addZoomChangeHandler(handler);
+  }
+
+  /**
+   * This event is fired when the map zoom property changes.
+   * 
+   * @param handler {@link ZoomChangeMapHandler}
+   * @return {@link MapHandlerRegistration}
+   */
+  public HandlerRegistration addRenderingTypeChangeHandler(RenderingTypeChangeMapHandler handler) {
+    return impl.addRenderingTypeChangeHandler(handler);
   }
 
   /**
