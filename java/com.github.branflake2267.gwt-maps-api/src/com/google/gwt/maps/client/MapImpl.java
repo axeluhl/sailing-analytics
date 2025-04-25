@@ -153,6 +153,19 @@ public class MapImpl extends MVCObject<MapImpl> {
   }-*/;
 
   /**
+   * gets {@link RenderingType}
+   * 
+   * @return {@link RenderingType}
+   */
+  public final RenderingType getRenderingType() {
+    return RenderingType.valueOf(getRenderingTypeImpl().toUpperCase());
+  }
+
+  private final native String getRenderingTypeImpl() /*-{
+    return this.getRenderingType();
+  }-*/;
+
+  /**
    * gets {@link MapTypeId}
    * 
    * @return {@link MapTypeId}
