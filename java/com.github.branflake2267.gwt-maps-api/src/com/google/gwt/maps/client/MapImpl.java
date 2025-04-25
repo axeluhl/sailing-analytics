@@ -56,6 +56,8 @@ import com.google.gwt.maps.client.events.mouseover.MouseOverEventFormatter;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapHandler;
 import com.google.gwt.maps.client.events.projection.ProjectionChangeEventFormatter;
 import com.google.gwt.maps.client.events.projection.ProjectionChangeMapHandler;
+import com.google.gwt.maps.client.events.renderingtype.RenderingTypeChangeEventFormatter;
+import com.google.gwt.maps.client.events.renderingtype.RenderingTypeChangeMapHandler;
 import com.google.gwt.maps.client.events.resize.ResizeEventFormatter;
 import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
 import com.google.gwt.maps.client.events.rightclick.RightClickEventFormatter;
@@ -615,4 +617,10 @@ public class MapImpl extends MVCObject<MapImpl> {
     return MapHandlerRegistration.addHandler(this, MapEventType.ZOOM_CHANGED, handler, new ZoomChangeEventFormatter());
   }
 
+  /**
+   * This event is fired when the map rendering type property changes.
+   */
+  public final HandlerRegistration addRenderingTypeChangeHandler(RenderingTypeChangeMapHandler handler) {
+    return MapHandlerRegistration.addHandler(this, MapEventType.RENDERINGTYPE_CHANGED, handler, new RenderingTypeChangeEventFormatter());
+  }
 }
