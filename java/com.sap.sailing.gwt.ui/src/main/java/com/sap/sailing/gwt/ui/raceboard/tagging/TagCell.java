@@ -77,9 +77,9 @@ public class TagCell extends AbstractCell<TagDTO> {
          * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><img src='{2}'/><div class='{4}'>⋯</div></div><div class='{1}'>{3}</div>")
+        @Template("<div class='{0}'><div class='{5}'><img src='{2}'/><div class='{4}' onclick=\"alert('Menu clicked!')\">⋯</div></div></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String classTagImage, String classTagComment, SafeUri imageURL,
-                SafeHtml comment, String classMenuIcon);
+                SafeHtml comment, String classMenuIcon, String classMediaWrapper);
 
         /**
          * Renders content with mixed configuration (comment, no image).
@@ -95,12 +95,11 @@ public class TagCell extends AbstractCell<TagDTO> {
          * Renders content with mixed configuration (image, no comment).
          * @param imageURL
          *            image URL
-         * @param classMenuIcon TODO
          * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><img src='{1}'/><div class='{2}'>⋯</div></div>")
-        SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL, String classMenuIcon);
+        @Template("<div class='{0}'><div class='{3}'><img src='{1}'/><div class='{2}' onclick=\"alert('Menu clicked!')\">⋯</div></div></div>")
+        SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL, String classMenuIcon, String classMediaWrapper);
 
         /**
          * Renders heading buttons to share, edit or delete a tag.
@@ -157,6 +156,7 @@ public class TagCell extends AbstractCell<TagDTO> {
         this.stringMessages = stringMessages;
         this.userService = userService;
         this.isPreviewCell = isPreviewCell;
+        sharedResources.ensureInjected();
     }
 
     /**
@@ -185,10 +185,10 @@ public class TagCell extends AbstractCell<TagDTO> {
         if (!tag.getComment().isEmpty() && trustedImageURL == null) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
         } else if (tag.getComment().isEmpty() && trustedImageURL != null) {
-            content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL, sharedResources.media_menu_icon());
+            content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL, sharedResources.media_menu_icon(), sharedResources.media_wrapper());
         } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
-                    trustedImageURL, safeComment, sharedResources.media_menu_icon());
+                    trustedImageURL, safeComment, sharedResources.media_menu_icon(), sharedResources.media_wrapper());
         }
         SafeHtml icon = SafeHtmlUtils.EMPTY_SAFE_HTML;
         if (!tag.isVisibleForPublic()) {
