@@ -552,3 +552,34 @@ figcaption {
   border-width: 1em 1em 0 0;
   color: transparent;
 }
+.media_wrapper {
+  position: relative;
+  display: inline-block; /* shrink to fit image size */
+  overflow: hidden;
+}
+.media_wrapper video {
+  display: block;
+  width: auto;
+  height: auto;
+}
+.media_wrapper img {
+  display: block;
+  width: auto;
+  height: auto;
+}
+.media_menu_icon {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 5px;
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background 0.2s ease;
+  user-select: none;
+}
+.media_menu_icon:hover {
+  background: rgba(0, 0, 0, 0.8);
+}

@@ -29,6 +29,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
+import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.gwt.common.CommonSharedResources.CommonMainCss;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -60,8 +62,6 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @param content
          *            available configurations are {@link #contentWithCommentWithImage},
          *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
-         * @param shareButton
-         * @param content2
          * @return {@link SafeHtml HTML template}
          */
         @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}</div><div class='{2}'>{6}</div>{7}</div>")
@@ -70,16 +70,16 @@ public class TagCell extends AbstractCell<TagDTO> {
 
         /**
          * Renders content with maximal configuration (comment and image).
-         * 
          * @param imageURL
          *            image URL
          * @param comment
          *            comment
+         * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
+        @Template("<div class='{0}'><img src='{2}'/><div class='{4}'>⋯</div></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String classTagImage, String classTagComment, SafeUri imageURL,
-                SafeHtml comment);
+                SafeHtml comment, String classMenuIcon);
 
         /**
          * Renders content with mixed configuration (comment, no image).
@@ -93,13 +93,14 @@ public class TagCell extends AbstractCell<TagDTO> {
 
         /**
          * Renders content with mixed configuration (image, no comment).
-         * 
          * @param imageURL
          *            image URL
+         * @param classMenuIcon TODO
+         * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><img src='{1}'/></div>")
-        SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL);
+        @Template("<div class='{0}'><img src='{1}'/><div class='{2}'>⋯</div></div>")
+        SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL, String classMenuIcon);
 
         /**
          * Renders heading buttons to share, edit or delete a tag.
@@ -134,6 +135,7 @@ public class TagCell extends AbstractCell<TagDTO> {
     private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
     private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
+    private final CommonMainCss sharedResources = CommonSharedResources.INSTANCE.mainCss();
 
     private final TaggingComponent taggingComponent;
     private final StringMessages stringMessages;
@@ -183,10 +185,10 @@ public class TagCell extends AbstractCell<TagDTO> {
         if (!tag.getComment().isEmpty() && trustedImageURL == null) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
         } else if (tag.getComment().isEmpty() && trustedImageURL != null) {
-            content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL);
+            content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL, sharedResources.media_menu_icon());
         } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
-                    trustedImageURL, safeComment);
+                    trustedImageURL, safeComment, sharedResources.media_menu_icon());
         }
         SafeHtml icon = SafeHtmlUtils.EMPTY_SAFE_HTML;
         if (!tag.isVisibleForPublic()) {
