@@ -36,11 +36,6 @@ public class RotatedCoordinateSystem implements CoordinateSystem {
     }
 
     @Override
-    public Position map(Position position) {
-        return position;
-    }
-
-    @Override
     public Position getPosition(LatLng p) {
         return new DegreePosition(p.getLatitude(), p.getLongitude());
     }

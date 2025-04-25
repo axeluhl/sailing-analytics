@@ -2550,7 +2550,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void zoomMapToNewBounds(NonCardinalBounds newBounds) {
         if (newBounds != null) {
-            double newZoomLevel = getZoomLevel(newBounds);
+            final double newZoomLevel = getZoomLevel(newBounds);
             if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -3402,9 +3402,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     Position competitorPosition = competitorFix != null ? competitorFix.position : null;
                     if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(competitorPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                            newBounds = NonCardinalBounds.create(competitorPosition, new DegreeBearingImpl(forMap.getMap().getHeading()));
                         } else {
-                            newBounds = newBounds.extend(forMap.coordinateSystem.map(competitorPosition));
+                            newBounds = newBounds.extend(competitorPosition);
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -3453,9 +3453,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
                     if (newBounds == null) {
-                        newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(markDTO.position), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                        newBounds = NonCardinalBounds.create(markDTO.position, new DegreeBearingImpl(forMap.getMap().getHeading()));
                     } else {
-                        newBounds = newBounds.extend(forMap.coordinateSystem.map(markDTO.position));
+                        newBounds = newBounds.extend(markDTO.position);
                     }
                 }
             }
@@ -3472,11 +3472,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
                     final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
                     if (Objects.nonNull(latLngPosition)) {
-                        NonCardinalBounds bounds = NonCardinalBounds.create(BoundsUtil.getAsPosition(latLngPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                        NonCardinalBounds bounds = NonCardinalBounds.create(forMap.getCoordinateSystem().getPosition(latLngPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(latLngPosition));
+                            newBounds = newBounds.extend(forMap.getCoordinateSystem().getPosition(latLngPosition));
                         }
                     }
                 }
