@@ -211,9 +211,7 @@ public class TagCell extends AbstractCell<TagDTO> {
                     editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
                             stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
                 }
-                if (tag.getUsername().equals(userService.getCurrentUser().getName())
-                        // FIXME doesn't work with permission-vertical anymore
-                        /* || userService.getCurrentUser().hasRole("admin") */) {
+                if (tag.getUsername().equals(userService.getCurrentUser().getName())) {
                     deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
                             stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
                 }

@@ -1,0 +1,78 @@
+package com.sap.sse.gwt.client.media;
+
+import java.util.Collections;
+
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.media.TakedownNoticeRequestContext;
+import com.sap.sse.common.media.TakedownNoticeRequestContext.NatureOfClaim;
+import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.StringMessages;
+import com.sap.sse.gwt.client.controls.GenericListBox;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
+/**
+ * A dialog that is shown to the user who wants to file a take-down notice for a media file found
+ * on the site, such as a video or an image.<p>
+ * 
+ * Upon dialog construction, basic contextual information such as the media URL, message key and
+ * message parameter must be provided. The remaining information that is required for the construction
+ * of the result {@link TakedownNoticeRequestContext} object is collected by the dialog.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeRequestContext> {
+    private final String contextDescriptionMessageKey;
+    private final String contextDescriptionMessageParameter;
+    private final String contentUrl;
+    private final GenericListBox<NatureOfClaim> natureOfClaimListBox;
+    private final TextArea reportingUserCommentTextArea;
+    private final StringListEditorComposite supportingURLsEditor;
+    private final String username;
+    private final StringMessages stringMessages;
+    
+    public TakedownNoticeRequestDialog(String contextDescriptionMessageKey, String contextDescriptionMessageParameter,
+            String contentUrl, String username, StringMessages stringMessages,
+            DialogCallback<TakedownNoticeRequestContext> callback) {
+        super(stringMessages.takedownNoticeDialogTitle(), stringMessages.takedownNoticeDialogMessage(contentUrl),
+                stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
+        this.stringMessages = stringMessages;
+        this.username = username;
+        this.reportingUserCommentTextArea = createTextArea("");
+        this.natureOfClaimListBox = createGenericListBox(NatureOfClaim::name, /* isMultipleSelect */ false);
+        for (final NatureOfClaim noc : NatureOfClaim.values()) {
+            this.natureOfClaimListBox.addItem(noc);
+        }
+        this.supportingURLsEditor = new StringListEditorComposite(/* initial values */ Collections.emptySet(), stringMessages,
+                IconResources.INSTANCE.removeIcon(), /* suggestValues */ Collections.emptySet());
+        this.contextDescriptionMessageKey = contextDescriptionMessageKey;
+        this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
+        this.contentUrl = contentUrl;
+    }
+    
+    @Override
+    protected Widget getAdditionalWidget() {
+        final Grid result = new Grid(3, 2);
+        int row = 0;
+        result.setWidget(row, 0, new Label(stringMessages.natureOfTakedownClaim()));
+        result.setWidget(row++, 1, natureOfClaimListBox);
+        result.setWidget(row,  0, new Label(stringMessages.comment()));
+        result.setWidget(row++, 1, reportingUserCommentTextArea);
+        result.setWidget(row, 0, new Label(stringMessages.supportingURLs()));
+        result.setWidget(row++, 1, supportingURLsEditor);
+        return result;
+    }
+
+
+
+    @Override
+    protected TakedownNoticeRequestContext getResult() {
+        return new TakedownNoticeRequestContext(contextDescriptionMessageKey, contextDescriptionMessageParameter,
+                contentUrl, natureOfClaimListBox.getValue(), reportingUserCommentTextArea.getValue(), supportingURLsEditor.getValue(),
+                username);
+    }
+}
