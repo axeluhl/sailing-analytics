@@ -119,4 +119,5 @@ public interface StringMessages extends Messages {
     String natureOfTakedownClaim();
     String comment();
     String supportingURLs();
+    String mustBeLoggedInAndWithValidatedEmail();
 }

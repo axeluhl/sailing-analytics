@@ -16,6 +16,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.Notification;
@@ -23,6 +24,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorage;
 import com.sap.sse.gwt.client.xdstorage.CrossDomainStorageEvent;
 import com.sap.sse.gwt.client.xdstorage.DelegatingCrossDomainStorageFuture;
@@ -63,7 +65,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * @author Axel Uhl (D043530)
  *
  */
-public class UserService {
+public class UserService implements TakedownNoticeService {
     private static final Logger logger = Logger.getLogger(UserService.class.getName());
     
     private static final StringMessages stringMessages = GWT.create(StringMessages.class);
@@ -583,5 +585,25 @@ public class UserService {
     
     public ServerInfoDTO getServerInfo() {
         return serverInfo;
+    }
+
+    @Override
+    public void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) {
+        userManagementWriteService.fileTakedownNotice(takedownNoticeRequestContext, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                GWT.log("successfully filed takedown notice");
+            }
+        });
+    }
+
+    @Override
+    public boolean isEmailAddressOfCurrentUserValidated() {
+        return getCurrentUser().isEmailValidated();
     }
 }

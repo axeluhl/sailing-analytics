@@ -25,6 +25,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
@@ -910,4 +911,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * will establish (if not yet locked) or extend the locking duration for the combination.
      */
     boolean isClientIPLockedForBearerTokenAuthentication(String clientIP);
+
+    void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) throws MailException;
 }

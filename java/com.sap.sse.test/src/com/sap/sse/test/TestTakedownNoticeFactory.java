@@ -8,8 +8,8 @@ import java.util.Locale;
 
 import org.junit.Test;
 
+import com.sap.sse.common.media.NatureOfClaim;
 import com.sap.sse.common.media.TakedownNoticeRequestContext;
-import com.sap.sse.common.media.TakedownNoticeRequestContext.NatureOfClaim;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.util.TakedownNoticeFactory;

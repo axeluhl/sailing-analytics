@@ -6,8 +6,9 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.media.NatureOfClaim;
 import com.sap.sse.common.media.TakedownNoticeRequestContext;
-import com.sap.sse.common.media.TakedownNoticeRequestContext.NatureOfClaim;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -28,6 +29,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  *
  */
 public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeRequestContext> {
+    private static TakedownNoticeService serviceToUseForTakedownNotice;
     private final String contextDescriptionMessageKey;
     private final String contextDescriptionMessageParameter;
     private final String contentUrl;
@@ -44,9 +46,26 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
      * JSNI call to the
      * {@link #TakedownNoticeRequestDialog(String, String, String, String, StringMessages, DialogCallback)} constructor
      * and will then display the dialog and, if confirmed, uses the {@link TakedownNoticeRequestContext dialog result}
-     * to then carry out the request by a call to the server.
+     * to then carry out the request by a call to the server.<p>
+     * 
+     * To use this in an {@code onclick} callback function of an element defined by a {@code @Template}, you have to
+     * "park" the parameters in attributes of the element and access them from within the {@code onclick} handler
+     * using the {@code getAttribute} method, e.g., like this:
+     * 
+     * <pre>
+     *   &ltdiv class='{0}'
+     *          takedown-contextDescriptionMessageKey='{1}'
+     *          takedown-contextDescriptionMessageParameter='{2}'
+     *          takedown-contentUrl='{3}' takedown-username='{4}'
+     *          onclick=\"showTakedownNoticeRequestDialog(this.getAttribute('takedown-contextDescriptionMessageKey'), this.getAttribute('takedown-contextDescriptionMessageParameter'), this.getAttribute('takedown-contentUrl'), this.getAttribute('takedown-username'))\"&gt;⋯&lt;/div&gt;
+     * </pre>
      */
-    public static native void ensureJSFunctionInstalled() /*-{
+    public static void ensureJSFunctionInstalled(TakedownNoticeService serviceToUseForTakedownNotice) {
+        TakedownNoticeRequestDialog.serviceToUseForTakedownNotice = serviceToUseForTakedownNotice;
+        ensureJSFunctionInstalled();
+    }
+    
+    private static native void ensureJSFunctionInstalled() /*-{
         if ($wnd.showTakedownNoticeRequestDialog == null) {
             $wnd.showTakedownNoticeRequestDialog = $entry(function(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username) {
                 @com.sap.sse.gwt.client.media.TakedownNoticeRequestDialog::showTakedownNoticeRequestDialog(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username);
@@ -56,8 +75,20 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
     
     private static void showTakedownNoticeRequestDialog(String contextDescriptionMessageKey, String contextDescriptionMessageParameter,
             String contentUrl, String username) {
-        Notification.notify(""+contextDescriptionMessageKey+", "+contextDescriptionMessageParameter+", "+contentUrl+", "+username,
-                NotificationType.INFO);
+        if (!Util.hasLength(username.trim()) || !serviceToUseForTakedownNotice.isEmailAddressOfCurrentUserValidated()) {
+            Notification.notify(StringMessages.INSTANCE.mustBeLoggedInAndWithValidatedEmail(), NotificationType.ERROR);
+        } else {
+            new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username, StringMessages.INSTANCE, new DialogCallback<TakedownNoticeRequestContext>() {
+                @Override
+                public void ok(TakedownNoticeRequestContext editedObject) {
+                    serviceToUseForTakedownNotice.fileTakedownNotice(editedObject);
+                }
+                
+                @Override
+                public void cancel() {
+                }
+            }).show();
+        }
     }
     
     public TakedownNoticeRequestDialog(String contextDescriptionMessageKey, String contextDescriptionMessageParameter,

@@ -1,5 +1,7 @@
 package com.sap.sse.common.media;
 
+import java.io.Serializable;
+
 /**
  * Whenever media content is made available that may have been uploaded by an end user, there is a possibility that
  * other users would like to request this content to be taken down, hidden or otherwise made unavailable. Reasons for
@@ -16,14 +18,9 @@ package com.sap.sse.common.media;
  * @author Axel Uhl (d043530)
  *
  */
-public class TakedownNoticeRequestContext {
-    public static enum NatureOfClaim {
-        NONE,
-        COPYRIGHT_INFRINGEMENT,
-        DEFAMATORY_CONTENT,
-        OTHER
-    }
-    
+public class TakedownNoticeRequestContext implements Serializable {
+    private static final long serialVersionUID = -7013553116801501898L;
+
     /**
      * A message key for a message that takes as parameters the following strings:
      * <ol>

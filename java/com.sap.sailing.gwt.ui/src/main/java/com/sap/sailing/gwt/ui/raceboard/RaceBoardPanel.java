@@ -407,7 +407,7 @@ public class RaceBoardPanel
             }
         }
         taggingComponent = new TaggingComponent(parent, componentContext, stringMessages, sailingService, withSecurity.getUserService(), timer,
-                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite);
+                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle, leaderboardDTO, sailingServiceWrite, selectedRaceIdentifier);
         addChildComponent(taggingComponent);
         taggingComponent.setVisible(showTaggingComponent);
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
