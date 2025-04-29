@@ -9,6 +9,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.common.media.TakedownNoticeRequestContext.NatureOfClaim;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
@@ -34,6 +36,29 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
     private final StringListEditorComposite supportingURLsEditor;
     private final String username;
     private final StringMessages stringMessages;
+    
+    /**
+     * Invoke this method to install a JavaScript callback function
+     * {@code showTakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username)}
+     * into the current page (the {@code $wnd} document) that can be invoked with arguments which will be forwarded to a
+     * JSNI call to the
+     * {@link #TakedownNoticeRequestDialog(String, String, String, String, StringMessages, DialogCallback)} constructor
+     * and will then display the dialog and, if confirmed, uses the {@link TakedownNoticeRequestContext dialog result}
+     * to then carry out the request by a call to the server.
+     */
+    public static native void ensureJSFunctionInstalled() /*-{
+        if ($wnd.showTakedownNoticeRequestDialog == null) {
+            $wnd.showTakedownNoticeRequestDialog = $entry(function(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username) {
+                @com.sap.sse.gwt.client.media.TakedownNoticeRequestDialog::showTakedownNoticeRequestDialog(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username);
+            });
+        }
+    }-*/;
+    
+    private static void showTakedownNoticeRequestDialog(String contextDescriptionMessageKey, String contextDescriptionMessageParameter,
+            String contentUrl, String username) {
+        Notification.notify(""+contextDescriptionMessageKey+", "+contextDescriptionMessageParameter+", "+contentUrl+", "+username,
+                NotificationType.INFO);
+    }
     
     public TakedownNoticeRequestDialog(String contextDescriptionMessageKey, String contextDescriptionMessageParameter,
             String contentUrl, String username, StringMessages stringMessages,

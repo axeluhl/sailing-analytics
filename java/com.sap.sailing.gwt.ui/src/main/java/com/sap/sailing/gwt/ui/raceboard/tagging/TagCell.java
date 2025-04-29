@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingComponent.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.dialog.ConfirmationDialog;
+import com.sap.sse.gwt.client.media.TakedownNoticeRequestDialog;
 import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.gwt.common.CommonSharedResources.CommonMainCss;
 import com.sap.sse.security.ui.client.UserService;
@@ -77,7 +78,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{5}'><img src='{2}'/><div class='{4}' onclick=\"alert('Menu clicked!')\">⋯</div></div></div><div class='{1}'>{3}</div>")
+        @Template("<div class='{0}'><div class='{5}'><img src='{2}'/><div class='{4}' onclick=\"showTakedownNoticeRequestDialog('Menu clicked!', 'Humba', 'Trala', 'username')\">⋯</div></div></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String classTagImage, String classTagComment, SafeUri imageURL,
                 SafeHtml comment, String classMenuIcon, String classMediaWrapper);
 
@@ -98,7 +99,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{3}'><img src='{1}'/><div class='{2}' onclick=\"alert('Menu clicked!')\">⋯</div></div></div>")
+        @Template("<div class='{0}'><div class='{3}'><img src='{1}'/><div class='{2}' onclick=\"showTakedownNoticeRequestDialog('Menu clicked!', 'Humba', 'Trala', 'username')\">⋯</div></div></div>")
         SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL, String classMenuIcon, String classMediaWrapper);
 
         /**
@@ -185,8 +186,10 @@ public class TagCell extends AbstractCell<TagDTO> {
         if (!tag.getComment().isEmpty() && trustedImageURL == null) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
         } else if (tag.getComment().isEmpty() && trustedImageURL != null) {
+            TakedownNoticeRequestDialog.ensureJSFunctionInstalled();
             content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL, sharedResources.media_menu_icon(), sharedResources.media_wrapper());
         } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
+            TakedownNoticeRequestDialog.ensureJSFunctionInstalled();
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
                     trustedImageURL, safeComment, sharedResources.media_menu_icon(), sharedResources.media_wrapper());
         }
