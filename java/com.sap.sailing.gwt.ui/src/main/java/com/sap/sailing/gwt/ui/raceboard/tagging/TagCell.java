@@ -194,13 +194,15 @@ public class TagCell extends AbstractCell<TagDTO> {
             content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL,
                     sharedResources.media_menu_icon(), sharedResources.media_wrapper(),
                     new SafeHtmlBuilder().appendEscaped(trustedImageURL.asString()).toSafeHtml().asString(),
-                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier, userService.getCurrentUser() == null ? "" : userService.getCurrentUser().getName());
+                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier+", "+Window.Location.createUrlBuilder().buildString(),
+                    userService.getCurrentUser() == null ? "" : userService.getCurrentUser().getName());
         } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
             TakedownNoticeRequestDialog.ensureJSFunctionInstalled(userService);
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
                     trustedImageURL, safeComment, sharedResources.media_menu_icon(), sharedResources.media_wrapper(),
                     new SafeHtmlBuilder().appendEscaped(trustedImageURL.asString()).toSafeHtml().asString(),
-                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier, userService.getCurrentUser() == null ? "" : userService.getCurrentUser().getName());
+                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier+", "+Window.Location.createUrlBuilder().buildString(),
+                    userService.getCurrentUser() == null ? "" : userService.getCurrentUser().getName());
         }
         SafeHtml icon = SafeHtmlUtils.EMPTY_SAFE_HTML;
         if (!tag.isVisibleForPublic()) {
