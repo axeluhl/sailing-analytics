@@ -99,7 +99,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         this.stringMessages = stringMessages;
         this.username = username;
         this.reportingUserCommentTextArea = createTextArea("");
-        this.natureOfClaimListBox = createGenericListBox(NatureOfClaim::name, /* isMultipleSelect */ false);
+        this.natureOfClaimListBox = createGenericListBox(this::getDisplayString, /* isMultipleSelect */ false);
         for (final NatureOfClaim noc : NatureOfClaim.values()) {
             this.natureOfClaimListBox.addItem(noc);
         }
@@ -108,6 +108,20 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         this.contextDescriptionMessageKey = contextDescriptionMessageKey;
         this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
         this.contentUrl = contentUrl;
+    }
+    
+    public String getDisplayString(NatureOfClaim natureOfClaim) {
+        switch (natureOfClaim) {
+        case COPYRIGHT_INFRINGEMENT:
+            return stringMessages.natureOfClaim_CopyrightInfringement();
+        case DEFAMATORY_CONTENT:
+            return stringMessages.natureOfClaim_DefamatoryContent();
+        case NONE:
+            return stringMessages.natureOfClaim_None();
+        case OTHER:
+            return stringMessages.natureOfClaim_Other();
+        }
+        throw new RuntimeException("unknown NatureOfClaim: "+natureOfClaim);
     }
     
     @Override
@@ -122,8 +136,6 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         result.setWidget(row++, 1, supportingURLsEditor);
         return result;
     }
-
-
 
     @Override
     protected TakedownNoticeRequestContext getResult() {

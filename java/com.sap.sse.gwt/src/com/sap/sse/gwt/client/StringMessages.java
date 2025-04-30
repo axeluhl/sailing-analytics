@@ -120,4 +120,8 @@ public interface StringMessages extends Messages {
     String comment();
     String supportingURLs();
     String mustBeLoggedInAndWithValidatedEmail();
+    String natureOfClaim_None();
+    String natureOfClaim_CopyrightInfringement();
+    String natureOfClaim_DefamatoryContent();
+    String natureOfClaim_Other();
 }
