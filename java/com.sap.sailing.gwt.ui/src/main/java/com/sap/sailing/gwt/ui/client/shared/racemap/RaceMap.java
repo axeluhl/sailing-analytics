@@ -17,9 +17,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import com.google.gwt.ajaxloader.client.ArrayHelper;
+import com.google.gwt.canvas.dom.client.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.CanvasElement;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.Style;
@@ -229,6 +231,17 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * rotated and translated versions of the map, implementing the "wind-up" view.
      */
     private DelegateCoordinateSystem coordinateSystem;
+    
+    /**
+     * Tells whether the {@link RenderingType#VECTOR} is supported on the current platform / browser.
+     * This then decides which {@link CoordinateSystem} to use for {@code #coordinateSystem} in case
+     * the user requests wind-up display: if {@link RenderingType#VECTOR} is supported, a
+     * {@link RotatedCoordinateSystem} will be used, and positions are mapped to their true
+     * {@link LatLng} counterparts. Otherwise, the legacy {@link RotateAndTranslateCoordinateSystem} is
+     * used, keeping the map's original heading at 0deg and virtually mapping the coordinate system
+     * to 0N 0E, rotating all directions such that wind appears to come from the north.
+     */
+    private boolean vectorRenderingTypeSupported;
     
     /**
      * A panel with flex-box display, representing the semi-transparent header bar. It aligns its flex-items
@@ -782,11 +795,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 if (lastCombinedTrueWindFromDirection != null) {
                     final int lastCombinedTrueWindFromDirectionInIntegerDegrees = (int) Math.round(lastCombinedTrueWindFromDirection.getDegrees());
                     // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
-                    coordinateSystem.setCoordinateSystem(new RotatedCoordinateSystem(
-                            new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90))));
+                    // TODO bug6098 use RotateAndTranslateCoordinateSystem if map fell back to rendering type RASTER:
+                    coordinateSystem.setCoordinateSystem(vectorRenderingTypeSupported
+                            ? new RotatedCoordinateSystem(new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90)))
+                            : new RotateAndTranslateCoordinateSystem(centerOfCourse, new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90))));
                     if (map != null) {
                         mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer());
-                        mapOptions.setHeading(lastCombinedTrueWindFromDirectionInIntegerDegrees);
+                        if (vectorRenderingTypeSupported) {
+                            mapOptions.setHeading(lastCombinedTrueWindFromDirectionInIntegerDegrees);
+                        }
                     } else {
                         mapOptions = null;
                     }
@@ -804,7 +821,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         } else {
             if (map != null) {
                 mapOptions = getMapOptions(/* wind-up */ false, settings.isShowSatelliteLayer());
-                mapOptions.setHeading(0);
+                if (vectorRenderingTypeSupported) {
+                    mapOptions.setHeading(0);
+                }
             } else {
                 mapOptions = null;
             }
@@ -855,6 +874,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 });
     }
+    
+    private boolean isVectorRenderingTypeSupported(MapWidget map) {
+        final CanvasElement canvasElement = map.getElement().getOwnerDocument().createCanvasElement();
+        final Context webgl2Context = canvasElement.getContext("webgl2");
+        final boolean result = webgl2Context != null;
+        canvasElement.removeFromParent();
+        return result;
+    }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel, final boolean showSatelliteLayer) {
         Runnable onLoad = new Runnable() {
@@ -863,6 +890,19 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer);
                 mapOptions.setRenderingType(RenderingType.VECTOR);
                 map = new MapWidget(mapOptions);
+                vectorRenderingTypeSupported = isVectorRenderingTypeSupported(map);
+                if (!vectorRenderingTypeSupported) {
+                    GWT.log("No support for VECTOR rendering type; resorting to RASTER; wind-up display will use coordinate transformation");
+                } else {
+                    GWT.log("Assuming VECTOR rendering type is supported because a WebGL2 context was created successfully");
+                }
+                map.addRenderingTypeChangeHandler(e->{
+                    final RenderingType newRenderingType = map.getRenderingType();
+                    if (vectorRenderingTypeSupported && newRenderingType == RenderingType.RASTER) {
+                        vectorRenderingTypeSupported = false;
+                        GWT.log("Map fell back to RASTER rendering type; wind-up display will use coordinate transformation");
+                    }
+                });
                 map.getElement().setId("googleMapsArea");
                 rootPanel.add(map, 0, 0);
                 map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
@@ -2510,7 +2550,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void zoomMapToNewBounds(NonCardinalBounds newBounds) {
         if (newBounds != null) {
-            double newZoomLevel = getZoomLevel(newBounds);
+            final double newZoomLevel = getZoomLevel(newBounds);
             if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
@@ -3121,7 +3161,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
         // Trigger auto-zoom if needed
-        RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
+        final RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
@@ -3362,9 +3402,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     Position competitorPosition = competitorFix != null ? competitorFix.position : null;
                     if (competitorPosition != null) {
                         if (newBounds == null) {
-                            newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(competitorPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                            newBounds = NonCardinalBounds.create(competitorPosition, new DegreeBearingImpl(forMap.getMap().getHeading()));
                         } else {
-                            newBounds = newBounds.extend(forMap.coordinateSystem.map(competitorPosition));
+                            newBounds = newBounds.extend(competitorPosition);
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
@@ -3413,9 +3453,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             if (marksToZoom != null) {
                 for (MarkDTO markDTO : marksToZoom) {
                     if (newBounds == null) {
-                        newBounds = NonCardinalBounds.create(forMap.coordinateSystem.map(markDTO.position), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                        newBounds = NonCardinalBounds.create(markDTO.position, new DegreeBearingImpl(forMap.getMap().getHeading()));
                     } else {
-                        newBounds = newBounds.extend(forMap.coordinateSystem.map(markDTO.position));
+                        newBounds = newBounds.extend(markDTO.position);
                     }
                 }
             }
@@ -3432,11 +3472,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 for (WindSensorOverlay windSensorOverlay : marksToZoom) {
                     final LatLng latLngPosition = windSensorOverlay.getLatLngPosition();
                     if (Objects.nonNull(latLngPosition)) {
-                        NonCardinalBounds bounds = NonCardinalBounds.create(BoundsUtil.getAsPosition(latLngPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
+                        NonCardinalBounds bounds = NonCardinalBounds.create(forMap.getCoordinateSystem().getPosition(latLngPosition), new DegreeBearingImpl(forMap.getMap().getHeading()));
                         if (newBounds == null) {
                             newBounds = bounds;
                         } else {
-                            newBounds = newBounds.extend(BoundsUtil.getAsPosition(latLngPosition));
+                            newBounds = newBounds.extend(forMap.getCoordinateSystem().getPosition(latLngPosition));
                         }
                     }
                 }
