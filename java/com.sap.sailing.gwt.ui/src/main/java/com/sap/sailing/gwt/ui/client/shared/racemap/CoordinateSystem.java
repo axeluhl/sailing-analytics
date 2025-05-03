@@ -13,8 +13,6 @@ import com.sap.sse.common.Bearing;
  *
  */
 public interface CoordinateSystem {
-    Position map(Position position);
-
     /**
      * Maps a real-world true bearing to a bearing on the map. If the map can be rotated natively,
      * this method will simply return the same {@code bearing} passed as argument unchanged. However,

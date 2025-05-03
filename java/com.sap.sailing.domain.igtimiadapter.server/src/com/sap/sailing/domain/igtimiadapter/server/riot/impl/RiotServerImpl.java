@@ -535,7 +535,9 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         final int masterPort = getMasterDescriptor().getServletPort();
         final String masterHostname = getMasterDescriptor().getHostname();
         final SecurityService securityService = getSecurityService();
-        final String currentUserBearerToken = securityService == null ? null : securityService.getAccessToken(securityService.getCurrentUser().getName());
+        final String currentUserBearerToken = securityService == null ? null
+                : securityService.getCurrentUser() == null ? null
+                        : securityService.getAccessToken(securityService.getCurrentUser().getName());
         try {
             final URL baseUrl = new URL(masterPort==443?"https":"http", masterHostname, masterPort, "/");
             final IgtimiConnectionFactory igtimiConnectionFactory =

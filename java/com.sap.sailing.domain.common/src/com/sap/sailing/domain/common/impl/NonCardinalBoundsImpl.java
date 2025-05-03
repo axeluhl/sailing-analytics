@@ -134,4 +134,10 @@ public class NonCardinalBoundsImpl implements NonCardinalBounds {
     public Position getCenter() {
         return getLowerLeft().translateGreatCircle(getLowerLeft().getBearingGreatCircle(getUpperRight()), getLowerLeft().getDistance(getUpperRight()).scale(0.5));
     }
+
+    @Override
+    public String toString() {
+        return "NonCardinalBounds[lowerLeft=" + lowerLeft + ", verticalBearing=" + verticalBearing
+                + ", verticalSize=" + verticalSize + ", horizontalSize=" + horizontalSize + "]";
+    }
 }

@@ -11,7 +11,12 @@
                 Google Maps rendering type instead of "magically" mapping the race course to the middle of
                 the Atlantic and virtually turning the coordinate system such that the wind seems to blow
                 from the north. This way, as you zoom out from the race course you can still see the
-                race in its original environment, particularly if it's an inshore or near-shore event.</li>
+                race in its original environment, particularly if it's an inshore or near-shore event.<p>
+                In case your browser does not support VECTOR-based maps display, the previous "magical"
+                wind-up implementation continues to be used. This can, e.g., be necessary when you run
+                a browser inside a virtual environment, such as a VNC server or a Citrix client, or if
+                your browser or graphics drivers don't support WebGL2.
+                </li>
             <li>The wind ladder now shows reliably when switched on in the map settings. Note that the time
                 slider needs to be at a time after the race start for the ladder to be shown.</li>
          </ul>

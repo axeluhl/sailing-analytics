@@ -75,9 +75,9 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     public NonCardinalBounds getNewBounds(RaceMap forMap) {
         NonCardinalBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
-            for (ZoomTypes type : typesToConsiderOnZoom.getValues()) {
+            for (final ZoomTypes type : typesToConsiderOnZoom.getValues()) {
                 // Calculate the new bounds and extend the result
-                NonCardinalBounds calculatedBounds = type.calculateNewBounds(forMap);
+                final NonCardinalBounds calculatedBounds = type.calculateNewBounds(forMap);
                 if (calculatedBounds != null) {
                     if (newBounds == null) {
                         newBounds = calculatedBounds;
