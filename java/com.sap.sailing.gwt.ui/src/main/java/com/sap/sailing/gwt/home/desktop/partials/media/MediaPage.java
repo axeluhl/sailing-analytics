@@ -84,6 +84,8 @@ public class MediaPage extends Composite {
     private boolean managePhotos;
     private VideoWithLowerThird videoDisplayUi;
 
+    private final UserService userService;
+
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
         manageVideos = !manageVideos;
@@ -137,12 +139,13 @@ public class MediaPage extends Composite {
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
         final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(
-                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia()));
+                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia(eventDto.getName())));
         popupHolder.add(popup);
         popup.center();
     }
 
     public MediaPage(IsWidget initialView, EventBus eventBus, UserService userService, EventViewDTO eventViewDto) {
+        this.userService = userService;
         MediaPageResources.INSTANCE.css().ensureInjected();
         stringMessages = StringMessages.INSTANCE;
         SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
@@ -157,12 +160,12 @@ public class MediaPage extends Composite {
         });
     }
 
-    public void setMedia(final MediaDTO media) {
+    public void setMedia(final MediaDTO media, EventViewDTO eventDTO) {
         manageMediaModel.setMedia(media);
-        updateMedia();
+        updateMedia(eventDTO.getName());
     }
 
-    private void updateMedia() {
+    private void updateMedia(String eventName) {
         contentPanel.setWidget(uiBinder.createAndBindUi(this));
         setMediaManaged(manageMediaModel.hasPermissions());
         int photosCount = manageMediaModel.getImages().size();
@@ -231,7 +234,7 @@ public class MediaPage extends Composite {
                 }
                 if (videoCount > 0) {
                     VideoThumbnail thumbnail = new VideoThumbnail(videoCandidateInfo,
-                            getDeleteVideoHandler(videoCandidateInfo), null);
+                            eventName, getDeleteVideoHandler(videoCandidateInfo), /* edit handler */ null, this.userService);
                     thumbnail.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
@@ -275,7 +278,7 @@ public class MediaPage extends Composite {
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.confirmDeleteVideo())) {
-                    manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia());
+                    manageMediaModel.deleteVideo(videoCandidateInfo, eventDto -> updateMedia(eventDto.getName()));
                 }
             }
         };
@@ -287,7 +290,7 @@ public class MediaPage extends Composite {
             public void onClick(ClickEvent event) {
                 event.stopPropagation();
                 if (Window.confirm(stringMessages.confirmDeleteImage())) {
-                    manageMediaModel.deleteImage(imageCandidateInfo, eventDto -> updateMedia());
+                    manageMediaModel.deleteImage(imageCandidateInfo, eventDto -> updateMedia(eventDto.getName()));
                 }
             }
         };

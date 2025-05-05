@@ -3442,6 +3442,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final String message = sb.toString();
         getMailService().sendMail(SUPPORT_MAIL_ADDRESS, "Media Take-Down Request", message);
         getMailService().sendMail(email, "Media Take-Down Request Confirmation", messages.get(user.getLocaleOrDefault(), "takedownRequestConfirmation",
-                Util.hasLength(user.getFullName().trim()) ? user.getFullName() : user.getName(), SUPPORT_MAIL_ADDRESS, message));
+                Util.hasLength(user.getFullName()) ? user.getFullName() : user.getName(), SUPPORT_MAIL_ADDRESS, message));
     }
 }
