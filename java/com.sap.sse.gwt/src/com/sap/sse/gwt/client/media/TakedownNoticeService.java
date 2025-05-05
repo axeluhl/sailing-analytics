@@ -10,4 +10,9 @@ public interface TakedownNoticeService {
      *         validated successfully
      */
     boolean isEmailAddressOfCurrentUserValidated();
+
+    /**
+     * @return {@code null} if no current user is logged in, or the current user's name
+     */
+    String getCurrentUserName();
 }

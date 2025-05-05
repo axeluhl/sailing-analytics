@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.media;
 
 import java.util.Collections;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
@@ -140,7 +141,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
     @Override
     protected TakedownNoticeRequestContext getResult() {
         return new TakedownNoticeRequestContext(contextDescriptionMessageKey, contextDescriptionMessageParameter,
-                contentUrl, natureOfClaimListBox.getValue(), reportingUserCommentTextArea.getValue(), supportingURLsEditor.getValue(),
-                username);
+                contentUrl, Window.Location.createUrlBuilder().buildString(), natureOfClaimListBox.getValue(),
+                reportingUserCommentTextArea.getValue(), supportingURLsEditor.getValue(), username);
     }
 }

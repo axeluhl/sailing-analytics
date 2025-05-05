@@ -5,14 +5,12 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -25,12 +23,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.gwt.client.LinkUtil;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.media.TakedownNoticeRequestDialog;
+import com.sap.sse.gwt.client.media.MediaMenuIcon;
 import com.sap.sse.security.ui.client.UserService;
 
 public class Countdown extends Composite {
@@ -50,16 +44,12 @@ public class Countdown extends Composite {
     @UiField HeadingElement infoTitle;
     @UiField(provided = true) NavigationAnchor navigationButton;
     @UiField DivElement image;
-    @UiField HTML imageMenuButton;
-    
-    private HandlerRegistration takedownNoticeButtonClickHandlerRegistration;
-    
-    private final UserService takedownNoticeService;
+    @UiField(provided = true) MediaMenuIcon imageMenuButton;
     
     public Countdown(CountdownNavigationProvider navigationProvider, UserService takedownNoticeService) {
         CSS.ensureInjected();
         this.navigationButton = new NavigationAnchor(navigationProvider);
-        this.takedownNoticeService = takedownNoticeService;
+        this.imageMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForImageOnEventStage");
         initWidget(uiBinder.createAndBindUi(this));
     }
     
@@ -77,37 +67,19 @@ public class Countdown extends Composite {
             this.updateUi(I18N.nextRaceStartingIn(), data.getTickerInfo());
             this.navigationButton.linkToRaceViewer((EventOverviewRaceTickerStageDTO) data);
         } else if (data instanceof EventOverviewRegattaTickerStageDTO) {
-            this.updateUi(I18N.startingIn(data.getTickerInfo()), data.getTickerInfo());
+            if (data.getStartTime() != null) {
+                this.updateUi(I18N.startingIn(data.getTickerInfo()), data.getTickerInfo());
+            }
             this.navigationButton.linkToRegatta((EventOverviewRegattaTickerStageDTO) data);
         } else {
-            this.updateUi(data.getTickerInfo() != null ? I18N.startingIn(data.getTickerInfo()) : null, null);
+            this.updateUi(data.getTickerInfo() != null && data.getStartTime() != null ? I18N.startingIn(data.getTickerInfo()) : null, null);
         }
         if (data.getStartTime() != null) {
             this.tickerContainer.setWidget(new CountdownTimer(data.getStartTime(), true));
         } else {
             this.tickerContainer.setWidget(null);
         }
-        if (takedownNoticeButtonClickHandlerRegistration != null) {
-            takedownNoticeButtonClickHandlerRegistration.removeHandler();
-        }
-        takedownNoticeButtonClickHandlerRegistration = imageMenuButton.addClickHandler(e->{
-            if (takedownNoticeService.isEmailAddressOfCurrentUserValidated()) {
-               new TakedownNoticeRequestDialog("takedownRequestForImageOnEventStage", data.getTickerInfo(), stageImageUrl,
-                       takedownNoticeService.getCurrentUser().getName(), StringMessages.INSTANCE,
-                       new DialogCallback<TakedownNoticeRequestContext>() {
-                   @Override
-                   public void ok(TakedownNoticeRequestContext editedObject) {
-                       takedownNoticeService.fileTakedownNotice(editedObject);
-                   }
-                   
-                   @Override
-                   public void cancel() {
-                   }
-               }).show();
-            } else {
-                Notification.notify(StringMessages.INSTANCE.mustBeLoggedInAndWithValidatedEmail(), NotificationType.ERROR);
-            }
-        });
+        imageMenuButton.setData(data.getTickerInfo(), stageImageUrl);
     }
 
     private void updateUi(String title, String info) {

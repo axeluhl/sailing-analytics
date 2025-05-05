@@ -29,8 +29,8 @@ public class TestTakedownNoticeFactory {
     @Test
     public void testSimpleMessage() {
         final TakedownNoticeRequestContext context = new TakedownNoticeRequestContext("competitorImage", "THA 4152", "https://example.com/image.jpg",
-                NatureOfClaim.DEFAMATORY_CONTENT, "This is the user comment",
-                Arrays.asList("https://example.com/explanation1.html", "https://example.com/explanation2.html"), "theUserName");
+                Window.Location.createUrlBuilder().buildString(), NatureOfClaim.DEFAMATORY_CONTENT,
+                "This is the user comment", Arrays.asList("https://example.com/explanation1.html", "https://example.com/explanation2.html"), "theUserName");
         final TakedownNoticeFactory factory = new TakedownNoticeFactory();
         assertEquals(
                 "The image with URL https://example.com/image.jpg that it used as a competitor image for THA 4152 has been reported by user theUserName for reason: DEFAMATORY_CONTENT. The user sends the following additional explanation: \"This is the user comment\". Additional URLs to help clarify this request are: https://example.com/explanation1.html, https://example.com/explanation2.html.",

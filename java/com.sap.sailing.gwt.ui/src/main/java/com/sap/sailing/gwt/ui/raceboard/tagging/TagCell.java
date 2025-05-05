@@ -194,7 +194,7 @@ public class TagCell extends AbstractCell<TagDTO> {
             content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL,
                     sharedResources.media_menu_icon(), sharedResources.media_wrapper(),
                     new SafeHtmlBuilder().appendEscaped(trustedImageURL.asString()).toSafeHtml().asString(),
-                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier+", "+Window.Location.createUrlBuilder().buildString(),
+                    tag.getTag()+", "+tag.getRaceTimepoint()+", "+raceIdentifier,
                     userService.getCurrentUser() == null ? "" : userService.getCurrentUser().getName());
         } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
             TakedownNoticeRequestDialog.ensureJSFunctionInstalled(userService);

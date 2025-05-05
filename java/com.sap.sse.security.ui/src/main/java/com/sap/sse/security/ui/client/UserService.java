@@ -606,4 +606,9 @@ public class UserService implements TakedownNoticeService {
     public boolean isEmailAddressOfCurrentUserValidated() {
         return getCurrentUser() != null && getCurrentUser().isEmailValidated();
     }
+
+    @Override
+    public String getCurrentUserName() {
+        return getCurrentUser() == null ? null : getCurrentUser().getName();
+    }
 }

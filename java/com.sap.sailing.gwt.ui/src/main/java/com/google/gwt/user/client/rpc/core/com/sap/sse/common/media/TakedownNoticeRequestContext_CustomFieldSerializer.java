@@ -23,6 +23,7 @@ public class TakedownNoticeRequestContext_CustomFieldSerializer extends CustomFi
         streamWriter.writeString(instance.getContextDescriptionMessageKey());
         streamWriter.writeString(instance.getContextDescriptionMessageParameter());
         streamWriter.writeString(instance.getContentUrl());
+        streamWriter.writeString(instance.getPageUrl());
         streamWriter.writeString(instance.getNatureOfClaim().name());
         streamWriter.writeString(instance.getReportingUserComment());
         streamWriter.writeObject(Util.toArray(instance.getSupportingURLs(), new String[0]));
@@ -43,8 +44,8 @@ public class TakedownNoticeRequestContext_CustomFieldSerializer extends CustomFi
     public static TakedownNoticeRequestContext instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
         return new TakedownNoticeRequestContext(streamReader.readString(), streamReader.readString(),
-                streamReader.readString(), NatureOfClaim.valueOf(streamReader.readString()), streamReader.readString(),
-                Arrays.asList((String[]) streamReader.readObject()), streamReader.readString());
+                streamReader.readString(), streamReader.readString(), NatureOfClaim.valueOf(streamReader.readString()),
+                streamReader.readString(), Arrays.asList((String[]) streamReader.readObject()), streamReader.readString());
     }
 
     @Override

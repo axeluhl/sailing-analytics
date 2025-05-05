@@ -3422,6 +3422,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 .append(takedownNoticeRequestContext.getContentUrl())
                 .append(" used in context ")
                 .append(messages.get(Locale.ENGLISH, takedownNoticeRequestContext.getContextDescriptionMessageKey(), takedownNoticeRequestContext.getContextDescriptionMessageParameter()))
+                .append(" on page ")
+                .append(takedownNoticeRequestContext.getPageUrl())
                 .append(" be removed from the site. The user provides the following comment:\n\n")
                 .append("   \"")
                 .append(takedownNoticeRequestContext.getReportingUserComment())

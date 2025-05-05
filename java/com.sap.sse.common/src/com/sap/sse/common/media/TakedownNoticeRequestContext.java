@@ -69,11 +69,17 @@ public class TakedownNoticeRequestContext implements Serializable {
      */
     private final String username;
 
+    /**
+     * URL of the page on which the media was seen by the user
+     */
+    private final String pageUrl;
+
     public TakedownNoticeRequestContext(String contextDescriptionMessageKey, String contextDescriptionMessageParameter, String contentUrl,
-            NatureOfClaim natureOfClaim, String reportingUserComment, Iterable<String> supportingURLs, String username) {
+            String pageUrl, NatureOfClaim natureOfClaim, String reportingUserComment, Iterable<String> supportingURLs, String username) {
         this.contextDescriptionMessageKey = contextDescriptionMessageKey;
         this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
         this.contentUrl = contentUrl;
+        this.pageUrl = pageUrl;
         this.natureOfClaim = natureOfClaim;
         this.reportingUserComment = reportingUserComment;
         this.supportingURLs = supportingURLs;
@@ -82,6 +88,10 @@ public class TakedownNoticeRequestContext implements Serializable {
 
     public String getContentUrl() {
         return contentUrl;
+    }
+
+    public String getPageUrl() {
+        return pageUrl;
     }
 
     public NatureOfClaim getNatureOfClaim() {
