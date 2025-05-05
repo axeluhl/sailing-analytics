@@ -20,9 +20,17 @@ import com.sap.sse.gwt.common.CommonSharedResources.CommonMainCss;
  * When using in a UI Binder {@code .ui.xml} file, use like this:
  * 
  * <pre>
+ * &lt;ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+ *                 xmlns:g="urn:import:com.google.gwt.user.client.ui"
+ *                 ...
+ *                 xmlns:m="urn:import:com.sap.sse.gwt.client.media"&gt;
+ *  &ltui:with field="res" type="com.sap.sse.gwt.CommonSharedResources" /&gt;
+ *  ...
  *  &lt;div ui:field="image" class="{local_res.css.countdown_image} {res.mainCss.media_wrapper}"&gt;
  *    &lt;m:MediaMenuIcon ui:field="imageMenuButton"/&gt;
  *  &lt;/div&gt;
+ *  ...
+ * &lt;/ui:UiBinder&gt;
  * </pre>
  * and in the UI Binder Java class declare the field for the {@code imageMenuButton} like this:
  * <pre>
@@ -35,7 +43,13 @@ import com.sap.sse.gwt.common.CommonSharedResources.CommonMainCss;
  * where the {@code takedownNotiveService} will typically be the {@code UserService} that may be available
  * from a {@code Presenter} field, and {@code "takedownRequestForImageOnEventStage"} as the message key
  * that resolves in the string messages of bundle {@code com.sap.sse.security} (see the {@code resources/stringmessages}
- * folder there).
+ * folder there).<p>
+ * 
+ * When you know the details of the media file to be displayed in the surrounding &lt;div&gt;, call
+ * {@link #setData(String, String)} with the {@code contextDescriptionMessageParameter} and the {@code contentUrl}
+ * parameters. The {@code contextDescriptionMessageParameter} will be used as a parameter for a single placeholder
+ * expected in the message string identified by the {@code contextDescriptionMessageKey} parameter of the
+ * constructor ({@code "takedownRequestForImageOnEventStage"} in the example above).
  * 
  * @author Axel Uhl (d043530)
  *

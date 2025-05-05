@@ -2,7 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" 
 	xmlns:dp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
-	xmlns:s="urn:import:com.sap.sailing.gwt.ui.shared">
+	xmlns:s="urn:import:com.sap.sailing.gwt.ui.shared"
+    xmlns:m="urn:import:com.sap.sse.gwt.client.media">
 
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
@@ -28,7 +29,9 @@
 					</div>
 					<div class="{local_res.css.eventheader_info_subtitle}">
 						<!-- IF event.logo -->
-						<a ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo}"></a>
+						<a ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo} {res.mainCss.media_wrapper}">
+                          <m:MediaMenuIcon ui:field="eventLogoMenuButton"/>
+                        </a>
 						<!-- IF END -->
 						<div class="{local_res.css.eventheader_info_subtitle_info}">
 							<!-- IF (event.name || event.date) -->

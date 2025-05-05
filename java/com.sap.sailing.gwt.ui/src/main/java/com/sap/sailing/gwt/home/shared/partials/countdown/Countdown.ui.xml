@@ -7,6 +7,7 @@
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources" />
   <g:HTMLPanel addStyleNames="{local_res.css.countdown}">
       <div ui:field="image" class="{local_res.css.countdown_image} {res.mainCss.media_wrapper}">
+        <!-- take-down notice/request button: -->
         <m:MediaMenuIcon ui:field="imageMenuButton"/>
       </div>
       <div class="{local_res.css.countdown_content}">
