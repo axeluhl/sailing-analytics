@@ -198,7 +198,7 @@ public class MediaPage extends Composite {
             }
             for (final ImageDTO holder : manageMediaModel.getImages()) {
                 if (holder.getSourceRef() != null) {
-                    GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder));
+                    GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder), this.userService, eventName);
                     gih.addStyleName(photoCss);
                     gih.addStyleName(res.mediaCss().columns());
                     photoListOuterBoxUi.add(gih);
