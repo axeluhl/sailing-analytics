@@ -10,7 +10,7 @@
 			<div class="{local_res.css.eventheader_intro}">
 				<div class="{local_res.css.eventheader_intro_logo}">
 					<div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image} {res.mainCss.media_wrapper}">
-                      <m:MediaMenuIcon ui:field="seriesLogoMenuButton"/>
+                      <m:MediaMenuIcon ui:field="seriesLogoMenuButton" fontSize="5px" />
                     </div>
 				</div>
 				<h2 class="{local_res.css.eventheader_intro_name}">

@@ -1,12 +1,14 @@
 package com.sap.sse.gwt.client.media;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -27,7 +29,7 @@ import com.sap.sse.gwt.common.CommonSharedResources.CommonMainCss;
  *  &ltui:with field="res" type="com.sap.sse.gwt.CommonSharedResources" /&gt;
  *  ...
  *  &lt;div ui:field="image" class="{local_res.css.countdown_image} {res.mainCss.media_wrapper}"&gt;
- *    &lt;m:MediaMenuIcon ui:field="imageMenuButton"/&gt;
+ *    &lt;m:MediaMenuIcon ui:field="imageMenuButton" fontSize="20px" /&gt;
  *  &lt;/div&gt;
  *  ...
  * &lt;/ui:UiBinder&gt;
@@ -59,7 +61,7 @@ public class MediaMenuIcon extends Composite {
     private static final CommonMainCss MAIN_CSS = CommonSharedResources.INSTANCE.mainCss();
 
     private static MediaMenuIconUiBinder uiBinder = GWT.create(MediaMenuIconUiBinder.class);
-
+    
     interface MediaMenuIconUiBinder extends UiBinder<Widget, MediaMenuIcon> {
     }
 
@@ -79,6 +81,18 @@ public class MediaMenuIcon extends Composite {
         this.contextDescriptionMessageKey = contextDescriptionMessageKey;
         initWidget(uiBinder.createAndBindUi(this));
         imageMenuButton.addClickHandler(this::onClick);
+    }
+    
+    public void setFontSize(String htmlFontSizeSpecification) {
+        if (Util.hasLength(htmlFontSizeSpecification)) {
+            final String valueString = htmlFontSizeSpecification.replaceFirst("[a-zA-Z]+$", "");
+            final String unitString = htmlFontSizeSpecification.replaceFirst("^[0-9.]*", "");
+            final double value = Double.valueOf(valueString);
+            final Unit unit = Util.hasLength(unitString) ? Unit.valueOf(unitString.toUpperCase()) : Unit.PX;
+            imageMenuButton.getElement().getStyle().setFontSize(value, unit);
+        } else {
+            GWT.log("Warning: unknown font size specification for MediaMenuIcon: "+htmlFontSizeSpecification);
+        }
     }
     
     public void setData(String contextDescriptionMessageParameter, String contentUrl) {

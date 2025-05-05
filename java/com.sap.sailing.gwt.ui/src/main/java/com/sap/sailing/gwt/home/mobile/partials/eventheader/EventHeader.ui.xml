@@ -27,13 +27,13 @@
 						</h3>
 						<!-- IF END -->
 					</div>
-					<div class="{local_res.css.eventheader_info_subtitle}">
+					<div>
 						<!-- IF event.logo -->
 						<a ui:field="eventLogoUi" class="{local_res.css.eventheader_info_subtitle_logo} {res.mainCss.media_wrapper}">
-                          <m:MediaMenuIcon ui:field="eventLogoMenuButton"/>
+                          <m:MediaMenuIcon ui:field="eventLogoMenuButton" fontSize="5px"/>
                         </a>
 						<!-- IF END -->
-						<div class="{local_res.css.eventheader_info_subtitle_info}">
+						<div class="{local_res.css.eventheader_info_subtitle_info} {local_res.css.eventheader_info_subtitle}">
 							<!-- IF (event.name || event.date) -->
 							<div ui:field="eventDateUi" class="{local_res.css.eventheader_info_subtitle_info_date}">
 								<!-- event.date -->

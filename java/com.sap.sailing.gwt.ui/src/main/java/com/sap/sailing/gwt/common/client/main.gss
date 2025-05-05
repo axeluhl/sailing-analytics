@@ -576,7 +576,6 @@ figcaption {
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 20px;
   transition: background 0.2s ease;
   user-select: none;
 }

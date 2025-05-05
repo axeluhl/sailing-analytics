@@ -13,7 +13,7 @@
         <div class="{local_res.css.eventheader_intro_logo}">
        	  <a ui:field="eventLogoAnchorUi">
             <div ui:field="eventLogo" class="{local_res.css.eventheader_intro_logo_image}">
-              <m:MediaMenuIcon ui:field="eventLogoMenuButton"/>
+              <m:MediaMenuIcon ui:field="eventLogoMenuButton" fontSize="5px" />
             </div>
           </a>
         </div>
