@@ -1300,18 +1300,25 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void successfulPasswordAuthentication(User user) {
-        apply(s->s.internalSuccessfulPasswordAuthentication(user.getName()));
+        // replicate only if this really implied a change
+        if (internalSuccessfulPasswordAuthentication(user.getName())) {
+            replicate(s->s.internalSuccessfulPasswordAuthentication(user.getName()));
+        }
     }
     
     @Override
-    public Void internalSuccessfulPasswordAuthentication(String username) {
+    public Boolean internalSuccessfulPasswordAuthentication(String username) {
+        final boolean changed;
         final User user = getUserByName(username);
         if (user != null) {
-            if (user.getLockingAndBanning().successfulPasswordAuthentication()) {
+            changed = user.getLockingAndBanning().successfulPasswordAuthentication();
+            if (changed) {
                 store.updateUser(user);
             }
+        } else {
+            changed = false;
         }
-        return null;
+        return changed;
     }
 
     @Override
@@ -1366,16 +1373,23 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public void successfulBearerTokenAuthentication(String clientIP) {
-        apply(s->s.internalSuccessfulBearerTokenAuthentication(clientIP));
+        // replicate only if this truly caused a change in locking/banning:
+        if (internalSuccessfulBearerTokenAuthentication(clientIP)) {
+            replicate(s->s.internalSuccessfulBearerTokenAuthentication(clientIP));
+        }
     }
     
     @Override
-    public Void internalSuccessfulBearerTokenAuthentication(String clientIP) {
+    public Boolean internalSuccessfulBearerTokenAuthentication(String clientIP) {
+        final boolean changed;
         final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.remove(escapeNullClientIP(clientIP));
         if (lockingAndBanning != null) {
             logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
+            changed = true;
+        } else {
+            changed = false;
         }
-        return null;
+        return changed;
     }
 
     @Override
