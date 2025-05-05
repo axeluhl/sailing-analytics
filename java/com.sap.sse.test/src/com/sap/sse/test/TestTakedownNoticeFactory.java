@@ -29,7 +29,7 @@ public class TestTakedownNoticeFactory {
     @Test
     public void testSimpleMessage() {
         final TakedownNoticeRequestContext context = new TakedownNoticeRequestContext("competitorImage", "THA 4152", "https://example.com/image.jpg",
-                Window.Location.createUrlBuilder().buildString(), NatureOfClaim.DEFAMATORY_CONTENT,
+                "https://localhost/some/test/url#with-a-fragment", NatureOfClaim.DEFAMATORY_CONTENT,
                 "This is the user comment", Arrays.asList("https://example.com/explanation1.html", "https://example.com/explanation2.html"), "theUserName");
         final TakedownNoticeFactory factory = new TakedownNoticeFactory();
         assertEquals(
