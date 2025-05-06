@@ -30,7 +30,9 @@ public class MainMediaVideo extends Composite {
     final VideoPlayer vJs;
 
     public MainMediaVideo(SailingVideoDTO video, MutualExclusionPlayHandler exclusionPlayHandler, TakedownNoticeService takedownNoticeService) {
-        vJs = exclusionPlayHandler == null ? new VideoPlayer(takedownNoticeService) : new VideoPlayer(exclusionPlayHandler, takedownNoticeService);
+        vJs = exclusionPlayHandler == null
+                ? new VideoPlayer(takedownNoticeService, video.getEventRef().getDisplayName())
+                : new VideoPlayer(exclusionPlayHandler, takedownNoticeService, video.getEventRef().getDisplayName());
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 

@@ -23,7 +23,7 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
         isDebug = Window.Location.getParameter("gwt.codesvr") != null;
         if (videoUrl != null) {
             videoJSDelegate = new VideoJSPlayer(true, false, getUserService());
-            videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl);
+            videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl, Window.Location.getParameter("eventName"));
             mainPanel.add(videoJSDelegate);
             initPlay();
         } else {

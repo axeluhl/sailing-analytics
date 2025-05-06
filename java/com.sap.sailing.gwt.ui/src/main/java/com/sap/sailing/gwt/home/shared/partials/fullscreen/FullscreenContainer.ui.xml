@@ -5,6 +5,7 @@
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer.Style">
 		.popup {
 			position: fixed !important;
+			z-index: 2; /* above media menu buttons (1) and video player iframe, same as gwt-Dialog (2) */
 			top: 0;
 			bottom: 0;
 			left: 0;

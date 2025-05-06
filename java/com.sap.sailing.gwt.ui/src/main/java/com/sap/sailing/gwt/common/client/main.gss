@@ -569,7 +569,7 @@ figcaption {
 }
 .media_menu_icon {
   position: absolute;
-  z-index: 100; /* make sure it appears above any iframes used for video */
+  z-index: 1; /* make sure it appears above any iframes used for video, but gwt-Dialog must have z-index greater than this, e.g., 2 */
   top: 6px;
   left: 6px;
   padding: 1px 5px;

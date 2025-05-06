@@ -4,6 +4,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class VideoPresenterImpl extends AutoPlayPresenterConfigured<VideoPlace>
@@ -31,5 +32,10 @@ public class VideoPresenterImpl extends AutoPlayPresenterConfigured<VideoPlace>
     @Override
     public UserService getUserService() {
         return getClientFactory().getUserService();
+    }
+    
+    @Override
+    public EventDTO getEventDTO() {
+        return getClientFactory().getAutoPlayCtxSignalError().getEvent();
     }
 }

@@ -39,10 +39,10 @@ public class VideoGalleryVideo extends Composite {
     @UiField Button editButtonUi;
     @UiField Button deleteButtonUi;
 
-    public VideoGalleryVideo(VideoDTO video, Consumer<VideoDTO> updateVideo, TakedownNoticeService takedownNoticeService) {
+    public VideoGalleryVideo(VideoDTO video, Consumer<VideoDTO> updateVideo, TakedownNoticeService takedownNoticeService, String eventName) {
         this.videoUrl = video.getSourceRef();
         this.videoCreateDate = video.getCreatedAtDate();
-        this.videoPlayerUi = new VideoPlayer(/* fullHeightWidth */ true, /* autoplay */ false, takedownNoticeService);
+        this.videoPlayerUi = new VideoPlayer(/* fullHeightWidth */ true, /* autoplay */ false, takedownNoticeService, eventName);
         initWidget(uiBinder.createAndBindUi(this));
         SharedHomeResources.INSTANCE.sharedHomeCss().ensureInjected();
         videoPlayerUi.setVideo(video);

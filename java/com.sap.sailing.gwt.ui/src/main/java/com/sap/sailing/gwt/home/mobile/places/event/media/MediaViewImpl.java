@@ -86,7 +86,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
         Collection<ImageDTO> images = manageMediaModel.getImages();
         Collection<VideoDTO> videos = manageMediaModel.getVideos();
         noContentInfoUi.setVisible(videos.isEmpty() && images.isEmpty());
-        videoGalleryUi.setVideos(videos, video -> deleteVideo(video), userService); // TODO bug6105: pass through event name for take-down request?
+        videoGalleryUi.setVideos(videos, video -> deleteVideo(video), userService, currentPresenter.getEventDTO().getName());
         videoGalleryUi.setVisible(!videos.isEmpty());
         imageGalleryUi.setImages(images, image -> deleteImage(image), userService, currentPresenter.getEventDTO().getName());
         imageGalleryUi.setVisible(!images.isEmpty());

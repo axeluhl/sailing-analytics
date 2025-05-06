@@ -201,6 +201,10 @@ public class ManageMediaModel {
         return hasEventMediaPermissions(eventDto, userService);
     }
     
+    public String getEventName() {
+        return eventViewDto.getName();
+    }
+    
     public static boolean hasEventMediaPermissions(SecuredDTO securedDTO, UserService userService) {
         final boolean hasPermission;
         if (userService.hasPermission(securedDTO, HasPermissions.DefaultActions.UPDATE) || userService.hasPermission(securedDTO, EventActions.UPLOAD_MEDIA)) {
@@ -210,5 +214,4 @@ public class ManageMediaModel {
         }
         return hasPermission;
     }
-
 }

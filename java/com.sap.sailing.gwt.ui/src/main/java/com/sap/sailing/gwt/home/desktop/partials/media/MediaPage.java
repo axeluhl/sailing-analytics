@@ -305,7 +305,7 @@ public class MediaPage extends Composite {
      *            true, if the video should play automatically, false otherwise
      */
     private void putVideoOnDisplay(final VideoDTO video, boolean autoplay) {
-        videoDisplayUi = new VideoWithLowerThird(true, autoplay, userService);
+        videoDisplayUi = new VideoWithLowerThird(true, autoplay, userService, manageMediaModel.getEventName());
         videoDisplayUi.setVideo(video);
         try {
             videoDisplayHolderUi.setWidget(videoDisplayUi);

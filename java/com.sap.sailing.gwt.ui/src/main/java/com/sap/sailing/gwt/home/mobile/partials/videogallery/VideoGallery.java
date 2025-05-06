@@ -41,11 +41,11 @@ public class VideoGallery extends Composite {
         });
     }
 
-    public void setVideos(Collection<? extends VideoDTO> videos, Consumer<VideoDTO> deleteVideo, TakedownNoticeService takedownNoticeService) {
+    public void setVideos(Collection<? extends VideoDTO> videos, Consumer<VideoDTO> deleteVideo, TakedownNoticeService takedownNoticeService, String eventName) {
         sectionHeaderUi.setInfoText(StringMessages.INSTANCE.videosCount(videos.size()));
         mobileSection.clearContent();
         for (VideoDTO video : videos) {
-            mobileSection.addContent(new VideoGalleryVideo(video, deleteVideo, takedownNoticeService));
+            mobileSection.addContent(new VideoGalleryVideo(video, deleteVideo, takedownNoticeService, eventName));
         }
     }
 

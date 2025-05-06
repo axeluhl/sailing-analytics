@@ -15,12 +15,12 @@ public class VideoWithLowerThird extends VideoPlayer {
     private String videoSourceRef;
     private Date videoCreatedAt;
 
-    public VideoWithLowerThird(TakedownNoticeService takedownNoticeService) {
-        this(true, false, takedownNoticeService);
+    public VideoWithLowerThird(TakedownNoticeService takedownNoticeService, String eventName) {
+        this(true, false, takedownNoticeService, eventName);
     }
 
-    public VideoWithLowerThird(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
-        super(fullHeightWidth, autoplay, takedownNoticeService);
+    public VideoWithLowerThird(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService, String eventName) {
+        super(fullHeightWidth, autoplay, takedownNoticeService, eventName);
     }
 
     @Override

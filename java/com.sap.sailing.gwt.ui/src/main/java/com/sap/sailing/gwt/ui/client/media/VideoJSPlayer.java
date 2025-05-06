@@ -80,7 +80,7 @@ public class VideoJSPlayer extends Composite implements RequiresResize {
         return addHandler(handler, PauseEvent.getType());
     }
 
-    public void setVideo(MimeType mimeType, String source) {
+    public void setVideo(MimeType mimeType, String source, String eventName) {
         final Widget videoElement;
         if (mimeType.mediaType == MediaType.audio) {
             videoElement = Audio.createIfSupported();
@@ -88,7 +88,7 @@ public class VideoJSPlayer extends Composite implements RequiresResize {
             videoElement = Video.createIfSupported();
         }
         playerHolder.add(videoElement);
-        videoPlayerMenuButton.setData("TODO bug 6105 eventName", source); // TODO bug6105 pass through event name or other/additional event master data
+        videoPlayerMenuButton.setData(eventName, source);
         videoElement.addStyleName(style.player());
         videoElement.addStyleName("video-js");
         videoElement.addStyleName("vjs-default-skin");

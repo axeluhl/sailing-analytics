@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.dom.client.MediaElement;
@@ -97,6 +98,16 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
+    
+    /**
+     * Used in case a take-down request is to be filed
+     */
+    private String leaderboardGroupName;
+
+    /**
+     * Used in case a take-down request is to be filed
+     */
+    private UUID eventId;
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle, SailingServiceWriteAsync sailingServiceWrite,
@@ -104,8 +115,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             Timer raceTimer, MediaServiceAsync mediaService, MediaServiceWriteAsync mediaServiceWrite,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings,
-            RaceDTO raceDto) {
+            RaceDTO raceDto, String leaderboardGroupName, UUID eventId) {
         super(parent, context);
+        this.leaderboardGroupName = leaderboardGroupName;
+        this.eventId = eventId;
         this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
@@ -127,7 +140,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
-
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -299,8 +311,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     /**
      * Wraps the callback handling functions in an object to better document their purpose. onSuccess and onError are
      * simply too generic to tell about their concrete use.
-     * 
-     * @return
      */
     private AsyncCallback<Iterable<MediaTrackWithSecurityDTO>> getOverlappingMediaCallback() {
         return new AsyncCallback<Iterable<MediaTrackWithSecurityDTO>>() {
@@ -430,7 +440,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
                 } else {
-                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener);
+                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener, leaderboardGroupName, eventId);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
                 closeFloatingPlayer(videoTrack);
@@ -440,7 +450,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer);
         } else {
-            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService);
+            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService, leaderboardGroupName, eventId);
         }
 
         return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaServiceWrite(), errorReporter,

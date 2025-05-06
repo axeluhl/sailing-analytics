@@ -19,9 +19,9 @@ public class Video extends Composite {
     private String source;
     @UiField(provided = true) VideoWithLowerThird videoPlayer;
 
-    public Video(TakedownNoticeService takedownNoticeService) {
+    public Video(TakedownNoticeService takedownNoticeService, String eventName) {
         VideoResources.INSTANCE.css().ensureInjected();
-        videoPlayer = new VideoWithLowerThird(false, false, takedownNoticeService);
+        videoPlayer = new VideoWithLowerThird(false, false, takedownNoticeService, eventName);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

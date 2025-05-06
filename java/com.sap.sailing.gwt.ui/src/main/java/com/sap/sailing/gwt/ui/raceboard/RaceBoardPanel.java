@@ -550,7 +550,7 @@ public class RaceBoardPanel
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(this, getComponentContext(), mediaPlayerLifecycle,
                 sailingServiceWrite, selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService,
                 mediaServiceWrite, userService, stringMessages, errorReporter, userAgent, this, mediaPlayerSettings,
-                raceDTO);
+                raceDTO, leaderboardGroupName, event);
         final LeaderboardWithSecurityFetcher asyncFetcher = new LeaderboardWithSecurityFetcher() {
             @Override
             public void getLeaderboardWithSecurity(Consumer<StrippedLeaderboardDTO> consumer) {

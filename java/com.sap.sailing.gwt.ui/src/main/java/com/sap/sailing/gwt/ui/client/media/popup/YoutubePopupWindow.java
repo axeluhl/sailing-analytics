@@ -54,7 +54,6 @@ public class YoutubePopupWindow extends AbstractPopupWindow {
                 tag.src = "//www.youtube.com/iframe_api"; // This is a protocol-relative URL as described here: http://paulirish.com/2010/the-protocol-relative-url/
                 var firstScriptTag = $doc.getElementsByTagName('script')[0];
                 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
     }-*/;
 
     public void setYoutubePlayer(JavaScriptObject youtubePlayer) {
