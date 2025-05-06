@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.media.SailingFullscreenViewer;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 public class MainMedia extends Composite {
 
@@ -62,14 +63,14 @@ public class MainMedia extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos) {
+    public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos, TakedownNoticeService takedownNoticeService) {
         final ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<>();
         imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator));
         Iterator<SailingVideoDTO> videoIterator = videos.iterator();
         int videoCount = 0;
         while (videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
             SailingVideoDTO videoDTO = videoIterator.next();
-            MainMediaVideo video = new MainMediaVideo(videoDTO, exclusionPlayHandler);
+            MainMediaVideo video = new MainMediaVideo(videoDTO, exclusionPlayHandler, takedownNoticeService);
             videosPanel.add(video);
             videoCount++;
         }

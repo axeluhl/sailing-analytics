@@ -60,7 +60,7 @@ public abstract class AbstractEventOverview extends AbstractEventView<EventViewB
     
     public void setMediaForImpressions(int nrOfImages, int nrOfVideos, Collection<SailingImageDTO> images) {
         impressionsUi.getElement().getStyle().setDisplay(Display.BLOCK);
-        impressionsUi.setStatistis(nrOfImages, nrOfVideos);
+        impressionsUi.setStatistics(nrOfImages, nrOfVideos);
         impressionsUi.addImages(new LinkedHashSet<ImageDTO>(images));
         // TODO: desktop media navigation
         impressionsUi.setClickDestinaton(currentPresenter.getMediaPageNavigation());

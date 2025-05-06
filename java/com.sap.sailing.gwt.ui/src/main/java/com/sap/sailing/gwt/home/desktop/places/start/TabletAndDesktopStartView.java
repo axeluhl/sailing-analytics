@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.desktop.partials.mainevents.MainEvents;
 import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.desktop.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
     
@@ -31,16 +32,14 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
         //  mainSponsors = new MainSponsors(navigator);
         mainEvents = new MainEvents(navigator);
         mainMedia = new MainMedia(navigator);
-        
         initWidget(uiBinder.createAndBindUi(this));
-
     }
     
     @Override
-    public void setData(StartViewDTO data) {
+    public void setData(StartViewDTO data, TakedownNoticeService takedownNoticeService) {
         stage.setFeaturedEvents(data.getStageEvents());
         mainEvents.setRecentEvents(data.getRecentEvents());
-        mainMedia.setData(data.getVideos(), data.getPhotos());
+        mainMedia.setData(data.getVideos(), data.getPhotos(), takedownNoticeService);
     }
 
     @Override

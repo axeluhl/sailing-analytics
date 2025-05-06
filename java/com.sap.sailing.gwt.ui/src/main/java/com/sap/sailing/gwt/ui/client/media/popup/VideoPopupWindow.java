@@ -15,25 +15,20 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
 
     @Override
     protected void initializePlayer() {
-
         RootLayoutPanel mainPanel = RootLayoutPanel.get();
-
         String title = Window.Location.getParameter("title");
         Window.setTitle(title);
-
         String videoUrl = Window.Location.getParameter("url");
         String mimeType = Window.Location.getParameter("mimetype");
         isDebug = Window.Location.getParameter("gwt.codesvr") != null;
-
         if (videoUrl != null) {
-            videoJSDelegate = new VideoJSPlayer(true, false);
+            videoJSDelegate = new VideoJSPlayer(true, false, getUserService());
             videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl);
             mainPanel.add(videoJSDelegate);
             initPlay();
         } else {
             mainPanel.add(new Label("Parameter 'url' not assigned."));
         }
-
     }
 
     native void initPlay() /*-{
@@ -118,5 +113,4 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
     protected void setVideoSize(int width, int height) {
         videoJSDelegate.setPixelSize(width, height);
     }
-
 }

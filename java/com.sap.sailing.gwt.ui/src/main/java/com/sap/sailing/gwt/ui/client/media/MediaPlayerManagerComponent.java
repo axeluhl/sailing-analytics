@@ -440,7 +440,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer);
         } else {
-            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer);
+            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService);
         }
 
         return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaServiceWrite(), errorReporter,

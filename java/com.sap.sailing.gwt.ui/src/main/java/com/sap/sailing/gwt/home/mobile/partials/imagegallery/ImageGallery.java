@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 public class ImageGallery extends Composite {
 
@@ -44,14 +45,14 @@ public class ImageGallery extends Composite {
         });
     }
 
-    public void setImages(final Collection<? extends ImageDTO> images, final Consumer<ImageDTO> deleteImage) {
+    public void setImages(final Collection<? extends ImageDTO> images, final Consumer<ImageDTO> deleteImage, TakedownNoticeService takedownNoticeService, String eventName) {
         sectionHeaderUi.setInfoText(StringMessages.INSTANCE.photosCount(images.size()));
         firstColumnUi.clear();
         secondColumnUi.clear();
         int imageCount = 0;
         for (final ImageDTO image : images) {
             FlowPanel container = ++imageCount % 2 != 0 ? firstColumnUi : secondColumnUi;
-            ImageGalleryItem imageGalleryItem = new ImageGalleryItem(image, deleteImage);
+            ImageGalleryItem imageGalleryItem = new ImageGalleryItem(image, deleteImage, takedownNoticeService, eventName);
             imageGalleryItem.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {

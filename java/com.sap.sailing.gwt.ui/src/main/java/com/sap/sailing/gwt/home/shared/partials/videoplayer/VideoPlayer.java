@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia.MutualExclu
 import com.sap.sailing.gwt.ui.client.media.PauseEvent;
 import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 /**
@@ -21,20 +22,20 @@ public class VideoPlayer extends Composite {
     
     private boolean initialized = false;
     
-    public VideoPlayer() {
-        this(true, false);
+    public VideoPlayer(TakedownNoticeService takedownNoticeService) {
+        this(true, false, takedownNoticeService);
     }
     
-    public VideoPlayer(MutualExclusionPlayHandler exclusionPlayer) {
-        this();
+    public VideoPlayer(MutualExclusionPlayHandler exclusionPlayer, TakedownNoticeService takedownNoticeService) {
+        this(takedownNoticeService);
         exclusionPlayer.register(videoJSPlayer);
     }
     
-    public VideoPlayer(boolean fullHeightWidth, boolean autoplay) {
+    public VideoPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
         style.ensureInjected();
         panel = new FlowPanel();
         panel.addStyleName(style.videoPlayer());
-        videoJSPlayer = new VideoJSPlayer(fullHeightWidth, autoplay);
+        videoJSPlayer = new VideoJSPlayer(fullHeightWidth, autoplay, takedownNoticeService);
         videoJSPlayer.addPlayHandler(new PlayEvent.Handler() {
             @Override
             public void onStart(PlayEvent event) {

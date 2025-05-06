@@ -4,6 +4,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayClientFactory;
 import com.sap.sailing.gwt.autoplay.client.app.AutoPlayPresenterConfigured;
+import com.sap.sse.security.ui.client.UserService;
 
 public class VideoPresenterImpl extends AutoPlayPresenterConfigured<VideoPlace>
         implements VideoView.VideoPresenter {
@@ -25,5 +26,10 @@ public class VideoPresenterImpl extends AutoPlayPresenterConfigured<VideoPlace>
     @Override
     public void publishDuration(int durationInSeconds) {
         getPlace().publishDuration(durationInSeconds);
+    }
+    
+    @Override
+    public UserService getUserService() {
+        return getClientFactory().getUserService();
     }
 }

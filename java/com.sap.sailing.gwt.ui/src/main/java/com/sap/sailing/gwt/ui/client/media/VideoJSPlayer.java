@@ -20,6 +20,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.gwt.client.media.MediaMenuIcon;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 /**
  * video.js (http://videojs.com/) wrapper as GWT widget.
@@ -42,6 +44,9 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
 
     @UiField
     DivElement playerHolder;
+    
+//    @UiField(provided=true)
+//    MediaMenuIcon videoPlayerMenuButton;
 
     private final boolean fullHeightWidth;
     private final Timer resizeChecker = new Timer() {
@@ -58,9 +63,12 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     private boolean panorama;
     private boolean controls = true;
 
-    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay) {
+    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
         this.autoplay = autoplay;
         this.fullHeightWidth = fullHeightWidth;
+        // TODO bug6105: if we want to add the MediaMenuIcon as a UIBinder element, the container must allow for Widgets, not only plain HTML
+        // TODO bug6105: but if we make this into a Composite with a g:HTMLPanel surrounding it, nothing works anymore...
+//        videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");
         setElement(uiBinder.createAndBindUi(this));
     }
 
@@ -80,18 +88,17 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             videoElement = Document.get().createVideoElement();
         }
         playerHolder.appendChild(videoElement);
+//        videoPlayerMenuButton.setData("TODO bug 6105 eventName", source); // TODO bug6105 pass through event name or other/additional event master data
         videoElement.addClassName(style.player());
         videoElement.addClassName("video-js");
         videoElement.addClassName("vjs-default-skin");
         videoElement.addClassName("vjs-big-play-centered");
         videoElement.setAttribute("preload", "auto");
-
         videoElement.setId(elementId = "videojs_" + Document.get().createUniqueId());
         if (fullHeightWidth) {
             videoElement.addClassName("video-js-fullscreen");
         }
         videoElement.setAttribute("controls", "");
-
         this.panorama = mimeType.isPanorama();
         if (this.panorama) {
             videoElement.setAttribute("crossorigin", "anonymous");

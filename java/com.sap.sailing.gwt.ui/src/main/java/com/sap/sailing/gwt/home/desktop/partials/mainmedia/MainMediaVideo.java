@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia.MutualExclusionPlayHandler;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.partials.videoplayer.VideoPlayer;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 public class MainMediaVideo extends Composite {
 
@@ -28,20 +29,10 @@ public class MainMediaVideo extends Composite {
 
     final VideoPlayer vJs;
 
-    public MainMediaVideo(SailingVideoDTO video) {
-        this(video, false);
-    }
-
-    // TODO cleanup unused constructors (GH 16.10.2020) 
-    public MainMediaVideo(SailingVideoDTO video, boolean showInfo) {
-        this(video,null);
-    }
-
-    public MainMediaVideo(SailingVideoDTO video, MutualExclusionPlayHandler exclusionPlayHandler) {
-        vJs = exclusionPlayHandler == null ? new VideoPlayer() : new VideoPlayer(exclusionPlayHandler);
+    public MainMediaVideo(SailingVideoDTO video, MutualExclusionPlayHandler exclusionPlayHandler, TakedownNoticeService takedownNoticeService) {
+        vJs = exclusionPlayHandler == null ? new VideoPlayer(takedownNoticeService) : new VideoPlayer(exclusionPlayHandler, takedownNoticeService);
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        
 
         // String youtubeUrl = "//www.youtube.com/embed/" + youtubeId + "?modestbranding=1&rel=0&autohide=1&fs=1";
         // if(!showInfo) {

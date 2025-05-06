@@ -38,8 +38,8 @@ public class Impressions extends Composite {
         headerUi.setClickAction(placeNavigation);
     }
 
-    public void setStatistis(int nrOfImages, int nrOfVideos) {
-        StringBuilder sb = new StringBuilder();
+    public void setStatistics(int nrOfImages, int nrOfVideos) {
+        final StringBuilder sb = new StringBuilder();
         if (nrOfImages > 0) {
             sb.append(i18n.photosCount(nrOfImages));
             if (nrOfVideos > 0) {
@@ -49,7 +49,6 @@ public class Impressions extends Composite {
         if (nrOfVideos > 0) {
             sb.append(i18n.videosCount(nrOfVideos));
         }
-
         headerUi.setSubtitle(sb.toString());
     }
 
@@ -58,7 +57,7 @@ public class Impressions extends Composite {
             return;
         }
         GWT.log("Got " + images.size() + " images");
-        ImageCarousel<ImageDTO> imageCarousel = new ImageCarousel<ImageDTO>();
+        final ImageCarousel<ImageDTO> imageCarousel = new ImageCarousel<ImageDTO>();
         imageCarousel.registerFullscreenViewer(new MobileFullscreenGallery());
         int count = addImages(imageCarousel, images);
         if (count > 1) {
