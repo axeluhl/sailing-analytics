@@ -117,6 +117,7 @@
 }
 .media_menu_icon {
   position: absolute;
+  z-index: 100; /* make sure it appears above any iframes used for video */
   top: 6px;
   left: 6px;
   padding: 1px 5px;

@@ -68,8 +68,6 @@ public class VideoJSPlayer extends Composite implements RequiresResize {
     public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
         this.autoplay = autoplay;
         this.fullHeightWidth = fullHeightWidth;
-        // TODO bug6105: if we want to add the MediaMenuIcon as a UIBinder element, the container must allow for Widgets, not only plain HTML
-        // TODO bug6105: but if we make this into a Composite with a g:HTMLPanel surrounding it, nothing works anymore...
         videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");
         initWidget(uiBinder.createAndBindUi(this));
     }
