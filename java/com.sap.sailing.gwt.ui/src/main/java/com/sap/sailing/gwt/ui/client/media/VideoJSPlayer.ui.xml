@@ -18,8 +18,8 @@
         }
     </ui:style>
     <!-- <g:HTMLPanel> TODO bug6105: if we do this, nothing works anymore... but we need to somehow embed the m:MediaMenuIcon widget in here... -->
-      <div ui:field="playerHolder" class="{style.player} {res.mainCss.media_wrapper}">
-        <!-- <m:MediaMenuIcon ui:field="videoPlayerMenuButton" fontSize="20px" /> -->
-      </div>
+      <g:HTMLPanel ui:field="playerHolder" styleName="{style.player} {res.mainCss.media_wrapper}">
+        <m:MediaMenuIcon ui:field="videoPlayerMenuButton" fontSize="20px" />
+      </g:HTMLPanel>
     <!-- </g:HTMLPanel> -->
 </ui:UiBinder>

@@ -4,16 +4,18 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.ScriptInjector;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SourceElement;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.media.client.Audio;
+import com.google.gwt.media.client.Video;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -26,11 +28,11 @@ import com.sap.sse.gwt.client.media.TakedownNoticeService;
 /**
  * video.js (http://videojs.com/) wrapper as GWT widget.
  */
-public class VideoJSPlayer extends Widget implements RequiresResize {
+public class VideoJSPlayer extends Composite implements RequiresResize {
     private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
     private static final int RESIZE_CHECK = 250;
 
-    interface VideoJSPlayerUiBinder extends UiBinder<Element, VideoJSPlayer> {
+    interface VideoJSPlayerUiBinder extends UiBinder<Widget, VideoJSPlayer> {
     }
 
     interface VideoJSStyle extends CssResource {
@@ -43,10 +45,10 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     VideoJSStyle style;
 
     @UiField
-    DivElement playerHolder;
+    HTMLPanel playerHolder;
     
-//    @UiField(provided=true)
-//    MediaMenuIcon videoPlayerMenuButton;
+    @UiField(provided=true)
+    MediaMenuIcon videoPlayerMenuButton;
 
     private final boolean fullHeightWidth;
     private final Timer resizeChecker = new Timer() {
@@ -68,8 +70,8 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         this.fullHeightWidth = fullHeightWidth;
         // TODO bug6105: if we want to add the MediaMenuIcon as a UIBinder element, the container must allow for Widgets, not only plain HTML
         // TODO bug6105: but if we make this into a Composite with a g:HTMLPanel surrounding it, nothing works anymore...
-//        videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");
-        setElement(uiBinder.createAndBindUi(this));
+        videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");
+        initWidget(uiBinder.createAndBindUi(this));
     }
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
@@ -81,30 +83,30 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
 
     public void setVideo(MimeType mimeType, String source) {
-        final Element videoElement;
+        final Widget videoElement;
         if (mimeType.mediaType == MediaType.audio) {
-            videoElement = Document.get().createAudioElement();
+            videoElement = Audio.createIfSupported();
         } else {
-            videoElement = Document.get().createVideoElement();
+            videoElement = Video.createIfSupported();
         }
-        playerHolder.appendChild(videoElement);
-//        videoPlayerMenuButton.setData("TODO bug 6105 eventName", source); // TODO bug6105 pass through event name or other/additional event master data
-        videoElement.addClassName(style.player());
-        videoElement.addClassName("video-js");
-        videoElement.addClassName("vjs-default-skin");
-        videoElement.addClassName("vjs-big-play-centered");
-        videoElement.setAttribute("preload", "auto");
-        videoElement.setId(elementId = "videojs_" + Document.get().createUniqueId());
+        playerHolder.add(videoElement);
+        videoPlayerMenuButton.setData("TODO bug 6105 eventName", source); // TODO bug6105 pass through event name or other/additional event master data
+        videoElement.addStyleName(style.player());
+        videoElement.addStyleName("video-js");
+        videoElement.addStyleName("vjs-default-skin");
+        videoElement.addStyleName("vjs-big-play-centered");
+        videoElement.getElement().setAttribute("preload", "auto");
+        videoElement.getElement().setId(elementId = "videojs_" + Document.get().createUniqueId());
         if (fullHeightWidth) {
-            videoElement.addClassName("video-js-fullscreen");
+            videoElement.addStyleName("video-js-fullscreen");
         }
-        videoElement.setAttribute("controls", "");
+        videoElement.getElement().setAttribute("controls", "");
         this.panorama = mimeType.isPanorama();
         if (this.panorama) {
-            videoElement.setAttribute("crossorigin", "anonymous");
+            videoElement.getElement().setAttribute("crossorigin", "anonymous");
         }
         if (mimeType.isFlippedPanorama()) {
-            videoElement.addClassName(style.invertedVideoPlayer());
+            videoElement.addStyleName(style.invertedVideoPlayer());
         }
         if (isAttached()) {
             prepareDependencies();
@@ -124,7 +126,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             SourceElement se = Document.get().createSourceElement();
             se.setSrc(source);
             se.setType(type);
-            videoElement.appendChild(se);
+            videoElement.getElement().appendChild(se);
         }
     }
 
