@@ -109,6 +109,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         this.contextDescriptionMessageKey = contextDescriptionMessageKey;
         this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
         this.contentUrl = contentUrl;
+        getDialogBox().getElement().getStyle().setProperty("overflowWrap", "anywhere"); // allow long URLs to be wrapped, especially on small phone screens...
     }
     
     public String getDisplayString(NatureOfClaim natureOfClaim) {
