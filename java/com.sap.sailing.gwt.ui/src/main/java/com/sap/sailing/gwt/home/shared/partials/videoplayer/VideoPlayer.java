@@ -52,7 +52,6 @@ public class VideoPlayer extends Composite {
         });
         panel.add(videoJSPlayer);
         playButton.addDomHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 videoJSPlayer.play();
@@ -75,7 +74,7 @@ public class VideoPlayer extends Composite {
     }
 
     public void setVideo(VideoDTO video) {
-        if(!initialized) {
+        if (!initialized) {
             initialize();
         }
         videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef(), eventName);

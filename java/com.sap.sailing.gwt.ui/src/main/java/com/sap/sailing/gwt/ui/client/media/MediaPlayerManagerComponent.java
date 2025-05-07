@@ -101,11 +101,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     /**
      * Used in case a take-down request is to be filed
      */
-    private String leaderboardGroupName;
-
-    /**
-     * Used in case a take-down request is to be filed
-     */
     private UUID eventId;
 
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
@@ -116,7 +111,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings,
             RaceDTO raceDto, String leaderboardGroupName, UUID eventId) {
         super(parent, context);
-        this.leaderboardGroupName = leaderboardGroupName;
         this.eventId = eventId;
         this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
@@ -405,7 +399,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                 if (videoTrack.isYoutube()) {
                     videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener); // TODO bug6105 make YouTube player show take-down request button
                 } else {
-                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener, leaderboardGroupName, eventId);
+                    videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener, raceIdentifier.toString(), eventId);
                 }
                 playerCloseListener.setVideoContainer(videoContainer);
                 closeFloatingPlayer(videoTrack);
@@ -415,7 +409,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer, userService, raceIdentifier);
         } else {
-            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService, leaderboardGroupName, eventId);
+            videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService, raceIdentifier.toString(), eventId);
         }
         return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaServiceWrite(), errorReporter,
                 playerCloseListener, popoutListener);

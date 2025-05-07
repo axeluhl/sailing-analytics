@@ -20,12 +20,12 @@ public class VideoJSSyncPlayer extends AbstractMediaPlayer implements MediaSynch
     private final Timer raceTimer;
 
     public VideoJSSyncPlayer(MediaTrackWithSecurityDTO mediaTrack, TimePoint raceStartTime, Timer raceTimer, TakedownNoticeService takedownNoticeService,
-            String leaderboardGroupName, UUID eventId) {
+            String regattaAndRaceIdentifier, UUID eventId) {
         super(mediaTrack);
         videoJsDelegate = new VideoJSPlayer(true, false, takedownNoticeService);
         this.raceStartTime = raceStartTime;
         this.raceTimer = raceTimer;
-        videoJsDelegate.setVideo(mediaTrack.mimeType, mediaTrack.url, ""+eventId+"/"+leaderboardGroupName);
+        videoJsDelegate.setVideo(mediaTrack.mimeType, mediaTrack.url, ""+eventId+"/"+regattaAndRaceIdentifier);
     }
 
     @Override

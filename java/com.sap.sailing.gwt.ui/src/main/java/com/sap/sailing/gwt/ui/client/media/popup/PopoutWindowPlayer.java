@@ -18,10 +18,9 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
     private final JavaScriptObject playerWindow;
     private final PlayerCloseListener popupCloseHandler;
 
-    protected PopoutWindowPlayer(MediaTrackWithSecurityDTO mediaTrack, PlayerCloseListener popupCloseListener) {
+    protected PopoutWindowPlayer(MediaTrackWithSecurityDTO mediaTrack, PlayerCloseListener popupCloseListener, String playerWindowUrl) {
         super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
-        String playerWindowUrl = getPlayerWindowUrl();  
         String codesvr = Window.Location.getParameter("gwt.codesvr");
         if (codesvr != null) {
             playerWindowUrl = playerWindowUrl + "&gwt.codesvr=" + codesvr;  
@@ -30,8 +29,6 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
         registerNativeStuff();
     }
     
-    protected abstract String getPlayerWindowUrl();
-
     native JavaScriptObject openWindow(String url) /*-{
         return $wnd
                 .open(
