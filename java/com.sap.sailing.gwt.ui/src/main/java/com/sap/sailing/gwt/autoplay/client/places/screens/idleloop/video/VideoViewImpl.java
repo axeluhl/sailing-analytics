@@ -49,7 +49,7 @@ public class VideoViewImpl extends Composite implements VideoView {
 
     @Override
     public void playVideo(VideoDTO video) {
-        player = new VideoJSPlayer(true, true, currentPresenter.getUserService());
+        player = new VideoJSPlayer(true, true, currentPresenter.getUserService(), "takedownRequestForEventGalleryVideo");
         player.setVideo(video.getMimeType(), video.getSourceRef(), currentPresenter.getEventDTO().getName());
         currentPresenter.publishDuration(WAIT_FOR_VIDEO_LOAD_MAX_TIME);
         RepeatingCommand durationDeterminator = new RepeatingCommand() {

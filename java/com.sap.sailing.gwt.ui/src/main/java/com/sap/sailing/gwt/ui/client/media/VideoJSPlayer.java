@@ -66,11 +66,11 @@ public class VideoJSPlayer extends Composite implements RequiresResize {
     private boolean panorama;
     private boolean controls = true;
 
-    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
+    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService, String takedownNoticeMessageKey) {
         SharedResources.INSTANCE.mainCss().ensureInjected();
         this.autoplay = autoplay;
         this.fullHeightWidth = fullHeightWidth;
-        videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");
+        videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, takedownNoticeMessageKey);
         initWidget(uiBinder.createAndBindUi(this));
     }
 

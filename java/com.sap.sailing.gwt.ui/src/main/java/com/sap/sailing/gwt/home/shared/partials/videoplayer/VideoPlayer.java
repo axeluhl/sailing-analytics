@@ -37,7 +37,7 @@ public class VideoPlayer extends Composite {
         this.eventName = eventName;
         panel = new FlowPanel();
         panel.addStyleName(style.videoPlayer());
-        videoJSPlayer = new VideoJSPlayer(fullHeightWidth, autoplay, takedownNoticeService);
+        videoJSPlayer = new VideoJSPlayer(fullHeightWidth, autoplay, takedownNoticeService, "takedownRequestForEventGalleryVideo");
         videoJSPlayer.addPlayHandler(new PlayEvent.Handler() {
             @Override
             public void onStart(PlayEvent event) {
