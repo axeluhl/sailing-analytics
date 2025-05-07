@@ -21,14 +21,11 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
     protected PopoutWindowPlayer(MediaTrackWithSecurityDTO mediaTrack, PlayerCloseListener popupCloseListener) {
         super(mediaTrack);
         this.popupCloseHandler = popupCloseListener;
-        
         String playerWindowUrl = getPlayerWindowUrl();  
-        
         String codesvr = Window.Location.getParameter("gwt.codesvr");
         if (codesvr != null) {
             playerWindowUrl = playerWindowUrl + "&gwt.codesvr=" + codesvr;  
         }
-        
         playerWindow = openWindow(playerWindowUrl);
         registerNativeStuff();
     }

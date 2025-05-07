@@ -77,7 +77,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     private final SimplePanel rootPanel = new SimplePanel();
     private final UserService userService;
 
-    private MediaPlayer dockedVideoPlayer;
     private final Map<MediaTrack, MediaPlayerContainer> activePlayerContainers = new HashMap<MediaTrack, MediaPlayerContainer>();
     private Collection<MediaTrackWithSecurityDTO> assignedMediaTracks = new ArrayList<>();
     private Collection<MediaTrackWithSecurityDTO> overlappingMediaTracks = new ArrayList<>();
@@ -340,36 +339,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public void playDockedVideo(MediaTrackWithSecurityDTO videoTrack) {
-        if ((dockedVideoPlayer == null) || (dockedVideoPlayer.getMediaTrack() != videoTrack)) {
-            closeDockedVideo();
-            closeFloatingPlayer(videoTrack);
-            MediaPlayerContainer videoDockedContainer = createAndWrapVideoPlayer(videoTrack,
-                    new VideoContainerFactory<VideoDockedContainer>() {
-                        @Override
-                        public VideoDockedContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userService, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
-                                PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-                            VideoDockedContainer videoDockedContainer = new VideoDockedContainer(rootPanel,
-                                    videoPlayer, playerCloseListener, popoutListener);
-                            return videoDockedContainer;
-                        }
-                    });
-            registerVideoContainer(videoTrack, videoDockedContainer);
-            notifyStateChange();
-        }
-    }
-
-    @Override
-    public void closeDockedVideo() {
-        if (dockedVideoPlayer != null) {
-            dockedVideoPlayer.shutDown();
-            dockedVideoPlayer = null;
-            notifyStateChange();
-        }
-    }
-
-    @Override
     public void playAudio(MediaTrackWithSecurityDTO audioTrack) {
         muteAudio();
         playFloatingVideo(audioTrack);
@@ -391,23 +360,19 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playFloatingVideo(final MediaTrackWithSecurityDTO videoTrack) {
-        if (dockedVideoPlayer != null && dockedVideoPlayer.getMediaTrack() == videoTrack) {
-            closeDockedVideo();
-        }
         MediaPlayerContainer activeVideoContainer = activePlayerContainers.get(videoTrack);
         if (activeVideoContainer == null) {
             FloatingMediaPlayerContainer videoFloatingContainer = createAndWrapVideoPlayer(videoTrack,
                     new VideoContainerFactory<FloatingMediaPlayerContainer>() {
                         @Override
                         public FloatingMediaPlayerContainer createVideoContainer(MediaSynchPlayer videoPlayer,
-                                UserService userservice, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
+                                UserService userService, MediaServiceWriteAsync mediaServiceWrite, ErrorReporter errorReporter,
                                 PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
                             FloatingMediaPlayerContainer videoFloatingContainer = new FloatingMediaPlayerContainer(videoPlayer, popupPositionProvider,
-                                    userservice, mediaServiceWrite, errorReporter, playerCloseListener, popoutListener);
+                                    userService, mediaServiceWrite, errorReporter, playerCloseListener, popoutListener);
                             return videoFloatingContainer;
                         }
                     });
-
             registerVideoContainer(videoTrack, videoFloatingContainer);
             notifyStateChange();
         }
@@ -438,7 +403,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             public void popoutVideo(MediaTrackWithSecurityDTO videoTrack) {
                 MediaPlayerContainer videoContainer;
                 if (videoTrack.isYoutube()) {
-                    videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener);
+                    videoContainer = new YoutubeWindowPlayer(videoTrack, playerCloseListener); // TODO bug6105 make YouTube player show take-down request button
                 } else {
                     videoContainer = new VideoJSWindowPlayer(videoTrack, playerCloseListener, leaderboardGroupName, eventId);
                 }
@@ -448,11 +413,10 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
         };
         final MediaSynchPlayer videoPlayer;
         if (videoTrack.isYoutube()) {
-            videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer);
+            videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), raceTimer, userService, raceIdentifier);
         } else {
             videoPlayer = new VideoJSSyncPlayer(videoTrack, getRaceStartTime(), raceTimer, userService, leaderboardGroupName, eventId);
         }
-
         return videoContainerFactory.createVideoContainer(videoPlayer, userService, getMediaServiceWrite(), errorReporter,
                 playerCloseListener, popoutListener);
     }
@@ -643,11 +607,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public void addPlayerChangeListener(PlayerChangeListener playerChangeListener) {
         this.playerChangeListener.add(playerChangeListener);
 
-    }
-
-    @Override
-    public MediaTrack getDockedVideoTrack() {
-        return dockedVideoPlayer != null ? dockedVideoPlayer.getMediaTrack() : null;
     }
 
     @Override
