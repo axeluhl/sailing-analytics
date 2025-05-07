@@ -39,7 +39,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     
     @Override
     public void setData(StartViewDTO data, TakedownNoticeService takedownNoticeService) {
-        stage.setFeaturedEvents(data.getStageEvents());
+        stage.setFeaturedEvents(data.getStageEvents(), takedownNoticeService);
         mainEvents.setRecentEvents(data.getRecentEvents(), takedownNoticeService);
         mainMedia.setData(data.getVideos(), data.getPhotos(), takedownNoticeService);
     }

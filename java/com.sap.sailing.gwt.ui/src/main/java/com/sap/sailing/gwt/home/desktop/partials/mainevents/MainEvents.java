@@ -44,8 +44,8 @@ public class MainEvents extends Composite {
         recentEventsTeaserPanel.clear();
         for (int i=0; i<recentEvents.size() && i<MAX_RECENT_EVENTS_ON_HOME_PAGE; i++) {
             EventListEventDTO event = recentEvents.get(i);
-            PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
-            RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, event, event.getState().getListStateMarker(), takedownNoticeService);
+            final PlaceNavigation<EventDefaultPlace> eventNavigation = navigator.getEventNavigation(event.getId().toString(), event.getBaseURL(), event.isOnRemoteServer());
+            final RecentEventTeaser recentEvent = new RecentEventTeaser(eventNavigation, event, event.getState().getListStateMarker(), takedownNoticeService);
             recentEventsTeaserPanel.add(recentEvent);
         }
     }
