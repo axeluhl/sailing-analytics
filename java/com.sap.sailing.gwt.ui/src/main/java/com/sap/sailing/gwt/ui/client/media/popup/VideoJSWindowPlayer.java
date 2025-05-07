@@ -22,8 +22,8 @@ public class VideoJSWindowPlayer extends PopoutWindowPlayer {
         String title = getMediaTrack().title;
         String mimetype = getMediaTrack().mimeType == null ? "" : getMediaTrack().mimeType.name();
         String videoPlayerUrl = "/gwt/VideoPopup.html?url=" + URL.encodeQueryString(videoUrl) + "&title="
-                + URL.encodeQueryString(title) + "&mimetype=" + URL.encodeQueryString(String.valueOf(mimetype)
-                + "&eventName=" + URL.encodeQueryString(""+eventId+"/"+leaderboardGroupName));
+                + URL.encodeQueryString(title) + "&mimetype=" + URL.encodeQueryString(String.valueOf(mimetype))
+                + "&eventName=" + URL.encodeQueryString(""+eventId+"/"+leaderboardGroupName);
         return videoPlayerUrl;
     }
 }

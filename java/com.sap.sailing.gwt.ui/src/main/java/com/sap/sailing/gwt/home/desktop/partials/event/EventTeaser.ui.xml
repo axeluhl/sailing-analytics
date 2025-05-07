@@ -8,7 +8,7 @@
 	<g:HTMLPanel>
   		<div class="{local_res.css.eventteasercontainer}">
 			<a ui:field="eventLink" class="{local_res.css.eventteaser}">
-				<div ui:field="eventImage" class="{local_res.css.eventteaser_image}">
+				<div ui:field="eventImage" class="{local_res.css.eventteaser_image} {res.mainCss.media_wrapper}">
                   <m:MediaMenuIcon ui:field="takedownButton"/>
                 </div>
 				<div class="{local_res.css.eventteaser_title}">

@@ -8,7 +8,7 @@
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.stage.StageResources" />
 	<g:HTMLPanel styleName="{local_res.css.stageteaser} {local_res.css.swiperslide}">
 		<div class="{local_res.css.stageteaser_background}">
-			<div ui:field="teaserImage" class="{local_res.css.stageteaser_background_image}">
+			<div ui:field="teaserImage" class="{local_res.css.stageteaser_background_image} {res.mainCss.media_wrapper}">
               <m:MediaMenuIcon ui:field="takedownButton" zIndex="1"/>
             </div>
 		</div>

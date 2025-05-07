@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
@@ -66,6 +67,7 @@ public class VideoJSPlayer extends Composite implements RequiresResize {
     private boolean controls = true;
 
     public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay, TakedownNoticeService takedownNoticeService) {
+        SharedResources.INSTANCE.mainCss().ensureInjected();
         this.autoplay = autoplay;
         this.fullHeightWidth = fullHeightWidth;
         videoPlayerMenuButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryVideo");

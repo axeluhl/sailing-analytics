@@ -65,6 +65,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements MediaSync
         mediaWrapper.setHeight("100%");
         mediaWrapper.setWidth("100%");
         takedownButton = new MediaMenuIcon(takedownNoticeService, "takedownRequestForRaceVideo");
+        takedownButton.setFontSize("20px"); // aligns with the font size for the VideoJSPlayer
         takedownButton.setData(raceIdentifier.toString(), videoTrack.url);
         this.videoContainer = new SimplePanel();
         mediaWrapper.add(videoContainer);

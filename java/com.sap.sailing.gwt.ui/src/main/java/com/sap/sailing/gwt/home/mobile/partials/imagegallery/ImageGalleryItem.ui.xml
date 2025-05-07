@@ -16,8 +16,7 @@
         type="com.sap.sailing.gwt.home.mobile.partials.imagegallery.ImageGalleryResources" />
     <g:HTMLPanel>
         <div style="position: relative;">
-            <div class="{local_res.css.imagegallery_column_item}"
-                ui:field="imageUi" style="position:relative">
+            <div class="{local_res.css.imagegallery_column_item} {res.mainCss.media_wrapper}" ui:field="imageUi" style="position:relative">
                 <m:MediaMenuIcon ui:field="mediaMenuIcon" fontSize="10px"/>
             </div>
             <div ui:field="overlayUi" class="{res_home.sharedHomeCss.overlay}">
