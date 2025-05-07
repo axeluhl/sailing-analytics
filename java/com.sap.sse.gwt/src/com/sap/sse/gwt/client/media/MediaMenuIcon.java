@@ -108,6 +108,7 @@ public class MediaMenuIcon extends Composite {
     
     private void onClick(ClickEvent e) {
         e.stopPropagation();
+        e.preventDefault();
         if (takedownNoticeService.isEmailAddressOfCurrentUserValidated()) {
             new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl,
                     takedownNoticeService.getCurrentUserName(), StringMessages.INSTANCE,
