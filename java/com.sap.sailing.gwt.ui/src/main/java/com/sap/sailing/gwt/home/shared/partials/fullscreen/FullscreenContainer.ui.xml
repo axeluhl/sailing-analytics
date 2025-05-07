@@ -90,7 +90,7 @@
 	</ui:style>
 	<g:HeaderPanel>
 		<g:HTMLPanel styleName="{style.header}">
-			<a href="http://sapsponsorships.com" class="{style.logoLink}" style="display:none;" ui:field="logoUi">
+			<a href="https://sap.com" class="{style.logoLink}" style="display:none;" ui:field="logoUi">
 		    	<img src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{style.logo}"></img>
 	        </a>
 			<div class="{style.toolbar}">

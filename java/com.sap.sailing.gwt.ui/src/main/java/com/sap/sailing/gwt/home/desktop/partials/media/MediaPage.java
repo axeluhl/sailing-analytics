@@ -198,7 +198,7 @@ public class MediaPage extends Composite {
             }
             for (final ImageDTO holder : manageMediaModel.getImages()) {
                 if (holder.getSourceRef() != null) {
-                    GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder), this.userService, eventName);
+                    GalleryImageHolder gih = new GalleryImageHolder(holder, getDeleteImageHandler(holder), userService, eventName);
                     gih.addStyleName(photoCss);
                     gih.addStyleName(res.mediaCss().columns());
                     photoListOuterBoxUi.add(gih);
@@ -216,7 +216,7 @@ public class MediaPage extends Composite {
                                 final SailingImageDTO showImage = sailingImageDTOs.stream()
                                         .filter(sailingImageDto -> sailingImageDto.compareTo(holder) == 0).findFirst()
                                         .orElse(new SailingImageDTO(null, holder));
-                                new SailingFullscreenViewer().show(showImage, sailingImageDTOs);
+                                new SailingFullscreenViewer(userService).show(showImage, sailingImageDTOs);
                             }
                         }
                     });

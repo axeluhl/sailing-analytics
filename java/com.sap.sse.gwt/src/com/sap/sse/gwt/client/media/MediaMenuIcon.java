@@ -95,6 +95,12 @@ public class MediaMenuIcon extends Composite {
         }
     }
     
+    public void setZIndex(String zIndexSpecification) {
+        if (Util.hasLength(zIndexSpecification)) {
+            imageMenuButton.getElement().getStyle().setZIndex(Integer.parseInt(zIndexSpecification));
+        }
+    }
+    
     public void setData(String contextDescriptionMessageParameter, String contentUrl) {
         this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
         this.contentUrl = contentUrl;

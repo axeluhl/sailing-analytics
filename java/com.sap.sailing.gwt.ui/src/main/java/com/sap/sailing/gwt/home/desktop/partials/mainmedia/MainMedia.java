@@ -65,7 +65,7 @@ public class MainMedia extends Composite {
 
     public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos, TakedownNoticeService takedownNoticeService) {
         final ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<>();
-        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator));
+        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator, takedownNoticeService));
         Iterator<SailingVideoDTO> videoIterator = videos.iterator();
         int videoCount = 0;
         while (videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
