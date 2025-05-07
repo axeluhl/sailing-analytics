@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.desktop.partials.mainmedia.MainMedia;
 import com.sap.sailing.gwt.home.desktop.partials.stage.Stage;
 import com.sap.sailing.gwt.home.shared.partials.anniversary.AnniversariesView;
 import com.sap.sse.gwt.client.media.TakedownNoticeService;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
 
 public class TabletAndDesktopStartView extends Composite implements StartView {
     
@@ -28,6 +29,7 @@ public class TabletAndDesktopStartView extends Composite implements StartView {
     @UiField(provided=true) MainMedia mainMedia;
     
     public TabletAndDesktopStartView(DesktopPlacesNavigator navigator) {
+        CommonControlsCSS.ensureInjected();
         stage = new Stage(navigator);
         //  mainSponsors = new MainSponsors(navigator);
         mainEvents = new MainEvents(navigator);
