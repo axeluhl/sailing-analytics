@@ -361,7 +361,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
         List<ImageDTO> imageList = new ArrayList<>();
         List<VideoDTO> videoList = new ArrayList<>();
         
-        for (Entry<String, MediaObject> mediaObjectEntry: mediaObjectMap.entrySet()) {
+        for (Entry<String, MediaObject> mediaObjectEntry : mediaObjectMap.entrySet()) {
             String uri = mediaObjectEntry.getKey();
             final String uploadUrl;
             if (uri == null) {
@@ -591,7 +591,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 setCollapsebleFilePanelHeader(collapsebleFilePanel, mediaObject.title, mediaObject.mimeType);
             }
         });
-        selectMimeTypeInBox(mediaTypeListBox, getMimeType(uri));
+        selectMimeTypeInBox(mediaTypeListBox, getMimeType(uri)); // TODO bug6105 when mime type is image, trigger sailingService.resolveImageDimensions(uri) to fill ImageDTO size
         vPanel.add(mediaTypeListBox);
         files.add(collapsebleFilePanel);
         fileExistingPanel.setVisible(false);

@@ -367,7 +367,6 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
             if (dims != null) {
                 image.setSizeInPx(dims.getA(), dims.getB());
                 fileInfoText = new Label(fileName + " (" + dims.getA() + "x" + dims.getB() + ")");
-                
             } else {
                 fileInfoText = new Label(fileName);
             }
