@@ -13,8 +13,9 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.statisticsBox.StatisticsBoxResources;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
-import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
 public class Impressions extends Composite {
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
@@ -52,24 +53,27 @@ public class Impressions extends Composite {
         headerUi.setSubtitle(sb.toString());
     }
 
-    public void addImages(Collection<ImageDTO> images) {
-        if (images.isEmpty()) {
-            return;
-        }
-        GWT.log("Got " + images.size() + " images");
-        final ImageCarousel<ImageDTO> imageCarousel = new ImageCarousel<ImageDTO>();
-        imageCarousel.registerFullscreenViewer(new MobileFullscreenGallery());
-        int count = addImages(imageCarousel, images);
-        if (count > 1) {
-            mobileSectionUi.clearContent();
-            if (count == 2) addImages(imageCarousel, images);
-            mobileSectionUi.addContent(imageCarousel);
+    public void addImages(Collection<SailingImageDTO> images, TakedownNoticeService takedownNoticeService) {
+        if (!images.isEmpty()) {
+            GWT.log("Got " + images.size() + " images");
+            final ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<>();
+            imageCarousel.registerFullscreenViewer(new MobileFullscreenGallery(takedownNoticeService));
+            int count = addImages(imageCarousel, images);
+            if (count > 1) {
+                mobileSectionUi.clearContent();
+                // the carousel has an issue with exactly two images and doesn't display the browsing
+                // buttons correctly; for this case, duplicate the two images by adding them another time...
+                if (count == 2) {
+                    addImages(imageCarousel, images);
+                }
+                mobileSectionUi.addContent(imageCarousel);
+            }
         }
     }
     
-    private int addImages(ImageCarousel<ImageDTO> imageCarousel, Collection<ImageDTO> images) {
+    private int addImages(ImageCarousel<SailingImageDTO> imageCarousel, Collection<SailingImageDTO> images) {
         int count = 0;
-        for (ImageDTO imageDTO : images) {
+        for (SailingImageDTO imageDTO : images) {
             if (imageDTO.getHeightInPx() == null || imageDTO.getWidthInPx() == null) {
                 GWT.log("Ignore image without size ");
                 continue;

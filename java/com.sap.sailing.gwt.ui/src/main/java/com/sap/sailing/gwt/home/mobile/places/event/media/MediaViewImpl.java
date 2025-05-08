@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ManageMediaModel;
+import com.sap.sailing.gwt.ui.shared.SailingImageDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.ui.client.UserService;
@@ -83,7 +84,7 @@ public class MediaViewImpl extends AbstractEventView<MediaView.Presenter> implem
 
     public void updateMedia() {
         setMediaManaged(manageMediaModel.hasPermissions());
-        Collection<ImageDTO> images = manageMediaModel.getImages();
+        Collection<SailingImageDTO> images = manageMediaModel.getImages();
         Collection<VideoDTO> videos = manageMediaModel.getVideos();
         noContentInfoUi.setVisible(videos.isEmpty() && images.isEmpty());
         videoGalleryUi.setVideos(videos, video -> deleteVideo(video), userService, currentPresenter.getEventDTO().getName());

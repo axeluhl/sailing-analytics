@@ -12,11 +12,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
-import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.media.SailingFullscreenViewer;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
+import com.sap.sailing.gwt.ui.client.shared.SailingVideoDTO;
+import com.sap.sailing.gwt.ui.shared.SailingImageDTO;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 import com.sap.sse.gwt.client.media.TakedownNoticeService;
 
