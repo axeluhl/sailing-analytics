@@ -86,6 +86,8 @@ public class MediaPage extends Composite {
 
     private final UserService userService;
 
+    private final SailingServiceWriteAsync sailingServiceWrite;
+
     @UiHandler("videoSettingsButton")
     public void handleVideoSettingsButtonClick(ClickEvent e) {
         manageVideos = !manageVideos;
@@ -139,7 +141,7 @@ public class MediaPage extends Composite {
     public void handleMediaAddButtonClick(ClickEvent e) {
         popupHolder.clear();
         final DesktopMediaUploadPopup popup = new DesktopMediaUploadPopup(
-                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia(eventDto.getName())));
+                (images, videos) -> manageMediaModel.addImagesAndVideos(images, videos, eventDto -> updateMedia(eventDto.getName())), sailingServiceWrite);
         popupHolder.add(popup);
         popup.center();
     }
@@ -148,7 +150,7 @@ public class MediaPage extends Composite {
         this.userService = userService;
         MediaPageResources.INSTANCE.css().ensureInjected();
         stringMessages = StringMessages.INSTANCE;
-        SailingServiceWriteAsync sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
+        this.sailingServiceWrite = SailingServiceHelper.createSailingServiceWriteInstance();
         manageMediaModel = new ManageMediaModel(sailingServiceWrite, userService, eventViewDto, stringMessages);
         contentPanel = new SimplePanel();
         contentPanel.setWidget(initialView);

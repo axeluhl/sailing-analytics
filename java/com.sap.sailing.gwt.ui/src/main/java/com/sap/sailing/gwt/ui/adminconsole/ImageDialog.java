@@ -57,7 +57,7 @@ public abstract class ImageDialog extends DataEntryDialog<List<ImageResizingTask
     private final ExpandedUiWithCheckboxes<String> expandedUi;
     private final BusyIndicator busyIndicator;
     private int busyCounter;
-    private final HashMap<String, Pair<Integer, Integer>> imageDimensionsMap;
+    private final Map<String, Pair<Integer, Integer>> imageDimensionsMap;
 
     protected static class ImageParameterValidator implements Validator<List<ImageResizingTaskDTO>> {
         private final StringMessages stringMessages;
