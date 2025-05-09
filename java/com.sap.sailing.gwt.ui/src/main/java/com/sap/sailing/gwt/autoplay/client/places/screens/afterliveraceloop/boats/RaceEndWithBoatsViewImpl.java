@@ -16,6 +16,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.client.media.MediaMenuIcon;
+import com.sap.sse.gwt.client.media.TakedownNoticeService;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 
 public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEndWithBoatsView {
@@ -54,12 +56,21 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     Label statisticValue3;
     @UiField
     Label statisticProperty3;
-
+    @UiField(provided = true)
+    MediaMenuIcon takedownButtonImage1;
+    @UiField(provided = true)
+    MediaMenuIcon takedownButtonImage2;
+    @UiField(provided = true)
+    MediaMenuIcon takedownButtonImage3;
+    
     private NumberFormat compactFormat = NumberFormat.getFormat("#.0");
 
     private ImageProvider provider;
 
-    public RaceEndWithBoatsViewImpl(ImageProvider provider) {
+    public RaceEndWithBoatsViewImpl(ImageProvider provider, TakedownNoticeService takedownNoticeService) {
+        takedownButtonImage1 = new MediaMenuIcon(takedownNoticeService, provider.getTakedownNoticeContextKey());
+        takedownButtonImage2 = new MediaMenuIcon(takedownNoticeService, provider.getTakedownNoticeContextKey());
+        takedownButtonImage3 = new MediaMenuIcon(takedownNoticeService, provider.getTakedownNoticeContextKey());
         initWidget(uiBinder.createAndBindUi(this));
         this.provider = provider;
     }
@@ -74,22 +85,26 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
         leaderBoardHolder.add(leaderboardPanel);
     }
 
+    private void setCompetitor(int position, Label subline, FlowPanel image, MediaMenuIcon takedownButton, CompetitorDTO c) {
+        subline.setText(""+position+". " + c.getName());
+        final String imageUrl = provider.getImageUrl(c);
+        setImage(image, imageUrl, true);
+        takedownButton.setData(c.getName(), imageUrl);
+    }
+
     @Override
     public void setFirst(CompetitorDTO c) {
-        subline1.setText("1. " + c.getName());
-        setImage(image1, provider.getImageUrl(c), true);
+        setCompetitor(1, subline1, image1, takedownButtonImage1, c);
     }
 
     @Override
     public void setSecond(CompetitorDTO c) {
-        subline2.setText("2. " + c.getName());
-        setImage(image2, provider.getImageUrl(c), false);
+        setCompetitor(2, subline2, image2, takedownButtonImage2, c);
     }
 
     @Override
     public void setThird(CompetitorDTO c) {
-        subline3.setText("3. " + c.getName());
-        setImage(image3, provider.getImageUrl(c), false);
+        setCompetitor(3, subline3, image3, takedownButtonImage3, c);
     }
 
     private void setImage(FlowPanel image, String imageUrl, boolean slightlyLarger) {
