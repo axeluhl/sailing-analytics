@@ -4,7 +4,7 @@
              xmlns:rf="urn:import:com.sap.sse.gwt.client.panels"
              xmlns:m="urn:import:com.sap.sse.gwt.client.media">
 	<ui:with field="res" type="com.sap.sailing.gwt.autoplay.client.resources.SixtyInchBundle" />
-        <ui:with field="shared_res" type="com.sap.sse.gwt.common.CommonSharedResources" />
+    <ui:with field="shared_res" type="com.sap.sse.gwt.common.CommonSharedResources" />
 	<ui:style gss="true">
 	.left {
 		position: absolute;

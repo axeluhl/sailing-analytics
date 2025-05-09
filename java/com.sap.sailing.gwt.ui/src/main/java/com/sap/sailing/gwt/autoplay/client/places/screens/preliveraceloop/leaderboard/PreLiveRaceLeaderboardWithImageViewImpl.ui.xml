@@ -67,17 +67,15 @@
 	<rf:ResizableFlowPanel styleName="{res.style.slideBackground}">
 		<rf:ResizableFlowPanel ui:field="leaderBoardHolder"
 			styleName="{style.left}" />
-		<rf:ResizableFlowPanel ui:field="infoHolder"
-			styleName="{style.right}">
-			<g:Image ui:field="image" styleName="{style.image} {shared_res.mainCss.media_wrapper}">
+		<rf:ResizableFlowPanel ui:field="infoHolder" styleName="{style.right}">
+			<g:FlowPanel ui:field="image" styleName="{style.image} {shared_res.mainCss.media_wrapper}">
               <m:MediaMenuIcon ui:field="takedownButton"/>
-            </g:Image>
+            </g:FlowPanel>
 			<g:Label ui:field="subline1" styleName="{style.subline1}" />
 			<g:Label ui:field="subline2" styleName="{style.subline2}" />
 			<g:Label ui:field="subline3" styleName="{style.subline3}" />
 		</rf:ResizableFlowPanel>
-		<rf:ResizableFlowPanel ui:field="nextRace"
-			styleName="{style.bottom}">
+		<rf:ResizableFlowPanel ui:field="nextRace" styleName="{style.bottom}">
 			<g:Label ui:field="bottomInfoPanel" />
 		</rf:ResizableFlowPanel>
 	</rf:ResizableFlowPanel>

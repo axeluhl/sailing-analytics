@@ -639,7 +639,7 @@ public abstract class AbstractMediaUploadPopup extends DialogBox {
                 setCollapsebleFilePanelHeader(collapsebleFilePanel, mediaObject.title, mediaObject.mimeType);
             }
         });
-        selectMimeTypeInBox(mediaTypeListBox, getMimeType(uri)); // TODO bug6105 when mime type is image, trigger sailingService.resolveImageDimensions(uri) to fill ImageDTO size
+        selectMimeTypeInBox(mediaTypeListBox, getMimeType(uri));
         vPanel.add(mediaTypeListBox);
         files.add(collapsebleFilePanel);
         fileExistingPanel.setVisible(false);

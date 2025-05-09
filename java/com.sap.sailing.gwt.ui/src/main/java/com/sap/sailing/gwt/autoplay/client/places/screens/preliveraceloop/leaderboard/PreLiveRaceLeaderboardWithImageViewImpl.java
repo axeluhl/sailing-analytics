@@ -4,7 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
+import com.sap.sse.gwt.client.ImageOnFlowPanelHelper;
 import com.sap.sse.gwt.client.media.MediaMenuIcon;
 import com.sap.sse.gwt.client.media.TakedownNoticeService;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -35,7 +36,7 @@ public class PreLiveRaceLeaderboardWithImageViewImpl extends ResizeComposite imp
     Label bottomInfoPanel;
 
     @UiField
-    Image image;
+    FlowPanel image;
     @UiField
     Label subline1;
     @UiField
@@ -78,7 +79,7 @@ public class PreLiveRaceLeaderboardWithImageViewImpl extends ResizeComposite imp
     @Override
     public void onCompetitorSelect(CompetitorDTO selected) {
         final String imageUrl = provider.getImageUrl(selected);
-        image.setUrl(imageUrl);
+        ImageOnFlowPanelHelper.setImage(image, imageUrl);
         takedownButton.setData(selected.getName(), imageUrl);
         final String boatName;
         if (selected.hasBoat() && (boatName = ((CompetitorWithBoatDTO) selected).getBoat().getName()) != null) {
@@ -94,7 +95,7 @@ public class PreLiveRaceLeaderboardWithImageViewImpl extends ResizeComposite imp
 
         subline3.setText("");
     }
-
+    
     @Override
     public void scrollLeaderBoardToTop() {
         leaderBoardHolder.getElement().setScrollTop(0);
