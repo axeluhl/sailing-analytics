@@ -123,5 +123,7 @@ public interface StringMessages extends Messages {
     String natureOfClaim_None();
     String natureOfClaim_CopyrightInfringement();
     String natureOfClaim_DefamatoryContent();
+    String natureOfClaim_Inappropriate();
+    String natureOfClaim_Violence();
     String natureOfClaim_Other();
 }
