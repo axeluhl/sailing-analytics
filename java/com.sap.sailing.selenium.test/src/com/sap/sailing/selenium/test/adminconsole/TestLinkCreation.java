@@ -212,10 +212,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
                 boatMatcher.matches(addDeviceMappingsDialog.getQrCodeUrl(boatUrlPattern)));
         // check URL based on competitor selection
         addDeviceMappingsDialog.getCompetitorTable().getEntries().get(0).select();
-        String compatitorUrlPattern = DEVICE_REGISTRATION_URL_REGEX + "competitor_id.*";
-        Matcher<String> competitorMater = Matchers.matchesRegex(compatitorUrlPattern);
-        String qrCodeUrl = addDeviceMappingsDialog.getQrCodeUrl(compatitorUrlPattern);
-        MatcherAssert.assertThat("Check URL", competitorMater.matches(qrCodeUrl));
+        String competitorUrlPattern = DEVICE_REGISTRATION_URL_REGEX + "competitor_id.*";
+        Matcher<String> competitorMatcher = Matchers.matchesRegex(competitorUrlPattern);
+        String qrCodeUrl = addDeviceMappingsDialog.getQrCodeUrl(competitorUrlPattern);
+        MatcherAssert.assertThat("Check URL", competitorMatcher.matches(qrCodeUrl));
         // check redirect
         getWebDriver().get(qrCodeUrl);
         // confirm dialog on my.sapsailing.com to redirect back to localhost
@@ -226,7 +226,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
                 By.xpath("//div[contains(text(), '" + EXPECTED_DEVICE_REGISTRATION_QR_CODE_TITLE + "')]")));
         WebElement qrCodeLink = wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
-        Matcher<String> matcher = Matchers.matchesRegex(compatitorUrlPattern);
+        Matcher<String> matcher = Matchers.matchesRegex(competitorUrlPattern);
         MatcherAssert.assertThat("Check URL", matcher.matches(qrCodeLink.getAttribute("href")));
     }
 }
