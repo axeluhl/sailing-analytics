@@ -126,10 +126,14 @@ public class RiotConnectionImpl implements RiotConnection {
         try {
             send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setDisconnect(ServerDisconnecting.newBuilder().setCode(500).setReason("Connection closed by server"))).build());
         } finally {
-            riotServer.connectionClosed(socketChannel); // remove the connection from the server managing it
-            heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
-            socketChannel.close();
+            onClosed();
         }
+    }
+
+    private void onClosed() throws IOException {
+        riotServer.connectionClosed(socketChannel); // remove the connection from the server managing it
+        heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
+        socketChannel.close();
     }
     
     @Override
@@ -274,11 +278,15 @@ public class RiotConnectionImpl implements RiotConnection {
     private void send(final AbstractMessage message) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);
         message.writeDelimitedTo(bos);
-        final ByteBuffer buf = ByteBuffer.allocate(bos.size());
+        final int size = bos.size();
+        final ByteBuffer buf = ByteBuffer.allocate(size);
         buf.put(bos.toByteArray());
         buf.flip();
-        // FIXME bug6121: we would need to check the channel for writability using a SocketSelector
-        socketChannel.write(buf); // FIXME bug6121: check return value and if less than bos.size() schedule writing the rest
+        final int bytesWritten;
+        if ((bytesWritten = socketChannel.write(buf)) < size) {
+            logger.warning("Trying to write "+size+" bytes to device "+socketChannel+" but was able to write only "+bytesWritten+
+                    "; message "+message+" most likely not delivered to device "+serialNumber+" successfully.");
+        }
     }
     
     /**
@@ -377,9 +385,9 @@ public class RiotConnectionImpl implements RiotConnection {
             try {
                 send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setHeartbeat(1)).build());
             } catch (ClosedChannelException cce) {
-                logger.warning("Channel "+socketChannel+" closed. Forwarding exception to stop sending heartbeat to closed connection");
+                logger.warning("Channel "+socketChannel+" closed.");
                 try {
-                    close();
+                    onClosed();
                 } catch (Exception e) {
                     logger.warning("Channel "+socketChannel+" threw exception while trying to close it: "+e.getMessage());
                     throw new RuntimeException(e);
