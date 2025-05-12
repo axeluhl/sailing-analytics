@@ -88,7 +88,7 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     private void setCompetitor(int position, Label subline, FlowPanel image, MediaMenuIcon takedownButton, CompetitorDTO c) {
         subline.setText(""+position+". " + c.getName());
         final String imageUrl = provider.getImageUrl(c);
-        ImageOnFlowPanelHelper.setImage(image1, provider.getImageUrl(c));
+        ImageOnFlowPanelHelper.setImage(image, provider.getImageUrl(c));
         takedownButton.setData(c.getName(), imageUrl);
     }
 
