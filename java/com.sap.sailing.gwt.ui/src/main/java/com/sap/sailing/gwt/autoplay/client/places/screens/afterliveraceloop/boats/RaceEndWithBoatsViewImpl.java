@@ -111,7 +111,6 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
     public void setStatistic(int competitorCount, Distance distance, Duration duration) {
         statisticProperty1.setText(StringMessages.INSTANCE.competitors());
         statisticValue1.setText(String.valueOf(competitorCount));
-
         statisticProperty2.setText(StringMessages.INSTANCE.distance());
         if(distance == null){
             statisticValue2
@@ -120,7 +119,6 @@ public class RaceEndWithBoatsViewImpl extends ResizeComposite implements RaceEnd
             statisticValue2
             .setText(compactFormat.format(distance.getNauticalMiles()) + " " + StringMessages.INSTANCE.nauticalMiles());
         }
-
         statisticProperty3.setText(StringMessages.INSTANCE.durationPlain());
         statisticValue3.setText(compactFormat.format(duration.asMinutes()) + " " + StringMessages.INSTANCE.minutes());
     }
