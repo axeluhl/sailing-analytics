@@ -11,6 +11,7 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -44,6 +45,7 @@ import com.sap.sailing.selenium.test.adminconsole.smartphonetracking.RegisterCom
 /**
  * There are various link creation logic in AdminConsole. This test is to cover them.
  */
+@Ignore("Until branch.io has resolved their CloudFront issue delivering an error 403 for our test links")
 public class TestLinkCreation extends AbstractSeleniumTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestLinkCreation.class);
