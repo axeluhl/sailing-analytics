@@ -118,6 +118,10 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
             return stringMessages.natureOfClaim_CopyrightInfringement();
         case DEFAMATORY_CONTENT:
             return stringMessages.natureOfClaim_DefamatoryContent();
+        case INAPPROPRIATE:
+            return stringMessages.natureOfClaim_Inappropriate();
+        case VIOLENCE:
+            return stringMessages.natureOfClaim_Violence();
         case NONE:
             return stringMessages.natureOfClaim_None();
         case OTHER:
