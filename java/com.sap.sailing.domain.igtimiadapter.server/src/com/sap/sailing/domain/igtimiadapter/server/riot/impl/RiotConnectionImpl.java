@@ -30,6 +30,7 @@ import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.ThreadPoolUtil;
@@ -84,15 +85,20 @@ public class RiotConnectionImpl implements RiotConnection {
     
     private TimePoint lastHeartbeatReceivedAt;
     
+    private TimePoint requireNextHeartbeatUntil;
+    
+    private static final Duration MAX_ALLOWED_DURATION_BETWEEN_HEARTBEATS = Duration.ONE_SECOND.times(30);
+    
     RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer) {
         this.socketChannel = socketChannel;
         this.riotServer = riotServer;
         this.messageLengthBuffer = ByteBuffer.allocate(5);
+        this.requireNextHeartbeatUntil = TimePoint.now().plus(Duration.ONE_MINUTE); // start gracefully; normally this would be 30s...
         heartbeatSendingTask = scheduleHeartbeat();
     }
     
     private ScheduledFuture<?> scheduleHeartbeat() {
-        return ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this::sendHeartbeat, 15, 15, TimeUnit.SECONDS);
+        return ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().scheduleAtFixedRate(this::sendAndCheckHeartbeat, 15, 15, TimeUnit.SECONDS);
     }
 
     @Override
@@ -120,9 +126,14 @@ public class RiotConnectionImpl implements RiotConnection {
         try {
             send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setDisconnect(ServerDisconnecting.newBuilder().setCode(500).setReason("Connection closed by server"))).build());
         } finally {
-            heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
-            socketChannel.close();
+            onClosed();
         }
+    }
+
+    private void onClosed() throws IOException {
+        riotServer.connectionClosed(socketChannel); // remove the connection from the server managing it
+        heartbeatSendingTask.cancel(/* mayInterruptIfRunning */ false);
+        socketChannel.close();
     }
     
     @Override
@@ -267,10 +278,15 @@ public class RiotConnectionImpl implements RiotConnection {
     private void send(final AbstractMessage message) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);
         message.writeDelimitedTo(bos);
-        final ByteBuffer buf = ByteBuffer.allocate(bos.size());
+        final int size = bos.size();
+        final ByteBuffer buf = ByteBuffer.allocate(size);
         buf.put(bos.toByteArray());
         buf.flip();
-        socketChannel.write(buf);
+        final int bytesWritten;
+        if ((bytesWritten = socketChannel.write(buf)) < size) {
+            logger.warning("Trying to write "+size+" bytes to device "+socketChannel+" but was able to write only "+bytesWritten+
+                    "; message "+message+" most likely not delivered to device "+serialNumber+" successfully.");
+        }
     }
     
     /**
@@ -310,6 +326,7 @@ public class RiotConnectionImpl implements RiotConnection {
                     @Override
                     public void handleHeartbeat(long heartbeat) {
                         lastHeartbeatReceivedAt = TimePoint.now();
+                        requireNextHeartbeatUntil = lastHeartbeatReceivedAt.plus(MAX_ALLOWED_DURATION_BETWEEN_HEARTBEATS);
                         updateDeviceHeartbeatIfSerialNumberKnown();
                     }
                 });
@@ -352,15 +369,38 @@ public class RiotConnectionImpl implements RiotConnection {
         }
     }
 
-    private void sendHeartbeat() {
-        try {
-            send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setHeartbeat(1)).build());
-        } catch (ClosedChannelException cce) {
-            logger.warning("Channel "+socketChannel+" closed. Forwarding exception to stop sending heartbeat to closed connection");
-            throw new RuntimeException(cce);
-        } catch (IOException e) {
-            logger.log(Level.WARNING, "Problem while trying to send heartbeat message to device "+getSerialNumber(), e);
-            throw new RuntimeException(e);
+    private void sendAndCheckHeartbeat() {
+        final TimePoint now = TimePoint.now();
+        if (now.after(requireNextHeartbeatUntil)) {
+            logger.info("Expected heartbeat from channel "+socketChannel+
+                    " until "+requireNextHeartbeatUntil+" but haven't received it until "+now+
+                    "; closing connection");
+            try {
+                close();
+            } catch (Exception e) {
+                logger.warning("Channel "+socketChannel+" threw exception while trying to close it: "+e.getMessage());
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                send(Msg.newBuilder().setChannelManagement(ChannelManagement.newBuilder().setHeartbeat(1)).build());
+            } catch (ClosedChannelException cce) {
+                logger.warning("Channel "+socketChannel+" closed.");
+                try {
+                    onClosed();
+                } catch (Exception e) {
+                    logger.warning("Channel "+socketChannel+" threw exception while trying to close it: "+e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            } catch (IOException e) {
+                logger.log(Level.WARNING, "Problem while trying to send heartbeat message to device "+getSerialNumber(), e);
+                try {
+                    close();
+                } catch (Exception e1) {
+                    logger.warning("Channel "+socketChannel+" threw exception while trying to close it: "+e1.getMessage());
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
