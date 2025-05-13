@@ -195,9 +195,8 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                             logger.info("Device channel from "+deviceChannel.getRemoteAddress()+" closed");
                             if (connection != null) {
                                 logger.info("The device was handled by connection "+connection);
-                                connections.remove(deviceChannel);
                                 try {
-                                    connection.close();
+                                    connection.close(); // will also remove the connection from this server through connectionClosed(RiotConnection)
                                 } catch (Exception e) {
                                     logger.warning("Trying to properly close a connection for which we read EOF from its channel threw an exception: "+e.getMessage());
                                 }
@@ -210,8 +209,26 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                 logger.log(Level.SEVERE, "Exception trying to read or accept new connection. Continuing...", e);
             }
         }
+        try {
+            logger.info("Riot server listening on "+serverSocketChannel.getLocalAddress()+" stops running");
+        } catch (IOException e) {
+            logger.info("Riot server listening on "+serverSocketChannel+" stops running");
+        }
     }
 
+    /**
+     * Removes the {@link RiotConnection} connected to the {@code deviceChannel} in {@link #connections} from this
+     * server. The {@code deviceChannel} has its key for the {@link #socketSelector} {@link SelectionKey#cancel()
+     * cancelled}.
+     */
+    void connectionClosed(SocketChannel deviceChannel) {
+        connections.remove(deviceChannel);
+        final SelectionKey selectionKey = deviceChannel.keyFor(socketSelector);
+        if (selectionKey != null) {
+            selectionKey.cancel();
+        }
+    }
+    
     @Override
     public void addListener(RiotMessageListener listener) {
         listeners.add(listener);

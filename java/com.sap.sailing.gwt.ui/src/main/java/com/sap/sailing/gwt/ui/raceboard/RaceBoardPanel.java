@@ -453,7 +453,7 @@ public class RaceBoardPanel
         addChildComponent(racetimePanel);
         final Long zoomStartMillis = parsedPerspectiveOwnSettings.getZoomStart();
         final Long zoomEndMillis = parsedPerspectiveOwnSettings.getZoomEnd();
-        if(isScreenLargeEnoughToInitiallyDisplayLeaderboard && zoomStartMillis != null && zoomEndMillis != null) {
+        if (isScreenLargeEnoughToInitiallyDisplayLeaderboard && zoomStartMillis != null && zoomEndMillis != null) {
             final Date zoomStart = new Date(zoomStartMillis);
             final Date zoomEnd = new Date(zoomEndMillis);
             Scheduler.get().scheduleDeferred(new Command() {
