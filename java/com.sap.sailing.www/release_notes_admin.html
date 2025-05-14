@@ -27,6 +27,9 @@
           <ul class="bulletList">
                 <li>The Riot server listening for WindBot data now properly implements connection closing upon not having
                     received device heartbeat messages for more than 30s.</li>
+                <li>Fixed parsing of X-Forwarded-For header, now reporting the correct client IP in case of multiple proxies along the way.</li>
+                <li>Improved logging in case operations received from replicas are being applied. The log entry now shows the name of the server
+                    where the operation originated from.</li>
           </ul>
           <h2 class="articleSubheadline">March 2025</h2>
           <ul class="bulletList">
