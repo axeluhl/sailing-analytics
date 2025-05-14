@@ -1291,6 +1291,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             lockingAndBanning = user.getLockingAndBanning();
             lockingAndBanning.failedPasswordAuthentication();
             store.updateUser(user);
+            logger.info("failed password authentication for user "+username+"; locking: "+lockingAndBanning);
         } else {
             lockingAndBanning = null;
         }
@@ -1329,6 +1330,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     public LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP) {
         final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
         lockingAndBanning.failedPasswordAuthentication();
+        logger.info("failed bearer token authentication from client IP "+clientIP+"; locking: "+lockingAndBanning);
         scheduleCleanUpTask(clientIP, lockingAndBanning, clientIPBasedLockingAndBanningForBearerTokenAuthentication,
                 "client IPs locked for bearer token authentication");
         return lockingAndBanning;
