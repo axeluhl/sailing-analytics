@@ -33,6 +33,9 @@
                     corner of the image/video tile. When a logged-in user with a validated e-mail address clicks the
                     button, a popup dialog allows for additional input and submitting of the take-down request, which
                     will lead to an e-mail being sent to support@sapsailing.com.</li>
+                <li>Fixed parsing of X-Forwarded-For header, now reporting the correct client IP in case of multiple proxies along the way.</li>
+                <li>Improved logging in case operations received from replicas are being applied. The log entry now shows the name of the server
+                    where the operation originated from.</li>
           </ul>
           <h2 class="articleSubheadline">March 2025</h2>
           <ul class="bulletList">
