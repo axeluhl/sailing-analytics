@@ -300,6 +300,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
         }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         logger.info("Applying operation of type " + operation.getClassForLogging().getName()
+                + (operation.getOriginServerName() == null ? "" : (" originating from server \""+operation.getOriginServerName()+"\""))
                 + " received from replica to replicable " + replicable.toString());
         try {
             replicable.apply(operation);
