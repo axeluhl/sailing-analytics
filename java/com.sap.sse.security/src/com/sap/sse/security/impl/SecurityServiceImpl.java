@@ -91,6 +91,7 @@ import com.nulabinc.zxcvbn.ZxcvbnBuilder;
 import com.nulabinc.zxcvbn.io.ClasspathResource;
 import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -1338,34 +1339,35 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     /**
      * Schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects; schedule it in two times the
-     * locking expiry pf {@code lockingAndBanning} because if no authentication failure occurs for that IP/user agent
-     * combination, we will entirely remove the {@link LockingAndBanning} from the map, effectively resetting that IP to
-     * a short default locking duration again; this way, if during the double expiration time another failed attempt is
-     * registered, we can still grow the locking duration because we have kept the {@link LockingAndBanning} object
-     * available for a bit longer. Furthermore, for authentication requests, the responsible {@link Realm} will let
-     * authentication requests get to here only if not locked, so if we were to expunge entries immediately as they
-     * unlock, the locking duration could never grow.
+     * locking expiry of {@code lockingAndBanning}, but at least one hour, because if no authentication failure occurs
+     * for that IP/user agent combination, we will entirely remove the {@link LockingAndBanning} from the map,
+     * effectively resetting that IP to a short default locking duration again; this way, if during the double
+     * expiration time another failed attempt is registered, we can still grow the locking duration because we have kept
+     * the {@link LockingAndBanning} object available for a bit longer. Furthermore, for authentication requests, the
+     * responsible {@link Realm} will let authentication requests get to here only if not locked, so if we were to
+     * expunge entries immediately as they unlock, the locking duration could never grow.<p>
+     * 
+     * With the minimum of one hour, we ensure that failing requests done at a slower rate still grow the locking
+     * expiry duration.
      */
     private void scheduleCleanUpTask(final String clientIPOrNull,
             final LockingAndBanning lockingAndBanning,
             final ConcurrentMap<String, LockingAndBanning> mapToRemoveFrom,
             final String nameOfMapForLog) {
-        final long millisUntilLockingExpiry = 2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis();
-        if (millisUntilLockingExpiry > 0) {
-            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
-                    ()->{
-                        final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
-                        if (lab != null && !lab.isAuthenticationLocked()) {
-                            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
-                            logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
-                                    +mapToRemoveFrom.size()
-                                    +" locked client IP(s) remaining");
-                        }
-                    },
-                    millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
-        } else { // a bit weird because we just locked it; suggests very slow execution; yet, let's clean up...
-            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
-        }
+        final long millisUntilLockingExpiry = Math.max(
+                2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis(),
+                Duration.ONE_HOUR.asMillis());
+        ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                ()->{
+                    final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
+                    if (lab != null && !lab.isAuthenticationLocked()) {
+                        mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
+                        logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
+                                +mapToRemoveFrom.size()
+                                +" locked client IP(s) remaining");
+                    }
+                },
+                millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
     }
 
     private String escapeNullClientIP(String clientIP) {
