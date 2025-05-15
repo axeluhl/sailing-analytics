@@ -1200,7 +1200,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
-        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts); // TODO: get the principal as owner
+        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts);
         return result;
     }
 
