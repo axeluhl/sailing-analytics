@@ -297,7 +297,8 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
                     break;
                 }
                 if (sse.isInitiatedByApplication()) {
-                    logger.severe("Application shut down messaging queue for " + this.toString());
+                    logger.severe("Application shut down messaging queue for " + this.toString()+
+                            ", indicated by exception "+sse.getMessage());
                     break;
                 }
                 logger.severe("RabbitMQ channel was shut down: "+sse.getMessage()+"; trying to re-connect");
