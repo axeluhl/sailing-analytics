@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -3409,5 +3410,34 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void unlockSubscriptionsForUser(final User user) {
         LockUtil.unlockAfterWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
+    }
+    
+    /**
+     * For a {@link SecuredSecurityTypes#SERVER SERVER} object identified by {@code serverName}, determines the user set
+     * as the server's owner, plus additional users that have the permission to execute
+     * {@code alsoSendToAllUsersWithThisPermissionOnReplicaSet} on that server.
+     * 
+     * @param serverName
+     *            identifies the server object; for the local server that would, e.g., be {@link ServerInfo#getName()}.
+     *            For replica sets, this is the name of the replica set.
+     * @param alsoSendToAllUsersWithThisPermissionOnReplicaSet
+     *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
+     *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user will
+     *            receive the e-mail twice.
+     * @return
+     */
+    @Override
+    public Iterable<User> getUsersToInformAboutReplicaSet(String serverName, Optional<HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) {
+        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(serverName));
+        final OwnershipAnnotation serverOwnership = getOwnership(serverIdentifier);
+        final User serverOwner;
+        final Set<User> usersToSendMailTo = new HashSet<>();
+        if (serverOwnership != null && serverOwnership.getAnnotation() != null && (serverOwner = serverOwnership.getAnnotation().getUserOwner()) != null) {
+            usersToSendMailTo.add(serverOwner);
+        }
+        alsoSendToAllUsersWithThisPermissionOnReplicaSet.ifPresent(
+                serverAction -> getUsersWithPermissions(serverIdentifier.getPermission(serverAction))
+                .forEach(usersToSendMailTo::add));
+        return usersToSendMailTo;
     }
 }

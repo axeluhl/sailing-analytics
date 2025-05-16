@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -910,4 +911,20 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * will establish (if not yet locked) or extend the locking duration for the combination.
      */
     boolean isClientIPLockedForBearerTokenAuthentication(String clientIP);
+
+    /**
+     * For a {@link SecuredSecurityTypes#SERVER SERVER} object identified by {@code serverName}, determines the user set
+     * as the server's owner, plus additional users that have the permission to execute
+     * {@code alsoSendToAllUsersWithThisPermissionOnReplicaSet} on that server.
+     * 
+     * @param serverName
+     *            identifies the server object; for the local server that would, e.g., be {@link ServerInfo#getName()}.
+     *            For replica sets, this is the name of the replica set.
+     * @param alsoSendToAllUsersWithThisPermissionOnReplicaSet
+     *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
+     *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user will
+     *            receive the e-mail twice.
+     */
+    Iterable<User> getUsersToInformAboutReplicaSet(String serverName,
+            Optional<com.sap.sse.security.shared.HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet);
 }
