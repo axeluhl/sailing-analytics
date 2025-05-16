@@ -371,7 +371,7 @@ public class ReplicationReceiverImpl implements ReplicationReceiver, Runnable {
             for (final User userToSendMailTo : securityService.getUsersToInformAboutReplicaSet(serverName, Optional.of(DefaultActions.UPDATE))) {
                 if (userToSendMailTo.isEmailValidated()) {
                     final String subject = stringMessages.get(userToSendMailTo.getLocaleOrDefault(), "MailSubjectShutdownSignalException", serverName);
-                    final String body = stringMessages.get(userToSendMailTo.getLocaleOrDefault(), "MailBodyShutdownSignalException", serverName);
+                    final String body = stringMessages.get(userToSendMailTo.getLocaleOrDefault(), "MailBodyShutdownSignalException", serverName, sse.getMessage());
                     try {
                         securityService.sendMail(userToSendMailTo.getName(), subject, body);
                     } catch (MailException e) {
