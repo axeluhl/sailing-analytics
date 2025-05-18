@@ -205,7 +205,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 logger.log(Level.SEVERE, "Exception trying to read or accept new connection. Continuing...", e);
             }
         }
