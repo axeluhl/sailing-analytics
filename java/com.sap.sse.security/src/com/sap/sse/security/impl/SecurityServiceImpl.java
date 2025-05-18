@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -91,6 +92,7 @@ import com.nulabinc.zxcvbn.ZxcvbnBuilder;
 import com.nulabinc.zxcvbn.io.ClasspathResource;
 import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -1200,7 +1202,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
-        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts); // TODO: get the principal as owner
+        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts);
         return result;
     }
 
@@ -1339,34 +1341,35 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     /**
      * Schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects; schedule it in two times the
-     * locking expiry pf {@code lockingAndBanning} because if no authentication failure occurs for that IP/user agent
-     * combination, we will entirely remove the {@link LockingAndBanning} from the map, effectively resetting that IP to
-     * a short default locking duration again; this way, if during the double expiration time another failed attempt is
-     * registered, we can still grow the locking duration because we have kept the {@link LockingAndBanning} object
-     * available for a bit longer. Furthermore, for authentication requests, the responsible {@link Realm} will let
-     * authentication requests get to here only if not locked, so if we were to expunge entries immediately as they
-     * unlock, the locking duration could never grow.
+     * locking expiry of {@code lockingAndBanning}, but at least one hour, because if no authentication failure occurs
+     * for that IP/user agent combination, we will entirely remove the {@link LockingAndBanning} from the map,
+     * effectively resetting that IP to a short default locking duration again; this way, if during the double
+     * expiration time another failed attempt is registered, we can still grow the locking duration because we have kept
+     * the {@link LockingAndBanning} object available for a bit longer. Furthermore, for authentication requests, the
+     * responsible {@link Realm} will let authentication requests get to here only if not locked, so if we were to
+     * expunge entries immediately as they unlock, the locking duration could never grow.<p>
+     * 
+     * With the minimum of one hour, we ensure that failing requests done at a slower rate still grow the locking
+     * expiry duration.
      */
     private void scheduleCleanUpTask(final String clientIPOrNull,
             final LockingAndBanning lockingAndBanning,
             final ConcurrentMap<String, LockingAndBanning> mapToRemoveFrom,
             final String nameOfMapForLog) {
-        final long millisUntilLockingExpiry = 2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis();
-        if (millisUntilLockingExpiry > 0) {
-            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
-                    ()->{
-                        final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
-                        if (lab != null && !lab.isAuthenticationLocked()) {
-                            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
-                            logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
-                                    +mapToRemoveFrom.size()
-                                    +" locked client IP(s) remaining");
-                        }
-                    },
-                    millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
-        } else { // a bit weird because we just locked it; suggests very slow execution; yet, let's clean up...
-            mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
-        }
+        final long millisUntilLockingExpiry = Math.max(
+                2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis(),
+                Duration.ONE_HOUR.asMillis());
+        ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                ()->{
+                    final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
+                    if (lab != null && !lab.isAuthenticationLocked()) {
+                        mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
+                        logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
+                                +mapToRemoveFrom.size()
+                                +" locked client IP(s) remaining");
+                    }
+                },
+                millisUntilLockingExpiry, TimeUnit.MILLISECONDS);
     }
 
     private String escapeNullClientIP(String clientIP) {
@@ -3445,5 +3448,34 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         getMailService().sendMail(SUPPORT_MAIL_ADDRESS, "Media Take-Down Request", message);
         getMailService().sendMail(email, "Media Take-Down Request Confirmation", messages.get(user.getLocaleOrDefault(), "takedownRequestConfirmation",
                 Util.hasLength(user.getFullName()) ? user.getFullName() : user.getName(), SUPPORT_MAIL_ADDRESS, message));
+    }
+    
+    /**
+     * For a {@link SecuredSecurityTypes#SERVER SERVER} object identified by {@code serverName}, determines the user set
+     * as the server's owner, plus additional users that have the permission to execute
+     * {@code alsoSendToAllUsersWithThisPermissionOnReplicaSet} on that server.
+     * 
+     * @param serverName
+     *            identifies the server object; for the local server that would, e.g., be {@link ServerInfo#getName()}.
+     *            For replica sets, this is the name of the replica set.
+     * @param alsoSendToAllUsersWithThisPermissionOnReplicaSet
+     *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
+     *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user will
+     *            receive the e-mail twice.
+     * @return
+     */
+    @Override
+    public Iterable<User> getUsersToInformAboutReplicaSet(String serverName, Optional<HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) {
+        final QualifiedObjectIdentifier serverIdentifier = SecuredSecurityTypes.SERVER.getQualifiedObjectIdentifier(new TypeRelativeObjectIdentifier(serverName));
+        final OwnershipAnnotation serverOwnership = getOwnership(serverIdentifier);
+        final User serverOwner;
+        final Set<User> usersToSendMailTo = new HashSet<>();
+        if (serverOwnership != null && serverOwnership.getAnnotation() != null && (serverOwner = serverOwnership.getAnnotation().getUserOwner()) != null) {
+            usersToSendMailTo.add(serverOwner);
+        }
+        alsoSendToAllUsersWithThisPermissionOnReplicaSet.ifPresent(
+                serverAction -> getUsersWithPermissions(serverIdentifier.getPermission(serverAction))
+                .forEach(usersToSendMailTo::add));
+        return usersToSendMailTo;
     }
 }

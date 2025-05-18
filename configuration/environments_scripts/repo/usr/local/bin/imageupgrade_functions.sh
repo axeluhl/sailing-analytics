@@ -67,7 +67,7 @@ clean_startup_logs() {
   echo "Clearing bootstrap logs"
   rm -f /var/log/sailing*
   # Ensure that upon the next boot the reboot indicator is not present, indicating that it's the first boot
-  rm "${REBOOT_INDICATOR}"
+  rm -f "${REBOOT_INDICATOR}"
 }
 
 clean_servers_dir() {
