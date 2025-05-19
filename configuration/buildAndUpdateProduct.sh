@@ -223,6 +223,7 @@ if [ "$TMP" = "" ]; then
   export TMP=/tmp
 fi
 extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
+extra="${extra} -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0"
 
 shift $((OPTIND-1))
 
