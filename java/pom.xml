@@ -598,7 +598,7 @@
           </artifact>
         </target>
         <executionEnvironment>
-          JavaSE-17
+          JavaSE-21
         </executionEnvironment>
         <environments>
           <environment>
