@@ -21,7 +21,7 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -89,6 +89,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
             + "&device_config_uuid=(\\w|\\d|-)*";
 
     private static final String DEVICE_REGISTRATION_URL_REGEX = ".*https:\\/\\/sailinsight30-app.sapsailing.com\\/invite\\?checkinUrl=.*";
+    private static final String BRANCH_IO_COMPLIANT_LOCALHOST_ALIAS = "branch-io-localhost-alias";
 
     @Override
     @Before
@@ -171,7 +172,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
      * branch.io is not smart enough to check the DNS record and will accept this domain name.
      */
     private String getNonLoopbackLocalhostAddress() throws SocketException {
-        return "test-qr-code-place.sapsailing.com";
+        return BRANCH_IO_COMPLIANT_LOCALHOST_ALIAS + "." + SharedLandscapeConstants.DEFAULT_DOMAIN_NAME;
     }
 
     /**
