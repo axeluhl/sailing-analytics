@@ -44,6 +44,17 @@ import com.sap.sailing.selenium.test.adminconsole.smartphonetracking.RegisterCom
 
 /**
  * There are various link creation logic in AdminConsole. This test is to cover them.
+ * <p>
+ * 
+ * TODO The reply from branch.io regarding the test failures was this:
+ * <p>
+ * 
+ * "It looks like the engineering team confirmed there was an update to security and this behavior is expected. Branch
+ * recently applied the new WAF rule, and does not allow passing the localhost as a query string due to avoid widely
+ * known risks/issues/phishing for security reasons. Since WAF does not have access to the link data, the error does not
+ * raise when localhost is set an encapsulated link data.<p>
+ * 
+ * It's recommend that clients use a hosted pre-prod environment for their internal testing, rather than localhost"
  */
 @Ignore("Until branch.io has resolved their CloudFront issue delivering an error 403 for our test links")
 public class TestLinkCreation extends AbstractSeleniumTest {
