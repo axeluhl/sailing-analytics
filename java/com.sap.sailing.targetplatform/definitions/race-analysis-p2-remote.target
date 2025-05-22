@@ -92,6 +92,7 @@
 <unit id="org.eclipse.equinox.coordinator" version="1.5.500.v20250505-2005"/>
 <unit id="org.eclipse.equinox.device" version="1.2.300.v20250322-0532"/>
 <unit id="org.eclipse.equinox.event" version="1.7.300.v20250408-1622"/>
+<unit id="org.eclipse.equinox.event.source" version="1.7.300.v20250408-1622"/>
 <unit id="org.eclipse.equinox.http.jetty" version="3.9.400.v20250506-0422"/>
 <unit id="org.eclipse.equinox.http.registry" version="1.4.300.v20250306-0513"/>
 <unit id="org.eclipse.equinox.http.servletbridge" version="1.3.100.v20250127-0453"/>
