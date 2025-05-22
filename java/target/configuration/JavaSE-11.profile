@@ -9,8 +9,6 @@
 #     IBM Corporation - initial API and implementation
 ###############################################################################
 
-# NOTE: The JavaSE-9 profile is not yet finalized.
-
 org.osgi.framework.system.packages = \
  javax.accessibility,\
  javax.activity,\
