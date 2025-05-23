@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="238">
+<target name="Race Analysis Target" sequenceNumber="239">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -131,6 +131,8 @@
 <unit id="org.osgi.service.http.whiteboard.source" version="1.1.1.202109301733"/>
 <unit id="org.osgi.service.useradmin" version="1.1.1.202109301733"/>
 <unit id="org.osgi.service.useradmin.source" version="1.1.1.202109301733"/>
+<unit id="org.osgi.service.metatype" version="1.4.1.202109301733"/>
+<unit id="org.osgi.service.metatype.source" version="1.4.1.202109301733"/>
 <unit id="org.eclipse.equinox.http.service.api" version="1.2.2.v20231218-2126"/>
 <unit id="org.eclipse.equinox.http.service.api.source" version="1.2.2.v20231218-2126"/>
 <unit id="org.osgi.service.wireadmin" version="1.0.2.202109301733"/>
@@ -420,6 +422,8 @@
 <plugin id="org.osgi.service.http.whiteboard.source"/>
 <plugin id="org.osgi.service.useradmin"/>
 <plugin id="org.osgi.service.useradmin.source"/>
+<plugin id="org.osgi.service.metatype"/>
+<plugin id="org.osgi.service.metatype.source"/>
 <plugin id="org.eclipse.equinox.http.service.api"/>
 <plugin id="org.eclipse.equinox.http.service.api.source"/>
 <plugin id="org.osgi.service.wireadmin"/>
