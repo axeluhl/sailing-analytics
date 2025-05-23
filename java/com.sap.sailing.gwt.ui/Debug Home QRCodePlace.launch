@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.github.sdbg.debug.core.chromeLaunchConfig">
+    <stringAttribute key="applicationArguments" value=""/>
+    <stringAttribute key="applicationName" value=""/>
+    <stringAttribute key="browserSearchOrder" value="chrome,chromium,edge,firefox"/>
+    <booleanAttribute key="launchFile" value="false"/>
+    <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+        <listEntry value="/com.sap.sailing.gwt.ui"/>
+    </listAttribute>
+    <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+        <listEntry value="4"/>
+    </listAttribute>
+    <stringAttribute key="projectName" value="com.sap.sailing.gwt.ui"/>
+    <booleanAttribute key="showLaunchOutput" value="false"/>
+    <stringAttribute key="url" value="http://127.0.0.1:8888/gwt/Home.html?regatta_name=a&amp;secret=1L74V15J15XM85DYJJA3&amp;server=http%3A%2F%2F127.0.0.1%3A8888&amp;event_id=5958661d-5978-4b83-aa40-250daf1e57c1&amp;_branch_match_id=1237329189577129221&amp;utm_medium=marketing&amp;_branch_referrer=H4sIAAAAAAAAAyWN0QqCMBiFn0bvpps6t4IRQgRJ3UZdye%2F804GusS2fv0HnO1ffuThLjC4cyzKAWY0NZl5iTQk4VwRwfzkX%2BrOV7juuRl%2FtbiKePM4QIwwWNlSQB9Qeo2I30TwY7xl%2F3iU%2Fv%2Fq%2Bq9Pmd%2FRqST9Z3WXVJZVVoqAJloxMyXFHGwczKX7gsm3ZRPhBSNKMsiYADSUVpxO8GXKh2Q%2Fo7Pi7swAAAA%3D%3D#QRCodePlace:mode=COMPETITOR_3"/>
+    <stringAttribute key="urlQueryParams" value=""/>
+</launchConfiguration>
