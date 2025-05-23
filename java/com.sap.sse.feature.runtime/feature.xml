@@ -743,7 +743,21 @@
          install-size="0"
          version="1.1.1.202109301733"
          unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.http.service.api"
+         download-size="0"
+         install-size="0"
+         version="1.2.2.v20231218-2126"
+         unpack="false"/>
    
+   <plugin
+         id="org.eclipse.equinox.http.service.api.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.2.v20231218-2126"
+         unpack="false"/>
+
    <plugin
          id="com.sun.istack.commons-runtime"
          download-size="0"
