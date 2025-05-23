@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="233">
+<target name="Race Analysis Target" sequenceNumber="234">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -127,6 +127,8 @@
 <unit id="org.osgi.service.upnp.source" version="1.2.1.202109301733"/>
 <unit id="org.osgi.service.device" version="1.1.1.202109301733"/>
 <unit id="org.osgi.service.device.source" version="1.1.1.202109301733"/>
+<unit id="org.osgi.service.http.whiteboard" version="1.1.1.202109301733"/>
+<unit id="org.osgi.service.http.whiteboard.source" version="1.1.1.202109301733"/>
 <unit id="org.objectweb.asm" version="9.8.0"/>
 <unit id="org.objectweb.asm.source" version="9.8.0"/>
 <unit id="org.objectweb.asm.commons" version="9.8.0"/>
@@ -406,6 +408,8 @@
 <plugin id="org.osgi.service.upnp.source"/>
 <plugin id="org.osgi.service.device"/>
 <plugin id="org.osgi.service.device.source"/>
+<plugin id="org.osgi.service.http.whiteboard"/>
+<plugin id="org.osgi.service.http.whiteboard.source"/>
 <plugin id="redisson"/>
 <plugin id="com.esotericsoftware.kryo"/>
 <plugin id="com.esotericsoftware.minlog"/>
