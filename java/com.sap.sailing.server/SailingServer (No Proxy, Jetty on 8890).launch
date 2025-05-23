@@ -147,6 +147,8 @@
 <setEntry value="org.eclipse.equinox.cm.source@default:default"/>
 <setEntry value="org.osgi.service.upnp@default:default"/>
 <setEntry value="org.osgi.service.upnp.source@default:default"/>
+<setEntry value="org.osgi.service.device@default:default"/>
+<setEntry value="org.osgi.service.device.source@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
 <setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
