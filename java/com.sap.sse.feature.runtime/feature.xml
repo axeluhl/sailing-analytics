@@ -773,6 +773,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.osgi.service.provisioning"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.201505202024"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.provisioning.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.201505202024"
+         unpack="false"/>
+
+   <plugin
          id="com.sun.istack.commons-runtime"
          download-size="0"
          install-size="0"
