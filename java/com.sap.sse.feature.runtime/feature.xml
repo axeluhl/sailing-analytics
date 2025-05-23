@@ -696,6 +696,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.equinox.cm.source"
+         download-size="0"
+         install-size="0"
+         version="1.6.300.v20250515-0501"
+         unpack="false"/>
+
+   <plugin
          id="com.sun.istack.commons-runtime"
          download-size="0"
          install-size="0"
