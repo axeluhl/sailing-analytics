@@ -129,8 +129,8 @@
 <unit id="org.osgi.service.device.source" version="1.1.1.202109301733"/>
 <unit id="org.osgi.service.http.whiteboard" version="1.1.1.202109301733"/>
 <unit id="org.osgi.service.http.whiteboard.source" version="1.1.1.202109301733"/>
-<unit id="org.osgi.service.useradmin" version="1.1.1.202109301733.jar"/>
-<unit id="org.osgi.service.useradmin.source" version="1.1.1.202109301733.jar"/>
+<unit id="org.osgi.service.useradmin" version="1.1.1.202109301733"/>
+<unit id="org.osgi.service.useradmin.source" version="1.1.1.202109301733"/>
 <unit id="org.eclipse.equinox.http.service.api" version="1.2.2.v20231218-2126"/>
 <unit id="org.eclipse.equinox.http.service.api.source" version="1.2.2.v20231218-2126"/>
 <unit id="org.osgi.service.wireadmin" version="1.0.2.202109301733"/>
