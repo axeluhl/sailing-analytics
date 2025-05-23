@@ -36,7 +36,7 @@
          When adjusting tycho-version here, also make sure to adjust it accordingly
          in java/com.amazon.aws.aws-java-api/pom.xml
      -->
-    <tycho-version>1.7.0</tycho-version>
+    <tycho-version>2.7.5</tycho-version>
     <gwt.version>2.11.1</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.1</gwt.plugin.version>
@@ -47,7 +47,7 @@
     Can we move the system property -Dmongo.dbName to "parameters.mongodb"? If so the IP of the host would be the same for all
     profiles. -->
     <parameters.common>
-      -Dfile.encoding=UTF-8 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
+      -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -Dosgi.java.profile=file://${session.executionRootDirectory}/java/target/configuration/JavaSE-11.profile -Dfile.encoding=UTF-8 -Dmongo.dbName=winddbTest -DspatialWind=true -Xss100m -Dgwt.rpc.version=9 -Dgoogle.maps.authenticationparams=key=AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E
     </parameters.common>
     <parameters.vm-settings>
       -ea -Xmx8192m -XX:+UseG1GC
@@ -104,6 +104,7 @@
         <module>com.sap.sailing.landscape.test</module>
         <module>com.sap.sailing.landscape.common</module>
         <module>com.sap.sailing.landscape.ui</module>
+        <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
         <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
@@ -566,6 +567,9 @@
             <classifier>../com.sap.sailing.targetplatform/definitions/${p2-target}</classifier>
           </artifact>
         </target>
+        <executionEnvironment>
+          JavaSE-17
+        </executionEnvironment>
         <environments>
           <environment>
             <os>linux</os>
