@@ -154,6 +154,7 @@
 <setEntry value="org.eclipse.osgi.services@default:default"/>
 <setEntry value="org.eclipse.osgi.services.source@default:default"/>
 <setEntry value="org.eclipse.equinox.cm@default:default"/>
+<setEntry value="org.eclipse.equinox.cm.source@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
 <setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
@@ -170,11 +171,11 @@
 <setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.objectweb.asm.commons@default:default"/>
-<setEntry value="org.objectweb.asm.analysis@default:default"/>
+<setEntry value="org.objectweb.asm.tree.analysis@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
 <setEntry value="org.objectweb.asm.util@default:default"/>
 <setEntry value="org.objectweb.asm.source@default:default"/>
-<setEntry value="org.objectweb.asm.analysis.source@default:default"/>
+<setEntry value="org.objectweb.asm.tree.analysis.source@default:default"/>
 <setEntry value="org.objectweb.asm.commons.source@default:default"/>
 <setEntry value="org.objectweb.asm.tree.source@default:default"/>
 <setEntry value="org.objectweb.asm.util.source@default:default"/>
@@ -195,6 +196,7 @@
 <setEntry value="org.apache.xalan@default:default"/>
 <setEntry value="org.apache.xml.serializer@default:default"/>
 <setEntry value="org.eclipse.equinox.event@default:default"/>
+<setEntry value="org.eclipse.equinox.event.source@default:default"/>
 <setEntry value="org.eclipse.jetty.annotations@4:true"/>
 <setEntry value="org.eclipse.jetty.jndi@default:default"/>
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
