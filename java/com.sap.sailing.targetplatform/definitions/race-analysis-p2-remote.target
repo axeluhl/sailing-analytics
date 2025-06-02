@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="244">
+<target name="Race Analysis Target" sequenceNumber="245">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -154,7 +154,7 @@
 <repository location="https://download.eclipse.org/releases/2025-06/202505231000"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.justj.openjdk.hotspot.jre.base.feature.group"/>
+<unit id="org.eclipse.justj.openjdk.hotspot.jre.full.feature.group"/>
 <repository location="https://download.eclipse.org/justj/jres/17/updates/release/latest/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
@@ -431,7 +431,7 @@
 <plugin id="org.eclipse.equinox.http.service.api"/>
 <plugin id="org.eclipse.equinox.http.service.api.source"/>
 <plugin id="org.osgi.service.wireadmin"/>
-<plugin id="org.osgi.service.wireadmin"/>
+<plugin id="org.osgi.service.wireadmin.source"/>
 <plugin id="org.osgi.service.provisioning"/>
 <plugin id="org.osgi.service.provisioning.source"/>
 <plugin id="redisson"/>
