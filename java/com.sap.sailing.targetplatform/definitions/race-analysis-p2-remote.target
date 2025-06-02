@@ -158,6 +158,10 @@
 <repository location="https://download.eclipse.org/justj/jres/17/updates/release/latest/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+  <unit id="a.jre.javase" version="17.0.0"/>
+  <repository location="https://download.eclipse.org/eclipse/updates/4.36-I-builds/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
 <unit id="org.apache.xmlbeans.source" version="3.1.0.v20200922-1359"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
