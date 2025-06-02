@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="239">
+<target name="Race Analysis Target" sequenceNumber="244">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -154,8 +154,8 @@
 <repository location="https://download.eclipse.org/releases/2025-06/202505231000"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="a.jre.javase" version="17.0.0"/>
-<repository location="https://download.eclipse.org/justj/jres/17/updates/release/17.0.0"/>
+<unit id="org.eclipse.justj.openjdk.hotspot.jre.base.feature.group"/>
+<repository location="https://download.eclipse.org/justj/jres/17/updates/release/latest/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
