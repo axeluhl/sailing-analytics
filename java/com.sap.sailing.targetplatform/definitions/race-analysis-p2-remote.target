@@ -154,10 +154,6 @@
 <repository location="https://download.eclipse.org/releases/2025-06/202505231000"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-  <unit id="org.eclipse.justj.openjdk.hotspot.jre.full.feature.group" version="17.0.10.v20240120-1143"/>
-  <repository location="https://download.eclipse.org/justj/jres/17/updates/release/17.0.10"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
 <unit id="org.apache.xmlbeans.source" version="3.1.0.v20200922-1359"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
@@ -469,7 +465,6 @@
 <plugin id="com.google.protobuf.source"/>
 <plugin id="com.nulab-inc.zxcvbn"/>
 <plugin id="com.nulab-inc.zxcvbn.source"/>
-<plugin id="org.eclipse.justj.openjdk.hotspot.jre.minimal"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17"/>
 </target>
