@@ -153,6 +153,16 @@
 <setEntry value="org.osgi.service.device.source@default:default"/>
 <setEntry value="org.osgi.service.http.whiteboard@default:default"/>
 <setEntry value="org.osgi.service.http.whiteboard.source@default:default"/>
+<setEntry value="org.osgi.service.useradmin@default:default"/>
+<setEntry value="org.osgi.service.useradmin.source@default:default"/>
+<setEntry value="org.osgi.service.metatype@default:default"/>
+<setEntry value="org.osgi.service.metatype.source@default:default"/>
+<setEntry value="org.eclipse.equinox.http.service.api@default:default"/>
+<setEntry value="org.eclipse.equinox.http.service.api.source@default:default"/>
+<setEntry value="org.osgi.service.wireadmin@default:default"/>
+<setEntry value="org.osgi.service.wireadmin.source@default:default"/>
+<setEntry value="org.osgi.service.provisioning@default:default"/>
+<setEntry value="org.osgi.service.provisioning.source@default:default"/>
 <setEntry value="com.sun.istack.commons-runtime@default:default"/>
 <setEntry value="jaxb-api@default:default"/>
 <setEntry value="com.sun.xml.bind.jaxb-impl@default:default"/>
