@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,10 +126,15 @@ public class TimeRangeResultCacheTest {
         cache.getResults(fourthAction);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testRegisterResultForNonExistentRequest() {
-        TimeRangeResultCache<Void> cache = new TimeRangeResultCache<>();
-        cache.registerResult(getDummyAction(), null);
+        try {
+            TimeRangeResultCache<Void> cache = new TimeRangeResultCache<>();
+            cache.registerResult(getDummyAction(), null);
+            fail("Excpected IllegalArgumentException for registering result for non-existent request");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 
     @Test

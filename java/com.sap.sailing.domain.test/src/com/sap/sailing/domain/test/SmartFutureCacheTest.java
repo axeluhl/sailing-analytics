@@ -18,19 +18,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.CacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
 
+@Timeout(value=2, unit=TimeUnit.MINUTES)
 public class SmartFutureCacheTest {
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
-    
     @Test
     public void testPerformanceOfGetAndCall() {
         SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
