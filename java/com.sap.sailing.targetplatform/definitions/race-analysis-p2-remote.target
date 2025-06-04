@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="223">
+<target name="Race Analysis Target" sequenceNumber="246">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -135,6 +135,27 @@
 <unit id="org.osgi.util.xml" version="1.0.2.202109301733"/>
 <unit id="org.osgi.util.xml.source" version="1.0.2.202109301733"/>
 <repository location="https://download.eclipse.org/releases/2022-06"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="junit-jupiter-api" version="5.12.2"/>
+<unit id="junit-jupiter-api.source" version="5.12.2"/>
+<unit id="junit-jupiter-engine" version="5.12.2"/>
+<unit id="junit-jupiter-engine.source" version="5.12.2"/>
+<unit id="junit-jupiter-migrationsupport" version="5.12.2"/>
+<unit id="junit-jupiter-migrationsupport.source" version="5.12.2"/>
+<unit id="junit-jupiter-params" version="5.12.2"/>
+<unit id="junit-jupiter-params.source" version="5.12.2"/>
+<unit id="junit-vintage-engine" version="5.12.2"/>
+<unit id="junit-vintage-engine.source" version="5.12.2"/>
+<unit id="junit-platform-commons" version="1.12.2"/>
+<unit id="junit-platform-commons.source" version="1.12.2"/>
+<unit id="junit-platform-engine" version="1.12.2"/>
+<unit id="junit-platform-engine.source" version="1.12.2"/>
+<unit id="junit-platform-launcher" version="1.12.2"/>
+<unit id="junit-platform-launcher.source" version="1.12.2"/>
+<unit id="junit-platform-runner" version="1.12.2"/>
+<unit id="junit-platform-runner.source" version="1.12.2"/>
+<repository location="https://download.eclipse.org/releases/2025-06/202505231000"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xmlbeans" version="3.1.0.v20200922-1359"/>
@@ -301,6 +322,24 @@
 <plugin id="org.hyperic.sigar"/>
 <plugin id="org.junit"/>
 <plugin id="org.junit.source"/>
+<plugin id="junit-jupiter-api"/>
+<plugin id="junit-jupiter-api.source"/>
+<plugin id="junit-jupiter-engine"/>
+<plugin id="junit-jupiter-engine.source"/>
+<plugin id="junit-jupiter-migrationsupport"/>
+<plugin id="junit-jupiter-migrationsupport.source"/>
+<plugin id="junit-jupiter-params"/>
+<plugin id="junit-jupiter-params.source"/>
+<plugin id="junit-vintage-engine"/>
+<plugin id="junit-vintage-engine.source"/>
+<plugin id="junit-platform-commons"/>
+<plugin id="junit-platform-commons.source"/>
+<plugin id="junit-platform-engine"/>
+<plugin id="junit-platform-engine.source"/>
+<plugin id="junit-platform-launcher"/>
+<plugin id="junit-platform-launcher.source"/>
+<plugin id="junit-platform-runner"/>
+<plugin id="junit-platform-runner.source"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mockito.mockito-core.source"/>

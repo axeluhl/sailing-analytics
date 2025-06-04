@@ -6,6 +6,10 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: com.sap.sailing.geocoding
-Require-Bundle: org.junit;bundle-version="4.8.2"
+Require-Bundle: junit-jupiter-api;bundle-version="5.12.2",
+ junit-jupiter-engine;bundle-version="5.12.2",
+ junit-platform-launcher;bundle-version="1.12.2",
+ junit-vintage-engine;bundle-version="5.12.2",
+ org.junit;bundle-version="4.13.2"
 Import-Package: org.json.simple.parser
 Automatic-Module-Name: com.sap.sailing.geocoding.test
