@@ -22,7 +22,7 @@ import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 public class ReverseGeocoderTest {
     private ReverseGeocoder geocoder;
     private static final Placemark KIEL = new PlacemarkImpl("Kiel", "DE", new DegreePosition(54.32132926107913, 10.1348876953125), 232758);
-    private static final Position KIEL_POSITION = new DegreePosition(54.3231063453431, 10.12265682220459);
+    private static final Position KIEL_POSITION = new DegreePosition(54.32217976191047, 10.133570443980922);
     
     @Before
     public void setUp() {
