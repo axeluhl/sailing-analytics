@@ -57,9 +57,14 @@ public class RaceLogTest {
         raceLog = new RaceLogImpl("testlock", "test-identifier");
     }
     
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsOnNoLock() {
-        raceLog.getRawFixes();
+        try {
+            raceLog.getRawFixes();
+            fail("Should throw IllegalStateException when lock is not acquired");
+        } catch (IllegalStateException e) {
+            // expected
+        }
     }
     
     @Test

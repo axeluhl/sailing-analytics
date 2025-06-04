@@ -9,14 +9,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -49,6 +49,7 @@ import com.sap.sse.common.TransformationException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
+@Timeout(value=3, unit=TimeUnit.MINUTES)
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private static final Logger logger = Logger.getLogger(TrackedRaceLoadsFixesTest.class.getName());
     
@@ -68,9 +69,6 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         competitorsAndBoats.put(comp2, boat2);
         this.raceDefinition = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
     }
-    
-    @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
