@@ -2,11 +2,11 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,8 +20,8 @@ import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.SecurityApi;
@@ -48,7 +48,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
 
     private final SecurityApi securityApi = new SecurityApi();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -57,18 +57,18 @@ public class SecurityApiTest extends AbstractSeleniumTest {
     public void testCreateAndGetUser() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final AccessToken createUserResponse = securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, DUMMY_PASSWORD);
-        assertEquals("Responded username of createUser is different!", USERNAME, createUserResponse.getUsername());
-        assertNotNull("Token is missing in reponse!", createUserResponse.getAccessToken());
+        assertEquals(USERNAME, createUserResponse.getUsername(), "Responded username of createUser is different!");
+        assertNotNull(createUserResponse.getAccessToken(), "Token is missing in reponse!");
         User getUserResponse = securityApi.getUser(adminCtx, USERNAME);
-        assertEquals("Responded username of getUser is different!", USERNAME, getUserResponse.getUsername());
+        assertEquals(USERNAME, getUserResponse.getUsername(), "Responded username of getUser is different!");
     }
 
     @Test
     public void testSayHello() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final Hello hello = securityApi.sayHello(adminCtx);
-        assertEquals("Responded principal of hello is different!", "admin", hello.getPrincipal());
-        assertEquals("Responded authenticated of hello is different!", true, hello.isAuthenticated());
+        assertEquals("admin", hello.getPrincipal(), "Responded principal of hello is different!");
+        assertEquals(true, hello.isAuthenticated(), "Responded authenticated of hello is different!");
     }
 
     @Test

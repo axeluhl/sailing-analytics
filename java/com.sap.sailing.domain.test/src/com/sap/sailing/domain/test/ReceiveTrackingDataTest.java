@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -51,7 +51,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
      * into {@link #firstTracked} and {@link #firstData}. All events are converted into {@link GPSFixMovingImpl}
      * objects and appended to the {@link DynamicTrackedRace}s.
      */
-    @Before
+    @BeforeEach
     public void setupListener() {
         final DomainFactory domainFactory = DomainFactory.INSTANCE;
         final RaceChangeListener positionListener = new AbstractRaceChangeListener() {

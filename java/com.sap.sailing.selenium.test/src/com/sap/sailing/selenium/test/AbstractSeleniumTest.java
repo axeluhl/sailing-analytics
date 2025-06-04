@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.junit.Before;
+import org.junit.BeforeEach;
 import org.junit.Rule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -207,7 +207,7 @@ public abstract class AbstractSeleniumTest {
      * This is important because {@link #clearState(String)} will also clear all session state that has been constructed
      * by {@link #setUpAuthenticatedSession()}.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         setUpAuthenticatedSession(getWebDriver());
     }

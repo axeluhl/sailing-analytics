@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
-import org.junit.Before;
+import org.junit.BeforeEach;
 import org.junit.Rule;
 import org.junit.rules.Timeout;
 
@@ -45,7 +45,7 @@ public abstract class AbstractTestWithIgtimiConnection extends AbstractSeleniumT
     
     protected ApiContext ctx;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
         super.setUp();

@@ -1,10 +1,10 @@
 package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.usermanagement.ChangePasswordDialogPO;
@@ -24,7 +24,7 @@ public class TestUserManagement extends AbstractSeleniumTest {
     private static final String TEST_PERMISSION = "USER:READ";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

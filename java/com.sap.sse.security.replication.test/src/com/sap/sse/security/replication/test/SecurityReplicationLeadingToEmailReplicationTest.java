@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.common.mail.MailException;
@@ -42,7 +42,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
     private MailServiceImpl masterMailService;
     private MailServiceImpl replicaMailService;
 
-    @Before
+    @BeforeEach
     @Override
     public void setUp() throws Exception {
         masterMailService = AbstractMailServiceReplicationTest.createMailCountingService(true);
@@ -137,7 +137,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
      * operations on the replica.
      */
     @Test
-    @Ignore
+    @Disabled
     public void triggerEmailSendByAddingUserOnReplica()
             throws UserManagementException, MailException, IllegalAccessException, InterruptedException, UserGroupManagementException {
         SecurityService replicaSecurityService = securitySetUp.getReplica();

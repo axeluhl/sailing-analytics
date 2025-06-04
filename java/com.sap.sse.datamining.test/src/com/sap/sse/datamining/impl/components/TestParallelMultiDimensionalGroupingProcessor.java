@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.factories.ProcessorFactory;
@@ -34,7 +34,7 @@ public class TestParallelMultiDimensionalGroupingProcessor {
 
     private GroupedDataEntry<Number> groupedElement;
 
-    @Before
+    @BeforeEach
     public void intializeProcessor() throws IllegalArgumentException, NoSuchMethodException, SecurityException {
         @SuppressWarnings("unchecked")
         Processor<GroupedDataEntry<Number>, Void> receiver = new NullProcessor<GroupedDataEntry<Number>, Void>((Class<GroupedDataEntry<Number>>)(Class<?>) GroupedDataEntry.class, Void.class) {

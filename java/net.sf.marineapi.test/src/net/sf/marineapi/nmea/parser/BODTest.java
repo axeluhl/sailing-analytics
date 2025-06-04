@@ -4,9 +4,9 @@ import junit.framework.TestCase;
 import net.sf.marineapi.nmea.sentence.BODSentence;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests the BOD sentence parser.
@@ -24,7 +24,7 @@ public class BODTest extends TestCase {
 	 * setUp
 	 */
 	@Override
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		try {
 			empty = new BODParser(TalkerId.GP);
@@ -38,7 +38,7 @@ public class BODTest extends TestCase {
 	 * tearDown
 	 */
 	@Override
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 	}
 

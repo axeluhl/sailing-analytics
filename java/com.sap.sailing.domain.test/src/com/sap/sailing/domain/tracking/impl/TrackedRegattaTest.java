@@ -11,9 +11,9 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Course;
@@ -46,7 +46,7 @@ public class TrackedRegattaTest {
             Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
     private DynamicTrackedRegatta regatta;
     
-    @Before
+    @BeforeEach
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
@@ -103,7 +103,7 @@ public class TrackedRegattaTest {
         try {
             removeBarrier.await(10, TimeUnit.MILLISECONDS);
             // if this line is reached, the order of events is not correctly ensured
-            Assert.fail();
+            Assertions.fail();
         } finally {
             addPhaser.forceTermination();
             try {

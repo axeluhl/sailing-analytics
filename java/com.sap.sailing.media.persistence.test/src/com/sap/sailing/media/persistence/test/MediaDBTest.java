@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.hamcrest.core.Is;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -22,8 +22,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MediaDBTest extends AbstractMongoDBTest {
 

@@ -1,10 +1,10 @@
 package com.sap.sailing.selenium.api.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -29,9 +29,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.junit.Ignore;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
@@ -113,7 +113,7 @@ public class WebSocketTest extends AbstractSeleniumTest {
         }
     }
     
-    @Ignore("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
+    @Disabled("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
     @Test
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
@@ -160,7 +160,7 @@ public class WebSocketTest extends AbstractSeleniumTest {
             }
         });
         assertNotNull(liveDataConnection);
-        assertTrue("Connection handshake not successful within 5s", liveDataConnection.waitForConnection(5000l));
+        assertTrue(liveDataConnection.waitForConnection(5000l), "Connection handshake not successful within 5s");
         liveDataConnection.stop(); // this won't stop the actual connection because it's still shared with redundantSecondSharedConnection
         redundantSecondSharedConnection.stop(); // now this should stop the actual connection
         LiveDataConnection secondRedundantSecondSharedConnection = conn.getOrCreateLiveConnection(Collections.singleton("GA-EN-AAEJ"));

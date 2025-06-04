@@ -3,7 +3,7 @@ package com.sap.sse.mail.replication.testsupport;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -20,7 +20,7 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
 
     public static final Map<MailServiceImpl, Integer> numberOfMailsSent = new HashMap<>();
     
-    @Before
+    @BeforeEach
     public void clearNumberOfMailsSent() {
         numberOfMailsSent.clear();
     }

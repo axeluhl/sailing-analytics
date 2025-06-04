@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -49,7 +49,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     private List<RaceDescriptor> leaderboardRaces;
     
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRaces = new ArrayList<>();
@@ -142,7 +142,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         });
     }
     
-    @Ignore("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
+    @Disabled("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
     @Test
     public void testDynamicRenamingOfRace() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {

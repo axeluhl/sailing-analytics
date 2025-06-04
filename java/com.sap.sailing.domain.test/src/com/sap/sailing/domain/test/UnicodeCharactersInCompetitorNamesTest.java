@@ -10,9 +10,9 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -36,7 +36,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
     
     @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.TEST_RACE_LOG_RESOLVER));
     }

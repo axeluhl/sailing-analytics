@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.data.impl.ContainerElement;
@@ -27,7 +27,7 @@ public class TestCompoundFunction {
     private Function<String> compoundFunction;
     private Function<String> compoundFunctionWithSecondTakingSingleIntParameter;
     
-    @Before
+    @BeforeEach
     public void initializeCompoundFunction() throws ClassCastException, NoSuchMethodException, SecurityException {
         {
         List<Function<?>> functions = new ArrayList<>();

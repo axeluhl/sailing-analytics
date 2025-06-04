@@ -1,8 +1,8 @@
 package com.sap.sailing.server.replication.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import java.net.URI;
 import java.net.URL;
@@ -12,9 +12,9 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
@@ -56,7 +56,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         // no-op
     }
 
-    @Before
+    @BeforeEach
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -189,7 +189,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
         return null;
     }
 
-    @After
+    @AfterEach
     @Override
     public void tearDown() throws Exception {
         if (racesHandle != null) {

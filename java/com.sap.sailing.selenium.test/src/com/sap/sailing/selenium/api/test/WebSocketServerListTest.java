@@ -1,12 +1,12 @@
 package com.sap.sailing.selenium.api.test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.net.URI;
 import java.net.URL;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;

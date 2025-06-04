@@ -1,8 +1,8 @@
 package com.sap.sailing.selenium.test.autoplay;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.function.Function;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -49,7 +49,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     private static final String BMW_CUP_RACE_NAME = "R1";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
@@ -74,7 +74,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
 
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(BMW_CUP_REGATTA);
-        Assert.assertTrue(details != null);
+        Assertions.assertTrue(details != null);
         details.linkRace(new RaceDescriptor(BMW_CUP_RACE_NAME, "Default", false, false, 0), trackedRace);
     }
 
@@ -94,8 +94,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         autoPlayConfiguration.select("Sixty Inch Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server change, better only check arguments
-        assertTrue("Url does not contain proper type " + url, url.contains("autoplayType=SIXTYINCH"));
-        assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
+        assertTrue(url.contains("autoplayType=SIXTYINCH"), "Url does not contain proper type " + url);
+        assertTrue(url.contains("name=BMW+Cup+(J80)"), "Url does not contain proper name " + url);
         AutoPlayUpcomingView autoplayPage = page.goToAutoPlaySixtyInchUrl(getWebDriver(), url);
         String nextUpText = autoplayPage.getText();
         assertEquals("There are no further races starting soon", nextUpText);
@@ -117,8 +117,8 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         autoPlayConfiguration.select("Classic Autoplay", BMW_CUP_EVENT, BMW_CUP_REGATTA);
         String url = autoPlayConfiguration.getConfiguredUrl();
         // eventid and server change, better only check arguments
-        assertTrue("Url does not contain proper title " + url, url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"));
-        assertTrue("Url does not contain proper name " + url, url.contains("name=BMW+Cup+(J80)"));
+        assertTrue(url.contains("lbwh.saph.title=Leaderboard%3A+BMW+Cup+(J80)"), "Url does not contain proper title " + url);
+        assertTrue(url.contains("name=BMW+Cup+(J80)"), "Url does not contain proper name " + url);
         AutoPlayLeaderboardView autoplayPage = page.goToAutoPlayClassicUrl(getWebDriver(), url);
         LeaderboardTablePO leaderBoard = autoplayPage.getLeaderBoardWithData();
         final List<String> races = new WebDriverWait(getWebDriver(), 20).until(new Function<WebDriver, List<String>>() {
@@ -141,9 +141,9 @@ public class TestAutoPlay extends AbstractSeleniumTest {
                 }
             }
         });
-        Assert.assertTrue(races.contains("R1"));
-        Assert.assertTrue(races.contains("R2"));
-        Assert.assertTrue(races.contains("R3"));
+        Assertions.assertTrue(races.contains("R1"));
+        Assertions.assertTrue(races.contains("R2"));
+        Assertions.assertTrue(races.contains("R3"));
     }
 
 }

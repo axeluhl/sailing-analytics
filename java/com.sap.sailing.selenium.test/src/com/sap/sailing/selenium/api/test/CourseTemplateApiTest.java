@@ -4,9 +4,9 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SECURITY_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.HttpException;
@@ -38,7 +38,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
     private ApiContext ctx;
     private CourseTemplateDataFactory ctdf;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
         ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
@@ -64,7 +64,7 @@ public class CourseTemplateApiTest extends AbstractSeleniumTest {
             fail();
         } catch (Exception e) {
             final String expected = "Subject does not have permission [MARK_ROLE:READ:";
-            assertTrue("Expected "+e.getMessage()+" to contain "+expected, e.getMessage().contains(expected));
+            assertTrue(e.getMessage().contains(expected), "Expected "+e.getMessage()+" to contain "+expected);
         }
     }
 

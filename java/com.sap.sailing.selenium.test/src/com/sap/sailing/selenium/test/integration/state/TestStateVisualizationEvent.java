@@ -6,8 +6,8 @@ import static com.sap.sailing.selenium.pages.common.DateHelper.getPastDate;
 import java.util.Date;
 import java.util.function.Predicate;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -45,7 +45,7 @@ public class TestStateVisualizationEvent extends AbstractSeleniumTest {
         eventConfigurationPanel.createEmptyEvent(name, null, venue, startDate, endDate, true);
         String eventUrl = eventConfigurationPanel.getEventEntry(name).getEventURL();
         EventPage eventPage = EventPage.goToEventUrl(getWebDriver(), eventUrl);
-        Assert.assertTrue(expectedLabelType.test(eventPage.getEventHeader().getEventStateLabel()));
+        Assertions.assertTrue(expectedLabelType.test(eventPage.getEventHeader().getEventStateLabel()));
     }
 
 }

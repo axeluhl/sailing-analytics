@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ResultImportUrlsPanelPO;
@@ -13,7 +13,7 @@ public class TestConnectorsResultImportUrls extends AbstractSeleniumTest {
     private final static String TEST_URL_PROVIDER_LABEL = "FREG HTML Score Importer";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

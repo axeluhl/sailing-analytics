@@ -5,18 +5,18 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static java.lang.System.currentTimeMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.MarkType;
@@ -52,7 +52,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
     private final CourseConfigurationApi courseConfigurationApi = new CourseConfigurationApi();
     private final SecurityApi securityApi = new SecurityApi();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -65,8 +65,8 @@ public class MarkApiTest extends AbstractSeleniumTest {
         final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
         final Mark mark = markApi.addMarkToRegatta(ctx, regatta.getName(), "Startboat");
 
-        assertNotNull("Mark result should not be null", mark);
-        assertNotNull("Id of created mark should not be null", mark.getMarkId());
+        assertNotNull(mark, "Mark result should not be null");
+        assertNotNull(mark.getMarkId(), "Id of created mark should not be null");
     }
 
     /**

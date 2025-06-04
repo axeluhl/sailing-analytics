@@ -1,6 +1,6 @@
 package com.sap.sailing.expeditionconnector.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,10 +9,10 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.expeditionconnector.UDPMirror;
@@ -24,7 +24,7 @@ public class UDPMirrorTest {
     private static final int RECEIVING_PORT = 33796;
     private Thread mirrorThread;
     
-    @Before
+    @BeforeEach
     public void startMirror() throws InterruptedException {
         mirrorThread = new Thread() {
             public void run() {
@@ -79,7 +79,7 @@ public class UDPMirrorTest {
     }
     
     @SuppressWarnings("deprecation")
-    @After
+    @AfterEach
     public void stopMirror() {
         mirrorThread.stop();
     }

@@ -1,6 +1,6 @@
 package com.sap.sse.datamining.impl.components;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.test.util.components.aggregators.TestAggregationProcessorDummyWithInvalidConstructor;
 

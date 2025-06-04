@@ -3,14 +3,14 @@ package com.sap.sse.datamining.impl.components;
 import static com.sap.sse.datamining.test.util.ConcurrencyTestsUtil.getSharedExecutor;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.components.DataRetrieverChainBuilder;
@@ -48,7 +48,7 @@ public class TestDataRetrieverChainCreation {
     };
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void initializeRetrieverChain() {
         dataRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_HasLegOfCompetitorContext.class, "TestRetrieverChain");
         dataRetrieverChainDefinition.startWith(TestRegattaRetrievalProcessor.class, Test_Regatta.class, "regatta");
@@ -62,7 +62,7 @@ public class TestDataRetrieverChainCreation {
                                              Test_HasLegOfCompetitorContext.class, "legOfCompetitor");
     }
     
-    @Before
+    @BeforeEach
     public void initializeFilters() {
         raceFilter = new AbstractFilterCriterion<Test_HasRaceContext>(Test_HasRaceContext.class) {
             @Override

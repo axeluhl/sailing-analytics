@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;

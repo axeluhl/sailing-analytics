@@ -1,10 +1,10 @@
 package com.sap.sailing.selenium.test.authentication;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.authentication.AuthenticationMenuPO;
@@ -13,7 +13,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 public class TestAuthenticationSignIn extends AbstractSeleniumTest {
     
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         getWebDriver().manage().deleteCookieNamed("JSESSIONID");

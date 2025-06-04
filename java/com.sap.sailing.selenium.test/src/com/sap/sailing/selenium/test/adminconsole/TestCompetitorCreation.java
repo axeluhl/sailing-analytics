@@ -3,11 +3,11 @@ package com.sap.sailing.selenium.test.adminconsole;
 import static com.sap.sailing.selenium.pages.PageObject.DEFAULT_POLLING_INTERVAL;
 import static com.sap.sailing.selenium.pages.PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS;
 import static com.sap.sailing.selenium.pages.PageObject.createFluentWait;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.support.ui.FluentWait;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -21,7 +21,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestCompetitorCreation extends AbstractSeleniumTest {
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
@@ -10,8 +10,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -56,7 +56,7 @@ public class ShortTimeWindCacheTest {
     private WindWithConfidence<Pair<Position, TimePoint>> result;
     
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() {
         now = MillisecondsTimePoint.now();
         trackedRace = mock(TrackedRaceImpl.class);

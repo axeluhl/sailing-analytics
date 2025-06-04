@@ -11,9 +11,9 @@ import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -54,7 +54,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     private static final String SERIES_MEDALS = "Medals";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
@@ -102,7 +102,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must not be available without wind data
-            Assert.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
+            Assertions.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
         }
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -129,7 +129,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1), false);
             MapSettingsPO mapSettings = raceboard.openMapSettings();
             // Simulator overlay option must be available with the wind data being available
-            Assert.assertTrue(mapSettings.isShowSimulationOverlayCheckBoxVisible());
+            Assertions.assertTrue(mapSettings.isShowSimulationOverlayCheckBoxVisible());
         }
     }
 

@@ -7,11 +7,11 @@ import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext
 import static com.sap.sailing.selenium.api.core.ApiContext.createApiContext;
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
 import static java.lang.System.currentTimeMillis;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,9 +27,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.MarkType;
@@ -84,7 +84,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
     private ApiContext ctx;
     private ApiContext sharedServerCtx;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
         ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -100,7 +100,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         found = true;
                     }
                 }
-                assertTrue("No markconfiguration with id " + mcId + " for waypoint", found);
+                assertTrue(found, "No markconfiguration with id " + mcId + " for waypoint");
             }
         }
     }
@@ -111,9 +111,9 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final Iterable<MarkConfiguration> trgtMarkConfigurations = trgtCourseConfiguration.getMarkConfigurations();
         final Iterable<WaypointWithMarkConfiguration> srcWaypoints = srcCourseConfiguration.getWaypoints();
         final Iterable<WaypointWithMarkConfiguration> trgtWaypoints = trgtCourseConfiguration.getWaypoints();
-        assertEquals("number of markconfiguration is different", Util.size(srcMarkConfigurations),
-                Util.size(trgtMarkConfigurations));
-        assertEquals("number of waypoints is different", Util.size(srcWaypoints), Util.size(trgtWaypoints));
+        assertEquals(Util.size(srcMarkConfigurations), Util.size(trgtMarkConfigurations),
+                "number of markconfiguration is different");
+        assertEquals(Util.size(srcWaypoints), Util.size(trgtWaypoints), "number of waypoints is different");
         final Map<MarkConfiguration, String> markConfigurationToNameMap = new HashMap<>();
         for (final MarkConfiguration markConfiguration : srcMarkConfigurations) {
             final UUID markTemplateId = markConfiguration.getMarkTemplateId();
@@ -146,30 +146,30 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                                             : "unknown";
                     markConfigurationToNameMap.put(markConfiguration, identifier);
                     if (markTemplateId != null && trgtMarkConfiguration.getMarkTemplateId() != null) {
-                        assertEquals("markTemplateId is different for " + msgIdentifier, markTemplateId,
-                                trgtMarkConfiguration.getMarkTemplateId());
+                        assertEquals(markTemplateId, trgtMarkConfiguration.getMarkTemplateId(),
+                                "markTemplateId is different for " + msgIdentifier);
                     }
                     final String srcAssociatedRoleId = markConfiguration.getAssociatedRoleId();
                     if (srcAssociatedRoleId != null) {
-                        assertEquals("associated role is different for " + msgIdentifier, srcAssociatedRoleId,
-                                trgtMarkConfiguration.getAssociatedRoleId());
+                        assertEquals(srcAssociatedRoleId, trgtMarkConfiguration.getAssociatedRoleId(),
+                                "associated role is different for " + msgIdentifier);
                     }
                     if (matchByName) {
-                        assertEquals("shortName is different for " + msgIdentifier, srcAppearance.getShortName(),
-                                trgtAppearance.getShortName());
+                        assertEquals(srcAppearance.getShortName(), trgtAppearance.getShortName(),
+                                "shortName is different for " + msgIdentifier);
                     }
                     List<DeviceMapping> trgtDeviceMappings = trgtMarkConfiguration.getDeviceMappings();
                     boolean hasNonPingDeviceIdentifier = !trgtDeviceMappings.isEmpty()
                             && !trgtDeviceMappings.get(0).getType().equals("PING");
                     if (srcPositioning != null) {
                         if (srcPositioning.getDeviceId() != null) {
-                            assertEquals("tracking device was not properly mapped for " + msgIdentifier,
-                                    "smartphoneUUID", trgtDeviceMappings.get(0).getType());
+                            assertEquals("smartphoneUUID",
+                                    trgtDeviceMappings.get(0).getType(), "tracking device was not properly mapped for " + msgIdentifier);
                         } else if (srcPositioning.getLatitudeDeg() != null && srcPositioning.getLongitudeDeg() != null) {
-                            assertEquals("position.lat is different for " + msgIdentifier, srcPositioning.getLatitudeDeg(),
-                                    trgtMarkConfiguration.getLastKnownPosition().getLatDeg(), 0.0001);
-                            assertEquals("position.lng is different for " + msgIdentifier,
-                                    srcPositioning.getLongitudeDeg(), trgtMarkConfiguration.getLastKnownPosition().getLngDeg(), 0.0001);
+                            assertEquals(srcPositioning.getLatitudeDeg(), trgtMarkConfiguration.getLastKnownPosition().getLatDeg(),
+                                    0.0001, "position.lat is different for " + msgIdentifier);
+                            assertEquals(srcPositioning.getLongitudeDeg(),
+                                    trgtMarkConfiguration.getLastKnownPosition().getLngDeg(), 0.0001, "position.lng is different for " + msgIdentifier);
                         }
                     }
                     if (markConfiguration.isStoreToInventory()) {
@@ -182,11 +182,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                             assertEquals(srcAppearance.getName(), markProperties.getName());
                             assertEquals(srcAppearance.getShortName(), markProperties.getShortName());
                         }
-                        assertEquals("device association differs for "+msgIdentifier, markProperties.hasDevice(), hasNonPingDeviceIdentifier);
+                        assertEquals(markProperties.hasDevice(), hasNonPingDeviceIdentifier, "device association differs for "+msgIdentifier);
                     }
                 }
             }
-            assertTrue("No matching markconfiguration found for markconfiguration " + markConfiguration.getId(), found);
+            assertTrue(found, "No matching markconfiguration found for markconfiguration " + markConfiguration.getId());
         }
         for (final WaypointWithMarkConfiguration srcWaypoint : srcWaypoints) {
             final String controlPointName = srcWaypoint.getControlPointName();
@@ -195,11 +195,11 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 for (final WaypointWithMarkConfiguration trgtWaypoint : trgtWaypoints) {
                     if (controlPointName.equals(trgtWaypoint.getControlPointName())) {
                         found = true;
-                        assertEquals("Waypoint controlpoint shortname is different",
-                                srcWaypoint.getControlPointShortName(), trgtWaypoint.getControlPointShortName());
-                        assertEquals("Waypoint number of markconfigurations is different",
-                                Util.size(srcWaypoint.getMarkConfigurationIds()),
-                                Util.size(trgtWaypoint.getMarkConfigurationIds()));
+                        assertEquals(srcWaypoint.getControlPointShortName(),
+                                trgtWaypoint.getControlPointShortName(), "Waypoint controlpoint shortname is different");
+                        assertEquals(Util.size(srcWaypoint.getMarkConfigurationIds()),
+                                Util.size(trgtWaypoint.getMarkConfigurationIds()),
+                                "Waypoint number of markconfigurations is different");
                         final LongAdder srcIndex = new LongAdder();
                         for (final String srcMarkConfigurationId : srcWaypoint.getMarkConfigurationIds()) {
                             srcIndex.increment();
@@ -213,8 +213,8 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                                             if (trgtMc.getId().equals(trgtMarkConfigurationId)) {
                                                 if (markConfigurationToNameMap.get(srcMc)
                                                         .equals(trgtMc.getEffectiveProperties().getName())) {
-                                                    assertEquals("Waypoint position of markconfigurations is wrong",
-                                                            srcIndex.intValue(), trgtIndex.intValue());
+                                                    assertEquals(srcIndex.intValue(),
+                                                            trgtIndex.intValue(), "Waypoint position of markconfigurations is wrong");
                                                 }
                                             }
                                         });
@@ -224,17 +224,17 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                         }
                     }
                 }
-                assertTrue("Waypoint with control point name " + controlPointName + " not found", found);
+                assertTrue(found, "Waypoint with control point name " + controlPointName + " not found");
             }
         }
         final RepeatablePart srcRepeatablePart = srcCourseConfiguration.getRepeatablePart();
         if (srcRepeatablePart != null) {
             final RepeatablePart tgrtRepeatablePart = trgtCourseConfiguration.getRepeatablePart();
-            assertEquals("repeatablePart.start is different",
-                    srcRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
-                    Integer.valueOf(tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartStart()));
-            assertEquals("repeatablePart.end is different", srcRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd(),
-                    tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd());
+            assertEquals(srcRepeatablePart.getZeroBasedIndexOfRepeatablePartStart(),
+                    Integer.valueOf(tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartStart()),
+                    "repeatablePart.start is different");
+            assertEquals(srcRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd(), tgrtRepeatablePart.getZeroBasedIndexOfRepeatablePartEnd(),
+                    "repeatablePart.end is different");
         }
     }
 
@@ -298,7 +298,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
                 template.getId(), /* optionalRegattaName */ null, /* tags */ null, /* optionalNumberOfLaps */ null);
         assertEquals(templateWaypoints, Util.size(courseConfiguration.getWaypoints()));
 
-        assertNull("repeatable part of course configuration is not null", courseConfiguration.getRepeatablePart());
+        assertNull(courseConfiguration.getRepeatablePart(), "repeatable part of course configuration is not null");
         assertEquals(numberOfLaps, courseConfiguration.getNumberOfLaps());
         // create a course and make sure it has no repeatable part
         final String regattaName = "test";
@@ -306,7 +306,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         final RaceColumn race = regattaApi.addRaceColumn(ctx, regattaName, null, 1)[0];
         final CourseConfiguration course = courseConfigurationApi.createCourse(ctx, courseConfiguration, "test", race.getRaceName(), "Default");
         assertEquals(templateWaypoints, Util.size(course.getWaypoints()));
-        assertNull("repeatable part of course is not null", course.getRepeatablePart());
+        assertNull(course.getRepeatablePart(), "repeatable part of course is not null");
         assertEquals(-1, course.getNumberOfLaps()); // the course template does not specify a repeatable part
     }
 
@@ -526,7 +526,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    @Ignore
+    @Disabled
     //TODO: Need to clarify this test. The two course template don't seem to get merged by
     // MarkRole. Perhaps the cause is, that the MarkTemplate/MarkRole-map of the first
     // MarkTemplate is passed to the creation of the second one, so the MarkTemplate-IDs are

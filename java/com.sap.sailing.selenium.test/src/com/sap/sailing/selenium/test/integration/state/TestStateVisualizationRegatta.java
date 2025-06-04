@@ -7,10 +7,9 @@ import static com.sap.sailing.selenium.pages.common.DateHelper.getPastTime;
 import java.util.Date;
 import java.util.function.Predicate;
 
-import org.junit.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -26,7 +25,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
@@ -86,7 +85,7 @@ public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
         private void assertStateFlagOfRegatta(String regattaName, Predicate<LabelTypePO> expectedLabelType) {
             RegattaEventPage regattaEventPage = RegattaEventPage.goToRegattaEventUrl(getWebDriver(), eventUrl);
             RegattaListItemPO regattaListItem = regattaEventPage.getRegattaListItem(regattaName);
-            Assert.assertTrue(expectedLabelType.test(regattaListItem.getRegattaHeader().getRegattaStateLabel()));
+            Assertions.assertTrue(expectedLabelType.test(regattaListItem.getRegattaHeader().getRegattaStateLabel()));
         }
     }
 }

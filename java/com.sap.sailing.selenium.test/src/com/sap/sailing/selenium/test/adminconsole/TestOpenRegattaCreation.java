@@ -1,7 +1,7 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -18,7 +18,7 @@ public class TestOpenRegattaCreation extends AbstractSeleniumTest {
     private RegattaDescriptor regatta;
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS, CompetitorRegistrationType.OPEN_UNMODERATED,
                 REGISTRATION_LINK_SECRET);
