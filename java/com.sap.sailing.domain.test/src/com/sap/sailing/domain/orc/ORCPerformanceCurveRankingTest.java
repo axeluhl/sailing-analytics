@@ -13,14 +13,14 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.rules.ErrorCollector;
-import org.junit.rules.TestRule;
-import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.orc.impl.RaceLogORCLegDataEventImpl;
@@ -62,6 +62,7 @@ import com.sap.sse.common.impl.SecondsDurationImpl;
  * @author Axel Uhl (d043530)
  *
  */
+@Timeout(value = 100, unit = TimeUnit.MINUTES)
 public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     final static MillisecondsTimePoint TIME_14_30_00 = new MillisecondsTimePoint(1555849800000l);
     final static MillisecondsTimePoint TIME_14_30_12 = new MillisecondsTimePoint(1555849812000l);
@@ -72,11 +73,6 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     private RegattaLog regattaLog;
     private LogEventAuthorImpl author;
 
-    @Rule
-    public TestRule getTimeoutRule() {
-        return Timeout.millis(100 * 60 * 1000);
-    }
-    
     @Rule
     public ErrorCollector collector = new ErrorCollector();
     

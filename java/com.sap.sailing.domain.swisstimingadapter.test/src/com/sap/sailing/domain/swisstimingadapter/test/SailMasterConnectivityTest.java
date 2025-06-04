@@ -16,13 +16,13 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
@@ -43,6 +43,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
+@Timeout(value=5, unit=TimeUnit.MINUTES)
 public class SailMasterConnectivityTest {
     private static final Logger logger = Logger.getLogger(SailMasterConnectivityTest.class.getName());
     
@@ -50,8 +51,6 @@ public class SailMasterConnectivityTest {
     
     private Thread dummyServerThread;
     private SailMasterDummy sailMaster;
-    
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // timeout after 5 minutes
 
     private SailMasterConnector connector4702;
     
