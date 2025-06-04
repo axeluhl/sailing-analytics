@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.coursetemplate.test;
 
-import static org.junit.Assume.assumeNoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -137,7 +136,7 @@ public class TestLapConfiguration {
         try {
             courseTemplate.getWaypointTemplates(0);
         } catch (IllegalArgumentException e) {
-            assumeNoException("No IllegalArgumentException should have been thrown for zero laps because the course has no repeatable part", e);
+            fail("No IllegalArgumentException should have been thrown for zero laps because the course has no repeatable part: "+e.getMessage());
         }
     }
     

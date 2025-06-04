@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
@@ -749,7 +751,7 @@ public class SensorFixStoreAndLoadTest {
         fixLoaderAndTracker.stop(true, /* willBeRemoved */ false);
     }
     
-    @Test(timeout=10_000)
+    @Timeout(value=10_000, unit=TimeUnit.SECONDS)
     /** Test for regression introduced while working on bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
     public void testPreemptiveStopDoesNotBlockThread() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,

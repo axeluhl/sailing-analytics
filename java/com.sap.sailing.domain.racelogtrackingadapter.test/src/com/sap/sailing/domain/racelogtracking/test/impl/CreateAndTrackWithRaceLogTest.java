@@ -16,12 +16,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
@@ -85,6 +84,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBService;
 
+@Timeout(value=3, unit=TimeUnit.MINUTES)
 public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private RacingEventService service;
     private final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
@@ -96,9 +96,6 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     private SensorFixStore sensorFixStore;
 
     private long time = 0;
-
-    @Rule
-    public Timeout CreateAndTrackWithRaceLogTestTimeout = Timeout.millis(3 * 60 * 1000);
 
     @BeforeEach
     public void setup() throws UnknownHostException, MongoException {

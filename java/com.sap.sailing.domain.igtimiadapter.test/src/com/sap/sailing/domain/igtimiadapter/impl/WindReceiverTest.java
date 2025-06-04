@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -31,9 +31,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@Timeout(value = 2, unit=TimeUnit.MINUTES) // 2 minutes timeout for the test
 public class WindReceiverTest {
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
-
     @Test
     public void simpleWindReceiverTest() {
         final List<Wind> windReceived = new ArrayList<>();
