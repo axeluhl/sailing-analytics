@@ -12,7 +12,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.function.Consumer;
 
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.base.Course;

@@ -8,8 +8,8 @@ import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToP
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -35,7 +35,7 @@ public class AclRevokeAnonymousTest extends AbstractSeleniumTest {
     private static final String BOAT_CLASS = "GC 32";
     private AdminConsolePage adminConsole;
     
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

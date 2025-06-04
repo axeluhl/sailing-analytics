@@ -1,15 +1,15 @@
 package com.sap.sse.datamining.impl.i18n;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.Date;
 import java.util.Locale;
 import java.util.MissingResourceException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.test.util.ConcurrencyTestsUtil;
@@ -30,7 +30,7 @@ public class TestI18N {
     
     private ResourceBundleStringMessages testStringMessages;
     
-    @Before
+    @BeforeEach
     public void initializeBundleManager() {
         testStringMessages = TestsUtil.getTestStringMessages();
     }

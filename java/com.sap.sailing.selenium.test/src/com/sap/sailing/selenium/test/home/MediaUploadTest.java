@@ -5,8 +5,8 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -37,7 +37,7 @@ public class MediaUploadTest extends AbstractSeleniumTest {
     private static final String MOV_URL = "https://exmaple.video.com/download/video.mov";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

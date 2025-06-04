@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;

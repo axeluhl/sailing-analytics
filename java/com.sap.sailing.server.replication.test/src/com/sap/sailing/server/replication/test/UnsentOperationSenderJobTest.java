@@ -1,6 +1,6 @@
 package com.sap.sailing.server.replication.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,9 +9,9 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
+import org.junit.BeforeEach;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
@@ -29,7 +29,7 @@ public class UnsentOperationSenderJobTest implements OperationsToMasterSender<Ra
     
     @Rule public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
     
-    @Before
+    @BeforeEach
     public void setUp() {
         job = new UnsentOperationsSenderJob();
         resendCount = 0;

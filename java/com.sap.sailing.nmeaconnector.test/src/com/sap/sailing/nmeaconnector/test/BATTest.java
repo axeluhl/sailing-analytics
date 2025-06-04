@@ -1,14 +1,14 @@
 package com.sap.sailing.nmeaconnector.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.nmeaconnector.BATSentence;
@@ -28,7 +28,7 @@ public class BATTest {
     BATSentence empty;
     BATSentence bat;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         empty = new BATParser(TalkerId.WI);
         bat = new BATParser(EXAMPLE);

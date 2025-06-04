@@ -1,9 +1,9 @@
 package com.sap.sse.gwt.client.async;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.TimeRange;
@@ -25,18 +25,18 @@ public class TimeRangeResultCacheTest {
             public void onFailure(Throwable caught) {
                 assertTriggeredOnce();
                 if (assertSuccess) {
-                    assertTrue("Expected onSuccess but got onFailure", false); // Fail test
+                    assertTrue(false, "Expected onSuccess but got onFailure"); // Fail test
                 }
             }
             @Override
             public void onSuccess(Void result) {
                 assertTriggeredOnce();
                 if (!assertSuccess) {
-                    assertTrue("Expected onFailure but got onSuccess", false); // Fail test
+                    assertTrue(false, "Expected onFailure but got onSuccess"); // Fail test
                 }
             }
             private void assertTriggeredOnce() {
-                assertFalse("Callback was triggered more than once", triggered);
+                assertFalse(triggered, "Callback was triggered more than once");
                 triggered = true;
             }
         };

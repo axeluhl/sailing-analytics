@@ -6,8 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
@@ -22,7 +22,7 @@ public class TestMethodWrappingFunction {
     private Method sideEffectFreeValueMethod;
     private Method externalLibraryMethod;
 
-    @Before
+    @BeforeEach
     public void initializeMethods() {
         dimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
         sideEffectFreeValueMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "sideEffectFreeValue");

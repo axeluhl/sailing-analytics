@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.igtimiadapter.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +15,8 @@ import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.FixFactory;
@@ -50,7 +50,7 @@ public class TestRiotServer {
         }
     }
     
-    @Before
+    @BeforeEach
     public void setUp() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         final SecurityService mockSecurityService = SecurityServiceMockFactory.mockSecurityService();
         Activator.getInstance().setSecurityService(mockSecurityService);

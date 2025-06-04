@@ -2,13 +2,13 @@ package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.SHARED_SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
@@ -26,7 +26,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
 
     private final MarkTemplateApi markTemplateApi = new MarkTemplateApi();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -36,18 +36,18 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate markTemplate = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME, MARK_TEMPLATE_SHORTNAME,
                 MARK_TEMPLATE_COLOR, MARK_TEMPLATE_SHAPE, MARK_TEMPLATE_PATTERN, MARK_TEMPLATE_TYPE);
-        assertNotNull("read: no MarkTemplate returnded", markTemplate);
+        assertNotNull(markTemplate, "read: no MarkTemplate returnded");
         assertDefaultValues(markTemplate);
     }
 
     private void assertDefaultValues(MarkTemplate markTemplate) {
-        assertNotNull("read: MarkTemplate.id is missing", markTemplate.getId());
-        assertEquals("read: MarkTemplate.name is different", MARK_TEMPLATE_NAME, markTemplate.getName());
-        assertEquals("read: MarkTemplate.shortName is different", MARK_TEMPLATE_SHORTNAME, markTemplate.getShortName());
-        assertEquals("read: MarkTemplate.color is different", MARK_TEMPLATE_COLOR, markTemplate.getColor());
-        assertEquals("read: MarkTemplate.shape is different", MARK_TEMPLATE_SHAPE, markTemplate.getShape());
-        assertEquals("read: MarkTemplate.pattern is different", MARK_TEMPLATE_PATTERN, markTemplate.getPattern());
-        assertEquals("read: MarkTemplate.type is different", MARK_TEMPLATE_TYPE, markTemplate.getMarkType().name());
+        assertNotNull(markTemplate.getId(), "read: MarkTemplate.id is missing");
+        assertEquals(MARK_TEMPLATE_NAME, markTemplate.getName(), "read: MarkTemplate.name is different");
+        assertEquals(MARK_TEMPLATE_SHORTNAME, markTemplate.getShortName(), "read: MarkTemplate.shortName is different");
+        assertEquals(MARK_TEMPLATE_COLOR, markTemplate.getColor(), "read: MarkTemplate.color is different");
+        assertEquals(MARK_TEMPLATE_SHAPE, markTemplate.getShape(), "read: MarkTemplate.shape is different");
+        assertEquals(MARK_TEMPLATE_PATTERN, markTemplate.getPattern(), "read: MarkTemplate.pattern is different");
+        assertEquals(MARK_TEMPLATE_TYPE, markTemplate.getMarkType().name(), "read: MarkTemplate.type is different");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
         assertDefaultValues(foundMarkTemplate);
     }
 
-    @Ignore
+    @Disabled
     public void createSeveralMarkTemplateAndGetAllTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate markTemplate1 = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME,

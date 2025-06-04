@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sse.common.Util.size;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,11 +16,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.mongodb.MongoException;
@@ -100,7 +100,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     @Rule
     public Timeout CreateAndTrackWithRaceLogTestTimeout = Timeout.millis(3 * 60 * 1000);
 
-    @Before
+    @BeforeEach
     public void setup() throws UnknownHostException, MongoException {
         final ClientSession clientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
         final ClientSession metadataCollectionClientSession = MongoDBService.INSTANCE.startCausallyConsistentSession();
@@ -132,7 +132,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         DomainFactory.INSTANCE.getCompetitorAndBoatStore().clear();
     }
     
-    @After
+    @AfterEach
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         service.removeRegatta(regatta);
     }
@@ -154,7 +154,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     public void cantAddBeforeDenoting() throws MalformedURLException, FileNotFoundException, URISyntaxException,
             Exception {
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
-        Assert.assertThrows(NotDenotedForRaceLogTrackingException.class, ()->trackAndGetRace(column));
+        Assertions.assertThrows(NotDenotedForRaceLogTrackingException.class, ()->trackAndGetRace(column));
     }
 
     private void testSize(Track<?> track, int expected) {

@@ -12,8 +12,8 @@ import java.util.List;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -55,7 +55,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
     private static final String SERIES_MEDALS = "Medals";
     
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

@@ -5,14 +5,14 @@ import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static java.lang.System.currentTimeMillis;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.json.simple.JSONArray;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -36,7 +36,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
     private final RegattaApi regattaApi = new RegattaApi();
     private final LeaderboardApi leaderboardApi = new LeaderboardApi();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -46,22 +46,22 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
         Leaderboard leaderBoard = leaderboardApi.getLeaderboard(ctx, LEADERBOARD_NAME);
-        assertEquals("read: leaderboard.name is different", LEADERBOARD_NAME, leaderBoard.getName());
-        assertEquals("read: leaderboard.displayName is different", LEADERBOARD_NAME, leaderBoard.getDisplayName());
-        assertNotNull("read: leaderboard.resultTimepoint is missing", leaderBoard.getResultTimePoint());
-        assertEquals("read: leaderboard.resultState is different", "Live", leaderBoard.getResultState());
-        assertEquals("read: leaderboard.type is different", "RegattaLeaderboard", leaderBoard.getType());
-        assertEquals("read: leaderboard.canBoatsOfCompetitorsChangePerRace is different", false,
-                leaderBoard.canBoatsOfCompetitorsChangePerRace());
-        assertNull("read: leaderboard.maxCompetitorsCount should be null", leaderBoard.getMaxCompetitorsCount());
-        assertNull("read: leaderboard.scoringComment should be null", leaderBoard.getScoringComment());
-        assertNull("read: leaderboard.lastScoringUpdate should be null", leaderBoard.getLastScoringUpdate());
-        assertEquals("read: leaderboard.columnNames should be empty", 0, leaderBoard.getColumnNames().length);
-        assertEquals("read: leaderboard.competitors should be empty", 0,
-                ((JSONArray) leaderBoard.get("competitors")).size());
-        assertEquals("read: leaderboard.shardingLeaderboardName is different",
-                "/leaderboard/" + LEADERBOARD_NAME.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
-                leaderBoard.get("shardingLeaderboardName"));
+        assertEquals(LEADERBOARD_NAME, leaderBoard.getName(), "read: leaderboard.name is different");
+        assertEquals(LEADERBOARD_NAME, leaderBoard.getDisplayName(), "read: leaderboard.displayName is different");
+        assertNotNull(leaderBoard.getResultTimePoint(), "read: leaderboard.resultTimepoint is missing");
+        assertEquals("Live", leaderBoard.getResultState(), "read: leaderboard.resultState is different");
+        assertEquals("RegattaLeaderboard", leaderBoard.getType(), "read: leaderboard.type is different");
+        assertEquals(false, leaderBoard.canBoatsOfCompetitorsChangePerRace(),
+                "read: leaderboard.canBoatsOfCompetitorsChangePerRace is different");
+        assertNull(leaderBoard.getMaxCompetitorsCount(), "read: leaderboard.maxCompetitorsCount should be null");
+        assertNull(leaderBoard.getScoringComment(), "read: leaderboard.scoringComment should be null");
+        assertNull(leaderBoard.getLastScoringUpdate(), "read: leaderboard.lastScoringUpdate should be null");
+        assertEquals(0, leaderBoard.getColumnNames().length, "read: leaderboard.columnNames should be empty");
+        assertEquals(0, ((JSONArray) leaderBoard.get("competitors")).size(),
+                "read: leaderboard.competitors should be empty");
+        assertEquals("/leaderboard/" + LEADERBOARD_NAME.replaceAll(" ", "_").replaceAll("<", "_").replaceAll(">", "_"),
+                leaderBoard.get("shardingLeaderboardName"),
+                "read: leaderboard.shardingLeaderboardName is different");
     }
 
     @Test
@@ -170,8 +170,8 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         leaderboardApi.startRaceLogTracking(ctx, LEADERBOARD_NAME, race.getRaceName(), "Default");
         TrackingTimes trackingTimes = leaderboardApi.setTrackingTimes(ctx, LEADERBOARD_NAME, race.getRaceName(),
                 "Default", startTime, endTime);
-        assertEquals("read: startTime is different", startTime, trackingTimes.getStartOfTracking());
-        assertEquals("read: endTime is different", endTime, trackingTimes.getEndOfTracking());
+        assertEquals(startTime, trackingTimes.getStartOfTracking(), "read: startTime is different");
+        assertEquals(endTime, trackingTimes.getEndOfTracking(), "read: endTime is different");
     }
 
     @Test

@@ -9,10 +9,10 @@ import javax.xml.bind.DatatypeConverter;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -92,7 +92,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     private static final String BRANCH_IO_COMPLIANT_LOCALHOST_ALIAS = "branch-io-localhost-alias";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         boolean checkUrlIsWorking;
         String prodCheckUrl = "https://www.sapsailing.com/gwt/status";
@@ -141,10 +141,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         RegistrationLinkWithQRCodeDialogPO registrationLinkWithQRCode = regattaDetails.configureRegistrationURL();
         // check URL
         String createdInvitationUrl = registrationLinkWithQRCode.getRegistrationLinkUrl();
-        Assert.assertTrue(createdInvitationUrl.startsWith(INVITATION_URL_BASE));
-        Assert.assertTrue(createdInvitationUrl.contains("secret=" + secret));
-        Assert.assertTrue(createdInvitationUrl.contains("event_id=" + selectedEventId));
-        Assert.assertTrue(createdInvitationUrl.contains("server=http%3A%2F%2Flocalhost%3A"));
+        Assertions.assertTrue(createdInvitationUrl.startsWith(INVITATION_URL_BASE));
+        Assertions.assertTrue(createdInvitationUrl.contains("secret=" + secret));
+        Assertions.assertTrue(createdInvitationUrl.contains("event_id=" + selectedEventId));
+        Assertions.assertTrue(createdInvitationUrl.contains("server=http%3A%2F%2Flocalhost%3A"));
         // "localhost" is not accepted by branch.io, so we need to replace by some artificial server;
         // that server will not have to be resolved during the test, so it can be a random string
         final String localNonLoopbackAddress = getNonLoopbackLocalhostAddress();
@@ -160,9 +160,9 @@ public class TestLinkCreation extends AbstractSeleniumTest {
                 By.xpath("//div[contains(text(), '" + EXPECTED_PUPLIC_INVITE_QR_CODE_TITLE + "')]")));
         WebElement qrCodeLink = wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2F"+localNonLoopbackAddress+"%3A"));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2F"+localNonLoopbackAddress+"%3A"));
     }
     
     /**

@@ -1,6 +1,6 @@
 package com.sap.sse.replication.testsupport;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -224,7 +224,7 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
                 logger.info("sent and closed STOP request");
                 initialLoadTestServerThread.join(10000 /* wait 10s */);
                 logger.info("joined servlet thread");
-                assertFalse("Expected initial load test server thread to die", initialLoadTestServerThread.isAlive());
+                assertFalse(initialLoadTestServerThread.isAlive(), "Expected initial load test server thread to die");
             }
         } catch (ConnectException ex) {
             /* do not make tests fail because of a server that has been shut down

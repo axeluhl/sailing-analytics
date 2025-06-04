@@ -1,9 +1,9 @@
 package com.sap.sailing.selenium.test.datamining;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.datamining.DataMiningPage;
 import com.sap.sailing.selenium.pages.datamining.DataMiningPanelPO;
@@ -11,7 +11,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class DataminingEntrypointSmokeTest extends AbstractSeleniumTest {
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

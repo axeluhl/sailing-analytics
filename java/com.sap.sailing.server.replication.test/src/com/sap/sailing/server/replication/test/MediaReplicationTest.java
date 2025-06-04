@@ -2,8 +2,8 @@ package com.sap.sailing.server.replication.test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -24,8 +24,8 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -348,11 +348,11 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     }
 
     private void compareTracks(MediaTrack trackOnSource, Iterable<MediaTrack> targetTracksMaster) {
-        Assert.assertEquals(1, Util.size(targetTracksMaster));
+        Assertions.assertEquals(1, Util.size(targetTracksMaster));
         MediaTrack trackOnTarget = targetTracksMaster.iterator().next();
-        Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
-        Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
-        Assert.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
+        Assertions.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
+        Assertions.assertEquals(trackOnSource.url, trackOnTarget.url);
+        Assertions.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
     }
 
     private <T extends AbstractSailingServerResource> T spyResource(T resource, RacingEventService service) {

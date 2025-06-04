@@ -1,6 +1,6 @@
 package com.sap.sailing.mongodb.test;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.mongodb.AlreadyRegisteredException;
 import com.sap.sse.mongodb.MongoDBService;

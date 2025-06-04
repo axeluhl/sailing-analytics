@@ -1,15 +1,15 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.PreferencesApi;
@@ -17,7 +17,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class PreferencesApiTest extends AbstractSeleniumTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -34,8 +34,8 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
         preferencesApi.createPreference(ctx, "pref1", prefObjectAttr);
 
         JSONObject foundPreference = preferencesApi.getPreference(ctx, "pref1");
-        assertEquals("restored preference is different", "value1", foundPreference.get("key1"));
-        assertEquals("restored preference is different", "value2", foundPreference.get("key2"));
+        assertEquals("value1", foundPreference.get("key1"), "restored preference is different");
+        assertEquals("value2", foundPreference.get("key2"), "restored preference is different");
     }
 
     @Test
@@ -51,7 +51,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
         preferencesApi.deletePreference(ctx, "pref2");
 
         JSONObject foundPreference = preferencesApi.getPreference(ctx, "pref2");
-        assertNull("should not find a deleted preference", foundPreference);
+        assertNull(foundPreference, "should not find a deleted preference");
     }
 
 }

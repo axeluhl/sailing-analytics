@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.orc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,10 +19,10 @@ import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.MaxIterationsExceededException;
 import org.json.simple.parser.ParseException;
-import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ErrorCollector;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
@@ -72,7 +72,7 @@ public class TestORCPerformanceCurve {
     
     public void assertEquals(double a, double b, double accuracy) {
         try {
-            Assert.assertEquals(a, b, accuracy);
+            Assertions.assertEquals(a, b, accuracy);
         } catch (AssertionError e) {
             if (collectErrors) {
                 collector.addError(e);
@@ -82,7 +82,7 @@ public class TestORCPerformanceCurve {
     
     public void assertEquals(String message, double a, double b, double accuracy) {
         try {
-            Assert.assertEquals(message, a, b, accuracy);
+            Assertions.assertEquals(a, b, accuracy, message);
         } catch (AssertionError e) {
             if (collectErrors) {
                 collector.addError(e);
@@ -90,7 +90,7 @@ public class TestORCPerformanceCurve {
         }
     }
     
-    @BeforeClass
+    @BeforeAll
     public static void initialize() throws IOException, ParseException, DOMException, SAXException,
             ParserConfigurationException, java.text.ParseException {
         List<ORCPerformanceCurveLeg> legs = new ArrayList<>();

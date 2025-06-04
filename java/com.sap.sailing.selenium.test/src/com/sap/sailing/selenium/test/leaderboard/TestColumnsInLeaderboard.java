@@ -1,16 +1,16 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -47,7 +47,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     private RaceDescriptor raceColumn;
     
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRace = new TrackableRaceDescriptor(EVENT, RACE, BOAT_CLASS);
@@ -58,7 +58,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         configureLeaderboard();
     }
     
-    @Ignore
+    @Disabled
     @Test
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);

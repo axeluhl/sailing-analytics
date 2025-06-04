@@ -1,9 +1,9 @@
 package com.sap.sailing.expeditionconnector.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,10 +31,10 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.Declination;
@@ -212,7 +212,7 @@ public class UDPExpeditionReceiverTest {
         }
     }
     
-    @Before
+    @BeforeEach
     public void setUp() throws UnknownHostException, SocketException, InterruptedException {
         validLines = new String[] {
                 "#0,1,7.700,2,-39.0,3,23.00,9,319.0,12,1.17,146,40348.390035*37",
@@ -280,7 +280,7 @@ public class UDPExpeditionReceiverTest {
         };
     }
     
-    @After
+    @AfterEach
     public void tearDown() {
         socket.close();
         receiver.removeListener(listener);

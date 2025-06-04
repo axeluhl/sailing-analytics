@@ -1,12 +1,12 @@
 package com.sap.sailing.selenium.api.test;
 
 import static com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage.goToPage;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.event.EventApi;
@@ -25,7 +25,7 @@ public class DefaultTenantApiTest extends AbstractSeleniumTest {
     private UUID tenantGroupId;
     private String userToken;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();

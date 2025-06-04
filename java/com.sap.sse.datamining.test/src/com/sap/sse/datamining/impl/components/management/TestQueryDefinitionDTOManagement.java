@@ -6,8 +6,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.exceptions.DataMiningComponentAlreadyRegisteredForKeyException;
@@ -26,7 +26,7 @@ public class TestQueryDefinitionDTOManagement {
     private static StatisticQueryDefinitionDTO pseudoQueryDefinition;
     private static StatisticQueryDefinitionDTO differentQueryDefinition;
 
-    @BeforeClass
+    @BeforeAll
     public static void initializeQueryDefinitions() {
         FunctionDTO statisticToCalculate = new FunctionDTO(false, "Test", "Test", "Test", new ArrayList<String>(), "Test", 0);
         AggregationProcessorDefinitionDTO aggregatorDefinition = new AggregationProcessorDefinitionDTO("Test", "Test", "Test", "Test");

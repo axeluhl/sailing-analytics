@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.orc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -14,10 +14,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
@@ -82,7 +82,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
     
     public void assertEquals(double a, double b, double accuracy) {
         try {
-            Assert.assertEquals(a, b, accuracy);
+            Assertions.assertEquals(a, b, accuracy);
         } catch (AssertionError e) {
             collector.addError(e);
         }
@@ -90,7 +90,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
 
     public void assertEquals(String message, double a, double b, double accuracy) {
         try {
-            Assert.assertEquals(message, a, b, accuracy);
+            Assertions.assertEquals(a, b, accuracy, message);
         } catch (AssertionError e) {
             collector.addError(e);
         }
@@ -104,7 +104,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
         return "D-Marin ORC World Championship";
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
         URI storedUri = new URI("file:///"+new File("resources/orc/worlds2019/348f93c0-6798-0137-b07e-60a44ce903c3.mtb").getCanonicalPath().replace('\\', '/'));
@@ -135,7 +135,7 @@ public class ORCPerformanceCurveRankingTest extends OnlineTracTracBasedTest {
                     certificate = certificates.getCertificateByBoatName(boat.getName() == null ? boat.getSailID() : boat.getName());
                 }
             }
-            assertNotNull("Couldn't find a certificate for boat "+boat, certificate);
+            assertNotNull(certificate, "Couldn't find a certificate for boat "+boat);
             final RegattaLogEvent certificateAssignment = new RegattaLogORCCertificateAssignmentEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(),
                     author, UUID.randomUUID(), certificate, boat);
             regattaLog.add(certificateAssignment);

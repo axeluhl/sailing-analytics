@@ -3,12 +3,12 @@ package com.sap.sailing.selenium.api.test;
 import static com.sap.sailing.selenium.api.core.ApiContext.SERVER_CONTEXT;
 import static com.sap.sailing.selenium.api.core.ApiContext.createAdminApiContext;
 import static com.sap.sailing.selenium.api.core.GpsFixMoving.createFix;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.GpsFixMoving;
@@ -20,7 +20,7 @@ public class GpsFixApiTest extends AbstractSeleniumTest {
 
     private final GpsFixApi gpsFixApi = new GpsFixApi();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         clearState(getContextRoot(), /* headless */ true);
     }
@@ -29,7 +29,7 @@ public class GpsFixApiTest extends AbstractSeleniumTest {
     public void testGpsFixHull() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final GpsFixResponse gpsFixRepsone = gpsFixApi.postGpsFix(ctx, UUID.randomUUID());
-        assertTrue("Result should be empty.", gpsFixRepsone.isEmpty());
+        assertTrue(gpsFixRepsone.isEmpty(), "Result should be empty.");
     }
 
     @Test
@@ -37,6 +37,6 @@ public class GpsFixApiTest extends AbstractSeleniumTest {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final GpsFixMoving gpsFix = createFix(49.12, 8.599, System.currentTimeMillis(), 10.0, 180.0);
         final GpsFixResponse gpsFixResponse = gpsFixApi.postGpsFix(ctx, UUID.randomUUID(), gpsFix);
-        assertTrue("Result should be empty.", gpsFixResponse.isEmpty());
+        assertTrue(gpsFixResponse.isEmpty(), "Result should be empty.");
     }
 }

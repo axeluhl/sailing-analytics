@@ -1,10 +1,10 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sse.common.Util.size;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
@@ -141,7 +141,7 @@ public class SensorFixStoreAndLoadTest {
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     private DynamicTrackedRace trackedRace;
 
-    @Before
+    @BeforeEach
     public void setUp() throws UnknownHostException, MongoException {
         dropPersistedData();
         raceLog = new RaceLogImpl("racelog");
@@ -180,7 +180,7 @@ public class SensorFixStoreAndLoadTest {
         db.getCollection(CollectionNames.RACE_LOGS.name()).drop();
     }
 
-    @After
+    @AfterEach
     public void after() {
         dropPersistedData();
     }

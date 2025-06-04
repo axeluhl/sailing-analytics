@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
@@ -51,7 +51,7 @@ public class TestFunctionManagerAsFunctionProvider {
     private ExpectedFunctionRegistryUtil functionRegistryUtil;
     private ModifiableDataMiningServer server;
     
-    @Before
+    @BeforeEach
     public void initializeDataMiningServer() throws NoSuchMethodException, SecurityException {
         functionRegistryUtil = new ExpectedFunctionRegistryUtil();
         server = TestsUtil.createNewServer();

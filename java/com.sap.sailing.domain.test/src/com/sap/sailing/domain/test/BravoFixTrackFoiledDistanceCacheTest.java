@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,8 +12,8 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -141,7 +141,7 @@ public class BravoFixTrackFoiledDistanceCacheTest {
         }
     }
     
-    @Before
+    @BeforeEach
     public void setUp() {
         final CourseAreaImpl courseArea = new CourseAreaImpl("Test", UUID.randomUUID(), /* centerPosition */ null, /* radius */ null);
         gpsTrack = new DynamicGPSFixMovingTrackImpl<>(courseArea, /* millisecondsOverWhichToAverage */ 15000);

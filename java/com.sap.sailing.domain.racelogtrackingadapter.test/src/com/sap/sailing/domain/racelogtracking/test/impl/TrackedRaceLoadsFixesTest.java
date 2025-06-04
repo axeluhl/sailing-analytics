@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -13,9 +13,9 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.Timeout;
 
 import com.mongodb.MongoException;
@@ -61,7 +61,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
     private RaceDefinition raceDefinition;
     
-    @Before
+    @BeforeEach
     public void setUp() throws UnknownHostException, MongoException {
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(comp, boat);
