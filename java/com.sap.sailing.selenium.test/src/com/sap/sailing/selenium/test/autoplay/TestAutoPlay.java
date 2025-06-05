@@ -12,10 +12,10 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -56,7 +56,6 @@ public class TestAutoPlay extends AbstractSeleniumTest {
     }
 
     private void initTrackingForBmwCupRace(AdminConsolePage adminConsole) {
-
         TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(BMW_RACE, 1),
                 BMW_CUP_BOAT_CLASS);
         TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
@@ -78,7 +77,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         details.linkRace(new RaceDescriptor(BMW_CUP_RACE_NAME, "Default", false, false, 0), trackedRace);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSixtyInchAutoPlayStartup() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();
@@ -101,7 +100,7 @@ public class TestAutoPlay extends AbstractSeleniumTest {
         assertEquals("There are no further races starting soon", nextUpText);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testClassicAutoPlayStartup() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         EventConfigurationPanelPO events = adminConsole.goToEvents();

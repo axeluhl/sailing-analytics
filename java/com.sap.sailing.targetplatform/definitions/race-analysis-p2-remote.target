@@ -157,8 +157,6 @@
 <unit id="junit-jupiter-migrationsupport.source" version="5.12.2"/>
 <unit id="junit-jupiter-params" version="5.12.2"/>
 <unit id="junit-jupiter-params.source" version="5.12.2"/>
-<unit id="junit-vintage-engine" version="5.12.2"/>
-<unit id="junit-vintage-engine.source" version="5.12.2"/>
 <unit id="junit-platform-commons" version="1.12.2"/>
 <unit id="junit-platform-commons.source" version="1.12.2"/>
 <unit id="junit-platform-engine" version="1.12.2"/>
@@ -344,8 +342,6 @@
 <plugin id="junit-jupiter-migrationsupport.source"/>
 <plugin id="junit-jupiter-params"/>
 <plugin id="junit-jupiter-params.source"/>
-<plugin id="junit-vintage-engine"/>
-<plugin id="junit-vintage-engine.source"/>
 <plugin id="junit-platform-commons"/>
 <plugin id="junit-platform-commons.source"/>
 <plugin id="junit-platform-engine"/>
