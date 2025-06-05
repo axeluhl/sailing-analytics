@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.ExpeditionDeviceConfigurationsPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -30,7 +30,7 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         createTestExpeditionDeviceConfigurations();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testUrlParameterFilter() {        
         ExpeditionDeviceConfigurationsPanelPO configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(); 
         List<String> availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();
@@ -50,7 +50,7 @@ public class TestExpeditionDeviceConfigurationsFilterAndSelectByUrlParameters ex
         assertEquals("Test Configuration", configurationPanelPO.getSelectedEntries().get(0).getName());
     }
     
-    @Test
+    @SeleniumTestCase
     public void testUrlParameterSelect() {       
         ExpeditionDeviceConfigurationsPanelPO configurationPanelPO = getExpeditionDeviceConfigurationsPanelPoOfPageWithUrlParams(PARAM_SELECT, "Test"); 
         List<String> availableConfigurations = configurationPanelPO.getAvailableExpeditionDeviceConfigurations();

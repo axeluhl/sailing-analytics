@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -69,7 +69,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         return competitorsPanel;
     }
 
-    @Test
+    @SeleniumTestCase
     public void testMaintenanceOfSelectionAfterDataChanges() {
         this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
             final WebDriver windowForEditDriver = windowForEdit.switchToWindow();
@@ -188,7 +188,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testRefreshOfDependingUIElements() {
         this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
             setUpTestRefreshOfDependingUIElements();
@@ -245,7 +245,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         });
     }
     
-    @Test
+    @SeleniumTestCase
     public void testMaintenanceOfSelectionAfterFilteringTrackedracesOnLeaderboardConfigPanel() {
         setUpTestRefreshOfDependingUIElements();
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());

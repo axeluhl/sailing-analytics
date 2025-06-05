@@ -22,8 +22,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.sap.sailing.selenium.core.UseSeleniumExtensions;
 import com.sap.sailing.selenium.core.TestEnvironment;
+import com.sap.sailing.selenium.core.UseSeleniumExtensions;
 import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.PageObject;
 import com.sap.sse.common.Duration;

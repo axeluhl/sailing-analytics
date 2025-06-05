@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO.LeaderboardEntryPO;
@@ -29,7 +29,7 @@ public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
         leaderboardDetails.addRacesToFlexibleLeaderboard(5);
     }
     
-    @Test
+    @SeleniumTestCase
     public void testBehaviorOfRaceSelectionWithTabChange() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -52,7 +52,7 @@ public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
         assertEquals(id, leaderboardDetails.getRacesTable().getSelectedEntries().get(0).getIdentifier());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testBehaviorOfRaceSelectionWithLeaderboardChange() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();

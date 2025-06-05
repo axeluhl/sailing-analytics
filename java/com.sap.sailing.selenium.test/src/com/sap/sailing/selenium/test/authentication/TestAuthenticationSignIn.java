@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.authentication.AuthenticationMenuPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -19,7 +19,7 @@ public class TestAuthenticationSignIn extends AbstractSeleniumTest {
         getWebDriver().manage().deleteCookieNamed("JSESSIONID");
     }
     
-    @Test
+    @SeleniumTestCase
     public void testSignInWithExistingUserAdmin() {
         AdminConsolePage adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         AuthenticationMenuPO authenticationMenu = adminConsolePage.getAuthenticationMenu();

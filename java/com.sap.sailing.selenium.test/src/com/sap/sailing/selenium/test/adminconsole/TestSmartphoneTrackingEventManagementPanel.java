@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -68,7 +68,7 @@ public class TestSmartphoneTrackingEventManagementPanel extends AbstractSelenium
         configureLeaderboard();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testAutomaticSelectionOfLinkedRaceInRaceTable() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfigurationPanelPO = adminConsole.goToLeaderboardConfiguration();

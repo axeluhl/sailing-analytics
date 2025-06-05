@@ -13,9 +13,9 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -93,7 +93,7 @@ public class WhitelabelTest extends AbstractSeleniumTest {
         setWhitelabel(true, getContextRoot());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testHomepageWhitelabel() throws UnsupportedEncodingException {
         HomePage homePage = HomePage.goToPage(getWebDriver(), getContextRoot());
         assertThat(homePage.getPageTitle(), not(containsString("SAP")));

@@ -12,7 +12,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -23,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -119,7 +119,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
      * from branch.io over production environment (my.sapsailing.com) back to localhost. The link back to localhost need
      * an additional confirmation on production server.
      */
-    @Test
+    @SeleniumTestCase
     public void testRegattaOverviewInvitationLinkCreation() throws SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // create an event and regatta
@@ -178,7 +178,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     /**
      * Testing the generation of an invitation QR code for the Race Manager App.
      */
-    @Test
+    @SeleniumTestCase
     public void testRaceManagerAppInvitationLink() throws SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RaceManagementAppPanelPO raceManagerApp = adminConsole.goToRaceManagerApp();
@@ -211,7 +211,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     /**
      * Device registration via QR code test.
      */
-    @Test
+    @SeleniumTestCase
     public void testDeviceRegistation() throws InterruptedException, SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // create an event and regatta

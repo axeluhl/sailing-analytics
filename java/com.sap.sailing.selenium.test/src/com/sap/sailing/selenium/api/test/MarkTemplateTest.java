@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplate;
 import com.sap.sailing.selenium.api.coursetemplate.MarkTemplateApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkTemplateTest extends AbstractSeleniumTest {
@@ -31,7 +31,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void createMarkTemplateWithDeviceUuidTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate markTemplate = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME, MARK_TEMPLATE_SHORTNAME,
@@ -50,7 +50,7 @@ public class MarkTemplateTest extends AbstractSeleniumTest {
         assertEquals(MARK_TEMPLATE_TYPE, markTemplate.getMarkType().name(), "read: MarkTemplate.type is different");
     }
 
-    @Test
+    @SeleniumTestCase
     public void createAndGetMarkTemplateTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
         MarkTemplate createdMarkTemplate = markTemplateApi.createMarkTemplate(ctx, MARK_TEMPLATE_NAME,

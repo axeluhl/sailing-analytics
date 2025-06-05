@@ -24,7 +24,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -43,6 +42,7 @@ import com.sap.sailing.selenium.api.regatta.RegattaApi;
 import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus;
 import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus.CompetitorDeviceStatus;
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.TimePoint;
@@ -69,7 +69,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetRegattaForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CLOSED, "default");
@@ -95,7 +95,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertNotNull(trackedRaces, "read: reagtta.trackedRaces is missing");
     }
     
-    @Test
+    @SeleniumTestCase
     public void testUpdateRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         
@@ -113,7 +113,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertTrue(regatta.isControlTrackingFromStartAndFinishTimes());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetRacesForRegattaForCreateEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
@@ -129,7 +129,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals(1, regattaRaces.getRaces().length, "read: reagtta.series should have 1 entries");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateAndAddCompetitor() {
         final String competitorName = "Max Mustermann";
         final String competitorNationality = "USA";
@@ -149,7 +149,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
                 "read: competitor.boat.boatClass.name is differnet");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetCompetitors() {
         final String competitor1Name = "Max Mustermann";
         final String competitor2Name = "Hans Albatros";
@@ -173,7 +173,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddRaceColumns() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
@@ -185,7 +185,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals("T5", result[4].getRaceName(), "read: racecolumn.racename is different");
     }
     
-    @Test
+    @SeleniumTestCase
     public void testRegisterExistingCompetitorWithSecret() {
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
@@ -212,7 +212,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals(competitor.getId(), competitors[0].getId());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testRegisterExistingCompetitorWithBadSecret() {
         final AdminConsolePage adminConsole = goToPage(getWebDriver(), getContextRoot());
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
@@ -256,7 +256,7 @@ public class RegattaApiTest extends AbstractSeleniumTest {
         assertEquals(0, competitors.length);
     }
     
-    @Test
+    @SeleniumTestCase
     public void testTrackingDeviceStatus() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         Event event = eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, OPEN_UNMODERATED, "default");

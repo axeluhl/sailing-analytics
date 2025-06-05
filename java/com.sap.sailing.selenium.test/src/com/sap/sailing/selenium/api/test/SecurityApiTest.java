@@ -21,13 +21,13 @@ import java.util.UUID;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.SecurityApi.AccessToken;
 import com.sap.sailing.selenium.api.event.SecurityApi.Hello;
 import com.sap.sailing.selenium.api.event.SecurityApi.User;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sailing.server.security.EventManagerRole;
 import com.sap.sse.common.Util;
@@ -53,7 +53,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateAndGetUser() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final AccessToken createUserResponse = securityApi.createUser(adminCtx, USERNAME, USERNAME_FULL, null, DUMMY_PASSWORD);
@@ -63,7 +63,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertEquals(USERNAME, getUserResponse.getUsername(), "Responded username of getUser is different!");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSayHello() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final Hello hello = securityApi.sayHello(adminCtx);
@@ -71,7 +71,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertEquals(true, hello.isAuthenticated(), "Responded authenticated of hello is different!");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSecuredServerGetUsername() throws ClientProtocolException, IOException, ParseException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -84,7 +84,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
                         ApiContext.ADMIN_PASSWORD));
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSecuredServerGetUserGroupId() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -92,7 +92,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertNull(securedServer.getUserGroupIdByName("this-group-does-not-exist"));
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetOwnership() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -101,7 +101,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertEquals(adminTenantGroupId, userAndGroupOwner.getA());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSetAndGetAcl() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -114,7 +114,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertEquals(actionsByGroups, groupIdAndActions);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateUserGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -124,7 +124,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         assertNull(humbaGroupIdAgain);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddUserToAndRemoveUserFromGroup() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -145,7 +145,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddRoleToUser() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);
@@ -158,7 +158,7 @@ public class SecurityApiTest extends AbstractSeleniumTest {
                         && r.getRoleDefinitionId().equals(EventManagerRole.getInstance().getId())));
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetPermissions() throws ClientProtocolException, IOException, ParseException, IllegalAccessException {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final SecuredServer securedServer = createSecuredServer(adminCtx);

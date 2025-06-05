@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -58,7 +58,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         configureRegattaAndLeaderboard();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
             final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();

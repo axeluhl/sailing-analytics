@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -19,6 +18,7 @@ import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.CompetitorsApi;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class CompetitorApiTest extends AbstractSeleniumTest {
@@ -41,7 +41,7 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         eventApi.createEvent(adminCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "Some special place");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetCompetitorWithOldSerializer() {
         final Competitor competitor = regattaApi.createAndAddCompetitor(adminCtx, EVENT_NAME, BOAT_CLASS, "test@test",
                 COMPETITOR_NAME, "USA");
@@ -60,7 +60,7 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals(competitor.getNationalityISO3(), competitorReloaded.getNationalityISO3());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUpdateCompetitor() {
         final Competitor competitor = regattaApi.createAndAddCompetitor(adminCtx, EVENT_NAME, BOAT_CLASS, "test@test",
                 COMPETITOR_NAME, "USA");
@@ -114,7 +114,7 @@ public class CompetitorApiTest extends AbstractSeleniumTest {
         assertEquals(10000.0, competitorU5.getTimeOnDistanceAllowanceInSecondsPerNauticalMile());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUpdateCompetitorValuesToNull() {
         final Competitor competitor = regattaApi.createAndAddCompetitor(adminCtx, EVENT_NAME, BOAT_CLASS, "test@test",
                 COMPETITOR_NAME, "USA");

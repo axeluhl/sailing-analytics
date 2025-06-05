@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.MarkType;
@@ -37,6 +36,7 @@ import com.sap.sailing.selenium.api.regatta.Course;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.Regatta;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkApiTest extends AbstractSeleniumTest {
@@ -58,7 +58,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddMarkToRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
@@ -73,7 +73,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
     /**
      * Negative test scenarios. Checks all common 'not found' errors.
      */
-    @Test
+    @SeleniumTestCase
     public void testRevokeMarkOnRegattaMarkNotFound() {
         assertThrows(HttpException.class, () -> {
             final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -113,7 +113,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
      * Test to check if mark is already used by a tracking of a race.
      * Expected result: HTTP exception, that mark is already used in a tacked race.
      */
-    @Test
+    @SeleniumTestCase
     public void testRevokeMarkOnRegattaAlreadyTracked() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
@@ -132,7 +132,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
     /**
      * Positive rest case. Revoke mark on regatte without errors.
      */
-    @Test
+    @SeleniumTestCase
     public void testRevokeMarkOnRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
@@ -148,7 +148,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
      * Try to revoke the mark on 1st race. 
      * Expected result is a HTTP exception, that the is mark already in use in 2nd race.
      */
-    @Test
+    @SeleniumTestCase
     public void testRevokeMarkAlreadyUsedInCourse() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
@@ -190,7 +190,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
      * Test to check if revoke also works on fixed marks. In parallel it checks if only specific mark is removed
      * from regatta/race/fleet.
      */
-    @Test
+    @SeleniumTestCase
     public void testRevokeMarkWithFixOnRegatta() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
@@ -221,7 +221,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
         assertEquals(markConfiguration2.getMarkId(), mark2.getMarkId());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddMarkFix() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
@@ -233,7 +233,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
                 /* markPropertiesId */ null, 9.12, .599, currentTimeMillis());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddMarkFixWithMarkTemplateAndMarkProperties() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
 
@@ -246,7 +246,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
                 currentTimeMillis());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testAddMarkToRegattaForNonExistingEvent() {
         assertThrows(HttpException.NotFound.class, () -> {
             final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
@@ -254,7 +254,7 @@ public class MarkApiTest extends AbstractSeleniumTest {
         });
     }
     
-    @Test
+    @SeleniumTestCase
     public void testAddMarkToRegattaWithoutPermission() {
         assertThrows(HttpException.Unauthorized.class, () -> {
             final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);

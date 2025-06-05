@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.json.simple.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -25,6 +24,7 @@ import com.sap.sailing.selenium.api.event.LeaderboardApi.TrackingTimes;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class LeaderboardApiTest extends AbstractSeleniumTest {
@@ -41,7 +41,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetLeaderboardForCreatedEvent() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
@@ -64,7 +64,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
                 "read: leaderboard.shardingLeaderboardName is different");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUpdatingLeaderboard() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
@@ -126,7 +126,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         assertEquals(leaderboardReloaded.getName(), leaderboardReloaded.getDisplayName());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUpdatingLeaderboardDisplayNameToNull() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
@@ -148,7 +148,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
                 leaderboardReloaded.getDiscardIndexResultsStartingWithHowManyRaces());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testDeviceMappingStartAndEnd() throws Exception {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
@@ -160,7 +160,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         request.endDeviceMapping(currentTimeMillis());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSetTrackingTimes() throws Exception {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");
@@ -174,7 +174,7 @@ public class LeaderboardApiTest extends AbstractSeleniumTest {
         assertEquals(endTime, trackingTimes.getEndOfTracking(), "read: endTime is different");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testRaceStartTime() throws Exception {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         eventApi.createEvent(ctx, LEADERBOARD_NAME, BOATCLASSNAME, CLOSED, "default");

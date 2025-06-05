@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.RoleApi;
 import com.sap.sailing.selenium.api.event.RoleApi.RoleDefinition;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
@@ -29,7 +29,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateAndGetRole() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -49,7 +49,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
         roleApi.deleteRole(adminCtx, roleCreated.getId());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testDeleteRole() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -72,7 +72,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUpdateRole() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -108,7 +108,7 @@ public class RoleApiTest extends AbstractSeleniumTest {
         roleApi.deleteRole(adminCtx, roleCreated.getId());
     }
 
-    @Test
+    @SeleniumTestCase
     public void createRoleWithDuplicateNameShouldFailTest() {
         final String roleName = "DUPLICATE_CHECK_ROLE";
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);

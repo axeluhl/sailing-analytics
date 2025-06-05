@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.core.DeviceStatus;
@@ -18,6 +17,7 @@ import com.sap.sailing.selenium.api.core.GPSFixResponse;
 import com.sap.sailing.selenium.api.core.GpsFixMoving;
 import com.sap.sailing.selenium.api.event.GpsFixApi;
 import com.sap.sailing.selenium.api.event.TrackingDeviceApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TrackingDeviceStatusApiTest extends AbstractSeleniumTest {
@@ -30,7 +30,7 @@ public class TrackingDeviceStatusApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testDeviceStatusWithLastFix() {
         final UUID deviceUUID = UUID.randomUUID();
         final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);

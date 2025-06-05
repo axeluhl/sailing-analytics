@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
 import com.sap.sailing.selenium.api.event.EventApi.Event;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class EventApiTest extends AbstractSeleniumTest {
@@ -24,7 +24,7 @@ public class EventApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(),  /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void createAndGetEventTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SERVER_CONTEXT);
 

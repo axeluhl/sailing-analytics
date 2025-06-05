@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupCreationDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.usergroups.UserGroupManagementPanelPO;
@@ -25,7 +25,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    @Test
+    @SeleniumTestCase
     public void testUserGroupCreation() {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         assertNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
@@ -40,7 +40,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         createUserdialog.clickOkButtonOrThrow();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testRoleAddition() {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);
@@ -57,7 +57,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         userRolesPO.clickAddButtonOrThrow();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testGroupUserAddition() {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);
@@ -74,7 +74,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         userGroupUserPanelPO.clickAddButtonOrThrow();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testUserGroupDeletion() throws InterruptedException {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);
@@ -85,7 +85,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         assertNull(userGroupManagementPanel.findGroup(TEST_GROUP_NAME));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testRoleRemoval() {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);
@@ -98,7 +98,7 @@ public class TestUserGroupCreation extends AbstractSeleniumTest {
         assertNull(userRolesPO.findRole(TEST_ROLE));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testUserRemoval() {
         final UserGroupManagementPanelPO userGroupManagementPanel = goToUserGroupDefinitionsPanel();
         createGroup(userGroupManagementPanel);

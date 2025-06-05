@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.common.LabelTypePO;
@@ -23,17 +23,17 @@ public class TestStateVisualizationEvent extends AbstractSeleniumTest {
         super.setUp();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testStateFlagOfUpcomingEvent() {
         testStateFlagOfEvent("Test1", "Somewhere", getFutureDate(3), getFutureDate(7), LabelTypePO::isUpcoming);
     }
     
-    @Test
+    @SeleniumTestCase
     public void testStateFlagOfLiveEvent() {
         testStateFlagOfEvent("Test2", "Somewhere else", getPastDate(3), getFutureDate(3), LabelTypePO::isLive);
     }
     
-    @Test
+    @SeleniumTestCase
     public void testStateFlagOfFinishedEvent() {
         testStateFlagOfEvent("Test3", "Anywhere", getPastDate(7), getPastDate(3), LabelTypePO::isFinished);
     }

@@ -13,8 +13,8 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -65,7 +65,7 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
      * class. This test verifies that the checkbox isn't available for a race when wind data isn't loaded yet but
      * appears after successfully loading wind.
      */
-    @Test
+    @SeleniumTestCase
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, IOException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
         {

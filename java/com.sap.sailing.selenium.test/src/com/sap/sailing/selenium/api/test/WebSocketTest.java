@@ -30,7 +30,6 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
@@ -39,6 +38,7 @@ import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.websocket.LiveDataConnectionWrapper;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
@@ -112,7 +112,7 @@ public class WebSocketTest extends AbstractSeleniumTest {
     }
     
     @Disabled("echo.websocket.org is (2021-08-19) down; http://www.websocket.org/index.html says ''Service no longer available''")
-    @Test
+    @SeleniumTestCase
     public void simpleWebSocketEchoTest() throws Exception {
         String destUri = "ws://echo.websocket.org"; // wss currently doesn't seem to work with Jetty 9.0.4 WebSocket implementation
         WebSocketClient client = new WebSocketClient();
@@ -138,7 +138,7 @@ public class WebSocketTest extends AbstractSeleniumTest {
         assertEquals("Humba Humba", socket.getStringsReceived().get(0));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testWebSocketConnect() throws Exception {
         final List<Fix> allFixesReceived = new ArrayList<>();
         final IgtimiConnectionFactory igtimiConnectionFactory = IgtimiConnectionFactory.create(new URL(getContextRoot()),

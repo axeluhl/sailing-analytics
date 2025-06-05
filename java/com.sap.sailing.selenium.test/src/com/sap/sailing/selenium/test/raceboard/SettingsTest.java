@@ -12,8 +12,8 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -86,7 +86,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * Verifies the settings storage of the raceboard. Checks the precedences of url, context specific settings, mode
      * settings and global settings.
      */
-    @Test
+    @SeleniumTestCase
     public void testRaceBoardPageSettingsStorage() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
@@ -197,7 +197,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     /**
      * Verifies that settings for different modes are distinct and do not have an effect on other modes. 
      */
-    @Test
+    @SeleniumTestCase
     public void testThatUserDefaultsForOneModeDoNotHaveAnEffectOnAnotherMode() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         
@@ -238,7 +238,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     /**
      * Verifies that settings are stored for raceboard.
      */
-    @Test
+    @SeleniumTestCase
     public void testThatSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         
@@ -265,7 +265,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     /**
      * Verifies that Modes correctly set the time slider.
      */
-    @Test
+    @SeleniumTestCase
     public void testThatAnalysisModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
@@ -279,7 +279,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assertions.assertTrue(sliderKnobTime.equals(endMarkerTime));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testThatFinishingLanesModeAffectsTimeSliderCorrectly() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         final RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
@@ -293,7 +293,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assertions.assertTrue(sliderKnobTime.equals(finishMarkerTime));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testThatPlayerModeAffectsTimeSliderCorrectly()
             throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
@@ -311,7 +311,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         Assertions.assertTrue(sliderKnobTime.equals(formatedPlayerStartTime));
     }
     
-    @Test
+    @SeleniumTestCase
     public void testThatStartAnalysisModeAffectsTimeSliderCorrectly()
             throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
@@ -333,7 +333,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     /**
      * Verifies that settings are stored for raceboard.
      */
-    @Test
+    @SeleniumTestCase
     public void testThatModeDependentSettingsAreStoredForOneMode() throws InterruptedException, UnsupportedEncodingException {
         createEventWithTrackedRace();
         RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
@@ -390,7 +390,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * is correctly not supported, thats why the corresponding assertion has been commented out.
      * 
      */
-    @Test
+    @SeleniumTestCase
     public void testLeaderboardPageSettingsForwarding() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -476,7 +476,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * the chart presence is verified when the corresponding settings in admin console has been checked. In order to get
      * the race details displayed, a tracked race is used.
      */
-    @Test
+    @SeleniumTestCase
     public void testLeaderboardPageSettingsForwardingWithTrackedRace() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -542,7 +542,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * console has been checked and the settings for overall leaderboard has been set differently than the settings of
      * the regatta leaderboard. The settings of both leaderboards get asserted separately.
      */
-    @Test
+    @SeleniumTestCase
     public void testLeaderboardPageSettingsForwardingWithOverallLeaderboard() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -604,7 +604,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * global settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate
      * settings storage support when it is set to {@code true}.
      */
-    @Test
+    @SeleniumTestCase
     public void testLeaderboardPageSettingsStorage() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -699,7 +699,7 @@ public class SettingsTest extends AbstractSeleniumTest {
      * settings. Verifies also the {@code ignoreLocalSettings} flag for correctness which is used to deactivate settings
      * storage support when it is set to {@code true}.
      */
-    @Test
+    @SeleniumTestCase
     public void testRegattaOverviewSettingsHandling() {
         // create event
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
