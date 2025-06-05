@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -17,6 +18,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestStateVisualizationEvent extends AbstractSeleniumTest {
 
+    @BeforeEach
     @Override
     public void setUp() {
         clearState(getContextRoot());
