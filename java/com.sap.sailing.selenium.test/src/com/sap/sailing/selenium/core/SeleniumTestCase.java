@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
+
 /**
  * Use this annotation on test methods in subclasses of {@link AbstractSeleniumTest} to indicate that they are Selenium
  * test cases. This will set the {@link SeleniumTestInvocationProvider} as the test invocation provider for the test

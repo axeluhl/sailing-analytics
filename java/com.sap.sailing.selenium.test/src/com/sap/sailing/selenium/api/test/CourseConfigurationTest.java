@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.MarkType;
@@ -61,6 +60,7 @@ import com.sap.sailing.selenium.api.helper.CourseTemplateDataFactory;
 import com.sap.sailing.selenium.api.regatta.Course;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
@@ -238,7 +238,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseFromCourseTemplateWithoutChanges() {
         final int numberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
@@ -265,7 +265,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(numberOfLaps, createdCourseAsConfiguration.getNumberOfLaps());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testReconstructionOfLapsForCourseBasedOnTemplate() {
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
         final CourseTemplate createdCourseTemplate = courseTemplateApi.createCourseTemplate(sharedServerCtx,
@@ -286,7 +286,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testWithoutRepeatablePart() {
         final int numberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
@@ -310,7 +310,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(-1, course.getNumberOfLaps()); // the course template does not specify a repeatable part
     }
 
-    @Test
+    @SeleniumTestCase
     public void testWithRepeatablePartOfSizeOneAndDifferentNumbersOfLaps() {
         final int defaultNumberOfLaps = 2;
         final CourseTemplateDataFactory ctdf = new CourseTemplateDataFactory(sharedServerCtx);
@@ -337,13 +337,13 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(expectedNumberOfWaypointsWithThreeLaps, Util.size(courseConfigurationWithThreeLaps.getWaypoints()));
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseWithLessNoOfLapsThanRepeatablePartOccurences() {
         createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 10, /* numberOfLapsForCOurse */ 8,
                 /* repeatable part start */ 1, /* repeatable part end */ 3, true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseWithMoreNoOfLapsThanRepeatablePartOccurences() {
         final int numberOfLaps = 2;
         final int numberOfLapsForCourse = 50;
@@ -371,7 +371,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseLineup() {
         createCourseFromTemplateBasedCourseConfiguration(/* numberOfLaps */ 2, /* numberOfLapsForCourse */ 2,
                 /* repeatable part start */ 0, /* repeatable part end */ 1, /* strict */ true);
@@ -443,7 +443,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         return new Pair<>(courseConfiguration, course);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testMarkPropertiesWithPositioning() throws JSONException {
         final double MP_LAT_DEG = 49.097487;
         final double MP_LNG_DEG = 8.648631;
@@ -477,7 +477,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testMarkPropertiesWithPositiongWithMarkTemplateUsage() throws JSONException {
         final double MP_LAT_DEG = 49.097487;
         final double MP_LNG_DEG = 8.648631;
@@ -568,7 +568,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         // TODO check that the marks are associated to the same role/position in the sequence as in the originally saved course.
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseFromFreestyleConfigurationWithPositioning() {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
@@ -598,7 +598,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, createdCourseAsConfiguration);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseTemplateWithPositioningIncluded() {
         MarkConfiguration sb = MarkConfiguration.createFreestyle(null, null,
                 markRoleApi.createMarkRole(sharedServerCtx, "role_sb", /* shortName */ null).getId(), "startboat", "sb",
@@ -627,7 +627,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertCourseConfigurationCompared(sharedServerCtx, courseConfiguration, courseConfigurationResult);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseTemplateWithPositiongUpdated() {
         final String regattaName = "test";
         final double longDeg = 7.1, updatedLongDeg = 8.4;
@@ -749,12 +749,12 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(updatedLongDeg, reloadedMp5.getLonDeg().doubleValue(), .0);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseAndReloadWithAdmin() {
         testCreateCourseAndReload(ctx, sharedServerCtx);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseAndReloadWithUser() {
         clearState(getContextRoot());
         super.setUp();
@@ -809,7 +809,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(courseConfiguration.getName(), course.getName());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetEmptyCourseWithPredefinedMarks() {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
@@ -839,7 +839,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(markName, previouslyDefinedMark.getEffectiveProperties().getName());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseConfigurationFromTemplate() {
         final List<MarkRole> markRolesInWpt1 = new ArrayList<>();
         final List<MarkTemplate> markTemplates = new ArrayList<>();
@@ -863,12 +863,12 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertConsistentCourseConfiguration(courseConfiguration);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseConfigurationWithStoreToInventoryWithAdmin() {
         testCreateCourseConfigurationWithStoreToInventory(ctx, sharedServerCtx);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseConfigurationWithStoreToInventoryWithUser() {
         clearState(getContextRoot());
         super.setUp();
@@ -966,7 +966,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertEquals(newNewStartBoatMp.getLonDeg(), newLonStartBoat, 0.0);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseConfigurationFromCourse() {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
@@ -977,7 +977,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertConsistentCourseConfiguration(createdCourseConfiguration);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseFromCourseConfiguration() {
         final String regattaName = "test";
         eventApi.createEvent(ctx, regattaName, "", CompetitorRegistrationType.CLOSED, "");
@@ -990,7 +990,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertCourseConfigurationCompared(sharedServerCtx, simpleCourseConfiguration, createdCourseConfiguration);
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateCourseTemplateFromCourseConfiguration() {
         final CourseConfiguration simpleCourseConfiguration = createSimpleCourseConfiguration(sharedServerCtx);
         logger.info(simpleCourseConfiguration.getJson().toJSONString());
@@ -1000,7 +1000,7 @@ public class CourseConfigurationTest extends AbstractSeleniumTest {
         assertCourseConfigurationCompared(sharedServerCtx, simpleCourseConfiguration, createdCourseConfiguration);
     }
     
-    @Test
+    @SeleniumTestCase
     public void createCourseConfigurationWithFreestyleUpdateForExistingMarkProperty() {
         final double MP_LAT_DEG = 49.097487;
         final double MP_LNG_DEG = 8.648631;

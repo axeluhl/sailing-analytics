@@ -22,7 +22,6 @@ import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -34,6 +33,7 @@ import com.sap.sailing.selenium.api.event.TrackedEventsApi;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedElement;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvent;
 import com.sap.sailing.selenium.api.event.TrackedEventsApi.TrackedEvents;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
@@ -52,7 +52,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetTrackedEventsEmpty() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final TrackedEvents trackedEvents = trackedEventsApi.getTrackedEvents(adminCtx, true);
@@ -60,7 +60,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         Assertions.assertTrue(Util.isEmpty(trackedEvents.getEvents()), "Expected empty list of tracked events");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateMultipleTrackingEventsAndEditOne() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String competitorId = UUID.randomUUID().toString();
@@ -94,7 +94,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         assertThat(trackedEvents.getEvents(), iterableWithSize(1));
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateUpdateTrackingEventsMultiThreaded() throws InterruptedException {
         final ExecutorService threadPool = Executors.newFixedThreadPool(20);
         final List<Future<?>> executions = new ArrayList<>();
@@ -171,7 +171,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         return actual;
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateMultipleTrackingEvents() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String competitorId = UUID.randomUUID().toString();
@@ -238,7 +238,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         Assertions.assertEquals(2, cntEvents, "Expected 2 events");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateMultipleTrackingsForSameEvent() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String eventName = "TestEvent-" + UUID.randomUUID().toString();
@@ -290,21 +290,21 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         Assertions.assertEquals(1, cntEvents, "Expected exactly 1 event");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateTrackedEventWithCompetitorTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         testCreateTrackedEventWithTracking(UUID.randomUUID().toString(), null, null, adminCtx,
                 "TestEvent-" + UUID.randomUUID().toString());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateTrackedEventWithBoatTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         testCreateTrackedEventWithTracking(null, UUID.randomUUID().toString(), null, adminCtx,
                 "TestEvent-" + UUID.randomUUID().toString());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateTrackedEventWithMarkTracking() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         testCreateTrackedEventWithTracking(null, null, UUID.randomUUID().toString(), adminCtx,
@@ -351,7 +351,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         return eventId;
     }
 
-    @Test
+    @SeleniumTestCase
     public void testDeleteEvent() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
         final String leaderboardName = "TestEvent-" + UUID.randomUUID().toString();
@@ -365,7 +365,7 @@ public class TrackedEventsResourceApiTest extends AbstractSeleniumTest {
         Assertions.assertTrue(Util.isEmpty(trackedEvents.getEvents()), "Expected empty list of tracked events");
     }
 
-    @Test
+    @SeleniumTestCase
     public void testMultipleUsers() {
 
         // create test user

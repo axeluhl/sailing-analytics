@@ -6,10 +6,12 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 
 import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefinition;
+import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
  * Used to extend the {@link SeleniumTestCase} annotation which in turn is used to mark the test methods of all Selenium

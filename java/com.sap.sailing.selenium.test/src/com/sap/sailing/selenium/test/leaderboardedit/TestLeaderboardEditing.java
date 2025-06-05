@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -42,7 +42,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    @Test
+    @SeleniumTestCase
     public void testSimpleLeaderboardEditing() {
         createNewLeaderboardLoadRaceAndLink(LEADERBOARD);
         LeaderboardEditingPage page = LeaderboardEditingPage.goToPage(LEADERBOARD, getWebDriver(), getContextRoot());

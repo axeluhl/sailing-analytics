@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -59,7 +59,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     }
     
     @Disabled
-    @Test
+    @SeleniumTestCase
     public void testCorrectDisplayOfAllColumns() {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, true);
         LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
@@ -93,7 +93,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
     /**
      * See bug 2425, comments 5, 6 and 7. This is testing that the leaderboard panel receives a refresh when shown.
      */
-    @Test
+    @SeleniumTestCase
     public void testLeaderboardPanelRefresh() {
         // Open the admin console
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());

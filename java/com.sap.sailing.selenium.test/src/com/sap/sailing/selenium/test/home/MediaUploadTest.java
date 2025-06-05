@@ -6,8 +6,8 @@ import java.util.Date;
 import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO.EventEntryPO;
@@ -44,7 +44,7 @@ public class MediaUploadTest extends AbstractSeleniumTest {
 
     }
 
-    @Test
+    @SeleniumTestCase
     public void testHomepageMedia() throws UnsupportedEncodingException {
         final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         final EventConfigurationPanelPO events = adminConsole.goToEvents();

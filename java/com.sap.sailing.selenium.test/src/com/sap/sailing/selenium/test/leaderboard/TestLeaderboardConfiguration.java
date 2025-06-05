@@ -9,9 +9,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -70,7 +70,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         configureLeaderboard();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testDynamicRaceLinking() {
         this.environment.getWindowManager().withExtraWindow((leaderboardWindow, adminConsoleWindow) -> {
             // Open the leaderboard and check for "empty" leaderboard
@@ -108,7 +108,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         });
     }
     
-    @Test
+    @SeleniumTestCase
     public void testDynamicRaceDeletion() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races
@@ -143,7 +143,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     }
     
     @Disabled("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
-    @Test
+    @SeleniumTestCase
     public void testDynamicRenamingOfRace() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races

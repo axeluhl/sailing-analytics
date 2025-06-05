@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO.EventEntryPO;
@@ -30,7 +30,7 @@ public class TestEventCreationWithPredefinedLeaderboards extends AbstractSeleniu
      * dialog, those leaderboard groups can be expected to be linked to the event when confirming the
      * creation operation.
      */
-    @Test
+    @SeleniumTestCase
     public void createTestEventLinkingToExistingLeaderboardGroups() {
         LeaderboardGroupConfigurationPanelPO leaderboardGroupsConfigPanel = adminConsolePage.goToLeaderboardGroupConfiguration();
         leaderboardGroupsConfigPanel.createLeaderboardGroup("A", "A");

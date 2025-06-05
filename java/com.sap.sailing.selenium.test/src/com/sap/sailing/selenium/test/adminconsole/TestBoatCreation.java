@@ -3,8 +3,8 @@ package com.sap.sailing.selenium.test.adminconsole;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
@@ -18,7 +18,7 @@ public class TestBoatCreation extends AbstractSeleniumTest {
         super.setUp();
     }
     
-    @Test
+    @SeleniumTestCase
     public void testOpenCreateBoatDialog() {
         final TrackedRacesBoatsPanelPO competitorsPanel = goToBoatsPanel();
         final TrackedRacesBoatEditDialogPO dialog = competitorsPanel.pushAddButton(); // fails with an exception if the dialog is not found
@@ -31,7 +31,7 @@ public class TestBoatCreation extends AbstractSeleniumTest {
         return boatsPanel;
     }
     
-    @Test
+    @SeleniumTestCase
     public void testBoatCreation() {
         final TrackedRacesBoatsPanelPO boatsPanel = goToBoatsPanel();
         final TrackedRacesBoatEditDialogPO dialog = boatsPanel.pushAddButton();

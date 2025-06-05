@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.coursetemplate.MarkRole;
 import com.sap.sailing.selenium.api.coursetemplate.MarkRoleApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class MarkRoleTest extends AbstractSeleniumTest {
@@ -23,7 +23,7 @@ public class MarkRoleTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void createMarkRoleAdminTest() {
         final String roleName1 = "role_sb";
         final String roleName2 = "role_pe";

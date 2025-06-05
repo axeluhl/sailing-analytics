@@ -9,10 +9,10 @@ import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.PreferencesApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class PreferencesApiTest extends AbstractSeleniumTest {
@@ -22,7 +22,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
         clearState(getContextRoot(), /* headless */ true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void createAndGetPreferencesTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
 
@@ -38,7 +38,7 @@ public class PreferencesApiTest extends AbstractSeleniumTest {
         assertEquals("value2", foundPreference.get("key2"), "restored preference is different");
     }
 
-    @Test
+    @SeleniumTestCase
     public void createAndDeletePreferencesTest() {
         final ApiContext ctx = createAdminApiContext(getContextRoot(), ApiContext.SECURITY_CONTEXT);
 

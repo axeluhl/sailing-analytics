@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.LongAdder;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.selenium.api.core.ApiContext;
@@ -26,6 +25,7 @@ import com.sap.sailing.selenium.api.event.RoleApi.RoleDefinition;
 import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi;
 import com.sap.sailing.selenium.api.event.UserGroupApi.UserGroup;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
@@ -44,7 +44,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    @Test
+    @SeleniumTestCase
     public void testCreateAndGetAndDeleteUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -84,7 +84,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testMetaPermissionCheck() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -119,7 +119,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void testGetReadableUserGroups() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final String user1Name = "user1";
@@ -161,7 +161,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertEquals(1, counter.intValue());
     }
 
-    @Test
+    @SeleniumTestCase
     public void testChangeUsersInUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 
@@ -203,7 +203,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertSameElements(userGroupCreated.getUsers(), userGroupAfterUserRemove.getUsers());
     }
 
-    @Test
+    @SeleniumTestCase
     public void setDefaultTenantForCurrentServerAndUserTest() {
         final String defaultTenantGroup = "NewGroup";
         final String eventName = "testevent";
@@ -233,7 +233,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         assertEquals(defaultTenantGroup, groupOfEvent);
     }
 
-    @Test
+    @SeleniumTestCase
     public void addUserToOwnGroupWithoutPermissionOnUserTest() {
         final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
         final String userToAdd = "usertoadd";
@@ -277,7 +277,7 @@ public class UserGroupApiTest extends AbstractSeleniumTest {
         }
     }
 
-    @Test
+    @SeleniumTestCase
     public void changeRolesAssociatedToUserGroup() {
         final ApiContext adminCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
 

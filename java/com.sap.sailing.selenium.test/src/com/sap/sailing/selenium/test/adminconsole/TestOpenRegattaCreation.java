@@ -1,9 +1,9 @@
 package com.sap.sailing.selenium.test.adminconsole;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
@@ -27,7 +27,7 @@ public class TestOpenRegattaCreation extends AbstractSeleniumTest {
         configureRegattaAndLeaderboard();
     }
 
-    @Test
+    @SeleniumTestCase
     public void test() {
 
     }

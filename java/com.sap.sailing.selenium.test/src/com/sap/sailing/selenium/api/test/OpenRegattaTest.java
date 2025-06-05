@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;
 import com.sap.sailing.selenium.api.event.EventApi;
@@ -29,6 +28,7 @@ import com.sap.sailing.selenium.api.event.SecurityApi;
 import com.sap.sailing.selenium.api.regatta.Competitor;
 import com.sap.sailing.selenium.api.regatta.RaceColumn;
 import com.sap.sailing.selenium.api.regatta.RegattaApi;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
@@ -62,7 +62,7 @@ public class OpenRegattaTest extends AbstractSeleniumTest {
         adminConsole.goToLocalServerPanel().setSelfServiceServer(true);
     }
 
-    @Test
+    @SeleniumTestCase
     public void simpleTest() throws Exception {
         final UUID deviceUuidCompetitor1 = randomUUID();
         final UUID deviceUuidCompetitor2 = randomUUID();
