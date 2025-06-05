@@ -7,8 +7,8 @@ import static com.sap.sailing.selenium.pages.common.DateHelper.getPastTime;
 import java.util.Date;
 import java.util.function.Predicate;
 
-import org.junit.BeforeEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;

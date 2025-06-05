@@ -1,19 +1,22 @@
 package net.sf.marineapi.nmea.parser;
 
-import junit.framework.TestCase;
-import net.sf.marineapi.nmea.sentence.BODSentence;
-import net.sf.marineapi.nmea.sentence.TalkerId;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import net.sf.marineapi.nmea.sentence.BODSentence;
+import net.sf.marineapi.nmea.sentence.TalkerId;
 
 /**
  * Tests the BOD sentence parser.
  * 
  * @author Kimmo Tuukkanen
  */
-public class BODTest extends TestCase {
+public class BODTest {
 
 	public static final String EXAMPLE = "$GPBOD,234.9,T,228.8,M,RUSKI,*1D";
 
@@ -23,7 +26,6 @@ public class BODTest extends TestCase {
 	/**
 	 * setUp
 	 */
-	@Override
 	@BeforeEach
 	public void setUp() throws Exception {
 		try {
@@ -37,7 +39,6 @@ public class BODTest extends TestCase {
 	/**
 	 * tearDown
 	 */
-	@Override
 	@AfterEach
 	public void tearDown() throws Exception {
 	}

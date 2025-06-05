@@ -28,14 +28,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
@@ -73,9 +73,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+@Timeout(value=60, unit=TimeUnit.SECONDS)
 public class UDPExpeditionReceiverTest {
-    @Rule public Timeout TestTimeout = Timeout.millis(60 * 1000);
-    
     private String[] validLines;
     private String[] someValidWithFourInvalidLines;
     private final List<ExpeditionMessage> messages = new ArrayList<ExpeditionMessage>();

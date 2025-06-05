@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mongodb.MongoException;

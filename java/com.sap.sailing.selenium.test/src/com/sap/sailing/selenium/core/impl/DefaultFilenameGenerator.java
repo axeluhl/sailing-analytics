@@ -2,7 +2,7 @@ package com.sap.sailing.selenium.core.impl;
 
 import java.util.UUID;
 
-import org.junit.runner.Description;
+import org.hamcrest.Description;
 
 import com.sap.sailing.selenium.core.ScreenShotFilenameGenerator;
 
@@ -11,5 +11,4 @@ public class DefaultFilenameGenerator implements ScreenShotFilenameGenerator {
     public String getTargetFilename(Description description) {
         return UUID.randomUUID().toString();
     }
-
 }

@@ -1,15 +1,17 @@
 package diffutils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
 import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
-public class PatchTest extends TestCase {
+public class PatchTest {
 
     public void testPatch_Insert()  {
         final List<String> insertTest_from = Arrays.asList("hhh");

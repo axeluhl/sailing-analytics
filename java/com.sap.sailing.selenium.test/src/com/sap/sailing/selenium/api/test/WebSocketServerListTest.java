@@ -4,18 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
+@Timeout(value = 2, unit = TimeUnit.MINUTES) // 2 minutes timeout for the test
 public class WebSocketServerListTest extends AbstractSeleniumTest {
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(2 * 60 * 1000);
-
     @Test
     public void testWebSocketServerList() throws Exception {
         final IgtimiConnectionFactory igtimiConnectionFactory = IgtimiConnectionFactory.create(

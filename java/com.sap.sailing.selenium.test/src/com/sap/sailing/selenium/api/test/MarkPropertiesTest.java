@@ -7,13 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -118,17 +119,19 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
                 "read: MarkProperties.type is different");
     }
 
-    @Test(expected = HttpException.NotFound.class)
+    @Test
     public void createAndDeleteMarkPropertiesTest() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
-        MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
-                MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
-        assertNotNull(createdMarkProperties, "create: no MarkProperties returnded");
-        assertNotNull(createdMarkProperties.getId(), "create: MarkProperties.id is missing");
-
-        markPropertiesApi.deleteMarkProperties(ctx, createdMarkProperties.getId());
-        markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
+        assertThrows(HttpException.NotFound.class, () -> {
+            final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
+            MarkProperties createdMarkProperties = markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                    MARK_PROPERTIES_SHORTNAME, null, MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                    MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
+            assertNotNull(createdMarkProperties, "create: no MarkProperties returnded");
+            assertNotNull(createdMarkProperties.getId(), "create: MarkProperties.id is missing");
+    
+            markPropertiesApi.deleteMarkProperties(ctx, createdMarkProperties.getId());
+            markPropertiesApi.getMarkProperties(ctx, createdMarkProperties.getId());
+        });
     }
 
     @Test
@@ -151,12 +154,14 @@ public class MarkPropertiesTest extends AbstractSeleniumTest {
         assertTrue(updatedMarkProperties.hasDevice());
     }
     
-    @Test(expected = HttpException.class)
+    @Test
     public void testOverlapOfDeviceUuidAndFixedPositioning() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
-        final UUID deviceUuid = UUID.randomUUID();
-        markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
-                MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
-                MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
+        assertThrows(HttpException.class, () -> {
+            final ApiContext ctx = createAdminApiContext(getContextRoot(), SHARED_SERVER_CONTEXT);
+            final UUID deviceUuid = UUID.randomUUID();
+            markPropertiesApi.createMarkProperties(ctx, MARK_PROPERTIES_NAME,
+                    MARK_PROPERTIES_SHORTNAME, deviceUuid.toString(), MARK_PROPERTIES_COLOR, MARK_PROPERTIES_SHAPE, MARK_PROPERTIES_PATTERN,
+                    MARK_PROPERTIES_TYPE, MARK_PROPERTIES_TAGS, MARK_PROPERTIES_LATDEG, MARK_PROPERTIES_LONDEG);
+        });
     }
 }

@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
 
 import org.bson.Document;
 import org.json.simple.parser.ParseException;
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mongodb.MongoException;

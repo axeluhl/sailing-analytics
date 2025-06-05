@@ -29,10 +29,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
-import org.junit.Rule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnection;
@@ -43,10 +42,9 @@ import com.sap.sailing.domain.igtimiadapter.websocket.LiveDataConnectionWrapper;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 import com.sap.sse.common.Util;
 
+@Timeout(value = 1, unit = TimeUnit.MINUTES)
 public class WebSocketTest extends AbstractSeleniumTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
-
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(1 * 60 * 1000);
 
     @WebSocket
     public class SimpleEchoTestSocket {

@@ -1,9 +1,7 @@
 package diffutils;
 
-import difflib.DiffUtils;
-import difflib.Patch;
-import difflib.PatchFailedException;
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,7 +12,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GenerateUnifiedDiffTest extends TestCase {
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
+
+public class GenerateUnifiedDiffTest {
     private static final String FS = File.separator;
     private static final String MOCK_FOLDER = "test" + FS + "mocks" + FS;
 

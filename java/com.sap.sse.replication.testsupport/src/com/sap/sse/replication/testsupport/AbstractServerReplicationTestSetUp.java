@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,8 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
-import org.junit.Rule;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -60,6 +60,7 @@ import com.sap.sse.replication.interfaces.impl.ReplicaDescriptorImpl;
 
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
+@Timeout(value=5, unit=TimeUnit.MINUTES) // timeout after 5 minutes
 public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
     private static final Logger logger = Logger.getLogger(AbstractServerReplicationTestSetUp.class.getName());
     
@@ -80,7 +81,6 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         this.servletPort = servletPort;
     }
     
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(5 * 60 * 1000); // timeout after 5 minutes
     private Thread initialLoadTestServerThread;
 
     /**

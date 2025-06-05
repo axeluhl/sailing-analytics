@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.bson.Document;
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 

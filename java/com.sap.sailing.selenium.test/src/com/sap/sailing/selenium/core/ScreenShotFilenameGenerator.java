@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.core;
 
-import org.junit.runner.Description;
+import org.hamcrest.Description;
 
 /**
  * <p>Describes the interface for objects that generate unique file names for screen shots.</p>

@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.impl.DynamicTeam;

@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mongodb.MongoException;

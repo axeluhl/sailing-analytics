@@ -1,14 +1,22 @@
 package diffutils;
 
-import difflib.*;
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class DiffTest extends TestCase {
+import difflib.ChangeDelta;
+import difflib.Chunk;
+import difflib.DeleteDelta;
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.InsertDelta;
+import difflib.Patch;
+
+public class DiffTest {
 
     public void testDiff_Insert() {
         final Patch<String> patch = DiffUtils.diff(Arrays.asList("hhh"), Arrays.asList("hhh", "jjj", "kkk"));
