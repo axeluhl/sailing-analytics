@@ -1,7 +1,8 @@
 package com.sap.sse.datamining.impl.functions;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,11 +47,13 @@ public class TestCompoundFunction {
         }
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testConstruction() {
-        List<Function<?>> functions = new ArrayList<>();
-        functions.add(getContainerElementFunction);
-        new ConcatenatingCompoundFunction<String>(functions, String.class);
+        assertThrows(IllegalArgumentException.class, () -> {
+            List<Function<?>> functions = new ArrayList<>();
+            functions.add(getContainerElementFunction);
+            new ConcatenatingCompoundFunction<String>(functions, String.class);
+        });
     }
     
     @Test
