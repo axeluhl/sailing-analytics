@@ -95,14 +95,14 @@
          unpack="false"/>
 
    <plugin
-         id="<unit id="org.apache.felix.scr"
+         id="org.apache.felix.scr"
          download-size="0"
          install-size="0"
          version="2.2.12"
          unpack="false"/>
          
    <plugin
-         id="<unit id="org.apache.felix.scr.source"
+         id="org.apache.felix.scr.source"
          download-size="0"
          install-size="0"
          version="2.2.12"
