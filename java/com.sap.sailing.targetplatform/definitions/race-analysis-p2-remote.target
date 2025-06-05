@@ -212,7 +212,6 @@
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
 <plugin id="javax.xml"/>
-<plugin id="jaxb-api"/>
 <plugin id="javax.xml.stream"/>
 <plugin id="javax.xml.ws"/>
 <plugin id="javax.xml.soap"/>
