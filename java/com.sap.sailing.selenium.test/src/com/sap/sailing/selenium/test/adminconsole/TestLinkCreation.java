@@ -9,8 +9,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Assume;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
@@ -107,8 +107,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
             LOG.warn("Productive server {} is NOT accessible. Skip tests which are requirering live connection.",
                     prodCheckUrl);
         }
-        Assume.assumeTrue("Execute link creation test only if productive server is online (www.sapsailing.com).",
-                checkUrlIsWorking);
+        Assumptions.assumeTrue(checkUrlIsWorking, "Execute link creation test only if productive server is online (www.sapsailing.com).");
         clearState(getContextRoot());
         super.setUp();
     }

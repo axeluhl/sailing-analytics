@@ -99,7 +99,6 @@ public class ShortTimeWindCacheTest {
         assertSame(oldResult, secondResult_2);
         final WindWithConfidence<Pair<Position, TimePoint>> thirdResult_2 = cache.getWindWithConfidence(p3, now, /* windSourcesToExclude */ null);
         assertSame(oldResult, thirdResult_2);
-        
         // now wait for the cache entries to be expired
         Thread.sleep(CACHE_ENTRY_LIFETIME_IN_MILLIS+1000l);
         final WindWithConfidence<Pair<Position, TimePoint>> firstResult_3 = cache.getWindWithConfidence(p1, now, /* windSourcesToExclude */ null);
