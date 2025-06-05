@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.functions;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.lang.reflect.Method;
@@ -29,10 +30,12 @@ public class TestMethodWrappingFunction {
         externalLibraryMethod = FunctionTestsUtil.getMethodFromClass(Test_ExternalLibraryClass.class, "foo");
     }
     
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testMethodReturnTypeAndGivenReturnTypeDoesntMatch() {
-        @SuppressWarnings("unused")
-        Function<String> function = new MethodWrappingFunction<>(externalLibraryMethod, String.class);
+        assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings("unused")
+            Function<String> function = new MethodWrappingFunction<>(externalLibraryMethod, String.class);
+        });
     }
     
     @Test

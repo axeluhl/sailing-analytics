@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.impl.components.management;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
@@ -54,11 +55,13 @@ public class TestQueryDefinitionDTOManagement {
         assertThat(server.getComponentsChangedTimepoint().after(beforeRegistration), is(false));
     }
     
-    @Test(expected=DataMiningComponentAlreadyRegisteredForKeyException.class)
+    @Test
     public void testQueryDefinitionRegistrationWithConflict() {
-        ModifiableDataMiningServer server = TestsUtil.createNewServer();
-        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
-        server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), differentQueryDefinition);
+        assertThrows(DataMiningComponentAlreadyRegisteredForKeyException.class, () -> {
+            ModifiableDataMiningServer server = TestsUtil.createNewServer();
+            server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), pseudoQueryDefinition);
+            server.registerPredefinedQueryDefinition(new PredefinedQueryIdentifier("Test", "Description"), differentQueryDefinition);
+        });
     }
 
     @Test
