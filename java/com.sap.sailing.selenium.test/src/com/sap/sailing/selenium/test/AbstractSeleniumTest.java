@@ -22,7 +22,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.sap.sailing.selenium.core.SeleniumTestTemplate;
+import com.sap.sailing.selenium.core.UseSeleniumExtensions;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.PageObject;
@@ -37,7 +37,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author
  *   D049941
  */
-@SeleniumTestTemplate
+@UseSeleniumExtensions
 public abstract class AbstractSeleniumTest {
     private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
     

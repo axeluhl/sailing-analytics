@@ -10,13 +10,14 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 
 import com.sap.sailing.selenium.core.TestEnvironmentConfiguration.DriverDefinition;
-import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 /**
- * Used to extend the {@link SeleniumTestTemplate} annotation which in turn is used to extend the
- * base class of all Selenium tests, {@link AbstractSeleniumTest}. This provider produces
- * text invocation contexts, one for each {@link TestEnvironmentConfiguration#getDriverDefinitions() driver definition}
- * found in the test environment configuration.
+ * Used to extend the {@link SeleniumTestCase} annotation which in turn is used to mark the test methods of all Selenium
+ * tests declared in subclasses of {@link AbstractSeleniumTest}. This provider produces test invocation contexts, one
+ * for each {@link TestEnvironmentConfiguration#getDriverDefinitions() driver definition} found in the test environment
+ * configuration. These contexts provide a test instance-specific extension of type {@link SeleniumTestEnvironmentInjector}
+ * which is in particular a {@link TestInstancePostProcessor} that creates and injects a {@link TestEnvironment} created
+ * for the driver definition known by the parameter resolver.<p>
  * 
  * @author Axel Uhl (d043530)
  *
@@ -49,7 +50,7 @@ public class SeleniumTestInvocationProvider implements TestTemplateInvocationCon
 
         @Override
         public List<Extension> getAdditionalExtensions() {
-            return Arrays.asList(new SeleniumParameterResolver(driverDefinition));
+            return Arrays.asList(new SeleniumTestEnvironmentInjector(driverDefinition));
         }
     }
 }

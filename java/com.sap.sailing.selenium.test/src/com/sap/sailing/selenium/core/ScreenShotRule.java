@@ -21,7 +21,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-class ScreenShotRule implements TestWatcher, BeforeEachCallback, AfterEachCallback {
+public class ScreenShotRule implements TestWatcher, BeforeEachCallback, AfterEachCallback {
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     /**
