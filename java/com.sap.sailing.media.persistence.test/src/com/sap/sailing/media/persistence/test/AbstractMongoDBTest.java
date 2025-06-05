@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;

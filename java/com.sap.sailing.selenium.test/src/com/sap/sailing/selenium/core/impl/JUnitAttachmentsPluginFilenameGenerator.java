@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.core.impl;
 
-import org.junit.runner.Description;
+import org.hamcrest.Description;
 
 public class JUnitAttachmentsPluginFilenameGenerator extends DefaultFilenameGenerator {
     @Override

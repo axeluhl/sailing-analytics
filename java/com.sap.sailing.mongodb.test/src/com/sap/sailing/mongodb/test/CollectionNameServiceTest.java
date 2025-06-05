@@ -1,5 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 
 import com.sap.sse.mongodb.AlreadyRegisteredException;
@@ -16,10 +18,12 @@ public class CollectionNameServiceTest {
         service.registerExclusively(TestInterface.class, "B");
     }
 
-    @Test(expected=AlreadyRegisteredException.class)
+    @Test
     public void shouldNotWork() throws AlreadyRegisteredException {
-        MongoDBService service = MongoDBService.INSTANCE;
-        service.registerExclusively(TestInterface.class, "b");
-        service.registerExclusively(com.sap.sailing.mongodb.test.needadifferentpackage.TestInterface.class, "b");
+        assertThrows(AlreadyRegisteredException.class, () -> {
+            MongoDBService service = MongoDBService.INSTANCE;
+            service.registerExclusively(TestInterface.class, "b");
+            service.registerExclusively(com.sap.sailing.mongodb.test.needadifferentpackage.TestInterface.class, "b");
+        });
     }
 }

@@ -9,10 +9,9 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.BeforeEach;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.replication.OperationWithResult;
@@ -21,13 +20,12 @@ import com.sap.sse.replication.OperationsToMasterSender;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.UnsentOperationsSenderJob;
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 public class UnsentOperationSenderJobTest implements OperationsToMasterSender<RacingEventService, OperationWithResult<RacingEventService, String>> {
     private static final int MAX_RESEND_COUNT = 10;
     private UnsentOperationsSenderJob job;
     private int resendCount;
     private CountDownLatch latch;
-    
-    @Rule public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
     
     @BeforeEach
     public void setUp() {

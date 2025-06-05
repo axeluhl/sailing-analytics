@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.api.core.ApiContext;

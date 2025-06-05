@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.nmeaconnector.BATSentence;
 import com.sap.sailing.nmeaconnector.BATSentence.WindVaneBatteryStatus;
@@ -20,10 +20,8 @@ import net.sf.marineapi.nmea.event.AbstractSentenceListener;
 import net.sf.marineapi.nmea.io.SentenceReader;
 import net.sf.marineapi.nmea.sentence.TalkerId;
 
+@Timeout(value = 10, unit=TimeUnit.SECONDS) // 10 seconds
 public class BATTest {
-
-    @Rule public Timeout AbstractTracTracLiveTestTimeout = Timeout.millis(10 * 1000);
-
     public static final String EXAMPLE = "$WIBAT,1,5";
     BATSentence empty;
     BATSentence bat;

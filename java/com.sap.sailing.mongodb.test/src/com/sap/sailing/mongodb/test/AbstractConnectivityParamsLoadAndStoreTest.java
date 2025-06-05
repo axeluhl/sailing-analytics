@@ -2,7 +2,7 @@ package com.sap.sailing.mongodb.test;
 
 import java.net.UnknownHostException;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;

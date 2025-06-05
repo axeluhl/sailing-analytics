@@ -5,7 +5,7 @@ import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;

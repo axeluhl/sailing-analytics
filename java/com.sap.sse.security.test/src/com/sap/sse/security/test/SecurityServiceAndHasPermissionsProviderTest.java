@@ -1,5 +1,6 @@
 package com.sap.sse.security.test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Function;
@@ -70,19 +71,25 @@ public class SecurityServiceAndHasPermissionsProviderTest {
         return subject.execute(()->callable.apply(securityService));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHasCurrentUserAnyPermissionExpectException() {
-        createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserAnyPermission(new WildcardPermission("LEADERBOARD:READ:Humba"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserAnyPermission(new WildcardPermission("LEADERBOARD:READ:Humba"));
+        });
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHasCurrentUserMetaPermissionExpectException() {
-        createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermission(new WildcardPermission("LEADERBOARD:READ:Humba"), /* ownership */ null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermission(new WildcardPermission("LEADERBOARD:READ:Humba"), /* ownership */ null);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHasCurrentUserMetaPermissionWithOwnershipLookupExpectException() {
-        createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermissionWithOwnershipLookup(new WildcardPermission("LEADERBOARD:READ:Humba"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            createSecurityServiceWithoutHasPermissionsProvider().hasCurrentUserMetaPermissionWithOwnershipLookup(new WildcardPermission("LEADERBOARD:READ:Humba"));
+        });
     }
     
     @Test

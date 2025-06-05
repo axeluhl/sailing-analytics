@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 import java.util.logging.Logger;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.BoatClass;

@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.junit.BeforeEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -45,9 +45,9 @@ import com.sap.sailing.selenium.api.regatta.RegattaDeviceStatus.CompetitorDevice
 import com.sap.sailing.selenium.api.regatta.RegattaRaces;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
 
 public class RegattaApiTest extends AbstractSeleniumTest {
 

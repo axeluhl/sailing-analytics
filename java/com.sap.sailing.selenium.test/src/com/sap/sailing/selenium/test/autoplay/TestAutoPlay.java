@@ -10,8 +10,8 @@ import java.util.function.Function;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.junit.BeforeEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;

@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -411,7 +412,7 @@ public class SentenceParserTest {
 		// https://bugs.openjdk.java.net/browse/JDK-8039915
 
 		String version = System.getProperty("java.version");
-		org.junit.Assume.assumeTrue(!version.startsWith("1.7."));
+		assumeTrue(!version.startsWith("1.7."));
 
 		// would fail in jdk7 claiming "12.35" not equal to "12.34"
 		instance.setDoubleValue(0, 12.345, 1, 2);

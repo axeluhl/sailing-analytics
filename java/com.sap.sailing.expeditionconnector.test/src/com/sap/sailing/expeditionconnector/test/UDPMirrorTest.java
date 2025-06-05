@@ -8,18 +8,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sailing.expeditionconnector.UDPMirror;
 
+@Timeout(value = 60, unit=TimeUnit.SECONDS)
 public class UDPMirrorTest {
-    @Rule public Timeout TestTimeout = Timeout.millis(60 * 1000);
-    
     private static final int MIRROR_PORT = 33795;
     private static final int RECEIVING_PORT = 33796;
     private Thread mirrorThread;

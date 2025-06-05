@@ -1,5 +1,7 @@
 package com.sap.sailing.server.anniversary;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
@@ -93,15 +95,19 @@ public class AnniversarySameDigitCheckerTest {
      * Tests that no runaway loop can happen, if the anniversary to check overflows internally. It is expected that the
      * resulting String cannot be converted to a number anymore if it exceeds IntegerRange.
      */
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void ensureInCaseOfBugNoFreeze() {
-        AnniversaryChecker checker = new SameDigitChecker();
-        checker.update(Integer.MAX_VALUE);
+        assertThrows(NumberFormatException.class, () -> {
+            AnniversaryChecker checker = new SameDigitChecker();
+            checker.update(Integer.MAX_VALUE);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void illegalRaceCountTest() {
-        AnniversaryChecker checker = new SameDigitChecker();
-        checker.update(-1);
+        assertThrows(IllegalStateException.class, () -> {
+            AnniversaryChecker checker = new SameDigitChecker();
+            checker.update(-1);
+        });
     }
 }

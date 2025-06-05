@@ -9,13 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 
-import org.junit.BeforeEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
@@ -72,38 +73,40 @@ public class MarkApiTest extends AbstractSeleniumTest {
     /**
      * Negative test scenarios. Checks all common 'not found' errors.
      */
-    @Test(expected = HttpException.class)
+    @Test
     public void testRevokeMarkOnRegattaMarkNotFound() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
-        final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
-        final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
-        try {
-            markApi.revokeMarkOnRegatta(ctx, "blah", race.getRaceName(), FLEET, UUID.randomUUID());
+        assertThrows(HttpException.class, () -> {
+            final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+            eventApi.createEvent(ctx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+            final Regatta regatta = regattaApi.getRegatta(ctx, EVENT_NAME);
+            final RaceColumn race = regattaApi.addRaceColumn(ctx, EVENT_NAME, null, 1)[0];
+            try {
+                markApi.revokeMarkOnRegatta(ctx, "blah", race.getRaceName(), FLEET, UUID.randomUUID());
+                assertFalse(true);
+            } catch (HttpException e) {
+                assertTrue(e.getMessage().contains("Could not find a regatta with name"));
+            }
+            try {
+                markApi.revokeMarkOnRegatta(ctx, regatta.getName(), "Blub", FLEET, UUID.randomUUID());
+                assertFalse(true);
+            } catch (HttpException e) {
+                assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
+            }
+            try {
+                markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), "Blume", UUID.randomUUID());
+                assertFalse(true);
+            } catch (HttpException e) {
+                assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
+            }
+            try {
+                markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), FLEET, UUID.randomUUID());
+                assertFalse(true);
+            } catch (HttpException e) {
+                assertTrue(e.getMessage().contains("Could not find a mark with id"));
+                throw e;
+            }
             assertFalse(true);
-        } catch (HttpException e) {
-            assertTrue(e.getMessage().contains("Could not find a regatta with name"));
-        }
-        try {
-            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), "Blub", FLEET, UUID.randomUUID());
-            assertFalse(true);
-        } catch (HttpException e) {
-            assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
-        }
-        try {
-            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), "Blume", UUID.randomUUID());
-            assertFalse(true);
-        } catch (HttpException e) {
-            assertTrue(e.getMessage().contains("Could not find a race with raceColumn"));
-        }
-        try {
-            markApi.revokeMarkOnRegatta(ctx, regatta.getName(), race.getRaceName(), FLEET, UUID.randomUUID());
-            assertFalse(true);
-        } catch (HttpException e) {
-            assertTrue(e.getMessage().contains("Could not find a mark with id"));
-            throw e;
-        }
-        assertFalse(true);
+        });
     }
 
     /**
@@ -243,20 +246,23 @@ public class MarkApiTest extends AbstractSeleniumTest {
                 currentTimeMillis());
     }
 
-    @Test(expected = HttpException.NotFound.class)
+    @Test
     public void testAddMarkToRegattaForNonExistingEvent() {
-        final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        markApi.addMarkToRegatta(ctx, "NONEVENT", "Startboat");
+        assertThrows(HttpException.NotFound.class, () -> {
+            final ApiContext ctx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+            markApi.addMarkToRegatta(ctx, "NONEVENT", "Startboat");
+        });
     }
     
-    @Test(expected = HttpException.Unauthorized.class)
+    @Test
     public void testAddMarkToRegattaWithoutPermission() {
-        final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
-        final ApiContext ownerCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
-        securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
-        final ApiContext readerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
-        
-        eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
-        markApi.addMarkToRegatta(readerCtx, EVENT_NAME, "Startboat");
+        assertThrows(HttpException.Unauthorized.class, () -> {
+            final ApiContext adminSecurityCtx = createAdminApiContext(getContextRoot(), SECURITY_CONTEXT);
+            final ApiContext ownerCtx = createAdminApiContext(getContextRoot(), SERVER_CONTEXT);
+            securityApi.createUser(adminSecurityCtx, "donald", "Donald Duck", null, DONALDS_PASSWORD);
+            final ApiContext readerCtx = createApiContext(getContextRoot(), SERVER_CONTEXT, "donald", DONALDS_PASSWORD);
+            eventApi.createEvent(ownerCtx, EVENT_NAME, BOAT_CLASS, CompetitorRegistrationType.CLOSED, "default");
+            markApi.addMarkToRegatta(readerCtx, EVENT_NAME, "Startboat");
+        });
     }
 }

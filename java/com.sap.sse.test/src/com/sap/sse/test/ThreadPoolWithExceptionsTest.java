@@ -8,10 +8,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Timeout;
 
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -22,9 +21,8 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * @author Axel Uhl (D043530)
  *
  */
+@Timeout(value=10, unit=TimeUnit.SECONDS)
 public class ThreadPoolWithExceptionsTest {
-    @Rule public Timeout threadPoolWithExceptionsTestTimeout = Timeout.millis(10 * 1000); // 10s timeout
-    
     private static final Logger logger = Logger.getLogger(ThreadPoolWithExceptionsTest.class.getName());
     
     final int THREAD_POOL_SIZE = 100;

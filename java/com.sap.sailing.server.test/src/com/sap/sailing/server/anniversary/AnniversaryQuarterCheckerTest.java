@@ -1,5 +1,7 @@
 package com.sap.sailing.server.anniversary;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
@@ -90,15 +92,19 @@ public class AnniversaryQuarterCheckerTest {
      * Tests that no runaway loop can happen, if the anniversary to check overflows internally. The used 1000000000 is
      * the first number, that will lead to a overflow, after *10 multiplier is applied, testing for the next anniversary
      */
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void ensureInCaseOfBugNoFreeze() {
-        AnniversaryChecker checker = new QuarterChecker();
-        checker.update(1000000000);
+        assertThrows(IllegalStateException.class, () -> {
+            AnniversaryChecker checker = new QuarterChecker();
+            checker.update(1000000000);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void illegalRaceCountTest() {
-        AnniversaryChecker checker = new QuarterChecker();
-        checker.update(-1);
+        assertThrows(IllegalStateException.class, () -> {
+            AnniversaryChecker checker = new QuarterChecker();
+            checker.update(-1);
+        });
     }
 }
