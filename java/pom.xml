@@ -607,6 +607,7 @@
         </excludes>
         <reportsDirectory>${reportsdirectory}</reportsDirectory>
         <showEclipseLog>true</showEclipseLog>
+        <<providerHint>>junit5</providerHint>
       </configuration>
     </plugin>
     <plugin>
