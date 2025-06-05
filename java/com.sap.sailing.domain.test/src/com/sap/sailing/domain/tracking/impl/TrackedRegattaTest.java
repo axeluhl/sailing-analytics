@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -55,67 +56,68 @@ public class TrackedRegattaTest {
                 /* registrationLinkSecret */ UUID.randomUUID().toString()));
     }
     
-    @Test(expected = TimeoutException.class)
+    @Test
     public void testBug4429() throws Exception {
-        final Phaser addPhaser = new Phaser(2);
-        final CyclicBarrier removeBarrier = new CyclicBarrier(2);
-        
-        regatta.addRaceListener(new RaceListener() {
-            @Override
-            public void raceRemoved(TrackedRace trackedRace) {
-                try {
-                    removeBarrier.await(1, TimeUnit.SECONDS);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        assertThrows(TimeoutException.class, ()->{
+            final Phaser addPhaser = new Phaser(2);
+            final CyclicBarrier removeBarrier = new CyclicBarrier(2);
             
-            @Override
-            public void raceAdded(TrackedRace trackedRace) {
-                try {
-                    addPhaser.arriveAndAwaitAdvance();
-                    addPhaser.arriveAndAwaitAdvance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+            regatta.addRaceListener(new RaceListener() {
+                @Override
+                public void raceRemoved(TrackedRace trackedRace) {
+                    try {
+                        removeBarrier.await(1, TimeUnit.SECONDS);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
-        }, Optional.empty(), /* synchronous */ false);
-        
-        DynamicTrackedRace race1 = createRace("R1");
-        Thread thread1 = new Thread(() -> {
-            regatta.addTrackedRace(race1, Optional.empty());
-        });
-        thread1.start();
-        // This ensures, that the add event is being processed but is not finished because
-        // this unblocks the first arriveAndAwaitAdvance() in raceAdded, but not the second.
-        // This way, the raceRemoved(...) call is expected to not be started because it has
-        // to wait for the raceAdded(...) call to have finished.
-        addPhaser.arriveAndAwaitAdvance();
-        
-        Thread thread2 = new Thread(() -> {
-            regatta.removeTrackedRace(race1, Optional.empty());
-        });
-        thread2.start();
-        // If the implementation ensures that the events are fired in order,
-        // the removeBarrier will run into a TimeoutException because the addBarrier
-        // is not solved and while the first event is processed the second one
-        // should not be started to be processed.
-        try {
-            removeBarrier.await(10, TimeUnit.MILLISECONDS);
-            // if this line is reached, the order of events is not correctly ensured
-            Assertions.fail();
-        } finally {
-            addPhaser.forceTermination();
+                
+                @Override
+                public void raceAdded(TrackedRace trackedRace) {
+                    try {
+                        addPhaser.arriveAndAwaitAdvance();
+                        addPhaser.arriveAndAwaitAdvance();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, Optional.empty(), /* synchronous */ false);
+            
+            DynamicTrackedRace race1 = createRace("R1");
+            Thread thread1 = new Thread(() -> {
+                regatta.addTrackedRace(race1, Optional.empty());
+            });
+            thread1.start();
+            // This ensures, that the add event is being processed but is not finished because
+            // this unblocks the first arriveAndAwaitAdvance() in raceAdded, but not the second.
+            // This way, the raceRemoved(...) call is expected to not be started because it has
+            // to wait for the raceAdded(...) call to have finished.
+            addPhaser.arriveAndAwaitAdvance();
+            
+            Thread thread2 = new Thread(() -> {
+                regatta.removeTrackedRace(race1, Optional.empty());
+            });
+            thread2.start();
+            // If the implementation ensures that the events are fired in order,
+            // the removeBarrier will run into a TimeoutException because the addBarrier
+            // is not solved and while the first event is processed the second one
+            // should not be started to be processed.
             try {
-                // solved the barrier if one hangs at this point
-                // a TimeoutException can occur but we do not care about it
                 removeBarrier.await(10, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
+                // if this line is reached, the order of events is not correctly ensured
+                Assertions.fail();
+            } finally {
+                addPhaser.forceTermination();
+                try {
+                    // solved the barrier if one hangs at this point
+                    // a TimeoutException can occur but we do not care about it
+                    removeBarrier.await(10, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
+                }
+                thread1.join(1000);
+                thread2.join(1000);
             }
-            thread1.join(1000);
-            thread2.join(1000);
-        }
-        
+        });
     }
     
     private DynamicTrackedRace createRace(String name) {

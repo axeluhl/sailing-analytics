@@ -26,7 +26,7 @@ public class TestORCCertificateImporterJSON extends AbstractORCCertificateImport
     @FailIfNoValidOrcCertificates
     @Test
     public void testSimpleOnlineFileRead() throws IOException, ParseException, InterruptedException {
-        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
+        Collection<ORCCertificate> certificates = FailIfNoValidOrcCertificateRule.getAvailableCerts();
         final ORCCertificate referenceCert = certificates.stream().findFirst().get();
         assertNotNull(referenceCert);
         assertTrue(referenceCert.getWindwardLeewardSpeedPrediction().get(ORCCertificate.ALLOWANCES_TRUE_WIND_SPEEDS[0]).getDuration(ORCCertificate.NAUTICAL_MILE).asSeconds() > 10); 

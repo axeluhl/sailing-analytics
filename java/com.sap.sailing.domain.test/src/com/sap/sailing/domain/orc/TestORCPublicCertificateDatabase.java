@@ -3,6 +3,7 @@ package com.sap.sailing.domain.orc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -26,10 +27,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.common.orc.ORCCertificate;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.orc.ORCPublicCertificateDatabase.CertificateHandle
 import com.sap.sailing.domain.orc.impl.ORCPublicCertificateDatabaseImpl;
 import com.sap.sse.common.Util;
 
+@ExtendWith(FailIfNoValidOrcCertificateRule.class)
 public class TestORCPublicCertificateDatabase {
     private static final Logger logger = Logger.getLogger(TestORCPublicCertificateDatabase.class.getName());
     
@@ -44,9 +46,6 @@ public class TestORCPublicCertificateDatabase {
     private Map<String, Date> dateComparisonMap = new LinkedHashMap<String, Date>();
     private List<String> dateFailureCases = Arrays.asList("2019-02-21T10:44GMT+2","2019-02-21T10:38+0800","2019-02-21T10:38+08:00",
             "2019-02-21T10:38-08","2019-02-21T10:38Z","2019-02-21T10z","2019-02-21T10:38z");
-    
-    @Rule
-    public FailIfNoValidOrcCertificateRule customIgnoreRule = new FailIfNoValidOrcCertificateRule();
     
     @BeforeEach
     public void setUp() {
@@ -153,7 +152,7 @@ public class TestORCPublicCertificateDatabase {
     @FailIfNoValidOrcCertificates
     @Test
     public void testGetCertificate() throws Exception {
-        Collection<ORCCertificate> certificates = customIgnoreRule.getAvailableCerts();
+        Collection<ORCCertificate> certificates = FailIfNoValidOrcCertificateRule.getAvailableCerts();
         final ORCCertificate cert = certificates.stream().findFirst().get();
         Iterable<CertificateHandle> certHandles = db.search(/* country */ null, LocalDate.now().getYear(), /* referenceNumber */ null, cert.getBoatName(),
                 cert.getSailNumber(), /*
@@ -207,7 +206,7 @@ public class TestORCPublicCertificateDatabase {
         int year = LocalDate.now().getYear();
         ArrayList<Future<Set<ORCCertificate>>> futures = new ArrayList<Future<Set<ORCCertificate>>>();
         boolean isYearFound = false;
-        for (ORCCertificate orcCertificate : customIgnoreRule.getAvailableCerts()) {
+        for (ORCCertificate orcCertificate : FailIfNoValidOrcCertificateRule.getAvailableCerts()) {
             futures.add(db.search(orcCertificate.getBoatName(), orcCertificate.getSailNumber(),
                     new BoatClassImpl(orcCertificate.getBoatClassName(), true)));
         }
@@ -225,12 +224,14 @@ public class TestORCPublicCertificateDatabase {
         }
     }
     
-    @Test(expected = DateTimeParseException.class)
+    @Test
     public void testShould() throws Exception {
-        for (String dateString : dateFailureCases) {
-            db.parseDate(dateString);
-            Assertions.fail(dateString + " is parsable");
-        }
+        assertThrows(DateTimeParseException.class, ()->{
+            for (String dateString : dateFailureCases) {
+                db.parseDate(dateString);
+                Assertions.fail(dateString + " is parsable");
+            }
+        });
     }
 
     private boolean assertFoundYear(final Set<ORCCertificate> certificates, int year) {
