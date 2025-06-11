@@ -448,6 +448,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSchemeLowPointForLeagueOverallLeaderboard();
+    String scoringSchemeLowPointOverallUsingNetPoints();
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
     String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
     String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
