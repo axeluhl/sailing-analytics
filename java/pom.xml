@@ -414,8 +414,8 @@
           <artifactId>tycho-compiler-plugin</artifactId>
           <configuration>
             <!-- TODO validate that 1.8 is OK also in the SAP-internal Android build -->
-            <source>8</source>
-            <target>8</target>
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
       </plugins>
@@ -566,7 +566,7 @@
       <configuration>
         <toolchains>
           <jdk>
-            <version>1.8</version>
+            <version>8</version>
           </jdk>
         </toolchains>
       </configuration>
