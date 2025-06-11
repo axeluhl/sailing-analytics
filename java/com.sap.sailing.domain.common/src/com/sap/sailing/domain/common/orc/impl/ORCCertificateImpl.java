@@ -37,7 +37,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     private final CountryCode issuingCountry;
     
     /**
-     * The "core" of the certificate for performance curve scoring; the values in the map tell how fast the boat
+     * The "core" of the certificate for polar curve scoring; the values in the map tell how fast the boat
      * described by this certificate is expected to sail for the true wind speed (TWS) provided by the key, and the true
      * wind angle (TWA) provided by the value map's key. This is the reciprocal of the duration it takes the boat to
      * sail a certain distance.
