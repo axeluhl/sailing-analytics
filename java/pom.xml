@@ -477,6 +477,7 @@
 <build>
   <directory>bin</directory>
   <outputDirectory>bin</outputDirectory>
+  <testSourceDirectory>src</testSourceDirectory>
   <testOutputDirectory>bin</testOutputDirectory>
 
   <pluginManagement>
