@@ -37,6 +37,7 @@
          in java/com.amazon.aws.aws-java-api/pom.xml
      -->
     <tycho-version>4.0.12</tycho-version>
+    <toolchains-version>3.2.0</toolchains-version>
     <gwt.version>2.11.1</gwt.version>
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.1</gwt.plugin.version>
@@ -497,7 +498,7 @@
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-toolchains-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>${toolchains-version}</version>
       </plugin>
       <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>
@@ -554,7 +555,7 @@
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-toolchains-plugin</artifactId>
-      <version>3.2.0</version>
+      <version>${toolchains-version}</version>
       <executions>
         <execution>
           <goals>
