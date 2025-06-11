@@ -46,6 +46,12 @@ jobs:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
+      - name: Install JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+          mvn-toolchain-id: 'JavaSE-17'
       - name: Setup Android SDK
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
         with:
