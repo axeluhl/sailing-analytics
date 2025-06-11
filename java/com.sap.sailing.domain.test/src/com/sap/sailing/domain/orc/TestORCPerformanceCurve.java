@@ -241,7 +241,7 @@ public class TestORCPerformanceCurve {
    }
     
     /**
-     * Tests to make sure, that the structure of the certificate files didn't change and performance curves can be built
+     * Tests to make sure, that the structure of the certificate files didn't change and polar curves can be built
      */
     @FailIfNoValidOrcCertificates
     @Test

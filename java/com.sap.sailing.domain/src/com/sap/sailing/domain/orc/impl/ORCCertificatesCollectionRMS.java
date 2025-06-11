@@ -180,7 +180,7 @@ public class ORCCertificatesCollectionRMS extends AbstractORCCertificatesCollect
             final Triple<CountryCode, String, String> natCertNoFileId = getIssuingNationalityCertificateNumberAndFileId(certificateValues.getValue(NATCERTN_FILE_ID));
             result = new ORCCertificateImpl(refNo, natCertNoFileId.getC(), sailNumber, boatName, boatclass, length, gph,
                     cdl, issueDate, natCertNoFileId.getA(), velocityPredictionsPerTrueWindSpeedAndAngle, beatAngles,
-                    beatVMGPredictionPerTrueWindSpeed,                    beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
+                    beatVMGPredictionPerTrueWindSpeed, beatAllowancePerTrueWindSpeed, runAngles, runVMGPredictionPerTrueWindSpeed,
                     runAllowancePerTrueWindSpeed, windwardLeewardSpeedPredictionPerTrueWindSpeed,
                     longDistanceSpeedPredictionPerTrueWindSpeed, circularRandomSpeedPredictionPerTrueWindSpeed,
                     nonSpinnakerSpeedPredictionPerTrueWindSpeed);
