@@ -633,7 +633,6 @@
         </excludes>
         <reportsDirectory>${reportsdirectory}</reportsDirectory>
         <showEclipseLog>true</showEclipseLog>
-        <providerHint>junit-platform</providerHint>
         <useJUnitPlatform>true</useJUnitPlatform>
       </configuration>
     </plugin>
