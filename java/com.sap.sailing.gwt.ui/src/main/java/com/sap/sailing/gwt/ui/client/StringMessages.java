@@ -2274,6 +2274,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String referenceNumber();
     String yachtName();
     String errorSearchingForCertificates(String message);
+    String orcPerformanceCurveLegTypeNameCircularRandom();
+    String orcPerformanceCurveLegTypeNameLongDistance();
+    String orcPerformanceCurveLegTypeNameNonSpinnaker();
+    String orcPerformanceCurveLegTypeNameConstructedCourse();
+    String orcPerformanceCurveLegTypeNameWindwardLeeward();
+    String orcPerformanceCurveLegTypeNameWindwardLeewardRealLive();
     String orcPerformanceCurveLegTypeDescriptionCircularRandom();
     String orcPerformanceCurveLegTypeDescriptionLongDistance();
     String orcPerformanceCurveLegTypeDescriptionNonSpinnaker();
