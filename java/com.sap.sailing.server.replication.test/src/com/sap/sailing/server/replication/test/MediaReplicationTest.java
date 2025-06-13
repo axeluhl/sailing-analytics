@@ -72,17 +72,12 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class MediaReplicationTest extends AbstractServerReplicationTest {
-    private FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock;
-    
     @SuppressWarnings("unchecked")
     public MediaReplicationTest() {
-        this(mock(FullyInitializedReplicableTracker.class));
-    }
-    
-    private MediaReplicationTest(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) {
-        super(new ServerReplicationTestSetUp() {
+        super(mock(FullyInitializedReplicableTracker.class), new ServerReplicationTestSetUp() {
             @Override
             public RacingEventServiceImpl createNewReplica() {
+                final FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock = mock(FullyInitializedReplicableTracker.class);
                 final MongoDBConfiguration masterMongoDBConfig = mongoDBService.getConfiguration();
                 final ConnectionString masterMongoDbUri = masterMongoDBConfig.getMongoClientURI();
                 final MongoDBConfiguration proxyReplicaMongoDBConfig = new MongoDBConfiguration(
@@ -117,7 +112,6 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
                 return result;
             }
         });
-        this.securityServiceTrackerMock = securityServiceTrackerMock;
     }
     
     private void waitSomeTime() throws InterruptedException {

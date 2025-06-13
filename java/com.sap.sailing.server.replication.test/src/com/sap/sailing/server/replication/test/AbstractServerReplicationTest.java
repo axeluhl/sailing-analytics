@@ -14,17 +14,27 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl.ConstructorParameters;
 import com.sap.sailing.server.interfaces.RacingEventService;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
+import com.sap.sse.security.SecurityService;
 
 public abstract class AbstractServerReplicationTest extends com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest<RacingEventService, RacingEventServiceImpl> {
     protected ServerReplicationTestSetUp testSetUp;
+    protected final FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock;
     
-    protected AbstractServerReplicationTest(ServerReplicationTestSetUp testSetUp) {
+    protected AbstractServerReplicationTest(final FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock,
+            ServerReplicationTestSetUp testSetUp) {
         super(testSetUp);
         this.testSetUp = testSetUp;
+        this.securityServiceTrackerMock = securityServiceTrackerMock;
+    }
+    
+    protected AbstractServerReplicationTest(ServerReplicationTestSetUp testSetUp) {
+        this(null, testSetUp);
     }
     
     public AbstractServerReplicationTest() {
         super(new ServerReplicationTestSetUp());
+        this.securityServiceTrackerMock = null;
         testSetUp = (ServerReplicationTestSetUp) super.testSetUp;
     }
 
