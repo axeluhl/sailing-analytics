@@ -79,7 +79,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         if (!Util.hasLength(username.trim()) || !serviceToUseForTakedownNotice.isEmailAddressOfCurrentUserValidated()) {
             Notification.notify(StringMessages.INSTANCE.mustBeLoggedInAndWithValidatedEmail(), NotificationType.ERROR);
         } else {
-            new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username, StringMessages.INSTANCE, new DialogCallback<TakedownNoticeRequestContext>() {
+            final TakedownNoticeRequestDialog dialog = new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl, username, StringMessages.INSTANCE, new DialogCallback<TakedownNoticeRequestContext>() {
                 @Override
                 public void ok(TakedownNoticeRequestContext editedObject) {
                     serviceToUseForTakedownNotice.fileTakedownNotice(editedObject);
@@ -88,7 +88,8 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
                 @Override
                 public void cancel() {
                 }
-            }).show();
+            });
+            dialog.show();
         }
     }
     
@@ -110,6 +111,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
         this.contextDescriptionMessageParameter = contextDescriptionMessageParameter;
         this.contentUrl = contentUrl;
         getDialogBox().getElement().getStyle().setProperty("overflowWrap", "anywhere"); // allow long URLs to be wrapped, especially on small phone screens...
+        getDialogBox().setWidth(""+(Math.min(Window.getClientWidth(), 600))+"px");
     }
     
     public String getDisplayString(NatureOfClaim natureOfClaim) {

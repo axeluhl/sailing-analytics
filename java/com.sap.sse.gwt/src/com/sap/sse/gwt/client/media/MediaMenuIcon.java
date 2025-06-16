@@ -110,7 +110,7 @@ public class MediaMenuIcon extends Composite {
         e.stopPropagation();
         e.preventDefault();
         if (takedownNoticeService.isEmailAddressOfCurrentUserValidated()) {
-            new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl,
+            final TakedownNoticeRequestDialog dialog = new TakedownNoticeRequestDialog(contextDescriptionMessageKey, contextDescriptionMessageParameter, contentUrl,
                     takedownNoticeService.getCurrentUserName(), StringMessages.INSTANCE,
                     new DialogCallback<TakedownNoticeRequestContext>() {
                 @Override
@@ -121,7 +121,8 @@ public class MediaMenuIcon extends Composite {
                 @Override
                 public void cancel() {
                 }
-            }).show();
+            });
+            dialog.show();
          } else {
              Notification.notify(StringMessages.INSTANCE.mustBeLoggedInAndWithValidatedEmail(), NotificationType.ERROR);
          }
