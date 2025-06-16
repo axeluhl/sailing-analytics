@@ -374,6 +374,7 @@
 <setEntry value="com.sap.sailing.server.gateway.test.support@5:true"/>
 
 </setAttribute>
+<<<<<<< HEAD
 =======
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
@@ -494,6 +495,8 @@
 
 </setAttribute>
 >>>>>>> master
+=======
+>>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>

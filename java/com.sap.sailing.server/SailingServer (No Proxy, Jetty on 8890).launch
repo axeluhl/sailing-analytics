@@ -369,6 +369,7 @@
 <setEntry value="com.sap.sse.aicore@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
+<<<<<<< HEAD
 =======
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
@@ -487,6 +488,8 @@
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
 >>>>>>> master
+=======
+>>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>
