@@ -549,6 +549,8 @@
 <setEntry value="lz4-java@default:default"/>
 <setEntry value="org.apache.felix.scr@default:default"/>
 <setEntry value="org.apache.felix.scr.source@default:default"/>
+=======
+>>>>>>> main
 <setEntry value="org.apache.felix.gogo.command@default:default"/>
 <setEntry value="org.apache.felix.gogo.runtime@default:default"/>
 <setEntry value="org.apache.felix.gogo.shell@default:default"/>
@@ -1087,6 +1089,8 @@
 <setEntry value="com.sap.sse.threadmanager@default:default"/>
 <setEntry value="com.sap.sse.security.common@default:default"/>
 <setEntry value="org.json.simple@default:default"/>
+=======
+>>>>>>> main
 <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
 <setEntry value="com.googlecode.java-diff-utils@default:default"/>
 <setEntry value="org.mp4parser.isoparser@default:default"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Race Analysis Target" sequenceNumber="249">
+<target name="Race Analysis Target" sequenceNumber="225">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -71,9 +71,9 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.54.v20240208"/>
-<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.54.v20240208"/>
-<repository location="https://p2.sapsailing.com/p2/jetty-9.4.54.v20240208/"/>
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="9.4.57.v20241219"/>
+<unit id="org.eclipse.jetty.bundles.f.source.feature.group" version="9.4.57.v20241219"/>
+<repository location="https://p2.sapsailing.com/p2/jetty-9.4.57.v20241219/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.felix.gogo.command" version="1.1.2"/>
@@ -434,6 +434,8 @@
 <plugin id="org.apache.geronimo.specs.geronimo-jta_1.1_spec"/>
 <plugin id="org.mortbay.jasper.apache-el"/>
 <plugin id="org.mortbay.jasper.apache-jsp"/>
+<plugin id="org.mortbay.jasper.apache-el.source"/>
+<plugin id="org.mortbay.jasper.apache-jsp.source"/>
 <plugin id="org.eclipse.jetty.apache-jsp"/>
 <plugin id="org.eclipse.jetty.apache-jsp.source"/>
 <plugin id="org.eclipse.jdt.core.compiler.batch"/>

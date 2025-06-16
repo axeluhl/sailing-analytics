@@ -262,6 +262,7 @@
 <setEntry value="com.nulab-inc.zxcvbn@default:default"/>
 <setEntry value="com.nulab-inc.zxcvbn.source@default:default"/>
 </setAttribute>
+<<<<<<< HEAD
 =======
 <setEntry value="routeconverter@default:default"/>
 <setEntry value="org.apache.commons.codec@default:default"/>
@@ -505,6 +506,8 @@
 <setEntry value="com.nulab-inc.zxcvbn.source@default:default"/>
 </setAttribute>
 >>>>>>> 3912c3f6342... bug6127: removed junit "vintage" from target platform after JUnit5 migration
+=======
+>>>>>>> main
     <setAttribute key="selected_workspace_bundles">
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
@@ -628,6 +631,7 @@
 <setEntry value="com.sap.sse.aicore@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
+<<<<<<< HEAD
 =======
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
@@ -746,6 +750,8 @@
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
 >>>>>>> master
+=======
+>>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>
