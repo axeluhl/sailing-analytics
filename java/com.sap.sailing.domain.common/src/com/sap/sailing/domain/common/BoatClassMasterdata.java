@@ -136,6 +136,7 @@ public enum BoatClassMasterdata {
     SPLASH_BLUE ("Splash Blue", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Blue"),
     SPLASH_RED ("Splash Red", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Red"),
     SPLASH_GREEN ("Splash Green", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Green"),
+    SRS ("Svenskt Respitsystem", true, 15.00, 4.00, BoatHullType.MONOHULL, false, "LYS", "Leading Yard Stick", "Lidingö Yard Stick"),
     STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL, false, "STR", "STARBOOT", "STARBOAT"),
     STREAMLINE ("Streamline", true, 7.15, 2.55, BoatHullType.MONOHULL, true),
     SUNBEAM_22 ("Sunbeam 22", true, 6.70, 2.15, BoatHullType.MONOHULL, true, "Sunbeam 22.1"),
@@ -168,6 +169,7 @@ public enum BoatClassMasterdata {
     ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC I", "ORC II", "ORC III", "ORC IV", "ORC III+IV", "ORC A", "ORC B", "ORC C", "ORC D"),
     ORC_CLUB ("ORC Club", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
+    ORC_MULTIHULL ("ORC Multihull", true, 13.83, 3.91, BoatHullType.CATAMARAN, true, "ORC MH"),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
     PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
