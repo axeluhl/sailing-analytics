@@ -614,6 +614,16 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * through another replica to which the device maintains a live connection.
      */
     void sendRestartCommandToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+    
+    /**
+     * Sends the command sequence to calibrate the IMU of the Igtimi device identified by {@code serialNumber}.
+     * <p>
+     * 
+     * The boolean result reflects whether a connection to the device identified by {@code serialNumber} was found on
+     * the local Igtimi Riot service; if {@code false}, the message may still have been delivered through another
+     * replica to which the device maintains a live connection.
+     */
+    void sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted

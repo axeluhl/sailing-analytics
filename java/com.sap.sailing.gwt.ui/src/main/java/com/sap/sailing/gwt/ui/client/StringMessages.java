@@ -2492,6 +2492,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String turnGPSOff();
     String turnGPSOn();
     String powerOff();
+    String calibrateIMU();
     String reallyTurnGPSOffForIgtimiDevice(String serialNumber);
     String reallyTurnGPSOnForIgtimiDevice(String serialNumber);
     String reallyPowerOffIgtimiDevice(String serialNumber);
@@ -2507,6 +2508,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String reallyRestartIgtimiDevice(String serialNumber);
     String errorRestartingIgtimiDevice(String serialNumber, String message);
     String successfullyRestartedIgtimiDevice(String serialNumber);
+    String reallyRunCalibrationOnIgtimiDevice(String serialNumber);
+    String errorCalibratingIgtimiDevice(String serialNumber, String message);
+    String successfullyCalibratedIgtimiDevice(String serialNumber);    
     String restart();
     String desktop();
     String mobile();

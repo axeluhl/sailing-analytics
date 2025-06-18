@@ -2161,6 +2161,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
     }
+    
+    @Override
+    public boolean sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber) throws IOException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
+        boolean result = true;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_STOP) && result;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_CAL_FROM_FILE) && result;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_SAVE) && result;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_ON) && result;
+        return result;
+    }
 
     @Override
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,

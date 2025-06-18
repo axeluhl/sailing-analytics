@@ -263,6 +263,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         public static final String ACTION_GPS_ON = "ACTION_GPS_ON";
         public static final String ACTION_RESTART = "ACTION_RESTART";
         public static final String ACTION_POWER_OFF = "ACTION_POWER_OFF";
+        public static final String ACTION_CALIBRATE = "ACTION_CALIBRATE";
         private final StringMessages stringMessages;
 
         public DevicesImagesBarCell(StringMessages stringMessages) {
@@ -277,6 +278,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     new ImageSpec(ACTION_GPS_ON, stringMessages.turnGPSOn(), IconResources.INSTANCE.gpsSymbol()),
                     new ImageSpec(ACTION_RESTART, stringMessages.restart(), IconResources.INSTANCE.restartSymbol()),
                     new ImageSpec(ACTION_POWER_OFF, stringMessages.powerOff(), IconResources.INSTANCE.powerButton()),
+                    new ImageSpec(ACTION_CALIBRATE, stringMessages.calibrateIMU(), IconResources.INSTANCE.compassSymbol()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
     }
@@ -351,6 +353,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         actionColumn.addAction(DevicesImagesBarCell.ACTION_GPS_ON, UPDATE, this::sendGPSOn);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_RESTART, UPDATE, this::sendRestart);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_POWER_OFF, UPDATE, this::sendPowerOff);
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_CALIBRATE, UPDATE, this::sendIMUCalibrationCommandSequence);
         actionColumn.addAction(ACTION_DELETE, DELETE, device -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
                 removeDevice(device, filteredDevices);
@@ -751,6 +754,26 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 public void onSuccess(Boolean result) {
                     if (result) {
                         Notification.notify(stringMessages.successfullyRestartedIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
+                    } else {
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                    }
+                }
+            });
+        }
+    }
+    
+    private void sendIMUCalibrationCommandSequence(IgtimiDeviceWithSecurityDTO device) {
+        if (Window.confirm(stringMessages.reallyRunCalibrationOnIgtimiDevice(device.getSerialNumber()))) {
+            sailingServiceWrite.sendIMUCalibrationCommandSequenceToIgtimiDevice(device.getSerialNumber(), new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.errorCalibratingIgtimiDevice(device.getSerialNumber(), caught.getMessage()), NotificationType.ERROR);
+                }
+
+                @Override
+                public void onSuccess(Boolean result) {
+                    if (result) {
+                        Notification.notify(stringMessages.successfullyCalibratedIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
                         Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
                     }
