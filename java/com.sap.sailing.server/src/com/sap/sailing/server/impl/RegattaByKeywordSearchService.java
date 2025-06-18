@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.shiro.SecurityUtils;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseArea;
@@ -36,7 +34,7 @@ import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.SecurityService;
 
 /**
  * Searches a {@link RacingEventService} instance for regattas that somehow match with a
@@ -52,6 +50,7 @@ public class RegattaByKeywordSearchService {
     private static final Logger logger = Logger.getLogger(RegattaByKeywordSearchService.class.getName());
     
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQueryWithOptionalEventQualification query) {
+        final SecurityService securityService = racingEventService.getSecurityService();
         final ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
         final Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<>();
         final Map<Leaderboard, Set<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
@@ -59,7 +58,7 @@ public class RegattaByKeywordSearchService {
         final Map<Event, Set<String>> stringsForEvent = new HashMap<>();
         final Map<LeaderboardGroup, Set<String>> stringsForLeaderboardGroup = new HashMap<>();
         for (final Event event : racingEventService.getEventsSelectively(query.isInclude(), query.getEventUUIDs())) {
-            if (SecurityUtils.getSubject().isPermitted(event.getIdentifier().getStringPermission(DefaultActions.READ))) {
+            if (securityService.hasCurrentUserReadPermission(event)) {
                 final Set<String> s4e = new HashSet<>();
                 s4e.add(event.getName());
                 s4e.add(event.getVenue().getName());
@@ -73,7 +72,7 @@ public class RegattaByKeywordSearchService {
             }
         }
         for (final LeaderboardGroup leaderboardGroup : racingEventService.getLeaderboardGroups().values()) {
-            if (SecurityUtils.getSubject().isPermitted(leaderboardGroup.getIdentifier().getStringPermission(DefaultActions.READ))) {
+            if (securityService.hasCurrentUserReadPermission(leaderboardGroup)) {
                 final Set<String> s4lg = new HashSet<>();
                 s4lg.add(leaderboardGroup.getName());
                 s4lg.add(leaderboardGroup.getDescription());
@@ -145,11 +144,11 @@ public class RegattaByKeywordSearchService {
             }
         };
         final Set<Leaderboard> leaderboardsToConsider = StreamSupport.stream(racingEventService.getAllEvents().spliterator(), /* parallel */ false).
-            filter(e->e.isPublic() && SecurityUtils.getSubject().isPermitted(e.getIdentifier().getStringPermission(DefaultActions.READ))).
+            filter(e->e.isPublic() && securityService.hasCurrentUserReadPermission(e)).
             flatMap(e->StreamSupport.stream(e.getLeaderboardGroups().spliterator(), /* parallel */ false).
-                           filter(lg->SecurityUtils.getSubject().isPermitted(lg.getIdentifier().getStringPermission(DefaultActions.READ)))).
+                           filter(lg->securityService.hasCurrentUserReadPermission(lg))).
             flatMap(lg->StreamSupport.stream(lg.getLeaderboards().spliterator(), /* parallel */ false).
-                           filter(l->SecurityUtils.getSubject().isPermitted(l.getIdentifier().getStringPermission(DefaultActions.READ)))).
+                           filter(l->securityService.hasCurrentUserReadPermission(l))).
             collect(Collectors.toSet());
         for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), leaderboardsToConsider)) {
             result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard,
