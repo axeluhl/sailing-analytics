@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +23,7 @@ import com.igtimi.IgtimiData.DataMsg;
 import com.igtimi.IgtimiDevice.DeviceCommand;
 import com.igtimi.IgtimiDevice.DeviceManagement;
 import com.igtimi.IgtimiDevice.DeviceManagementRequest;
+import com.igtimi.IgtimiDevice.DeviceManagementResponse;
 import com.igtimi.IgtimiStream.AckResponse;
 import com.igtimi.IgtimiStream.Authentication;
 import com.igtimi.IgtimiStream.Authentication.AuthResponse;
@@ -30,6 +34,7 @@ import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
+import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -137,9 +142,24 @@ public class RiotConnectionImpl implements RiotConnection {
     }
     
     @Override
-    public void sendCommand(String command) throws IOException {
+    public DeviceManagementResponse sendCommand(String command) throws IOException, InterruptedException, ExecutionException {
+        final CompletableFuture<DeviceManagementResponse> responseFuture = new CompletableFuture<>();
+        final RiotMessageListener listener = m->{
+            if (m.hasDeviceManagement() && m.getDeviceManagement().hasResponse()) {
+                final DeviceManagementResponse response = m.getDeviceManagement().getResponse();
+                responseFuture.complete(response);
+            }
+        };
+        riotServer.addListener(listener);
         send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
                 .setCommand(DeviceCommand.newBuilder().setText(command)))).build());
+        try {
+            return responseFuture.get(10, TimeUnit.SECONDS); // wait for 10 seconds for the response
+        } catch (TimeoutException e) {
+            return null; // no response received within 10 seconds
+        } finally {
+            riotServer.removeListener(listener);
+        }
     }
 
     @Override
@@ -299,6 +319,13 @@ public class RiotConnectionImpl implements RiotConnection {
             @Override
             public void handleDeviceManagement(DeviceManagement deviceManagement) {
                 updateSerialNumber(deviceManagement.getSerialNumber());
+                if (deviceManagement.hasResponse()) {
+                    logger.info("Received a response from device "+deviceManagement.getSerialNumber()+
+                            ". Code: "+deviceManagement.getResponse().getCode()+
+                            ", reason: "+deviceManagement.getResponse().getReason()+
+                            ", text: "+deviceManagement.getResponse().getText()+
+                            ", timestamp: "+TimePoint.of(deviceManagement.getResponse().getTimestamp()));
+                }
             }
             
             @Override
