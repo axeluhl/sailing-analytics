@@ -4,8 +4,10 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.ExecutionException;
 
 import com.google.protobuf.CodedInputStream;
+import com.igtimi.IgtimiDevice.DeviceManagementResponse;
 import com.igtimi.IgtimiStream.Msg;
 import com.sap.sse.common.TimePoint;
 
@@ -43,8 +45,10 @@ public interface RiotConnection extends Closeable {
      * <tr><td>GPS ON</td><td>Turns the GPS on</td></tr>
      * </table>
      * See {@link RiotStandardCommand} for convenience commands.
+     * 
+     * @return the response received within a 10s timeout, or {@code null} if no response was received within that time.
      */
-    void sendCommand(String command) throws IOException;
+    DeviceManagementResponse sendCommand(String command) throws IOException, InterruptedException, ExecutionException;
 
     TimePoint getLastHeartbeatReceivedAt();
 }

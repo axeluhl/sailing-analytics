@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -599,11 +600,12 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException, InterruptedException, ExecutionException {
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
-                connection.sendCommand(command.getCommand());
+                final DeviceManagementResponse response = connection.sendCommand(command.getCommand());
+                // TODO bug6140: make use of the response and fold it into a combined return value that informs callers about whether the connection was found and what the device responded for the command
                 foundConnection = true;
                 break;
             }
