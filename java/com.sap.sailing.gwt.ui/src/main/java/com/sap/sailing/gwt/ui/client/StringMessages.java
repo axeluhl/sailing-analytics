@@ -2464,7 +2464,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorFetchingUserPreference(String preferenceKey, String message);
     String errorSettingUserPreference(String preferenceKey, String message);
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal();
+    String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingTwoToFinalAndTwoToSemifinal();
     String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinalDescription();
+    String scoringSchemeLowPointWithEliminatingMedalSeriesPromotingTwoToFinalAndTwoToSemifinalDescription();
     String incrementalScoreCorrectionInPoints();
     String errorObtainingCourseAreasForLeaderboard(String leaderboardName, String message);
     String tackTypeUnit();
