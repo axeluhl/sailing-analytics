@@ -617,6 +617,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     
     /**
      * Sends the command sequence to calibrate the IMU of the Igtimi device identified by {@code serialNumber}.
+     * Waits 1s in between commands to allow the device to process them. So, expect the method invocation to take
+     * at least 5 seconds.
      * <p>
      * 
      * The boolean result reflects whether a connection to the device identified by {@code serialNumber} was found on

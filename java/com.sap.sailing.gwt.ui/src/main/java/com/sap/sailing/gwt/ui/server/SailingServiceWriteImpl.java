@@ -2163,14 +2163,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
     
     @Override
-    public boolean sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber) throws IOException {
+    public boolean sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber) throws IOException, InterruptedException {
         checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         boolean result = true;
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_STOP) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_CAL_FROM_FILE) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_SAVE) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_ON) && result;
         return result;
     }
