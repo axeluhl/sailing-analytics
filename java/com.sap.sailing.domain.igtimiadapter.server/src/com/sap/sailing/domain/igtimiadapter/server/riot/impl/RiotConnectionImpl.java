@@ -19,6 +19,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiAPI.Token;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiData.DataMsg;
+import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiDevice.DeviceCommand;
 import com.igtimi.IgtimiDevice.DeviceManagement;
 import com.igtimi.IgtimiDevice.DeviceManagementRequest;
@@ -336,6 +337,11 @@ public class RiotConnectionImpl implements RiotConnection {
             public void handleData(Data data) {
                 for (final DataMsg dataMsg : data.getDataList()) {
                     updateSerialNumber(dataMsg.getSerialNumber());
+                    for (final DataPoint d : dataMsg.getDataList()) {
+                        if (d.hasLog()) {
+                            logger.info("Log from Igtimi device "+getSerialNumber()+": "+d.getLog().getMessage());
+                        }
+                    }
                 }
             }
             
