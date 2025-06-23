@@ -142,9 +142,13 @@
     opacity: 0;
     pointer-events: none;
   }
-
   .media_wrapper:hover .media_menu_icon {
     opacity: 1;
     pointer-events: auto;
   }
+  /**
+   * There is more that applies to the .media_menu_icon but since
+   * GSS doesn't support nested selectors, we use medka-takedown-hover.css
+   * and CommonSharedResources.mediaTakedownHoverCss instead.
+   */
 }

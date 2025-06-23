@@ -48,6 +48,7 @@ public class MobileGalleryPlayer extends ResizeComposite {
         img.getStyle().setProperty("backgroundPosition", "center");
         img.addClassName(CommonSharedResources.INSTANCE.mainCss().media_wrapper());
         final MediaMenuIcon mmi = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryImage");
+        mmi.setFontSize("20px");
         RootPanel.get().add(mmi); // required to attach to the DOM and let the mouse click handler become effective
         mmi.setData(i.getEventLink().getDisplayName(), i.getSourceRef());
         img.appendChild(mmi.getElement());
