@@ -100,6 +100,7 @@
   font-size: 0.8em;
   margin: -0.266666666666667em 0 0.333333333333333em;
 }
+@external media_wrapper, media_menu_icon;
 .media_wrapper {
   position: relative;
   display: inline-block; /* shrink to fit image size */
@@ -125,9 +126,25 @@
   color: white;
   border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s ease;
   user-select: none;
+  transition: background 0.2s ease, opacity 0.2s ease;
+
+  /* Set default visibility */
+  opacity: 1;
+  pointer-events: auto;
 }
+/* Highlight icon on hover/touch */
 .media_menu_icon:hover {
   background: rgba(0, 0, 0, 0.8);
+}
+@media (hover: hover) and (pointer: fine) {
+  .media_menu_icon {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .media_wrapper:hover .media_menu_icon {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }

@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.media;
 
 import java.util.Collections;
 
+import com.google.gwt.dom.client.StyleInjector;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -17,6 +18,7 @@ import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.common.CommonSharedResources;
 
 /**
  * A dialog that is shown to the user who wants to file a take-down notice for a media file found
@@ -63,6 +65,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
      */
     public static void ensureJSFunctionInstalled(TakedownNoticeService serviceToUseForTakedownNotice) {
         TakedownNoticeRequestDialog.serviceToUseForTakedownNotice = serviceToUseForTakedownNotice;
+        StyleInjector.injectAtEnd(CommonSharedResources.INSTANCE.mediaTakedownHoverCss().getText());
         ensureJSFunctionInstalled();
     }
     
