@@ -49,6 +49,7 @@ public class SailingGalleryPlayer extends ResizeComposite implements HasSelectio
         for (SailingImageDTO i : images) {
             final DivElement mainImgElement = createMainImgElement(i);
             final MediaMenuIcon mmi = new MediaMenuIcon(takedownNoticeService, "takedownRequestForEventGalleryImage");
+            mmi.setFontSize("20px");
             RootPanel.get().add(mmi); // required to attach to the DOM and let the mouse click handler become effective
             mmi.setData(i.getEventLink().getDisplayName(), i.getSourceRef());
             mainImgElement.appendChild(mmi.getElement());
