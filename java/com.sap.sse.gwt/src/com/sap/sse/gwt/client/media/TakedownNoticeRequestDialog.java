@@ -135,6 +135,7 @@ public class TakedownNoticeRequestDialog extends DataEntryDialog<TakedownNoticeR
     @Override
     protected Widget getAdditionalWidget() {
         final Grid result = new Grid(3, 2);
+        result.setStyleName("table-with-spacing");
         int row = 0;
         result.setWidget(row, 0, new Label(stringMessages.natureOfTakedownClaim()));
         result.setWidget(row++, 1, natureOfClaimListBox);
