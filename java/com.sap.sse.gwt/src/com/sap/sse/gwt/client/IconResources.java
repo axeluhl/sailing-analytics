@@ -76,4 +76,7 @@ public interface IconResources extends ClientBundle {
     
     @Source("images/restart.png")
     ImageResource restartSymbol();
+    
+    @Source("images/compass_symbol.png")
+    ImageResource compassSymbol();
 }

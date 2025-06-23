@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +59,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -595,15 +597,16 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+        logger.info("User "+SessionUtils.getPrincipal()+" requests sending standard command "+command+" to device with serial number "+deviceSerialNumber);
         return apply(s->s.internalSendStandardCommand(deviceSerialNumber, command));
     }
 
     @Override
-    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException, InterruptedException, ExecutionException {
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
-                connection.sendCommand(command.getCommand());
+                connection.sendCommand(command.getCommand()); // see bug6140: could try to use log output returned as a queue
                 foundConnection = true;
                 break;
             }
