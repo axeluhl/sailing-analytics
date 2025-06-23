@@ -100,7 +100,7 @@
   font-size: 0.8em;
   margin: -0.266666666666667em 0 0.333333333333333em;
 }
-@external media_wrapper, media_menu_icon;
+@external media_wrapper, media_menu_icon; /* required to allow for nested selectors below in @media query */
 .media_wrapper {
   position: relative;
   display: inline-block; /* shrink to fit image size */
@@ -146,9 +146,4 @@
     opacity: 1;
     pointer-events: auto;
   }
-  /**
-   * There is more that applies to the .media_menu_icon but since
-   * GSS doesn't support nested selectors, we use medka-takedown-hover.css
-   * and CommonSharedResources.mediaTakedownHoverCss instead.
-   */
 }

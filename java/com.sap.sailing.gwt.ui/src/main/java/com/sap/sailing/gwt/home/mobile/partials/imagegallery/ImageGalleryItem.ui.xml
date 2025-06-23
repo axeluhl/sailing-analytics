@@ -17,7 +17,7 @@
     <g:HTMLPanel>
         <div style="position: relative;">
             <div class="{local_res.css.imagegallery_column_item} {res.mainCss.media_wrapper}" ui:field="imageUi" style="position:relative">
-                <m:MediaMenuIcon ui:field="mediaMenuIcon" fontSize="10px"/>
+                <m:MediaMenuIcon ui:field="mediaMenuIcon" fontSize="15px"/>
             </div>
             <div ui:field="overlayUi" class="{res_home.sharedHomeCss.overlay}">
                 <g:Button addStyleNames="{media_res.css.button} {media_res.css.editButton}" ui:field="editButtonUi"></g:Button>

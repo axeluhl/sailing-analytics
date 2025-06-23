@@ -5,7 +5,6 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
-import com.google.gwt.resources.client.TextResource;
 
 
 public interface CommonSharedResources extends ClientBundle {
@@ -14,7 +13,6 @@ public interface CommonSharedResources extends ClientBundle {
     public static final String RESET = "com/sap/sse/gwt/common/common-reset.gss";
     public static final String MAIN = "com/sap/sse/gwt/common/common-main.gss";
     public static final String MEDIA = "com/sap/sse/gwt/common/common-media.gss";
-    public static final String MEDIA_TAKEDOWN_HOVER = "media-takedown-hover.css";
     
     @Source({RESET, MAIN})
     CommonMainCss mainCss();
@@ -25,9 +23,6 @@ public interface CommonSharedResources extends ClientBundle {
     @Source("buttonarrowrightwhite.png")
     @MimeType("image/png")
     DataResource buttonarrowrightwhite();
-    
-    @Source(MEDIA_TAKEDOWN_HOVER)
-    TextResource mediaTakedownHoverCss();
     
     public interface CommonMainCss extends CssResource {
         String button();
