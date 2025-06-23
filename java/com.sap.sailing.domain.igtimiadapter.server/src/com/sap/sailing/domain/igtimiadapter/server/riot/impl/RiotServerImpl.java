@@ -598,15 +598,21 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @Override
     public boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
         logger.info("User "+SessionUtils.getPrincipal()+" requests sending standard command "+command+" to device with serial number "+deviceSerialNumber);
-        return apply(s->s.internalSendStandardCommand(deviceSerialNumber, command));
+        return apply(s->s.internalSendCommand(deviceSerialNumber, command.getCommand()));
     }
 
     @Override
-    public boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException, InterruptedException, ExecutionException {
+    public boolean sendFreestyleCommand(String deviceSerialNumber, String command) throws IOException {
+        logger.info("User "+SessionUtils.getPrincipal()+" requests sending freestyle command "+command+" to device with serial number "+deviceSerialNumber);
+        return apply(s->s.internalSendCommand(deviceSerialNumber, command));
+    }
+
+    @Override
+    public boolean internalSendCommand(String deviceSerialNumber, String command) throws IOException, InterruptedException, ExecutionException {
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
-                connection.sendCommand(command.getCommand()); // see bug6140: could try to use log output returned as a queue
+                connection.sendCommand(command); // see bug6140: could try to use log output returned as a queue
                 foundConnection = true;
                 break;
             }

@@ -174,4 +174,10 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * device identified by {@code deviceSerialNumber}.
      */
     boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException;
+    
+    /**
+     * Returns {@code true} if and only if a {@link #getLiveConnections() live connection} was found that belongs to the
+     * device identified by {@code deviceSerialNumber}.
+     */
+    boolean sendFreestyleCommand(String deviceSerialNumber, String command) throws IOException;
 }

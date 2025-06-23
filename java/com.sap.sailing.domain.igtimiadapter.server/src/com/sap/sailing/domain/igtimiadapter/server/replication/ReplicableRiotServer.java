@@ -7,7 +7,6 @@ import com.igtimi.IgtimiStream.Msg;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Device;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotServer;
-import com.sap.sailing.domain.igtimiadapter.server.riot.RiotStandardCommand;
 import com.sap.sse.common.TimePoint;
 
 public interface ReplicableRiotServer extends RiotServer {
@@ -25,5 +24,5 @@ public interface ReplicableRiotServer extends RiotServer {
 
     Device internalCreateDevice(String deviceSerialNumber);
 
-    boolean internalSendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException, InterruptedException, ExecutionException;
+    boolean internalSendCommand(String deviceSerialNumber, String command) throws IOException, InterruptedException, ExecutionException;
 }

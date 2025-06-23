@@ -2495,6 +2495,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String turnGPSOn();
     String powerOff();
     String calibrateIMU();
+    String sendFreestyleCommand();
+    String sendCommandsTo(String deviceSerialNumber);
+    String sendCommandsToDescription(String deviceSerialNumber);
     String reallyTurnGPSOffForIgtimiDevice(String serialNumber);
     String reallyTurnGPSOnForIgtimiDevice(String serialNumber);
     String reallyPowerOffIgtimiDevice(String serialNumber);

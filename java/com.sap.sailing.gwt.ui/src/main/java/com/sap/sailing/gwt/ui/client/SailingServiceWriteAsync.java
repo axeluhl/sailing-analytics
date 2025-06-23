@@ -628,6 +628,11 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
 
     /**
+     * Sends a "freestyle" command to the Igtimi device identified by {@code serialNumber}.
+     */
+    void sendIgtimiCommand(String serialNumber, String command, AsyncCallback<Boolean> asyncCallback);
+
+    /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
      *         so
      */

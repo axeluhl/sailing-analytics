@@ -2181,6 +2181,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
+    public boolean sendIgtimiCommand(String serialNumber, String command) throws IOException, InterruptedException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
+        return getRiotServer().sendFreestyleCommand(serialNumber, command);
+    }
+
+    @Override
     public Map<RegattaAndRaceIdentifier, Integer> importWindFromIgtimi(List<RaceDTO> selectedRaces,
             boolean correctByDeclination)
             throws IllegalStateException, ClientProtocolException, IOException, org.json.simple.parser.ParseException {
