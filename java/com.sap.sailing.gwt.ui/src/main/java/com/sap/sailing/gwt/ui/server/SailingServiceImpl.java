@@ -3218,7 +3218,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         }
     }
 
-    protected List<ImageDescriptor> convertToImages(Iterable<ImageDTO> images) throws MalformedURLException {
+    protected List<ImageDescriptor> convertToImages(Iterable<? extends ImageDTO> images) throws MalformedURLException {
         List<ImageDescriptor> eventImages = new ArrayList<ImageDescriptor>();
         for (ImageDTO image : images) {
             try {
@@ -3230,7 +3230,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         return eventImages;
     }
 
-    protected List<VideoDescriptor> convertToVideos(Iterable<VideoDTO> videos) throws MalformedURLException {
+    protected List<VideoDescriptor> convertToVideos(Iterable<? extends VideoDTO> videos) throws MalformedURLException {
         List<VideoDescriptor> eventVideos = new ArrayList<VideoDescriptor>();
         for (VideoDTO video : videos) {
             try {
@@ -5497,8 +5497,8 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
             if (skipSecuritychecks || getService().getSecurityService().hasCurrentUserReadPermission(event)) {
                 ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO.getName());
                 ImageDTO logo = logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null;
-                String name = HomeServiceUtil.getEventDisplayName(event, getService());
-                String location = HomeServiceUtil.getLocation(event, getService());
+                String name = HomeServiceUtil.getEventDisplayName(event);
+                String location = HomeServiceUtil.getLocation(event);
                 if ((location == null || location.isEmpty()) && event.getVenue() != null) {
                     location = event.getVenue().getName();
                 }
