@@ -2549,4 +2549,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String isCORSWildcard();
     String corsAllowedOrigins();
     String successfullyUpdatedCORSAllowedOrigins();
+    String commandLogOutput();
 }

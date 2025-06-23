@@ -28,6 +28,7 @@ import com.sap.sailing.domain.igtimiadapter.server.replication.ReplicableRiotSer
 import com.sap.sailing.domain.igtimiadapter.server.replication.RiotReplicationOperation;
 import com.sap.sailing.domain.igtimiadapter.server.riot.impl.RiotServerImpl;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -180,4 +181,6 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * device identified by {@code deviceSerialNumber}.
      */
     boolean sendFreestyleCommand(String deviceSerialNumber, String command) throws IOException;
+
+    Iterable<String> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException;
 }

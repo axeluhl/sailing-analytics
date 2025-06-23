@@ -14,9 +14,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -571,6 +573,31 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     @FunctionalInterface
     private static interface MessageLoader<T> {
         T getResult(IgtimiConnection connection, String deviceSerialNumber, Type[] types) throws IOException, ParseException;
+    }
+
+    @Override
+    public Iterable<String> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException {
+        final TimePoint endTime = TimePoint.now();
+        final TimePoint startTime = endTime.minus(duration);
+        final Iterable<Msg> messages;
+        if (getMasterDescriptor() == null) {
+            messages = domainObjectFactory.getMessages(serialNumber, MultiTimeRange.of(TimeRange.create(startTime, endTime)),
+                    Collections.singleton(DataCase.LOG), /* clientSessionOrNull */ null);
+        } else {
+            messages = getFromPrimary(serialNumber, new Type[] { Type.valueOf(DataCase.LOG.getNumber()) },
+                    (c, dsn, ts)->c.getMessages(startTime, endTime, Collections.singleton(dsn), ts));
+        }
+        final List<String> logMessages = new ArrayList<>();
+        for (final Msg message : messages) {
+            for (final DataMsg data : message.getData().getDataList()) {
+                for (final DataPoint dataPoint : data.getDataList()) {
+                    if (dataPoint.hasLog()) {
+                        logMessages.add(dataPoint.getLog().getMessage());
+                    }
+                }
+            }
+        }
+        return logMessages;
     }
 
     @Override
