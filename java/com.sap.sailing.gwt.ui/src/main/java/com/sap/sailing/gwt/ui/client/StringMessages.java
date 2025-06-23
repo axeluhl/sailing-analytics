@@ -2550,4 +2550,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String corsAllowedOrigins();
     String successfullyUpdatedCORSAllowedOrigins();
     String commandLogOutput();
+    String errorLoadingLeaderboard(String leaderboardName, String message);
 }

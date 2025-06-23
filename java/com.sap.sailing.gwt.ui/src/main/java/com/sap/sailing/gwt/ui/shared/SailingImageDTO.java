@@ -1,9 +1,7 @@
-package com.sap.sailing.gwt.home.communication.media;
+package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
-import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
-import com.sap.sse.gwt.client.media.AbstractMediaDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class SailingImageDTO extends ImageDTO {
@@ -33,11 +31,5 @@ public class SailingImageDTO extends ImageDTO {
 
     public EventLinkDTO getEventLink() {
         return eventLink;
-    }
-
-    @Override
-    public int compareTo(AbstractMediaDTO o) {
-        int createdAtDateComp = compareToByCreatedAtDate(o); 
-        return createdAtDateComp == 0 ? getSourceRef().compareTo(o.getSourceRef()) : createdAtDateComp;
     }
 }

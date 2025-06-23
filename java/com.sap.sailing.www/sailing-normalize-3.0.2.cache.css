@@ -415,7 +415,6 @@ optgroup {
 /**
  * Remove most spacing between table cells.
  */
-
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -424,4 +423,12 @@ table {
 td,
 th {
   padding: 0;
+}
+
+/**
+ * But if you still do want spacing, use this:
+ */
+.table-with-spacing td, .table-with-spacing th {
+  border-collapse: collapse;
+  padding: 2px;
 }

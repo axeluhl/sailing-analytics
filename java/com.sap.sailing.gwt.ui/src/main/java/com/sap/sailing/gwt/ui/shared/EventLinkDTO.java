@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.ui.shared;
 
 public class EventLinkDTO extends EventReferenceDTO {
     
