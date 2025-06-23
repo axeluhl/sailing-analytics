@@ -59,6 +59,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -596,6 +597,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
 
     @Override
     public boolean sendStandardCommand(String deviceSerialNumber, RiotStandardCommand command) throws IOException {
+        logger.info("User "+SessionUtils.getPrincipal()+" requests sending standard command "+command+" to device with serial number "+deviceSerialNumber);
         return apply(s->s.internalSendStandardCommand(deviceSerialNumber, command));
     }
 
@@ -604,8 +606,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         boolean foundConnection = false;
         for (final RiotConnection connection : getLiveConnections()) {
             if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
-                final DeviceManagementResponse response = connection.sendCommand(command.getCommand());
-                // TODO bug6140: make use of the response and fold it into a combined return value that informs callers about whether the connection was found and what the device responded for the command
+                connection.sendCommand(command.getCommand()); // see bug6140: could try to use log output returned as a queue
                 foundConnection = true;
                 break;
             }

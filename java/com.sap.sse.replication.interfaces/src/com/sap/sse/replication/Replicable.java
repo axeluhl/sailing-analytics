@@ -123,6 +123,9 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
      * To determine whether this {@link Replicable} is a replica, this method uses the
      * {@link ReplicationService#getReplicatingFromMaster()} method which also provides the master server's connectivity
      * information required to forward the <code>operation</code>.
+     * 
+     * @return the result of applying the operation locally; results of applying the operation on other nodes of the
+     *        replica set are not considered
      */
     <T> T apply(O operation);
 

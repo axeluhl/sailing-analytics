@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,10 +19,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiAPI.Token;
 import com.igtimi.IgtimiData.Data;
 import com.igtimi.IgtimiData.DataMsg;
+import com.igtimi.IgtimiData.DataPoint;
 import com.igtimi.IgtimiDevice.DeviceCommand;
 import com.igtimi.IgtimiDevice.DeviceManagement;
 import com.igtimi.IgtimiDevice.DeviceManagementRequest;
-import com.igtimi.IgtimiDevice.DeviceManagementResponse;
 import com.igtimi.IgtimiStream.AckResponse;
 import com.igtimi.IgtimiStream.Authentication;
 import com.igtimi.IgtimiStream.Authentication.AuthResponse;
@@ -32,7 +31,12 @@ import com.igtimi.IgtimiStream.Msg;
 import com.igtimi.IgtimiStream.ServerDisconnecting;
 import com.sap.sailing.domain.igtimiadapter.ChannelManagementVisitor;
 import com.sap.sailing.domain.igtimiadapter.Device;
+import com.sap.sailing.domain.igtimiadapter.FixFactory;
+import com.sap.sailing.domain.igtimiadapter.FixVisitor;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiver;
+import com.sap.sailing.domain.igtimiadapter.IgtimiFixReceiverAdapter;
 import com.sap.sailing.domain.igtimiadapter.MsgVisitor;
+import com.sap.sailing.domain.igtimiadapter.datatypes.Log;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotConnection;
 import com.sap.sailing.domain.igtimiadapter.server.riot.RiotMessageListener;
 import com.sap.sse.common.Duration;
@@ -142,24 +146,25 @@ public class RiotConnectionImpl implements RiotConnection {
     }
     
     @Override
-    public DeviceManagementResponse sendCommand(String command) throws IOException, InterruptedException, ExecutionException {
-        final CompletableFuture<DeviceManagementResponse> responseFuture = new CompletableFuture<>();
-        final RiotMessageListener listener = m->{
-            if (m.hasDeviceManagement() && m.getDeviceManagement().hasResponse()) {
-                final DeviceManagementResponse response = m.getDeviceManagement().getResponse();
-                responseFuture.complete(response);
+    public ConcurrentLinkedQueue<String> sendCommand(String command) throws IOException, InterruptedException, ExecutionException {
+        final ConcurrentLinkedQueue<String> logLines = new ConcurrentLinkedQueue<>();
+        final FixFactory fixFactory = new FixFactory();
+        final IgtimiFixReceiver fixReceiver = new IgtimiFixReceiverAdapter() {
+            @Override
+            public void received(Log fix) {
+                logLines.add(fix.getLogMessage());
+                logger.info("Log from device "+getSerialNumber()+": "+fix.getLogMessage());
             }
         };
+        final FixVisitor fixVisitor = new FixVisitor(fixReceiver);
+        final RiotMessageListener listener = m->fixVisitor.received(fixFactory.createFixes(m));
         riotServer.addListener(listener);
         send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
                 .setCommand(DeviceCommand.newBuilder().setText(command)))).build());
-        try {
-            return responseFuture.get(10, TimeUnit.SECONDS); // wait for 10 seconds for the response
-        } catch (TimeoutException e) {
-            return null; // no response received within 10 seconds
-        } finally {
-            riotServer.removeListener(listener);
-        }
+        // stop log collection after 10 seconds
+        ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
+                ()->riotServer.removeListener(listener), 10, TimeUnit.SECONDS);
+        return logLines;
     }
 
     @Override
@@ -332,6 +337,11 @@ public class RiotConnectionImpl implements RiotConnection {
             public void handleData(Data data) {
                 for (final DataMsg dataMsg : data.getDataList()) {
                     updateSerialNumber(dataMsg.getSerialNumber());
+                    for (final DataPoint d : dataMsg.getDataList()) {
+                        if (d.hasLog()) {
+                            logger.info("Log from Igtimi device "+getSerialNumber()+": "+d.getLog().getMessage());
+                        }
+                    }
                 }
             }
             
