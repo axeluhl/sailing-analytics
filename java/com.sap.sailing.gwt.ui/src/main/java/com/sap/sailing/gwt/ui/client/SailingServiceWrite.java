@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -262,6 +263,10 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException;
 
     boolean sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber) throws IOException, InterruptedException;
+    
+    boolean sendIgtimiCommand(String serialNumber, String command) throws IOException, InterruptedException;
+    
+    ArrayList<String> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws Exception;
     
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 

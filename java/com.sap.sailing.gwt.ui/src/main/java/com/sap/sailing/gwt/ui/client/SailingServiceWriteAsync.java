@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -626,6 +627,13 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      * replica to which the device maintains a live connection.
      */
     void sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber, AsyncCallback<Boolean> callback);
+
+    /**
+     * Sends a "freestyle" command to the Igtimi device identified by {@code serialNumber}.
+     */
+    void sendIgtimiCommand(String serialNumber, String command, AsyncCallback<Boolean> asyncCallback);
+    
+    void getIgtimiDeviceLogs(String serialNumber, Duration duration, AsyncCallback<ArrayList<String>> asyncCallback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted

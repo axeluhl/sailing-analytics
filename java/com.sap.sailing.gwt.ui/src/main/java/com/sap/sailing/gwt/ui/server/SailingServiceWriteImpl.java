@@ -2133,10 +2133,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
     
     private void checkCurrentUserUpdatePermissionForIgtimiDevice(String serialNumber) {
-        final RiotServer riotServer = getRiotServer();
-        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        final Device existingDevice = getIgtimiDevice(serialNumber);
         if (existingDevice != null) {
             getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+        }
+    }
+
+    private Device getIgtimiDevice(String serialNumber) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        return existingDevice;
+    }
+
+    private void checkCurrentUserReadPermissionForIgtimiDevice(String serialNumber) {
+        final Device existingDevice = getIgtimiDevice(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserReadPermission(existingDevice);
         }
     }
 
@@ -2180,6 +2192,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         Thread.sleep(1000); // wait for 1s for the command to process
         result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_ON) && result;
         return result;
+    }
+
+    @Override
+    public boolean sendIgtimiCommand(String serialNumber, String command) throws IOException, InterruptedException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
+        return getRiotServer().sendFreestyleCommand(serialNumber, command);
+    }
+    
+    @Override
+    public ArrayList<String> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws IOException, org.json.simple.parser.ParseException {
+        checkCurrentUserReadPermissionForIgtimiDevice(serialNumber);
+        return Util.mapToArrayList(getRiotServer().getDeviceLogs(serialNumber, duration), s->s);
     }
 
     @Override

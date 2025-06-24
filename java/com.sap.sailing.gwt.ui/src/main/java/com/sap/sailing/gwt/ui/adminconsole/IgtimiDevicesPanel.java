@@ -264,6 +264,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         public static final String ACTION_RESTART = "ACTION_RESTART";
         public static final String ACTION_POWER_OFF = "ACTION_POWER_OFF";
         public static final String ACTION_CALIBRATE = "ACTION_CALIBRATE";
+        public static final String ACTION_SEND_FREESTYLE_COMMAND = "ACTION_SEND_FREESTYLE_COMMAND";
         private final StringMessages stringMessages;
 
         public DevicesImagesBarCell(StringMessages stringMessages) {
@@ -279,6 +280,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     new ImageSpec(ACTION_RESTART, stringMessages.restart(), IconResources.INSTANCE.restartSymbol()),
                     new ImageSpec(ACTION_POWER_OFF, stringMessages.powerOff(), IconResources.INSTANCE.powerButton()),
                     new ImageSpec(ACTION_CALIBRATE, stringMessages.calibrateIMU(), IconResources.INSTANCE.compassSymbol()),
+                    new ImageSpec(ACTION_SEND_FREESTYLE_COMMAND, stringMessages.sendFreestyleCommand(), IconResources.INSTANCE.commandSymbol()),
                     getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec());
         }
     }
@@ -354,6 +356,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         actionColumn.addAction(DevicesImagesBarCell.ACTION_RESTART, UPDATE, this::sendRestart);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_POWER_OFF, UPDATE, this::sendPowerOff);
         actionColumn.addAction(DevicesImagesBarCell.ACTION_CALIBRATE, UPDATE, this::sendIMUCalibrationCommandSequence);
+        actionColumn.addAction(DevicesImagesBarCell.ACTION_SEND_FREESTYLE_COMMAND, UPDATE, this::sendFreestyleCommands);
         actionColumn.addAction(ACTION_DELETE, DELETE, device -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveIgtimiDevice(device.getSerialNumber()))) {
                 removeDevice(device, filteredDevices);
@@ -780,5 +783,9 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                 }
             });
         }
+    }
+    
+    private void sendFreestyleCommands(IgtimiDeviceWithSecurityDTO device) {
+        new FreestyleCommandDialog(stringMessages, sailingServiceWrite, device.getSerialNumber()).show();
     }
 }

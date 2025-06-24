@@ -96,6 +96,12 @@ public class RiotConnectionImpl implements RiotConnection {
     
     private TimePoint requireNextHeartbeatUntil;
     
+    /**
+     * How many command sends have enabled over-the-air log collection? Use only while holding
+     * this object's monitor to make this thread-safe.
+     */
+    private int overTheAirLogEnabled;
+    
     private static final Duration MAX_ALLOWED_DURATION_BETWEEN_HEARTBEATS = Duration.ONE_SECOND.times(30);
     
     RiotConnectionImpl(SocketChannel socketChannel, RiotServerImpl riotServer) {
@@ -153,18 +159,49 @@ public class RiotConnectionImpl implements RiotConnection {
             @Override
             public void received(Log fix) {
                 logLines.add(fix.getLogMessage());
-                logger.info("Log from device "+getSerialNumber()+": "+fix.getLogMessage());
+                logger.info("Log from device "+getSerialNumber()+" probably in response to command "+command+
+                        ": "+fix.getLogMessage());
             }
         };
         final FixVisitor fixVisitor = new FixVisitor(fixReceiver);
         final RiotMessageListener listener = m->fixVisitor.received(fixFactory.createFixes(m));
         riotServer.addListener(listener);
-        send(Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
-                .setCommand(DeviceCommand.newBuilder().setText(command)))).build());
+        enableOverTheAirLog(); // enable over-the-air log collection
+        send(buildCommandMessage(command));
         // stop log collection after 10 seconds
         ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
-                ()->riotServer.removeListener(listener), 10, TimeUnit.SECONDS);
+                ()->{
+                    try {
+                        disableOverTheAirLog();
+                    } catch (IOException e) {
+                        logger.warning("Couldn't send commands to stop receiving logs to device "+getSerialNumber()+": "+e.getMessage());
+                    }
+                    riotServer.removeListener(listener);
+                }, 10, TimeUnit.SECONDS);
         return logLines;
+    }
+
+    private synchronized void enableOverTheAirLog() throws IOException {
+        if (overTheAirLogEnabled == 0) {
+            send(buildCommandMessage("log cell debug"));
+            send(buildCommandMessage("log cell block 2"));
+        }
+        overTheAirLogEnabled++;
+    }
+    
+    private synchronized void disableOverTheAirLog() throws IOException {
+        if (overTheAirLogEnabled > 0) {
+            overTheAirLogEnabled--;
+            if (overTheAirLogEnabled == 0) {
+                send(buildCommandMessage("log cell none"));
+                send(buildCommandMessage("log cell block 0"));
+            }
+        }
+    }
+
+    private Msg buildCommandMessage(String command) {
+        return Msg.newBuilder().setDeviceManagement(DeviceManagement.newBuilder().setRequest(DeviceManagementRequest.newBuilder()
+                .setCommand(DeviceCommand.newBuilder().setText(command)))).build();
     }
 
     @Override
