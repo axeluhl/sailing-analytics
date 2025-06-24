@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Focusable;
@@ -68,6 +70,9 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
         verticalPanel.add(new Label(stringMessages.commandLogOutput()));
         final HorizontalPanel logPanel = new HorizontalPanel();
         logPanel.add(logOutputArea);
+        final Button refreshLogButton = new Button(stringMessages.refresh());
+        refreshLogButton.addClickHandler(e -> updateLog());
+        logPanel.add(refreshLogButton);
         logPanel.add(fetchLogBusyIndicator);
         verticalPanel.add(logPanel);
         return verticalPanel;
@@ -84,7 +89,13 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
                 } else {
                     Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(deviceSerialNumber), NotificationType.WARNING);
                 }
-                updateLog();
+                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+                    @Override
+                    public boolean execute() {
+                        updateLog();
+                        return false; // don't repeat
+                    }
+                }, /* delay in milliseconds */ 1000);
             }
 
             @Override
