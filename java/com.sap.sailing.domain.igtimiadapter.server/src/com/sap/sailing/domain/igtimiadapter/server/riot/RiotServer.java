@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
+import org.osgi.framework.BundleContext;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.igtimi.IgtimiData.DataMsg;
@@ -65,15 +66,15 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      * Created a {@link RiotServer} listening on the {@code port} specified. If the port is not
      * available, an {@link IOException} will be thrown.
      */
-    static RiotServer create(int port, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
-        return new RiotServerImpl(port, domainObjectFactory, mongoObjectFactory);
+    static RiotServer create(int port, DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, BundleContext context) throws Exception {
+        return new RiotServerImpl(port, domainObjectFactory, mongoObjectFactory, context);
     }
     
     /**
      * Creates a {@link RiotServer} listening on an available local TCP port selected automatically.
      */
-    static RiotServer create(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) throws Exception {
-        return new RiotServerImpl(domainObjectFactory, mongoObjectFactory);
+    static RiotServer create(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory, BundleContext context) throws Exception {
+        return new RiotServerImpl(domainObjectFactory, mongoObjectFactory, context);
     }
     
     void addListener(RiotMessageListener listener);

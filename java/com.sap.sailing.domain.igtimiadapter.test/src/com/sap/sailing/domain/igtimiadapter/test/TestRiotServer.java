@@ -61,7 +61,7 @@ public class TestRiotServer {
         final MongoDBConfiguration mongoTestConfig = MongoDBConfiguration.getDefaultTestConfiguration();
         final MongoDBService mongoTestService = mongoTestConfig.getService();
         final RiotServer riot = RiotServer.create(PersistenceFactory.INSTANCE.getDomainObjectFactory(mongoTestService),
-                PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService));
+                PersistenceFactory.INSTANCE.getMongoObjectFactory(mongoTestService), /* OSGi Bundle Context */ null);
         final TestListener listener = new TestListener();
         riot.addListener(listener);
         try (final Socket socket = new Socket("localhost", riot.getPort())) {
