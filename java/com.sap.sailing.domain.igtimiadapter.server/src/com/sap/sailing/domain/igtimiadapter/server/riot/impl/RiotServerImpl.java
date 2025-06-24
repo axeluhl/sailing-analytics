@@ -297,9 +297,10 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
                     getSecurityService().getServerGroup(), newDevice.getName());
         } else {
             final byte[] messageAsBytes = message.toByteArray();
-            final SecurityService securityService = getSecurityService();
             final TimeRange messageDataTimeRange = getTimeRange(message);
             final Iterable<DataAccessWindow> daws = getDataAccessWindows(Collections.singleton(deviceSerialNumber), MultiTimeRange.of(messageDataTimeRange));
+            // obtain the securityService only if connections exist; otherwise, we may still be in start-up mode
+            final SecurityService securityService = liveWebSocketConnections.isEmpty() ? null : getSecurityService();
             for (final RiotWebsocketHandler webSocketClient : liveWebSocketConnections) {
                 final User user = webSocketClient.getAuthenticatedUser();
                 final OwnershipAnnotation deviceOwnership = securityService.getOwnership(device.getIdentifier());
