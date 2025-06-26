@@ -633,6 +633,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
      */
     void sendIgtimiCommand(String serialNumber, String command, AsyncCallback<Boolean> asyncCallback);
     
+    void enableIgtimiDeviceOverTheAirLog(String deviceSerialNumber, boolean enable, AsyncCallback<Boolean> asyncCallback);
+    
     void getIgtimiDeviceLogs(String serialNumber, Duration duration, AsyncCallback<ArrayList<String>> asyncCallback);
 
     /**

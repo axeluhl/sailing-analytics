@@ -25,4 +25,6 @@ public interface ReplicableRiotServer extends RiotServer {
     Device internalCreateDevice(String deviceSerialNumber);
 
     boolean internalSendCommand(String deviceSerialNumber, String command) throws IOException, InterruptedException, ExecutionException;
+
+    boolean internalEnableOverTheAirLog(String deviceSerialNumber, boolean enable) throws IOException;
 }

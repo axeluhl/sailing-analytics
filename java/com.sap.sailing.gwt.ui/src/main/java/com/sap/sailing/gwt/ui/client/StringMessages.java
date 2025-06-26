@@ -2517,6 +2517,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorCalibratingIgtimiDevice(String serialNumber, String message);
     String successfullyCalibratedIgtimiDevice(String serialNumber);    
     String restart();
+    String enableOverTheAirLog();
+    String disableOverTheAirLog();
     String desktop();
     String mobile();
     String gapToLeaderInSecondsChange();

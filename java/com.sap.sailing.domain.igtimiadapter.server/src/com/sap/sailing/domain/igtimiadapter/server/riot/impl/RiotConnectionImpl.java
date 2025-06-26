@@ -181,7 +181,8 @@ public class RiotConnectionImpl implements RiotConnection {
         return logLines;
     }
 
-    private synchronized void enableOverTheAirLog() throws IOException {
+    @Override
+    public synchronized void enableOverTheAirLog() throws IOException {
         if (overTheAirLogEnabled == 0) {
             send(buildCommandMessage("log cell debug"));
             send(buildCommandMessage("log cell block 2"));
@@ -189,7 +190,8 @@ public class RiotConnectionImpl implements RiotConnection {
         overTheAirLogEnabled++;
     }
     
-    private synchronized void disableOverTheAirLog() throws IOException {
+    @Override
+    public synchronized void disableOverTheAirLog() throws IOException {
         if (overTheAirLogEnabled > 0) {
             overTheAirLogEnabled--;
             if (overTheAirLogEnabled == 0) {

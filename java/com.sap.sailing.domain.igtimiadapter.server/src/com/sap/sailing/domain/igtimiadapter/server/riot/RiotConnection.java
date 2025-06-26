@@ -55,4 +55,8 @@ public interface RiotConnection extends Closeable {
     ConcurrentLinkedQueue<String> sendCommand(String command) throws IOException, InterruptedException, ExecutionException;
 
     TimePoint getLastHeartbeatReceivedAt();
+
+    void enableOverTheAirLog() throws IOException;
+
+    void disableOverTheAirLog() throws IOException;
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.channels.ServerSocketChannel;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
@@ -184,4 +185,7 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
     boolean sendFreestyleCommand(String deviceSerialNumber, String command) throws IOException;
 
     Iterable<String> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException;
+
+    boolean enableOverTheAirLog(String deviceSerialNumber, boolean enable)
+            throws IOException, InterruptedException, ExecutionException;
 }
