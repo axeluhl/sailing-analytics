@@ -698,7 +698,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     if (result) {
                         Notification.notify(stringMessages.successfullyTurnedGPSOffForIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
-                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.WARNING);
                     }
                 }
             });
@@ -718,7 +718,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     if (result) {
                         Notification.notify(stringMessages.successfullyTurnedGPSOnForIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
-                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.WARNING);
                     }
                 }
             });
@@ -738,7 +738,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     if (result) {
                         Notification.notify(stringMessages.successfullyPoweredOffIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
-                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.WARNING);
                     }
                 }
             });
@@ -758,7 +758,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     if (result) {
                         Notification.notify(stringMessages.successfullyRestartedIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
-                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.WARNING);
                     }
                 }
             });
@@ -778,7 +778,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
                     if (result) {
                         Notification.notify(stringMessages.successfullyCalibratedIgtimiDevice(device.getSerialNumber()), NotificationType.INFO);
                     } else {
-                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.ERROR);
+                        Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(device.getSerialNumber()), NotificationType.WARNING);
                     }
                 }
             });

@@ -70,12 +70,39 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
         verticalPanel.add(new Label(stringMessages.commandLogOutput()));
         final HorizontalPanel logPanel = new HorizontalPanel();
         logPanel.add(logOutputArea);
+        final VerticalPanel logButtonPanel = new VerticalPanel();
         final Button refreshLogButton = new Button(stringMessages.refresh());
         refreshLogButton.addClickHandler(e -> updateLog());
-        logPanel.add(refreshLogButton);
+        logPanel.add(logButtonPanel);
+        logButtonPanel.add(refreshLogButton);
+        final Button enableOverTheAirLogButton = new Button(stringMessages.enableOverTheAirLog());
+        enableOverTheAirLogButton.addClickHandler(e->enableOverTheAirLog(true));
+        logButtonPanel.add(enableOverTheAirLogButton);
+        final Button disableOverTheAirLogButton = new Button(stringMessages.disableOverTheAirLog());
+        disableOverTheAirLogButton.addClickHandler(e->enableOverTheAirLog(false));
+        logButtonPanel.add(disableOverTheAirLogButton);
         logPanel.add(fetchLogBusyIndicator);
         verticalPanel.add(logPanel);
         return verticalPanel;
+    }
+
+    private void enableOverTheAirLog(boolean enabled) {
+        sailingServiceWrite.enableIgtimiDeviceOverTheAirLog(deviceSerialNumber, enabled, new AsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    Notification.notify(stringMessages.ok(), NotificationType.SUCCESS);
+                } else {
+                    Notification.notify(stringMessages.noLiveConnectionFoundForIgtimiDevice(deviceSerialNumber), NotificationType.WARNING);
+                }
+                updateLog();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+        });
     }
 
     private void sendCommand(String command) {

@@ -669,4 +669,30 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         }
         return foundConnection;
     }
+    
+    @Override
+    public boolean enableOverTheAirLog(String deviceSerialNumber, boolean enable) throws IOException, InterruptedException, ExecutionException {
+        final Device device = getDeviceBySerialNumber(deviceSerialNumber);
+        if (device == null) {
+            throw new IllegalArgumentException("No device with serial number "+deviceSerialNumber+" found");
+        }
+        return apply(s->s.internalEnableOverTheAirLog(deviceSerialNumber, enable));
+    }
+
+    @Override
+    public boolean internalEnableOverTheAirLog(String deviceSerialNumber, boolean enable) throws IOException {
+        boolean foundConnection = false;
+        for (final RiotConnection connection : getLiveConnections()) {
+            if (Util.equalsWithNull(connection.getSerialNumber(), deviceSerialNumber)) {
+                if (enable) {
+                    connection.enableOverTheAirLog();
+                } else {
+                    connection.disableOverTheAirLog();
+                }
+                foundConnection = true;
+                break;
+            }
+        }
+        return foundConnection;
+    }
 }

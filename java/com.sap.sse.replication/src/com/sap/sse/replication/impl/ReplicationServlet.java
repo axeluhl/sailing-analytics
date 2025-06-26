@@ -236,7 +236,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             String replicableIdAsString = dis.readUTF();
             Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
             if (replicable != null) {
-                logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
+                logger.fine("Received request to apply and replicate an operation from a replica for replicable "+replicable);
                 checkReplicatorPermission(ServerActions.REPLICATE);
                 try {
                     applyOperationToReplicable(replicable, is);
@@ -299,7 +299,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
             throw e;
         }
         Thread.currentThread().setContextClassLoader(oldContextClassLoader);
-        logger.info("Applying operation of type " + operation.getClassForLogging().getName()
+        logger.fine("Applying operation of type " + operation.getClassForLogging().getName()
                 + (operation.getOriginServerName() == null ? "" : (" originating from server \""+operation.getOriginServerName()+"\""))
                 + " received from replica to replicable " + replicable.toString());
         try {
