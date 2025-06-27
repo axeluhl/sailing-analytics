@@ -268,7 +268,7 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     
     boolean enableIgtimiDeviceOverTheAirLog(String serialNumber, boolean enable) throws Exception;
     
-    ArrayList<String> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws Exception;
+    ArrayList<Pair<TimePoint, String>> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws Exception;
     
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException;
 

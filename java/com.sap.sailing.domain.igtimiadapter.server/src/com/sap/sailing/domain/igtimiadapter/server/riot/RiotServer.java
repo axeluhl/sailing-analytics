@@ -34,6 +34,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.Replicable;
 
 /**
@@ -184,7 +185,7 @@ public interface RiotServer extends Replicable<ReplicableRiotServer, RiotReplica
      */
     boolean sendFreestyleCommand(String deviceSerialNumber, String command) throws IOException;
 
-    Iterable<String> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException;
+    Iterable<Pair<TimePoint, String>> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException;
 
     boolean enableOverTheAirLog(String deviceSerialNumber, boolean enable)
             throws IOException, InterruptedException, ExecutionException;

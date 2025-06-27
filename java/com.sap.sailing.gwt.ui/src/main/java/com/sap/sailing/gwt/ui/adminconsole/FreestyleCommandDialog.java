@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -135,13 +137,16 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
 
     private void updateLog() {
         fetchLogBusyIndicator.setBusy(true);
-        sailingServiceWrite.getIgtimiDeviceLogs(deviceSerialNumber, Duration.ONE_MINUTE, new AsyncCallback<ArrayList<String>>() {
+        sailingServiceWrite.getIgtimiDeviceLogs(deviceSerialNumber, Duration.ONE_MINUTE, new AsyncCallback<ArrayList<Pair<TimePoint, String>>>() {
             @Override
-            public void onSuccess(ArrayList<String> result) {
+            public void onSuccess(ArrayList<Pair<TimePoint, String>> result) {
                 fetchLogBusyIndicator.setBusy(false);
                 final StringBuilder sb = new StringBuilder();
-                for (final String logLine : result) {
-                    sb.append(logLine).append("\n");
+                for (final Pair<TimePoint, String> logLine : result) {
+                    sb.append(logLine.getA())
+                      .append(": ")
+                      .append(logLine.getB())
+                      .append("\n");
                 }
                 logOutputArea.setText(sb.toString());
             }

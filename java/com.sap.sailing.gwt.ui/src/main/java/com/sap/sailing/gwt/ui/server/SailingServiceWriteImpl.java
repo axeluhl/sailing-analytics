@@ -2207,7 +2207,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
     
     @Override
-    public ArrayList<String> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws IOException, org.json.simple.parser.ParseException {
+    public ArrayList<Pair<TimePoint, String>> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws IOException, org.json.simple.parser.ParseException {
         checkCurrentUserReadPermissionForIgtimiDevice(serialNumber);
         return Util.mapToArrayList(getRiotServer().getDeviceLogs(serialNumber, duration), s->s);
     }

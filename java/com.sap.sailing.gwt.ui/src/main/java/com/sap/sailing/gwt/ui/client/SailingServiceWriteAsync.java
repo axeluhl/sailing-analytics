@@ -635,7 +635,7 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     
     void enableIgtimiDeviceOverTheAirLog(String deviceSerialNumber, boolean enable, AsyncCallback<Boolean> asyncCallback);
     
-    void getIgtimiDeviceLogs(String serialNumber, Duration duration, AsyncCallback<ArrayList<String>> asyncCallback);
+    void getIgtimiDeviceLogs(String serialNumber, Duration duration, AsyncCallback<ArrayList<Pair<TimePoint, String>>> asyncCallback);
 
     /**
      * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
