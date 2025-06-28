@@ -61,6 +61,7 @@ import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.security.SecurityService;
@@ -599,7 +600,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     }
 
     @Override
-    public Iterable<String> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException {
+    public Iterable<Pair<TimePoint, String>> getDeviceLogs(String serialNumber, Duration duration) throws ParseException, IOException {
         final TimePoint endTime = TimePoint.now();
         final TimePoint startTime = endTime.minus(duration);
         final Iterable<Msg> messages;
@@ -610,12 +611,12 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
             messages = getFromPrimary(serialNumber, new Type[] { Type.valueOf(DataCase.LOG.getNumber()) },
                     (c, dsn, ts)->c.getMessages(startTime, endTime, Collections.singleton(dsn), ts));
         }
-        final List<String> logMessages = new ArrayList<>();
+        final List<Pair<TimePoint, String>> logMessages = new ArrayList<>();
         for (final Msg message : messages) {
             for (final DataMsg data : message.getData().getDataList()) {
                 for (final DataPoint dataPoint : data.getDataList()) {
                     if (dataPoint.hasLog()) {
-                        logMessages.add(dataPoint.getLog().getMessage());
+                        logMessages.add(new Pair<>(TimePoint.of(dataPoint.getLog().getTimestamp()), dataPoint.getLog().getMessage()));
                     }
                 }
             }
