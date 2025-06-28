@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -32,6 +35,7 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
     private final String deviceSerialNumber;
     private final SimpleBusyIndicator sendBusyIndicator;
     private final SimpleBusyIndicator fetchLogBusyIndicator;
+    private final NavigableMap<TimePoint, String> logEntries;
 
     public FreestyleCommandDialog(StringMessages stringMessages, SailingServiceWriteAsync sailingServiceWrite, String deviceSerialNumber) {
         super(stringMessages.sendCommandsTo(deviceSerialNumber),
@@ -40,6 +44,7 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
         this.stringMessages = stringMessages;
         this.sailingServiceWrite = sailingServiceWrite;
         this.deviceSerialNumber = deviceSerialNumber;
+        logEntries = new TreeMap<>();
         commandTextBox = new TextBox();
         commandTextBox.setVisibleLength(80);
         logOutputArea = new TextArea();
@@ -137,15 +142,24 @@ public class FreestyleCommandDialog extends DataEntryDialog<Void> {
 
     private void updateLog() {
         fetchLogBusyIndicator.setBusy(true);
-        sailingServiceWrite.getIgtimiDeviceLogs(deviceSerialNumber, Duration.ONE_MINUTE, new AsyncCallback<ArrayList<Pair<TimePoint, String>>>() {
+        // compute how long back to fetch the log entries; ask from last known entry up to now, defaulting to one minute if no log entry exists yet
+        final Duration duration;
+        if (logEntries.isEmpty()) {
+            duration = Duration.ONE_MINUTE;
+        } else {
+            final TimePoint lastLogEntryTime = logEntries.lastKey();
+            duration = lastLogEntryTime.until(TimePoint.now());
+        }
+        sailingServiceWrite.getIgtimiDeviceLogs(deviceSerialNumber, duration, new AsyncCallback<ArrayList<Pair<TimePoint, String>>>() {
             @Override
             public void onSuccess(ArrayList<Pair<TimePoint, String>> result) {
                 fetchLogBusyIndicator.setBusy(false);
+                result.forEach(logEntry -> logEntries.put(logEntry.getA(), logEntry.getB()));
                 final StringBuilder sb = new StringBuilder();
-                for (final Pair<TimePoint, String> logLine : result) {
-                    sb.append(logLine.getA())
+                for (final Entry<TimePoint, String> logLine : logEntries.entrySet()) {
+                    sb.append(logLine.getKey())
                       .append(": ")
-                      .append(logLine.getB())
+                      .append(logLine.getValue())
                       .append("\n");
                 }
                 logOutputArea.setText(sb.toString());
