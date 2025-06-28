@@ -3,7 +3,6 @@ package com.sap.sailing.domain.igtimiadapter.shared;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.igtimiadapter.websocket.WebSocketConnectionManager;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.WindListener;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackWithRemoveImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
@@ -63,14 +62,14 @@ import com.sap.sse.common.Util.Pair;
  */
 public class IgtimiWindReceiver implements BulkFixReceiver {
     private static final Logger logger = Logger.getLogger(IgtimiWindReceiver.class.getName());
-    private final Map<String, DynamicTrack<AWA>> awaTracks;
-    private final Map<String, DynamicTrack<AWS>> awsTracks;
-    private final Map<String, DynamicTrack<GpsLatLong>> gpsTracks;
-    private final Map<String, DynamicTrack<COG>> cogTracks;
-    private final Map<String, DynamicTrack<SOG>> sogTracks;
-    private final Map<String, DynamicTrack<HDG>> hdgTracks;
-    private final Map<String, DynamicTrack<HDGM>> hdgmTracks;
-    private final Map<String, DynamicTrack<BatteryLevel>> batteryLevelTracks;
+    private final ConcurrentMap<String, DynamicTrack<AWA>> awaTracks;
+    private final ConcurrentMap<String, DynamicTrack<AWS>> awsTracks;
+    private final ConcurrentMap<String, DynamicTrack<GpsLatLong>> gpsTracks;
+    private final ConcurrentMap<String, DynamicTrack<COG>> cogTracks;
+    private final ConcurrentMap<String, DynamicTrack<SOG>> sogTracks;
+    private final ConcurrentMap<String, DynamicTrack<HDG>> hdgTracks;
+    private final ConcurrentMap<String, DynamicTrack<HDGM>> hdgmTracks;
+    private final ConcurrentMap<String, DynamicTrack<BatteryLevel>> batteryLevelTracks;
     private final FixReceiver receiver;
     private final DeclinationService declinationService;
     private final ConcurrentMap<IgtimiWindListener, IgtimiWindListener> listeners;
@@ -122,20 +121,20 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
         receiver = new FixReceiver();
         this.declinationService = declinationService;
         listeners = new ConcurrentHashMap<>();
-        awaTracks = new HashMap<>();
-        awsTracks = new HashMap<>();
-        gpsTracks = new HashMap<>();
-        cogTracks = new HashMap<>();
-        sogTracks = new HashMap<>();
-        hdgTracks = new HashMap<>();
-        hdgmTracks = new HashMap<>();
-        batteryLevelTracks = new HashMap<>();
+        awaTracks = new ConcurrentHashMap<>();
+        awsTracks = new ConcurrentHashMap<>();
+        gpsTracks = new ConcurrentHashMap<>();
+        cogTracks = new ConcurrentHashMap<>();
+        sogTracks = new ConcurrentHashMap<>();
+        hdgTracks = new ConcurrentHashMap<>();
+        hdgmTracks = new ConcurrentHashMap<>();
+        batteryLevelTracks = new ConcurrentHashMap<>();
     }
     
     private <T extends Fix> DynamicTrack<T> getTrack(String deviceSerialNumber, Map<String, DynamicTrack<T>> tracksByDeviceSerialNumber) {
         DynamicTrack<T> result = tracksByDeviceSerialNumber.get(deviceSerialNumber);
         if (result == null) {
-            result = new DynamicTrackImpl<T>("Track for Igtimi wind track for device "+deviceSerialNumber);
+            result = new DynamicTrackWithRemoveImpl<T>("Track for Igtimi wind track for device "+deviceSerialNumber);
             tracksByDeviceSerialNumber.put(deviceSerialNumber, result);
         }
         return result;
