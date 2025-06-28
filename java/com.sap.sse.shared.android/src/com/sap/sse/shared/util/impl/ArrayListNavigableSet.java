@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.SortedSet;
 
 import com.sap.sse.common.ReverseRandomAccessList;
+import com.sap.sse.shared.util.NavigableSetWithRemove;
 
 /**
  * A {@link NavigableSet} implementation that internally uses an {@link ArrayList} to represent the data structure.
@@ -39,7 +40,7 @@ import com.sap.sse.common.ReverseRandomAccessList;
  * 
  * @author Axel Uhl (d043530)
  */
-public class ArrayListNavigableSet<E> extends AbstractSet<E> implements NavigableSet<E>, Serializable {
+public class ArrayListNavigableSet<E> extends AbstractSet<E> implements NavigableSetWithRemove<E>, Serializable {
     private static final long serialVersionUID = 6923963699509907975L;
     private final List<E> list;
     private final Comparator<? super E> comparator;
@@ -408,6 +409,55 @@ public class ArrayListNavigableSet<E> extends AbstractSet<E> implements Navigabl
         return tailSet(fromElement, false);
     }
     
+    @Override
+    public void removeAllLessThan(E e) {
+        final int i = binarySearch(e);
+        if (i < 0) {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for e was found.
+            // Therefore, -i = insertionPoint+1
+            list.subList(0, -i - 1).clear(); // uses ArrayList.removeRange internally which is as efficient as can be
+        } else {
+            list.subList(0, i).clear();
+        }
+    }
+
+    @Override
+    public void removeAllLessOrEqual(E e) {
+        final int i = binarySearch(e);
+        if (i < 0) {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for e was found.
+            // Therefore, -i = insertionPoint+1
+            list.subList(0, -i - 1).clear(); // uses ArrayList.removeRange internally which is as efficient as can be
+        } else {
+            list.subList(0, i + 1).clear();
+        }
+    }
+
+    @Override
+    public void removeAllGreaterThan(E e) {
+        final int i = binarySearch(e);
+        if (i < 0) {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for e was found.
+            // Therefore, -i = insertionPoint+1
+            list.subList(-i - 1, list.size()).clear(); // uses ArrayList.removeRange internally which is as efficient as can be
+        } else {
+            list.subList(i + 1, list.size()).clear();
+        }
+        
+    }
+
+    @Override
+    public void removeAllGreaterOrEqual(E e) {
+        final int i = binarySearch(e);
+        if (i < 0) {
+            // A negative binarySearch result represents -insertPosition-1 because no exact match for e was found.
+            // Therefore, -i = insertionPoint+1
+            list.subList(-i - 1, list.size()).clear(); // uses ArrayList.removeRange internally which is as efficient as can be
+        } else {
+            list.subList(i, list.size()).clear();
+        }
+    }
+
     @Override
     public String toString() {
         return list.toString();

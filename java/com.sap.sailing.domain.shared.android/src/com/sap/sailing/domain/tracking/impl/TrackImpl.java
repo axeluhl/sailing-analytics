@@ -18,6 +18,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.shared.util.NavigableSetWithRemove;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 import com.sap.sse.shared.util.impl.UnmodifiableNavigableSet;
 
@@ -91,9 +92,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
      * to avoid {@link ConcurrentModificationException}s. Should they modify the structure returned, they have to use
      * {@link #lockForWrite()} and {@link #unlockAfterWrite()}, respectively.
      */
-    protected NavigableSet<FixType> getInternalRawFixes() {
+    protected NavigableSetWithRemove<FixType> getInternalRawFixes() {
         @SuppressWarnings("unchecked")
-        NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
+        NavigableSetWithRemove<FixType> result = (NavigableSetWithRemove<FixType>) fixes;
         return result;
     }
 
@@ -120,8 +121,8 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
      *         {@link #getInternalRawFixes()} because for only {@link Timed} fixes we can't know how to remove outliers.
      *         Subclasses that constrain the <code>FixType</code> may provide smoothening implementations.
      */
-    protected NavigableSet<FixType> getInternalFixes() {
-        NavigableSet<FixType> result = getInternalRawFixes();
+    protected NavigableSetWithRemove<FixType> getInternalFixes() {
+        NavigableSetWithRemove<FixType> result = getInternalRawFixes();
         return result;
     }
 

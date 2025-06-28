@@ -25,4 +25,6 @@ public interface DynamicTrackWithRemove<FixType extends Timed> extends DynamicTr
      * @return <code>true</code> if the fix was successfully removed, <code>false</code> otherwise
      */
     boolean remove(FixType fix);
+
+    void removeAllUpToAndIncluding(FixType fix);
 }

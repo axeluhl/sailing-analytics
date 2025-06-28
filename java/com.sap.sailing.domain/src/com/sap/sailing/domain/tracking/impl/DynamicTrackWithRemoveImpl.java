@@ -14,4 +14,9 @@ public class DynamicTrackWithRemoveImpl<FixType extends Timed> extends DynamicTr
     public boolean remove(FixType fix) {
         return getInternalFixes().remove(fix);
     }
+    
+    @Override
+    public void removeAllUpToAndIncluding(FixType fix) {
+        getInternalFixes().removeAllLessOrEqual(fix);
+    }
 }
