@@ -17,4 +17,18 @@ public interface NavigableSetWithRemove<E> extends NavigableSet<E> {
     void removeAllLessOrEqual(E e);
     void removeAllGreaterThan(E e);
     void removeAllGreaterOrEqual(E e);
+    @Override
+    NavigableSetWithRemove<E> descendingSet();
+    @Override
+    NavigableSetWithRemove<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive);
+    @Override
+    NavigableSetWithRemove<E> headSet(E toElement, boolean inclusive) ;
+    @Override
+    NavigableSetWithRemove<E> tailSet(E fromElement, boolean inclusive);
+    @Override
+    NavigableSetWithRemove<E> subSet(E fromElement, E toElement);
+    @Override
+    NavigableSetWithRemove<E> headSet(E toElement);
+    @Override
+    NavigableSetWithRemove<E> tailSet(E fromElement);
 }
