@@ -45,8 +45,10 @@ public class TestRiotServer {
 
         @Override
         public void onMessage(Msg message) {
-            Util.addAll(new FixFactory().createFixes(message), fixes);
-            
+            final Iterable<Fix> newFixes = new FixFactory().createFixes(message);
+            synchronized (this) {
+                Util.addAll(newFixes, fixes);
+            }
         }
     }
     
@@ -87,7 +89,9 @@ public class TestRiotServer {
                     logger.log(Level.SEVERE, "Exception trying to read from test Riot server", ioe);
                 }
             }).start();
-            Wait.wait(()->Util.size(listener.getAllFixesReceived()) >= 218, /* timeout */ Optional.of(Duration.ONE_MINUTE), /* sleepBetweenAttempts */ Duration.ONE_SECOND);
+            Wait.wait(()->Util.size(listener.getAllFixesReceived()) >= 218, /* timeout */ Optional.of(Duration.ONE_MINUTE),
+                    /* sleepBetweenAttempts */ Duration.ONE_SECOND,
+                    Level.WARNING, "218 expected fixes; received "+Util.size(listener.getAllFixesReceived())+" so far");
             finished[0] = true;
             riot.stop();
             is.close();
