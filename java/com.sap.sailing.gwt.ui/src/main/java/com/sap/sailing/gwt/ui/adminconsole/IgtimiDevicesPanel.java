@@ -63,6 +63,8 @@ import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -91,6 +93,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     private final RefreshableMultiSelectionModel<IgtimiDeviceWithSecurityDTO> refreshableDevicesSelectionModel;
     private final LabeledAbstractFilterablePanel<IgtimiDataAccessWindowWithSecurityDTO> filterDataAccessWindowPanel;
     private final RefreshableMultiSelectionModel<IgtimiDataAccessWindowWithSecurityDTO> refreshableDataAccessWindowsSelectionModel;
+    private final BusyIndicator busyIndicator;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -175,6 +178,8 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         devicesControlsPanel.add(filterDevicesPanel);
         final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(presenter.getUserService(), SecuredDomainType.IGTIMI_DEVICE);
         devicesControlsPanel.add(buttonPanel);
+        busyIndicator = new SimpleBusyIndicator();
+        devicesControlsPanel.add(busyIndicator);
         buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> refreshDevices());
         // setup controls
         final Button removeDeviceButton = buttonPanel.addRemoveAction(stringMessages.remove(), refreshableDevicesSelectionModel,
@@ -286,7 +291,7 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     }
 
 
-    private FlushableCellTable<IgtimiDeviceWithSecurityDTO> createIgtimiDevicesTable(
+    private void createIgtimiDevicesTable(
             final FlushableCellTable<IgtimiDeviceWithSecurityDTO> table, final CellTableWithCheckboxResources tableResources,
             final UserService userService, final ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredDevices,
             final LabeledAbstractFilterablePanel<IgtimiDeviceWithSecurityDTO> filterDevicesPanel) {
@@ -382,7 +387,6 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
         table.addColumn(actionColumn, stringMessages.actions());
         table.setSelectionModel(devicesSelectionCheckboxColumn.getSelectionModel(),
                 devicesSelectionCheckboxColumn.getSelectionManager());
-        return table;
     }
     
     private void editDevice(IgtimiDeviceWithSecurityDTO device, ListDataProvider<IgtimiDeviceWithSecurityDTO> filteredDevices) {
@@ -501,14 +505,17 @@ public class IgtimiDevicesPanel extends FlowPanel implements FilterablePanelProv
     }
 
     public void refreshDevices() {
+        busyIndicator.setBusy(true);
         sailingServiceWrite.getAllIgtimiDevicesWithSecurity(new AsyncCallback<ArrayList<IgtimiDeviceWithSecurityDTO>>() {
             @Override
             public void onSuccess(ArrayList<IgtimiDeviceWithSecurityDTO> result) {
+                busyIndicator.setBusy(false);
                 filterDevicesPanel.updateAll(result);
             }
 
             @Override
             public void onFailure(Throwable caught) {
+                busyIndicator.setBusy(false);
                 errorReporter.reportError(stringMessages.errorFetchingIgtimiDevices(caught.getMessage()));
             }
         });
