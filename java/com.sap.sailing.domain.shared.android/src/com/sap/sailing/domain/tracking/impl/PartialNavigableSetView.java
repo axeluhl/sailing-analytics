@@ -32,7 +32,6 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
         protected boolean isValid(E e) {
             return PartialNavigableSetView.this.isValid(e);
         }
-        
     }
     
     private class FilteringIterator implements Iterator<E> {
@@ -52,7 +51,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
         private E lastNext;
         
         public FilteringIterator() {
-            iter = set.iterator();
+            iter = getSet().iterator();
             hasLastNext = false;
             advance();
         }
@@ -115,14 +114,23 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     
     @Override
     public Comparator<? super E> comparator() {
-        return set.comparator();
+        return getSet().comparator();
+    }
+
+    public NavigableSet<E> descendingSet() {
+        return new PartialNavigableSetViewWithSameValidityAsEnclosing(getSet().descendingSet());
+    }
+
+    @Override
+    public Iterator<E> descendingIterator() {
+        return descendingSet().iterator();
     }
 
     @Override
     public E first() {
-        E first = set.first();
+        E first = getSet().first();
         while (first != null && !isValid(first)) {
-            first = set.higher(first);
+            first = getSet().higher(first);
         }
         if (first == null) {
             throw new NoSuchElementException();
@@ -133,9 +141,9 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
 
     @Override
     public E last() {
-        E last = set.last();
+        E last = getSet().last();
         while (last != null && !isValid(last)) {
-            last = set.lower(last);
+            last = getSet().lower(last);
         }
         if (last == null) {
             throw new NoSuchElementException();
@@ -147,7 +155,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     @Override
     public int size() {
         int size = 0;
-        for (E e : set) {
+        for (E e : getSet()) {
             if (isValid(e)) {
                 size++;
             }
@@ -157,7 +165,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
 
     @Override
     public boolean isEmpty() {
-        for (E e : set) {
+        for (E e : getSet()) {
             if (isValid(e)) {
                 return false;
             }
@@ -168,13 +176,13 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean contains(Object o) {
-        return set.contains(o) && isValid((E) o);
+        return getSet().contains(o) && isValid((E) o);
     }
 
     @Override
     public Object[] toArray() {
         List<E> l = new ArrayList<E>();
-        for (E e : set) {
+        for (E e : getSet()) {
             if (isValid(e)) {
                 l.add(e);
             }
@@ -186,7 +194,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     @Override
     public <T> T[] toArray(T[] a) {
         List<T> l = new ArrayList<T>();
-        for (E e : set) {
+        for (E e : getSet()) {
             if (isValid(e)) {
                 l.add((T) e);
             }
@@ -197,19 +205,19 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
 
     @Override
     public boolean add(E e) {
-        return set.add(e);
+        return getSet().add(e);
     }
 
     @Override
     public boolean remove(Object o) {
-        return set.remove(o);
+        return getSet().remove(o);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Object o : c) {
-            if (!isValid((E) o) || !set.contains(o)) {
+            if (!isValid((E) o) || !getSet().contains(o)) {
                 return false;
             }
         }
@@ -218,29 +226,29 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        return set.addAll(c);
+        return getSet().addAll(c);
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return set.retainAll(c);
+        return getSet().retainAll(c);
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return set.removeAll(c);
+        return getSet().removeAll(c);
     }
 
     @Override
     public void clear() {
-        set.clear();
+        getSet().clear();
     }
 
     @Override
     public E lower(E e) {
-        E result = set.lower(e);
+        E result = getSet().lower(e);
         while (result != null && !isValid(result)) {
-            result = set.lower(result);
+            result = getSet().lower(result);
         }
         return result;
     }
@@ -250,7 +258,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
      * <code>false</code>
      */
     protected E lowerInternal(E e) {
-        return set.lower(e);
+        return getSet().lower(e);
     }
 
     /**
@@ -258,32 +266,32 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
      * <code>false</code>
      */
     protected E higherInternal(E e) {
-        return set.higher(e);
+        return getSet().higher(e);
     }
 
     @Override
     public E floor(E e) {
-        E result = set.floor(e);
+        E result = getSet().floor(e);
         while (result != null && !isValid(result)) {
-            result = set.lower(result);
+            result = getSet().lower(result);
         }
         return result;
     }
 
     @Override
     public E ceiling(E e) {
-        E result = set.ceiling(e);
+        E result = getSet().ceiling(e);
         while (result != null && !isValid(result)) {
-            result = set.higher(result);
+            result = getSet().higher(result);
         }
         return result;
     }
 
     @Override
     public E higher(E e) {
-        E result = set.higher(e);
+        E result = getSet().higher(e);
         while (result != null && !isValid(result)) {
-            result = set.higher(result);
+            result = getSet().higher(result);
         }
         return result;
     }
@@ -296,56 +304,41 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
      */
     @Override
     public E pollFirst() {
-        E result = set.first();
+        E result = getSet().first();
         while (result != null && !isValid(result)) {
-            set.remove(result);
-            result = set.first();
+            getSet().remove(result);
+            result = getSet().first();
         }
         return result;
     }
 
     @Override
     public E pollLast() {
-        E result = set.last();
+        E result = getSet().last();
         while (result != null && !isValid(result)) {
-            set.remove(result);
-            result = set.last();
+            getSet().remove(result);
+            result = getSet().last();
         }
         return result;
     }
-
-    @Override
-    public Iterator<E> iterator() {
-        return new FilteringIterator();
-    }
-
-    @Override
-    public NavigableSet<E> descendingSet() {
-        return new PartialNavigableSetViewWithSameValidityAsEnclosing(set.descendingSet());
-    }
-
-    @Override
-    public Iterator<E> descendingIterator() {
-        return descendingSet().iterator();
-    }
-
+    
     @Override
     public NavigableSet<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
-        return new PartialNavigableSetViewWithSameValidityAsEnclosing(set.subSet(fromElement, fromInclusive, toElement, toInclusive));
+        return new PartialNavigableSetViewWithSameValidityAsEnclosing(getSet().subSet(fromElement, fromInclusive, toElement, toInclusive));
     }
 
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
-        return new PartialNavigableSetViewWithSameValidityAsEnclosing(set.headSet(toElement, inclusive));
+        return new PartialNavigableSetViewWithSameValidityAsEnclosing(getSet().headSet(toElement, inclusive));
     }
 
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
-        return new PartialNavigableSetViewWithSameValidityAsEnclosing(set.tailSet(fromElement, inclusive));
+        return new PartialNavigableSetViewWithSameValidityAsEnclosing(getSet().tailSet(fromElement, inclusive));
     }
 
     @Override
-    public SortedSet<E> subSet(E fromElement, E toElement) {
+    public NavigableSet<E> subSet(E fromElement, E toElement) {
         SortedSet<E> subSet = set.subSet(fromElement, toElement);
         if (subSet instanceof NavigableSet<?>) {
             return new PartialNavigableSetViewWithSameValidityAsEnclosing((NavigableSet<E>) subSet);
@@ -356,7 +349,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     }
 
     @Override
-    public SortedSet<E> headSet(E toElement) {
+    public NavigableSet<E> headSet(E toElement) {
         SortedSet<E> headSet = set.headSet(toElement);
         if (headSet instanceof NavigableSet<?>) {
             return new PartialNavigableSetViewWithSameValidityAsEnclosing((NavigableSet<E>) headSet);
@@ -367,7 +360,7 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
     }
 
     @Override
-    public SortedSet<E> tailSet(E fromElement) {
+    public NavigableSet<E> tailSet(E fromElement) {
         SortedSet<E> tailSet = set.tailSet(fromElement);
         if (tailSet instanceof NavigableSet<?>) {
             return new PartialNavigableSetViewWithSameValidityAsEnclosing((NavigableSet<E>) tailSet);
@@ -377,8 +370,18 @@ public abstract class PartialNavigableSetView<E> implements NavigableSet<E> {
         }
     }
 
+
+    @Override
+    public Iterator<E> iterator() {
+        return new FilteringIterator();
+    }
+
     @Override
     public String toString() {
         return new ArrayList<E>(this).toString();
+    }
+
+    protected NavigableSet<E> getSet() {
+        return set;
     }
 }
