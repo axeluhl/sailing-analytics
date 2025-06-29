@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,6 +75,7 @@ import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.shared.util.Wait;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<ReplicableRiotServer, RiotReplicationOperation<?>> implements RiotServer, ReplicableRiotServer, Runnable {
     private static final Logger logger = Logger.getLogger(RiotServerImpl.class.getName());
@@ -100,6 +102,8 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     private final ConcurrentMap<SocketChannel, RiotConnection> connections;
 
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    
+    private final ExecutorService executorForNotifyingListeners;
 
     /**
      * Like {@link #RiotServerImpl(int)}, only that an available port is selected automatically.
@@ -127,6 +131,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
         this.replicationServiceTracker = context == null ? null :
             ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
         this.listeners = ConcurrentHashMap.newKeySet();
+        this.executorForNotifyingListeners = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor("Riot Listener Notifier");
         this.dataAccessWindows = new ConcurrentHashMap<>();
         this.devices = new ConcurrentHashMap<>();
         this.devicesBySerialNumber = new ConcurrentHashMap<>();
@@ -261,15 +266,22 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
     /**
      * Forwards the {@code message} to all {@link #addListener(RiotMessageListener) registered} listeners and sends it
      * to all {@link #liveWebSocketConnections} that are authorized to {@link DefaultActions#READ READ} from the
-     * {@link Device} from which the message originated and for which a READable {@link DataAccessWindow} exists for
-     * the web socket connection's authenticated user for the time points of the data points in the message.<p>
+     * {@link Device} from which the message originated and for which a READable {@link DataAccessWindow} exists for the
+     * web socket connection's authenticated user for the time points of the data points in the message.
+     * <p>
      * 
-     * This is a replicating operation which only {@link #apply(RiotReplicationOperation) applies} this request to
-     * the replicable; if running as primary/master, the request will be applied locally and replicated to all replicas
+     * This is a replicating operation which only {@link #apply(RiotReplicationOperation) applies} this request to the
+     * replicable; if running as primary/master, the request will be applied locally and replicated to all replicas
      * which will forward the {@code message} to their respective live websocket connections. If on a replica, the
-     * {@code message} will be applied on the replica and sent to the master/primary for forwarding to the primary's
-     * web socket listeners. The persistent storage of the message on the primary/master is essential for retrieving
+     * {@code message} will be applied on the replica and sent to the master/primary for forwarding to the primary's web
+     * socket listeners. The persistent storage of the message on the primary/master is essential for retrieving
      * resource data at a later point, e.g., for "replay" purposes. The replicas' persistence is to be ignored.
+     * <p>
+     * 
+     * We expect listeners to perform DB and other network interactions which may block for I/O.. Therefore, the method
+     * uses the {@link #executorForNotifyingListeners} executor to notify the listeners in a separate thread. This will
+     * allow the calling thread to return quickly, even if the listeners take a long time to process the message.
+     * <p>
      * 
      * @param message
      *            the message received from the device
@@ -277,7 +289,7 @@ public class RiotServerImpl extends AbstractReplicableWithObjectInputStream<Repl
      *            the serial number of the device from which the message originated
      */
     void notifyListeners(Msg message, String deviceSerialNumber) {
-        apply(s->s.internalNotifyListeners(message, deviceSerialNumber));
+        executorForNotifyingListeners.execute(()->apply(s->s.internalNotifyListeners(message, deviceSerialNumber)));
     }
     
     @Override
