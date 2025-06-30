@@ -2494,6 +2494,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String turnGPSOff();
     String turnGPSOn();
     String powerOff();
+    String calibrateIMU();
+    String sendFreestyleCommand();
+    String sendCommandsTo(String deviceSerialNumber);
+    String sendCommandsToDescription(String deviceSerialNumber);
     String reallyTurnGPSOffForIgtimiDevice(String serialNumber);
     String reallyTurnGPSOnForIgtimiDevice(String serialNumber);
     String reallyPowerOffIgtimiDevice(String serialNumber);
@@ -2509,7 +2513,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String reallyRestartIgtimiDevice(String serialNumber);
     String errorRestartingIgtimiDevice(String serialNumber, String message);
     String successfullyRestartedIgtimiDevice(String serialNumber);
+    String reallyRunCalibrationOnIgtimiDevice(String serialNumber);
+    String errorCalibratingIgtimiDevice(String serialNumber, String message);
+    String successfullyCalibratedIgtimiDevice(String serialNumber);    
     String restart();
+    String enableOverTheAirLog();
+    String disableOverTheAirLog();
     String desktop();
     String mobile();
     String gapToLeaderInSecondsChange();
@@ -2542,4 +2551,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String isCORSWildcard();
     String corsAllowedOrigins();
     String successfullyUpdatedCORSAllowedOrigins();
+    String commandLogOutput();
+    String errorLoadingLeaderboard(String leaderboardName, String message);
 }

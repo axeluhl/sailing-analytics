@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.dispatch.shared.commands;
+package com.sap.sse.gwt.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
