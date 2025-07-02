@@ -185,6 +185,8 @@
 <setEntry value="org.apache.aries.spifly.dynamic.bundle.source@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-el.source@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
 <setEntry value="org.apache.taglibs.standard-impl@default:default"/>
 <setEntry value="org.apache.taglibs.taglibs-standard-spec@default:default"/>

@@ -72,7 +72,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     @SeleniumTestCase
     public void testDynamicRaceLinking() {
-        this.environment.getWindowManager().withExtraWindow((leaderboardWindow, adminConsoleWindow) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (leaderboardWindow, adminConsoleWindow) -> {
             // Open the leaderboard and check for "empty" leaderboard
             LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, false);
             LeaderboardTablePO table = leaderboard.getLeaderboardTable();
@@ -110,7 +110,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     
     @SeleniumTestCase
     public void testDynamicRaceDeletion() {
-        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -145,7 +145,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
     @Disabled("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
     @SeleniumTestCase
     public void testDynamicRenamingOfRace() {
-        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (adminConsoleWindow, leaderboardWindow) -> {
             // Go to the administration console and link all 5 races
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();

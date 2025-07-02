@@ -71,7 +71,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
     @SeleniumTestCase
     public void testMaintenanceOfSelectionAfterDataChanges() {
-        this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (windowForSelection, windowForEdit) -> {
             final WebDriver windowForEditDriver = windowForEdit.switchToWindow();
             setUpAuthenticatedSession(windowForEditDriver);
             final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel(
@@ -190,7 +190,7 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
 
     @SeleniumTestCase
     public void testRefreshOfDependingUIElements() {
-        this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (windowForSelection, windowForEdit) -> {
             setUpTestRefreshOfDependingUIElements();
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             SmartphoneTrackingEventManagementPanelPO smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
