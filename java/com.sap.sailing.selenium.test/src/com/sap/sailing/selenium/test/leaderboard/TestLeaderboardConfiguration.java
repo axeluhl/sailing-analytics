@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.core.SeleniumTestCase;
@@ -142,7 +141,6 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         });
     }
     
-    @Disabled("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
     @SeleniumTestCase
     public void testDynamicRenamingOfRace() {
         this.environment.getWindowManager().withExtraWindow(getWebDriver(), (adminConsoleWindow, leaderboardWindow) -> {
