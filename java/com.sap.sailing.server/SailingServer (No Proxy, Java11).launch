@@ -177,7 +177,6 @@
 <setEntry value="javax.xml.ws@default:default"/>
 <setEntry value="javax.xml.soap@default:default"/>
 <setEntry value="org.eclipse.osgi.util@default:default"/>
-<setEntry value="org.eclipse.osgi.util.source@default:default"/>
 <setEntry value="com.chargebee.chargebee-java@default:default"/>
 <setEntry value="com.github.mwiede.jsch@default:default"/>
 <setEntry value="com.github.mwiede.jsch.source@default:default"/>
@@ -398,21 +397,6 @@
 <setEntry value="com.sap.sse.aicore@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
-<<<<<<< HEAD
-=======
-<setEntry value="com.sap.sailing.geocoding@default:default"/>
-<setEntry value="com.sap.sailing.domain.common@default:default"/>
-<setEntry value="com.sap.sailing.domain@default:default"/>
-<setEntry value="com.sap.sailing.news@4:true"/>
-<setEntry value="com.sap.sailing.domain.tractracadapter@5:true"/>
-<setEntry value="com.sap.sailing.expeditionconnector@default:default"/>
-<setEntry value="com.sap.sailing.domain.windfinderadapter@4:true"/>
-<setEntry value="com.sap.sailing.server@5:true"/>
-<setEntry value="com.sap.sailing.server.gateway@5:true"/>
-<setEntry value="com.sap.sailing.server.gateway.interfaces@default:default"/>
-<setEntry value="com.tractrac.clientmodule@default:default"/>
-=======
->>>>>>> main
 <setEntry value="com.sap.sailing.declination@default:default"/>
 <setEntry value="com.sap.sailing.domain.persistence@default:default"/>
 <setEntry value="com.sap.sailing.domain.swisstimingadapter@5:true"/>
@@ -516,9 +500,6 @@
 <setEntry value="com.sap.sse.debranding@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
->>>>>>> master
-=======
->>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>
