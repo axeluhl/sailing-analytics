@@ -336,7 +336,10 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         // ---Asserts---
         final Iterable<MediaTrack> targetTracksMaster = master.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksMaster);
-        Wait.wait(()->replica.getDataImportLock().getProgress(randomUUID).getOverallProgressPct() >= 1.0, Optional.of(Duration.ONE_SECOND.times(5)), Duration.ONE_SECOND);
+        Wait.wait(()->replica.getDataImportLock() != null
+                && replica.getDataImportLock().getProgress(randomUUID) != null
+                && replica.getDataImportLock().getProgress(randomUUID).getOverallProgressPct() >= 1.0,
+                Optional.of(Duration.ONE_SECOND.times(5)), Duration.ONE_SECOND);
         final Iterable<MediaTrack> targetTracksReplica = replica.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksReplica);
     }
