@@ -209,7 +209,7 @@ public class ORCCertificateImpl implements ORCCertificate {
     
     @Override
     public double getGPHInSecondsToTheMile() {
-        return gph.asSeconds();
+        return gph==null ? 0 : gph.asSeconds();
     }
 
     // Please do not try to calculate these combined allowances and instead use the provided values from the certificate.

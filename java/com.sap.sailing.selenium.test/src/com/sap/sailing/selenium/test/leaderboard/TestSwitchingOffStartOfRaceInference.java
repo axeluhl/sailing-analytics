@@ -60,7 +60,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     
     @SeleniumTestCase
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
-        this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
+        this.environment.getWindowManager().withExtraWindow(getWebDriver(), (adminConsoleWindow, leaderboardWindow) -> {
             final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
             setUpAuthenticatedSession(leaderboardWindowDriver);
             LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, /* race details */ false);

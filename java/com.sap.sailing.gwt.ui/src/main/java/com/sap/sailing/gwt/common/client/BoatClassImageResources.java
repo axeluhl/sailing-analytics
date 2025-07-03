@@ -512,6 +512,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource SplashGreenIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SRS.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource SRSIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ORC.png")
     @ImageOptions(preventInlining = true)
     ImageResource ORCIcon();
@@ -523,6 +527,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ORC_INTERNATIONAL.png")
     @ImageOptions(preventInlining = true)
     ImageResource ORCInternationalIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ORC_MULTIHULL.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource ORCMultihullIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/PHRF.png")
     @ImageOptions(preventInlining = true)

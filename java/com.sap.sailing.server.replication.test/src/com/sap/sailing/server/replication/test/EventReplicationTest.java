@@ -69,7 +69,7 @@ public class EventReplicationTest extends AbstractServerReplicationTest {
         Event replicatedEvent = replica.getEvent(masterEvent.getId());
         assertEquals(1, Util.size(replicatedEvent.getLeaderboardGroups()));
         assertEquals(leaderboardGroupName, replicatedEvent.getLeaderboardGroups().iterator().next().getName());
-        assertTrue(master.apply(new RemoveLeaderboardGroupFromEvent(masterEvent.getId(), lg.getId())));
+        assertTrue(()->master.apply(new RemoveLeaderboardGroupFromEvent(masterEvent.getId(), lg.getId())));
         Thread.sleep(1000);
         assertTrue(Util.isEmpty(replicatedEvent.getLeaderboardGroups()));
     }

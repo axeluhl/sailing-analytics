@@ -179,5 +179,5 @@ public class WindReceiverTest {
         SpeedWithBearing expectedTrueWind2 = apparentWind2.add(boatSogCog2);
         assertEquals(expectedTrueWind2.getKnots(), wind2.getKnots(), 0.00000001);
         assertEquals(expectedTrueWind2.getBearing().getDegrees(), wind2.getBearing().getDegrees(), 0.00000001);
-}
+    }
 }

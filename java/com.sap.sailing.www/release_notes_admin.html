@@ -34,11 +34,20 @@
                     our message texts in the UI accordingly. Furthermore, the "CIRCULAR_RANDOM" pre-set is now called "All Purpose,"
                     and "LONG_DISTANCE" is now called "Ocean Race." Non-spinnaker allowances now typically come in separate certificates.</li>
                 <li>Upgraded embedded Jetty web server, closing CVE-2024-13009</li>
+                <li>Added boat classes "ORC Multihull" and "SRS" (also known as "LYS")</li>
+                <li>Added action to remotely trigger a calibration run on a WindBot device.</li>
+                <li>New scoring system for iQFOil medal series mode where two, not one, get promoted straight into the grand final.</li>
           </ul>
           <h2 class="articleSubheadline">May 2025</h2>
           <ul class="bulletList">
                 <li>The Riot server listening for WindBot data now properly implements connection closing upon not having
                     received device heartbeat messages for more than 30s.</li>
+                <li>Users can now file take-down requests for media assets displayed on the web site. This includes
+                    event stage/logo/teaser/gallery images and videos, as well as competitor images and competitor flags.
+                    For all these assets, a little semi-transparent three-dots button is displayed in the top-left
+                    corner of the image/video tile. When a logged-in user with a validated e-mail address clicks the
+                    button, a popup dialog allows for additional input and submitting of the take-down request, which
+                    will lead to an e-mail being sent to support@sapsailing.com.</li>
                 <li>Fixed parsing of X-Forwarded-For header, now reporting the correct client IP in case of multiple proxies along the way.</li>
                 <li>Improved logging in case operations received from replicas are being applied. The log entry now shows the name of the server
                     where the operation originated from.</li>

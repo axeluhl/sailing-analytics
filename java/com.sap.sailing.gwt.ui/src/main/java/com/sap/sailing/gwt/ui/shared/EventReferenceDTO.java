@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.home.communication.event;
+package com.sap.sailing.gwt.ui.shared;
 
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.gwt.shared.DTO;
 
 public class EventReferenceDTO implements DTO {
     private UUID id;

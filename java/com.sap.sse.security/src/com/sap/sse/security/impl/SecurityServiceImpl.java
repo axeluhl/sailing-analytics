@@ -98,6 +98,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
@@ -3410,6 +3411,43 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public void unlockSubscriptionsForUser(final User user) {
         LockUtil.unlockAfterWrite(subscriptionLocksForUsers.computeIfAbsent(user, u->new NamedReentrantReadWriteLock("Subscriptions lock for user "+user.getName(), /* fair */ false)));
+    }
+
+    @Override
+    public void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) throws MailException {
+        final String SUPPORT_MAIL_ADDRESS = "support@sapsailing.com";
+        final User user = getUserByName(takedownNoticeRequestContext.getUsername());
+        final String email = user.getEmail();
+        final StringBuilder sb = new StringBuilder()
+                .append("User ")
+                .append(takedownNoticeRequestContext.getUsername())
+                .append(" with e-mail ")
+                .append(email)
+                .append(" requests that the media with URL ")
+                .append(takedownNoticeRequestContext.getContentUrl())
+                .append(" used in context ")
+                .append(messages.get(Locale.ENGLISH, takedownNoticeRequestContext.getContextDescriptionMessageKey(), takedownNoticeRequestContext.getContextDescriptionMessageParameter()))
+                .append(" on page ")
+                .append(takedownNoticeRequestContext.getPageUrl())
+                .append(" be removed from the site. The user provides the following comment:\n\n")
+                .append("   \"")
+                .append(takedownNoticeRequestContext.getReportingUserComment())
+                .append("\"\n\n")
+                .append("The claim is of nature ")
+                .append(takedownNoticeRequestContext.getNatureOfClaim())
+                .append(".");
+        if (!Util.isEmpty(takedownNoticeRequestContext.getSupportingURLs())) {
+            sb.append("\n\nThe user provided the following additional URLs to substantiate or prove the claim:\n");
+            for (final String url : takedownNoticeRequestContext.getSupportingURLs()) {
+                sb.append(" - ");
+                sb.append(url);
+                sb.append("\n");
+            }
+        }
+        final String message = sb.toString();
+        getMailService().sendMail(SUPPORT_MAIL_ADDRESS, "Media Take-Down Request", message);
+        getMailService().sendMail(email, "Media Take-Down Request Confirmation", messages.get(user.getLocaleOrDefault(), "takedownRequestConfirmation",
+                Util.hasLength(user.getFullName()) ? user.getFullName() : user.getName(), SUPPORT_MAIL_ADDRESS, message));
     }
     
     /**
