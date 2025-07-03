@@ -22,7 +22,8 @@ Require-Bundle: junit-jupiter-api;bundle-version="5.12.2",
  org.hamcrest;bundle-version="2.2.0"
 Export-Package: com.sap.sse.replication.testsupport
 Automatic-Module-Name: com.sap.sse.replication.testsupport
-Import-Package: javax.servlet;version="3.1.0",
+Import-Package: com.sap.sse.security,
+ javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.mockito;version="4.8.1",
  org.mockito.invocation;version="4.8.1",

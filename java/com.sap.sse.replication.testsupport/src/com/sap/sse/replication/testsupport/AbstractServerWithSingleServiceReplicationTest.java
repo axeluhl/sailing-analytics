@@ -48,11 +48,11 @@ public abstract class AbstractServerWithSingleServiceReplicationTest<ReplicableI
     }
     
     protected ReplicableImpl createNewMaster() throws Exception {
-        return testSetUp.createNewMaster();
+        return testSetUp.createNewMaster(testSetUp.getSecurityServiceTrackerMock());
     }
     
     protected ReplicableImpl createNewReplica() throws Exception {
-        return testSetUp.createNewReplica();
+        return testSetUp.createNewReplica(testSetUp.getSecurityServiceTrackerMock());
     }
     
     protected void persistenceSetUp(boolean dropDB) {
