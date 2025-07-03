@@ -90,12 +90,12 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
 
     private class MailServerReplicationTestSetUp extends AbstractMailServiceReplicationTest.MailServerReplicationTestSetUp {
         @Override
-        protected MailServiceImpl createNewMaster() throws MailException {
+        protected MailServiceImpl createNewMaster(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) throws MailException {
             return masterMailService;
         }
 
         @Override
-        protected MailServiceImpl createNewReplica() throws MailException {
+        protected MailServiceImpl createNewReplica(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) throws MailException {
             return replicaMailService;
         }
     }
