@@ -1,33 +1,4 @@
 The video below gives an excellent overview of the main functionality of the SAP Race Player which is accessible on a per-race basis via the "Races/Tracking" Tab of a regatta.
 
-<div id="player"></div>
-
-<script>
-  // Load YouTube IFrame API script
-  var tag = document.createElement('script');
-  tag.src = "https://www.youtube.com/iframe_api";
-  var firstScriptTag = document.getElementsByTagName('script')[0];
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-  // Create YouTube player when API ready
-  var player;
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-      height: '360',
-      width: '640',
-      videoId: 'A2Z86lYV7CE',
-      events: {
-        'onReady': onPlayerReady,
-      }
-    });
-  }
-
-  function onPlayerReady(event) {
-    // Autoplay video
-    event.target.playVideo();
-  }
-</script>
-
-
-
+[![tracking race player](https://i.vimeocdn.com/video/1580518450-d061bcba753035fe130227e4b1c3ac735440041fabb61c3a14e289b9cd102dd5-d?mw=640&q=85)](https://player.vimeo.com/video/786236240?h=5837f0d8b3)
 
