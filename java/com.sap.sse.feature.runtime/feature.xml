@@ -587,14 +587,14 @@
          id="org.eclipse.equinox.console"
          download-size="0"
          install-size="0"
-         version="1.4.1000.v20250306-0518"
+         version="1.4.1000.v20250518-0610"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.launcher"
          download-size="0"
          install-size="0"
-         version="1.7.0.v20250424-1814"
+         version="1.7.0.v20250519-0528"
          unpack="false"/>
 
    <plugin
@@ -790,14 +790,14 @@
          id="org.eclipse.equinox.http.service.api"
          download-size="0"
          install-size="0"
-         version="1.2.2.v20231218-2126"
+         version="1.2.102.v20250520-0629"
          unpack="false"/>
    
    <plugin
          id="org.eclipse.equinox.http.service.api.source"
          download-size="0"
          install-size="0"
-         version="1.2.2.v20231218-2126"
+         version="1.2.102.v20250520-0629"
          unpack="false"/>
 
    <plugin
@@ -873,14 +873,7 @@
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"
-         version="3.7.300.v20231104-1118"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.osgi.util.source"
-         download-size="0"
-         install-size="0"
-         version="3.7.300.v20231104-1118"
+         version="3.7.400.v20250516-0916"
          unpack="false"/>
 
    <plugin
@@ -1126,14 +1119,14 @@
          id="org.eclipse.equinox.event"
          download-size="0"
          install-size="0"
-         version="1.7.300.v20250408-1622"
+         version="1.7.300.v20250518-0609"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.event.source"
          download-size="0"
          install-size="0"
-         version="1.7.300.v20250408-1622"
+         version="1.7.300.v20250518-0609"
          unpack="false"/>
 
    <plugin
