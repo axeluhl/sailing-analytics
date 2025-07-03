@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
@@ -38,6 +40,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *   D049941
  */
 @UseSeleniumExtensions
+@TestInstance(Lifecycle.PER_METHOD)
 public abstract class AbstractSeleniumTest {
     private static final Logger logger = Logger.getLogger(AbstractSeleniumTest.class.getName());
     

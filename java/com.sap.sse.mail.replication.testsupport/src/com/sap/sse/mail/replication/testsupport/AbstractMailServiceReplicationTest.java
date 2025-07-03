@@ -10,8 +10,10 @@ import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.impl.MailServiceImpl;
+import com.sap.sse.replication.FullyInitializedReplicableTracker;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
+import com.sap.sse.security.SecurityService;
 
 public class AbstractMailServiceReplicationTest extends AbstractServerWithSingleServiceReplicationTest<MailService, MailServiceImpl> {
     public AbstractMailServiceReplicationTest() {
@@ -59,12 +61,12 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
 
     public static class MailServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<MailService, MailServiceImpl> {
         @Override
-        protected MailServiceImpl createNewMaster() throws MailException {
+        protected MailServiceImpl createNewMaster(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) throws MailException {
             return createMailCountingService(true);
         }
 
         @Override
-        protected MailServiceImpl createNewReplica() throws MailException {
+        protected MailServiceImpl createNewReplica(FullyInitializedReplicableTracker<SecurityService> securityServiceTrackerMock) throws MailException {
             return createMailCountingService(false);
         }
     }

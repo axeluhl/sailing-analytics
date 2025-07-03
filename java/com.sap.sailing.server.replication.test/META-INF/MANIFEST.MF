@@ -48,5 +48,7 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.shared.server,
  com.sap.sailing.resultimport,
  com.sap.sailing.shared.server.gateway,
- com.sap.sailing.server.gateway.interfaces
+ com.sap.sailing.server.gateway.interfaces,
+ net.bytebuddy.byte-buddy;bundle-version="1.14.12",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.14.12"
 Automatic-Module-Name: com.sap.sailing.server.replication.test

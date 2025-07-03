@@ -20,4 +20,5 @@ Require-Bundle: com.sap.sse.replication,
  com.sap.sse.replication.interfaces;bundle-version="1.0.0",
  org.hamcrest;bundle-version="2.2.0"
 Export-Package: com.sap.sse.mail.replication.testsupport
+Import-Package: com.sap.sse.security
 Automatic-Module-Name: com.sap.sse.mail.replication.testsupport
