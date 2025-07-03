@@ -428,7 +428,6 @@
 <plugin id="javax.annotation"/>
 <plugin id="org.eclipse.jetty.io"/>
 <plugin id="org.eclipse.osgi.util"/>
-<plugin id="org.eclipse.osgi.util.source"/>
 <plugin id="org.eclipse.jetty.io.source"/>
 <plugin id="org.osgi.service.cm"/>
 <plugin id="org.osgi.service.component"/>
