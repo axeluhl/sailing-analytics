@@ -2,6 +2,7 @@ package diffutils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class PatchTest {
-
+    @Test
     public void testPatch_Insert()  {
         final List<String> insertTest_from = Arrays.asList("hhh");
         final List<String> insertTest_to = Arrays.asList("hhh", "jjj", "kkk", "lll");
@@ -25,6 +26,7 @@ public class PatchTest {
         }
     }
 
+    @Test
     public void testPatch_Delete() {
         final List<String> deleteTest_from = Arrays.asList("ddd", "fff", "ggg", "hhh");
         final List<String> deleteTest_to = Arrays.asList("ggg");
@@ -37,6 +39,7 @@ public class PatchTest {
         }
     }
 
+    @Test
     public void testPatch_Change() {
         final List<String> changeTest_from = Arrays.asList("aaa", "bbb", "ccc", "ddd");
         final List<String> changeTest_to = Arrays.asList("aaa", "bxb", "cxc", "ddd");
@@ -49,6 +52,7 @@ public class PatchTest {
         }
     }
 
+    @Test
     public void testPatch_EntirelyDifferent() {
         final List<String> changeTest_from = new ArrayList<String>();
         changeTest_from.add("aaa");

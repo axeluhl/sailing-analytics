@@ -2,11 +2,13 @@ package diffutils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 
 import difflib.ChangeDelta;
 import difflib.Chunk;
@@ -17,7 +19,7 @@ import difflib.InsertDelta;
 import difflib.Patch;
 
 public class DiffTest {
-
+    @Test
     public void testDiff_Insert() {
         final Patch<String> patch = DiffUtils.diff(Arrays.asList("hhh"), Arrays.asList("hhh", "jjj", "kkk"));
         assertNotNull(patch);
@@ -29,6 +31,7 @@ public class DiffTest {
         assertEquals(new Chunk<String>(1, Arrays.asList("jjj", "kkk")), delta.getRevised());
     }
 
+    @Test
     public void testDiff_Delete() {
         final Patch<String> patch = DiffUtils.diff(Arrays.asList("ddd", "fff", "ggg"), Arrays.asList("ggg"));
         assertNotNull(patch);
@@ -40,6 +43,7 @@ public class DiffTest {
         assertEquals(new Chunk<String>(0, emptyList), delta.getRevised());
     }
 
+    @Test
     public void testDiff_Change() {
         final List<String> changeTest_from = Arrays.asList("aaa", "bbb", "ccc");
         final List<String> changeTest_to = Arrays.asList("aaa", "zzz", "ccc");
@@ -53,12 +57,14 @@ public class DiffTest {
         assertEquals(new Chunk<String>(1, Arrays.asList("zzz")), delta.getRevised());
     }
 
+    @Test
     public void testDiff_EmptyList() {
         final Patch<String> patch = DiffUtils.diff(new ArrayList<String>(), new ArrayList<String>());
         assertNotNull(patch);
         assertEquals(0, patch.getDeltas().size());
     }
 
+    @Test
     public void testDiff_EmptyListWithNonEmpty() {
         final Patch<String> patch = DiffUtils.diff(new ArrayList<String>(), Arrays.asList("aaa"));
         assertNotNull(patch);
