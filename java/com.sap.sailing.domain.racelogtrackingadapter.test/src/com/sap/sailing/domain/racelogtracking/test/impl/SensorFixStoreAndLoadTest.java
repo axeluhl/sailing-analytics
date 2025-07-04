@@ -752,6 +752,7 @@ public class SensorFixStoreAndLoadTest {
     }
     
     @Timeout(value=10_000, unit=TimeUnit.SECONDS)
+    @Test
     /** Test for regression introduced while working on bug 4125 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4125 */
     public void testPreemptiveStopDoesNotBlockThread() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
