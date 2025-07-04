@@ -2,13 +2,13 @@ package diffutils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 
 import difflib.ChangeDelta;
 import difflib.Chunk;
@@ -19,6 +19,7 @@ import difflib.InsertDelta;
 import difflib.Patch;
 
 public class DiffTest {
+
     @Test
     public void testDiff_Insert() {
         final Patch<String> patch = DiffUtils.diff(Arrays.asList("hhh"), Arrays.asList("hhh", "jjj", "kkk"));
