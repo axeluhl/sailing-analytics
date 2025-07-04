@@ -9,10 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestWatcher;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -21,7 +19,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class ScreenShotRule implements TestWatcher, BeforeEachCallback, AfterEachCallback {
+public class ScreenShotRule implements TestExecutionExceptionHandler {
     private static final String NOT_SUPPORTED_IMAGE = "/com/sap/sailing/selenium/resources/not-supported.png"; //$NON-NLS-1$
     private static final String ATTACHMENT_FORMAT = "[[ATTACHMENT|%s]]"; //$NON-NLS-1$
     /**
@@ -29,28 +27,11 @@ public class ScreenShotRule implements TestWatcher, BeforeEachCallback, AfterEac
      */
     static final String SCREENSHOT_FILE_EXTENSION = ".png"; //$NON-NLS-1$
     
-    private TestEnvironment environment;
-    
     @Override
-    public void testFailed(ExtensionContext context, Throwable cause) {
-        captureScreenshots();
+    public void handleTestExecutionException(ExtensionContext context, Throwable cause) {
+        captureScreenshots(context);
     }
 
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        environment.getWindowManager().closeAllWindows();
-    }
-
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-        if (context.getRequiredTestInstance() instanceof AbstractSeleniumTest) {
-            AbstractSeleniumTest testInstance = (AbstractSeleniumTest) context.getRequiredTestInstance();
-            this.environment = testInstance.getEnvironment();
-        } else {
-            throw new IllegalStateException("The test instance must be of type AbstractSeleniumTest to use the ScreenShotRule.");
-        }
-    }
-    
     /**
      * <p>Captures a screen shot and saves the picture as an PNG file under the given file name. The complete path to
      *   the stored picture consists of the screenshot folder, as defined in the test environment, and the given
@@ -64,10 +45,17 @@ public class ScreenShotRule implements TestWatcher, BeforeEachCallback, AfterEac
      * @throws IOException
      *   if an I/O error occurs.
      */
-    private void captureScreenshots() {
-        final File screenshotFolder = this.environment.getScreenshotFolder();
+    private void captureScreenshots(ExtensionContext context) {
+        final TestEnvironment environment;
+        if (context.getRequiredTestInstance() instanceof AbstractSeleniumTest) {
+            AbstractSeleniumTest testInstance = (AbstractSeleniumTest) context.getRequiredTestInstance();
+            environment = testInstance.getEnvironment();
+        } else {
+            throw new IllegalStateException("The test instance must be of type AbstractSeleniumTest to use the ScreenShotRule.");
+        }
+        final File screenshotFolder = environment.getScreenshotFolder();
         if (screenshotFolder != null) {
-            this.environment.getWindowManager().forEachOpenedWindow(window -> {
+            environment.getWindowManager().forEachOpenedWindow(window -> {
                 final String filename = UUID.randomUUID().toString();
                 WebDriver driver = window.getWebDriver();
                 if (RemoteWebDriver.class.equals(driver.getClass())) {

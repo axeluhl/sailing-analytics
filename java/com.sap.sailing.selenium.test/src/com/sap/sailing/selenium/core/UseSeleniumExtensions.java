@@ -10,5 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(ScreenShotRule.class)
+@ExtendWith(CloseAllWindowsAfterEach.class)
 public @interface UseSeleniumExtensions {
 }
