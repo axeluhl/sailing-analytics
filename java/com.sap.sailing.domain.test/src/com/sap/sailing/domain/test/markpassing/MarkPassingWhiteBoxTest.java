@@ -32,7 +32,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Tests tricky situation that can fail easily. Created with help of http://itouchmap.com/latlong.html
- * 
  */
 @Disabled
 public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {

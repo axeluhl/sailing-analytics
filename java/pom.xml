@@ -189,7 +189,6 @@
         <module>com.google.gwt.servlet</module>
         <module>com.tractrac.clientmodule</module>
         <module>com.googlecode.java-diff-utils</module>
-        <module>com.googlecode.java-diff-utils.test</module>
         <module>com.googlecode.mgwt</module>
         <module>net.sf.marineapi</module>
         <module>net.sf.marineapi.test</module>
