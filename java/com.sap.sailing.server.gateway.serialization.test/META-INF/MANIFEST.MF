@@ -21,4 +21,6 @@ Require-Bundle: com.sap.sailing.domain;bundle-version="1.0.0",
  com.sap.sse.common,
  com.sap.sse.shared.android,
  com.sap.sse.security.common,
- org.hamcrest;bundle-version="2.2.0"
+ org.hamcrest;bundle-version="2.2.0",
+ net.bytebuddy.byte-buddy;bundle-version="1.14.12",
+ net.bytebuddy.byte-buddy-agent;bundle-version="1.14.12"
