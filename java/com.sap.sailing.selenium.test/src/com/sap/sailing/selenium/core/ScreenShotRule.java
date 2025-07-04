@@ -28,8 +28,9 @@ public class ScreenShotRule implements TestExecutionExceptionHandler {
     static final String SCREENSHOT_FILE_EXTENSION = ".png"; //$NON-NLS-1$
     
     @Override
-    public void handleTestExecutionException(ExtensionContext context, Throwable cause) {
+    public void handleTestExecutionException(ExtensionContext context, Throwable cause) throws Throwable {
         captureScreenshots(context);
+        throw cause;
     }
 
     /**
