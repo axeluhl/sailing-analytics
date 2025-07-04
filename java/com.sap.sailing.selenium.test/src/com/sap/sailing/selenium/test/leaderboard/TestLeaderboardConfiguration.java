@@ -102,6 +102,8 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
                         points, equalTo(expectedPointsForFindelJens[i]));
                 assertThat("Total rank after " + (i + 1) + " race(s) does not match for competitor '8875' (Findel, Jens)",
                         rank, equalTo(expectedRankForFindelJens[i]));
+                int TODO; // provoke a warning so we see this in any case!
+                assertThat("We want a screenshot!", true, equalTo(false)); // TODO remove this again; it is used only in the context of bug6135 to see if the screenshot rule still works with JUnit5:
                 adminConsoleWindow.switchToWindow();
             }
         });
