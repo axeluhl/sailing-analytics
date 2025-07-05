@@ -58,6 +58,7 @@ public class ScreenShotRule implements TestExecutionExceptionHandler {
         if (screenshotFolder != null) {
             environment.getWindowManager().forEachOpenedWindow(window -> {
                 final String filename = UUID.randomUUID().toString();
+                // FIXME we only use one driver for multiple windows. How to select the right window for screenshot?
                 WebDriver driver = window.getWebDriver();
                 if (RemoteWebDriver.class.equals(driver.getClass())) {
                     driver = new Augmenter().augment(driver);
@@ -67,6 +68,7 @@ public class ScreenShotRule implements TestExecutionExceptionHandler {
                     source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
                 }
                 try {
+                    // FIXME how could this ever have written to the correct folder? This always writes to ScreenShotRule...
                     final File destinationDir = new File(screenshotFolder, getClass().getName());
                     destinationDir.mkdirs();
                     final File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
