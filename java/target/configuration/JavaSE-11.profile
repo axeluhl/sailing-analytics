@@ -12,6 +12,7 @@
 # NOTE: The JavaSE-9 profile is not yet finalized.
 
 org.osgi.framework.system.packages = \
+ java.io,\
  javax.accessibility,\
  javax.activity,\
  javax.crypto,\
