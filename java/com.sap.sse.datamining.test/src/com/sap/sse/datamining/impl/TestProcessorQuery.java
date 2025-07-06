@@ -50,6 +50,7 @@ public class TestProcessorQuery {
     private QueryResult<?> resultAfterAbortion;
 
     @Timeout(value=2, unit=TimeUnit.SECONDS)
+    @Test
     public void testQueryTimeouting() {
         receivedElementOrFinished = false;
         receivedAbort = false;
@@ -88,6 +89,7 @@ public class TestProcessorQuery {
     }
 
     @Timeout(value=2, unit=TimeUnit.SECONDS)
+    @Test
     public void testQueryAbortion() throws InterruptedException {
         receivedElementOrFinished = false;
         receivedAbort = false;
@@ -131,7 +133,6 @@ public class TestProcessorQuery {
     }
     
     private class AbortResultReceiver extends NullProcessor<Double, Void> {
-
         private final Processor<Map<GroupKey, Double>, Void> queryResultReceiver;
         
         public AbortResultReceiver(Processor<Map<GroupKey, Double>, Void> queryResultReceiver) {

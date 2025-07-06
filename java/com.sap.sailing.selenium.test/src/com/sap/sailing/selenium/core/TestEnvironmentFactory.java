@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.core;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class TestEnvironmentFactory {
         Constructor<WebDriver> constructor = clazz.getConstructor(Capabilities.class);
 
         WebDriver driver = constructor.newInstance(new DesiredCapabilities(capabilities));
-        return new TestEnvironmentImpl(() -> driver, TestEnvironmentConfiguration.getInstance().getContextRoot(), null);
+        return new TestEnvironmentImpl(() -> driver, TestEnvironmentConfiguration.getInstance().getContextRoot(),
+                new File(TestEnvironmentConfiguration.getInstance().getScreenshotsFolder()));
     }
 }
