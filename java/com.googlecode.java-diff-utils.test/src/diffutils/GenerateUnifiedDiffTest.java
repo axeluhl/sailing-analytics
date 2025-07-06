@@ -1,7 +1,7 @@
 package diffutils;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -22,7 +22,7 @@ public class GenerateUnifiedDiffTest {
     private static final String FS = File.separator;
     private static final String MOCK_FOLDER = "test" + FS + "mocks" + FS;
 
-    public List<String> fileToLines(String filename) {
+    private List<String> fileToLines(String filename) {
         List<String> lines = new LinkedList<String>();
         String line = "";
         try {

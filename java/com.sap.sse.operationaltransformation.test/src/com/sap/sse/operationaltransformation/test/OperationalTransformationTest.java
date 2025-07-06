@@ -1,7 +1,7 @@
 package com.sap.sse.operationaltransformation.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 import java.util.UUID;
@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sse.operationaltransformation.ClientServerOperationPair;
 import com.sap.sse.operationaltransformation.Operation;
@@ -126,7 +126,7 @@ public class OperationalTransformationTest {
 	}
     }
     
-    @Before
+    @BeforeEach
     public void setUp() {
 	server = new PeerImpl<StringInsertOperation, StringState>(
 		"Server", new StringInsertTransformer(), new StringState(""), Role.SERVER);
