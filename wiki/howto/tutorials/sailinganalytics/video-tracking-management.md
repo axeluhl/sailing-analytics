@@ -4,7 +4,7 @@ This tutorial shows how to add and align *Youtube videos* to the **tracking time
   <a href="https://vimeo.com/634989080" target="_blank">
     <img src="https://i.vimeocdn.com/video/1277334324-ee19c413fefcee3578a6b2e395e45cd678e31de2d3299670b?f=webp&region=us" alt="Adding and aligning Youtube videos to the tracking timeline" style="display: inline-block;">
   </a>
-  <div style="line-height: normal; margin-top: -18em;">
+  <div style="line-height: normal; margin-top: -18em; margin-bottom: 16em">
     <a href="https://vimeo.com/634989080" target="_blank" style="
       display: inline-block;
       vertical-align: middle;
