@@ -23,6 +23,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.ORC.getDisplayName(), imageResources.ORCIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ORC_CLUB.getDisplayName(), imageResources.ORCClubIcon());
         boatClassIconsMap.put(BoatClassMasterdata.ORC_INTERNATIONAL.getDisplayName(), imageResources.ORCInternationalIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.ORC_MULTIHULL.getDisplayName(), imageResources.ORCMultihullIcon());
         boatClassIconsMap.put(BoatClassMasterdata.PHRF.getDisplayName(), imageResources.PHRFIcon());
         boatClassIconsMap.put(BoatClassMasterdata._12M.getDisplayName(), imageResources._12mRIcon());
         boatClassIconsMap.put(BoatClassMasterdata._18Footer.getDisplayName(), imageResources._18FooterIcon());
@@ -150,6 +151,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.SPLASH_RED.getDisplayName(), imageResources.SplashRedIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SPLASH_GREEN.getDisplayName(), imageResources.SplashGreenIcon());
         boatClassIconsMap.put(BoatClassMasterdata.STAR.getDisplayName(), imageResources.StarIcon());
+        boatClassIconsMap.put(BoatClassMasterdata.SRS.getDisplayName(), imageResources.SRSIcon());
         boatClassIconsMap.put(BoatClassMasterdata.STREAMLINE.getDisplayName(), imageResources.StreamlineIcon());
         boatClassIconsMap.put(BoatClassMasterdata.SUNBEAM_22.getDisplayName(), imageResources.Sunbeam22Icon());
         boatClassIconsMap.put(BoatClassMasterdata.SWAN_45.getDisplayName(), imageResources.Swan45Icon());

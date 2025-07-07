@@ -179,6 +179,8 @@
 <setEntry value="org.apache.aries.spifly.dynamic.bundle.source@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-el.source@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
 <setEntry value="org.apache.taglibs.standard-impl@default:default"/>
 <setEntry value="org.apache.taglibs.taglibs-standard-spec@default:default"/>
@@ -371,6 +373,7 @@
 <setEntry value="com.sap.sse.aicore@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
+<<<<<<< HEAD
 >>>>>>> master
         <setEntry value="com.sap.sailing.declination@default:default"/>
         <setEntry value="com.sap.sailing.domain.bravoadapter@5:true"/>
@@ -480,6 +483,8 @@
         <setEntry value="org.moxieapps.gwt.highcharts@default:default"/>
         <setEntry value="org.mp4parser.isoparser@default:default"/>
     </setAttribute>
+=======
+>>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>

@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.racelogtracking.test;
 
 import static com.sap.sse.common.Util.size;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.mongodb.ReadConcern;
 import com.mongodb.WriteConcern;
@@ -81,7 +81,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
                 new MillisecondsTimePoint(millis));
     }
 
-    @Before
+    @BeforeEach
     public void setServiceAndRaceLog() {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
@@ -93,7 +93,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
                 serviceFinderFactory, ReadConcern.MAJORITY, WriteConcern.MAJORITY, clientSession, metadataCollectionClientSession);
     }
 
-    @After
+    @AfterEach
     public void after() {
         dropPersistedData();
         clientSession.close();
