@@ -4,7 +4,7 @@ This episode shows you how to configure *wind settings* with **the SAP Sailing R
   <a href="thttps://vimeo.com/488860317" target="_blank">
     <img src="https://i.vimeocdn.com/video/1011532573-a72305c16fcb48b67ff30dd60ffb19612a7dc407c852424da37cd49cdc238351-d?f=webp&region=us" alt="How to configure wind settings" style="display: inline-block;">
   </a>
-  <div style="line-height: normal; margin-top: -18em;">
+  <div style="line-height: normal; margin-top: -18em; margin-bottom: 16em;">
     <a href="hhttps://vimeo.com/488860317" target="_blank" style="
       display: inline-block;
       vertical-align: middle;
