@@ -13,6 +13,20 @@
 
 org.osgi.framework.system.packages = \
  java.io,\
+ java.lang,\
+ java.lang.annotation,\
+ java.lang.invoke,\
+ java.lang.reflect,\
+ java.net,\
+ java.nio.file,\
+ java.nio.file.attribute,\
+ java.tim,\
+ java.utio,\
+ java.util.concurrent,\
+ java.util.concurrent.atomic,\
+ java.util.function,\
+ java.util.regex,\
+ java.util.stream,\
  javax.accessibility,\
  javax.activity,\
  javax.crypto,\
