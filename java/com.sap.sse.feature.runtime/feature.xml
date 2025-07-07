@@ -95,24 +95,38 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.felix.scr"
+         download-size="0"
+         install-size="0"
+         version="2.2.12"
+         unpack="false"/>
+         
+   <plugin
+         id="org.apache.felix.scr.source"
+         download-size="0"
+         install-size="0"
+         version="2.2.12"
+         unpack="false"/>
+         
+   <plugin
          id="org.apache.felix.gogo.command"
          download-size="0"
          install-size="0"
-         version="1.1.0.v20201023-1558"
+         version="1.1.2"
          unpack="false"/>
 
    <plugin
          id="org.apache.felix.gogo.runtime"
          download-size="0"
          install-size="0"
-         version="1.1.2.v20201023-1558"
+         version="1.1.6"
          unpack="false"/>
 
    <plugin
          id="org.apache.felix.gogo.shell"
          download-size="0"
          install-size="0"
-         version="1.1.2.v20201023-1558"
+         version="1.1.4"
          unpack="false"/>
 
    <plugin
@@ -566,56 +580,56 @@
          id="org.eclipse.equinox.common"
          download-size="0"
          install-size="0"
-         version="3.14.0.v20201102-2053"
+         version="3.19.200.v20241004-0654"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.console"
          download-size="0"
          install-size="0"
-         version="1.4.200.v20200828-1034"
+         version="1.4.800.v20240513-1104"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.launcher"
          download-size="0"
          install-size="0"
-         version="1.6.0.v20200915-1508"
+         version="1.6.900.v20240613-2009"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator"
          download-size="0"
          install-size="0"
-         version="1.3.600.v20200721-1308"
+         version="1.5.300.v20240424-1301"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi"
          download-size="0"
          install-size="0"
-         version="3.18.0.v20220516-2155"
+         version="3.22.0.v20241030-2121"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.source"
          download-size="0"
          install-size="0"
-         version="3.18.0.v20220516-2155"
+         version="3.22.0.v20241030-2121"
          unpack="false"/>
 
    <plugin
          id="org.osgi.util.promise"
          download-size="0"
          install-size="0"
-         version="1.2.0.202109301733"
+         version="1.3.0.202212101352"
          unpack="false"/>
 
    <plugin
          id="org.osgi.util.promise.source"
          download-size="0"
          install-size="0"
-         version="1.2.0.202109301733"
+         version="1.3.0.202212101352"
          unpack="false"/>
 
    <plugin
@@ -678,21 +692,140 @@
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
-         version="3.10.200.v20210723-0643"
+         version="3.12.100.v20240327-0645"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.services.source"
          download-size="0"
          install-size="0"
-         version="3.10.200.v20210723-0643"
+         version="3.12.100.v20240327-0645"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.cm"
          download-size="0"
          install-size="0"
-         version="1.4.400.v20200422-1833"
+         version="1.6.100.v20240329-0940"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.cm.source"
+         download-size="0"
+         install-size="0"
+         version="1.6.100.v20240329-0940"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.upnp"
+         download-size="0"
+         install-size="0"
+         version="1.2.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.upnp.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.device"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.device.source"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.http.whiteboard"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.http.whiteboard.source"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.useradmin"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.useradmin.source"
+         download-size="0"
+         install-size="0"
+         version="1.1.1.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.metatype"
+         download-size="0"
+         install-size="0"
+         version="1.4.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.metatype.source"
+         download-size="0"
+         install-size="0"
+         version="1.4.1.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.eclipse.equinox.http.service.api"
+         download-size="0"
+         install-size="0"
+         version="1.2.2.v20231218-2126"
+         unpack="false"/>
+   
+   <plugin
+         id="org.eclipse.equinox.http.service.api.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.2.v20231218-2126"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.wireadmin"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.wireadmin.source"
+         download-size="0"
+         install-size="0"
+         version="1.0.2.202109301733"
+         unpack="false"/>
+
+   <plugin
+         id="org.osgi.service.provisioning"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.201505202024"
+         unpack="false"/>
+   
+   <plugin
+         id="org.osgi.service.provisioning.source"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.201505202024"
          unpack="false"/>
 
    <plugin
@@ -733,14 +866,7 @@
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"
-         version="3.7.0.v20220427-2144"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.osgi.util.source"
-         download-size="0"
-         install-size="0"
-         version="3.7.0.v20220427-2144"
+         version="3.7.300.v20231104-1118"
          unpack="false"/>
 
    <plugin
@@ -789,70 +915,70 @@
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
-         id="org.objectweb.asm.analysis"
+         id="org.objectweb.asm.tree.analysis"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.source"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
-         id="org.objectweb.asm.analysis.source"
+         id="org.objectweb.asm.tree.analysis.source"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons.source"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree.source"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util.source"
          download-size="0"
          install-size="0"
-         version="9.4.0.v20221107-1714"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
@@ -895,14 +1021,14 @@
          id="org.apache.aries.spifly.dynamic.bundle"
          download-size="0"
          install-size="0"
-         version="1.3.6"
+         version="1.3.7"
          unpack="false"/>
 
    <plugin
          id="org.apache.aries.spifly.dynamic.bundle.source"
          download-size="0"
          install-size="0"
-         version="1.3.6"
+         version="1.3.7"
          unpack="false"/>
 
    <plugin
@@ -986,7 +1112,14 @@
          id="org.eclipse.equinox.event"
          download-size="0"
          install-size="0"
-         version="1.5.500.v20200616-0800"
+         version="1.7.100.v20240321-1445"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.event.source"
+         download-size="0"
+         install-size="0"
+         version="1.7.100.v20240321-1445"
          unpack="false"/>
 
    <plugin
