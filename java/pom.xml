@@ -37,12 +37,8 @@
          in java/com.amazon.aws.aws-java-api/pom.xml
      -->
     <tycho-version>4.0.12</tycho-version>
-<<<<<<< HEAD
-    <gwt.version>2.11.0</gwt.version>
-=======
     <toolchains-version>3.2.0</toolchains-version>
     <gwt.version>2.11.1</gwt.version>
->>>>>>> main
     <!-- gwt-maven-plugin is typically in sync with the GWT version. But sometimes versions need extra time after a new GWT release. -->
     <gwt.plugin.version>2.11.1</gwt.plugin.version>
     <gwt.minVersion>2.11.1</gwt.minVersion>
