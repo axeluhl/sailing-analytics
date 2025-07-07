@@ -4,29 +4,15 @@
 
 <h1>🏆 SAP Sailing How-To Tutorials</h1>
 
-<div style="display: flex;">
-
-  <!-- SIDEBAR -->
-  <div style="
-    width: 220px;
-    padding: 20px;
-    border-right: 1px solid #ddd;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    background: #f9f9f9;
-  ">
-    <h3>📑 Skipper’s Handbook</h3>
-    <ul>
-      <li><a href="#sap-sailing-how-to-tutorials">🏠 Home</a></li>
-      <li><a href="#sail-insight-application">⛵ Sail Insight</a></li>
-      <li><a href="#sap-sailing-race-manager-application">🏁 Race Manager</a></li>
-      <li><a href="#sap-sailing-analytics">📊 Sailing Analytics</a></li>
-      <li><a href="#happy-sailing">⚓️ Contact</a></li>
-    </ul>
-  </div>
-
-  <div style="padding: 20px; flex: 1;">
+<h3>📑 Skipper’s Handbook</h3>
+<ul>
+  <li><a href="#sap-sailing-how-to-tutorials">🏠 Home</a></li>
+  <li><a href="#sail-insight-application">⛵ Sail Insight</a></li>
+  <li><a href="#sap-sailing-race-manager-application">🏁 Race Manager</a></li>
+  <li><a href="#sap-sailing-analytics">📊 Sailing Analytics</a></li>
+  <li><a href="#happy-sailing">⚓️ Contact</a></li>
+</ul>
+<div style="padding: 0px;">
 
     <blockquote>
       🚀 <em>Welcome to the SAP Sailing knowledge base!</em><br>
@@ -166,4 +152,4 @@
     </blockquote>
 
   </div>
-</div>
+
