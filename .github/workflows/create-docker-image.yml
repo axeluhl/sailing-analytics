@@ -6,7 +6,7 @@ on:
   workflow_run:
     workflows: [release]
     types: [completed]
-    branches: [main, docker-17]
+    branches: [main, docker-17, docker-21, docker-24]
   workflow_dispatch:
     inputs:
       release:
