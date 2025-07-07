@@ -2,6 +2,8 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/2560px-SAP_2011_logo.svg.png" alt="SAP Logo" width="60">
 </p>
 
+[[_TOC_]]
+
 # 🏆 SAP Sailing How-To Tutorials
 
 > 🚀 *Welcome to the SAP Sailing knowledge base!*  
