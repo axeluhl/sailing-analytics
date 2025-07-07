@@ -7,6 +7,7 @@ This tutorial shows how to configure **wind settings** :
   <div style="line-height: normal; margin-top: -18em;">
     <a href="https://vimeo.com/488860317" target="_blank" style="
       display: inline-block;
+      vertical-align: middle;
       background-color: #007BFF;
       color: white;
       padding: 10px 20px;
