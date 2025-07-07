@@ -16,6 +16,7 @@ org.osgi.framework.system.packages = \
  java.lang,\
  java.lang.annotation,\
  java.lang.invoke,\
+ java.lang.module,\
  java.lang.ref,\
  java.lang.reflect,\
  java.math,\
