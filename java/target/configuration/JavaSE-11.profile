@@ -17,11 +17,14 @@ org.osgi.framework.system.packages = \
  java.lang.annotation,\
  java.lang.invoke,\
  java.lang.reflect,\
+ java.math,\
  java.net,\
  java.nio.file,\
  java.nio.file.attribute,\
- java.tim,\
- java.utio,\
+ java.time,\
+ java.time.format,\
+ java.time.temporal,\
+ java.util,\
  java.util.concurrent,\
  java.util.concurrent.atomic,\
  java.util.function,\
