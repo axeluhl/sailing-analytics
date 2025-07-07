@@ -580,42 +580,42 @@
          id="org.eclipse.equinox.common"
          download-size="0"
          install-size="0"
-         version="3.20.100.v20250506-0427"
+         version="3.19.200.v20241004-0654"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.console"
          download-size="0"
          install-size="0"
-         version="1.4.1000.v20250518-0610"
+         version="1.4.800.v20240513-1104"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.launcher"
          download-size="0"
          install-size="0"
-         version="1.7.0.v20250519-0528"
+         version="1.6.900.v20240613-2009"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator"
          download-size="0"
          install-size="0"
-         version="1.5.500.v20250306-1127"
+         version="1.5.300.v20240424-1301"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi"
          download-size="0"
          install-size="0"
-         version="3.23.100.v20250514-1759"
+         version="3.22.0.v20241030-2121"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.source"
          download-size="0"
          install-size="0"
-         version="3.23.100.v20250514-1759"
+         version="3.22.0.v20241030-2121"
          unpack="false"/>
 
    <plugin
@@ -692,28 +692,28 @@
          id="org.eclipse.osgi.services"
          download-size="0"
          install-size="0"
-         version="3.12.200.v20241212-0858"
+         version="3.12.100.v20240327-0645"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.osgi.services.source"
          download-size="0"
          install-size="0"
-         version="3.12.200.v20241212-0858"
+         version="3.12.100.v20240327-0645"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.cm"
          download-size="0"
          install-size="0"
-         version="1.6.300.v20250515-0501"
+         version="1.6.100.v20240329-0940"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.cm.source"
          download-size="0"
          install-size="0"
-         version="1.6.300.v20250515-0501"
+         version="1.6.100.v20240329-0940"
          unpack="false"/>
    
    <plugin
@@ -790,14 +790,14 @@
          id="org.eclipse.equinox.http.service.api"
          download-size="0"
          install-size="0"
-         version="1.2.102.v20250520-0629"
+         version="1.2.2.v20231218-2126"
          unpack="false"/>
    
    <plugin
          id="org.eclipse.equinox.http.service.api.source"
          download-size="0"
          install-size="0"
-         version="1.2.102.v20250520-0629"
+         version="1.2.2.v20231218-2126"
          unpack="false"/>
 
    <plugin
@@ -873,7 +873,7 @@
          id="org.eclipse.osgi.util"
          download-size="0"
          install-size="0"
-         version="3.7.400.v20250516-0916"
+         version="3.7.300.v20231104-1118"
          unpack="false"/>
 
    <plugin
@@ -922,70 +922,70 @@
          id="org.objectweb.asm"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree.analysis"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.source"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree.analysis.source"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.commons.source"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.tree.source"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
          id="org.objectweb.asm.util.source"
          download-size="0"
          install-size="0"
-         version="9.8.0"
+         version="9.7.1"
          unpack="false"/>
 
    <plugin
@@ -1119,14 +1119,14 @@
          id="org.eclipse.equinox.event"
          download-size="0"
          install-size="0"
-         version="1.7.300.v20250518-0609"
+         version="1.7.100.v20240321-1445"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.equinox.event.source"
          download-size="0"
          install-size="0"
-         version="1.7.300.v20250518-0609"
+         version="1.7.100.v20240321-1445"
          unpack="false"/>
 
    <plugin
