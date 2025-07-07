@@ -264,6 +264,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWrite;
+import com.sap.sailing.gwt.ui.client.shared.SailingVideoDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -282,6 +283,7 @@ import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
+import com.sap.sailing.gwt.ui.shared.SailingImageDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -1470,8 +1472,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         String officialWebsiteURLString = eventDTO.getOfficialWebsiteURL();
         String baseURLAsString = eventDTO.getBaseURL();
         Map<String, String> sailorsInfoWebsiteURLsByLocaleName = eventDTO.getSailorsInfoWebsiteURLs();
-        List<ImageDTO> images = eventDTO.getImages();
-        List<VideoDTO> videos = eventDTO.getVideos();
+        List<SailingImageDTO> images = eventDTO.getImages();
+        List<SailingVideoDTO> videos = eventDTO.getVideos();
         List<String> windFinderReviewedSpotCollectionIds = eventDTO.getWindFinderReviewedSpotsCollectionIds();
         return updateEvent(eventId, eventName, eventDescription, startDate, endDate, venue, isPublic,
                 leaderboardGroupIds, officialWebsiteURLString, baseURLAsString, sailorsInfoWebsiteURLsByLocaleName,
@@ -1481,8 +1483,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, List<UUID> leaderboardGroupIds, String officialWebsiteURLString,
-            String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<ImageDTO> images,
-            List<VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
+            String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, List<? extends ImageDTO> images,
+            List<? extends VideoDTO> videos, List<String> windFinderReviewedSpotCollectionIds)
             throws MalformedURLException, UnauthorizedException {
         final TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
         final TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
@@ -2131,10 +2133,22 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
     
     private void checkCurrentUserUpdatePermissionForIgtimiDevice(String serialNumber) {
-        final RiotServer riotServer = getRiotServer();
-        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        final Device existingDevice = getIgtimiDevice(serialNumber);
         if (existingDevice != null) {
             getSecurityService().checkCurrentUserUpdatePermission(existingDevice);
+        }
+    }
+
+    private Device getIgtimiDevice(String serialNumber) {
+        final RiotServer riotServer = getRiotServer();
+        final Device existingDevice = riotServer.getDeviceBySerialNumber(serialNumber);
+        return existingDevice;
+    }
+
+    private void checkCurrentUserReadPermissionForIgtimiDevice(String serialNumber) {
+        final Device existingDevice = getIgtimiDevice(serialNumber);
+        if (existingDevice != null) {
+            getSecurityService().checkCurrentUserReadPermission(existingDevice);
         }
     }
 
@@ -2160,6 +2174,42 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public boolean sendRestartCommandToIgtimiDevice(String serialNumber) throws IOException {
         checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
         return getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_RESTART);
+    }
+    
+    @Override
+    public boolean sendIMUCalibrationCommandSequenceToIgtimiDevice(String serialNumber) throws IOException, InterruptedException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
+        boolean result = true;
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_STOP) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_CAL_FROM_FILE) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_GYROCAL_PERFORM) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_SAVE) && result;
+        Thread.sleep(1000); // wait for 1s for the command to process
+        result = getRiotServer().sendStandardCommand(serialNumber, RiotStandardCommand.CMD_IMU_ON) && result;
+        return result;
+    }
+
+    @Override
+    public boolean sendIgtimiCommand(String serialNumber, String command) throws IOException, InterruptedException {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(serialNumber);
+        return getRiotServer().sendFreestyleCommand(serialNumber, command);
+    }
+    
+    @Override
+    public boolean enableIgtimiDeviceOverTheAirLog(String deviceSerialNumber, boolean enable) throws Exception {
+        checkCurrentUserUpdatePermissionForIgtimiDevice(deviceSerialNumber);
+        return getRiotServer().enableOverTheAirLog(deviceSerialNumber, enable);
+    }
+    
+    @Override
+    public ArrayList<Pair<TimePoint, String>> getIgtimiDeviceLogs(String serialNumber, Duration duration) throws IOException, org.json.simple.parser.ParseException {
+        checkCurrentUserReadPermissionForIgtimiDevice(serialNumber);
+        return Util.mapToArrayList(getRiotServer().getDeviceLogs(serialNumber, duration), s->s);
     }
 
     @Override

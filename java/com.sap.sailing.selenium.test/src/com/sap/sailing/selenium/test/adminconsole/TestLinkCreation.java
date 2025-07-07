@@ -9,10 +9,9 @@ import javax.xml.bind.DatatypeConverter;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,7 +20,9 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
+import com.sap.sailing.selenium.core.SeleniumTestCase;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
@@ -92,7 +93,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     private static final String BRANCH_IO_COMPLIANT_LOCALHOST_ALIAS = "branch-io-localhost-alias";
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         boolean checkUrlIsWorking;
         String prodCheckUrl = "https://www.sapsailing.com/gwt/status";
@@ -106,8 +107,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
             LOG.warn("Productive server {} is NOT accessible. Skip tests which are requirering live connection.",
                     prodCheckUrl);
         }
-        Assume.assumeTrue("Execute link creation test only if productive server is online (www.sapsailing.com).",
-                checkUrlIsWorking);
+        Assumptions.assumeTrue(checkUrlIsWorking, "Execute link creation test only if productive server is online (www.sapsailing.com).");
         clearState(getContextRoot());
         super.setUp();
     }
@@ -119,7 +119,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
      * from branch.io over production environment (my.sapsailing.com) back to localhost. The link back to localhost need
      * an additional confirmation on production server.
      */
-    @Test
+    @SeleniumTestCase
     public void testRegattaOverviewInvitationLinkCreation() throws SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // create an event and regatta
@@ -141,10 +141,10 @@ public class TestLinkCreation extends AbstractSeleniumTest {
         RegistrationLinkWithQRCodeDialogPO registrationLinkWithQRCode = regattaDetails.configureRegistrationURL();
         // check URL
         String createdInvitationUrl = registrationLinkWithQRCode.getRegistrationLinkUrl();
-        Assert.assertTrue(createdInvitationUrl.startsWith(INVITATION_URL_BASE));
-        Assert.assertTrue(createdInvitationUrl.contains("secret=" + secret));
-        Assert.assertTrue(createdInvitationUrl.contains("event_id=" + selectedEventId));
-        Assert.assertTrue(createdInvitationUrl.contains("server=http%3A%2F%2Flocalhost%3A"));
+        Assertions.assertTrue(createdInvitationUrl.startsWith(INVITATION_URL_BASE));
+        Assertions.assertTrue(createdInvitationUrl.contains("secret=" + secret));
+        Assertions.assertTrue(createdInvitationUrl.contains("event_id=" + selectedEventId));
+        Assertions.assertTrue(createdInvitationUrl.contains("server=http%3A%2F%2Flocalhost%3A"));
         // "localhost" is not accepted by branch.io, so we need to replace by some artificial server;
         // that server will not have to be resolved during the test, so it can be a random string
         final String localNonLoopbackAddress = getNonLoopbackLocalhostAddress();
@@ -160,9 +160,9 @@ public class TestLinkCreation extends AbstractSeleniumTest {
                 By.xpath("//div[contains(text(), '" + EXPECTED_PUPLIC_INVITE_QR_CODE_TITLE + "')]")));
         WebElement qrCodeLink = wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//a[contains(text(), '" + EXPECTED_QR_LINK_TEXT + "')]")));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
-        Assert.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2F"+localNonLoopbackAddress+"%3A"));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").startsWith(INVITATION_QR_CODE_BASE));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").contains("secret=" + secret));
+        Assertions.assertTrue(qrCodeLink.getAttribute("href").contains("server=http%3A%2F%2F"+localNonLoopbackAddress+"%3A"));
     }
     
     /**
@@ -178,7 +178,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     /**
      * Testing the generation of an invitation QR code for the Race Manager App.
      */
-    @Test
+    @SeleniumTestCase
     public void testRaceManagerAppInvitationLink() throws SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         RaceManagementAppPanelPO raceManagerApp = adminConsole.goToRaceManagerApp();
@@ -211,7 +211,7 @@ public class TestLinkCreation extends AbstractSeleniumTest {
     /**
      * Device registration via QR code test.
      */
-    @Test
+    @SeleniumTestCase
     public void testDeviceRegistation() throws InterruptedException, SocketException {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // create an event and regatta

@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Mark;
@@ -28,7 +28,7 @@ public class LineAnalysisTest extends TrackBasedTest {
     private DynamicTrackedRace trackedRace;
     private CompetitorWithBoat competitor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         competitor = createCompetitorWithBoat("Test");
         now = MillisecondsTimePoint.now();
