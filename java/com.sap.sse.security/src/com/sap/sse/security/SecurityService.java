@@ -26,6 +26,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.http.HttpHeaderUtil;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.replication.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
@@ -912,6 +913,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     boolean isClientIPLockedForBearerTokenAuthentication(String clientIP);
 
+    void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) throws MailException;
+    
     /**
      * For a {@link SecuredSecurityTypes#SERVER SERVER} object identified by {@code serverName}, determines the user set
      * as the server's owner, plus additional users that have the permission to execute

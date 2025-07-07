@@ -44,7 +44,7 @@ For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that
 
 ### Installations
 
-1. Eclipse IDE for Eclipse Committers, version ["2025-03"](https://www.eclipse.org/downloads/packages/release/2025-03/r/eclipse-ide-eclipse-committers) 
+1. Eclipse IDE for Eclipse Committers, version ["2025-03"](https://www.eclipse.org/downloads/packages/release/2025-03/r/eclipse-ide-eclipse-committers). If you are using a Mac and want to use SAPJVM, this has to be the 64 bit version. This is because SAPJVM is not available for Apple Silicon Macs, and Eclipse's OS architecture must match the JVM architecture.
 2. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)still
 4. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
@@ -52,7 +52,7 @@ For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that
 6. RabbitMQ, download from [http://www.rabbitmq.com](http://www.rabbitmq.com). Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang. Some sources report that there may be trouble with the latest versions of RabbitMQ. In some cases, McAffee seems to block the installation of the latest version on SAP hardware; in other cases connection problems to the newest versions have been reported. We know that version 3.6.8 works well. [https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8](https://github.com/rabbitmq/rabbitmq-server/releases/tag/rabbitmq_v3_6_8)
 7.  Maven 3.1.1 (or higher), [http://maven.apache.org](http://maven.apache.org)
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
-8.  Forked GWT SDK 2.11.0 release candidate ([https://static.sapsailing.com/gwt-2.11.0.zip](https://static.sapsailing.com/gwt-2.11.0.zip)). The official releases can be found at [http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html)
+8.  Forked GWT SDK 2.11.1 release candidate ([https://static.sapsailing.com/gwt-2.11.1.zip](https://static.sapsailing.com/gwt-2.11.1.zip)). The official releases can be found at [http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html)
     but shouldn't be used unless we roll back the changes of branch ``bug5077`` or GWT has merged and released the [pull request 9779](https://github.com/gwtproject/gwt/pull/9779).
     Download the GWT DSK and extract it to a location of your preference (e.g. `C:\Program Files\gwt` on Windows or `/opt/gwt` on Linux or MacOS/X).
     You will see in section [Tuning the Eclipse Installation](#onboarding-information_sap-sailing-analytics-development-setup_tuning-the-eclipse-installation)
@@ -108,7 +108,9 @@ The p2f-file includes the following plugins for your convenience:
 
 ### Tuning the Eclipse Installation
 
-Out of the box, multiple settings in Eclipse need to be changed. Go to Window ⇒ Preferences and change the following two settings:
+Out of the box, multiple settings in Eclipse need to be changed. You can either import the configurations from the ``configuration/eclipse-preferences.epf`` file or follow the given instructions;
+
+Go to Window ⇒ Preferences and change the following two settings:
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs

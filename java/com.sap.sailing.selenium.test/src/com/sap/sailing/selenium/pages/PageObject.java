@@ -1,6 +1,6 @@
 package com.sap.sailing.selenium.pages;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.MessageFormat;
 import java.time.Duration;

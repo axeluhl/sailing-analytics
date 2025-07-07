@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -38,7 +38,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class StarbordSideOfStartLineRecognitionTest {
     private TimePoint now;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         now = MillisecondsTimePoint.now();
     }

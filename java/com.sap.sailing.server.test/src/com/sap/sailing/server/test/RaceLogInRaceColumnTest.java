@@ -1,9 +1,9 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -38,7 +38,7 @@ public class RaceLogInRaceColumnTest {
     private Peer<RacingEventServiceOperation<?>, RacingEventService> server;
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MongoDBService.INSTANCE.getDB().drop();
         racingEventServiceServer = new RacingEventServiceImpl();
