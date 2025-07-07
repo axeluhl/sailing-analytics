@@ -206,7 +206,6 @@
 <setEntry value="org.apache.xalan@default:default"/>
 <setEntry value="org.apache.xml.serializer@default:default"/>
 <setEntry value="org.eclipse.equinox.event@default:default"/>
-<setEntry value="org.eclipse.equinox.event.source@default:default"/>
 <setEntry value="org.eclipse.jetty.annotations@4:true"/>
 <setEntry value="org.eclipse.jetty.jndi@default:default"/>
 <setEntry value="org.eclipse.jetty.plus@default:default"/>
