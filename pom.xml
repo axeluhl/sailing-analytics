@@ -88,11 +88,6 @@
         <!-- The repository declarations are only active when running in a non Lean DI environment.
              On Lean DI we are not allowed to define our own repositories because everything must be hosted in SAP's Nexus server. -->
         <repositories>
-          <repository>
-              <id>equinox-sdk-3.9</id>
-              <layout>p2</layout>
-              <url>https://download.eclipse.org/releases/luna/</url>
-          </repository>
   <!--
           <repository>
               <id>sap-nexus</id>
