@@ -28,7 +28,7 @@
   </div>
 </div>
 **Guides:**
-- [How-to: Managing marks in Sail Insight](wiki/howto/tutorials/sailinsight/manage-marks.md)
+- [How-to: Managing marks in Sail Insight](tutorials/sailinsight/manage-marks.md)
 - [Boat and team creation in Sail Insight](wiki/howto/tutorials/sailinsight/boat-team-creation.md)
 - [Getting started with Sail Insight](wiki/howto/tutorials/sailinsight/getting-started.md)
 - [How-to: Create an event with Sail Insight](wiki/howto/tutorials/sailinsight/create-events.md)
