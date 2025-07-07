@@ -4,7 +4,7 @@ This episode shows you how to work with **the SAP Sailing Race Manager App** :
   <a href="https://vimeo.com/488484868" target="_blank">
     <img src="https://i.vimeocdn.com/video/1010878230-c2c61789493de4080b910dbb08521af8ff8f7036aa66c9b1eabe51690a68e5a0-d?f=webp&region=us" alt="How to work with the SAP Sailing Race Manager App" style="display: inline-block;">
   </a>
-  <div style="line-height: normal; margin-top: -18em;">
+  <div style="line-height: normal; margin-top: -18em;margin-bottom: 16em;">
     <a href="https://vimeo.com/488484868" target="_blank" style="
       display: inline-block;
       vertical-align: middle;
