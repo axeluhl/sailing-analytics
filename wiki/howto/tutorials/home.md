@@ -29,11 +29,11 @@
 </div>
 **Guides:**
 - [How-to: Managing marks in Sail Insight](sailinsight/manage-marks.md)
-- [Boat and team creation in Sail Insight](wiki/howto/tutorials/sailinsight/boat-team-creation.md)
-- [Getting started with Sail Insight](wiki/howto/tutorials/sailinsight/getting-started.md)
-- [How-to: Create an event with Sail Insight](wiki/howto/tutorials/sailinsight/create-events.md)
+- [Boat and team creation in Sail Insight](sailinsight/boat-team-creation.md)
+- [Getting started with Sail Insight](sailinsight/getting-started.md)
+- [How-to: Create an event with Sail Insight](sailinsight/create-events.md)
 
-You can also visit [FAQ & Answers](wiki/howto/tutorials/sailinsight/faq-answers.md) for common questions.
+You can also visit [FAQ & Answers](sailinsight/faq-answers.md) for common questions.
 
 ---
 
@@ -56,10 +56,10 @@ You can also visit [FAQ & Answers](wiki/howto/tutorials/sailinsight/faq-answers.
 *The SAP Sailing Race Manager app simplifies starting, running, and finishing sailing races, with real-time updates for organizers, fans, and media.*
 
 **Guides:**
-- [How to connect the Race Manager App to an Event](wiki/howto/tutorials/sailingracemanager/connect-to-event.md)
-- [How to configure wind settings](wiki/howto/tutorials/sailingracemanager/configure-wind-settings.md)
-- [How to work with the SAP Sailing Race Manager App](wiki/howto/tutorials/sailingracemanager/sailing-race-guide.md)
-- [Editing results with the SAP Sailing Race Manager App](wiki/howto/tutorials/sailingracemanager/edit-results.md)
+- [How to connect the Race Manager App to an Event](sailingracemanager/connect-to-event.md)
+- [How to configure wind settings](sailingracemanager/configure-wind-settings.md)
+- [How to work with the SAP Sailing Race Manager App](sailingracemanager/sailing-race-guide.md)
+- [Editing results with the SAP Sailing Race Manager App](sailingracemanager/edit-results.md)
 
 ---
 
@@ -83,16 +83,16 @@ You can also visit [FAQ & Answers](wiki/howto/tutorials/sailinsight/faq-answers.
 
 **All Tutorials:**
 
-| [Tracking Race Player Overview](wiki/howto/tutorials/sailinganalytics/tracking-race-player.md) | [Signing up for a user account](wiki/howto/tutorials/sailinganalytics/sign-up.md) | [Introduction to Analytics Backend](wiki/howto/tutorials/sailinganalytics/into-to-backend.md) | 
+| [Tracking Race Player Overview](sailinganalytics/tracking-race-player.md) | [Signing up for a user account](sailinganalytics/sign-up.md) | [Introduction to Analytics Backend](sailinganalytics/into-to-backend.md) | 
 |----------|----------|----------|
-| [Create a simple event](wiki/howto/tutorials/sailinganalytics/simple-event-creation.md) | [Add & align Youtube videos](wiki/howto/tutorials/sailinganalytics/video-tracking-management.md) | [Create complex regattas](wiki/howto/tutorials/sailinganalytics/create-regattas.md) |
-| [Edit scores/results](wiki/howto/tutorials/sailinganalytics/competitors-data-management.md) | [Importing results](wiki/howto/tutorials/sailinganalytics/importing-results.md) | [Adjust mark position](wiki/howto/tutorials/sailinganalytics/adjust-mark-position.md) |
-| [Set mark position](wiki/howto/tutorials/sailinganalytics/set-mark-position.md) | [Configure wind settings](wiki/howto/tutorials/sailinganalytics/configure-wind-settings.md) | [Set up multiple regattas](wiki/howto/tutorials/sailinganalytics/set-up-regattas.md) |
-| [Leaderboard groups explained](wiki/howto/tutorials/sailinganalytics/leaderboard-groups-explanation.md) | [Split a leaderboard](wiki/howto/tutorials/sailinganalytics/split-leaderboard.md) | [Working with course areas](wiki/howto/tutorials/sailinganalytics/course-areas.md) |
-| [Work with Race Manager app](wiki/howto/tutorials/sailinganalytics/sailing-race-manager.md) | [Connect Race Manager to event](wiki/howto/tutorials/sailinganalytics/race-manager-connection.md) | [Editing results](wiki/howto/tutorials/sailinganalytics/edit-results.md) |
-| [Set up matchrace event](wiki/howto/tutorials/sailinganalytics/set-matchrace-event.md) | [Security system intro](wiki/howto/tutorials/sailinganalytics/security-system.md) | [Default creation group](wiki/howto/tutorials/sailinganalytics/default-creation-group.md) |
-| [Make group public](wiki/howto/tutorials/sailinganalytics/make-group-public.md) | [Publish an event](wiki/howto/tutorials/sailinganalytics/publish-event.md) | [Import a GPX track](wiki/howto/tutorials/sailinganalytics/import-gpx-track.md) |
-| [Fix device assignment](wiki/howto/tutorials/sailinganalytics/race-fixes.md) | [Data Mining Tool intro](wiki/howto/tutorials/sailinganalytics/data-mining-tool.md) |  |
+| [Create a simple event](sailinganalytics/simple-event-creation.md) | [Add & align Youtube videos](sailinganalytics/video-tracking-management.md) | [Create complex regattas](sailinganalytics/create-regattas.md) |
+| [Edit scores/results](sailinganalytics/competitors-data-management.md) | [Importing results](sailinganalytics/importing-results.md) | [Adjust mark position](sailinganalytics/adjust-mark-position.md) |
+| [Set mark position](sailinganalytics/set-mark-position.md) | [Configure wind settings](sailinganalytics/configure-wind-settings.md) | [Set up multiple regattas](sailinganalytics/set-up-regattas.md) |
+| [Leaderboard groups explained](sailinganalytics/leaderboard-groups-explanation.md) | [Split a leaderboard](sailinganalytics/split-leaderboard.md) | [Working with course areas](sailinganalytics/course-areas.md) |
+| [Work with Race Manager app](sailinganalytics/sailing-race-manager.md) | [Connect Race Manager to event](sailinganalytics/race-manager-connection.md) | [Editing results](sailinganalytics/edit-results.md) |
+| [Set up matchrace event](sailinganalytics/set-matchrace-event.md) | [Security system intro](sailinganalytics/security-system.md) | [Default creation group](sailinganalytics/default-creation-group.md) |
+| [Make group public](sailinganalytics/make-group-public.md) | [Publish an event](sailinganalytics/publish-event.md) | [Import a GPX track](sailinganalytics/import-gpx-track.md) |
+| [Fix device assignment](sailinganalytics/race-fixes.md) | [Data Mining Tool intro](sailinganalytics/data-mining-tool.md) |  |
 
 ---
 
