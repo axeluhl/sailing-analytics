@@ -16,4 +16,3 @@ This tutorial shows how to create **more complex regattas** :
       font-weight: bold;
     ">Watch the Video</a>
   </div>
-  <br><br><br>
