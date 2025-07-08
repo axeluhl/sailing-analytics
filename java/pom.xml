@@ -308,7 +308,7 @@
          for Tycho that have been removed from JavaSE-11 if not building for Android -->
     <id>with-java11-non-android-relevant</id>
     <activation>
-      <jdk>[9.0,21.0)</jdk>
+      <jdk>[9.0,24.0)</jdk>
     </activation>
     <build>
       <plugins>
@@ -584,7 +584,6 @@
       <artifactId>target-platform-configuration</artifactId>
       <version>${tycho-version}</version>
       <configuration>
-        <resolver>p2</resolver>
         <target>
           <artifact>
             <groupId>${project.groupId}</groupId>

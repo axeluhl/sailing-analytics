@@ -40,6 +40,17 @@
   <toolchain>
       <type>jdk</type>
       <provides>
+            <version>21</version>
+            <id>JavaSE-21</id>
+            <vendor>sun</vendor>
+      </provides>
+      <configuration>
+            <jdkHome>/usr/lib/jvm/sapmachine-jdk-21.0.7</jdkHome>
+      </configuration>
+  </toolchain>
+  <toolchain>
+      <type>jdk</type>
+      <provides>
             <version>24</version>
             <id>JavaSE-24</id>
             <vendor>sun</vendor>
