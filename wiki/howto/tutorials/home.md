@@ -13,7 +13,6 @@
   <li><a href="#happy-sailing">⚓️ Contact</a></li>
 </ul>
 <div style="padding: 0px;">
-
     <blockquote>
       🚀 <em>Welcome to the SAP Sailing knowledge base!</em><br>
       Use this guide to access step-by-step tutorials for each of these tools:
