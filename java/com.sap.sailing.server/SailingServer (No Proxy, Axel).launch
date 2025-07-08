@@ -22,7 +22,7 @@
         <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
     </listAttribute>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+    <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console 12001 -clean"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-ea -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dfile.encoding=cp1252 -Dexpedition.udp.port=5010 -Xmx6000m -XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -Djetty.home=${project_loc:com.sap.sailing.server}/../target/configuration/jetty -Djava.util.logging.config.file=${project_loc:com.sap.sailing.server}/../target/configuration/logging_debug.properties -Dkiwo.results=${project_loc:com.sap.sailing.kiworesultimport.test}/resources -Dpersistentcompetitors.clear=false -Dpolardata.source.url=https://www.sapsailing.com -Dwindestimation.source.url=https://www.sapsailing.com -Drestore.tracked.races=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=50000000 -Dmongo.uri=&quot;mongodb://silent,klo,homemp3/winddb?replicaSet=rs0&amp;retryWrites=true&quot; -DAnniversaryRaceDeterminator.enabled=true -Djava.naming.factory.url.pkgs=org.eclipse.jetty.jndi -Djava.naming.factory.initial=org.eclipse.jetty.jndi.InitialContextFactory -Dorg.eclipse.jetty.annotations.maxWait=120 -Dchargebee.site=${CHARGEBEE_SITE} -Dchargebee.apikey=${CHARGEBEE_API_KEY} -Dmanage2sail.accesstoken=${MANAGE2SAIL_ACCESS_TOKEN} -Dsubscriptions.disableMailVerificationRequirement=true -Dgoogle.maps.authenticationparams=${GOOGLE_MAPS_AUTHENTICATION_PARAMS} -Dyoutube.api.key=${YOUTUBE_API_KEY} -Dgwt.rpc.version=9 -Digtimi.riot.port=6000 -Digtimi.base.url=http://127.0.0.1:8888 -Dcom.sap.sse.debranding=false -Dgeonames.org.usernames=&quot;${GEONAMES_ORG_USERNAMES}&quot;"/>
@@ -170,11 +170,13 @@
 <setEntry value="com.amazon.aws.aws-java-api.source@default:default"/>
 <setEntry value="org.objectweb.asm@default:default"/>
 <setEntry value="org.objectweb.asm.commons@default:default"/>
-<setEntry value="org.objectweb.asm.analysis@default:default"/>
+<setEntry value="org.objectweb.asm.tree.analysis@default:default"/>
+<setEntry value="org.objectweb.asm.tree.analysis.source@default:default"/>
+<setEntry value="org.objectweb.asm.tree@default:default"/>
+<setEntry value="org.objectweb.asm.tree.source@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
 <setEntry value="org.objectweb.asm.util@default:default"/>
 <setEntry value="org.objectweb.asm.source@default:default"/>
-<setEntry value="org.objectweb.asm.analysis.source@default:default"/>
 <setEntry value="org.objectweb.asm.commons.source@default:default"/>
 <setEntry value="org.objectweb.asm.tree.source@default:default"/>
 <setEntry value="org.objectweb.asm.util.source@default:default"/>
