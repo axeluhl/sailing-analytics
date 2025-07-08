@@ -18,7 +18,6 @@
       Use this guide to access step-by-step tutorials for each of these tools:
       <strong>Sail Insight</strong>, <strong>Sailing Race Manager</strong>, and <strong>Sailing Analytics</strong>.
     </blockquote>
-
     <hr>
 
     <h2 id="sail-insight-application">⛵ 1. Sail Insight Application</h2>
