@@ -177,6 +177,8 @@
 <setEntry value="org.apache.aries.spifly.dynamic.bundle.source@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-el@default:default"/>
 <setEntry value="org.mortbay.jasper.apache-jsp@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-el.source@default:default"/>
+<setEntry value="org.mortbay.jasper.apache-jsp.source@default:default"/>
 <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
 <setEntry value="org.apache.taglibs.standard-impl@default:default"/>
 <setEntry value="org.apache.taglibs.taglibs-standard-spec@default:default"/>
@@ -369,6 +371,7 @@
 <setEntry value="com.sap.sse.aicore@default:default"/>
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
+<<<<<<< HEAD
 =======
 <setEntry value="com.sap.sailing.geocoding@default:default"/>
 <setEntry value="com.sap.sailing.domain.common@default:default"/>
@@ -487,6 +490,8 @@
 <setEntry value="elemental2@default:default"/>
 </setAttribute>
 >>>>>>> master
+=======
+>>>>>>> main
     <booleanAttribute key="show_selected_only" value="false"/>
     <booleanAttribute key="tracing" value="false"/>
     <booleanAttribute key="useCustomFeatures" value="false"/>

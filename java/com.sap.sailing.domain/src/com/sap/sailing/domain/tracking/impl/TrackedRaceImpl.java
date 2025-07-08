@@ -443,7 +443,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * Tells how ranks are to be assigned to the competitors at any time during the race. For one-design boat classes
      * this will usually happen by projecting the competitors to the wind direction for upwind and downwind legs or to
      * the leg's rhumb line for reaching legs, then comparing positions. For handicap races using a time-on-time,
-     * time-on-distance, combination thereof or a more complicated scheme such as ORC Performance Curve, the ranking
+     * time-on-distance, combination thereof or a more complicated scheme such as ORC Polar Curve, the ranking
      * process needs to take into account the competitor-specific correction factors defined in the measurement
      * certificate.<p>
      * 

@@ -1,14 +1,14 @@
 package com.sap.sailing.server.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -40,7 +40,7 @@ public class RaceLogOperationalTransformationTest {
     private CountDownLatch client2Latch;
     private CountDownLatch serverLatch;
     
-    @Before
+    @BeforeEach
     public void setUp() {
         raceLogClient1 = new RaceLogImpl("Test Race Log Client1");
         raceLogClient2 = new RaceLogImpl("Test Race Log Client2");
