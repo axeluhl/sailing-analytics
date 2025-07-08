@@ -44,7 +44,7 @@ For a Gollum Wiki account send a request to Axel Uhl or Simon Marcel Pamies that
 
 ### Installations
 
-1. Eclipse IDE for Eclipse Committers, version ["2025-03"](https://www.eclipse.org/downloads/packages/release/2025-03/r/eclipse-ide-eclipse-committers) 
+1. Eclipse IDE for Eclipse Committers, version ["2025-03"](https://www.eclipse.org/downloads/packages/release/2025-03/r/eclipse-ide-eclipse-committers). If you are using a Mac and want to use SAPJVM, this has to be the 64 bit version. This is because SAPJVM is not available for Apple Silicon Macs, and Eclipse's OS architecture must match the JVM architecture.
 2. JDK 1.8 (Java SE 8), ideal is the SAPJVM 1.8: Go to [https://tools.eu1.hana.ondemand.com/#cloud](https://tools.eu1.hana.ondemand.com/#cloud), scroll down to `SAP JVM` select your operating System, extract the downloaded .zip into desired location (e.g. Windows `C:\Program Files\Java`. If you want to make this your default JDK, set the `JAVA_HOME` variable to it. In any case, set the `JAVA8_HOME` variable to it which is required by a few build scripts where certain steps currently are not yet compatible with newer JDK releases, such as our Android build process, keeping us on Gradle 6.0.1 for the time being which isn't Java 17-compatible.
 3. Git (e.g. Git for Windows v2.18), [http://git-scm.com](http://git-scm.com) / [https://git-for-windows.github.io](https://git-for-windows.github.io)still
 4. Configure git (see [Git repository configuration essentials](#onboarding-information_sap-sailing-analytics-development-setup_git-repository-configuration-essentials))
@@ -108,7 +108,9 @@ The p2f-file includes the following plugins for your convenience:
 
 ### Tuning the Eclipse Installation
 
-Out of the box, multiple settings in Eclipse need to be changed. Go to Window ⇒ Preferences and change the following two settings:
+Out of the box, multiple settings in Eclipse need to be changed. You can either import the configurations from the ``configuration/eclipse-preferences.epf`` file or follow the given instructions;
+
+Go to Window ⇒ Preferences and change the following two settings:
 
 - In "General ⇒ Content Types" select on CSS (Text ⇒ CSS) and add \*.gss in the lower file association list to get limited syntax highlighting and content assist in GSS files
 - In "General ⇒ Editors ⇒ Text Editors" check Insert Spaces for Tabs
