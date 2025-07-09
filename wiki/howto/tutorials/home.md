@@ -13,13 +13,11 @@
   <li><a href="#happy-sailing">⚓️ Contact</a></li>
 </ul>
 <div style="padding: 0px;">
-
     <blockquote>
       🚀 <em>Welcome to the SAP Sailing knowledge base!</em><br>
       Use this guide to access step-by-step tutorials for each of these tools:
       <strong>Sail Insight</strong>, <strong>Sailing Race Manager</strong>, and <strong>Sailing Analytics</strong>.
     </blockquote>
-
     <hr>
 
     <h2 id="sail-insight-application">⛵ 1. Sail Insight Application</h2>
@@ -39,13 +37,12 @@
 
     <h3>Guides:</h3>
     <ul>
-      <li><a href="sailinsight/manage-marks.md">How-to: Managing marks in Sail Insight</a></li>
-      <li><a href="sailinsight/boat-team-creation.md">Boat and team creation in Sail Insight</a></li>
       <li><a href="sailinsight/getting-started.md">Getting started with Sail Insight</a></li>
       <li><a href="sailinsight/create-events.md">How-to: Create an event with Sail Insight</a></li>
+      <li><a href="sailinsight/manage-marks.md">How-to: Managing marks in Sail Insight</a></li>
+      <li><a href="sailinsight/boat-team-creation.md">Boat and team creation in Sail Insight</a></li>
     </ul>
     <p>You can also visit <a href="sailinsight/faq-answers.md">FAQ & Answers</a> for common questions.</p>
-
     <hr>
 
     <h2 id="sap-sailing-race-manager-application">🏁 2. SAP Sailing Race Manager Application</h2>
