@@ -66,6 +66,6 @@ jobs:
         with:
           type: now
           from_branch: main
-          target_branch: docker-17
+          target_branch: docker-24
           message: Auto-merging main into docker-24 after successful release build
           github_token: ${{ secrets.REPO_TOKEN_FOR_MERGE_AND_PUSH }}
