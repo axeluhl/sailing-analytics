@@ -44,7 +44,7 @@ public class BoatClassVectorGraphicsResolver {
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_15, BoatClassMasterdata.NACRA_17,
                 BoatClassMasterdata.NACRA_17_FOIL, BoatClassMasterdata.F_16, BoatClassMasterdata.F_18,
                 BoatClassMasterdata.HOBIE_WILD_CAT, BoatClassMasterdata.HOBIE_16, BoatClassMasterdata.HOBIE_TIGER,
-                BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO, BoatClassMasterdata.FLYING_PHANTOM);
+                BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO, BoatClassMasterdata.FLYING_PHANTOM, BoatClassMasterdata.ORC_MULTIHULL);
         BoatClassVectorGraphics keelBoatWithGennaker = new KeelBoatWithGennakerVectorGraphics(BoatClassMasterdata.ELAN350,
                 BoatClassMasterdata.FIRST_CLASS_7_5,
                 BoatClassMasterdata.J70, BoatClassMasterdata.J80, BoatClassMasterdata.J92, BoatClassMasterdata.J92S,
@@ -59,7 +59,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.BRASSFAHRT_I, BoatClassMasterdata.BRASSFAHRT_II, BoatClassMasterdata.BRASSFAHRT_III,
                 BoatClassMasterdata.BRASSFAHRT_IV, BoatClassMasterdata.BRASSFAHRT_V,
                 BoatClassMasterdata.VO60, BoatClassMasterdata.VO65, BoatClassMasterdata.IMOCA,
-                BoatClassMasterdata.HANSE_418, BoatClassMasterdata.SALONA_46);
+                BoatClassMasterdata.HANSE_418, BoatClassMasterdata.SALONA_46, BoatClassMasterdata.SRS);
         BoatClassVectorGraphics dinghyWithSpinnaker = new DinghyWithSpinnakerVectorGraphics(BoatClassMasterdata._420,
                 BoatClassMasterdata._470, BoatClassMasterdata._5O5, BoatClassMasterdata.CADET, BoatClassMasterdata.FLYING_DUTCHMAN,
                 BoatClassMasterdata.FOLKBOAT, BoatClassMasterdata.DYAS, BoatClassMasterdata.DRAGON_INT,

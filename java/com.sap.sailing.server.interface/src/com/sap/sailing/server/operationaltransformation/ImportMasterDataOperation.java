@@ -139,6 +139,7 @@ public class ImportMasterDataOperation extends
 
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
+        logger.info("Starting to import master data into "+toState);
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
         SecurityService securityService = toState.getSecurityService();
         if (securityService == null) {
@@ -194,6 +195,7 @@ public class ImportMasterDataOperation extends
             waitForTrackedRacesToFinishLoading(trackedRacesToWaitForLoadingComplete);
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             progress.setOverAllProgressPct(1.0);
+            logger.info("Done importing master data into "+toState);
             return creationCount;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error during execution of ImportMasterDataOperation", e);
