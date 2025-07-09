@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +47,12 @@ public class OperationalTransformationTest {
         // wire the peers:
         server.addPeer(replica);
         replica.addPeer(server);
+    }
+    
+    @AfterEach
+    public void tearDown() {
+        server.shutdown();
+        replica.shutdown();
     }
 
     @Test
