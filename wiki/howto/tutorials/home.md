@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/SAP_2011_logo.svg/2560px-SAP_2011_logo.svg.png" alt="SAP Logo" width="60">
+  <img src="sap_logo.png" alt="SAP Logo" width="60">
 </p>
 
 <h1>🏆 SAP Sailing How-To Tutorials</h1>
@@ -29,7 +29,7 @@
       margin: 20px 0;
       max-width: 700px;
     ">
-      <img src="https://support.sapsailing.com/hc/theming_assets/01HZPQ67SXG8T9HEZX0GYX5HFF" alt="Sail Insight" style="width: 100%; height: auto;">
+      <img src="sail_insight.png" alt="Sail Insight" style="width: 100%; height: auto;">
       <div style="padding: 20px;">
         <p><em>Set up events, invite competitors, manage courses and marks, edit results and start sailing smarter.</em></p>
       </div>
@@ -54,7 +54,7 @@
       margin: 20px 0;
       max-width: 700px;
     ">
-      <img src="https://keyassets.timeincuk.net/inspirewp/live/wp-content/uploads/sites/21/2022/07/YAW275.5_tips.stc220427ff_01789.jpg" alt="Race Manager" style="width: 100%; height: auto;">
+      <img src="race_manager.png" alt="Race Manager" style="width: 100%; height: auto;">
       <div style="padding: 20px;">
         <p><em>Connect your devices, manage wind settings, edit results, and master your races.</em></p>
       </div>
@@ -81,7 +81,7 @@
       margin: 20px 0;
       max-width: 700px;
     ">
-      <img src="https://media.licdn.com/dms/image/v2/D4E12AQGZuRQLaR_EYw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1731440383764?e=2147483647&v=beta&t=8RngKX_NQa15pFlJD6zXGqZqigU7-xYZuAcc9J_BxPk" alt="Sailing Analytics" style="width: 100%; height: auto;">
+      <img src="sailing_analytics.png" alt="Sailing Analytics" style="width: 100%; height: auto;">
       <div style="padding: 20px;">
         <p><em>Dive deep into race tracking, data mining, and event publishing.</em></p>
       </div>
