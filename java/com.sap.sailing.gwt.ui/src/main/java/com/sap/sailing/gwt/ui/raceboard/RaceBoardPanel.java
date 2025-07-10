@@ -844,7 +844,7 @@ public class RaceBoardPanel
             final FlowPanel helpButtonAndRaceTimePanel = new FlowPanel();
             helpButtonAndRaceTimePanel.setStyleName("Help-And-RaceTime");
             final HelpButton helpButton = new HelpButton(HelpButtonResources.INSTANCE,
-                    stringMessages.videoGuide(), "https://support.sapsailing.com/hc/en-us/articles/7275243525148-Tracking-Race-Player-Overview");
+                    stringMessages.videoGuide(), "https://wiki.sapsailing.com/wiki/howto/tutorials/sailinganalytics/tracking-race-player.md");
             if (!DeviceDetector.isMobile()) {
                 helpButtonAndRaceTimePanel.add(helpButton);
             }
