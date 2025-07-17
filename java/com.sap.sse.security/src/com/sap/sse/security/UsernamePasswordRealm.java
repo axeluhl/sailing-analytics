@@ -47,6 +47,7 @@ public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
         byte[] salt = null;
         final User user = getUserStore().getUserByName(username);
         if (user == null) {
+            logger.warning("Rejecting authentication attempt for non-existing user "+username);
             return null;
         }
         if (user.getLockingAndBanning().isAuthenticationLocked()) {
