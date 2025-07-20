@@ -597,6 +597,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalResetPassword(String username, String passwordResetSecret) {
+        logger.info("Password reset for user "+username+" requested");
         getUserByName(username).startPasswordReset(passwordResetSecret);
         return null;
     }
@@ -1236,6 +1237,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        logger.info("Password for user "+username+" was updated by "+SessionUtils.getPrincipal());
         user.passwordWasReset();
         store.updateUser(user);
         return null;
