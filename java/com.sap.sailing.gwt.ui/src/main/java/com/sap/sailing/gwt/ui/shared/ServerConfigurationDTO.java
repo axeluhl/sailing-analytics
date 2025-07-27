@@ -8,6 +8,8 @@ public class ServerConfigurationDTO implements IsSerializable {
     private Boolean isPublic;
     private Boolean isSelfService;
     private StrippedUserGroupDTO serverDefaultTenant;
+    private Boolean debrandingActive;
+
 
     // for GWT
     ServerConfigurationDTO() {
@@ -39,4 +41,12 @@ public class ServerConfigurationDTO implements IsSerializable {
     public Boolean isSelfService() {
         return isSelfService;
     }
+    public Boolean getDebrandingActive() {
+        return debrandingActive;
+    }
+
+    public void setDebrandingActive(Boolean debrandingActive) {
+        this.debrandingActive = debrandingActive;
+    }
+
 }

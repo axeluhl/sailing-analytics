@@ -63,6 +63,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     private Anchor groupOwnerInfo, userOwnerInfo;
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
     private CheckBox isCORSWildcardCheckbox;
+    private CheckBox debrandingCheckbox;
     private StringListEditorComposite corsAllowedOriginsTextArea;
 
     private ServerInfoDTO currentServerInfo;
@@ -91,6 +92,7 @@ public class LocalServerManagementPanel extends SimplePanel {
             mainPanel.add(createCORSFilterConfigurationUI());
             refreshCORSConfiguration();
         }
+        mainPanel.add(createDebrandingConfigurationUI());
     }
 
     @Override
@@ -121,6 +123,22 @@ public class LocalServerManagementPanel extends SimplePanel {
                 () -> configACL.openDialog(currentServerInfo));
         return buttonPanel;
     }
+    private Widget createDebrandingConfigurationUI() {
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel("Branding & UI Customization", 1);
+
+        VerticalPanel debrandingPanel = new VerticalPanel();
+        debrandingPanel.setSpacing(4);
+        Label label = new Label("Enable Debranding Mode (removes SAP references):");
+        debrandingCheckbox = new CheckBox("Debranding Active");
+        debrandingCheckbox.addValueChangeHandler(event -> serverConfigurationChanged());
+        debrandingCheckbox.ensureDebugId("debrandingCheckbox");
+        debrandingPanel.add(label);
+        debrandingPanel.add(debrandingCheckbox);
+        captionPanel.addWidget("Rebranding", debrandingPanel);
+
+        return captionPanel;
+    }
+
 
     private Widget createServerInfoUI() {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.serverInformation(), 4);
@@ -210,8 +228,17 @@ public class LocalServerManagementPanel extends SimplePanel {
         final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
                 ? isSelfServiceServerCheckbox.getValue()
                 : null;
-        final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
-                publicServer, selfServiceServer, null);
+
+        final Boolean debrandingActive = debrandingCheckbox.getValue();
+
+        final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(
+                isStandaloneServerCheckbox.getValue(),
+                publicServer,
+                selfServiceServer,
+                null
+        );
+        serverConfig.setDebrandingActive(debrandingActive);
+
         isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
@@ -276,6 +303,10 @@ public class LocalServerManagementPanel extends SimplePanel {
         isStandaloneServerCheckbox.setEnabled(true);
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
+
+        if (result.getDebrandingActive() != null) {
+            debrandingCheckbox.setValue(result.getDebrandingActive(), false);
+        }
     }
     
     private void updateCORSFilterConfiguration(Pair<Boolean, ArrayList<String>> corsFilterConfiguration) {

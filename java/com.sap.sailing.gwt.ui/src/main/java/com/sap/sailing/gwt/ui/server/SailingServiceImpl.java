@@ -3536,10 +3536,20 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         UserGroup serverTenant = getSecurityService().getServerGroup();
         StrippedUserGroupDTO serverTenantDTO = new SecurityDTOFactory()
                 .createStrippedUserGroupDTOFromUserGroup(serverTenant, new HashMap<>());
-        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
-                isPublicServer(), isSelfServiceServer(), serverTenantDTO);
+        
+        ServerConfigurationDTO result = new ServerConfigurationDTO(
+                sailingServerConfiguration.isStandaloneServer(),
+                isPublicServer(),
+                isSelfServiceServer(),
+                serverTenantDTO
+        );
+
+        // ✅ Add the current debranding state to the DTO
+        result.setDebrandingActive(sailingServerConfiguration.getDebrandingActive());
+
         return result;
     }
+
 
     @Override
     //??

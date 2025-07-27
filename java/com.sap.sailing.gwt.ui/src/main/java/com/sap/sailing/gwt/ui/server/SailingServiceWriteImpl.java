@@ -4034,20 +4034,33 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
+
+        // 1. Apply core standalone setting as before
         getService().apply(new UpdateServerConfiguration(
-                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
+                new SailingServerConfigurationImpl(
+                    serverConfiguration.isStandaloneServer(),
+                    serverConfiguration.getDebrandingActive()
+                )));
+
+
+        // 2. Handle Self-Service toggle (unchanged)
         if (serverConfiguration.isSelfService() != null) {
             final boolean isCurrentlySelfService = isSelfServiceServer();
             final boolean shouldBeSelfService = serverConfiguration.isSelfService();
             if (isCurrentlySelfService != shouldBeSelfService) {
-                SecurityUtils.getSubject().checkPermission(getServerInfo().getIdentifier().getStringPermission(DefaultActions.CHANGE_ACL));
+                SecurityUtils.getSubject().checkPermission(getServerInfo().getIdentifier()
+                        .getStringPermission(DefaultActions.CHANGE_ACL));
                 if (shouldBeSelfService) {
-                    getSecurityService().addToAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
+                    getSecurityService().addToAccessControlList(
+                            getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
                 } else {
-                    getSecurityService().removeFromAccessControlList(getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
+                    getSecurityService().removeFromAccessControlList(
+                            getServerInfo().getIdentifier(), null, ServerActions.CREATE_OBJECT.name());
                 }
             }
         }
+
+        // 3. Handle Public Server toggle (unchanged)
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
@@ -4056,12 +4069,11 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
-                    // value changed
                     if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                                     viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, /* forAll */ true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
                         } else {
                             getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }
@@ -4070,8 +4082,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     }
                 }
             } else {
-                throw new IllegalArgumentException(
-                        SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
+                throw new IllegalArgumentException("Viewer role or default server tenant does not exist");
+            }
+        }
+
+        // 4. ✅ NEW: Handle debranding runtime flag
+        if (serverConfiguration.getDebrandingActive() != null) {
+            String debrandingFlag = String.valueOf(serverConfiguration.getDebrandingActive());
+            System.setProperty("com.sap.sse.debranding", debrandingFlag);
+
+            // Only try setting servlet context if available (typical for Jetty/Tomcat)
+            if (getServletContext() != null) {
+                getServletContext().setAttribute(
+                        "clientConfigurationContext.debrandingActive", debrandingFlag);
             }
         }
     }
