@@ -363,6 +363,7 @@ import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.aicore.Credentials;
 import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -4147,9 +4148,19 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         checkAIAgentConfigPermission();
         final AIAgent aiAgent = getAIAgent();
         if (aiAgent != null) {
-            aiAgent.setCredentials(Util.hasLength(credentials)
-                    ? CredentialsParser.create().parse(credentials)
-                    : null);
+            if (Util.hasLength(credentials)) {
+                Credentials parsedCredentials;
+                try {
+                    parsedCredentials = CredentialsParser.create().parse(credentials);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Credentials could not be parsed");
+                }
+                if (parsedCredentials != null) {
+                    aiAgent.setCredentials(parsedCredentials);                    
+                }
+            } else {
+                throw new IllegalStateException("Blank credentials received");
+            }
         }
     }
 }
