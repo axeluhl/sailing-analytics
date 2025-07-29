@@ -597,6 +597,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalResetPassword(String username, String passwordResetSecret) {
+        logger.info("Password reset for user "+username+" requested");
         getUserByName(username).startPasswordReset(passwordResetSecret);
         return null;
     }
@@ -1152,7 +1153,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (lockingAndBanning == null || !lockingAndBanning.isAuthenticationLocked()) {
                 apply(s->s.internalRecordUserCreationFromClientIP(clientIP));
             } else {
-                throw new UserManagementException("Client IP "+clientIP+" locked for user creation: "+lockingAndBanning);
+                throw new UserManagementException(UserManagementException.CLIENT_CURRENTLY_LOCKED_FOR_USER_CREATION);
             }
         }
     }
@@ -1236,6 +1237,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        logger.info("Password for user "+username+" was updated by "+SessionUtils.getPrincipal());
         user.passwordWasReset();
         store.updateUser(user);
         return null;
@@ -1267,7 +1269,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         if (user.getLockingAndBanning().isAuthenticationLocked()) {
-            throw new UserManagementException("Password authentication is locked for user "+username);
+            throw new UserManagementException(UserManagementException.PASSWORD_AUTHENTICATION_CURRENTLY_LOCKED_FOR_USER);
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
