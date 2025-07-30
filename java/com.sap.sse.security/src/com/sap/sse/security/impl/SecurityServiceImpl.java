@@ -3464,7 +3464,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
      *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user will
      *            receive the e-mail twice.
-     * @return
      */
     @Override
     public Iterable<User> getUsersToInformAboutReplicaSet(String serverName, Optional<HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) {
