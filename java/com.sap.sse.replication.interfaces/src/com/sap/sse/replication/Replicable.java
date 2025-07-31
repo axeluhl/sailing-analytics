@@ -253,7 +253,7 @@ extends OperationsToMasterSender<S, O>, Replicator<S, O> {
 
     /**
      * Responds with what has been passed to the last invocation to {@link #setCurrentlyFillingFromInitialLoad(boolean)}
-     * and {@link #setCurrentlyApplyingOperationReceivedFromMaster(boolean)}, respectively, in the calling thread; the
+     * and {@link #setCurrentlyFillingFromInitialLoad(boolean)}, respectively, in the calling thread; the
      * default is <code>false</code>. This is required in order to not replicate operations triggered on the replica
      * while receiving the initial load back to the master.
      */

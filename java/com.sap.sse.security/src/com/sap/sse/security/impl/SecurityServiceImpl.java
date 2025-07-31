@@ -103,6 +103,7 @@ import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.rest.CORSFilterConfiguration;
 import com.sap.sse.security.Action;
@@ -244,6 +245,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     
     private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
+    
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
@@ -322,8 +325,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
             UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, corsFilterConfigurationTracker, userStore, accessControlStore, hasPermissionsProvider,
-                subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, userStore, accessControlStore,
+                hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -333,8 +336,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
-            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
-            SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, UserStore userStore, AccessControlStore accessControlStore,
+            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
@@ -350,6 +353,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
+        this.replicationServiceTracker = replicationServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         this.cacheManager = loadReplicationCacheManagerContents();
         this.corsFilterConfigurationsByReplicaSetName = loadCORSFilterConfigurations();
@@ -539,6 +543,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     private CORSFilterConfiguration getCORSFilterConfiguration() {
         return corsFilterConfigurationTracker == null ? null : corsFilterConfigurationTracker.getService();
+    }
+    
+    private ReplicationService getReplicationService() {
+        return replicationServiceTracker == null ? null : replicationServiceTracker.getService();
     }
 
     @Override
@@ -1328,7 +1336,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
-        return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+        final LockingAndBanning result;
+        final ReplicationService replicationService = getReplicationService();
+        if (replicationService == null || !replicationService.isReplicationStarting()) {
+            result = apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+        } else {
+            logger.warning("Replication is starting, so not recording failed bearer token authentication for client IP "+clientIP);
+            result = null;
+        }
+        return result;
     }
     
     @Override
