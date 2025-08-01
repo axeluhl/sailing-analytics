@@ -2,7 +2,7 @@
 
 ### Table of Contents
 
-* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+* [[Runtime Environment|wiki/info/landscape/runtime-environment.md]]
 * [[Basic Architectural Principles|wiki/info/landscape/basic-architectural-principles]]
 * [[User Management|wiki/info/landscape/usermanagement]]
 * [[Development Environment|wiki/info/landscape/development-environment]]
