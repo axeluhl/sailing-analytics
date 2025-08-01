@@ -16,11 +16,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
 * [[General Project Information|wiki/info/general/general-information]]
-* [[Inventory|wiki/info/general/inventar-liste]]
+* [[Project History|wiki/info/general/project-history]]
 
 ### Landscape and Development
 
-* [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
+* Architecture and Infrastructure
   * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
   * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
   * [[User Management|wiki/info/landscape/usermanagement]]
