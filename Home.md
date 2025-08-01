@@ -21,6 +21,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Landscape and Development
 
 * Architecture and Infrastructure
+  * [[Workspace, Bundles, Projects|wiki/info/general/workspace-bundles-projects-structure]]
   * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
   * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
   * [[User Management|wiki/info/landscape/usermanagement]]
