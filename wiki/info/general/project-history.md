@@ -1,17 +1,6 @@
-# Architecture and Infrastructure
+# Project History
 
-### Table of Contents
-
-* [[Runtime Environment|wiki/info/landscape/runtime-environment.md]]
-* [[Basic Architectural Principles|wiki/info/landscape/basic-architectural-principles]]
-* [[User Management|wiki/info/landscape/usermanagement]]
-* [[Development Environment|wiki/info/landscape/development-environment]]
-* [[AWS Production Environment|wiki/info/landscape/amazon-ec2.md]]
-* [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
-
-## Introduction, Project Background and History
-
-The SAP Sailing Analytics are a technology show-case demonstrating SAP technologies, concepts, skills and values applied to the domain of regatta sailing. They started as a small tool primarily intended to support a commentator in his job by displaying a live leaderboard for a sailing regatta with data interesting for the commentary. GPS and wind data travel from sensors to the server where the application keeps it in memory. When a request for a leaderboard is received, the data is aggregated on the fly, performing geometric computations including wind projections and involving a virtual "advantage line" orthogonal to the wind direction.
+The Sailing Analytics are a technology show-case originally used for demonstrating SAP technologies, concepts, skills and values applied to the domain of regatta sailing. They started as a small tool primarily intended to support a commentator in his job by displaying a live leaderboard for a sailing regatta with data interesting for the commentary. GPS and wind data travel from sensors to the server where the application keeps it in memory. When a request for a leaderboard is received, the data is aggregated on the fly, performing geometric computations including wind projections and involving a virtual "advantage line" orthogonal to the wind direction.
 
 The live leaderboard started as a web application with a Java back-end responsible for the connectivity with the sensors and providing the geometry engine, and a Python process rendering the Web UI for the client's browser. The Python process issued REST requests to the Java back-end which responded with JSON documents.
 
@@ -23,7 +12,3 @@ A Google Map visualization, originally intended primarily for debugging purposes
 The REST/JSON APIs offered by the Java back-end have been exploited by at least two additional show-case scenarios. Already in 2011, Business Objects Dashboards displayed data extracted through these interfaces in various analytical views. In 2012, the interfaces started to be used for repeated extraction of data into a HANA database on top of which Experience UI technology is now used for visualization with sophisticated analyses.
 
 In 2012, a mobile application to support the race committees in their functions has been developed using largely the same architecture. Although the server for this app currently runs in a separate process, it uses largely the same code base, versioning repository and build process. We plan to integrate it with the SAP Sailing Analytics soon. A first loose coupling will allow users of the mobile app to send wind data entered on a mobile device into the SAP Sailing Analytics back-end where it augments the wind-based calculations. Later, we plan to integrate the mobile app even closer so that it supports race officials in laying and moving marks, changing the course layout as well as detecting and announcing disqualifications.
-
-The remainder of this document explains the key architectural principles on which the SAP Sailing Analytics have been developed. It is to be considered a snapshot of the status quo, as documented by the time stamp in the document's header.
-
-See also this [[presentation|https://git.wdf.sap.corp/gitweb?p=SAPSail/sapsailingcapture.git;a=blob;f=doc/SAPSailingAnalyticsArchitecture.pptx;h=26e0746e2d6a660cc2885fc47c0e817ab2dc8709;hb=refs/heads/master]] that provides an overview of the project's architecture and history.
