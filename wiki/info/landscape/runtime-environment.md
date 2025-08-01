@@ -3,7 +3,11 @@
 [[_TOC_]]
 
 ## Linux, Java, OSGi/Equinox
-By and large, the SAP Sailing Analytics are a web application implemented using Java technology. The application's components are OSGi bundles running in an Equinox OSGi container. Some bundles offer static web content or dynamic content in the form of servlets. Those bundles are implemented as OSGi Web Bundles which we consider a simple and elegant way to meet web standards using an OSGi-based implementation. A Web Bundle's main extension compared to a regular OSGi bundle is the presence of a web.xml descriptor in the WEB-INF top-level folder where servlets and static content can be declared and mapped to URLs.
+By and large, the Sailing Analytics are a web application implemented using Java technology. The application's components are OSGi bundles running in an Equinox OSGi container. Some bundles offer static web content or dynamic content in the form of servlets. Those bundles are implemented as OSGi Web Bundles which we consider a simple and elegant way to meet web standards using an OSGi-based implementation. A Web Bundle's main extension compared to a regular OSGi bundle is the presence of a web.xml descriptor in the WEB-INF top-level folder where servlets and static content can be declared and mapped to URLs.
+
+Yet other bundles are GWT projects that also may have a backend part, making them an OSGi bundle from the backend's perspective, yet a GWT project for the GWT compiler and runtime.
+
+The application exposes a web UI, implemented using GWT (see below), a REST API implemented largely using JAX-RS/Jersey-based OSGi web bundles, an OSGi console accessible through the telnet protocol, and one or more connectivity components, such as a socket server backend for Igtimi wind sensors or a UDP connector for the "Expedition" on-board navigation tool.
 
 ## Database
 By and large, we use a database to recover from a server restart. Once started, most data managed by the application is kept in main memory. We currently use MongoDB as our database. Different DB instances belong to different server instances. This allows us to cleanly separate development and test data from production data.
