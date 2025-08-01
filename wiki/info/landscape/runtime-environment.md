@@ -17,7 +17,7 @@ The GPS tracking data is currently usually fetched from the tracking provider in
 We therefore consider using our database also for replicated versions of at least the "archived" tracks where further changes on behalf of the tracking provider are unlikely.
 
 ## Google Web Toolkit (GWT)
-The web UI is built using the Google Web Toolkit (GWT). This allows us to share code between UI and back-end and gives us the power of the regular Eclipse Java tools for code understanding, debugging and agile manipulation.
+The web UI is built using the Google Web Toolkit (GWT). This allows us to share code between UI and back-end and gives us the power of the regular Eclipse Java tools for code understanding, debugging and agile manipulation. We use a [[forked version of GWT|wiki/howto/development/gwt-fork]].
 
 The GWT application communicates with the server using GWT RPC which, in the back-end, is implemented as a so-called RemoteServiceServlet which again is exposed by means of an OSGi web bundle. This servlet accesses the core application through an OSGi service (RacingEventService) which is hooked up in the OSGi service registry.
 
