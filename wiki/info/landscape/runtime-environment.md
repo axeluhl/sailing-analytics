@@ -10,16 +10,36 @@ Yet other bundles are GWT projects that also may have a backend part, making the
 The application exposes a web UI, implemented using GWT (see below), a REST API implemented largely using JAX-RS/Jersey-based OSGi web bundles, an OSGi console accessible through the telnet protocol, and one or more connectivity components, such as a socket server backend for Igtimi wind sensors or a UDP connector for the "Expedition" on-board navigation tool.
 
 ## Database
-By and large, we use a database to recover from a server restart. Once started, most data managed by the application is kept in main memory. We currently use MongoDB as our database. Different DB instances belong to different server instances. This allows us to cleanly separate development and test data from production data.
+By and large, we use a database to recover from a server restart. Once started, most data managed by the application is kept in main memory. We currently use MongoDB as our database. Different DB instances belong to different server instances. This allows us to cleanly separate development and test data from production data. Replicas (see also [Replication](#replication) below) have their own "phony" MongoDB that is only a placeholder and is never read from. It's a good plan to run those replica MongoDB processes on machines separate from the primary's MongoDB. In our production environment we run those replica MongoDB processes on the same host the replica runs on, so separate replicas on separate nodes use separate MongoDBs, so there will be no single bottleneck that all replicas would try to write to.
 
 The GPS tracking data is currently usually fetched from the tracking provider in case the provider stores it persistently. While this avoids redundancies and ensures up-to-date versions of the tracking data are used, it also creates a strong dependence upon the provider's system availability and may cause performance issues when many GPS tracks need to be reloaded after a server restart.
 
 We therefore consider using our database also for replicated versions of at least the "archived" tracks where further changes on behalf of the tracking provider are unlikely.
 
+## Replication
+To improve at least read-only availability and to scale out with growing numbers of concurrent users, we allow for replicating a server process's state. Similar to the MongoDB architecture, we support a single "primary" and multiple "replica" nodes. The primary is where by default we want modifying transactions to be processed first. Furthermore, some aspects of connectivity to external systems are handled by the primary but not the replicas. For example, connections to the TracTrac environment from where GPS tracking data can be received, are managed only on the primary. Likewise, only the primary would have an e-mail service configured for outbound e-mail sending.
+
+When the primary has received a modifying request, it will make sure to send a corresponding operation to all replicas. This happens through RabbitMQ, where queues and fan-out exchanges are used so that the primary sends the serialized operation as a message which gets propagated through a fan-out exchange to all registered replicas. There, the operation is de-serialized and applied. Transitive replication from replicas through another RabbitMQ / fan-out exchange to further replicas is possible.
+
+Should a modifying request have reached a replica directly (e.g., a user session being created), the replica will apply this operation locally first, then assign an ID to the operation and send it to its primary using an HTTP request, serializing the operation into the request body. The primary will then apply the operation and propagate it to all replicas. The replica where the operation originated will recognize it based on its ID and not apply it again. With this "reverse replication" pattern, replicas may already allow for certain types of local modifications even in case their primary is currently unavailable. Reverse replication will enqueue those messages to be sent to the primary in case the primary is temporarily unavailable and send them at a later point. This will lead to eventual consistency across the replica set.
+
+In our AWS EC2 production environment we use load balancer rules to make it likely that modifying operations are routed to the primary. See [here](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2.md#standard-application-replica-set-with-target-groups-auto-scaling-group-and-launch-configuration) for more details.
+
+Yet more details on replication can be found [[here|wiki/howto/misc/server-replication.md]] and [[here|wiki/info/landscape/basic-architectural-principles#scale-out-through-replication]].
+
 ## Google Web Toolkit (GWT)
 The web UI is built using the Google Web Toolkit (GWT). This allows us to share code between UI and back-end and gives us the power of the regular Eclipse Java tools for code understanding, debugging and agile manipulation. We use a [[forked version of GWT|wiki/howto/development/gwt-fork]].
 
-The GWT application communicates with the server using GWT RPC which, in the back-end, is implemented as a so-called RemoteServiceServlet which again is exposed by means of an OSGi web bundle. This servlet accesses the core application through an OSGi service (RacingEventService) which is hooked up in the OSGi service registry.
+The GWT application communicates with the server using GWT RPC which, in the back-end, is implemented as a so-called RemoteServiceServlet which again is exposed by means of an OSGi web bundle. This servlet accesses the core application through OSGi services, such as ``RacingEventService`` or ``SecurityService`` which is hooked up in the OSGi service registry.
+
+Our GWT RPC services offer reading and modifying operations. As laid out in [Replication](#replication), we are interested in those modifying operations to reach the primary node of a replica set first. This is why on the client side we distinguish between the reading and the modifying ``...Async`` interface for the RPC service. For example, we have ``SailingService`` and ``SailingServiceWrite``, where the latter extends the former and adds all modifying operations. The actual implementation then implements the ``...Write`` interface with all methods. Client code can then decide to obtain an instance of the reading or the modifying interface, as in
+
+```
+    final SailingServiceAsync readService = SailingServiceHelper.createSailingServiceInstance();
+    final SailingServiceWriteAsync writeService = SailingServiceHelper.createSailingServiceWriteInstance();
+```
+
+The two service clients will be configured (using ``EntryPointHelper.registerASyncService(...)``) with different HTTP headers they will send when the request is made, giving a load balancer a chance to route writing requests to the primary node.
 
 We try to keep important styling information separate in CSS resources which can be manipulated by web designers more conveniently than the Java source code. We balance this with the benefits of the Java sources' traceability which does not exist really for CSS resources where everything is just a string.
 
