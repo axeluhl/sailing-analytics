@@ -6,7 +6,7 @@
 * [[Basic Architectural Principles|wiki/info/landscape/basic-architectural-principles]]
 * [[User Management|wiki/info/landscape/usermanagement]]
 * [[Development Environment|wiki/info/landscape/development-environment]]
-* [[Production Environment|wiki/info/landscape/production-environment]]
+* [[AWS Production Environment|wiki/info/landscape/amazon-ec2.md]]
 * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 
 ## Introduction, Project Background and History
