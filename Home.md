@@ -17,6 +17,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
 * [[General Project Information|wiki/info/general/general-information]]
 * [[Inventory|wiki/info/general/inventar-liste]]
+* [[Project History|wiki/info/general/project-history]]
 
 ### Landscape and Development
 
