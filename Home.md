@@ -16,11 +16,12 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
 * [[General Project Information|wiki/info/general/general-information]]
-* [[Inventory|wiki/info/general/inventar-liste]]
+* [[Project History|wiki/info/general/project-history]]
 
 ### Landscape and Development
 
-* [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
+* Architecture and Infrastructure
+  * [[Workspace, Bundles, Projects|wiki/info/general/workspace-bundles-projects-structure]]
   * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
   * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
   * [[User Management|wiki/info/landscape/usermanagement]]
@@ -48,7 +49,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
-* [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
 * [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
 * [[Docker Registry|wiki/info/landscape/docker-registry]]
