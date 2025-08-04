@@ -261,19 +261,19 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onSuccess(SuccessInfo result) {
-                                Window.alert("Unlock succeeded for user " + userName + ".");
+                                Window.alert(stringMessages.unlockSucceededFor(userName));
                             }
                             
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert("Unlock failed for user " + userName + ".");
+                                Window.alert(stringMessages.unlockFailedFor(userName));
                                 errorReporter.reportError(caught.getMessage());
                             }
                         }
                     );
                 }
             } else {
-                Window.alert("This user is already unlocked.");
+                Window.alert(stringMessages.userIsAlreadyUnlocked());
             }
         };
     }
