@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Use this servlet to turn whitelabelling on and off during testing.
- * @see com.sap.sse.debranding.ClientConfigurationFilter
+ * 
+ * @see com.sap.sse.branding.ClientConfigurationFilter
  * @author Georg Herdt
  *
  */

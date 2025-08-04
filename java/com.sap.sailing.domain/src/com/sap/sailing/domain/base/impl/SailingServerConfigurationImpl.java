@@ -31,7 +31,7 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
         this.isStandaloneServer = isStandaloneServer;
     }
 
-    public Boolean getDebrandingActive() {
+    public Boolean isDebrandingActive() {
         return debrandingActive;
     }
 

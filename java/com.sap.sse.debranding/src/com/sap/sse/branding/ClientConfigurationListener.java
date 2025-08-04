@@ -1,4 +1,4 @@
-package com.sap.sse.debranding;
+package com.sap.sse.branding;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.http.HttpServletRequest;
+
+import com.sap.sse.branding.impl.Activator;
 /**
  * JSP servlet is registered on *.html within web.xml . Use the following JSP expression 
  * <pre>applicationScope['clientConfigurationContext.variableName']}</pre> to get strings replaced within the page. The
@@ -51,8 +53,6 @@ import javax.servlet.http.HttpServletRequest;
  *
  */
 public class ClientConfigurationListener implements javax.servlet.ServletRequestListener {
-    public static final String DEBRANDING_PROPERTY_NAME = "com.sap.sse.debranding";
-
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
         if (sre.getServletRequest().getScheme().startsWith("http")) {
@@ -61,7 +61,8 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
                 final ServletContext ctx = sre.getServletContext();
                 final String ctxDebrandingActive = (String) ctx
                         .getAttribute("clientConfigurationContext.debrandingActive");
-                final boolean deBrandingActive = Boolean.valueOf(System.getProperty(DEBRANDING_PROPERTY_NAME, "true"));
+                final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
+                final boolean deBrandingActive = brandingConfigurationService.isBrandingActive();
                 if (ctxDebrandingActive == null
                         || !Boolean.toString(deBrandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
                     createReplacementMap(deBrandingActive).forEach((k, v) -> {

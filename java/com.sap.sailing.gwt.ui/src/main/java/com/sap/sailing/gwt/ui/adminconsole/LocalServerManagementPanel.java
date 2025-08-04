@@ -229,15 +229,8 @@ public class LocalServerManagementPanel extends SimplePanel {
                 : null;
 
         final Boolean debrandingActive = debrandingCheckbox.getValue();
-
-        final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(
-                isStandaloneServerCheckbox.getValue(),
-                publicServer,
-                selfServiceServer,
-                null
-        );
-        serverConfig.setDebrandingActive(debrandingActive);
-
+        final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
+                publicServer, selfServiceServer, null, debrandingActive);
         isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
@@ -302,7 +295,6 @@ public class LocalServerManagementPanel extends SimplePanel {
         isStandaloneServerCheckbox.setEnabled(true);
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
-
         if (result.getDebrandingActive() != null) {
             debrandingCheckbox.setValue(result.getDebrandingActive(), false);
         }

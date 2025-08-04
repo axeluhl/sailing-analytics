@@ -78,6 +78,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.aiagent.interfaces.AIAgent;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
@@ -538,7 +539,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private static final long serialVersionUID = 9031688830194537489L;
 
     private final FullyInitializedReplicableTracker<RacingEventService> racingEventServiceTracker;
-
+    
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
@@ -3536,16 +3537,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         UserGroup serverTenant = getSecurityService().getServerGroup();
         StrippedUserGroupDTO serverTenantDTO = new SecurityDTOFactory()
                 .createStrippedUserGroupDTOFromUserGroup(serverTenant, new HashMap<>());
-        
         ServerConfigurationDTO result = new ServerConfigurationDTO(
                 sailingServerConfiguration.isStandaloneServer(),
                 isPublicServer(),
                 isSelfServiceServer(),
-                serverTenantDTO
+                serverTenantDTO, sailingServerConfiguration.isDebrandingActive()
         );
-
-        result.setDebrandingActive(sailingServerConfiguration.getDebrandingActive());
-
         return result;
     }
 

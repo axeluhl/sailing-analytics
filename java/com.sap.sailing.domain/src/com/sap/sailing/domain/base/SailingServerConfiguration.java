@@ -10,7 +10,7 @@ public interface SailingServerConfiguration extends Serializable {
 
     void setStandaloneServer(boolean isStandaloneServer);
 
-    Boolean getDebrandingActive();
+    Boolean isDebrandingActive();
 
     void setDebrandingActive(Boolean debrandingActive);
 }
