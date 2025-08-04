@@ -61,6 +61,8 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
     void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties, AsyncCallback<Void> callback);
 
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
+
+    void unlockUser(String username, AsyncCallback<SuccessInfo> callback);
     
     void deleteUsers(Set<String> usernames, AsyncCallback<Set<SuccessInfo>> callback);
 

@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.impl.LockingAndBanning;
+import com.sap.sse.security.shared.impl.TimedLock;
 
 /**
  * Starting with the CORS filter configurations, this and future extensions of the {@link SecurityService}'s
@@ -30,28 +30,28 @@ public class SecurityServiceInitialLoadExtensionsDTO implements Serializable {
 
     private final ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName;
     
-    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    private final ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForBearerTokenAuthentication;
     
-    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+    private final ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForUserCreation;
     
     public SecurityServiceInitialLoadExtensionsDTO(ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName,
-            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication,
-            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation) {
+            ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForBearerTokenAuthentication,
+            ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForUserCreation) {
         super();
         this.corsFilterConfigurationsByReplicaSetName = corsFilterConfigurationsByReplicaSetName;
-        this.clientIPBasedLockingAndBanningForBearerTokenAuthentication = clientIPBasedLockingAndBanningForBearerTokenAuthentication;
-        this.clientIPBasedLockingAndBanningForUserCreation = clientIPBasedLockingAndBanningForUserCreation;
+        this.clientIPBasedTimedLocksForBearerTokenAuthentication = clientIPBasedTimedLocksForBearerTokenAuthentication;
+        this.clientIPBasedTimedLocksForUserCreation = clientIPBasedTimedLocksForUserCreation;
     }
     
     ConcurrentMap<String, Pair<Boolean, Set<String>>> getCorsFilterConfigurationsByReplicaSetName() {
         return corsFilterConfigurationsByReplicaSetName;
     }
 
-    ConcurrentMap<String, LockingAndBanning> getClientIPBasedLockingAndBanningForBearerTokenAuthentication() {
-        return clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    ConcurrentMap<String, TimedLock> getClientIPBasedTimedLocksForBearerTokenAuthentication() {
+        return clientIPBasedTimedLocksForBearerTokenAuthentication;
     }
 
-    ConcurrentMap<String, LockingAndBanning> getClientIPBasedLockingAndBanningForUserCreation() {
-        return clientIPBasedLockingAndBanningForUserCreation;
+    ConcurrentMap<String, TimedLock> getClientIPBasedTimedLocksForUserCreation() {
+        return clientIPBasedTimedLocksForUserCreation;
     }
 }

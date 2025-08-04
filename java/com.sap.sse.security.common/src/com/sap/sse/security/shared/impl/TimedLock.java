@@ -10,8 +10,8 @@ import com.sap.sse.common.TimePoint;
  * <p>
  * 
  * For example, failed password authentication requests shall be logged by the realm using calls to
- * {@link #failedPasswordAuthentication()}, successful ones with {@link #successfulPasswordAuthentication()}. Using the
- * {@link #isAuthenticationLocked()} method, a realm can determine if the user account to which this object belongs
+ * {@link #extendLockDuration()}, successful ones with {@link #resetLock()}. Using the
+ * {@link #isLocked()} method, a realm can determine if the user account to which this object belongs
  * shall currently accept password authentication.
  * <p>
  * 
@@ -21,15 +21,15 @@ import com.sap.sse.common.TimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public interface LockingAndBanning extends Serializable {
-    void failedPasswordAuthentication();
+public interface TimedLock extends Serializable {
+    void extendLockDuration();
 
     /**
      * @return {@code true} if this locking and banning record changed due to this call
      */
-    boolean successfulPasswordAuthentication();
+    boolean resetLock();
 
-    boolean isAuthenticationLocked();
+    boolean isLocked();
 
     TimePoint getLockedUntil();
 }

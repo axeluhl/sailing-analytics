@@ -125,5 +125,5 @@ public interface User extends SecurityUser<RoleDefinition, Role, UserGroup> {
     
     Subscription getSubscriptionById(String subscriptionId);
     
-    LockingAndBanning getLockingAndBanning();
+    TimedLock getTimedLock();
 }

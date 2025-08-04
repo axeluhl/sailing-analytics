@@ -53,7 +53,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.LockingAndBanning;
+import com.sap.sse.security.shared.impl.TimedLock;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -222,6 +222,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
+    
+    void resetUserTimedLock(String username) throws UserManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
@@ -874,7 +876,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     Pair<Boolean, Set<String>> getCORSFilterConfiguration(String serverName);
 
-    LockingAndBanning failedPasswordAuthentication(User user);
+    TimedLock failedPasswordAuthentication(User user);
 
     void successfulPasswordAuthentication(User user);
 
@@ -892,7 +894,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * structures, avoiding garbage piling up.
      * @return TODO
      */
-    LockingAndBanning failedBearerTokenAuthentication(String clientIP);
+    TimedLock failedBearerTokenAuthentication(String clientIP);
 
     /**
      * Call this when the combination of {@code clientIP} and {@code userAgent} was not

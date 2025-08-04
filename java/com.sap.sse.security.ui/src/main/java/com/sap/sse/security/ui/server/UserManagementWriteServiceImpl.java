@@ -374,6 +374,25 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
         }
     }
+
+    @Override
+    public SuccessInfo unlockUser(String username) throws UnauthorizedException {
+        User user = getSecurityService().getUserByName(username);
+        if (user != null) {
+            if (!getSecurityService().hasCurrentUserExplicitPermissions(user, DefaultActions.MANAGE_LOCK)) {
+                return new SuccessInfo(false, "You are not permitted to manage locking on user " + username,
+                        /* redirectURL */ null, null);
+            }
+            try {
+                getSecurityService().resetUserTimedLock(username);
+                return new SuccessInfo(true, "Reset lock on user: " + username + ".", /* redirectURL */ null, null);
+            } catch (UserManagementException e) {
+                return new SuccessInfo(false, "Could not reset lock on user " + username, /* redirectURL */ null, null);
+            }
+        } else {
+            return new SuccessInfo(false, "Could not reset lock on user " + username, /* redirectURL */ null, null);
+        }
+    }
     
     @Override
     public Set<SuccessInfo> deleteUsers(Set<String> usernames) throws UnauthorizedException {

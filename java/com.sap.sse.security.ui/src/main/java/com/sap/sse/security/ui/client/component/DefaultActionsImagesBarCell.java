@@ -14,6 +14,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY = "MIGRATE_GROUP_OWNERSHIP_HIERARCHY";
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
+    public static final String ACTION_MANAGE_LOCK = DefaultActions.MANAGE_LOCK.name();
 
     protected final StringMessages stringMessages;
 
@@ -24,7 +25,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec(), getChangeOwnershipImageSpec(),
-                getChangeACLImageSpec());
+                getChangeACLImageSpec(), getResetLockImageSpec());
     }
 
     /**
@@ -63,6 +64,14 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     protected ImageSpec getChangeACLImageSpec() {
         return new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
                 IconResources.INSTANCE.changeACLIcon());
+    }
+
+    /**
+     * @return {@link ImageSpec} for {@link DefaultActions#CHANGE_ACL reset lock} action
+     */
+    protected ImageSpec getResetLockImageSpec() {
+        return new ImageSpec(ACTION_MANAGE_LOCK, stringMessages.resetLock(),
+                IconResources.INSTANCE.resetLockIcon());
     }
 
 }

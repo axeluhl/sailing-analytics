@@ -144,6 +144,7 @@ import com.sap.sse.security.operations.RemoveRoleDefinitionFromUserGroupOperatio
 import com.sap.sse.security.operations.RemoveRoleFromUserOperation;
 import com.sap.sse.security.operations.RemoveUserFromUserGroupOperation;
 import com.sap.sse.security.operations.ResetPasswordOperation;
+import com.sap.sse.security.operations.ResetUserLockOperation;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.operations.SetAccessTokenOperation;
 import com.sap.sse.security.operations.SetDefaultTenantForServerForUserOperation;
@@ -184,8 +185,8 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.LockingAndBanning;
-import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
+import com.sap.sse.security.shared.impl.TimedLock;
+import com.sap.sse.security.shared.impl.TimedLockImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.PermissionAndRoleAssociation;
 import com.sap.sse.security.shared.impl.Role;
@@ -277,7 +278,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * @see #successfulBearerTokenAuthentication(String)
      * @see #isClientIPLockedForBearerTokenAuthentication(String)
      */
-    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication;
+    private final ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForBearerTokenAuthentication;
     private final static String CLIENT_IP_NULL_ESCAPE = UUID.randomUUID().toString();
 
     /**
@@ -289,7 +290,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * When entering values into this map, the method entering it is responsible for also scheduling a background
      * task that a while after lock expiry the record is expunged again from the map to avoid garbage piling up.
      */
-    private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
+    private final ConcurrentMap<String, TimedLock> clientIPBasedTimedLocksForUserCreation;
 
     private final Zxcvbn passwordValidator;
     
@@ -340,8 +341,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
         }
         logger.info("Initializing Security Service with user store " + userStore);
-        this.clientIPBasedLockingAndBanningForBearerTokenAuthentication = new ConcurrentHashMap<>();
-        this.clientIPBasedLockingAndBanningForUserCreation = new ConcurrentHashMap<>();
+        this.clientIPBasedTimedLocksForBearerTokenAuthentication = new ConcurrentHashMap<>();
+        this.clientIPBasedTimedLocksForUserCreation = new ConcurrentHashMap<>();
         this.permissionChangeListeners = new PermissionChangeListeners(this);
         this.sharedAcrossSubdomainsOf = sharedAcrossSubdomainsOf;
         this.subscriptionPlanProvider = subscriptionPlanProvider;
@@ -1148,22 +1149,22 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         // synchronize to ensure that no two threads can enter values into the map concurrently;
         // still the use of a ConcurrentMap is justified because there may be concurrent write access
         // through replication
-        synchronized (clientIPBasedLockingAndBanningForUserCreation) {
-            final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForUserCreation.get(clientIP);
-            if (lockingAndBanning == null || !lockingAndBanning.isAuthenticationLocked()) {
+        synchronized (clientIPBasedTimedLocksForUserCreation) {
+            final TimedLock timedLock = clientIPBasedTimedLocksForUserCreation.get(clientIP);
+            if (timedLock == null || !timedLock.isLocked()) {
                 apply(s->s.internalRecordUserCreationFromClientIP(clientIP));
             } else {
-                throw new UserManagementException(UserManagementException.CLIENT_CURRENTLY_LOCKED_FOR_USER_CREATION);
+                throw new UserManagementException("Client IP "+clientIP+" locked for user creation: "+timedLock);
             }
         }
     }
     
     @Override
-    public LockingAndBanning internalRecordUserCreationFromClientIP(String clientIP) {
-        final LockingAndBanning result = new LockingAndBanningImpl(TimePoint.now().plus(DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION),
+    public TimedLock internalRecordUserCreationFromClientIP(String clientIP) {
+        final TimedLock result = new TimedLockImpl(TimePoint.now().plus(DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION),
                 DEFAULT_CLIENT_IP_BASED_USER_CREATION_LOCKING_DURATION);
-        clientIPBasedLockingAndBanningForUserCreation.put(clientIP, result);
-        scheduleCleanUpTask(clientIP, result, clientIPBasedLockingAndBanningForUserCreation,
+        clientIPBasedTimedLocksForUserCreation.put(clientIP, result);
+        scheduleCleanUpTask(clientIP, result, clientIPBasedTimedLocksForUserCreation,
                 "client IPs locked for user creation");
         return result;
     }
@@ -1203,7 +1204,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     @Override
     public User internalCreateUser(String username, String email, Account... accounts) throws UserManagementException {
-        final User result = store.createUser(username, email, new LockingAndBanningImpl(), accounts);
+        final User result = store.createUser(username, email, new TimedLockImpl(), accounts);
         return result;
     }
 
@@ -1263,13 +1264,30 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
+    public void resetUserTimedLock(String username) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        apply(new ResetUserLockOperation(username, user.getTimedLock()));
+    }
+
+    @Override
+    public Void internalResetUserTimedLock(String username) {
+        final User user = store.getUserByName(username);
+        user.getTimedLock().resetLock();
+        store.updateUser(user);
+        return null;
+    }
+
+    @Override
     public boolean checkPassword(String username, String password) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        if (user.getLockingAndBanning().isAuthenticationLocked()) {
-            throw new UserManagementException(UserManagementException.PASSWORD_AUTHENTICATION_CURRENTLY_LOCKED_FOR_USER);
+        if (user.getTimedLock().isLocked()) {
+            throw new UserManagementException("Password authentication is locked for user "+username);
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
@@ -1284,23 +1302,23 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
     
     @Override
-    public LockingAndBanning failedPasswordAuthentication(User user) {
+    public TimedLock failedPasswordAuthentication(User user) {
         return apply(s->s.internalFailedPasswordAuthentication(user.getName()));
     }
 
     @Override
-    public LockingAndBanning internalFailedPasswordAuthentication(String username) {
+    public TimedLock internalFailedPasswordAuthentication(String username) {
         final User user = getUserByName(username);
-        final LockingAndBanning lockingAndBanning;
+        final TimedLock timedLock;
         if (user != null) {
-            lockingAndBanning = user.getLockingAndBanning();
-            lockingAndBanning.failedPasswordAuthentication();
+            timedLock = user.getTimedLock();
+            timedLock.extendLockDuration();
             store.updateUser(user);
-            logger.info("failed password authentication for user "+username+"; locking: "+lockingAndBanning);
+            logger.info("failed password authentication for user "+username+"; locking: "+timedLock);
         } else {
-            lockingAndBanning = null;
+            timedLock = null;
         }
-        return lockingAndBanning;
+        return timedLock;
     }
 
     @Override
@@ -1316,7 +1334,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final boolean changed;
         final User user = getUserByName(username);
         if (user != null) {
-            changed = user.getLockingAndBanning().successfulPasswordAuthentication();
+            changed = user.getTimedLock().resetLock();
             if (changed) {
                 store.updateUser(user);
             }
@@ -1327,27 +1345,27 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     }
 
     @Override
-    public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
+    public TimedLock failedBearerTokenAuthentication(String clientIP) {
         return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
     }
     
     @Override
-    public LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP) {
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.computeIfAbsent(escapeNullClientIP(clientIP), key->new LockingAndBanningImpl());
-        lockingAndBanning.failedPasswordAuthentication();
-        logger.info("failed bearer token authentication from client IP "+clientIP+"; locking: "+lockingAndBanning);
-        scheduleCleanUpTask(clientIP, lockingAndBanning, clientIPBasedLockingAndBanningForBearerTokenAuthentication,
+    public TimedLock internalFailedBearerTokenAuthentication(String clientIP) {
+        final TimedLock timedLock = clientIPBasedTimedLocksForBearerTokenAuthentication.computeIfAbsent(escapeNullClientIP(clientIP), key->new TimedLockImpl());
+        timedLock.extendLockDuration();
+        logger.info("failed bearer token authentication from client IP "+clientIP+"; locking: "+timedLock);
+        scheduleCleanUpTask(clientIP, timedLock, clientIPBasedTimedLocksForBearerTokenAuthentication,
                 "client IPs locked for bearer token authentication");
-        return lockingAndBanning;
+        return timedLock;
     }
 
     /**
-     * Schedule a clean-up task to avoid leaking memory for the LockingAndBanning objects; schedule it in two times the
-     * locking expiry of {@code lockingAndBanning}, but at least one hour, because if no authentication failure occurs
-     * for that IP/user agent combination, we will entirely remove the {@link LockingAndBanning} from the map,
+     * Schedule a clean-up task to avoid leaking memory for the TimedLock objects; schedule it in two times the
+     * locking expiry of {@code timedLock}, but at least one hour, because if no authentication failure occurs
+     * for that IP/user agent combination, we will entirely remove the {@link TimedLock} from the map,
      * effectively resetting that IP to a short default locking duration again; this way, if during the double
      * expiration time another failed attempt is registered, we can still grow the locking duration because we have kept
-     * the {@link LockingAndBanning} object available for a bit longer. Furthermore, for authentication requests, the
+     * the {@link TimedLock} object available for a bit longer. Furthermore, for authentication requests, the
      * responsible {@link Realm} will let authentication requests get to here only if not locked, so if we were to
      * expunge entries immediately as they unlock, the locking duration could never grow.<p>
      * 
@@ -1355,16 +1373,16 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * expiry duration.
      */
     private void scheduleCleanUpTask(final String clientIPOrNull,
-            final LockingAndBanning lockingAndBanning,
-            final ConcurrentMap<String, LockingAndBanning> mapToRemoveFrom,
+            final TimedLock timedLock,
+            final ConcurrentMap<String, TimedLock> mapToRemoveFrom,
             final String nameOfMapForLog) {
         final long millisUntilLockingExpiry = Math.max(
-                2*ApproximateTime.approximateNow().until(lockingAndBanning.getLockedUntil()).asMillis(),
+                2*ApproximateTime.approximateNow().until(timedLock.getLockedUntil()).asMillis(),
                 Duration.ONE_HOUR.asMillis());
         ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().schedule(
                 ()->{
-                    final LockingAndBanning lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
-                    if (lab != null && !lab.isAuthenticationLocked()) {
+                    final TimedLock lab = mapToRemoveFrom.get(escapeNullClientIP(clientIPOrNull));
+                    if (lab != null && !lab.isLocked()) {
                         mapToRemoveFrom.remove(escapeNullClientIP(clientIPOrNull));
                         logger.info("Removed "+clientIPOrNull+" from "+nameOfMapForLog+"; "
                                 +mapToRemoveFrom.size()
@@ -1389,9 +1407,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     @Override
     public Boolean internalSuccessfulBearerTokenAuthentication(String clientIP) {
         final boolean changed;
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.remove(escapeNullClientIP(clientIP));
-        if (lockingAndBanning != null) {
-            logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+lockingAndBanning);
+        final TimedLock timedLock = clientIPBasedTimedLocksForBearerTokenAuthentication.remove(escapeNullClientIP(clientIP));
+        if (timedLock != null) {
+            logger.info("Unlocked bearer token authentication from "+clientIP+"; last locking state was "+timedLock);
             changed = true;
         } else {
             changed = false;
@@ -1401,8 +1419,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public boolean isClientIPLockedForBearerTokenAuthentication(String clientIP) {
-        final LockingAndBanning lockingAndBanning = clientIPBasedLockingAndBanningForBearerTokenAuthentication.get(escapeNullClientIP(clientIP));
-        return lockingAndBanning != null && lockingAndBanning.isAuthenticationLocked();
+        final TimedLock timedLock = clientIPBasedTimedLocksForBearerTokenAuthentication.get(escapeNullClientIP(clientIP));
+        return timedLock != null && timedLock.isLocked();
     }
 
     @Override
@@ -2501,8 +2519,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         store.clear();
         accessControlStore.clear();
         corsFilterConfigurationsByReplicaSetName.clear();
-        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
-        clientIPBasedLockingAndBanningForUserCreation.clear();
+        clientIPBasedTimedLocksForBearerTokenAuthentication.clear();
+        clientIPBasedTimedLocksForUserCreation.clear();
     }
 
     @Override
@@ -2584,13 +2602,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final SecurityServiceInitialLoadExtensionsDTO initialLoadExtensions = (SecurityServiceInitialLoadExtensionsDTO) is.readObject();
         final ConcurrentMap<String, Pair<Boolean, Set<String>>> newCORSFilterConfigurations = initialLoadExtensions.getCorsFilterConfigurationsByReplicaSetName();
         corsFilterConfigurationsByReplicaSetName.putAll(newCORSFilterConfigurations);
-        if (initialLoadExtensions.getClientIPBasedLockingAndBanningForBearerTokenAuthentication() != null) {
+        if (initialLoadExtensions.getClientIPBasedTimedLocksForBearerTokenAuthentication() != null) {
             // checking for null for backward compatibility; an older primary/master may not have known this field yet
-            clientIPBasedLockingAndBanningForBearerTokenAuthentication.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForBearerTokenAuthentication());
+            clientIPBasedTimedLocksForBearerTokenAuthentication.putAll(initialLoadExtensions.getClientIPBasedTimedLocksForBearerTokenAuthentication());
         }
-        if (initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation() != null) {
+        if (initialLoadExtensions.getClientIPBasedTimedLocksForUserCreation() != null) {
             // checking for null for backward compatibility; an older primary/master may not have known this field yet
-            clientIPBasedLockingAndBanningForUserCreation.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation());
+            clientIPBasedTimedLocksForUserCreation.putAll(initialLoadExtensions.getClientIPBasedTimedLocksForUserCreation());
         }
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
@@ -2606,8 +2624,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(baseUrlForCrossDomainStorage);
         objectOutputStream.writeObject(new SecurityServiceInitialLoadExtensionsDTO(
                 corsFilterConfigurationsByReplicaSetName,
-                clientIPBasedLockingAndBanningForBearerTokenAuthentication,
-                clientIPBasedLockingAndBanningForUserCreation));
+                clientIPBasedTimedLocksForBearerTokenAuthentication,
+                clientIPBasedTimedLocksForUserCreation));
     }
 
     @Override
@@ -2914,8 +2932,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     // See com.sap.sse.security.impl.Activator.clearState(), moved due to required reinitialisation sequence for
     // permission-vertical
     public void clearState() throws Exception {
-        clientIPBasedLockingAndBanningForBearerTokenAuthentication.clear();
-        clientIPBasedLockingAndBanningForUserCreation.clear();
+        clientIPBasedTimedLocksForBearerTokenAuthentication.clear();
+        clientIPBasedTimedLocksForUserCreation.clear();
     }
 
     @Override

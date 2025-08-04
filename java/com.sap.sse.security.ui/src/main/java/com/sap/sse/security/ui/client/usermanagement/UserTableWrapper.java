@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -45,6 +46,7 @@ import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
@@ -162,42 +164,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 user->user.getLockedUntil() != null && user.getLockedUntil().after(TimePoint.now()) ?
                         DateAndTimeFormatterUtil.dateTimeMedium.render(user.getLockedUntil().asDate()) : "",
                 userColumnListHandler);
-        final HasPermissions type = SecuredSecurityTypes.USER;
-        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
-                new DefaultActionsImagesBarCell(stringMessages), userService);
-        userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user));
-        userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
-                getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        deletingUserFailed(user, caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful()) {
-                            filterField.remove(user);
-                        } else {
-                            deletingUserFailed(user, result.getMessage());
-                        }
-                    }
-                    
-                    private void deletingUserFailed(UserDTO user, String message) {
-                        errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), message));
-                    }
-                });
-            }
-        });
-        final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
-                userService.getUserManagementWriteService(), type,
-                user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
-        final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementWriteService(), type,
-                user -> user.getAccessControlList(), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
-        userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
-                u -> configACL.openDialog(u));
+        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = composeUserActionColumn(
+                stringMessages, errorReporter);
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider, stringMessages) {
             @Override
@@ -233,6 +201,81 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         SecuredDTOOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(userActionColumn, stringMessages.actions());
         table.ensureDebugId("UsersTable");
+    }
+
+    private AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> composeUserActionColumn(
+            StringMessages stringMessages, ErrorReporter errorReporter) {
+        final HasPermissions type = SecuredSecurityTypes.USER;
+        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = create(
+                new DefaultActionsImagesBarCell(stringMessages), userService);
+        userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user));
+        userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
+                getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        deletingUserFailed(user, caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+                            filterField.remove(user);
+                        } else {
+                            deletingUserFailed(user, result.getMessage());
+                        }
+                    }
+                    
+                    private void deletingUserFailed(UserDTO user, String message) {
+                        errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), message));
+                    }
+                });
+            }
+        });
+        final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
+                userService.getUserManagementWriteService(), type,
+                user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openOwnershipDialog);
+        final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementWriteService(), type,
+                user -> user.getAccessControlList(), stringMessages);
+        userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                u -> configACL.openDialog(u));
+        userActionColumn.addAction(
+                DefaultActionsImagesBarCell.ACTION_MANAGE_LOCK,
+                DefaultActions.MANAGE_LOCK,
+                onManageLockPressed(stringMessages, errorReporter)
+                );
+        return userActionColumn;
+    }
+
+    private Consumer<UserDTO> onManageLockPressed(StringMessages stringMessages, ErrorReporter errorReporter) {
+        return user -> {
+            final boolean isLocked = user.getLockedUntil().after(TimePoint.now());
+            if (isLocked) {
+                final String userName = user.getName();
+                final boolean didConfirm = Window.confirm(stringMessages.doYouReallyWantToUnlockUser(userName));
+                if (didConfirm) {
+                    getUserManagementWriteService().unlockUser(
+                        userName,
+                        new AsyncCallback<SuccessInfo>() {
+                            @Override
+                            public void onSuccess(SuccessInfo result) {
+                                Window.alert("Unlock succeeded for user " + userName + ".");
+                            }
+                            
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert("Unlock failed for user " + userName + ".");
+                                errorReporter.reportError(caught.getMessage());
+                            }
+                        }
+                    );
+                }
+            } else {
+                Window.alert("This user is already unlocked.");
+            }
+        };
     }
     
     public Iterable<UserDTO> getAllUsers() {

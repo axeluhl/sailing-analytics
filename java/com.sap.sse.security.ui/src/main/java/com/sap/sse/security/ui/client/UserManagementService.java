@@ -23,6 +23,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -33,7 +34,7 @@ public interface UserManagementService extends RemoteService {
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 
     Collection<UserGroupDTO> getUserGroups() throws org.apache.shiro.authz.UnauthorizedException;
-
+    
     UserGroupDTO getUserGroupByName(String userGroupName)
             throws UnauthorizedException, org.apache.shiro.authz.UnauthorizedException;
 

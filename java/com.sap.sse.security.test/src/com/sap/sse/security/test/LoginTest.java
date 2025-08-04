@@ -44,7 +44,7 @@ import com.sap.sse.security.shared.UserStoreManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.LockingAndBanningImpl;
+import com.sap.sse.security.shared.impl.TimedLockImpl;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
@@ -242,7 +242,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserStoreManagementException {
-        userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
+        userStore.createUser("me", "me@sap.com", new TimedLockImpl());
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
                 Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, true);
@@ -254,7 +254,7 @@ public class LoginTest {
     @Test
     public void roleWithQualifiersTest() throws UserStoreManagementException {
         UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
-        User meUser = userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
+        User meUser = userStore.createUser("me", "me@sap.com", new TimedLockImpl());
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole",
                 Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser, true);
@@ -268,7 +268,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserStoreManagementException {
-        userStore.createUser("me", "me@sap.com", new LockingAndBanningImpl());
+        userStore.createUser("me", "me@sap.com", new TimedLockImpl());
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = createAndLoadUserStore();
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);
