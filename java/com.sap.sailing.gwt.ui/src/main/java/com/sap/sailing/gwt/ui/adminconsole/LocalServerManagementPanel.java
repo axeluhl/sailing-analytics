@@ -123,18 +123,17 @@ public class LocalServerManagementPanel extends SimplePanel {
                 () -> configACL.openDialog(currentServerInfo));
         return buttonPanel;
     }
+    
     private Widget createDebrandingConfigurationUI() {
-        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel("Branding & UI Customization", 1);
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel("Debranding Configuration", 1);
 
         VerticalPanel debrandingPanel = new VerticalPanel();
         debrandingPanel.setSpacing(4);
-        Label label = new Label("Enable Debranding Mode (removes SAP references):");
-        debrandingCheckbox = new CheckBox("Debranding Active");
+        debrandingCheckbox = new CheckBox();
         debrandingCheckbox.addValueChangeHandler(event -> serverConfigurationChanged());
         debrandingCheckbox.ensureDebugId("debrandingCheckbox");
-        debrandingPanel.add(label);
         debrandingPanel.add(debrandingCheckbox);
-        captionPanel.addWidget("Rebranding", debrandingPanel);
+        captionPanel.addWidget("Debranding is active:", debrandingPanel);
 
         return captionPanel;
     }

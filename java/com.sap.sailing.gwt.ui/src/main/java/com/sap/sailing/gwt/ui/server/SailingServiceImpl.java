@@ -3544,7 +3544,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 serverTenantDTO
         );
 
-        // ✅ Add the current debranding state to the DTO
         result.setDebrandingActive(sailingServerConfiguration.getDebrandingActive());
 
         return result;

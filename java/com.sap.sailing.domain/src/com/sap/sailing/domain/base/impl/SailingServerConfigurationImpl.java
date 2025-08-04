@@ -8,7 +8,7 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
     /** indicates if the server is running in standalone mode or not  */
     private boolean isStandaloneServer;
 
-    /** NEW: indicates if debranding is active */
+    /** indicates if debranding is active */
     private Boolean debrandingActive;
 
     public SailingServerConfigurationImpl(boolean isStandaloneServer) {
@@ -31,7 +31,6 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
         this.isStandaloneServer = isStandaloneServer;
     }
 
-    // ✅ NEW Getter & Setter
     public Boolean getDebrandingActive() {
         return debrandingActive;
     }

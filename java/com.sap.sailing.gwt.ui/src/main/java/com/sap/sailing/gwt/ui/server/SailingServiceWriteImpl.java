@@ -4035,15 +4035,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
 
-        // 1. Apply core standalone setting as before
         getService().apply(new UpdateServerConfiguration(
                 new SailingServerConfigurationImpl(
                     serverConfiguration.isStandaloneServer(),
                     serverConfiguration.getDebrandingActive()
                 )));
 
-
-        // 2. Handle Self-Service toggle (unchanged)
         if (serverConfiguration.isSelfService() != null) {
             final boolean isCurrentlySelfService = isSelfServiceServer();
             final boolean shouldBeSelfService = serverConfiguration.isSelfService();
@@ -4059,8 +4056,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 }
             }
         }
-
-        // 3. Handle Public Server toggle (unchanged)
+        
         if (serverConfiguration.isPublic() != null) {
             final RoleDefinition viewerRole = getSecurityService()
                     .getRoleDefinition(SailingViewerRole.getInstance().getId());
@@ -4086,7 +4082,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             }
         }
 
-        // 4. ✅ NEW: Handle debranding runtime flag
         if (serverConfiguration.getDebrandingActive() != null) {
             String debrandingFlag = String.valueOf(serverConfiguration.getDebrandingActive());
             System.setProperty("com.sap.sse.debranding", debrandingFlag);
