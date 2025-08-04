@@ -125,7 +125,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
     
     private Widget createDebrandingConfigurationUI() {
-        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel("Debranding Configuration", 1);
+        final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.debrandingConfiguration(), 1);
 
         VerticalPanel debrandingPanel = new VerticalPanel();
         debrandingPanel.setSpacing(4);
@@ -133,7 +133,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         debrandingCheckbox.addValueChangeHandler(event -> serverConfigurationChanged());
         debrandingCheckbox.ensureDebugId("debrandingCheckbox");
         debrandingPanel.add(debrandingCheckbox);
-        captionPanel.addWidget("Debranding is active:", debrandingPanel);
+        captionPanel.addWidget(stringMessages.debrandingIsActive(), debrandingPanel);
 
         return captionPanel;
     }
