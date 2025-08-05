@@ -83,6 +83,10 @@ With a distinction between master and replica it also becomes possible to apply 
 
 The code base already contains an OT implementation (see package com.sap.sailing.server.operationaltransformation). The operations used for replication are prepared to interact with this framework, but the implementation of the transformation rules are largely not yet implemented except for a few tests in the area of leaderboard-related operations.
 
+For now, it is most important to ensure that the operation implementations behave as "idempotent," meaning that if applied to the replicable object multiple times, only the first execution will lead to a state change; repeated executions will leave the state unchanged. This is important because during the initialization of a replica, operations may be executed on the primary and sent and queued on the replica that is currently initializing by receiving and installing the initial load from the primary. After the initial load has been installed in the replica, the queued operations are applied. The effects of some of these operations may already be encoded in the initial load received by the replica, so re-applying those operations must not alter the state anymore.
+
+This, in particular, means that operation implementations should not describe incremental state changes but should rather specify the new state.
+
 ### Implementation of Operations, Services, and Events
 The operations used for replicating changes are so far all located in the package com.sap.sailing.server.operationaltransformation. There are three ways in which these operations are being used, two of which need urgent consolidation.
 
