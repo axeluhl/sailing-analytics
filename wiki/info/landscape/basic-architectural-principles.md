@@ -4,7 +4,7 @@
 
 ## Domain Model
 
-We have created a set of interfaces that represent the concepts of the domain of sailing races. Typical abstractions captured by these interfaces are, e.g., Regatta, Series, Course, Leg, Waypoint, Buoy and Competitor. There are also interfaces describing more general concepts not necessarily specific to sailing, such as GPSTrack, Position and Distance.
+We have created a set of interfaces that represent the concepts of the domain of sailing races. Typical abstractions captured by these interfaces are, e.g., Regatta, Series, Course, Leg, Waypoint, Mark and Competitor. There are also interfaces describing more general concepts not necessarily specific to sailing, such as GPSTrack, Position and Distance.
 
 Instances of classes implementing these domain interfaces are generally created using a DomainFactory instance. However, in some special cases constructors of domain classes implementing the domain interfaces may also be invoked directly.
 
