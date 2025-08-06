@@ -14,6 +14,7 @@ public class LeaderboardConfigImagesBarCell extends DefaultActionsImagesBarCell 
     public static final String ACTION_SHOW_REGATTA_LOG = "ACTION_SHOW_REGATTA_LOG";
     public static final String ACTION_CREATE_PAIRINGLIST = "ACTION_CREATE_PAIRINGLIST";
     public static final String ACTION_PRINT_PAIRINGLIST = "ACTION_PRINT_PAIRINGLIST";
+    public static final String ACTION_COPY_PAIRINGLIST_FROM_OTHER_LEADERBOARD = "ACTION_COPY_PAIRINGLIST_FROM_OTHER_LEADERBOARD";
 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private final StringMessages stringMessages;
@@ -37,6 +38,8 @@ public class LeaderboardConfigImagesBarCell extends DefaultActionsImagesBarCell 
                 new ImageSpec(ACTION_SHOW_REGATTA_LOG, stringMessages.regattaLog(), resources.flagIcon()),
                 new ImageSpec(ACTION_CREATE_PAIRINGLIST, stringMessages.pairingLists(), resources.pairingList()),
                 new ImageSpec(ACTION_PRINT_PAIRINGLIST, stringMessages.print() + " " + stringMessages.pairingList(),
-                        resources.printPairingList()));
+                        resources.printPairingList()),
+                new ImageSpec(ACTION_COPY_PAIRINGLIST_FROM_OTHER_LEADERBOARD, stringMessages.copyPairingListFromOtherLeaderboard(),
+                        resources.copyPairingList()));
     }
 }
