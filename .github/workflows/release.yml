@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest-${{ github.event.inputs.runner_cpus == '' && '16' || github.event.inputs.runner_cpus }}cpu
     strategy:
       matrix:
-        firefox: [ '137.0' ]
+        firefox: [ '137.0', '138.0', '139.0', '140.0', '141.0' ]
     steps:
       - name: Allocate swap space
         shell: bash
