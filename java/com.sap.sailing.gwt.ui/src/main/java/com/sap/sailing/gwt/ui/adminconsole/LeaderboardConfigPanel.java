@@ -1203,7 +1203,8 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
     }
     
     private void copyPairingListFromOtherLeaderboard(final StrippedLeaderboardDTO leaderboardDTO) {
-        final CopyPairingListDialog dialog = new CopyPairingListDialog(leaderboardDTO, stringMessages,
+        final CopyPairingListDialog dialog = new CopyPairingListDialog(availableLeaderboardList,
+                Collections.unmodifiableCollection(allRegattas), leaderboardDTO, stringMessages,
                 new DialogCallback<CopyPairingListDialog.Result>() {
                     @Override
                     public void ok(CopyPairingListDialog.Result editedObject) {
