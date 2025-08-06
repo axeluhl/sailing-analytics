@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -52,13 +53,33 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  */
 public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.ui.adminconsole.CopyPairingListDialog.Result> {
     public static class Result {
+        private final String sourceLeaderboardName;
+        private final String fromRaceColumnName;
+        private final String toRaceColumnInclusiveName;
         
+        public Result(String sourceLeaderboardName, String fromRaceColumnName, String toRaceColumnInclusiveName) {
+            this.sourceLeaderboardName = sourceLeaderboardName;
+            this.fromRaceColumnName = fromRaceColumnName;
+            this.toRaceColumnInclusiveName = toRaceColumnInclusiveName;
+        }
+
+        public String getSourceLeaderboardName() {
+            return sourceLeaderboardName;
+        }
+
+        public String getFromRaceColumnName() {
+            return fromRaceColumnName;
+        }
+
+        public String getToRaceColumnInclusiveName() {
+            return toRaceColumnInclusiveName;
+        }
     }
     
     private static class Validator implements DataEntryDialog.Validator<Result> {
         @Override
         public String getErrorMessage(Result valueToValidate) {
-            // TODO Auto-generated method stub
+            // TODO check that to column is not before from column
             return null;
         }
     }
@@ -67,6 +88,8 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
     private final Map<String, RegattaDTO> regattasByName;
     private final Collection<StrippedLeaderboardDTO> otherLeaderboards;
     private final StringMessages stringMessages;
+    private final ListBox fromRaceColumnListBox;
+    private final ListBox toRaceColumnInclusiveListBox;
     
     public CopyPairingListDialog(Collection<StrippedLeaderboardDTO> availableLeaderboards,
             Collection<RegattaDTO> availableRegattas, StrippedLeaderboardDTO targetLeaderboardDTO,
@@ -79,6 +102,8 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
                 && regattasByName.containsKey(l.regattaName) && doCompetitorsAndBoatsMatch(regattasByName.get(l.regattaName), targetRegatta)));
         this.otherLeaderboardListBox = AbstractLeaderboardDialog.createSortedRegattaLeaderboardsListBox(otherLeaderboards, /* preSelectedRegattaName */ null, stringMessages, this);
         this.otherLeaderboardListBox.addChangeHandler(this::onOtherLeaderboardSelected);
+        this.fromRaceColumnListBox = new ListBox();
+        this.toRaceColumnInclusiveListBox = new ListBox();
         this.stringMessages = stringMessages;
     }
     
@@ -89,6 +114,12 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
     private void onOtherLeaderboardSelected(ChangeEvent e) {
         final RegattaDTO sourceRegatta = regattasByName.get(otherLeaderboardListBox.getSelectedValue());
         final List<RaceColumnDTO> raceColumns = getRaceColumns(sourceRegatta);
+        fromRaceColumnListBox.clear();
+        toRaceColumnInclusiveListBox.clear();
+        for (final RaceColumnDTO raceColumn : raceColumns) {
+            fromRaceColumnListBox.addItem(raceColumn.getName(), raceColumn.getName());
+            toRaceColumnInclusiveListBox.addItem(raceColumn.getName(), raceColumn.getName());
+        }
     }
 
     private List<RaceColumnDTO> getRaceColumns(final RegattaDTO regatta) {
@@ -130,13 +161,20 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
         int row = 0;
         result.setWidget(row, 0, new Label(stringMessages.selectALeaderboard()));
         result.setWidget(row++, 1, otherLeaderboardListBox);
+        result.setWidget(row, 0, new Label(stringMessages.selectRaceColumnsWhosePairingsToCopy()));
+        final HorizontalPanel hp = new HorizontalPanel();
+        result.setWidget(row++, 1, hp);
+        hp.add(new Label(stringMessages.from()));
+        hp.add(fromRaceColumnListBox);
+        hp.add(new Label(stringMessages.to()));
+        hp.add(toRaceColumnInclusiveListBox);
         return result;
     }
 
 
     @Override
     protected Result getResult() {
-        // TODO Auto-generated method stub
-        return new Result();
+        return new Result(otherLeaderboardListBox.getSelectedValue(),
+                fromRaceColumnListBox.getSelectedValue(), toRaceColumnInclusiveListBox.getSelectedValue());
     }
 }
