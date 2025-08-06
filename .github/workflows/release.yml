@@ -23,6 +23,9 @@ jobs:
       contents: write
       checks: write
     runs-on: ubuntu-latest-${{ github.event.inputs.runner_cpus == '' && '16' || github.event.inputs.runner_cpus }}cpu
+    strategy:
+      matrix:
+        firefox: [ '137.0' ]
     steps:
       - name: Allocate swap space
         shell: bash
@@ -36,6 +39,14 @@ jobs:
         uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2.0.0
         with:
           comment_on_pr: false
+      - name: Setup firefox
+        id: setup-firefox
+        uses: browser-actions/setup-firefox@a6d021f85451e513efce26150222faefccf7cd18 # 1.7.0
+        with:
+          firefox-version: ${{ matrix.firefox }}
+      - run: |
+          echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
+          ${{ steps.setup-firefox.outputs.firefox-path }} --version
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
         with:
