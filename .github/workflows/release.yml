@@ -41,7 +41,7 @@ jobs:
           comment_on_pr: false
       - name: Setup firefox
         id: setup-firefox
-        uses: browser-actions/setup-firefox@a6d021f85451e513efce26150222faefccf7cd18 # 1.7.0
+        uses: browser-actions/setup-firefox@6a1b4a4b1961b3705b75f7c78b70a56d51fc4c4c # 1.7.0
         with:
           firefox-version: ${{ matrix.firefox }}
       - run: |
