@@ -16,6 +16,9 @@ on:
       runner_cpus:
         description: Default is 16, but can be 4, 8, and 64 as well
         default: '16'
+      firefox_version:
+        description: Version to use for Selenium tests; default is 137.0, but could, e.g., be "141.0" or "latest"
+        default: '137.0'
 
 jobs:
   build:
@@ -23,9 +26,6 @@ jobs:
       contents: write
       checks: write
     runs-on: ubuntu-latest-${{ github.event.inputs.runner_cpus == '' && '16' || github.event.inputs.runner_cpus }}cpu
-    strategy:
-      matrix:
-        firefox: [ '137.0' ]
     steps:
       - name: Allocate swap space
         shell: bash
@@ -43,7 +43,7 @@ jobs:
         id: setup-firefox
         uses: browser-actions/setup-firefox@5914774dda97099441f02628f8d46411fcfbd208 # v1.7.0
         with:
-          firefox-version: ${{ matrix.firefox }}
+          firefox-version: ${{  github.event.inputs.firefox }}
       - run: |
           echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
           ${{ steps.setup-firefox.outputs.firefox-path }} --version
