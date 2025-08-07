@@ -18,7 +18,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[General Project Information|wiki/info/general/general-information]]
 * [[Project History|wiki/info/general/project-history]]
 
-### Landscape and Development
+### Landscape
 
 * Architecture and Infrastructure
   * [[Workspace, Bundles, Projects|wiki/info/general/workspace-bundles-projects-structure]]
@@ -31,7 +31,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Internationalization (i18n)|wiki/howto/development/i18n]]
   * [[AI Agent|wiki/info/landscape/ai-agent]]
   * [[Malware Scanning|wiki/info/landscape/malware-scanning]]
-  * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 * [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
   * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
@@ -46,12 +45,32 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
   * [[Setting up dedicated S3 buckets|wiki/info/landscape/s3-bucket-setup]]
   * [[Large-Scale Set-Ups, e.g., Olympic Games|wiki/info/landscape/tokyo2020/olympic-setup]]
-* [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
+* [[Log File Analysis|wiki/howto/development/Log-File-Analysis]]
+* [[Old Log Compression|wiki/howto/development/Log-File-Compression]]
+* [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Webdesign|wiki/info/landscape/webdesign]]
 * [[sail-insight.com website|wiki/info/landscape/sail-insight.com-website]]
 * [[Docker Registry|wiki/info/landscape/docker-registry]]
+
+### Development
+
+* [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
+* [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
+* [[Create boat graphics for the 2D race viewer|wiki/howto/development/boatgraphicssvg]]
+* [[Continuous Integration with Hudson/Jenkins|wiki/howto/development/ci]]
+* [[Dispatch|wiki/howto/development/dispatch]]
+* [[Working with GWT UI Binder|wiki/howto/development/gwt-ui-binder]]
+* [[Java De(Serialization) and Circular Dependencies|wiki/howto/development/java-de-serialization-and-circular-dependencies]]
+* [[JMX Support|wiki/howto/development/jmx]]
+* [[Working with GWT Locally|wiki/howto/development/local-gwt]]
+* [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
+* [[Profiling|wiki/howto/development/profiling]]
+* [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
+* [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
+* [[Whitelabelling|wiki/howto/whitelabelling]]
+* [[Secured Settings|wiki/howto/development/secured-settings]]
 
 ### Mobile
 
@@ -88,16 +107,10 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ### Miscellaneous
 
-* [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
 * [[Data Quality|wiki/info/misc/data-quality]]
 * [[Sailing Domain Algorithms|wiki/info/misc/sailing-domain-algorithms]]
 * [[Google Analytics (Web Page Tracking)|wiki/info/misc/ganalytics]]
 * [[S3 Development Sample|wiki/info/misc/s3-sample]]
-
-* [[FAQ for League Operators|wiki/info/misc/league-operators-faq]]
-* [[Prionet related information|wiki/info/misc/prionet-related-information]]
-* [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
-
 * [[Subscriptions|wiki/info/misc/subscriptions]]
 
 ## HowTo
@@ -106,30 +119,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Managing Events with the AdminConsole|wiki/howto/adminconsoleinstructions]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
-* [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
+* [[Managing ORC Polar Curve Regattas (formerly "Performance Curve Scoring")|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 * [[Paywall|wiki/howto/paywall]]
 * [[Subscriptions|wiki/howto/subscriptions]]
 * [[Building and Using a Forked GWT Version|wiki/howto/development/gwt-fork]]
-
-### Development
-
-* [[Create boat graphics for the 2D race viewer|wiki/howto/development/boatgraphicssvg]]
-* [[Continuous Integration with Hudson/Jenkins|wiki/howto/development/ci]]
-* [[Dispatch|wiki/howto/development/dispatch]]
-* [[Working with GWT UI Binder|wiki/howto/development/gwt-ui-binder]]
-* [[Java De(Serialization) and Circular Dependencies|wiki/howto/development/java-de-serialization-and-circular-dependencies]]
-* [[JMX Support|wiki/howto/development/jmx]]
-* [[Working with GWT Locally|wiki/howto/development/local-gwt]]
-* [[Log File Analysis|wiki/howto/development/Log-File-Analysis]]
-* [[Old Log Compression|wiki/howto/development/Log-File-Compression]]
-* [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
-* [[Profiling|wiki/howto/development/profiling]]
-* [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
-* [[Training of internal Wind Estimation models|wiki/howto/windestimation]]
-* [[Whitelabelling|wiki/howto/whitelabelling]]
-* [[Downloading and Archiving TracTrac Events|wiki/howto/downloading-and-archiving-tractrac-events]]
-* [[Secured Settings|wiki/howto/development/secured-settings]]
 
 ### For Event Managers
 
