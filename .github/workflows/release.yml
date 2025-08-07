@@ -18,7 +18,7 @@ on:
         default: '16'
       firefox_version:
         description: Version to use for Selenium tests; default is 137.0, but could, e.g., be "141.0" or "latest"
-        default: '137.0'
+        default: '140.0'
 
 jobs:
   build:
