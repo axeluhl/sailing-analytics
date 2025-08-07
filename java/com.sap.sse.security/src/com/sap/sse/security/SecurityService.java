@@ -211,7 +211,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            if <code>null</code>, no validation will be attempted
      * @param requestClientIP
      *            used for throttling user creation requests coming from the same IP address
-     * @param enforceStrongPassword TODO
      */
     User createSimpleUser(String username, String email, String password, String fullName, String company,
             Locale locale, String validationBaseURL, UserGroup userOwner, String requestClientIP, boolean enforceStrongPassword)
@@ -892,7 +891,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * If two locking durations have expired without this method being invoked for equal {@cod eclientIP} and
      * {@code userAgent}, the locking record including its last locking duration is expunged from the internal data
      * structures, avoiding garbage piling up.
-     * @return TODO
      */
     TimedLock failedBearerTokenAuthentication(String clientIP);
 

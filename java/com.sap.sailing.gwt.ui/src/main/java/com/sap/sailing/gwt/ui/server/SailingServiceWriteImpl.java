@@ -4163,4 +4163,27 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
             }
         }
     }
+
+    @Override
+    public void copyPairingListFromOtherLeaderboard(String sourceLeaderboardName, String targetLeaderboardName,
+            String fromRaceColumnName, String toRaceColumnInclusiveName)
+            throws UnauthorizedException, NotFoundException {
+        final Leaderboard sourceLeaderboard = getLeaderboardByName(sourceLeaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(sourceLeaderboard);
+        final Leaderboard targetLeaderboard = getLeaderboardByName(targetLeaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(targetLeaderboard);
+        if (!(sourceLeaderboard instanceof RegattaLeaderboard)) {
+            throw new IllegalArgumentException("Source leaderboard " + sourceLeaderboardName
+                    + " must be a regatta leaderboard, but was: " + sourceLeaderboard.getLeaderboardType());
+        }
+        if (!(targetLeaderboard instanceof RegattaLeaderboard)) {
+            throw new IllegalArgumentException("Target leaderboard " + sourceLeaderboardName
+                    + " must be a regatta leaderboard, but was: " + targetLeaderboard.getLeaderboardType());
+        }
+        // we don't need to worry about replication here because all operations carried out by
+        // the following call will only manipulate race logs and regatta logs, and those have
+        // their own listener-based replication scheme.
+        getRaceLogTrackingAdapter().copyPairingListFromOtherLeaderboard((RegattaLeaderboard) sourceLeaderboard,
+                (RegattaLeaderboard) targetLeaderboard, fromRaceColumnName, toRaceColumnInclusiveName);
+    }
 }
