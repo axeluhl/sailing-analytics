@@ -2555,4 +2555,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingLeaderboard(String leaderboardName, String message);
     String debrandingConfiguration();
     String debrandingIsActive();
+    String copyPairingListFromOtherLeaderboard();
+    String selectRaceColumnsWhosePairingsToCopy();
+    String errorCopyingPairings(String message);
+    String successfullyCopiedPairings();
+    String selectFromRaceColumn();
+    String selectToRaceColumn();
 }

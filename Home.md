@@ -119,7 +119,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Managing Events with the AdminConsole|wiki/howto/adminconsoleinstructions]]
 * [[Importing Sessions from Expedition|wiki/howto/expeditionimport]]
 * [[Checking our DBs for a user record by e-mail|wiki/howto/privacy]]
-* [[Managing ORC Performance Curve Regattas|wiki/howto/setup-orc-regatta]]
+* [[Managing ORC Polar Curve Regattas (formerly "Performance Curve Scoring")|wiki/howto/setup-orc-regatta]]
 * [[Qualtrics Surveys|wiki/howto/qualtrics/qualtrics]]
 * [[Paywall|wiki/howto/paywall]]
 * [[Subscriptions|wiki/howto/subscriptions]]
