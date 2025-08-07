@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +48,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * objects, furthermore the sequence of {@link RaceColumnDTO}s that were selected from the source leaderboard.
  * <p>
  * 
- * 
  * @author Axel Uhl (d043530)
  *
  */
@@ -77,48 +77,88 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
     }
     
     private static class Validator implements DataEntryDialog.Validator<Result> {
+        private final StringMessages stringMessages;
+
+        public Validator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
         @Override
         public String getErrorMessage(Result valueToValidate) {
-            // TODO check that to column is not before from column
-            return null;
+            final String errorMessage;
+            if (valueToValidate.getSourceLeaderboardName() == null) {
+                errorMessage = stringMessages.selectALeaderboard();
+            } else if (valueToValidate.getFromRaceColumnName() == null) {
+                errorMessage = stringMessages.selectFromRaceColumn();
+            } else if (valueToValidate.getToRaceColumnInclusiveName() == null) {
+                errorMessage = stringMessages.selectToRaceColumn();
+            } else {
+                errorMessage = null;
+            }
+            return errorMessage;
         }
     }
 
-    private final ListBox otherLeaderboardListBox;
+    private final StringMessages stringMessages;
+    private final ListBox sourceLeaderboardListBox;
     private final Map<String, RegattaDTO> regattasByName;
     private final Collection<StrippedLeaderboardDTO> otherLeaderboards;
-    private final StringMessages stringMessages;
+    private List<RaceColumnDTO> raceColumnsOfSourceRegatta;
     private final ListBox fromRaceColumnListBox;
     private final ListBox toRaceColumnInclusiveListBox;
     
     public CopyPairingListDialog(Collection<StrippedLeaderboardDTO> availableLeaderboards,
             Collection<RegattaDTO> availableRegattas, StrippedLeaderboardDTO targetLeaderboardDTO,
             StringMessages stringMessages, DialogCallback<Result> dialogCallback) {
-        super(stringMessages.copyPairingListFromOtherLeaderboard(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(), dialogCallback);
+        super(stringMessages.copyPairingListFromOtherLeaderboard(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages), dialogCallback);
         this.regattasByName = new HashMap<>();
         availableRegattas.forEach(r->regattasByName.put(r.getName(), r));
         final RegattaDTO targetRegatta = regattasByName.get(targetLeaderboardDTO.regattaName);
         this.otherLeaderboards = Util.asList(Util.filter(availableLeaderboards, l->l != targetLeaderboardDTO && l.canBoatsOfCompetitorsChangePerRace && l.type.isRegattaLeaderboard()
                 && regattasByName.containsKey(l.regattaName) && doCompetitorsAndBoatsMatch(regattasByName.get(l.regattaName), targetRegatta)));
-        this.otherLeaderboardListBox = AbstractLeaderboardDialog.createSortedRegattaLeaderboardsListBox(otherLeaderboards, /* preSelectedRegattaName */ null, stringMessages, this);
-        this.otherLeaderboardListBox.addChangeHandler(this::onOtherLeaderboardSelected);
-        this.fromRaceColumnListBox = new ListBox();
-        this.toRaceColumnInclusiveListBox = new ListBox();
+        this.sourceLeaderboardListBox = AbstractLeaderboardDialog.createSortedRegattaLeaderboardsListBox(otherLeaderboards, /* preSelectedRegattaName */ null, stringMessages, this);
+        this.sourceLeaderboardListBox.addChangeHandler(this::onOtherLeaderboardSelected);
+        this.fromRaceColumnListBox = createListBox(/* isMultipleSelect */ false);
+        this.fromRaceColumnListBox.addChangeHandler(e->updateToRaceColumnListBox(fromRaceColumnListBox.getSelectedValue()));
+        this.toRaceColumnInclusiveListBox = createListBox(/* isMultipleSelect */ false);
         this.stringMessages = stringMessages;
     }
     
+    private void updateToRaceColumnListBox(String selectedFromRaceColumnName) {
+        final String previouslySelectedToRaceColumnName = toRaceColumnInclusiveListBox.getSelectedValue();
+        toRaceColumnInclusiveListBox.clear();
+        boolean foundSelected = false;
+        int i = 0;
+        for (final RaceColumnDTO raceColumn : raceColumnsOfSourceRegatta) {
+            foundSelected = foundSelected || Util.equalsWithNull(selectedFromRaceColumnName, raceColumn.getName());
+            if (foundSelected) {
+                toRaceColumnInclusiveListBox.addItem(raceColumn.getName(), raceColumn.getName());
+                if (Util.equalsWithNull(raceColumn.getName(), previouslySelectedToRaceColumnName)) {
+                    toRaceColumnInclusiveListBox.setSelectedIndex(i);
+                }
+                i++;
+            }
+        }
+    }
+
     /**
      * Updates the race colums drop-downs for first and last race column to copy the competitor-to-boat assignments from,
-     * based on the structure of the regatta that belongs to the leaderboard selected in the {@link #otherLeaderboardListBox}.
+     * based on the structure of the regatta that belongs to the leaderboard selected in the {@link #sourceLeaderboardListBox}.
      */
     private void onOtherLeaderboardSelected(ChangeEvent e) {
-        final RegattaDTO sourceRegatta = regattasByName.get(otherLeaderboardListBox.getSelectedValue());
-        final List<RaceColumnDTO> raceColumns = getRaceColumns(sourceRegatta);
-        fromRaceColumnListBox.clear();
-        toRaceColumnInclusiveListBox.clear();
-        for (final RaceColumnDTO raceColumn : raceColumns) {
-            fromRaceColumnListBox.addItem(raceColumn.getName(), raceColumn.getName());
-            toRaceColumnInclusiveListBox.addItem(raceColumn.getName(), raceColumn.getName());
+        final RegattaDTO sourceRegatta = regattasByName.get(sourceLeaderboardListBox.getSelectedValue());
+        if (sourceRegatta == null) {
+            fromRaceColumnListBox.clear();
+            toRaceColumnInclusiveListBox.clear();
+            raceColumnsOfSourceRegatta = Collections.emptyList();
+        } else {
+            raceColumnsOfSourceRegatta = getRaceColumns(sourceRegatta);
+            fromRaceColumnListBox.clear();
+            toRaceColumnInclusiveListBox.clear();
+            for (final RaceColumnDTO raceColumn : raceColumnsOfSourceRegatta) {
+                fromRaceColumnListBox.addItem(raceColumn.getName(), raceColumn.getName());
+                toRaceColumnInclusiveListBox.addItem(raceColumn.getName(), raceColumn.getName());
+            }
         }
     }
 
@@ -160,7 +200,7 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
         final Grid result = new Grid(2, 2);
         int row = 0;
         result.setWidget(row, 0, new Label(stringMessages.selectALeaderboard()));
-        result.setWidget(row++, 1, otherLeaderboardListBox);
+        result.setWidget(row++, 1, sourceLeaderboardListBox);
         result.setWidget(row, 0, new Label(stringMessages.selectRaceColumnsWhosePairingsToCopy()));
         final HorizontalPanel hp = new HorizontalPanel();
         result.setWidget(row++, 1, hp);
@@ -168,13 +208,15 @@ public class CopyPairingListDialog extends DataEntryDialog<com.sap.sailing.gwt.u
         hp.add(fromRaceColumnListBox);
         hp.add(new Label(stringMessages.to()));
         hp.add(toRaceColumnInclusiveListBox);
+        validateAndUpdate();
         return result;
     }
 
 
     @Override
     protected Result getResult() {
-        return new Result(otherLeaderboardListBox.getSelectedValue(),
+        final String selectedLeaderboardName = sourceLeaderboardListBox.getSelectedIndex() == 0 ? null : sourceLeaderboardListBox.getSelectedValue();
+        return new Result(selectedLeaderboardName,
                 fromRaceColumnListBox.getSelectedValue(), toRaceColumnInclusiveListBox.getSelectedValue());
     }
 }

@@ -1202,12 +1202,30 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
         dialog.show();
     }
     
-    private void copyPairingListFromOtherLeaderboard(final StrippedLeaderboardDTO leaderboardDTO) {
+    private void copyPairingListFromOtherLeaderboard(final StrippedLeaderboardDTO targetLeaderboardDTO) {
         final CopyPairingListDialog dialog = new CopyPairingListDialog(availableLeaderboardList,
-                Collections.unmodifiableCollection(allRegattas), leaderboardDTO, stringMessages,
+                Collections.unmodifiableCollection(allRegattas), targetLeaderboardDTO, stringMessages,
                 new DialogCallback<CopyPairingListDialog.Result>() {
                     @Override
                     public void ok(CopyPairingListDialog.Result editedObject) {
+                        sailingServiceWrite.copyPairingListFromOtherLeaderboard(
+                            editedObject.getSourceLeaderboardName(), targetLeaderboardDTO.getName(),
+                            editedObject.getFromRaceColumnName(), editedObject.getToRaceColumnInclusiveName(),
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Notification.notify(
+                                        stringMessages.errorCopyingPairings(caught.getMessage()),
+                                        NotificationType.ERROR);
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    Notification.notify(
+                                            stringMessages.successfullyCopiedPairings(),
+                                            NotificationType.SUCCESS);
+                                }
+                            });
                         // TODO
                     }
 
