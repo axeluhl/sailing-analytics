@@ -1354,7 +1354,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public TimedLock failedBearerTokenAuthentication(String clientIP) {
-        final LockingAndBanning result;
+        final TimedLock result;
         final ReplicationService replicationService = getReplicationService();
         if (replicationService == null || !replicationService.isReplicationStarting()) {
             result = apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
