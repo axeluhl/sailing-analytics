@@ -46,7 +46,7 @@ import com.sap.sse.security.shared.dto.RoleWithSecurityDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserManagementWriteServiceAsync;
@@ -210,7 +210,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 new DefaultActionsImagesBarCell(stringMessages), userService);
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
+            if (Window.confirm(stringMessages.doYouReallyWantToDeleteUser(user.getName()))) {
                 getUserManagementWriteService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -243,7 +243,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 u -> configACL.openDialog(u));
         userActionColumn.addAction(
                 DefaultActionsImagesBarCell.ACTION_MANAGE_LOCK,
-                DefaultActions.MANAGE_LOCK,
+                UserActions.MANAGE_LOCK,
                 onManageLockPressed(stringMessages, errorReporter)
                 );
         return userActionColumn;

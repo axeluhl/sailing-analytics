@@ -136,7 +136,7 @@ public interface HasPermissions extends Named {
      *
      */
     public enum DefaultActions implements Action {
-        CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP, CHANGE_ACL, MANAGE_LOCK;
+        CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP, CHANGE_ACL;
         
         public static final Action[] MUTATION_ACTIONS = new Action[] { CREATE, UPDATE, DELETE, CHANGE_OWNERSHIP,
                 CHANGE_ACL };

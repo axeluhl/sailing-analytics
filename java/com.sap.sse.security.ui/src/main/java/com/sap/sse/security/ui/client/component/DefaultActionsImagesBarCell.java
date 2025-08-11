@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class DefaultActionsImagesBarCell extends ImagesBarCell {
@@ -14,7 +15,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY = "MIGRATE_GROUP_OWNERSHIP_HIERARCHY";
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
-    public static final String ACTION_MANAGE_LOCK = DefaultActions.MANAGE_LOCK.name();
+    public static final String ACTION_MANAGE_LOCK = UserActions.MANAGE_LOCK.name();
 
     protected final StringMessages stringMessages;
 

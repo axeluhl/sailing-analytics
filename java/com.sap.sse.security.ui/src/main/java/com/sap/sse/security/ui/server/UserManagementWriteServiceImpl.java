@@ -379,7 +379,7 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     public SuccessInfo unlockUser(String username) throws UnauthorizedException {
         User user = getSecurityService().getUserByName(username);
         if (user != null) {
-            if (!getSecurityService().hasCurrentUserExplicitPermissions(user, DefaultActions.MANAGE_LOCK)) {
+            if (!getSecurityService().hasCurrentUserExplicitPermissions(user, UserActions.MANAGE_LOCK)) {
                 return new SuccessInfo(false, "You are not permitted to manage locking on user " + username,
                         /* redirectURL */ null, null);
             }
