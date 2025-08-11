@@ -59,13 +59,11 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
             String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
                 final ServletContext ctx = sre.getServletContext();
-                final String ctxDebrandingActive = (String) ctx
-                        .getAttribute("clientConfigurationContext.debrandingActive");
+                final String ctxDebrandingActive = (String) ctx.getAttribute("clientConfigurationContext.debrandingActive");
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
-                final boolean deBrandingActive = brandingConfigurationService.isBrandingActive();
-                if (ctxDebrandingActive == null
-                        || !Boolean.toString(deBrandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
-                    createReplacementMap(deBrandingActive).forEach((k, v) -> {
+                final boolean brandingActive = brandingConfigurationService.isBrandingActive();
+                if (ctxDebrandingActive == null || !Boolean.toString(brandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
+                    createReplacementMap(brandingActive).forEach((k, v) -> {
                         sre.getServletContext().setAttribute("clientConfigurationContext." + k, v);
                     });
                 }
@@ -78,19 +76,19 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
         // intentionally left blank
     }
 
-    private Map<String, String> createReplacementMap(boolean deBrandingActive) {
+    private Map<String, String> createReplacementMap(boolean brandingActive) {
         final Map<String, String> map = new HashMap<>();
         final String title;
         final String whitelabeled;
-        if (deBrandingActive) {
-            title = "";
-            whitelabeled = "-whitelabeled";
-        } else {
+        if (brandingActive) {
             title = "SAP ";
             whitelabeled = "";
+        } else {
+            title = "";
+            whitelabeled = "-whitelabeled";
         }
         map.put("SAP", title);
-        map.put("debrandingActive", Boolean.toString(deBrandingActive));
+        map.put("debrandingActive", Boolean.toString(!brandingActive));
         map.put("whitelabeled", whitelabeled);
         return map;
     }
