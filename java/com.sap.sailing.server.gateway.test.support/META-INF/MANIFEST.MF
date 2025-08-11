@@ -25,4 +25,5 @@ Import-Package: com.sap.sse.branding,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
 Automatic-Module-Name: com.sap.sailing.server.gateway.test.support
-Bundle-Activator: com.sap.sse.branding.impl.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: com.sap.sailing.server.gateway.test.support.Activator
