@@ -1,7 +1,7 @@
 package com.sap.sse.security.operations;
 
+import com.sap.sse.common.TimedLock;
 import com.sap.sse.security.impl.ReplicableSecurityService;
-import com.sap.sse.security.shared.impl.TimedLock;
 
 public class ResetUserLockOperation implements SecurityOperation<Void> {
     private static final long serialVersionUID = -6267523788529623080L;

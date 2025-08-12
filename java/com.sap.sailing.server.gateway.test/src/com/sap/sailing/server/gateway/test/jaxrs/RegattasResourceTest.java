@@ -49,11 +49,11 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimedLockImpl;
 import com.sap.sse.rest.StreamingOutputUtil;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.impl.TimedLockImpl;
 import com.sap.sse.security.shared.impl.User;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {

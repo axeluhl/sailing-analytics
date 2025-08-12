@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.common.TimedLock;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.security.shared.impl.TimedLock;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;

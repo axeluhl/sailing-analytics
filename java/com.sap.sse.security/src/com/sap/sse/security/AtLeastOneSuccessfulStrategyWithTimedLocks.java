@@ -13,8 +13,8 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.realm.Realm;
 
+import com.sap.sse.common.TimedLock;
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.impl.TimedLock;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.util.ServiceTrackerFactory;
 

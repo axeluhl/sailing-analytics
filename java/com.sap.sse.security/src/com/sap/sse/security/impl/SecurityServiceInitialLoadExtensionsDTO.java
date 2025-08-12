@@ -6,10 +6,10 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import com.sap.sse.common.TimedLock;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.impl.TimedLock;
 
 /**
  * Starting with the CORS filter configurations, this and future extensions of the {@link SecurityService}'s

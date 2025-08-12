@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.sap.sse.common.impl.TimedLockImpl;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.interfaces.UserImpl;
-import com.sap.sse.security.shared.impl.TimedLockImpl;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;

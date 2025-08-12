@@ -1,8 +1,6 @@
-package com.sap.sse.security.shared.impl;
+package com.sap.sse.common;
 
 import java.io.Serializable;
-
-import com.sap.sse.common.TimePoint;
 
 /**
  * Holds information about a user's log-on history which is then used to decide whether the user account should be

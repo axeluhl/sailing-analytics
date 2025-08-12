@@ -1,7 +1,8 @@
-package com.sap.sse.security.shared.impl;
+package com.sap.sse.common.impl;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimedLock;
 import com.sap.sse.common.Util;
 
 public class TimedLockImpl implements TimedLock {
