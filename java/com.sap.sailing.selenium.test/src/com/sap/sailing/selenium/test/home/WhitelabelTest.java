@@ -13,6 +13,7 @@ import java.util.List;
 import javax.xml.bind.DatatypeConverter;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.SeleniumTestCase;
@@ -91,6 +92,11 @@ public class WhitelabelTest extends AbstractSeleniumTest {
             details.linkRace(new RaceDescriptor("M", DEFAULT_FLEET, true, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
         }
         setWhitelabel(true, getContextRoot());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        setWhitelabel(false, getContextRoot());
     }
 
     @SeleniumTestCase
