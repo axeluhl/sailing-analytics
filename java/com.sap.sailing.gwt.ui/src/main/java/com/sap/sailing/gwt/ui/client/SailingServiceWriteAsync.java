@@ -769,6 +769,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getAIAgentLanguageModelName(AsyncCallback<String> callback);
     
     void hasAIAgentCredentials(AsyncCallback<Boolean> callback);
-    
+
     void setAIAgentCredentials(String credentials, AsyncCallback<Void> callback);
+    
+    void resetAIAgentCredentials(AsyncCallback<Void> callback);
 }

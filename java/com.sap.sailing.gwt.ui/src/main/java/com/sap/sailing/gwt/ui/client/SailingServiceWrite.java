@@ -758,4 +758,6 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     boolean hasAIAgentCredentials();
     
     void setAIAgentCredentials(String credentials) throws Exception;
+    
+    void resetAIAgentCredentials();
 }

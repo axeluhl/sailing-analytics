@@ -4156,11 +4156,18 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     throw new IllegalStateException("Credentials could not be parsed");
                 }
                 if (parsedCredentials != null) {
-                    aiAgent.setCredentials(parsedCredentials);                    
+                    aiAgent.setCredentials(parsedCredentials);    
                 }
             } else {
                 throw new IllegalStateException("Blank credentials received");
             }
         }
+    }
+    
+    @Override
+    public void resetAIAgentCredentials() {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        aiAgent.setCredentials(null);
     }
 }
