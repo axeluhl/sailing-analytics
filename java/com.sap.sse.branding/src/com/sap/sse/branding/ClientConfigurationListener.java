@@ -56,15 +56,15 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
         if (sre.getServletRequest().getScheme().startsWith("http")) {
-            String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
+            final String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
                 final ServletContext ctx = sre.getServletContext();
                 final String ctxDebrandingActive = (String) ctx.getAttribute("clientConfigurationContext.debrandingActive");
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
-                final boolean brandingActive = brandingConfigurationService.isBrandingActive();
-                if (ctxDebrandingActive == null || !Boolean.toString(brandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
-                    createReplacementMap(brandingActive).forEach((k, v) -> {
-                        sre.getServletContext().setAttribute("clientConfigurationContext." + k, v);
+                final boolean debrandingActive = !brandingConfigurationService.isBrandingActive();
+                if (ctxDebrandingActive == null || !Boolean.toString(debrandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
+                    createReplacementMap(!debrandingActive).forEach((k, v) -> {
+                        ctx.setAttribute("clientConfigurationContext." + k, v);
                     });
                 }
             }
