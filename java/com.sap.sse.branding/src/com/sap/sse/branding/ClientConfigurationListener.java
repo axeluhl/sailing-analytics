@@ -59,12 +59,12 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
             final String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
                 final ServletContext ctx = sre.getServletContext();
-                final String ctxDebrandingActive = (String) ctx.getAttribute("clientConfigurationContext.debrandingActive");
+                final String ctxBrandingActive = (String) ctx.getAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX+BrandingConfigurationService.BRANDING_ACTIVE_JSP_PROPERTY_NAME);
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
-                final boolean debrandingActive = !brandingConfigurationService.isBrandingActive();
-                if (ctxDebrandingActive == null || !Boolean.toString(debrandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
+                final boolean brandingActive = brandingConfigurationService.isBrandingActive();
+                if (ctxBrandingActive == null || Boolean.toString(brandingActive).equalsIgnoreCase(ctxBrandingActive)) {
                     createReplacementMap(brandingConfigurationService).forEach((k, v) -> {
-                        ctx.setAttribute("clientConfigurationContext." + k, v);
+                        ctx.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX + k, v);
                     });
                 }
             }

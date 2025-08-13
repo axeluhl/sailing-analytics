@@ -29,7 +29,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     public BrandingConfiguration setActiveBrandingConfigurationById(String brandingConfigurationId) {
         try {
             Filter filter = bundleContext.createFilter(
-                    String.format("(&(%s=%s)(%s=%s)",
+                    String.format("(&(%s=%s)(%s=%s))",
                             BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME, ""+brandingConfigurationId,
                             Constants.OBJECTCLASS, BrandingConfiguration.class.getName()));
             brandingConfigurationTracker = ServiceTrackerFactory.createAndOpen(bundleContext, filter);
