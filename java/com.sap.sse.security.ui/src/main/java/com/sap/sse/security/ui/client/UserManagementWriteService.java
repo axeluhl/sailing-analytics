@@ -13,7 +13,6 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -115,8 +114,6 @@ public interface UserManagementWriteService extends UserManagementService {
     void setCORSFilterConfigurationAllowedOrigins(ArrayList<String> allowedOrigins);
 
     void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) throws MailException;
-    
-    void updateBrandingConfiguration(BrandingConfigurationDTO brandingConfiguration) throws UnauthorizedException;
     
     // ------------------------------------------------ OAuth Interface
     // --------------------------------------------------------------

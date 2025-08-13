@@ -42,7 +42,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -420,27 +419,18 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public BrandingConfigurationDTO getBrandingConfiguration() {
+    public String getBrandingConfigurationId() {
         final BrandingConfigurationService brandingConfigurationService = getBrandingConfigurationService();
-        final BrandingConfigurationDTO result;
+        final String result;
         if (brandingConfigurationService == null) {
             result = null;
         } else {
-            result = createBrandingConfigurationDTO(brandingConfigurationService);
+            result = brandingConfigurationService.getActiveBrandingConfiguration().getId();
         }
         return result;
     }
 
     private BrandingConfigurationService getBrandingConfigurationService() {
         return brandingConfigurationServiceTracker.getService();
-    }
-
-    private BrandingConfigurationDTO createBrandingConfigurationDTO(
-            BrandingConfigurationService brandingConfigurationService) {
-        final BrandingConfigurationDTO brandingConfigurationDTO = new BrandingConfigurationDTO(
-                brandingConfigurationService.isBrandingActive(),
-                brandingConfigurationService.getDefaultBrandingLogoURL(),
-                brandingConfigurationService.getGreyTransparentLogoURL());
-        return brandingConfigurationDTO;
     }
 }

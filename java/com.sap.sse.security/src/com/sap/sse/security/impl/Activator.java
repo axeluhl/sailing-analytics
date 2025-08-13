@@ -16,7 +16,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.ServerInfo;
-import com.sap.sse.branding.BrandingConfigurationService;
 import com.sap.sse.classloading.ServiceTrackerCustomizerForClassLoaderSupplierRegistrations;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
@@ -215,8 +214,8 @@ public class Activator implements BundleActivator {
                 ServiceTrackerFactory.createAndOpen(context, MailService.class),
                 ServiceTrackerFactory.createAndOpen(context, CORSFilterConfiguration.class),
                 ServiceTrackerFactory.createAndOpen(context, ReplicationService.class),
-                ServiceTrackerFactory.createAndOpen(context, BrandingConfigurationService.class), userStore,
-                accessControlStore, new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), subscriptionPlanProvider, sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
+                userStore, accessControlStore,
+                new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), subscriptionPlanProvider, sharedAcrossSubdomainsOf, baseUrlForCrossDomainStorage);
         initialSecurityService.initialize();
         securityService.complete(initialSecurityService);
         registration = context.registerService(SecurityService.class, initialSecurityService, null);

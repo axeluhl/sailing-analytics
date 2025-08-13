@@ -1,5 +1,6 @@
 package com.sap.sailing.server.gateway.test.support;
 
+import com.sap.sse.branding.sap.SAPBrandingConfiguration;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -32,10 +33,10 @@ public class WhitelabelSwitchServlet extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getPathInfo();
         if (path.endsWith("on") || path.endsWith("true")) {
-            Activator.getBrandingConfigurationService().setBrandingActive(false);
+            Activator.getBrandingConfigurationService().setActiveBrandingConfigurationById(null);
             resp.setStatus(HttpServletResponse.SC_OK);
         } else if (path.endsWith("off") || path.endsWith("false")) {
-            Activator.getBrandingConfigurationService().setBrandingActive(true);
+            Activator.getBrandingConfigurationService().setActiveBrandingConfigurationById(SAPBrandingConfiguration.ID);
             resp.setStatus(HttpServletResponse.SC_OK);
         } else {
             logger.config("unrecoginzed path " + path);

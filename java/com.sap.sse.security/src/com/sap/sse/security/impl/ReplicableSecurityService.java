@@ -131,6 +131,4 @@ public interface ReplicableSecurityService extends SecurityService {
     LockingAndBanning internalFailedBearerTokenAuthentication(String clientIP);
 
     LockingAndBanning internalRecordUserCreationFromClientIP(String clientIP);
-
-    Void internalUpdateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL);
 }

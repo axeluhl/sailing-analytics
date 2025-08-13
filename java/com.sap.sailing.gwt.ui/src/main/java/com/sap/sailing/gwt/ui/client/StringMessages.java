@@ -2554,7 +2554,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String commandLogOutput();
     String errorLoadingLeaderboard(String leaderboardName, String message);
     String debrandingConfiguration();
-    String debrandingIsActive();
+    String activeBranding();
     String copyPairingListFromOtherLeaderboard();
     String selectRaceColumnsWhosePairingsToCopy();
     String errorCopyingPairings(String message);

@@ -6,11 +6,13 @@ Automatic-Module-Name: com.sap.sse.branding
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: javax.servlet;version="3.1.0",
+Import-Package: com.sap.sse.util,
+ javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  javax.ws.rs.core;version="1.1.1",
  org.apache.http,
- org.osgi.framework;version="[1.10.0,2.0.0)"
+ org.osgi.framework;version="[1.10.0,2.0.0)",
+ org.osgi.util.tracker;version="[1.5.0,2.0.0)"
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.sap.sse.branding.impl.Activator

@@ -34,24 +34,14 @@ public class SecurityServiceInitialLoadExtensionsDTO implements Serializable {
     
     private final ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation;
     
-    private final boolean brandingActive;
-    
-    private final String defaultBrandingLogoURL;
-    
-    private final String greyTransparentLogoURL;
-    
     public SecurityServiceInitialLoadExtensionsDTO(
             ConcurrentMap<String, Pair<Boolean, Set<String>>> corsFilterConfigurationsByReplicaSetName,
             ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForBearerTokenAuthentication,
-            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation,
-            boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL) {
+            ConcurrentMap<String, LockingAndBanning> clientIPBasedLockingAndBanningForUserCreation) {
         super();
         this.corsFilterConfigurationsByReplicaSetName = corsFilterConfigurationsByReplicaSetName;
         this.clientIPBasedLockingAndBanningForBearerTokenAuthentication = clientIPBasedLockingAndBanningForBearerTokenAuthentication;
         this.clientIPBasedLockingAndBanningForUserCreation = clientIPBasedLockingAndBanningForUserCreation;
-        this.brandingActive = brandingActive;
-        this.defaultBrandingLogoURL = defaultBrandingLogoURL;
-        this.greyTransparentLogoURL = greyTransparentLogoURL;
     }
     
     ConcurrentMap<String, Pair<Boolean, Set<String>>> getCorsFilterConfigurationsByReplicaSetName() {
@@ -64,17 +54,5 @@ public class SecurityServiceInitialLoadExtensionsDTO implements Serializable {
 
     ConcurrentMap<String, LockingAndBanning> getClientIPBasedLockingAndBanningForUserCreation() {
         return clientIPBasedLockingAndBanningForUserCreation;
-    }
-    
-    boolean isBrandingActive() {
-        return brandingActive;
-    }
-
-    String getDefaultBrandingLogoURL() {
-        return defaultBrandingLogoURL;
-    }
-
-    String getGreyTransparentLogoURL() {
-        return greyTransparentLogoURL;
     }
 }

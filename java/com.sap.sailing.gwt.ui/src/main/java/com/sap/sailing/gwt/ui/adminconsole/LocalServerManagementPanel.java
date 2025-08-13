@@ -43,7 +43,6 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -64,7 +63,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     private Anchor groupOwnerInfo, userOwnerInfo;
     private CheckBox isStandaloneServerCheckbox, isPublicServerCheckbox, isSelfServiceServerCheckbox;
     private CheckBox isCORSWildcardCheckbox;
-    private CheckBox debrandingCheckbox;
+    private Label activeBrandingIdLabel;
     private StringListEditorComposite corsAllowedOriginsTextArea;
 
     private ServerInfoDTO currentServerInfo;
@@ -128,13 +127,11 @@ public class LocalServerManagementPanel extends SimplePanel {
     
     private Widget createDebrandingConfigurationUI() {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.debrandingConfiguration(), 1);
-        VerticalPanel debrandingPanel = new VerticalPanel();
-        debrandingPanel.setSpacing(4);
-        debrandingCheckbox = new CheckBox();
-        debrandingCheckbox.addValueChangeHandler(event -> brandingConfigurationChanged());
-        debrandingCheckbox.ensureDebugId("debrandingCheckbox");
-        debrandingPanel.add(debrandingCheckbox);
-        captionPanel.addWidget(stringMessages.debrandingIsActive(), debrandingPanel);
+        VerticalPanel brandingPanel = new VerticalPanel();
+        brandingPanel.setSpacing(4);
+        activeBrandingIdLabel = new Label();
+        brandingPanel.add(activeBrandingIdLabel);
+        captionPanel.addWidget(stringMessages.activeBranding(), brandingPanel);
         return captionPanel;
     }
 
@@ -248,34 +245,12 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
-    private void brandingConfigurationChanged() {
-        final Boolean brandingActive = !debrandingCheckbox.getValue();
-        userService.getUserManagementWriteService().updateBrandingConfiguration(
-                new BrandingConfigurationDTO(brandingActive, /* defaultBrandingLogoURL TODO */ null, /* greyTransparentLogoURL TODO */ null),
-                new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.updatedServerSetupError(), NotificationType.ERROR);
-                errorReporter.reportError(caught.getMessage());
-                refreshBrandingConfiguration();
-                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                Notification.notify(stringMessages.updatedServerSetup(), NotificationType.SUCCESS);
-                refreshBrandingConfiguration();
-                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
-            }
-        });
-    }
-
     public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
     }
     
     public void refreshBrandingConfiguration() {
-        userService.getUserManagementService().getBrandingConfiguration(new RefreshAsyncCallback<>(this::updateBrandingConfiguration));
+        userService.getUserManagementService().getBrandingConfigurationId(new RefreshAsyncCallback<>(this::updateBrandingConfiguration));
     }
     
     public void refreshCORSConfiguration() {
@@ -321,8 +296,8 @@ public class LocalServerManagementPanel extends SimplePanel {
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
     }
     
-    private void updateBrandingConfiguration(BrandingConfigurationDTO result) {
-        debrandingCheckbox.setValue(!result.isBrandingActive(), /* fireEvents */ false);
+    private void updateBrandingConfiguration(String brandingConfigurationId) {
+        activeBrandingIdLabel.setText(brandingConfigurationId == null ? "" : brandingConfigurationId);
     }
     
     private void updateCORSFilterConfiguration(Pair<Boolean, ArrayList<String>> corsFilterConfiguration) {

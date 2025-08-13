@@ -32,7 +32,6 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
@@ -709,12 +708,5 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
     @Override
     public void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext) throws MailException {
         getSecurityService().fileTakedownNotice(takedownNoticeRequestContext);
-    }
-    
-    @Override
-    public void updateBrandingConfiguration(BrandingConfigurationDTO brandingConfiguration) {
-        getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
-        getSecurityService().updateBrandingConfiguration(brandingConfiguration.isBrandingActive(),
-                brandingConfiguration.getDefaultBrandingLogoURL(), brandingConfiguration.getGreyTransparentLogoURL());
     }
 }

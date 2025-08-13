@@ -63,7 +63,7 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
                 final boolean debrandingActive = !brandingConfigurationService.isBrandingActive();
                 if (ctxDebrandingActive == null || !Boolean.toString(debrandingActive).equalsIgnoreCase(ctxDebrandingActive)) {
-                    createReplacementMap(!debrandingActive).forEach((k, v) -> {
+                    createReplacementMap(brandingConfigurationService).forEach((k, v) -> {
                         ctx.setAttribute("clientConfigurationContext." + k, v);
                     });
                 }
@@ -76,20 +76,21 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
         // intentionally left blank
     }
 
-    private Map<String, String> createReplacementMap(boolean brandingActive) {
+    private Map<String, String> createReplacementMap(BrandingConfigurationService brandingConfigurationService) {
         final Map<String, String> map = new HashMap<>();
         final String title;
         final String whitelabeled;
-        if (brandingActive) {
+        if (brandingConfigurationService.isBrandingActive()) {
             title = "SAP ";
             whitelabeled = "";
         } else {
             title = "";
             whitelabeled = "-whitelabeled";
         }
-        map.put("SAP", title);
-        map.put("debrandingActive", Boolean.toString(!brandingActive));
-        map.put("whitelabeled", whitelabeled);
+        map.put(BrandingConfigurationService.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
+        map.put(BrandingConfigurationService.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, Boolean.toString(!brandingConfigurationService.isBrandingActive()));
+        map.put(BrandingConfigurationService.BRANDING_ACTIVE_JSP_PROPERTY_NAME, Boolean.toString(brandingConfigurationService.isBrandingActive()));
+        map.put(BrandingConfigurationService.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);
         return map;
     }
 }

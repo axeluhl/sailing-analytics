@@ -247,8 +247,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
     
-    private final ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker;
-
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
@@ -328,8 +326,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
             ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker, UserStore userStore, AccessControlStore accessControlStore,
             HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, brandingConfigurationServiceTracker, userStore,
-                accessControlStore, hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, userStore, accessControlStore,
+                hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -340,10 +338,9 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker,
             ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
-            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker,
-            UserStore userStore, AccessControlStore accessControlStore,
-            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
-            String sharedAcrossSubdomainsOf,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, UserStore userStore,
+            AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
+            SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf,
             String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
@@ -360,7 +357,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
-        this.brandingConfigurationServiceTracker = brandingConfigurationServiceTracker;
         this.replicationServiceTracker = replicationServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         this.cacheManager = loadReplicationCacheManagerContents();
@@ -2616,11 +2612,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // checking for null for backward compatibility; an older primary/master may not have known this field yet
             clientIPBasedLockingAndBanningForUserCreation.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation());
         }
-        if (getBrandingConfigurationService() != null) {
-            getBrandingConfigurationService().setBrandingActive(initialLoadExtensions.isBrandingActive());
-            getBrandingConfigurationService().setDefaultBrandingLogoURL(initialLoadExtensions.getDefaultBrandingLogoURL());
-            getBrandingConfigurationService().setGreyTransparentLogoURL(initialLoadExtensions.getGreyTransparentLogoURL());
-        }
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
@@ -2636,10 +2627,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(new SecurityServiceInitialLoadExtensionsDTO(
                 corsFilterConfigurationsByReplicaSetName,
                 clientIPBasedLockingAndBanningForBearerTokenAuthentication,
-                clientIPBasedLockingAndBanningForUserCreation,
-                getBrandingConfigurationService() != null ? getBrandingConfigurationService().isBrandingActive() : false,
-                getBrandingConfigurationService() != null ? getBrandingConfigurationService().getDefaultBrandingLogoURL() : null,
-                getBrandingConfigurationService() != null ? getBrandingConfigurationService().getGreyTransparentLogoURL() : null));
+                clientIPBasedLockingAndBanningForUserCreation));
     }
 
     @Override
@@ -3510,23 +3498,5 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 serverAction -> getUsersWithPermissions(serverIdentifier.getPermission(serverAction))
                 .forEach(usersToSendMailTo::add));
         return usersToSendMailTo;
-    }
-
-    @Override
-    public void updateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL) {
-        apply(s->s.internalUpdateBrandingConfiguration(brandingActive, defaultBrandingLogoURL, greyTransparentLogoURL));
-    }
-
-    @Override
-    public Void internalUpdateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL) {
-        final BrandingConfigurationService brandingConfigurationService = getBrandingConfigurationService();
-        brandingConfigurationService.setBrandingActive(brandingActive);
-        brandingConfigurationService.setDefaultBrandingLogoURL(defaultBrandingLogoURL);
-        brandingConfigurationService.setGreyTransparentLogoURL(greyTransparentLogoURL);
-        return null;
-    }
-
-    private BrandingConfigurationService getBrandingConfigurationService() {
-        return brandingConfigurationServiceTracker.getService();
     }
 }

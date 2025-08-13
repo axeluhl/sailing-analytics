@@ -14,9 +14,9 @@ public class Activator implements BundleActivator {
     
     @Override
     public void start(BundleContext context) throws Exception {
-        defaultBrandingConfigurationService = new BrandingConfigurationServiceImpl();
-        final boolean debrandingActive = Boolean.valueOf(System.getProperty(BrandingConfigurationService.DEBRANDING_PROPERTY_NAME, "true"));
-        defaultBrandingConfigurationService.setBrandingActive(!debrandingActive);
+        defaultBrandingConfigurationService = new BrandingConfigurationServiceImpl(context);
+        final String brandingConfigurationId = System.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME);
+        defaultBrandingConfigurationService.setActiveBrandingConfigurationById(brandingConfigurationId);
         context.registerService(BrandingConfigurationService.class.getName(), defaultBrandingConfigurationService, null);
     }
 
