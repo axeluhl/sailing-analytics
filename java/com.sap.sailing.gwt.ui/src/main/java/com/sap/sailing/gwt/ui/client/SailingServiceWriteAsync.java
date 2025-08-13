@@ -773,4 +773,8 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void setAIAgentCredentials(String credentials, AsyncCallback<Void> callback);
     
     void resetAIAgentCredentials(AsyncCallback<Void> callback);
+    
+    
+    void copyPairingListFromOtherLeaderboard(String sourceLeaderboardName, String targetLeaderboardName, String fromRaceColumnName,
+            String toRaceColumnInclusiveName, AsyncCallback<Void> asyncCallback);
 }
