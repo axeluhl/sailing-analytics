@@ -30,6 +30,13 @@
                     season, create a pairing list for that and the copy sub-sequences from it to
                     the regattas of the individual events. This can help improve the fairness of
                     pairing lists across an entire season.</li>
+                <li>Branding is now more configurable. Instead of using system property <pre>-Dcom.sap.sse.debranding=false</pre>
+                    to request SAP branding you now have to set system property <pre>-Dcom.sap.sse.branding=SAP</pre> for
+                    SAP's branding. With this, branding generally becomes pluggable. Alternative branding may be provided
+                    by registering a service for type <tt>com.sap.sse.branding.BrandingConfiguration</tt> with the OSGi
+                    service registry, adding the <tt>com.sap.sse.branding</tt> attribute in the registration's dictionary,
+                    setting the value to the ID that can then be selected by the <tt>com.sap.sse.branding</tt> system
+                    property.</li>
           </ul>
           <h2 class="articleSubheadline">June 2025</h2>
           <ul class="bulletList">
