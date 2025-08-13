@@ -2616,6 +2616,11 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             // checking for null for backward compatibility; an older primary/master may not have known this field yet
             clientIPBasedLockingAndBanningForUserCreation.putAll(initialLoadExtensions.getClientIPBasedLockingAndBanningForUserCreation());
         }
+        if (getBrandingConfigurationService() != null) {
+            getBrandingConfigurationService().setBrandingActive(initialLoadExtensions.isBrandingActive());
+            getBrandingConfigurationService().setDefaultBrandingLogoURL(initialLoadExtensions.getDefaultBrandingLogoURL());
+            getBrandingConfigurationService().setGreyTransparentLogoURL(initialLoadExtensions.getGreyTransparentLogoURL());
+        }
         logger.info("Triggering SecurityInitializationCustomizers upon replication ...");
         customizers.forEach(c -> c.customizeSecurityService(this));
         logger.info("Done filling SecurityService");
@@ -2631,7 +2636,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         objectOutputStream.writeObject(new SecurityServiceInitialLoadExtensionsDTO(
                 corsFilterConfigurationsByReplicaSetName,
                 clientIPBasedLockingAndBanningForBearerTokenAuthentication,
-                clientIPBasedLockingAndBanningForUserCreation));
+                clientIPBasedLockingAndBanningForUserCreation,
+                getBrandingConfigurationService() != null ? getBrandingConfigurationService().isBrandingActive() : false,
+                getBrandingConfigurationService() != null ? getBrandingConfigurationService().getDefaultBrandingLogoURL() : null,
+                getBrandingConfigurationService() != null ? getBrandingConfigurationService().getGreyTransparentLogoURL() : null));
     }
 
     @Override

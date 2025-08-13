@@ -1,8 +1,9 @@
 package com.sap.sse.security.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public class BrandingConfigurationDTO implements IsSerializable {
+public class BrandingConfigurationDTO implements Serializable {
+    private static final long serialVersionUID = -8823261111571006856L;
     private boolean brandingActive;
     private String defaultBrandingLogoURL;
     private String greyTransparentLogoURL;

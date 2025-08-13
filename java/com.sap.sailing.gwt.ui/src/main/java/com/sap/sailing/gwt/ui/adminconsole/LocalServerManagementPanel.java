@@ -93,6 +93,7 @@ public class LocalServerManagementPanel extends SimplePanel {
             mainPanel.add(createCORSFilterConfigurationUI());
             refreshCORSConfiguration();
         }
+        refreshBrandingConfiguration();
         mainPanel.add(createDebrandingConfigurationUI());
     }
 
@@ -256,14 +257,14 @@ public class LocalServerManagementPanel extends SimplePanel {
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.updatedServerSetupError(), NotificationType.ERROR);
                 errorReporter.reportError(caught.getMessage());
-                refreshServerConfiguration();
+                refreshBrandingConfiguration();
                 isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
             }
 
             @Override
             public void onSuccess(Void result) {
                 Notification.notify(stringMessages.updatedServerSetup(), NotificationType.SUCCESS);
-                refreshServerConfiguration();
+                refreshBrandingConfiguration();
                 isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
             }
         });
@@ -277,7 +278,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         userService.getUserManagementService().getBrandingConfiguration(new RefreshAsyncCallback<>(this::updateBrandingConfiguration));
     }
     
-    private void refreshCORSConfiguration() {
+    public void refreshCORSConfiguration() {
         if (userService.hasServerPermission(ServerActions.CONFIGURE_CORS_FILTER)) {
             userService.getUserManagementService().getCORSFilterConfiguration(new RefreshAsyncCallback<>(this::updateCORSFilterConfiguration));
         }
@@ -321,9 +322,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
     
     private void updateBrandingConfiguration(BrandingConfigurationDTO result) {
-        if (result.isBrandingActive()) {
-            debrandingCheckbox.setValue(result.isBrandingActive(), /* fireEvents */ false);
-        }
+        debrandingCheckbox.setValue(!result.isBrandingActive(), /* fireEvents */ false);
     }
     
     private void updateCORSFilterConfiguration(Pair<Boolean, ArrayList<String>> corsFilterConfiguration) {

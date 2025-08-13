@@ -445,6 +445,8 @@ public class AdminConsoleViewImpl extends Composite implements AdminConsoleView 
                             public void refreshAfterBecomingVisible() {
                                 if (getWidget() != null) {
                                     getWidget().refreshServerConfiguration();
+                                    getWidget().refreshBrandingConfiguration();
+                                    getWidget().refreshCORSConfiguration();
                                 }
                             }
         }, stringMessages.localServer(), new LocalServerPlace((String) null /* no place token */),
