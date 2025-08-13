@@ -8,17 +8,12 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
     /** indicates if the server is running in standalone mode or not  */
     private boolean isStandaloneServer;
 
-    /** indicates if debranding is active */
-    private Boolean debrandingActive;
-
     public SailingServerConfigurationImpl(boolean isStandaloneServer) {
         this.isStandaloneServer = isStandaloneServer;
-        this.debrandingActive = false; // default
     }
 
     public SailingServerConfigurationImpl(boolean isStandaloneServer, Boolean debrandingActive) {
         this.isStandaloneServer = isStandaloneServer;
-        this.debrandingActive = debrandingActive;
     }
 
     @Override
@@ -29,13 +24,5 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
     @Override
     public void setStandaloneServer(boolean isStandaloneServer) {
         this.isStandaloneServer = isStandaloneServer;
-    }
-
-    public Boolean isDebrandingActive() {
-        return debrandingActive;
-    }
-
-    public void setDebrandingActive(Boolean debrandingActive) {
-        this.debrandingActive = debrandingActive;
     }
 }

@@ -39,10 +39,11 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
-import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite.ExpandedUi;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -126,15 +127,13 @@ public class LocalServerManagementPanel extends SimplePanel {
     
     private Widget createDebrandingConfigurationUI() {
         final ServerDataCaptionPanel captionPanel = new ServerDataCaptionPanel(stringMessages.debrandingConfiguration(), 1);
-
         VerticalPanel debrandingPanel = new VerticalPanel();
         debrandingPanel.setSpacing(4);
         debrandingCheckbox = new CheckBox();
-        debrandingCheckbox.addValueChangeHandler(event -> serverConfigurationChanged());
+        debrandingCheckbox.addValueChangeHandler(event -> brandingConfigurationChanged());
         debrandingCheckbox.ensureDebugId("debrandingCheckbox");
         debrandingPanel.add(debrandingCheckbox);
         captionPanel.addWidget(stringMessages.debrandingIsActive(), debrandingPanel);
-
         return captionPanel;
     }
 
@@ -227,10 +226,8 @@ public class LocalServerManagementPanel extends SimplePanel {
         final Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled()
                 ? isSelfServiceServerCheckbox.getValue()
                 : null;
-
-        final Boolean debrandingActive = debrandingCheckbox.getValue();
         final ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
-                publicServer, selfServiceServer, null, debrandingActive);
+                publicServer, selfServiceServer, null);
         isSelfServiceServerCheckbox.getElement().setAttribute("updating", "true");
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
@@ -250,8 +247,34 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     }
 
+    private void brandingConfigurationChanged() {
+        final Boolean brandingActive = !debrandingCheckbox.getValue();
+        userService.getUserManagementWriteService().updateBrandingConfiguration(
+                new BrandingConfigurationDTO(brandingActive, /* defaultBrandingLogoURL TODO */ null, /* greyTransparentLogoURL TODO */ null),
+                new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.updatedServerSetupError(), NotificationType.ERROR);
+                errorReporter.reportError(caught.getMessage());
+                refreshServerConfiguration();
+                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                Notification.notify(stringMessages.updatedServerSetup(), NotificationType.SUCCESS);
+                refreshServerConfiguration();
+                isSelfServiceServerCheckbox.getElement().setAttribute("updating", "false");
+            }
+        });
+    }
+
     public void refreshServerConfiguration() {
         sailingService.getServerConfiguration(new RefreshAsyncCallback<>(this::updateServerConfiguration));
+    }
+    
+    public void refreshBrandingConfiguration() {
+        userService.getUserManagementService().getBrandingConfiguration(new RefreshAsyncCallback<>(this::updateBrandingConfiguration));
     }
     
     private void refreshCORSConfiguration() {
@@ -295,8 +318,11 @@ public class LocalServerManagementPanel extends SimplePanel {
         isStandaloneServerCheckbox.setEnabled(true);
         isPublicServerCheckbox.setValue(result.isPublic(), false);
         isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
-        if (result.getDebrandingActive() != null) {
-            debrandingCheckbox.setValue(result.getDebrandingActive(), false);
+    }
+    
+    private void updateBrandingConfiguration(BrandingConfigurationDTO result) {
+        if (result.isBrandingActive()) {
+            debrandingCheckbox.setValue(result.isBrandingActive(), /* fireEvents */ false);
         }
     }
     

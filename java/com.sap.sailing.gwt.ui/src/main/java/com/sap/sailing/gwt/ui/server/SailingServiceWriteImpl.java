@@ -4036,10 +4036,7 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_LOCAL_SERVER);
         getService().apply(new UpdateServerConfiguration(
-                new SailingServerConfigurationImpl(
-                    serverConfiguration.isStandaloneServer(),
-                    serverConfiguration.getDebrandingActive()
-                )));
+                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
         if (serverConfiguration.isSelfService() != null) {
             final boolean isCurrentlySelfService = isSelfServiceServer();
             final boolean shouldBeSelfService = serverConfiguration.isSelfService();

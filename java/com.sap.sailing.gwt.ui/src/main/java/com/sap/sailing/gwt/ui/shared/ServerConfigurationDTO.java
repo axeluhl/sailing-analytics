@@ -8,7 +8,6 @@ public class ServerConfigurationDTO implements IsSerializable {
     private Boolean isPublic;
     private Boolean isSelfService;
     private StrippedUserGroupDTO serverDefaultTenant;
-    private Boolean debrandingActive;
 
     // for GWT
     ServerConfigurationDTO() {
@@ -18,12 +17,11 @@ public class ServerConfigurationDTO implements IsSerializable {
      * serverDefaultTenant is only for transfer to client, it is not used in the server configuration update
      */
     public ServerConfigurationDTO(boolean isStandaloneServer, Boolean isPublic, Boolean isSelfService,
-            StrippedUserGroupDTO serverDefaultTenant, Boolean debrandingActive) {
+            StrippedUserGroupDTO serverDefaultTenant) {
         this.isStandaloneServer = isStandaloneServer;
         this.isPublic = isPublic;
         this.isSelfService = isSelfService;
         this.serverDefaultTenant = serverDefaultTenant;
-        this.debrandingActive = debrandingActive;
     }
 
     public StrippedUserGroupDTO getServerDefaultTenant() {
@@ -40,9 +38,5 @@ public class ServerConfigurationDTO implements IsSerializable {
 
     public Boolean isSelfService() {
         return isSelfService;
-    }
-    
-    public Boolean getDebrandingActive() {
-        return debrandingActive;
     }
 }

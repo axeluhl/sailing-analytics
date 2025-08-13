@@ -24,6 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.branding.BrandingConfigurationService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -41,6 +42,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -59,6 +61,7 @@ import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SecurityServiceSharingDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
     private static final long serialVersionUID = 4458564336368629101L;
@@ -67,6 +70,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
+    private final ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker;
     protected final SecurityDTOFactory securityDTOFactory;
 
     public UserManagementServiceImpl() {
@@ -96,6 +100,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
+        brandingConfigurationServiceTracker = ServiceTrackerFactory.createAndOpen(context, BrandingConfigurationService.class); 
     }
 
     protected UserDTO getAllUser() {
@@ -412,5 +417,30 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         getSecurityService().checkCurrentUserServerPermission(ServerActions.CONFIGURE_CORS_FILTER);
         final Pair<Boolean, Set<String>> preResult = getSecurityService().getCORSFilterConfiguration(ServerInfo.getName());
         return preResult == null ? null : new Pair<>(preResult.getA(), new ArrayList<>(preResult.getB()));
+    }
+
+    @Override
+    public BrandingConfigurationDTO getBrandingConfiguration() {
+        final BrandingConfigurationService brandingConfigurationService = getBrandingConfigurationService();
+        final BrandingConfigurationDTO result;
+        if (brandingConfigurationService == null) {
+            result = null;
+        } else {
+            result = createBrandingConfigurationDTO(brandingConfigurationService);
+        }
+        return result;
+    }
+
+    private BrandingConfigurationService getBrandingConfigurationService() {
+        return brandingConfigurationServiceTracker.getService();
+    }
+
+    private BrandingConfigurationDTO createBrandingConfigurationDTO(
+            BrandingConfigurationService brandingConfigurationService) {
+        final BrandingConfigurationDTO brandingConfigurationDTO = new BrandingConfigurationDTO(
+                brandingConfigurationService.isBrandingActive(),
+                brandingConfigurationService.getDefaultBrandingLogoURL(),
+                brandingConfigurationService.getGreyTransparentLogoURL());
+        return brandingConfigurationDTO;
     }
 }

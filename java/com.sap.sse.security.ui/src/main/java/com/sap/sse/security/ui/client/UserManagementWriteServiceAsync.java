@@ -10,6 +10,7 @@ import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -121,4 +122,6 @@ public interface UserManagementWriteServiceAsync extends UserManagementServiceAs
     void setCORSFilterConfigurationAllowedOrigins(ArrayList<String> allowedOrigins, AsyncCallback<Void> callback);
 
     void fileTakedownNotice(TakedownNoticeRequestContext takedownNoticeRequestContext, AsyncCallback<Void> callback);
+
+    void updateBrandingConfiguration(BrandingConfigurationDTO brandingConfiguration, AsyncCallback<Void> callback);
 }

@@ -545,7 +545,7 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final ServiceTracker<WindFinderTrackerFactory, WindFinderTrackerFactory> windFinderTrackerFactoryServiceTracker;
-
+    
     private final MongoObjectFactory mongoObjectFactory;
 
     protected final ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionConnectorTracker;
@@ -3537,18 +3537,12 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         UserGroup serverTenant = getSecurityService().getServerGroup();
         StrippedUserGroupDTO serverTenantDTO = new SecurityDTOFactory()
                 .createStrippedUserGroupDTOFromUserGroup(serverTenant, new HashMap<>());
-        ServerConfigurationDTO result = new ServerConfigurationDTO(
-                sailingServerConfiguration.isStandaloneServer(),
-                isPublicServer(),
-                isSelfServiceServer(),
-                serverTenantDTO, sailingServerConfiguration.isDebrandingActive()
-        );
+        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
+                isPublicServer(), isSelfServiceServer(), serverTenantDTO);
         return result;
     }
-
-
+    
     @Override
-    //??
     public List<RemoteSailingServerReferenceDTO> getRemoteSailingServerReferences() {
         List<RemoteSailingServerReferenceDTO> result = new ArrayList<RemoteSailingServerReferenceDTO>();
         for (Entry<RemoteSailingServerReference, com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception>> remoteSailingServerRefAndItsCachedEvent :

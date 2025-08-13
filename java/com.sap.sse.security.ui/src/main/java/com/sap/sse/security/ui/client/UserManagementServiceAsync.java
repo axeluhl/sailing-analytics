@@ -15,6 +15,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -105,4 +106,6 @@ public interface UserManagementServiceAsync {
     void addSecurityInformation(SecuredDTO securedDTO, AsyncCallback<SecuredDTO> callback);
     
     void getCORSFilterConfiguration(AsyncCallback<Pair<Boolean, ArrayList<String>>> callback);
+
+    void getBrandingConfiguration(AsyncCallback<BrandingConfigurationDTO> callback);
 }

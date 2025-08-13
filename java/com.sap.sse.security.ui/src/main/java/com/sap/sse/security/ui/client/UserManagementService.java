@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.BrandingConfigurationDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.RolesAndPermissionsForUserDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
@@ -92,4 +93,6 @@ public interface UserManagementService extends RemoteService {
     SecuredDTO addSecurityInformation(SecuredDTO securedDTO);
     
     Pair<Boolean, ArrayList<String>> getCORSFilterConfiguration();
+
+    BrandingConfigurationDTO getBrandingConfiguration();
 }

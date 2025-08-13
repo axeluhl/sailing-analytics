@@ -92,6 +92,7 @@ import com.nulabinc.zxcvbn.ZxcvbnBuilder;
 import com.nulabinc.zxcvbn.io.ClasspathResource;
 import com.nulabinc.zxcvbn.matchers.SlantedKeyboardLoader;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.branding.BrandingConfigurationService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -246,6 +247,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     
     private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
     
+    private final ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker;
+
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
@@ -323,10 +326,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker,
             ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
-            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
-            SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, userStore, accessControlStore,
-                hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+            ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker, UserStore userStore, AccessControlStore accessControlStore,
+            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider) {
+        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, brandingConfigurationServiceTracker, userStore,
+                accessControlStore, hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -335,9 +338,13 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * the browser local and session store shall be shared and for which sessions identified by the {@code JSESSIONID} cookie shall
      * be shared as well.
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
-            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, UserStore userStore, AccessControlStore accessControlStore,
-            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker,
+            ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker,
+            UserStore userStore, AccessControlStore accessControlStore,
+            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider,
+            String sharedAcrossSubdomainsOf,
+            String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
@@ -353,6 +360,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
+        this.brandingConfigurationServiceTracker = brandingConfigurationServiceTracker;
         this.replicationServiceTracker = replicationServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         this.cacheManager = loadReplicationCacheManagerContents();
@@ -3494,5 +3502,23 @@ implements ReplicableSecurityService, ClearStateTestSupport {
                 serverAction -> getUsersWithPermissions(serverIdentifier.getPermission(serverAction))
                 .forEach(usersToSendMailTo::add));
         return usersToSendMailTo;
+    }
+
+    @Override
+    public void updateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL) {
+        apply(s->s.internalUpdateBrandingConfiguration(brandingActive, defaultBrandingLogoURL, greyTransparentLogoURL));
+    }
+
+    @Override
+    public Void internalUpdateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL) {
+        final BrandingConfigurationService brandingConfigurationService = getBrandingConfigurationService();
+        brandingConfigurationService.setBrandingActive(brandingActive);
+        brandingConfigurationService.setDefaultBrandingLogoURL(defaultBrandingLogoURL);
+        brandingConfigurationService.setGreyTransparentLogoURL(greyTransparentLogoURL);
+        return null;
+    }
+
+    private BrandingConfigurationService getBrandingConfigurationService() {
+        return brandingConfigurationServiceTracker.getService();
     }
 }

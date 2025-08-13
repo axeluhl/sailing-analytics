@@ -928,4 +928,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     Iterable<User> getUsersToInformAboutReplicaSet(String serverName,
             Optional<com.sap.sse.security.shared.HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet);
+    
+    void updateBrandingConfiguration(boolean brandingActive, String defaultBrandingLogoURL, String greyTransparentLogoURL);
 }
