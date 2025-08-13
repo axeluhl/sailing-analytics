@@ -62,7 +62,7 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
                 final String ctxBrandingActive = (String) ctx.getAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX+BrandingConfigurationService.BRANDING_ACTIVE_JSP_PROPERTY_NAME);
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
                 final boolean brandingActive = brandingConfigurationService.isBrandingActive();
-                if (ctxBrandingActive == null || Boolean.toString(brandingActive).equalsIgnoreCase(ctxBrandingActive)) {
+                if (ctxBrandingActive == null || !Boolean.toString(brandingActive).equalsIgnoreCase(ctxBrandingActive)) {
                     createReplacementMap(brandingConfigurationService).forEach((k, v) -> {
                         ctx.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX + k, v);
                     });
