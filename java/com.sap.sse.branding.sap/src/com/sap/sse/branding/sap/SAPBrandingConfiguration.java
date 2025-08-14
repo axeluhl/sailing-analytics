@@ -1,6 +1,6 @@
 package com.sap.sse.branding.sap;
 
-import com.sap.sse.branding.BrandingConfiguration;
+import com.sap.sse.branding.shared.BrandingConfiguration;
 
 public class SAPBrandingConfiguration implements BrandingConfiguration {
     public static final String ID = "SAP";

@@ -13,11 +13,7 @@
     <link href='images/dashboardicon${applicationScope['clientConfigurationContext.whitelabeled']}.png' rel='apple-touch-icon'>
     <link rel="stylesheet" type="text/css" href="/sailing-fontface-1.0.cache.css">
     <title>Dashboard</title>
-    <script>
-       document.clientConfigurationContext = {
-            debrandingActive: ${applicationScope['clientConfigurationContext.debrandingActive']}
-       };
-    </script>
+    <script type="text/javascript" src="/gwt-base/api/client_configuration_context"></script>
     <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
     <script type="text/javascript"
        src="com.sap.sailing.dashboards.gwt.RibDashboard/com.sap.sailing.dashboards.gwt.RibDashboard.nocache.js"></script>

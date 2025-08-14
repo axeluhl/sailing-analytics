@@ -1,12 +1,10 @@
 package com.sap.sse.branding;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.http.HttpServletRequest;
 
+import com.sap.sse.branding.BrandingConfigurationService.BrandingConfigurationProperty;
 import com.sap.sse.branding.impl.Activator;
 /**
  * JSP servlet is registered on *.html within web.xml . Use the following JSP expression 
@@ -59,12 +57,13 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
             final String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
                 final ServletContext ctx = sre.getServletContext();
-                final String ctxBrandingActive = (String) ctx.getAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX+BrandingConfigurationService.BRANDING_ACTIVE_JSP_PROPERTY_NAME);
+                final Boolean ctxBrandingActive = (Boolean) ctx.getAttribute(
+                        BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX+BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME.getPropertyName());
                 final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
                 final boolean brandingActive = brandingConfigurationService.isBrandingActive();
-                if (ctxBrandingActive == null || !Boolean.toString(brandingActive).equalsIgnoreCase(ctxBrandingActive)) {
-                    createReplacementMap(brandingConfigurationService).forEach((k, v) -> {
-                        ctx.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX + k, v);
+                if (ctxBrandingActive == null || brandingActive != ctxBrandingActive.booleanValue()) {
+                    brandingConfigurationService.getBrandingConfigurationPropertiesForJspContext().forEach((k, v) -> {
+                        ctx.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX + k.getPropertyName(), v);
                     });
                 }
             }
@@ -74,23 +73,5 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
         // intentionally left blank
-    }
-
-    private Map<String, String> createReplacementMap(BrandingConfigurationService brandingConfigurationService) {
-        final Map<String, String> map = new HashMap<>();
-        final String title;
-        final String whitelabeled;
-        if (brandingConfigurationService.isBrandingActive()) {
-            title = "SAP ";
-            whitelabeled = "";
-        } else {
-            title = "";
-            whitelabeled = "-whitelabeled";
-        }
-        map.put(BrandingConfigurationService.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
-        map.put(BrandingConfigurationService.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, Boolean.toString(!brandingConfigurationService.isBrandingActive()));
-        map.put(BrandingConfigurationService.BRANDING_ACTIVE_JSP_PROPERTY_NAME, Boolean.toString(brandingConfigurationService.isBrandingActive()));
-        map.put(BrandingConfigurationService.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);
-        return map;
     }
 }

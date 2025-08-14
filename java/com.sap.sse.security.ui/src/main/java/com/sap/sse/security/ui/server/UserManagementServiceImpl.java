@@ -25,6 +25,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.branding.BrandingConfigurationService;
+import com.sap.sse.branding.shared.BrandingConfiguration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -425,7 +426,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (brandingConfigurationService == null) {
             result = null;
         } else {
-            result = brandingConfigurationService.getActiveBrandingConfiguration().getId();
+            final BrandingConfiguration activeBrandingConfiguration = brandingConfigurationService.getActiveBrandingConfiguration();
+            result = activeBrandingConfiguration == null ? null : activeBrandingConfiguration.getId();
         }
         return result;
     }

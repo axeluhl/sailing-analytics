@@ -11,7 +11,6 @@ import com.google.gwt.core.client.JavaScriptObject;
  *
  */
 public class ClientConfigurationContextDataJSO extends JavaScriptObject {
-
     protected ClientConfigurationContextDataJSO() {
     }
 
@@ -19,4 +18,19 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
         return this.debrandingActive;
     }-*/;
 
+    public final native String getId() /*-{
+        return this.id;
+    }-*/;
+
+    public final native String getBrandTitle() /*-{
+        return this.brandTitle;
+    }-*/;
+
+    public final native String getDefaultBrandingLogoURL() /*-{
+        return this.defaultBrandingLogoURL;
+    }-*/;
+
+    public final native String getGreyTransparentLogoURL() /*-{
+        return this.greyTransparentLogoURL;
+    }-*/;
 }

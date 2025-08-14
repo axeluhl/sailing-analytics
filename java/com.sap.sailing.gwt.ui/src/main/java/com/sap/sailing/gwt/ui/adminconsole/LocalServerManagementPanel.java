@@ -297,7 +297,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
     
     private void updateBrandingConfiguration(String brandingConfigurationId) {
-        activeBrandingIdLabel.setText(brandingConfigurationId == null ? "" : brandingConfigurationId);
+        activeBrandingIdLabel.setText(brandingConfigurationId == null ? stringMessages.none() : brandingConfigurationId);
     }
     
     private void updateCORSFilterConfiguration(Pair<Boolean, ArrayList<String>> corsFilterConfiguration) {

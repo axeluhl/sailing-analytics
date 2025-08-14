@@ -35,4 +35,21 @@
       <servlet-name>CrossDomainStorageConfigurationService</servlet-name>
       <url-pattern>/service/crossdomainstorageconfiguration</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>Jersey REST API</servlet-name>
+        <servlet-class>com.sap.sse.gwt.jaxrs.RestServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.sap.sse.gwt.jaxrs.api.RestApiApplication</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Jersey REST API</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
 </web-app>

@@ -1,5 +1,9 @@
 package com.sap.sse.branding;
 
+import java.util.Map;
+
+import com.sap.sse.branding.shared.BrandingConfiguration;
+
 /**
  * Describes all the aspects of branding as it may show in various places, specifically in the UI.
  * This includes whether branding is active, but also various logos to be displayed in different contexts,
@@ -42,33 +46,45 @@ public interface BrandingConfigurationService {
      */
     String JSP_PROPERTY_NAME_PREFIX = "clientConfigurationContext.";
     
-    /**
-     * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that contains the brand title
-     * with a trailing space, so it can be concatenated with, e.g., the string "Sailing Analytics" to produce "{Your Brand Name} Sailing Analytics".
-     */
-    String BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME = "brandTitle";
-    
-    /**
-     * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that indicates whether
-     * debranding/whitelabeling is active. If this is {@code "true"}, the brand title will be empty, the property identified
-     * by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be {@code "-whitelabeled"}, and the property identified by
-     * {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "false"}. If this is {@code "false"}, the brand title will
-     * be filled, the property identified by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be empty, and the property
-     * identified by {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "true"}.
-     */
-    String DEBRANDING_ACTIVE_JSP_PROPERTY_NAME = "debrandingActive";
-    
-    /**
-     * Opposite of {@link #DEBRANDING_ACTIVE_JSP_PROPERTY_NAME}.
-     */
-    String BRANDING_ACTIVE_JSP_PROPERTY_NAME = "brandingActive";
-    
-    /**
-     * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, whose value is
-     * either empty (if branding is not active) or {@code "-whitelabeled"} (if branding is active). It may be used,
-     * e.g., to produce an image URL that is different for whitelabeled and branded versions of the product.
-     */
-    String DASH_WHITELABELED_JSP_PROPERTY_NAME = "whitelabeled";
+    public static enum BrandingConfigurationProperty {
+        /**
+         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that contains the brand title
+         * with a trailing space, so it can be concatenated with, e.g., the string "Sailing Analytics" to produce "{Your Brand Name} Sailing Analytics".
+         */
+        BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME("brandTitle"),
+        
+        /**
+         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that indicates whether
+         * debranding/whitelabeling is active. If this is {@code "true"}, the brand title will be empty, the property identified
+         * by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be {@code "-whitelabeled"}, and the property identified by
+         * {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "false"}. If this is {@code "false"}, the brand title will
+         * be filled, the property identified by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be empty, and the property
+         * identified by {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "true"}.
+         */
+        DEBRANDING_ACTIVE_JSP_PROPERTY_NAME("debrandingActive"),
+        
+        /**
+         * Opposite of {@link #DEBRANDING_ACTIVE_JSP_PROPERTY_NAME}.
+         */
+        BRANDING_ACTIVE_JSP_PROPERTY_NAME("brandingActive"),
+        
+        /**
+         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, whose value is
+         * either empty (if branding is not active) or {@code "-whitelabeled"} (if branding is active). It may be used,
+         * e.g., to produce an image URL that is different for whitelabeled and branded versions of the product.
+         */
+        DASH_WHITELABELED_JSP_PROPERTY_NAME("whitelabeled");
+
+        private BrandingConfigurationProperty(String propertyName) {
+            this.propertyName = propertyName;
+        }
+        
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        private final String propertyName;
+    }
     
     boolean isBrandingActive();
     
@@ -88,4 +104,18 @@ public interface BrandingConfigurationService {
      * can still return that configuration if it is called after the configuration was added.<p>
      */
     BrandingConfiguration setActiveBrandingConfigurationById(String brandingConfigurationId);
+    
+    /**
+     * Uses the {@link #getActiveBrandingConfiguration() active branding configuration} to produce a map of the
+     * branding-related properties that can be used in JSP contexts. The keys of the map are constructed using the
+     * {@link #JSP_PROPERTY_NAME_PREFIX} and the property names defined in
+     * {@link BrandingConfigurationProperty#getPropertyName()}. When branding is not active, the map will contain only
+     * the following entries: {@link BrandingConfigurationProperty#BRANDING_ACTIVE_JSP_PROPERTY_NAME},
+     * {@link BrandingConfigurationProperty#DEBRANDING_ACTIVE_JSP_PROPERTY_NAME},
+     * {@link BrandingConfigurationProperty#BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME}, and
+     * {@link BrandingConfigurationProperty#DASH_WHITELABELED_JSP_PROPERTY_NAME}. Otherwise, all properties from
+     * {@link BrandingConfigurationProperty} will be included.
+     * <p>
+     */
+    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext();
 }
