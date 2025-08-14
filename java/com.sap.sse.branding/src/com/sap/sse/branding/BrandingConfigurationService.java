@@ -1,6 +1,7 @@
 package com.sap.sse.branding;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.sap.sse.branding.shared.BrandingConfiguration;
 
@@ -73,7 +74,13 @@ public interface BrandingConfigurationService {
          * either empty (if branding is not active) or {@code "-whitelabeled"} (if branding is active). It may be used,
          * e.g., to produce an image URL that is different for whitelabeled and branded versions of the product.
          */
-        DASH_WHITELABELED_JSP_PROPERTY_NAME("whitelabeled");
+        DASH_WHITELABELED_JSP_PROPERTY_NAME("whitelabeled"),
+        
+        /**
+         * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will
+         * set the {@code document.clientConfigurationContext} object to a JSON object that contains all the branding fields. 
+         */
+        SCRIPT_FOR_CLIENT_CONFIGURATION_CONTEXT_TO_DOCUMENT_JSP_PROPERTY_NAME("scriptForClientConfigurationContextToDocument");
 
         private BrandingConfigurationProperty(String propertyName) {
             this.propertyName = propertyName;
@@ -116,6 +123,7 @@ public interface BrandingConfigurationService {
      * {@link BrandingConfigurationProperty#DASH_WHITELABELED_JSP_PROPERTY_NAME}. Otherwise, all properties from
      * {@link BrandingConfigurationProperty} will be included.
      * <p>
+     * @param locale if present, the locale to use for the branding configuration properties, otherwise the default locale
      */
-    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext();
+    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale);
 }

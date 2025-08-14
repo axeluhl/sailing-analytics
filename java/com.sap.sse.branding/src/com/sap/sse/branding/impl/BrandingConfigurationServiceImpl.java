@@ -2,7 +2,10 @@ package com.sap.sse.branding.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -49,21 +52,36 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
 
 
     @Override
-    public Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext() {
+    public Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale) {
+        final BrandingConfiguration brandingConfiguration = getActiveBrandingConfiguration();
         final Map<BrandingConfigurationProperty, Object> map = new HashMap<>();
         final String title;
         final String whitelabeled;
-        if (isBrandingActive()) {
-            title = "SAP ";
+        if (brandingConfiguration != null) {
+            title = brandingConfiguration.getBrandTitle()+" ";
             whitelabeled = "";
         } else {
             title = "";
             whitelabeled = "-whitelabeled";
         }
+        // TODO bug6060: figure out how to deal with i18n and the locale parameter
         map.put(BrandingConfigurationProperty.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());
         map.put(BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME, isBrandingActive());
         map.put(BrandingConfigurationProperty.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);
+        map.put(BrandingConfigurationProperty.SCRIPT_FOR_CLIENT_CONFIGURATION_CONTEXT_TO_DOCUMENT_JSP_PROPERTY_NAME, generateScriptForClientConfigurationContext(map));
         return map;
+    }
+
+    private Object generateScriptForClientConfigurationContext(Map<BrandingConfigurationProperty, Object> map) {
+        final StringBuilder scriptBuilder = new StringBuilder();
+        scriptBuilder.append("document.clientConfigurationContext=");
+        final JSONObject jsonObject = new JSONObject();
+        for (final Entry<BrandingConfigurationProperty, Object> brandingConfigurationPropertyAndValue : map.entrySet()) {
+            jsonObject.put(brandingConfigurationPropertyAndValue.getKey().getPropertyName(), brandingConfigurationPropertyAndValue.getValue());
+        }
+        scriptBuilder.append(jsonObject.toJSONString());
+        scriptBuilder.append(";");
+        return scriptBuilder.toString();
     }
 }

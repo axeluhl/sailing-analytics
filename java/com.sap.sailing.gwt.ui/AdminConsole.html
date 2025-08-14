@@ -38,7 +38,10 @@
   
     <!-- Client-side QR code generation -->
     <script type="text/javascript" src="qrcode/qrcode.min.js"></script>
+    <script>${applicationScope['clientConfigurationContext.scriptForClientConfigurationContextToDocument']}</script>
+    <!-- TODO remove this when the above works...
     <script type="text/javascript" src="/gwt-base/api/client_configuration_context"></script>
+    -->
     <!--                                           -->
     <!-- This script loads your compiled module.   -->
     <!-- If you add any GWT meta tags, they must   -->
