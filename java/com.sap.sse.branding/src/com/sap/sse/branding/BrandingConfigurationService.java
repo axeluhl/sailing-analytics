@@ -3,8 +3,6 @@ package com.sap.sse.branding;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.ServletContext;
-
 import com.sap.sse.branding.shared.BrandingConfiguration;
 
 /**
@@ -48,13 +46,6 @@ public interface BrandingConfigurationService {
      * {@link BrandingConfigurationProperty#BRANDING_ACTIVE_JSP_PROPERTY_NAME} and their respective {@link BrandingConfigurationProperty#getPropertyName()}.
      */
     String JSP_PROPERTY_NAME_PREFIX = "clientConfigurationContext";
-    
-    /**
-     * Attribute name used in the {@link ServletContext}, value being a map from a pair of locale (e.g. "en") and
-     * branding ID (see {@link BrandingConfiguration#getId()}) to a map of JSP properties that can be used to set it
-     * to the {@link #JSP_PROPERTY_NAME_PREFIX} attribute in the {@link HttpServletRequest} scope.
-     */
-    String JSP_PROPERTIES_BY_LOCALE_AND_BRANDING_ID = "clientConfigurationContextsByLocaleAndBrandingId";
     
     public static enum BrandingConfigurationProperty {
         /**
@@ -134,5 +125,11 @@ public interface BrandingConfigurationService {
      * <p>
      * @param locale if present, the locale to use for the branding configuration properties, otherwise the default locale
      */
-    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale);
+    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationProperties(Optional<String> locale);
+    
+    /**
+     * Same as {@link #getBrandingConfigurationProperties(Optional)} but returns a map where the keys are
+     * the property names as defined in {@link BrandingConfigurationProperty#getPropertyName()}.
+     */
+    Map<String, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale);
 }

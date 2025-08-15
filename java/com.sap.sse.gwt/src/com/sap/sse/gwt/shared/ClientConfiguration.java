@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.context.impl.ClientConfigurationContextDataFactory
  *      document.clientConfigurationContext={"brandingActive":true,"brandTitle":"SAP ","debrandingActive":false,"whitelabeled":""};
  * </pre>
  * That can be accessed from here using the {@link ClientConfigurationContextDataJSO}. Responsible for the properties listed in the
- * object is {@link BrandingConfigurationService#getBrandingConfigurationPropertiesForJspContext(Optional)} and its
+ * object is {@link BrandingConfigurationService#getBrandingConfigurationProperties(Optional)} and its
  * {@link BrandingConfigurationService#getActiveBrandingConfiguration() active branding configuration}, or none if the solution
  * is running without any branding.<p>
  * 

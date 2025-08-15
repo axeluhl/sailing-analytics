@@ -1,10 +1,7 @@
 package com.sap.sse.branding;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequestEvent;
@@ -12,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.sap.sse.branding.BrandingConfigurationService.BrandingConfigurationProperty;
 import com.sap.sse.branding.impl.Activator;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.rest.GwtLocaleFromHttpRequestUtil;
 
 /**
@@ -71,7 +67,7 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
      * <p>
      * 
      * The properties are constructed using
-     * {@link BrandingConfigurationService#getBrandingConfigurationPropertiesForJspContext(Optional)} with the locale as
+     * {@link BrandingConfigurationService#getBrandingConfigurationProperties(Optional)} with the locale as
      * argument, where the property names are derived from the {@link BrandingConfigurationProperty#getPropertyName()}
      * method which get appended to the {@link BrandingConfigurationService#JSP_PROPERTY_NAME_PREFIX} prefix.
      * <p>
@@ -86,37 +82,13 @@ public class ClientConfigurationListener implements javax.servlet.ServletRequest
             final String path = httpServletRequest.getServletPath();
             // populate JSP scopes (applicationScope and requestScope) only for HTML pages or "/" requests
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
-                final ServletContext servletContext = httpServletRequest.getServletContext();
                 Optional<String> requestLocale = GwtLocaleFromHttpRequestUtil.getLocaleFromHttpRequest(httpServletRequest);
-                final Map<String, Object> brandingProperties = getAndCacheBrandingConfigurationPropertiesFromServletContext(
-                        servletContext, requestLocale, Activator.getDefaultBrandingConfigurationService());
+                final Map<String, Object> brandingProperties = Activator.getDefaultBrandingConfigurationService().getBrandingConfigurationPropertiesForJspContext(requestLocale);
                 httpServletRequest.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX, brandingProperties);
             }
         }
     }
     
-    private Map<String, Object> getAndCacheBrandingConfigurationPropertiesFromServletContext(
-            ServletContext servletContext, Optional<String> locale, BrandingConfigurationService brandingConfigurationService) {
-        @SuppressWarnings("unchecked")
-        ConcurrentMap<Pair<String, String>, Map<String, Object>> brandingProperties =
-            (ConcurrentMap<Pair<String, String>, Map<String, Object>>) servletContext.getAttribute(BrandingConfigurationService.JSP_PROPERTIES_BY_LOCALE_AND_BRANDING_ID);
-        if (brandingProperties == null) {
-            brandingProperties = new ConcurrentHashMap<>();
-            servletContext.setAttribute(BrandingConfigurationService.JSP_PROPERTIES_BY_LOCALE_AND_BRANDING_ID, brandingProperties);
-        }
-        final Pair<String, String> key = new Pair<>(locale.orElse(null),
-                brandingConfigurationService.isBrandingActive() ? brandingConfigurationService.getActiveBrandingConfiguration().getId() : null);
-        return brandingProperties.computeIfAbsent(key, k->computeBrandingConfigurationProperties(brandingConfigurationService, locale));
-    }
-    
-    private Map<String, Object> computeBrandingConfigurationProperties(BrandingConfigurationService brandingConfigurationService, Optional<String> requestLocale) {
-        final Map<String, Object> brandingProperties = new HashMap<>(); // no concurrency control needed within single request
-        brandingConfigurationService.getBrandingConfigurationPropertiesForJspContext(requestLocale).forEach((k, v) -> {
-            brandingProperties.put(k.getPropertyName(), v);
-        });
-        return brandingProperties;
-    }
-
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
         // intentionally left blank
