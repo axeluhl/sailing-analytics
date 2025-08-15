@@ -59,7 +59,8 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     @Override
     public BrandingConfiguration setActiveBrandingConfigurationById(String brandingConfigurationId) {
         filterForActiveBrandingConfigurationId = createFilterForBrandingConfigurationId(brandingConfigurationId);
-        activeBrandingConfiguration = brandingConfigurationTracker.getServiceReferences() == null ? null :
+        activeBrandingConfiguration = filterForActiveBrandingConfigurationId == null ? null :
+            brandingConfigurationTracker.getServiceReferences() == null ? null :
             Arrays.asList(brandingConfigurationTracker.getServiceReferences())
                 .stream()
                 .filter(ref -> filterForActiveBrandingConfigurationId.match(ref.getProperties()))
@@ -78,7 +79,8 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
 
     private Filter createFilterForBrandingConfigurationId(String brandingConfigurationId) {
         try {
-            return bundleContext.createFilter(
+            return brandingConfigurationId == null ? null :
+                bundleContext.createFilter(
                     String.format("(&(%s=%s)(%s=%s))",
                             BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME, ""+brandingConfigurationId,
                             Constants.OBJECTCLASS, BrandingConfiguration.class.getName()));
@@ -146,7 +148,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         final BrandingConfiguration service = evictCachedPropertiesForBrandingServiceReference(reference);
         logger.info("Adding branding configuration service with ID: " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
                 " and object ID " + System.identityHashCode(service));
-        if (service != null && filterForActiveBrandingConfigurationId.match(reference)) {
+        if (service != null && filterForActiveBrandingConfigurationId != null && filterForActiveBrandingConfigurationId.match(reference)) {
             logger.info("Added branding configuration service with ID " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
                     " is selected as the active one.");
             activeBrandingConfiguration = service;
@@ -174,7 +176,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         evictCachedPropertiesForBrandingServiceReference(reference);
         logger.info("Modified branding configuration service with ID: " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
                 " and object ID " + System.identityHashCode(service));
-        if (service != null && filterForActiveBrandingConfigurationId.match(reference)) {
+        if (service != null && filterForActiveBrandingConfigurationId != null && filterForActiveBrandingConfigurationId.match(reference)) {
             logger.info("Modified branding configuration service with ID " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
                     ", updating active branding configuration.");
             activeBrandingConfiguration = service;
