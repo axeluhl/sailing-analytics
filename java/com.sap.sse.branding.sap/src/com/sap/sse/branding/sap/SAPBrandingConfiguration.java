@@ -1,5 +1,7 @@
 package com.sap.sse.branding.sap;
 
+import java.util.Optional;
+
 import com.sap.sse.branding.shared.BrandingConfiguration;
 
 public class SAPBrandingConfiguration implements BrandingConfiguration {
@@ -11,17 +13,17 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     }
 
     @Override
-    public String getDefaultBrandingLogoURL() {
+    public String getDefaultBrandingLogoURL(Optional<String> locale) {
         return defaultBrandingLogoURL;
     }
 
     @Override
-    public String getGreyTransparentLogoURL() {
+    public String getGreyTransparentLogoURL(Optional<String> locale) {
         return greyTransparentLogoURL;
     }
 
     @Override
-    public String getBrandTitle() {
+    public String getBrandTitle(Optional<String> locale) {
         return "SAP";
     }
 

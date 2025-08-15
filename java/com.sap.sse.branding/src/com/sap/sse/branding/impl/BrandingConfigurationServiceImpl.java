@@ -58,7 +58,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         final String title;
         final String whitelabeled;
         if (brandingConfiguration != null) {
-            title = brandingConfiguration.getBrandTitle()+" ";
+            title = brandingConfiguration.getBrandTitle(locale)+" ";
             whitelabeled = "";
         } else {
             title = "";
