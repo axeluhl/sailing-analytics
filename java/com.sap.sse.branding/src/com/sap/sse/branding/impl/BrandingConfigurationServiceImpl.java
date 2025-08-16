@@ -53,7 +53,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
 
     @Override
     public boolean isBrandingActive() {
-        return brandingConfigurationTracker != null && brandingConfigurationTracker.getService() != null;
+        return activeBrandingConfiguration != null;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     
     @Override
     public BrandingConfiguration getActiveBrandingConfiguration() {
-        return brandingConfigurationTracker == null ? null : brandingConfigurationTracker.getService();
+        return activeBrandingConfiguration;
     }
 
 
