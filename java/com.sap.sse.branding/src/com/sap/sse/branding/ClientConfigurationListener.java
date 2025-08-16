@@ -9,10 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.sap.sse.branding.BrandingConfigurationService.BrandingConfigurationProperty;
 import com.sap.sse.branding.impl.Activator;
+import com.sap.sse.rest.GwtLocaleFromHttpRequestUtil;
 
 /**
  * JSP servlet is registered on *.html within web.xml. Use the following JSP expression 
- * <pre>applicationScope['clientConfigurationContext.variableName']}</pre> to get strings replaced within the page. Among others, the
+ * <pre>${clientConfigurationContext['variableName']}</pre> to get strings replaced within the page. Among others, the
  * variables listed below are available for replacements:
  * <table border="1">
  * <tr>
@@ -39,8 +40,6 @@ import com.sap.sse.branding.impl.Activator;
  * <p>
  * For a full list of variables, see the {@link BrandingConfigurationService.BrandingConfigurationProperty} enumeration type.<p>
  * 
- * TODO bug6060 some String properties may depend on the locale; should we use a map keyed by the locale? How to index that map in the JSP expressions?
- *
  * Register a the jsp servlet for all the URLs that produce such static pages that you'd like to run replacements on. Example
  * registration in a {@code web.xml} configuration file:
  * 
@@ -58,32 +57,38 @@ import com.sap.sse.branding.impl.Activator;
  *
  */
 public class ClientConfigurationListener implements javax.servlet.ServletRequestListener {
+    /**
+     * In the {@link ServletContext} maintains an attribute
+     * {@link BrandingConfigurationService.LOCALES_JSP_PROPERTY_NAME} which is a map from a pair of locale (e.g. "en")
+     * and branding ID (possibly {@code null} for a debranded configuration) to {@link String}-keyed maps of properties
+     * that can be used in JSP EL expressions in those HTML pages. The map is initialized lazily, so the locale- and
+     * branding configuration-specific properties are added the first time a request for that combination of locale and
+     * branding configuration is seen here.
+     * <p>
+     * 
+     * The properties are constructed using
+     * {@link BrandingConfigurationService#getBrandingConfigurationProperties(Optional)} with the locale as
+     * argument, where the property names are derived from the {@link BrandingConfigurationProperty#getPropertyName()}
+     * method which get appended to the {@link BrandingConfigurationService#JSP_PROPERTY_NAME_PREFIX} prefix.
+     * <p>
+     * 
+     * For the current request, the properties map is then fetched from the {@link ServletContext} and set for the
+     * {@code requestScope}. This way, the maps don't need to be created for every request.
+     */
     @Override
     public void requestInitialized(ServletRequestEvent sre) {
         if (sre.getServletRequest().getScheme().startsWith("http")) {
-            final String path = ((HttpServletRequest) sre.getServletRequest()).getServletPath();
-            final Map<String, String[]> parameterMap = ((HttpServletRequest) sre.getServletRequest()).getParameterMap();
-            final Optional<String> locale;
-            if (parameterMap != null && parameterMap.containsKey("locale")) {
-                locale = Optional.of(parameterMap.get("locale")[0]);
-            } else {
-                locale = Optional.empty();
-            }
+            final HttpServletRequest httpServletRequest = (HttpServletRequest) sre.getServletRequest();
+            final String path = httpServletRequest.getServletPath();
+            // populate JSP scopes (applicationScope and requestScope) only for HTML pages or "/" requests
             if (path != null && (path.endsWith("/") || path.endsWith(".html"))) {
-                final ServletContext ctx = sre.getServletContext();
-                final Boolean ctxBrandingActive = (Boolean) ctx.getAttribute(
-                        BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX+BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME.getPropertyName());
-                final BrandingConfigurationService brandingConfigurationService = Activator.getDefaultBrandingConfigurationService();
-                final boolean brandingActive = brandingConfigurationService.isBrandingActive();
-                if (ctxBrandingActive == null || brandingActive != ctxBrandingActive.booleanValue()) { // FIXME now we also need to check the locale
-                    brandingConfigurationService.getBrandingConfigurationPropertiesForJspContext(locale).forEach((k, v) -> {
-                        ctx.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX + k.getPropertyName(), v);
-                    });
-                }
+                Optional<String> requestLocale = GwtLocaleFromHttpRequestUtil.getLocaleFromHttpRequest(httpServletRequest);
+                final Map<String, Object> brandingProperties = Activator.getDefaultBrandingConfigurationService().getBrandingConfigurationPropertiesForJspContext(requestLocale);
+                httpServletRequest.setAttribute(BrandingConfigurationService.JSP_PROPERTY_NAME_PREFIX, brandingProperties);
             }
         }
     }
-
+    
     @Override
     public void requestDestroyed(ServletRequestEvent sre) {
         // intentionally left blank

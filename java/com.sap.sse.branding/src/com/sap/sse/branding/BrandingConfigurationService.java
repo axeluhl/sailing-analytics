@@ -41,11 +41,11 @@ public interface BrandingConfigurationService {
     String BRANDING_ID_PROPERTY_NAME = "com.sap.sse.branding";
     
     /**
-     * This is the prefix used for JSP properties that are set by the {@link ClientConfigurationListener}. To the value
-     * of this constant, property names as defined, e.g., by {@link #BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME} or
-     * {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} are appended.
+     * This is the name of the property holding the map of JSP properties that are set by the {@link ClientConfigurationListener}. The keys of
+     * the map found under this property name are defined, e.g., by {@link BrandingConfigurationProperty#BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME} or
+     * {@link BrandingConfigurationProperty#BRANDING_ACTIVE_JSP_PROPERTY_NAME} and their respective {@link BrandingConfigurationProperty#getPropertyName()}.
      */
-    String JSP_PROPERTY_NAME_PREFIX = "clientConfigurationContext.";
+    String JSP_PROPERTY_NAME_PREFIX = "clientConfigurationContext";
     
     public static enum BrandingConfigurationProperty {
         /**
@@ -125,5 +125,11 @@ public interface BrandingConfigurationService {
      * <p>
      * @param locale if present, the locale to use for the branding configuration properties, otherwise the default locale
      */
-    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale);
+    Map<BrandingConfigurationProperty, Object> getBrandingConfigurationProperties(Optional<String> locale);
+    
+    /**
+     * Same as {@link #getBrandingConfigurationProperties(Optional)} but returns a map where the keys are
+     * the property names as defined in {@link BrandingConfigurationProperty#getPropertyName()}.
+     */
+    Map<String, Object> getBrandingConfigurationPropertiesForJspContext(Optional<String> locale);
 }

@@ -3,11 +3,9 @@ package com.sap.sse.gwt.shared;
 import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sse.branding.BrandingConfigurationService;
 import com.sap.sse.branding.shared.BrandingConfiguration;
 import com.sap.sse.gwt.client.context.data.ClientConfigurationContextDataJSO;
 import com.sap.sse.gwt.client.context.impl.ClientConfigurationContextDataFactoryImpl;
-import com.sap.sse.gwt.jaxrs.api.ClientConfigurationContextScriptGenerator;
 
 /**
  * Provides information for the GWT client if debranding/whitelabeling is currently brandingActive.
@@ -22,7 +20,7 @@ import com.sap.sse.gwt.jaxrs.api.ClientConfigurationContextScriptGenerator;
  *      document.clientConfigurationContext={"brandingActive":true,"brandTitle":"SAP ","debrandingActive":false,"whitelabeled":""};
  * </pre>
  * That can be accessed from here using the {@link ClientConfigurationContextDataJSO}. Responsible for the properties listed in the
- * object is {@link BrandingConfigurationService#getBrandingConfigurationPropertiesForJspContext(Optional)} and its
+ * object is {@link BrandingConfigurationService#getBrandingConfigurationProperties(Optional)} and its
  * {@link BrandingConfigurationService#getActiveBrandingConfiguration() active branding configuration}, or none if the solution
  * is running without any branding.<p>
  * 
@@ -80,17 +78,17 @@ public class ClientConfiguration implements BrandingConfiguration {
     }
 
     @Override
-    public String getBrandTitle() {
+    public String getBrandTitle(Optional<String> locale) {
         return brandTitle;
     }
 
     @Override
-    public String getDefaultBrandingLogoURL() {
+    public String getDefaultBrandingLogoURL(Optional<String> locale) {
         return defaultBrandingLogoURL;
     }
 
     @Override
-    public String getGreyTransparentLogoURL() {
+    public String getGreyTransparentLogoURL(Optional<String> locale) {
         return greyTransparentLogoURL;
     }
 
