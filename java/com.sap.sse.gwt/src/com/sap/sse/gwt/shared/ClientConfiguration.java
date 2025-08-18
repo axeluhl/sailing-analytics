@@ -57,6 +57,12 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String greyTransparentLogoURL;
     private String solutionsInSailingImageURL;
     private String soutionsInSailingTrimmedImageURL;
+    private String sailingRaceManagerAppTrimmedImageURL;
+    private String sailInSightAppImageURL;
+    private String sailingRaceManagerAppImageURL;
+    private String sailingSimulatorImageURL;
+    private String sailingSimulatorTrimmedImageURL;
+    private String buoyPingerAppImageURL;
 
     public ClientConfiguration() {
         try {
@@ -67,10 +73,21 @@ public class ClientConfiguration implements BrandingConfiguration {
             greyTransparentLogoURL = dataJso.getGreyTransparentLogoURL();
             solutionsInSailingImageURL = dataJso.getSoutionsInSailingImageURL();
             soutionsInSailingTrimmedImageURL = dataJso.getSolutionsInSailingTrimmedImageURL();
+            sailingRaceManagerAppTrimmedImageURL = dataJso.getSailingRaceManagerAppTrimmedImageURL();
+            sailInSightAppImageURL = dataJso.getSailInSightAppImageURL();
             brandingActive = !dataJso.isDebrandingActive();
+            sailingRaceManagerAppImageURL = dataJso.getSailingRaceManagerAppImageURL();
+            sailingSimulatorImageURL = dataJso.getSailingSimulatorImageURL();
+            sailingSimulatorTrimmedImageURL = dataJso.getSailingSimulatorTrimmedImageURL();
+            buoyPingerAppImageURL = dataJso.getBuoyPingerAppImageURL();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
         }
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     /**
@@ -97,7 +114,7 @@ public class ClientConfiguration implements BrandingConfiguration {
     }
 
     @Override
-    public String getSoutionsInSailingImageURL() {
+    public String getSolutionsInSailingImageURL() {
         return solutionsInSailingImageURL;
     }
 
@@ -107,7 +124,30 @@ public class ClientConfiguration implements BrandingConfiguration {
     }
 
     @Override
-    public String getId() {
-        return id;
+    public String getSailingRaceManagerAppTrimmedImageURL() {
+        return sailingRaceManagerAppTrimmedImageURL;
+    }
+    
+    public String getSailInSightAppImageURL() {
+        return sailInSightAppImageURL;
+    }
+
+    @Override
+    public String getSailingRaceManagerAppImageURL() {
+        return sailingRaceManagerAppImageURL;
+    }
+
+    @Override
+    public String getSailingSimulatorImageURL() {
+        return sailingSimulatorImageURL;
+    }
+
+    @Override
+    public String getSailingSimulatorTrimmedImageURL() {
+        return sailingSimulatorTrimmedImageURL;
+    }
+
+    public String getBuoyPingerAppImageURL() {
+        return buoyPingerAppImageURL;
     }
 }

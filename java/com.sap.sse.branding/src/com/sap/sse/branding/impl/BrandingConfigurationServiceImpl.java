@@ -109,8 +109,15 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
             whitelabeled = "-whitelabeled";
         }
         map.put(BrandingConfigurationProperty.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
-        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingImageURL());
+        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSolutionsInSailingImageURL());
         map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppImageURL());
+        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
+        map.put(BrandingConfigurationProperty.BUOY_PINGER_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getBuoyPingerAppImageURL());
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());
         map.put(BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME, isBrandingActive());
         map.put(BrandingConfigurationProperty.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);

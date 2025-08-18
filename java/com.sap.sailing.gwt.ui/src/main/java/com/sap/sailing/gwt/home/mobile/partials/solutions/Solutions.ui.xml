@@ -8,7 +8,7 @@
     <ui:with field="res_local" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
     <a:Accordion>
         <a:item>
-            <s:SolutionsItem ui:field="brandInSailingItem" title="{i18n.sapInSailing}" image="{res_local.whitelabeled}" showInitial="true">
+            <s:SolutionsItem ui:field="brandInSailingItem" title="{i18n.sapInSailing}" showInitial="true">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -50,8 +50,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem ui:field="sailingAnalyticsItem" title="{i18n.sapSailingAnalyticsTitle}"
-                    image="{res_local.whitelabeled}" showInitial="false">
+            <s:SolutionsItem ui:field="sailingAnalyticsItem" title="{i18n.sapSailingAnalyticsTitle}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -68,8 +67,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapSailingRaceManager}"
-                    image="{res_local.race}" showInitial="false">
+            <s:SolutionsItem ui:field="sailingRaceManager" title="{i18n.sapSailingRaceManager}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -84,8 +82,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapSailInSight}"
-                    image="{res_local.sapSailingInsight}" showInitial="false">
+            <s:SolutionsItem ui:field="sapSailInSight" title="{i18n.sapSailInSight}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -101,8 +98,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapSailingBuoyPinger}"
-                    image="{res_local.sapSailingBuoyPinger}" showInitial="false">
+            <s:SolutionsItem title="{i18n.sapSailingBuoyPinger}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>

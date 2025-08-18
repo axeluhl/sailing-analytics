@@ -15,18 +15,6 @@ public interface SolutionsResources extends SolutionsSharedResources {
     @Source("solutions-sap.png")
     ImageResource sap();
     
-    @Source("solutions-sap-sailing-race-manager.png")
-    ImageResource sapSailingRaceManager();
-    
-    @Source("solutions-post.png")
-    ImageResource post();
-    
-    @Source("solutions-training.png")
-    ImageResource training();
-    
-    @Source("solutions-simulator.png")
-    ImageResource simulator();
-    
     @Shared
     public interface LocalCss extends CssResource {
         String solutions();

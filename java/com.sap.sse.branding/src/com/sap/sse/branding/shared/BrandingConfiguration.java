@@ -3,18 +3,30 @@ package com.sap.sse.branding.shared;
 import java.util.Optional;
 
 public interface BrandingConfiguration {
+    /**
+     * The ID by which to find or set this configuration in {@code BrandingConfigurationService#setActiveBrandingConfigurationById(String)}
+     */
+    String getId();
+
     String getBrandTitle(Optional<String> locale);
 
     String getDefaultBrandingLogoURL(Optional<String> locale);
 
     String getGreyTransparentLogoURL(Optional<String> locale);
     
-    String getSoutionsInSailingImageURL();
+    String getSolutionsInSailingImageURL();
     
     String getSoutionsInSailingTrimmedImageURL();
+    
+    String getSailingRaceManagerAppTrimmedImageURL();
+    
+    String getSailInSightAppImageURL();
+    
+    String getSailingRaceManagerAppImageURL();
+    
+    String getSailingSimulatorImageURL();
+    
+    String getSailingSimulatorTrimmedImageURL();
 
-    /**
-     * The ID by which to find or set this configuration in {@code BrandingConfigurationService#setActiveBrandingConfigurationById(String)}
-     */
-    String getId();
+    String getBuoyPingerAppImageURL();
 }
