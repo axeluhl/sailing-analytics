@@ -109,6 +109,8 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
             whitelabeled = "-whitelabeled";
         }
         map.put(BrandingConfigurationProperty.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
+        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingImageURL());
+        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingTrimmedImageURL());
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());
         map.put(BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME, isBrandingActive());
         map.put(BrandingConfigurationProperty.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);

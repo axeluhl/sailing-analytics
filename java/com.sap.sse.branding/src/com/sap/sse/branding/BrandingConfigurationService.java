@@ -49,18 +49,18 @@ public interface BrandingConfigurationService {
     
     public static enum BrandingConfigurationProperty {
         /**
-         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that contains the brand title
-         * with a trailing space, so it can be concatenated with, e.g., the string "Sailing Analytics" to produce "{Your Brand Name} Sailing Analytics".
+         * The name of the JSP property that contains the brand title with a trailing space, so it can be concatenated
+         * with, e.g., the string "Sailing Analytics" to produce "{Your Brand Name} Sailing Analytics".
          */
         BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME("brandTitle"),
         
         /**
-         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, that indicates whether
-         * debranding/whitelabeling is active. If this is {@code "true"}, the brand title will be empty, the property identified
-         * by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be {@code "-whitelabeled"}, and the property identified by
-         * {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "false"}. If this is {@code "false"}, the brand title will
-         * be filled, the property identified by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be empty, and the property
-         * identified by {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "true"}.
+         * The name of the JSP property, that indicates whether debranding/whitelabeling is active. If this is
+         * {@code "true"}, the brand title will be empty, the property identified by
+         * {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be {@code "-whitelabeled"}, and the property identified by
+         * {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "false"}. If this is {@code "false"}, the brand
+         * title will be filled, the property identified by {@link #DASH_WHITELABELED_JSP_PROPERTY_NAME} will be empty,
+         * and the property identified by {@link #BRANDING_ACTIVE_JSP_PROPERTY_NAME} will be {@code "true"}.
          */
         DEBRANDING_ACTIVE_JSP_PROPERTY_NAME("debrandingActive"),
         
@@ -70,11 +70,20 @@ public interface BrandingConfigurationService {
         BRANDING_ACTIVE_JSP_PROPERTY_NAME("brandingActive"),
         
         /**
-         * The name of the JSP property, appended to the value of {@link #JSP_PROPERTY_NAME_PREFIX}, whose value is
-         * either empty (if branding is not active) or {@code "-whitelabeled"} (if branding is active). It may be used,
-         * e.g., to produce an image URL that is different for whitelabeled and branded versions of the product.
+         * The name of the JSP property, whose value is either empty (if branding is not active) or
+         * {@code "-whitelabeled"} (if branding is active). It may be used, e.g., to produce an image URL that is
+         * different for whitelabeled and branded versions of the product.
          */
         DASH_WHITELABELED_JSP_PROPERTY_NAME("whitelabeled"),
+        
+        /**
+         * The name of the JSP property that contains the URL for an image representing your brand in the context
+         * of sailing, e.g., a photo of a boat carrying your brand logo. This is used in the presentation of the
+         * different elements of the Sailing Analytics solutions.
+         */
+        SOLUTIONS_IN_SAILING_IMAGE_URL("solutionsInSailingImageURL"),
+        
+        SOLUTIONS_IN_SAILING_TRIMMED_IMAGE_URL("solutionsInSailingTrimmedImageURL"),
         
         /**
          * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will

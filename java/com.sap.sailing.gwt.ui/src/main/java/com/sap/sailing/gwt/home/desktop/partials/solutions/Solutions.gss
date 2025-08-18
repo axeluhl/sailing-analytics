@@ -94,7 +94,6 @@
   background-repeat: no-repeat;
   background-position: right center;
   background-size: 40%;
-  background-image: resourceUrl("sapInSailing");
 }
 .solutions_contentsapinsailing_body .gridalternator {
   padding: 4em 0 4.333333333333333em;

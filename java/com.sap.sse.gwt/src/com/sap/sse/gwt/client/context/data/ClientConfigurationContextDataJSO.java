@@ -33,4 +33,12 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getGreyTransparentLogoURL() /*-{
         return this.greyTransparentLogoURL;
     }-*/;
+
+    public final native String getSoutionsInSailingImageURL() /*-{
+        return this.solutionsInSailingImageURL;
+    }-*/;
+
+    public final native String getSolutionsInSailingTrimmedImageURL() /*-{
+        return this.solutionsInSailingTrimmedImageURL;
+    }-*/;
 }

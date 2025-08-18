@@ -8,8 +8,7 @@
     <ui:with field="res_local" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
     <a:Accordion>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapInSailing}"
-                    image="{res_local.sapInSailing}" showInitial="true">
+            <s:SolutionsItem ui:field="brandInSailingItem" title="{i18n.sapInSailing}" image="{res_local.whitelabeled}" showInitial="true">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -51,8 +50,8 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapSailingAnalyticsTitle}"
-                    image="{res_local.sapTrimmed}" showInitial="false">
+            <s:SolutionsItem ui:field="sailingAnalyticsItem" title="{i18n.sapSailingAnalyticsTitle}"
+                    image="{res_local.whitelabeled}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>

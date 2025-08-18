@@ -26,6 +26,16 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getBrandTitle(Optional<String> locale) {
         return "SAP";
     }
+    
+    @Override
+    public String getSoutionsInSailingImageURL() {
+        return "/sap-branding/images/solutions-sap-in-sailing.jpg";
+    }
+
+    @Override
+    public String getSoutionsInSailingTrimmedImageURL() {
+        return "/sap-branding/images/solutions-sap-trimmed.png";
+    }
 
     @Override
     public String getId() {

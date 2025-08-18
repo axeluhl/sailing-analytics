@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class Solutions extends Composite {
 
@@ -19,6 +20,8 @@ public class Solutions extends Composite {
 
     @UiField StringMessages i18n;
 
+    @UiField SolutionsItem brandInSailingItem;
+    @UiField SolutionsItem sailingAnalyticsItem;
     @UiField AnchorElement sailingAnalyticsDetailsAnchor;
     @UiField AnchorElement raceManagerAppDetailsAnchor;
     @UiField AnchorElement sailInSightAppDetailsAnchor;
@@ -27,6 +30,8 @@ public class Solutions extends Composite {
     
     public Solutions(MobilePlacesNavigator placesNavigator) {
         initWidget(uiBinder.createAndBindUi(this));
+        brandInSailingItem.setImageUrl(ClientConfiguration.getInstance().getSoutionsInSailingImageURL());
+        sailingAnalyticsItem.setImageUrl(ClientConfiguration.getInstance().getSoutionsInSailingTrimmedImageURL());
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.SailingAnalytics, sailingAnalyticsDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.RaceManagerApp, raceManagerAppDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.InSightApp, sailInSightAppDetailsAnchor);

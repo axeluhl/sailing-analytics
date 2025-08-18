@@ -4,6 +4,8 @@ import com.google.gwt.resources.client.ImageResource;
 import com.sap.sailing.gwt.home.shared.partials.solutions.SolutionsSharedResources;
 
 public interface SolutionsResources extends SolutionsSharedResources {
+    @Source("whitelabeled.png")
+    ImageResource whitelabeled();
     
     @Source("solutions-sap-trimmed.png")
     ImageResource sapTrimmed();

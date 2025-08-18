@@ -58,6 +58,10 @@ public class AccordionItem extends Composite {
         imageUi.setAlt(imageAltText);
         initAnimation(showInitial);
     }
+    
+    public void setImageUrl(String imageUrl) {
+        imageUi.setSrc(imageUrl);
+    }
 
     private void initAnimation(boolean showInitial) {
         final CollapseAnimation animation = new CollapseAnimation(contentWrapperUi, showInitial);

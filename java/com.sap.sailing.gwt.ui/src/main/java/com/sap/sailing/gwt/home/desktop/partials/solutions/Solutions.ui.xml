@@ -39,7 +39,7 @@
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsapinsailing}">
 					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-							<div class="{local_res.css.solutions_contentsapinsailing_body}">
+							<div ui:field="brandInSailingInnerDiv" class="{local_res.css.solutions_contentsapinsailing_body}">
 								<h2>
 									<ui:text from='{i18n.sapInSailing}' />
 								</h2>
@@ -73,10 +73,10 @@
 									<li>
 										<ui:text from='{i18n.contentSapInSailing12}' />
 									</li>
-                                                                        <li>
-                                                                                <ui:text from='{i18n.contentSapInSailing13}' />
-                                                                        </li>
-                  						</ul>
+                                    <li>
+                                        <ui:text from='{i18n.contentSapInSailing13}' />
+                                    </li>
+          						</ul>
 							</div>
 						</div>
 					</div>

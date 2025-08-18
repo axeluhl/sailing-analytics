@@ -8,6 +8,10 @@ public interface BrandingConfiguration {
     String getDefaultBrandingLogoURL(Optional<String> locale);
 
     String getGreyTransparentLogoURL(Optional<String> locale);
+    
+    String getSoutionsInSailingImageURL();
+    
+    String getSoutionsInSailingTrimmedImageURL();
 
     /**
      * The ID by which to find or set this configuration in {@code BrandingConfigurationService#setActiveBrandingConfigurationById(String)}

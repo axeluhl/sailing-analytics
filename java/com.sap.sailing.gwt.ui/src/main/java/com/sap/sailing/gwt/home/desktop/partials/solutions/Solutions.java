@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class Solutions extends Composite {
     interface SolutionsUiBinder extends UiBinder<Widget, Solutions> {
@@ -32,8 +33,7 @@ public class Solutions extends Composite {
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
 
     @UiField StringMessages i18n;
-    @UiField
-    Anchor sapInSailingAnchor;
+    @UiField Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
     @UiField Anchor inSightAnchor;
@@ -41,6 +41,7 @@ public class Solutions extends Composite {
     @UiField Anchor simulatorAnchor;
 
     @UiField DivElement sapInSailingDiv;
+    @UiField DivElement brandInSailingInnerDiv;
     @UiField DivElement sailingAnalyticsDiv;
     @UiField DivElement raceDiv;
     @UiField DivElement inSightDiv;
@@ -73,6 +74,7 @@ public class Solutions extends Composite {
         this.placesNavigator = placesNavigator;
         SolutionsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        brandInSailingInnerDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSoutionsInSailingImageURL()+"\')");
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);

@@ -55,6 +55,8 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String brandTitle;
     private String defaultBrandingLogoURL;
     private String greyTransparentLogoURL;
+    private String solutionsInSailingImageURL;
+    private String soutionsInSailingTrimmedImageURL;
 
     public ClientConfiguration() {
         try {
@@ -63,6 +65,8 @@ public class ClientConfiguration implements BrandingConfiguration {
             brandTitle = dataJso.getBrandTitle();
             defaultBrandingLogoURL = dataJso.getDefaultBrandingLogoURL();
             greyTransparentLogoURL = dataJso.getGreyTransparentLogoURL();
+            solutionsInSailingImageURL = dataJso.getSoutionsInSailingImageURL();
+            soutionsInSailingTrimmedImageURL = dataJso.getSolutionsInSailingTrimmedImageURL();
             brandingActive = !dataJso.isDebrandingActive();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
@@ -90,6 +94,16 @@ public class ClientConfiguration implements BrandingConfiguration {
     @Override
     public String getGreyTransparentLogoURL(Optional<String> locale) {
         return greyTransparentLogoURL;
+    }
+
+    @Override
+    public String getSoutionsInSailingImageURL() {
+        return solutionsInSailingImageURL;
+    }
+
+    @Override
+    public String getSoutionsInSailingTrimmedImageURL() {
+        return soutionsInSailingTrimmedImageURL;
     }
 
     @Override
