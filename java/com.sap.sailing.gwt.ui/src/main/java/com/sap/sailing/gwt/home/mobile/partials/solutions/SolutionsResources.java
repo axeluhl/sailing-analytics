@@ -7,9 +7,6 @@ public interface SolutionsResources extends SolutionsSharedResources {
     @Source("whitelabeled.png")
     ImageResource whitelabeled();
     
-    @Source("solutions-sap-trimmed.png")
-    ImageResource sapTrimmed();
-    
     @Source("solutions-race.png")
     ImageResource race();
     

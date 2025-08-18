@@ -7,9 +7,6 @@ import com.google.gwt.resources.client.ImageResource;
 public interface SolutionsSharedResources extends ClientBundle {
     public static final SolutionsSharedResources INSTANCE = GWT.create(SolutionsSharedResources.class);
     
-    @Source("solutions-sap-in-sailing.jpg")
-    ImageResource sapInSailing();
-    
     @Source("solutions-sap-sailing-insight.png")
     ImageResource sapSailingInsight();
     
