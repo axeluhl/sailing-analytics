@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
-import com.sap.sailing.gwt.home.shared.partials.solutions.SolutionsSharedResources;
 
-public interface SolutionsResources extends SolutionsSharedResources {
+public interface SolutionsResources extends ClientBundle {
     public static final SolutionsResources INSTANCE = GWT.create(SolutionsResources.class);
 
     @Source("Solutions.gss")

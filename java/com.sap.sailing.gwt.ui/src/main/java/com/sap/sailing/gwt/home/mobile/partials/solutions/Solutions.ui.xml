@@ -5,7 +5,6 @@
         xmlns:sb="urn:import:com.sap.sailing.gwt.home.shared.partials.storebadges">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="res_local" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
     <a:Accordion>
         <a:item>
             <s:SolutionsItem ui:field="brandInSailingItem" title="{i18n.sapInSailing}" showInitial="true">
