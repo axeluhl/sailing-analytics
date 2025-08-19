@@ -24,6 +24,8 @@ public class Solutions extends Composite {
     @UiField SolutionsItem sailingAnalyticsItem;
     @UiField SolutionsItem sailingRaceManager;
     @UiField SolutionsItem sapSailInSight;
+    @UiField SolutionsItem sailingBuoyPinger;
+    @UiField SolutionsItem strategySimulator;
     @UiField AnchorElement sailingAnalyticsDetailsAnchor;
     @UiField AnchorElement raceManagerAppDetailsAnchor;
     @UiField AnchorElement sailInSightAppDetailsAnchor;
@@ -36,6 +38,8 @@ public class Solutions extends Composite {
         sailingAnalyticsItem.setImageUrl(ClientConfiguration.getInstance().getSoutionsInSailingTrimmedImageURL());
         sailingRaceManager.setImageUrl(ClientConfiguration.getInstance().getSailingRaceManagerAppTrimmedImageURL());
         sapSailInSight.setImageUrl(ClientConfiguration.getInstance().getSailInSightAppImageURL());
+        sailingBuoyPinger.setImageUrl(ClientConfiguration.getInstance().getBuoyPingerAppImageURL());
+        strategySimulator.setImageUrl(ClientConfiguration.getInstance().getSailingSimulatorTrimmedImageURL());
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.SailingAnalytics, sailingAnalyticsDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.RaceManagerApp, raceManagerAppDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.InSightApp, sailInSightAppDetailsAnchor);

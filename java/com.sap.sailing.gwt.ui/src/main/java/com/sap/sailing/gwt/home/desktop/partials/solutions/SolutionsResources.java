@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.CssResource.Shared;
 import com.sap.sailing.gwt.home.shared.partials.solutions.SolutionsSharedResources;
 
@@ -11,9 +10,6 @@ public interface SolutionsResources extends SolutionsSharedResources {
 
     @Source("Solutions.gss")
     LocalCss css();
-    
-    @Source("solutions-sap.png")
-    ImageResource sap();
     
     @Shared
     public interface LocalCss extends CssResource {
@@ -32,11 +28,6 @@ public interface SolutionsResources extends SolutionsSharedResources {
         String solutions_contentsapsailinsight();
         String solutions_contentsapsailingbuoypinger();
         String solutions_contentsapsailingbuoypinger_body();
-        String solutions_contentpost();
-        String solutions_contenttraining();
-        String solutions_contenttraining_body();
-        String background();
-        String noparallax();
         String solutions_contentsimulator();
         String solutions_content_linkappstore();
     }

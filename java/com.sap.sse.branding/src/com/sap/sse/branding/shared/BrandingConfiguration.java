@@ -29,4 +29,6 @@ public interface BrandingConfiguration {
     String getSailingSimulatorTrimmedImageURL();
 
     String getBuoyPingerAppImageURL();
+
+    String getSailingAnalyticsImageURL();
 }

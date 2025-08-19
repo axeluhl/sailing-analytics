@@ -48,13 +48,15 @@ public class AccordionItem extends Composite {
     }
 
     public AccordionItem(String title, ImageResource image, String imageAltText, boolean showInitial) {
-        this(title, image.getSafeUri(), imageAltText, showInitial);
+        this(title, image==null?null:image.getSafeUri(), imageAltText, showInitial);
     }
 
     public AccordionItem(String title, SafeUri imageUrl, String imageAltText, boolean showInitial) {
         initWidget(uiBinder.createAndBindUi(this));
         titleUi.setInnerText(title);
-        imageUi.setSrc(imageUrl.asString());
+        if (imageUrl != null) {
+            imageUi.setSrc(imageUrl.asString());
+        }
         imageUi.setAlt(imageAltText);
         initAnimation(showInitial);
     }

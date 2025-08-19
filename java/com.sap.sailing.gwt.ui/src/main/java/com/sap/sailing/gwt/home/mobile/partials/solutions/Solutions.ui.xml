@@ -98,7 +98,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.sapSailingBuoyPinger}" showInitial="false">
+            <s:SolutionsItem ui:field="sailingBuoyPinger" title="{i18n.sapSailingBuoyPinger}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>
@@ -113,8 +113,7 @@
             </s:SolutionsItem>
         </a:item>
         <a:item>
-            <s:SolutionsItem title="{i18n.strategySimulator}"
-                    image="{res_local.simulatorTrimmed}" showInitial="false">
+            <s:SolutionsItem ui:field="strategySimulator" title="{i18n.strategySimulator}" showInitial="false">
                 <s:content>
                     <g:HTMLPanel>
                         <p>

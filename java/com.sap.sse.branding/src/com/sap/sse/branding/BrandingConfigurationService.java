@@ -97,6 +97,8 @@ public interface BrandingConfigurationService {
         
         SAILING_SIMULATOR_TRIMMED_IMAGE_URL("sailingSimulatorTrimmedImageURL"),
         
+        SAILING_ANALYTICS_IMAGE_URL("sailingAnalyticsImageURL"),
+        
         /**
          * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will
          * set the {@code document.clientConfigurationContext} object to a JSON object that contains all the branding fields. 

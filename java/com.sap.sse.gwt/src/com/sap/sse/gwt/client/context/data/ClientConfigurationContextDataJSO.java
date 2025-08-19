@@ -55,14 +55,18 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     }-*/;
 
     public final native String getSailingRaceManagerAppImageURL() /*-{
-        return sailingRaceManagerAppImageURL;
+        return this.sailingRaceManagerAppImageURL;
     }-*/;
 
     public final native String getSailingSimulatorImageURL() /*-{
-        return sailingSimulatorImageURL;
+        return this.sailingSimulatorImageURL;
     }-*/;
 
     public final native String getBuoyPingerAppImageURL() /*-{
-        return buoyPingerAppImageURL;;
+        return this.buoyPingerAppImageURL;
+    }-*/;
+
+    public final native String getSailingAnalyticsImageURL() /*-{
+        return this.sailingAnalyticsImageURL;
     }-*/;
 }

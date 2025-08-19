@@ -13,6 +13,11 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     }
 
     @Override
+    public String getId() {
+        return ID;
+    }
+
+    @Override
     public String getDefaultBrandingLogoURL(Optional<String> locale) {
         return defaultBrandingLogoURL;
     }
@@ -68,7 +73,7 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     }
 
     @Override
-    public String getId() {
-        return ID;
+    public String getSailingAnalyticsImageURL() {
+        return "/sap-branding/images/solutions-sap.png";
     }
 }

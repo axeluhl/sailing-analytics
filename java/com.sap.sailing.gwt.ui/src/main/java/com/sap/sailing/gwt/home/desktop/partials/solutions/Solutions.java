@@ -74,6 +74,7 @@ public class Solutions extends Composite {
         this.placesNavigator = placesNavigator;
         SolutionsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        sailingAnalyticsDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingAnalyticsImageURL()+"\')");
         brandInSailingInnerDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSolutionsInSailingImageURL()+"\')");
         inSightDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailInSightAppImageURL()+"\')");
         simulatorDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingSimulatorImageURL()+"\')");
