@@ -43,10 +43,15 @@ public class Solutions extends Composite {
     @UiField DivElement sapInSailingDiv;
     @UiField DivElement brandInSailingInnerDiv;
     @UiField DivElement sailingAnalyticsDiv;
+    @UiField DivElement sailingAnalyticsDivGridAlternator;
     @UiField DivElement raceDiv;
+    @UiField DivElement raceDivGridAlternator;
     @UiField DivElement inSightDiv;
+    @UiField DivElement inSightDivGridAlternator;
     @UiField DivElement buoyPingerDiv;
+    @UiField DivElement buoyPingerDivGridAlternator;
     @UiField DivElement simulatorDiv;
+    @UiField DivElement simulatorDivGridAlternator;
 
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
@@ -74,12 +79,12 @@ public class Solutions extends Composite {
         this.placesNavigator = placesNavigator;
         SolutionsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        sailingAnalyticsDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingAnalyticsImageURL()+"\')");
+        sailingAnalyticsDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingAnalyticsImageURL()+"\')");
         brandInSailingInnerDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSolutionsInSailingImageURL()+"\')");
-        inSightDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailInSightAppImageURL()+"\')");
-        simulatorDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingSimulatorImageURL()+"\')");
-        raceDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingRaceManagerAppImageURL()+"\')");
-        buoyPingerDiv.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getBuoyPingerAppImageURL()+"\')");
+        inSightDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailInSightAppImageURL()+"\')");
+        simulatorDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingSimulatorImageURL()+"\')");
+        raceDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingRaceManagerAppImageURL()+"\')");
+        buoyPingerDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getBuoyPingerAppImageURL()+"\')");
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);

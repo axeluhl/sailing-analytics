@@ -83,7 +83,7 @@
 				</div>
 				<div ui:field="sailingAnalyticsDiv"
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsap}">
-					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
+					<div ui:field="sailingAnalyticsDivGridAlternator" class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div
 							class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
 							<h2>
@@ -106,8 +106,7 @@
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsapsailingracemanager}">
 					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div class="{res.mediaCss.small12} {res.mediaCss.column}">
-							<div
-								class="{local_res.css.solutions_contentsapsailingracemanager_body}">
+							<div ui:field="raceDivGridAlternator" class="{local_res.css.solutions_contentsapsailingracemanager_body}">
 								<h2>
 									<ui:text from='{i18n.sapSailingRaceManager}' />
 								</h2>
@@ -125,7 +124,7 @@
 				</div>
 				<div ui:field="inSightDiv"
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsapsailinsight}">
-					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
+					<div ui:field="inSightDivGridAlternator" class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div
 							class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
 							<h2>
@@ -147,8 +146,7 @@
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsapsailingbuoypinger}">
 					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div class="{res.mediaCss.small12} {res.mediaCss.column}">
-							<div
-								class="{local_res.css.solutions_contentsapsailingbuoypinger_body}">
+							<div ui:field="buoyPingerDivGridAlternator" class="{local_res.css.solutions_contentsapsailingbuoypinger_body}">
 								<h2>
 									<ui:text from='{i18n.sapSailingBuoyPinger}' />
 								</h2>
@@ -166,7 +164,7 @@
 				</div>
 				<div ui:field="simulatorDiv"
 					class="{local_res.css.solutions_content} {local_res.css.solutions_contentsimulator}">
-					<div class="{res.mediaCss.grid} {local_res.css.gridalternator}">
+					<div ui:field="simulatorDivGridAlternator" class="{res.mediaCss.grid} {local_res.css.gridalternator}">
 						<div
 							class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
 							<h2>
