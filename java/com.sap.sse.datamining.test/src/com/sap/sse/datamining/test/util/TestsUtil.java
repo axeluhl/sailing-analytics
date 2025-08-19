@@ -47,7 +47,7 @@ public class TestsUtil {
             EXTENDED_STRING_MESSAGES = new CompoundResourceBundleStringMessages();
             EXTENDED_STRING_MESSAGES.addStringMessages(getTestStringMessages());
             EXTENDED_STRING_MESSAGES
-                    .addStringMessages(new ResourceBundleStringMessagesImpl(PRODUCTIVE_STRING_MESSAGES_BASE_NAME,
+                    .addStringMessages(ResourceBundleStringMessages.create(PRODUCTIVE_STRING_MESSAGES_BASE_NAME,
                             TestsUtil.class.getClassLoader(), StandardCharsets.UTF_8.name()));
         }
         

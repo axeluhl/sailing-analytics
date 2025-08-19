@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.solutions;
 
+import java.util.Optional;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -40,6 +42,7 @@ public class Solutions extends Composite {
         sapSailInSight.setImageUrl(ClientConfiguration.getInstance().getSailInSightAppImageURL());
         sailingBuoyPinger.setImageUrl(ClientConfiguration.getInstance().getBuoyPingerAppImageURL());
         strategySimulator.setImageUrl(ClientConfiguration.getInstance().getSailingSimulatorTrimmedImageURL());
+        sailingAnalyticsDetailsAnchor.setInnerText(ClientConfiguration.getInstance().getSailingAnalyticsReadMoreText(Optional.empty()));
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.SailingAnalytics, sailingAnalyticsDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.RaceManagerApp, raceManagerAppDetailsAnchor);
         initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.InSightApp, sailInSightAppDetailsAnchor);

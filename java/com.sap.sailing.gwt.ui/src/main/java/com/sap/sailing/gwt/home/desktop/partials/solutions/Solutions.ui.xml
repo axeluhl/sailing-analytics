@@ -95,9 +95,7 @@
 							<p>
 								<ui:text from='{i18n.contentSapSailingAnalytics2}' />
 							</p>
-							<g:Anchor ui:field="sailingAnalyticsDetailsAnchor"
-								styleName="{res.mainCss.button}">
-								<ui:text from='{i18n.sapSailingAnalyticsReadMore}' />
+							<g:Anchor ui:field="sailingAnalyticsDetailsAnchor" styleName="{res.mainCss.button}">
 							</g:Anchor>
 						</div>
 					</div>

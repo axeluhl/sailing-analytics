@@ -31,4 +31,6 @@ public interface BrandingConfiguration {
     String getBuoyPingerAppImageURL();
 
     String getSailingAnalyticsImageURL();
+
+    String getSailingAnalyticsReadMoreText(Optional<String> locale);
 }

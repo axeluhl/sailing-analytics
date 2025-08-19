@@ -69,4 +69,8 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getSailingAnalyticsImageURL() /*-{
         return this.sailingAnalyticsImageURL;
     }-*/;
+
+    public final native String getSailingAnalyticsReadMoreText() /*-{
+        return this.sailingAnalyticsReadMoreText;
+    }-*/;
 }

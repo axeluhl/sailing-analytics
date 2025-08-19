@@ -102,7 +102,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.media.TakedownNoticeRequestContext;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
@@ -218,7 +218,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private SecurityManager securityManager;
     
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
+    private static final ResourceBundleStringMessages messages = ResourceBundleStringMessages.create(
             SecurityServiceImpl.STRING_MESSAGES_BASE_NAME, SecurityServiceImpl.class.getClassLoader(),
             StandardCharsets.UTF_8.name());
 

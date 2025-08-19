@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.partials.solutions;
 
+import java.util.Optional;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
@@ -85,6 +87,7 @@ public class Solutions extends Composite {
         simulatorDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingSimulatorImageURL()+"\')");
         raceDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getSailingRaceManagerAppImageURL()+"\')");
         buoyPingerDivGridAlternator.getStyle().setBackgroundImage("url(\'"+ClientConfiguration.getInstance().getBuoyPingerAppImageURL()+"\')");
+        sailingAnalyticsDetailsAnchor.setText(ClientConfiguration.getInstance().getSailingAnalyticsReadMoreText(Optional.empty()));
 
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);

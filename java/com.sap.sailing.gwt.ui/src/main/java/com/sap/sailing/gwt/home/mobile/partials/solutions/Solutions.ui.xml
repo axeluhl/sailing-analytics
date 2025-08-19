@@ -59,7 +59,6 @@
                             <ui:text from='{i18n.contentSapSailingAnalytics2}' />
                         </p>
                         <a class="{res.mainCss.button}" ui:field="sailingAnalyticsDetailsAnchor">
-                           <ui:text from="{i18n.sapSailingAnalyticsReadMore}"/>
                         </a>
                     </g:HTMLPanel>
                 </s:content>

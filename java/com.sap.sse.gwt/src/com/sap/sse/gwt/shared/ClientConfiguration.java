@@ -32,6 +32,11 @@ import com.sap.sse.gwt.client.context.impl.ClientConfigurationContextDataFactory
  * <li>corresponding variable must be declared and filled with the appropriate value in {@link ClientConfigurationFilter}</li>
  * <li>class {@link ClientConfigurationContextDataJSO} must be extended with an getter for the new field</li>
  * </ul>
+ * <p>
+ * 
+ * Methods accepting an {@link Optional} locale parameter are used to support internationalization of the branding information in
+ * the back-end. GWT clients can use {@link Optional#empty()} and will get an internationalized value because the back-end will
+ * have handled the client's locale information.
  * 
  * @see ClientConfigurationContextScriptGenerator
  * 
@@ -64,6 +69,7 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String sailingSimulatorTrimmedImageURL;
     private String buoyPingerAppImageURL;
     private String sailingAnalyticsImageURL;
+    private String sailingAnalyticsReadMoreText;
 
     public ClientConfiguration() {
         try {
@@ -82,6 +88,7 @@ public class ClientConfiguration implements BrandingConfiguration {
             sailingSimulatorTrimmedImageURL = dataJso.getSailingSimulatorTrimmedImageURL();
             buoyPingerAppImageURL = dataJso.getBuoyPingerAppImageURL();
             sailingAnalyticsImageURL = dataJso.getSailingAnalyticsImageURL();
+            sailingAnalyticsReadMoreText = dataJso.getSailingAnalyticsReadMoreText();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
         }
@@ -155,5 +162,9 @@ public class ClientConfiguration implements BrandingConfiguration {
 
     public String getSailingAnalyticsImageURL() {
         return sailingAnalyticsImageURL;
+    }
+
+    public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
+        return sailingAnalyticsReadMoreText;
     }
 }
