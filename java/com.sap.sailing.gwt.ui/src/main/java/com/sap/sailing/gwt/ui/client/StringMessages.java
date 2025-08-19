@@ -1704,7 +1704,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sapSailingAnalyticsTitle();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
-    String sapSailingAnalyticsReadMore();
     String sapSailingRaceManager();
     String contentSapSailingRaceManager();
     String sapSailingRaceManagerReadMore();
