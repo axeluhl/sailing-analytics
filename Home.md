@@ -14,6 +14,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ### General
 
+* [[Onboarding|wiki/howto/onboarding]]
 * [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
 * [[General Project Information|wiki/info/general/general-information]]
 * [[Project History|wiki/info/general/project-history]]
