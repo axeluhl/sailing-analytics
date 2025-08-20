@@ -380,16 +380,20 @@ public class UserManagementWriteServiceImpl extends UserManagementServiceImpl im
         User user = getSecurityService().getUserByName(username);
         if (user != null) {
             if (!getSecurityService().hasCurrentUserExplicitPermissions(user, UserActions.MANAGE_LOCK)) {
+                logger.info("You are not permitted to manage locking on user " + username);
                 return new SuccessInfo(false, "You are not permitted to manage locking on user " + username,
                         /* redirectURL */ null, null);
             }
             try {
                 getSecurityService().resetUserTimedLock(username);
+                logger.info("Reset lock on user: " + username + ".");
                 return new SuccessInfo(true, "Reset lock on user: " + username + ".", /* redirectURL */ null, null);
             } catch (UserManagementException e) {
+                logger.info("Could not reset lock on user: " + username + ".");
                 return new SuccessInfo(false, "Could not reset lock on user " + username, /* redirectURL */ null, null);
             }
         } else {
+            logger.info("Could not reset lock on user: " + username + ".");
             return new SuccessInfo(false, "Could not reset lock on user " + username, /* redirectURL */ null, null);
         }
     }

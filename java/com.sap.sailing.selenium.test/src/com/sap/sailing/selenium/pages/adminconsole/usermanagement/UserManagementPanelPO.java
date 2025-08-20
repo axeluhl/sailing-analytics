@@ -151,6 +151,17 @@ public class UserManagementPanelPO extends PageArea {
     public void deleteSelectedUser() {
         deleteUserButton.click();
     }
+    
+    public void unlockUser(String name) {
+        selectUser(name);
+        final DataEntryPO entry = findUser(name);
+        if (entry != null) {
+            final WebElement action = ActionsHelper.findUnlockAction(entry.getWebElement());
+            action.click();
+        }
+        waitUntilAlertIsPresent();
+        driver.switchTo().alert().accept();
+    }
 
     public void waitUntilUserFound(String userName) {
         waitUntil(() -> findUser(userName) != null);
