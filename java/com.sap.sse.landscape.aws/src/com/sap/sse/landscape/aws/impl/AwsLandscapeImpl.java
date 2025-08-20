@@ -364,6 +364,7 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
     }
     
     private void getWafACLsByTagAndAssociateWithALB(String tagKey, String tagValue, String albArn, Region region) {
+        logger.info("Trying to find WAF ACLs with tag "+tagKey+"="+tagValue+" to associate with ALB "+albArn+" in region "+region.id());
         final Wafv2Client wafClient = getWafClient(region);
         // Step 1: list all REGIONAL Web ACLs
         final ListWebAcLsResponse listResp = wafClient.listWebACLs(b->b.scope(Scope.REGIONAL));
@@ -371,11 +372,13 @@ public class AwsLandscapeImpl<ShardingKey> implements AwsLandscape<ShardingKey> 
             // Step 2: filter the ACLs down to those with the right tag
             wafClient.listTagsForResource(b->b.resourceARN(aclSummary.arn())).tagInfoForResource().tagList().stream()
                     .anyMatch(tag -> tag.key().equals(tagKey) && tag.value().equals(tagValue)))
-        .forEach(aclSummary ->
+        .forEach(aclSummary -> {
             // Step 3: associate the ALB with those Web ACLs
+            logger.info("Associating WAF ACL "+aclSummary.arn()+" with ALB "+albArn);
             wafClient.associateWebACL(b->b
-                    .webACLArn(aclSummary.arn())
-                        .resourceArn(albArn)));
+                        .webACLArn(aclSummary.arn())
+                        .resourceArn(albArn));
+        });
     }
     
     private Subnet getSubnetForAvailabilityZoneInSameVpcAsSecurityGroup(AwsAvailabilityZone az, SecurityGroup securityGroup, Region region) {
