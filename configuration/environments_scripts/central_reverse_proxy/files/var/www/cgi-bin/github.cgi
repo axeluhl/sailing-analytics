@@ -7,7 +7,6 @@ PUSHER=$( echo "${BODY}" | jq -r '.pusher.email' )
 logger -t github-cgi "ref is $REF, pusher was $PUSHER"
 # For testing:
 #if [ "${PUSHER}" = "your-email@example.com" -a "${REF}" = "refs/heads/translation" ]; then
-tmsatsls+github.com_service-tip-git@sap.com
 # The filter in case this is to be used for alternative Github at github.tools.sap:
 #if [ "${PUSHER}" = "tmsatsls+github.tools.sap_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
 # The filter for github.com:
