@@ -20,7 +20,7 @@ Everything else should follow the pattern
 - when build is "green," suggest your branch for review; so far we do this informally by assigning the Bugzilla issue to the reviewer and in a comment asking for review; in the future, we may want to use Github Pull Requests for this
 - after your branch has been merged into ``main``, disable your Hudson build job for your branch
 - the ``main`` branch will then build a new release that you can roll out into the production landscape
-- in case of changes to i18n-related message properties files, merge ``main`` into ``translation`` which triggers the translation process; the completed translations will arrive as pushes to the ``translations`` branch, triggering another ``release`` workflow, and---if successful---an automated merge into ``main`` with the corresponding build/release process again
+- in case of changes to i18n-related message properties files, merge ``main`` into ``translation`` which triggers the translation process; the completed translations will arrive as pushes to the ``translations`` branch, triggering another ``release`` workflow, and---if successful---an automated merge into ``main`` with the corresponding build/release process happens, based on the [translation Hudson job](https://hudson.sapsailing.com/job/translation/configure)'s special logic
 - a successful ``main`` build (still on Java 8) will lead to an automatic merge into one or more branches for newer Java releases (such as ``docker-24``) with the corresponding build/release process
 
 Be eager to equip your features and functions with tests. There should be enough examples to learn from. For UI testing, use Selenium (see the ``java/com.sap.sailing.selenium.test`` project).
