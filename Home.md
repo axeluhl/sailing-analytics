@@ -18,6 +18,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
 * [[General Project Information|wiki/info/general/general-information]]
 * [[Project History|wiki/info/general/project-history]]
+* [[Development Environment|wiki/info/landscape/development-environment]]
 
 ### Development
 
@@ -45,7 +46,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
   * [[User Management|wiki/info/landscape/usermanagement]]
   * [[Igtimi Windbot Riot Connector|wiki/info/landscape/igtimi-riot]]
-  * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Internationalization (i18n)|wiki/howto/development/i18n]]
   * [[AI Agent|wiki/info/landscape/ai-agent]]
