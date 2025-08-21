@@ -2,14 +2,13 @@
 echo "
 "
 BODY=$( cat )
-echo "${BODY}" >/tmp/github-hook-body
 REF=$( echo "${BODY}" | jq -r '.ref' )
 PUSHER=$( echo "${BODY}" | jq -r '.pusher.email' )
 logger -t github-cgi "ref is $REF, pusher was $PUSHER"
 # For testing:
-#if [ "${PUSHER}" = "axel.uhl@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
+#if [ "${PUSHER}" = "your-email@example.com" -a "${REF}" = "refs/heads/translation" ]; then
 tmsatsls+github.com_service-tip-git@sap.com
-# The filter in case this is to be used for github.tools.sap:
+# The filter in case this is to be used for alternative Github at github.tools.sap:
 #if [ "${PUSHER}" = "tmsatsls+github.tools.sap_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
 # The filter for github.com:
 if [ "${PUSHER}" = "tmsatsls+github.com_service-tip-git@sap.com" -a "${REF}" = "refs/heads/translation" ]; then
