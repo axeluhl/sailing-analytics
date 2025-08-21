@@ -3,7 +3,7 @@
 [[_TOC_]]
 
 ## Adding a Bundle
-We distinguish two cases: adding a 3rd-party bundle to the target platform and adding a new development bundle as a Java project.
+Make sure you have read [[Workspace, Bundles, Projects|wiki/info/general/workspace-bundles-projects-structure]] before continuing. We distinguish two cases: adding a 3rd-party bundle to the target platform and adding a new development bundle as a Java project.
 
 ## Adding a Bundle to the Target Platform
 * Add a New Library which can not be found in any SAP Repository
