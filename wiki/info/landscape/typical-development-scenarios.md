@@ -55,7 +55,8 @@ Bundle-Version: 3.6.4
  * Currently this scripts work for the cygwin shell and the git bash, if the path to your files in the target definition is incorrect, this may be the reason.
 * Test the new overall target platform
  * by setting the race-analysis-p2-local.target as target platform in the IDE
- * by running the local maven build via ''buildAndUpdateProduct.sh -v build'' (the ''-v'' switch builds and uses the local p2 repository)
+ * by running the ``release`` workflow on Github using the "Build with a local target platform (set to "true" to use local target platform)" switch, or
+ * run the local maven build via ''buildAndUpdateProduct.sh -v build'' (the ''-v'' switch builds and uses the local p2 repository)
 * The admin of the central p2 repository (currently at sapsailing.com) must now replace the content of the central server /home/trac/p2-repositories/sailing with the content of the new local base p2 repository (com.sap.sailing.targetplatform.base/target/repository), using the 'uploadRepositoryToServer.sh' script
 * Reload the target platform in the IDE
 
