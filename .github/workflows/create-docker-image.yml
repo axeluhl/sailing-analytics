@@ -67,7 +67,7 @@ jobs:
             index:org.opencontainers.image.description=The Sailing Analytics Web Application
           file: ${{ env.BRANCH == 'docker-17' && 'docker/Dockerfile_sapsailing_on_sapmachine17' || env.BRANCH == 'docker-21' && 'docker/Dockerfile_sapsailing_on_sapmachine21' || env.BRANCH == 'docker-24' && 'docker/Dockerfile_sapsailing_on_sapmachine24' || 'docker/Dockerfile' }}
           context: docker/
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
       - name: Clean up copied files
         shell: bash
