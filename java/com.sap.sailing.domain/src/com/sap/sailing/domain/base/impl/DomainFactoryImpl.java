@@ -69,6 +69,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPointWithAutomaticRDG;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminatingMedalSeriesPromotingOneToFinalAndTwoToSemifinal;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminatingMedalSeriesPromotingTwoToFinalAndTwoToSemifinal;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
+import com.sap.sailing.domain.leaderboard.impl.NoticeOfRaceComplexScoringScheme;
 import com.sap.sailing.domain.racelog.RaceLogAndTrackedRaceResolver;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -173,6 +174,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl<RaceLogAndTracked
             return new LowPointForOverallUsingNetPoints();
         case LOW_POINT_WITH_ELIMINATING_MEDAL_SERIES_PROMOTING_TWO_TO_FINAL_AND_TWO_TO_SEMIFINAL:
             return new LowPointWithEliminatingMedalSeriesPromotingTwoToFinalAndTwoToSemifinal();
+        case NOTICE_OF_RACE_COMPLEX_SCORING:
+            return new NoticeOfRaceComplexScoringScheme();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
