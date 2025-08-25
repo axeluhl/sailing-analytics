@@ -3,6 +3,7 @@ package com.sap.sailing.selenium.test.adminconsole.usermanagement;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 
@@ -112,12 +113,14 @@ public class TestUserManagement extends AbstractSeleniumTest {
         attemptAbusiveLogins(TEST_USER_NAME, "wrongPassword", 5, authenticationMenu);
         // 16s lock window in place now, sufficient to log into admin, unlock user
         // and return till test user can login, within the erstwhile lock window
-        assert (authenticationMenu.attemptLogin("admin", "admin"));
+        assertTrue(authenticationMenu.attemptLogin("admin", "admin"));
         userManagementPanel = goToUserManagementPanel();
         userManagementPanel.unlockUser(TEST_USER_NAME);
         // logout and correct login within now-unlocked lock window
         authenticationMenu = logoutAndGoToAdminConsolePage().getAuthenticationMenu();
-        assert (authenticationMenu.attemptLogin(TEST_USER_NAME, TEST_USER_PASSWORD + UserManagementPanelPO.PASSWORD_COMPLEXITY_SALT));
+        assertTrue(
+                authenticationMenu.attemptLogin(
+                        TEST_USER_NAME, TEST_USER_PASSWORD + UserManagementPanelPO.PASSWORD_COMPLEXITY_SALT));
     }
 
     private void attemptAbusiveLogins(final String username, final String wrongPassword, final int attempts, AuthenticationMenuPO authenticationMenu)
