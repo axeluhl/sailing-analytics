@@ -52,12 +52,9 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @Override
     public void navigateTabsTo(AbstractSeriesTabPlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(
-                Optional.ofNullable(
-                        ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
-                     .filter(s -> !s.trim().isEmpty())
-                     .map(b -> b + " - ")
-                     .orElse(""));
+        StringBuilder titleBuilder = new StringBuilder(!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.getSeriesDTO().getDisplayName());
 

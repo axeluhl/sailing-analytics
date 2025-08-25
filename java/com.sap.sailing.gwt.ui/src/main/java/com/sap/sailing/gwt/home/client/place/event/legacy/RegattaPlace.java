@@ -53,12 +53,9 @@ public class RegattaPlace extends AbstractBasePlace {
     }
     
     public String getTitle(String eventName, String leaderboardName) {
-        return Optional.ofNullable(
-                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
-             .filter(s -> !s.trim().isEmpty())
-             .map(b -> b + " - ")
-             .orElse("") + StringMessages.INSTANCE.leaderboard() + ": "
-                     + leaderboardName;
+        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.leaderboard() + ": " + leaderboardName;
     }
     
     public String getEventUuidAsString() {

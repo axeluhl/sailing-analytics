@@ -23,11 +23,9 @@ public class SearchResultPlace extends Place implements HasLocationTitle, HasMob
     }
 
     public String getTitle() {
-        return Optional.ofNullable(
-                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
-             .filter(s -> !s.trim().isEmpty())
-             .map(b -> b + " - ")
-             .orElse("") + StringMessages.INSTANCE.search();
+        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.search();
     }
     
     public String getSearchText() {

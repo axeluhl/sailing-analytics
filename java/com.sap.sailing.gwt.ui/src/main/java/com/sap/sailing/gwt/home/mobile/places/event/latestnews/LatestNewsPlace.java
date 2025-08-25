@@ -35,7 +35,9 @@ public class LatestNewsPlace extends AbstractEventPlace implements HasMobileVers
     }
 
     public String getTitle() {
-        return ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty());
+        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing());
     }
 
     @Override

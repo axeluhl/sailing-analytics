@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sse.common.Util;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.AbstractBasePlace;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
@@ -42,11 +43,9 @@ public class EventPlace extends AbstractBasePlace {
     }
 
     public String getTitle(String eventName) {
-        return Optional.ofNullable(
-                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
-             .filter(s -> !s.trim().isEmpty())
-             .map(b -> b + " - " + eventName)
-             .orElse(eventName);
+        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
     
     public String getEventUuidAsString() {

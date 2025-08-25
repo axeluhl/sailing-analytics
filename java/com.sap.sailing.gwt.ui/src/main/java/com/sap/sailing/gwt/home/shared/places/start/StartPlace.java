@@ -11,7 +11,9 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class StartPlace extends Place implements HasLocationTitle, HasMobileVersion {
     public String getTitle() {
-        return ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty());
+        return !ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing();
     }
 
     public static class Tokenizer implements PlaceTokenizer<StartPlace> {

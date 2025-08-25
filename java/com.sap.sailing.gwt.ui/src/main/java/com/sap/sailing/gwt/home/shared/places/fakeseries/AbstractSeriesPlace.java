@@ -23,11 +23,9 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public String getTitle(String eventName) {
-        return Optional.ofNullable(
-                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
-             .filter(s -> !s.trim().isEmpty())
-             .map(b -> b + " - " + eventName)
-             .orElse(eventName);
+        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
 
     public String getSeriesUuidAsString() {
