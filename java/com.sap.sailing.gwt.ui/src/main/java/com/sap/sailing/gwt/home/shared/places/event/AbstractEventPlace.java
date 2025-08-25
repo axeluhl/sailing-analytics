@@ -34,7 +34,7 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     }
 
     public String getTitle(String eventName) {
-        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+        return (ClientConfiguration.getInstance().isBrandingActive() 
                 ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }

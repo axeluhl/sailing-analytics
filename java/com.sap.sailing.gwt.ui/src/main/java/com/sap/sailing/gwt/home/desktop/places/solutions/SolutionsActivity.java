@@ -23,7 +23,7 @@ public class SolutionsActivity extends AbstractActivity {
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         SolutionsView solutionsView = clientFactory.createSolutionsView(solutionsPlace.getNavigationTab());
         panel.setWidget(solutionsView.asWidget());
-        Window.setTitle((!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+        Window.setTitle((ClientConfiguration.getInstance().isBrandingActive() 
                 ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.solutions());
     }
