@@ -237,22 +237,6 @@ figcaption {
   vertical-align: middle;
   margin-top: -0.416666666666667em;
 }
-.label[data-labeltype='new'],
-.label[data-labeltype='updated'] {
-  background-color: #efaa00;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-.label[data-labeltype='ess'] {
-  background-color: #a71724;
-}
-.label[data-labeltype='worldcup'] {
-  background-color: #c79242;
-}
-.label[data-labeltype='bundesliga'] {
-  background-color: #005fa7;
-}
-
 .label[data-labeltype='active'],
 .label[data-labeltype='cancelled'],
 .label[data-labeltype='intrial'],
