@@ -25,29 +25,31 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.ServiceTrackerFactory;
 
-public class BrandingConfigurationServiceImpl implements BrandingConfigurationService, ServiceTrackerCustomizer<BrandingConfiguration, BrandingConfiguration> {
+public class BrandingConfigurationServiceImpl implements BrandingConfigurationService,
+        ServiceTrackerCustomizer<BrandingConfiguration, BrandingConfiguration> {
     private static final Logger logger = Logger.getLogger(BrandingConfigurationServiceImpl.class.getName());
 
     private final ServiceTracker<BrandingConfiguration, BrandingConfiguration> brandingConfigurationTracker;
-    
+
     private final BundleContext bundleContext;
-    
+
     private final ConcurrentMap<Pair<String, String>, Map<String, Object>> brandingConfigurationsByIdAndLocale;
-    
+
     /**
      * Starts out as {@code null}. Will be set by {@link #setActiveBrandingConfigurationById(String)} if the
-     * configuration by that ID is found through the {@link #brandingConfigurationTracker}. Furthermore,
-     * a {@link ServiceTrackerCustomizer} is used to update this field whenever the service currently in
-     * use is removed or modified, or a new service matching the ID is added.
+     * configuration by that ID is found through the {@link #brandingConfigurationTracker}. Furthermore, a
+     * {@link ServiceTrackerCustomizer} is used to update this field whenever the service currently in use is removed or
+     * modified, or a new service matching the ID is added.
      */
     private BrandingConfiguration activeBrandingConfiguration;
-    
+
     private Filter filterForActiveBrandingConfigurationId;
-    
+
     public BrandingConfigurationServiceImpl(BundleContext bundleContext) {
         super();
         this.bundleContext = bundleContext;
-        brandingConfigurationTracker = ServiceTrackerFactory.createAndOpen(bundleContext, BrandingConfiguration.class, this);
+        brandingConfigurationTracker = ServiceTrackerFactory.createAndOpen(bundleContext, BrandingConfiguration.class,
+                this);
         brandingConfigurationsByIdAndLocale = new ConcurrentHashMap<>();
     }
 
@@ -59,41 +61,36 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     @Override
     public BrandingConfiguration setActiveBrandingConfigurationById(String brandingConfigurationId) {
         filterForActiveBrandingConfigurationId = createFilterForBrandingConfigurationId(brandingConfigurationId);
-        activeBrandingConfiguration = filterForActiveBrandingConfigurationId == null ? null :
-            brandingConfigurationTracker.getServiceReferences() == null ? null :
-            Arrays.asList(brandingConfigurationTracker.getServiceReferences())
-                .stream()
-                .filter(ref -> filterForActiveBrandingConfigurationId.match(ref.getProperties()))
-                .findFirst()
-                .map(ref -> brandingConfigurationTracker.getService(ref))
-                .orElse(null);
+        activeBrandingConfiguration = filterForActiveBrandingConfigurationId == null ? null
+                : brandingConfigurationTracker.getServiceReferences() == null ? null
+                        : Arrays.asList(brandingConfigurationTracker.getServiceReferences()).stream()
+                                .filter(ref -> filterForActiveBrandingConfigurationId.match(ref.getProperties()))
+                                .findFirst().map(ref -> brandingConfigurationTracker.getService(ref)).orElse(null);
         if (activeBrandingConfiguration == null) {
-            logger.warning("Couldn't find a branding configuration with ID " + brandingConfigurationId +
-                    " in the OSGi service registry. Branding is effectively deactivated.");
+            logger.warning("Couldn't find a branding configuration with ID " + brandingConfigurationId
+                    + " in the OSGi service registry. Branding is effectively deactivated.");
         } else {
-            logger.info("Found active branding configuration: " + activeBrandingConfiguration.getId()+
-                    " with object ID "+System.identityHashCode(activeBrandingConfiguration));
+            logger.info("Found active branding configuration: " + activeBrandingConfiguration.getId()
+                    + " with object ID " + System.identityHashCode(activeBrandingConfiguration));
         }
         return activeBrandingConfiguration;
     }
 
     private Filter createFilterForBrandingConfigurationId(String brandingConfigurationId) {
         try {
-            return brandingConfigurationId == null ? null :
-                bundleContext.createFilter(
-                    String.format("(&(%s=%s)(%s=%s))",
-                            BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME, ""+brandingConfigurationId,
+            return brandingConfigurationId == null ? null
+                    : bundleContext.createFilter(String.format("(&(%s=%s)(%s=%s))",
+                            BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME, "" + brandingConfigurationId,
                             Constants.OBJECTCLASS, BrandingConfiguration.class.getName()));
         } catch (InvalidSyntaxException e) {
             throw new RuntimeException("Internal error: Invalid filter syntax for BrandingConfigurationService", e);
         }
     }
-    
+
     @Override
     public BrandingConfiguration getActiveBrandingConfiguration() {
         return activeBrandingConfiguration;
     }
-
 
     @Override
     public Map<BrandingConfigurationProperty, Object> getBrandingConfigurationProperties(Optional<String> locale) {
@@ -102,28 +99,42 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         final String title;
         final String whitelabeled;
         if (brandingConfiguration != null) {
-            title = brandingConfiguration.getBrandTitle(locale)+" ";
+            title = brandingConfiguration.getBrandTitle(locale) + " ";
             whitelabeled = "";
         } else {
             title = "";
             whitelabeled = "-whitelabeled";
         }
         map.put(BrandingConfigurationProperty.BRAND_TITLE_WITH_TRAILING_SPACE_JSP_PROPERTY_NAME, title);
-        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSolutionsInSailingImageURL());
-        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingTrimmedImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppTrimmedImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppImageURL());
-        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_TRIMMED_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorTrimmedImageURL());
-        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
-        map.put(BrandingConfigurationProperty.BUOY_PINGER_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getBuoyPingerAppImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsImageURL());
-        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_READ_MORE_TEXT, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsReadMoreText(locale));
+        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSolutionsInSailingImageURL());
+        map.put(BrandingConfigurationProperty.SOLUTIONS_IN_SAILING_TRIMMED_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSoutionsInSailingTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_TRIMMED_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_RACE_MANAGER_APP_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingRaceManagerAppImageURL());
+        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_SIMULATOR_TRIMMED_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingSimulatorTrimmedImageURL());
+        map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
+        map.put(BrandingConfigurationProperty.BUOY_PINGER_APP_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getBuoyPingerAppImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_IMAGE_URL,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsImageURL());
+        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_READ_MORE_TEXT,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsReadMoreText(locale));
+        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_SAP_SAILING,
+                brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsSapSailing(locale));
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());
         map.put(BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME, isBrandingActive());
         map.put(BrandingConfigurationProperty.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);
-        map.put(BrandingConfigurationProperty.SCRIPT_FOR_CLIENT_CONFIGURATION_CONTEXT_TO_DOCUMENT_JSP_PROPERTY_NAME, generateScriptForClientConfigurationContext(map));
+        map.put(BrandingConfigurationProperty.SCRIPT_FOR_CLIENT_CONFIGURATION_CONTEXT_TO_DOCUMENT_JSP_PROPERTY_NAME,
+                generateScriptForClientConfigurationContext(map));
         return map;
     }
 
@@ -135,7 +146,8 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     }
 
     private Map<String, Object> computeBrandingConfigurationProperties(Optional<String> requestLocale) {
-        final Map<String, Object> brandingProperties = new HashMap<>(); // no concurrency control needed within single request
+        final Map<String, Object> brandingProperties = new HashMap<>(); // no concurrency control needed within single
+                                                                        // request
         getBrandingConfigurationProperties(requestLocale).forEach((k, v) -> {
             brandingProperties.put(k.getPropertyName(), v);
         });
@@ -146,8 +158,10 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         final StringBuilder scriptBuilder = new StringBuilder();
         scriptBuilder.append("document.clientConfigurationContext=");
         final JSONObject jsonObject = new JSONObject();
-        for (final Entry<BrandingConfigurationProperty, Object> brandingConfigurationPropertyAndValue : map.entrySet()) {
-            jsonObject.put(brandingConfigurationPropertyAndValue.getKey().getPropertyName(), brandingConfigurationPropertyAndValue.getValue());
+        for (final Entry<BrandingConfigurationProperty, Object> brandingConfigurationPropertyAndValue : map
+                .entrySet()) {
+            jsonObject.put(brandingConfigurationPropertyAndValue.getKey().getPropertyName(),
+                    brandingConfigurationPropertyAndValue.getValue());
         }
         scriptBuilder.append(jsonObject.toJSONString());
         scriptBuilder.append(";");
@@ -157,11 +171,14 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     @Override
     public BrandingConfiguration addingService(ServiceReference<BrandingConfiguration> reference) {
         final BrandingConfiguration service = evictCachedPropertiesForBrandingServiceReference(reference);
-        logger.info("Adding branding configuration service with ID: " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                " and object ID " + System.identityHashCode(service));
-        if (service != null && filterForActiveBrandingConfigurationId != null && filterForActiveBrandingConfigurationId.match(reference)) {
-            logger.info("Added branding configuration service with ID " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                    " is selected as the active one.");
+        logger.info("Adding branding configuration service with ID: "
+                + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) + " and object ID "
+                + System.identityHashCode(service));
+        if (service != null && filterForActiveBrandingConfigurationId != null
+                && filterForActiveBrandingConfigurationId.match(reference)) {
+            logger.info("Added branding configuration service with ID "
+                    + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME)
+                    + " is selected as the active one.");
             activeBrandingConfiguration = service;
         }
         return service;
@@ -169,12 +186,15 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
 
     private BrandingConfiguration evictCachedPropertiesForBrandingServiceReference(
             ServiceReference<BrandingConfiguration> reference) {
-        final String brandingId = (String) reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME);
+        final String brandingId = (String) reference
+                .getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME);
         final BrandingConfiguration service = bundleContext.getService(reference);
-        for (final Iterator<Pair<String, String>> i=brandingConfigurationsByIdAndLocale.keySet().iterator(); i.hasNext(); ) {
+        for (final Iterator<Pair<String, String>> i = brandingConfigurationsByIdAndLocale.keySet().iterator(); i
+                .hasNext();) {
             final Pair<String, String> cachedProperties = i.next();
             if (Util.equalsWithNull(cachedProperties.getB(), brandingId)) {
-                logger.info("Removing cached branding properties from service with ID: " + brandingId + " and object ID " + System.identityHashCode(service));
+                logger.info("Removing cached branding properties from service with ID: " + brandingId
+                        + " and object ID " + System.identityHashCode(service));
                 // remove the cached properties for this ID, so that they will be recomputed
                 i.remove();
             }
@@ -185,11 +205,14 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     @Override
     public void modifiedService(ServiceReference<BrandingConfiguration> reference, BrandingConfiguration service) {
         evictCachedPropertiesForBrandingServiceReference(reference);
-        logger.info("Modified branding configuration service with ID: " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                " and object ID " + System.identityHashCode(service));
-        if (service != null && filterForActiveBrandingConfigurationId != null && filterForActiveBrandingConfigurationId.match(reference)) {
-            logger.info("Modified branding configuration service with ID " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                    ", updating active branding configuration.");
+        logger.info("Modified branding configuration service with ID: "
+                + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) + " and object ID "
+                + System.identityHashCode(service));
+        if (service != null && filterForActiveBrandingConfigurationId != null
+                && filterForActiveBrandingConfigurationId.match(reference)) {
+            logger.info("Modified branding configuration service with ID "
+                    + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME)
+                    + ", updating active branding configuration.");
             activeBrandingConfiguration = service;
         }
     }
@@ -197,11 +220,13 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
     @Override
     public void removedService(ServiceReference<BrandingConfiguration> reference, BrandingConfiguration service) {
         evictCachedPropertiesForBrandingServiceReference(reference);
-        logger.info("Removed branding configuration service with ID: " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                " and object ID " + System.identityHashCode(service));
+        logger.info("Removed branding configuration service with ID: "
+                + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) + " and object ID "
+                + System.identityHashCode(service));
         if (service == activeBrandingConfiguration) {
-            logger.info("The active branding configuration service with ID " + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME) +
-                    " was removed, setting active branding configuration to null.");
+            logger.info("The active branding configuration service with ID "
+                    + reference.getProperty(BrandingConfigurationService.BRANDING_ID_PROPERTY_NAME)
+                    + " was removed, setting active branding configuration to null.");
             activeBrandingConfiguration = null;
         }
     }

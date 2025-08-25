@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -33,8 +34,11 @@ public abstract class AbstractEventPlace extends Place implements HasLocationTit
     }
 
     public String getTitle(String eventName) {
-        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
-                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
+        return Optional.ofNullable(
+                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
+             .filter(s -> !s.trim().isEmpty())
+             .map(b -> b + " - " + eventName)
+             .orElse(eventName);
     }
 
     @Override

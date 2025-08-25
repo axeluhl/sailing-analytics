@@ -33,4 +33,6 @@ public interface BrandingConfiguration {
     String getSailingAnalyticsImageURL();
 
     String getSailingAnalyticsReadMoreText(Optional<String> locale);
+
+    String getSailingAnalyticsSapSailing(Optional<String> locale);
 }

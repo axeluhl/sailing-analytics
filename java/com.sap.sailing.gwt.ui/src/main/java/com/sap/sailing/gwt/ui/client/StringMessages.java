@@ -1647,7 +1647,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaDetails();
     String chooseChartType();
     String whatsNew();
-    String sapSailing();
     String search();
     String countdownStartingInDays();
     String countdownDays();

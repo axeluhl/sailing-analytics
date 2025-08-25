@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
+import java.util.Optional;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.TextTransform;
@@ -104,8 +106,11 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     public void navigateTabsTo(AbstractEventRegattaPlace place) {
         tabPanelUi.activatePlace(place);
         StringBuilder titleBuilder = new StringBuilder(
-                (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
-                        : StringMessages.INSTANCE.whitelabelSailing())).append(" - ");
+                Optional.ofNullable(
+                        ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
+                     .filter(s -> !s.trim().isEmpty())
+                     .map(b -> b + " - ")
+                     .orElse(""));
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
                 .getDisplayName() : currentPresenter.getEventDTO().getDisplayName());

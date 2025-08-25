@@ -88,4 +88,8 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsReadMore");
     }
+    @Override
+    public String getSailingAnalyticsSapSailing(Optional<String> locale) {
+        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsSapSailing");
+    }
 }

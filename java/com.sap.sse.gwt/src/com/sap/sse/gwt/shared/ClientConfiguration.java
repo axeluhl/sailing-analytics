@@ -70,6 +70,7 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String buoyPingerAppImageURL;
     private String sailingAnalyticsImageURL;
     private String sailingAnalyticsReadMoreText;
+    private String sailingAnalyticsSapSailing;
 
     public ClientConfiguration() {
         try {
@@ -89,6 +90,7 @@ public class ClientConfiguration implements BrandingConfiguration {
             buoyPingerAppImageURL = dataJso.getBuoyPingerAppImageURL();
             sailingAnalyticsImageURL = dataJso.getSailingAnalyticsImageURL();
             sailingAnalyticsReadMoreText = dataJso.getSailingAnalyticsReadMoreText();
+            sailingAnalyticsSapSailing = dataJso.getSailingAnalyticsSapSailing();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
         }
@@ -166,5 +168,8 @@ public class ClientConfiguration implements BrandingConfiguration {
 
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingAnalyticsReadMoreText;
+    }
+    public String getSailingAnalyticsSapSailing(Optional<String> locale) {
+        return sailingAnalyticsSapSailing;
     }
 }

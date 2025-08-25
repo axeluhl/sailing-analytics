@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.places.events;
 
+import java.util.Optional;
+
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
@@ -9,8 +11,11 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class EventsPlace extends Place implements HasLocationTitle, HasMobileVersion {
     public String getTitle() {
-        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
-                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.events();
+        return Optional.ofNullable(
+                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
+             .filter(s -> !s.trim().isEmpty())
+             .map(b -> b + " - ")
+             .orElse("") + StringMessages.INSTANCE.events();
     }
     
     public static class Tokenizer implements PlaceTokenizer<EventsPlace> {

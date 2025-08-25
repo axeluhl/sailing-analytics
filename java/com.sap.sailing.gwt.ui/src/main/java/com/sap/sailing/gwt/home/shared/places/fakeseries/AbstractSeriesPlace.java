@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,8 +24,11 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public String getTitle(String eventName) {
-        return (ClientConfiguration.getInstance().isBrandingActive() ? StringMessages.INSTANCE.sapSailing()
-                : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
+        return Optional.ofNullable(
+                ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()))
+             .filter(s -> !s.trim().isEmpty())
+             .map(b -> b + " - " + eventName)
+             .orElse(eventName);
     }
 
     public String getSeriesUuidAsString() {
