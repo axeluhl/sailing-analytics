@@ -11,7 +11,7 @@ import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class EventsPlace extends Place implements HasLocationTitle, HasMobileVersion {
     public String getTitle() {
-        return (!ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty()).trim().isEmpty() 
+        return (ClientConfiguration.getInstance().isBrandingActive()
                 ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.events();
     }
