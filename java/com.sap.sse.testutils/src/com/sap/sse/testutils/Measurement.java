@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.measurements;
+package com.sap.sse.testutils;
 
 /**
  * Create an instance of this class and {@link MeasurementCase#addMeasurement(Measurement) add it} to a

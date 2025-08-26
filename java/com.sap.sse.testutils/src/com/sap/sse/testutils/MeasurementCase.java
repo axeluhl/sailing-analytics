@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.measurements;
+package com.sap.sse.testutils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

@@ -50,6 +50,13 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         brandingConfigurationTracker = ServiceTrackerFactory.createAndOpen(bundleContext, BrandingConfiguration.class, this);
         brandingConfigurationsByIdAndLocale = new ConcurrentHashMap<>();
     }
+    
+    BrandingConfigurationServiceImpl(BundleContext bundleContext, ServiceTracker<BrandingConfiguration, BrandingConfiguration> brandingConfigurationTracker) {
+        // for testing only
+        this.bundleContext = bundleContext;
+        this.brandingConfigurationTracker = brandingConfigurationTracker;
+        this.brandingConfigurationsByIdAndLocale = new ConcurrentHashMap<>();
+    }
 
     @Override
     public boolean isBrandingActive() {

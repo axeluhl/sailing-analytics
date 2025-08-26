@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test.measurements;
+package com.sap.sse.testutils;
 
 import java.io.BufferedWriter;
 import java.io.File;

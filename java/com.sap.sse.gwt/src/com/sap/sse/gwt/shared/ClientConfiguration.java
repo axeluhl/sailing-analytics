@@ -178,6 +178,7 @@ public class ClientConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingAnalyticsReadMoreText;
     }
+    
     public String getSailingAnalyticsSapSailing(Optional<String> locale) {
         return sailingAnalyticsSapSailing;
     }
