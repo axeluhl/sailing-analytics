@@ -4070,7 +4070,8 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                     }
                 }
             } else {
-                throw new IllegalArgumentException("Viewer role or default server tenant does not exist");
+                throw new IllegalArgumentException(
+                        SailingViewerRole.getInstance().getName() + " role or default server tenant does not exist");
             }
         }
     }
