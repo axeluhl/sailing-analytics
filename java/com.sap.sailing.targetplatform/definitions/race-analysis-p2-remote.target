@@ -10,13 +10,28 @@
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.mockito.mockito-core" version="4.8.1.v20221103-2317"/>
 <unit id="org.mockito.mockito-core.source" version="4.8.1.v20221103-2317"/>
-<unit id="com.sun.jna" version="5.12.1.v20221103-2317"/>
-<unit id="com.sun.jna.source" version="5.12.1.v20221103-2317"/>
-<unit id="com.sun.jna.platform" version="5.12.1.v20221103-2317"/>
-<unit id="com.sun.jna.platform.source" version="5.12.1.v20221103-2317"/>
 <unit id="org.objenesis" version="3.3.0.v20221103-2317"/>
 <unit id="org.objenesis.source" version="3.3.0.v20221103-2317"/>
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20221123021534/repository/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.objectweb.asm" version="9.8.0"/>
+<unit id="org.objectweb.asm.source" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree.source" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree.analysis" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree.analysis.source" version="9.8.0"/>
+<unit id="org.objectweb.asm.commons" version="9.8.0"/>
+<unit id="org.objectweb.asm.commons.source" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree" version="9.8.0"/>
+<unit id="org.objectweb.asm.tree.source" version="9.8.0"/>
+<unit id="org.objectweb.asm.util" version="9.8.0"/>
+<unit id="org.objectweb.asm.util.source" version="9.8.0"/>
+<unit id="com.sun.jna" version="5.17.0.v20250316-1700"/>
+<unit id="com.sun.jna.source" version="5.17.0.v20250316-1700"/>
+<unit id="com.sun.jna.platform" version="5.17.0"/>
+<unit id="com.sun.jna.platform.source" version="5.17.0"/>
+<repository location="https://download.eclipse.org/releases/2025-06/202506111000/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.annotation" version="1.3.5.v20200909-1856"/>
@@ -178,7 +193,7 @@
 <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.25.11"/>
+<unit id="com.amazon.aws.aws-java-api.feature.group" version="2.32.25"/>
 <repository location="https://p2.sapsailing.com/p2/aws-sdk/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">

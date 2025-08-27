@@ -19,10 +19,26 @@
         </div>
     </div>
     <div class="yield_content">
-        <div class="contentWrapper">
-            <div class="mainContent">
-                <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
-                <div class="innerContent">
+      <div class="contentWrapper">
+        <div class="mainContent">
+          <h2 class="releaseHeadline">Release Notes - Administration Console</h2>
+          <div class="innerContent">
+          <h2 class="articleSubheadline">August 2025</h2>
+          <ul class="bulletList">
+                <li>Pairings, e.g., in league set-ups, can not be copied across regattas/leaderboards.
+                    This allows users to create a hidden regatta/leaderboard with flights to the entire
+                    season, create a pairing list for that and the copy sub-sequences from it to
+                    the regattas of the individual events. This can help improve the fairness of
+                    pairing lists across an entire season.</li>
+                <li>Upon popular demand, the series editing dialog now supports not only 50 but 100
+                    race columns / flights to be created in the drop-down list.</li>
+                <li>AI Agent credentials can now be reset from the Admin Console.</li>
+                <li>When using the Advanced / Landscape Management page of the Admin Console, and a new
+                    application load balancer (ALB) is created (e.g., in response to the number of ALB
+                    listener rules exceeding the limit for all existing ALBs in the region), the new ALB
+                    will automatically be registered with any AWS Web Application Firewall (WAF) access
+                    control list (Web ACL) that has a tag "web-acl-purpose" with value "geoblocking".<p>
+          </ul>
           <h2 class="articleSubheadline">June 2025</h2>
           <ul class="bulletList">
                 <li>Introduced a new Low Point scoring scheme for overall leaderboards which---instead of using the <em>ranks</em>

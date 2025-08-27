@@ -2,10 +2,10 @@
 Install **Sail Insight** via these links:
 
 <a href="https://apps.apple.com/us/app/sail-insight-powered-by-sap/id1495355086">
-  <img src="https://support.sapsailing.com/hc/article_attachments/360024350700/IOS.png" alt="Apple link" style="width:150px;" />
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/1280px-Download_on_the_App_Store_Badge.svg.png" alt="Apple link" style="width:170px;" />
 </a>
 <a href="https://play.google.com/store/apps/details?id=org.sailyachtresearch.sailinsight">
-  <img src="https://support.sapsailing.com/hc/article_attachments/360024350720/Android.png" alt="Google Play link" style="width:150px;" />
+  <img src="https://freelogopng.com/images/all_img/1664287128google-play-store-logo-png.png" alt="Google Play link" style="width:170px;" />
 </a>
 
 Note to event organizers: You can send invitation links to competitors after creating an event. Competitors will be guided through the installation and registration process once they follow an event invitation link.

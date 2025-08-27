@@ -7,6 +7,7 @@ import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -91,6 +92,13 @@ public class RaceLogOperationalTransformationTest {
         client2.addPeer(server);
     }
     
+    @AfterEach
+    public void tearDown() {
+        server.shutdown();
+        client1.shutdown();
+        client2.shutdown();
+    }
+
     @Test
     public void testSimpleApply() {
         Calendar c = new GregorianCalendar(2013, 6, 7, 13, 59, 33);

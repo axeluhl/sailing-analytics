@@ -16,6 +16,9 @@ on:
       runner_cpus:
         description: Default is 16, but can be 4, 8, and 64 as well
         default: '16'
+      firefox_version:
+        description: Version to use for Selenium tests; default is 137.0, but could, e.g., be "141.0" or "latest"
+        default: '140.0'
 
 jobs:
   build:
@@ -36,6 +39,14 @@ jobs:
         uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2.0.0
         with:
           comment_on_pr: false
+      - name: Setup firefox
+        id: setup-firefox
+        uses: browser-actions/setup-firefox@5914774dda97099441f02628f8d46411fcfbd208 # v1.7.0
+        with:
+          firefox-version: ${{  github.event.inputs.firefox_version == '' && '140.0' || github.event.inputs.firefox_version }}
+      - run: |
+          echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
+          ${{ steps.setup-firefox.outputs.firefox-path }} --version
       - name: Check out the repository to the runner
         uses: actions/checkout@v4
         with:
@@ -91,7 +102,7 @@ jobs:
           reporter: java-junit
           fail-on-error: true
       - name: Build Release
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || startsWith(github.ref, 'refs/heads/releases/') }}
         shell: bash
         run: |
           ./configuration/buildAndUpdateProduct.sh -u -L ${{ github.event.inputs.skip_tests == 'true' && '-n untested' || '' }} release
@@ -108,14 +119,14 @@ jobs:
             retention-days: 90
       - name: Upload distribution artifact
         uses: actions/upload-artifact@v4
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || startsWith(github.ref, 'refs/heads/releases/') }}
         with:
             name: ${{ env.SIMPLE_VERSION_INFO }}
             path: dist/**/*
             retention-days: 90
       - name: Create Release
         id: create_release
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         with:
           tag_name: ${{ env.SIMPLE_VERSION_INFO }}
@@ -124,7 +135,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset tar.gz
         id: upload-release-asset-tar-gz
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,7 +146,7 @@ jobs:
           asset_content_type: application/x-tar
       - name: Upload Release Asset release_notes.txt
         id: upload-release-asset-release-notes-txt
-        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-17' || startsWith(github.ref, 'refs/heads/releases/') }}
+        if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || startsWith(github.ref, 'refs/heads/releases/') }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
