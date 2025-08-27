@@ -97,7 +97,7 @@
       measurementNames.forEach(measure => {
 	graphs.push({
 	  title: `${test} ${measure}`,
-	  url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/${test}/${test}/measurementPlots/${measure}/history/graph/png`,
+	  url: `https://hudson.sapsailing.com/job/${jobName}/lastSuccessfulBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/${test}/${test}/measurementPlots/${measure}/history/graph/png`,
 	  source: `Hudson: ${jobName} → ${test} ${measure}`
 	});
       });
@@ -105,19 +105,19 @@
     // Also include your Branding client script size graph as the first entry:
     graphs.unshift({
       title: "Branding client script size in bytes",
-      url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sse.branding.impl/TestAndMeasureSizeOfSAPBranding/TestAndMeasureSizeOfSAPBranding/measurementPlots/Branding%20client%20script%20size%20in%20bytes/history/graph/png`,
+      url: `https://hudson.sapsailing.com/job/${jobName}/lastSuccessfulBuild/testReport/junit/com.sap.sse.branding.impl/TestAndMeasureSizeOfSAPBranding/TestAndMeasureSizeOfSAPBranding/measurementPlots/Branding%20client%20script%20size%20in%20bytes/history/graph/png`,
       source: `Hudson: ${jobName} → Branding client script size in bytes`
     });
     // Also include the MarkPassingCalculatorPerformanceTest.ChooserPerformance Measurement
     graphs.unshift({
       title: "MarkPassingCalculator Chooser Performance",
-        url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/ChooserPerformance/measurementPlots/ChooserPerformance/history/graph/png`,
+        url: `https://hudson.sapsailing.com/job/${jobName}/lastSuccessfulBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/ChooserPerformance/measurementPlots/ChooserPerformance/history/graph/png`,
       source: `Hudson: ${jobName} → MarkPassingCalculator Chooser Performance`
     });
     // Also include the MarkPassingCalculatorPerformanceTest.FinderPerformance Measurement
     graphs.unshift({
       title: "MarkPassingCalculator Finder Performance",
-        url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/FinderPerformance/measurementPlots/FinderPerformance/history/graph/png`,
+        url: `https://hudson.sapsailing.com/job/${jobName}/lastSuccessfulBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/FinderPerformance/measurementPlots/FinderPerformance/history/graph/png`,
       source: `Hudson: ${jobName} → MarkPassingCalculator Finder Performance`
     });
 
