@@ -86,9 +86,6 @@
       "FlorianopolisMarkPassingTest",
       "KW470MarkPassingTest",
       "Kiel2013505Test",
-      "MarkPassingCalculatorPerformanceTest",
-      "MarkPassingCalculatorWithTrackersOnStartBoatTest",
-      "MarkPassingWhiteBoxTest",
       "OBMR2012VRMarkPassingTest",
       "StarIDM2013MarkPassingTest"
     ];
@@ -109,6 +106,18 @@
       title: "Branding client script size in bytes",
       url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sse.branding.impl/TestAndMeasureSizeOfSAPBranding/TestAndMeasureSizeOfSAPBranding/measurementPlots/Branding%20client%20script%20size%20in%20bytes/history/graph/png`,
       source: `Hudson: ${jobName} → Branding client script size in bytes`
+    });
+    // Also include the MarkPassingCalculatorPerformanceTest.ChooserPerformance Measurement
+    graphs.unshift({
+      title: "MarkPassingCalculator Chooser Performance",
+        url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/ChooserPerformance/measurementPlots/ChooserPerformance/history/graph/png`,
+      source: `Hudson: ${jobName} → MarkPassingCalculator Chooser Performance`
+    });
+    // Also include the MarkPassingCalculatorPerformanceTest.FinderPerformance Measurement
+    graphs.unshift({
+      title: "MarkPassingCalculator Finder Performance",
+        url: `https://hudson.sapsailing.com/job/${jobName}/lastCompletedBuild/testReport/junit/com.sap.sailing.domain.test.markpassing/MarkPassingCalculatorPerformanceTest/FinderPerformance/measurementPlots/FinderPerformance/history/graph/png`,
+      source: `Hudson: ${jobName} → MarkPassingCalculator Finder Performance`
     });
 
     const PREFS_KEY = "hudson-graphs-prefs";
@@ -182,11 +191,11 @@
       img.loading = 'lazy';
       img.decoding = 'async';
       img.src = g.url;
-      img.className = 'w-full h-auto hidden';
+      img.className = 'w-full h-auto opacity-0 transition-opacity duration-300';
 
       img.addEventListener('load', () => {
         spinner.remove();
-        img.classList.remove('hidden');
+        img.classList.remove('opacity-0');
       });
       img.addEventListener('error', () => {
         spinner.className = 'absolute inset-0 flex items-center justify-center text-sm text-red-600 bg-red-50';
