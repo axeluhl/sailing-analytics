@@ -223,6 +223,7 @@ if [ "$TMP" = "" ]; then
   export TMP=/tmp
 fi
 extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
+extra="${extra} -Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0"
 
 shift $((OPTIND-1))
 
@@ -772,7 +773,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "Maven version used: `mvn --version`"
         echo "JAVA_HOME used: $JAVA_HOME"
 	export MAVEN_OPTS="-Xmx4g"
-        mvn -X $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}
         echo "Maven exit code is $MVN_EXIT_CODE"

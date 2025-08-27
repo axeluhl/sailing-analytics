@@ -1,4 +1,4 @@
-name: Merge main branch into docker-17 after successful build
+name: Merge main branch into docker-24 after successful build
 on:
   workflow_run:
     workflows: [release]
@@ -6,7 +6,7 @@ on:
     branches: [main]
   workflow_dispatch: {}
 jobs:
-  merge-main-into-docker-17:
+  merge-main-into-docker-24:
     permissions:
       contents: write
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -15,15 +15,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: docker-17
+          ref: docker-24
           fetch-depth: 0  # fetch the whole thing to make sure the histories merge
-      - name: Merge main into docker-17
+      - name: Merge main into docker-24
         uses: devmasx/merge-branch@854d3ac71ed1e9deb668e0074781b81fdd6e771f # v1.4.0
         env:
           GH_TOKEN: ${{ secrets.REPO_TOKEN_FOR_MERGE_AND_PUSH }}
         with:
           type: now
           from_branch: main
-          target_branch: docker-17
-          message: Auto-merging main into docker-17 after successful release build
+          target_branch: docker-24
+          message: Auto-merging main into docker-24 after successful release build
           github_token: ${{ secrets.REPO_TOKEN_FOR_MERGE_AND_PUSH }}

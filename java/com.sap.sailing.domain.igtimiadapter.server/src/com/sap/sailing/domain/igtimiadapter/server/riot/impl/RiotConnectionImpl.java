@@ -183,9 +183,16 @@ public class RiotConnectionImpl implements RiotConnection {
 
     @Override
     public synchronized void enableOverTheAirLog() throws IOException {
+        // Logging priorities:
+        //        debug
+        //        info
+        //        warning
+        //        error
+        //        fatal
+        //        response // possibly special case for console responses
         if (overTheAirLogEnabled == 0) {
-            send(buildCommandMessage("log cell debug"));
-            send(buildCommandMessage("log cell block 2"));
+            send(buildCommandMessage("log cell debug"));   // alternatively: "log cell verbose payload"     // log messages over modem in "payload" format
+            send(buildCommandMessage("log cell block 2")); // blocking wait for modem for two seconds
         }
         overTheAirLogEnabled++;
     }

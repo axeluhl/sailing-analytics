@@ -908,14 +908,14 @@
          id="com.amazon.aws.aws-java-api"
          download-size="0"
          install-size="0"
-         version="2.25.11"
+         version="2.32.25"
          unpack="false"/>
 
    <plugin
          id="com.amazon.aws.aws-java-api.source"
          download-size="0"
          install-size="0"
-         version="2.25.11"
+         version="2.32.25"
          unpack="false"/>
 
    <plugin
@@ -940,6 +940,27 @@
          unpack="false"/>
 
    <plugin
+         id="org.objectweb.asm.tree.analysis.source"
+         download-size="0"
+         install-size="0"
+         version="9.8.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.tree"
+         download-size="0"
+         install-size="0"
+         version="9.8.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm.tree.source"
+         download-size="0"
+         install-size="0"
+         version="9.8.0"
+         unpack="false"/>
+
+   <plugin
          id="org.objectweb.asm.tree"
          download-size="0"
          install-size="0"
@@ -948,13 +969,6 @@
 
    <plugin
          id="org.objectweb.asm.util"
-         download-size="0"
-         install-size="0"
-         version="9.8.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.objectweb.asm.source"
          download-size="0"
          install-size="0"
          version="9.8.0"
@@ -1512,28 +1526,28 @@
          id="com.sun.jna"
          download-size="0"
          install-size="0"
-         version="5.12.1.v20221103-2317"
+         version="5.17.0.v20250316-1700"
          unpack="false"/>
 
    <plugin
          id="com.sun.jna.source"
          download-size="0"
          install-size="0"
-         version="5.12.1.v20221103-2317"
+         version="5.17.0.v20250316-1700"
          unpack="false"/>
 
    <plugin
          id="com.sun.jna.platform"
          download-size="0"
          install-size="0"
-         version="5.12.1.v20221103-2317"
+         version="5.17.0"
          unpack="false"/>
 
    <plugin
          id="com.sun.jna.platform.source"
          download-size="0"
          install-size="0"
-         version="5.12.1.v20221103-2317"
+         version="5.17.0"
          unpack="false"/>
 
    <plugin
