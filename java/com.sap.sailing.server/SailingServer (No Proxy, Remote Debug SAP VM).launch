@@ -180,8 +180,7 @@
 <setEntry value="org.objectweb.asm.tree.source@default:default"/>
 <setEntry value="org.objectweb.asm.tree@default:default"/>
 <setEntry value="org.objectweb.asm.util@default:default"/>
-<setEntry value="org.objectweb.asm.source@default:default"/>
-<setEntry value="org.objectweb.asm.analysis.source@default:default"/>
+<setEntry value="org.objectweb.asm.tree.analysis.source@default:default"/>
 <setEntry value="org.objectweb.asm.commons.source@default:default"/>
 <setEntry value="org.objectweb.asm.tree.source@default:default"/>
 <setEntry value="org.objectweb.asm.util.source@default:default"/>
