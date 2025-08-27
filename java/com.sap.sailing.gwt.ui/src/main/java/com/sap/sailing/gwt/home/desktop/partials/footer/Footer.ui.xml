@@ -8,8 +8,8 @@
   <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.shared.app.PlaceNavigation" />
   <g:HTMLPanel tag="footer" addStyleNames="{local_res.css.sitefooter}">
     <!-- Website footer-->
-      <div class="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns}">
+      <div class="{res.mediaCss.grid} {local_res.css.sitefooter_row}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.medium9} {res.mediaCss.columns} {local_res.css.sitefooter_left}">
           <div ui:field="copyrightDiv" class="{local_res.css.sitefooter_copyright}">
             <ui:text from='{i18n.footerCopyright}' />
           </div>
@@ -35,8 +35,9 @@
             </a>
           </div>
         </div>
-        <l:LanguageSelector ui:field="languageSelector" labelText="{i18n.footerLanguage}" addStyleNames="{res.mediaCss.small12}
-                {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}" />
+        <div class="{res.mediaCss.small12} {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_right}">
+            <l:LanguageSelector ui:field="languageSelector" labelText="{i18n.footerLanguage}" addStyleNames="{local_res.css.sitefooter_language}" />
+        </div>
       </div>
   </g:HTMLPanel>
 </ui:UiBinder>
