@@ -594,7 +594,7 @@
          id="org.eclipse.equinox.launcher"
          download-size="0"
          install-size="0"
-         version="1.6.900.v20240613-2009"
+         version="1.6.0.v20200915-1508"
          unpack="false"/>
 
    <plugin
