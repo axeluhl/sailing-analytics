@@ -73,8 +73,8 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getSailingAnalyticsReadMoreText() /*-{
         return this.sailingAnalyticsReadMoreText;
     }-*/;
-    public final native String getSailingAnalyticsSapSailing() /*-{
-        return this.sailingAnalyticsSapSailing;
+    public final native String getSailingAnalyticsSailing() /*-{
+        return this.sailingAnalyticsSailing;
     }-*/;
     public final native String getFooterCopyright() /*-{
         return this.footerCopyright;

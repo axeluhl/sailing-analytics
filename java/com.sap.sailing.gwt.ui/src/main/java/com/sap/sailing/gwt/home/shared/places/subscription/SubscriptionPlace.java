@@ -38,7 +38,7 @@ public class SubscriptionPlace extends Place implements HasLocationTitle, HasMob
 
     public String getTitle() {
         return (ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.subscription();
     }
 

@@ -106,7 +106,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     public void navigateTabsTo(AbstractEventRegattaPlace place) {
         tabPanelUi.activatePlace(place);
         StringBuilder titleBuilder = new StringBuilder(ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()

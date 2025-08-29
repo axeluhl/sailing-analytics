@@ -34,7 +34,7 @@ public interface BrandingConfiguration {
 
     String getSailingAnalyticsReadMoreText(Optional<String> locale);
 
-    String getSailingAnalyticsSapSailing(Optional<String> locale);
+    String getSailingAnalyticsSailing(Optional<String> locale);
     
     String getFooterCopyright();
     

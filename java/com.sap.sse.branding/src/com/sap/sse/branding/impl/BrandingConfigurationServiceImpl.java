@@ -133,7 +133,7 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         map.put(BrandingConfigurationProperty.FOOTER_WHATS_NEW_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterWhatsNewLink());
         map.put(BrandingConfigurationProperty.FOOTER_LEGAL_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterLegalLink());
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_READ_MORE_TEXT, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsReadMoreText(locale));
-        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_SAP_SAILING, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsSapSailing(locale));
+        map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_SAP_SAILING, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsSailing(locale));
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());
         map.put(BrandingConfigurationProperty.BRANDING_ACTIVE_JSP_PROPERTY_NAME, isBrandingActive());
         map.put(BrandingConfigurationProperty.DASH_WHITELABELED_JSP_PROPERTY_NAME, whitelabeled);

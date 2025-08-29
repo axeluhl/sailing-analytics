@@ -24,7 +24,7 @@ public class SolutionsActivity extends AbstractActivity {
         SolutionsView solutionsView = clientFactory.createSolutionsView(solutionsPlace.getNavigationTab());
         panel.setWidget(solutionsView.asWidget());
         Window.setTitle((ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.solutions());
     }
 }

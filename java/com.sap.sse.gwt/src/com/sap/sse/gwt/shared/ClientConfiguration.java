@@ -105,7 +105,7 @@ public class ClientConfiguration implements BrandingConfiguration {
             buoyPingerAppImageURL = dataJso.getBuoyPingerAppImageURL();
             sailingAnalyticsImageURL = dataJso.getSailingAnalyticsImageURL();
             sailingAnalyticsReadMoreText = dataJso.getSailingAnalyticsReadMoreText();
-            sailingAnalyticsSapSailing = dataJso.getSailingAnalyticsSapSailing();
+            sailingAnalyticsSapSailing = dataJso.getSailingAnalyticsSailing();
             footerCopyright = dataJso.getFooterCopyright();
             footerLegalLink = dataJso.getFooterLegalLink();
             footerPrivacyLink = dataJso.getFooterPrivacyLink();
@@ -190,7 +190,7 @@ public class ClientConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingAnalyticsReadMoreText;
     }
-    public String getSailingAnalyticsSapSailing(Optional<String> locale) {
+    public String getSailingAnalyticsSailing(Optional<String> locale) {
         return sailingAnalyticsSapSailing;
     }
     public String getFooterCopyright() {

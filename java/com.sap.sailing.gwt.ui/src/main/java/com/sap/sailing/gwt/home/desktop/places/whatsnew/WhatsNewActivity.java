@@ -23,7 +23,7 @@ public class WhatsNewActivity extends AbstractActivity {
         WhatsNewView whatsNewView = clientFactory.createWhatsNewView(place.getNavigationTab());
         panel.setWidget(whatsNewView.asWidget());
         Window.setTitle((ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + StringMessages.INSTANCE.whatsNew());
     }
 }

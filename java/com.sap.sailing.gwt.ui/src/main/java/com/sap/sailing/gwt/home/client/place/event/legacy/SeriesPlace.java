@@ -54,7 +54,7 @@ public class SeriesPlace extends AbstractBasePlace {
 
     public String getTitle(String eventName, String leaderboardName) {
         return (ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + StringMessages.INSTANCE.leaderboard() + ": " + leaderboardName;
     }
     

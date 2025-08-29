@@ -44,7 +44,7 @@ public class EventPlace extends AbstractBasePlace {
 
     public String getTitle(String eventName) {
         return (ClientConfiguration.getInstance().isBrandingActive()
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()) + " - " + eventName;
     }
     

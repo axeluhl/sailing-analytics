@@ -85,7 +85,7 @@ public class TabletAndDesktopUserProfileView extends Composite
     public void navigateTabsTo(final AbstractUserProfilePlace place) {
         tabPanelUi.activatePlace(place);
         final StringBuilder titleBuilder = new StringBuilder(ClientConfiguration.getInstance().isBrandingActive() 
-                ? ClientConfiguration.getInstance().getSailingAnalyticsSapSailing(Optional.empty())
+                ? ClientConfiguration.getInstance().getSailingAnalyticsSailing(Optional.empty())
                 : StringMessages.INSTANCE.whitelabelSailing()).append(" - ");
 
         titleBuilder.append(place.getLocationTitle());
