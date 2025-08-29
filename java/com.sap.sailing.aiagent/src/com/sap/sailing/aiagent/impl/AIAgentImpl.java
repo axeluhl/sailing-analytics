@@ -46,7 +46,7 @@ import com.sap.sse.shared.util.WeakValueCache;
 public class AIAgentImpl implements AIAgent {
     private static final Logger logger = Logger.getLogger(AIAgentImpl.class.getName());
     
-    private static final String DEFAULT_MODEL_NAME = "gpt-5";
+    private static final String DEFAULT_MODEL_NAME = "o4-mini";
 
     private static final String SAP_AI_CORE_TAG = "SAP AI Core on %s";
     
