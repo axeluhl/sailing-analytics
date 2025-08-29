@@ -8,21 +8,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 
@@ -42,13 +38,10 @@ public class Footer extends Composite {
     @UiField DivElement copyrightDiv;
     @UiField AnchorElement imprintAnchorLink;
     @UiField AnchorElement desktopUi;
-    @UiField AnchorElement sapJobsAnchor;
+    @UiField AnchorElement jobsAnchor;
     @UiField AnchorElement privacyAnchorLink;
 
-    private final MobilePlacesNavigator placeNavigator;
-
-    public Footer(MobilePlacesNavigator placeNavigator) {
-        this.placeNavigator = placeNavigator;
+    public Footer() {
         FooterResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         DOM.sinkEvents(desktopUi, Event.ONCLICK);
@@ -67,48 +60,35 @@ public class Footer extends Composite {
             supportAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
-            sapJobsAnchor.getStyle().setDisplay(Display.NONE);
+            jobsAnchor.getStyle().setDisplay(Display.NONE);
             privacyAnchorLink.getStyle().setDisplay(NONE);
         } else {
+            languageSelector.setLabelText(cfg.getBrandTitle(Optional.empty()) + " " + StringMessages.INSTANCE.whitelabelFooterLanguage());
+            setHrefOrHide(privacyAnchorLink, cfg.getFooterPrivacyLink());
+            setHrefOrHide(jobsAnchor, cfg.getFooterJobsLink());
+            setHrefOrHide(supportAnchor, cfg.getFooterSupportLink());
+            setHrefOrHide(imprintAnchorLink, cfg.getFooterLegalLink());
+            if (!Util.hasLength(cfg.getFooterWhatsNewLink())) {
+                whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
+            } else {
+                whatsNewLinkUi.setHref(cfg.getFooterWhatsNewLink());
+            }
             if (!hideIfBlank(copyrightDiv, cfg.getFooterCopyright())) {
                 copyrightDiv.setInnerText(cfg.getFooterCopyright());
             }
-            languageSelector.setLabelText(cfg.getBrandTitle(Optional.empty()) + " " + StringMessages.INSTANCE.whitelabelFooterLanguage());
-            setHrefOrHide(privacyAnchorLink, cfg.getFooterPrivacyLink());
-            setHrefOrHide(sapJobsAnchor, cfg.getFooterJobsLink());
-            setHrefOrHide(supportAnchor, cfg.getFooterSupportLink());
-            setHrefOrHide(imprintAnchorLink, cfg.getFooterLegalLink());
-            if (cfg.getFooterLegalLink().equals("nothing")) {
-                placeNavigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
-            }
-            if (isBlank(cfg.getFooterWhatsNewLink())) {
-                whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
-            }
         }
-    }
-
-    @UiHandler("whatsNewLinkUi")
-    void onWhatsNew(ClickEvent e) {
-        if (!cfg.getFooterWhatsNewLink().equals("nothing")) {
-            Window.Location.assign(cfg.getFooterWhatsNewLink());
-        } else {
-            placeNavigator.getWhatsNewNavigation(WhatsNewPlace.WhatsNewNavigationTabs.SailingAnalytics).goToPlace();
-        }
-    }
-    private static boolean isBlank(String s) {
-        return s == null || s.isEmpty();
     }
     private static boolean hideIfBlank(DivElement el, String text) {
-        if (isBlank(text)) {
+        if (!Util.hasLength(text)) {
             el.getStyle().setDisplay(Display.NONE);
             return true;
         }
         return false;
     }
     private static void setHrefOrHide(AnchorElement el, String url) {
-        if (isBlank(url)) {
+        if (!Util.hasLength(url)) {
           el.getStyle().setDisplay(Display.NONE);
-        } else if (!url.equals("nothing")) {
+        } else {
           el.setHref(url);
         }
     }

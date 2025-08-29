@@ -16,10 +16,9 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.languageselect.LanguageSelector;
 import com.sap.sse.gwt.shared.ClientConfiguration;
 import com.sap.sse.gwt.shared.DebugConstants;
@@ -39,9 +38,8 @@ public class Footer extends Composite {
     @UiField AnchorElement mobileUi;
     @UiField AnchorElement sapJobsAnchor;
 
-    public Footer(DesktopPlacesNavigator navigator, EventBus eventBus) {
+    public Footer(EventBus eventBus) {
         FooterResources.INSTANCE.css().ensureInjected();
-        //navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
 
         initWidget(uiBinder.createAndBindUi(this));
         
@@ -72,12 +70,6 @@ public class Footer extends Composite {
             setHrefOrHide(whatsNewAnchor, cfg.getFooterWhatsNewLink());
             setHrefOrHide(imprintAnchorLink, cfg.getFooterLegalLink());
             languageSelector.setLabelText(cfg.getBrandTitle(Optional.empty()) + " " + StringMessages.INSTANCE.whitelabelFooterLanguage());
-            if (cfg.getFooterLegalLink().equals("nothing")) {
-                navigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
-            }
-            if (cfg.getFooterWhatsNewLink().equals("nothing")) {
-                whatsNewAnchor.setHref(navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics).getSafeTargetUrl());
-            }
             if (!hideIfBlank(copyrightDiv, cfg.getFooterCopyright())) {
                 copyrightDiv.setInnerText(cfg.getFooterCopyright());
             }
@@ -90,20 +82,17 @@ public class Footer extends Composite {
         languageSelector.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "languageSelector");
         sapJobsAnchor.setAttribute(DEBUG_ID_ATTRIBUTE, "sapJobsAnchor");
     }
-    private static boolean isBlank(String s) {
-        return s == null || s.isEmpty();
-    }
     private static boolean hideIfBlank(DivElement el, String text) {
-        if (isBlank(text)) {
+        if (!Util.hasLength(text)) {
             el.getStyle().setDisplay(Display.NONE);
             return true;
         }
         return false;
     }
     private static void setHrefOrHide(AnchorElement el, String url) {
-        if (isBlank(url)) {
+        if (!Util.hasLength(url)) {
           el.getStyle().setDisplay(Display.NONE);
-        } else if (!url.equals("nothing")) {
+        } else {
           el.setHref(url);
         }
     }

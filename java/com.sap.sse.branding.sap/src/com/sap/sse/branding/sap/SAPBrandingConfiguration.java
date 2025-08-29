@@ -100,7 +100,7 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
 
     @Override
     public String getFooterLegalLink() {
-        return "nothing"; //as implemented through page navigation
+        return "/gwt/Home.html#/imprint/:";
     }
 
     @Override
@@ -120,6 +120,6 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
 
     @Override
     public String getFooterWhatsNewLink() {
-        return "nothing"; //as implemented through page navigation
+        return "/gwt/Home.html#WhatsNewPlace:navigationTab=SailingAnalytics";
     }
 }

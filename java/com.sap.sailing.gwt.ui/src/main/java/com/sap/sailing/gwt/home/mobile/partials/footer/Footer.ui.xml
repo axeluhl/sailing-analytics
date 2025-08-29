@@ -19,7 +19,7 @@
                         title="{i18n.footerPrivacy}">
                         <ui:text from='{i18n.footerPrivacy}' />
                     </a>
-                    <a ui:field="sapJobsAnchor" target="_blank">
+                    <a ui:field="jobsAnchor">
                         <ui:text from='{i18n.footerJobs}'/>
                     </a>
                     <br></br>

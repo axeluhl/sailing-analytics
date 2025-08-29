@@ -12,7 +12,7 @@
           <div ui:field="copyrightDiv" class="{local_res.css.sitefooter_copyright}">
           </div>
           <div class="{local_res.css.sitefooter_links}">
-            <a ui:field="imprintAnchorLink" target="_blank" class="{local_res.css.sitefooter_links_link}">
+            <a ui:field="imprintAnchorLink" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.footerLegal}' />
             </a>
             <a ui:field="privacyAnchorLink" target="_blank" class="{local_res.css.sitefooter_links_link}">
