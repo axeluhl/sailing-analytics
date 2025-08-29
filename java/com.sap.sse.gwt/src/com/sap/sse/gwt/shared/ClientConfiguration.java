@@ -80,6 +80,12 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String sailingAnalyticsImageURL;
     private String sailingAnalyticsReadMoreText;
     private String sailingAnalyticsSapSailing;
+    private String footerCopyright;
+    private String footerLegalLink;
+    private String footerPrivacyLink;
+    private String footerJobsLink;
+    private String footerSupportLink;
+    private String footerWhatsNewLink;
 
     public ClientConfiguration() {
         try {
@@ -100,6 +106,12 @@ public class ClientConfiguration implements BrandingConfiguration {
             sailingAnalyticsImageURL = dataJso.getSailingAnalyticsImageURL();
             sailingAnalyticsReadMoreText = dataJso.getSailingAnalyticsReadMoreText();
             sailingAnalyticsSapSailing = dataJso.getSailingAnalyticsSapSailing();
+            footerCopyright = dataJso.getFooterCopyright();
+            footerLegalLink = dataJso.getFooterLegalLink();
+            footerPrivacyLink = dataJso.getFooterPrivacyLink();
+            footerJobsLink = dataJso.getFooterJobsLink();
+            footerSupportLink = dataJso.getFooterSupportLink();
+            footerWhatsNewLink = dataJso.getFooterWhatsNewLink();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
         }
@@ -178,8 +190,25 @@ public class ClientConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingAnalyticsReadMoreText;
     }
-    
     public String getSailingAnalyticsSapSailing(Optional<String> locale) {
         return sailingAnalyticsSapSailing;
     }
+    public String getFooterCopyright() {
+        return footerCopyright;
+    }
+    public String getFooterLegalLink() {
+        return footerLegalLink;
+    }
+    public String getFooterPrivacyLink() {
+        return footerPrivacyLink;
+    }
+    public String getFooterJobsLink() {
+        return footerJobsLink;
+    }
+    public String getFooterSupportLink() {
+        return footerSupportLink;
+    }
+    public String getFooterWhatsNewLink() {
+        return footerWhatsNewLink;
+    } 
 }

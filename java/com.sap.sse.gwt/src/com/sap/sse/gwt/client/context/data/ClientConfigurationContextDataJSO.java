@@ -76,4 +76,22 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getSailingAnalyticsSapSailing() /*-{
         return this.sailingAnalyticsSapSailing;
     }-*/;
+    public final native String getFooterCopyright() /*-{
+        return this.footerCopyright;
+    }-*/;
+    public final native String getFooterLegalLink() /*-{
+        return this.footerLegalLink;
+    }-*/;
+    public final native String getFooterPrivacyLink() /*-{
+        return this.footerPrivacyLink;
+    }-*/;
+    public final native String getFooterJobsLink() /*-{
+        return this.footerJobsLink;
+    }-*/;
+    public final native String getFooterSupportLink() /*-{
+        return this.footerSupportLink;
+    }-*/;
+    public final native String getFooterWhatsNewLink() /*-{
+        return this.footerWhatsNewLink;
+    }-*/;
 }

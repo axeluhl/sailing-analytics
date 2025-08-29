@@ -1663,8 +1663,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaLeaderboardLastScoreUpdate();
     String eventRegattaRaceNotTracked();
     String footerJobs();
-    String footerCopyright();
-    String footerLanguage();
     String footerLegal();
     String footerPrivacy();
     String footerFeedback();

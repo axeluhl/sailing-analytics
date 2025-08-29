@@ -126,6 +126,12 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         map.put(BrandingConfigurationProperty.SAIL_IN_SIGHT_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailInSightAppImageURL());
         map.put(BrandingConfigurationProperty.BUOY_PINGER_APP_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getBuoyPingerAppImageURL());
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_IMAGE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsImageURL());
+        map.put(BrandingConfigurationProperty.FOOTER_COPYRIGHT, brandingConfiguration == null ? "" : brandingConfiguration.getFooterCopyright());
+        map.put(BrandingConfigurationProperty.FOOTER_PRIVACY_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterPrivacyLink());
+        map.put(BrandingConfigurationProperty.FOOTER_JOBS_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterJobsLink());
+        map.put(BrandingConfigurationProperty.FOOTER_SUPPORT_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterSupportLink());
+        map.put(BrandingConfigurationProperty.FOOTER_WHATS_NEW_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterWhatsNewLink());
+        map.put(BrandingConfigurationProperty.FOOTER_LEGAL_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterLegalLink());
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_READ_MORE_TEXT, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsReadMoreText(locale));
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_SAP_SAILING, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsSapSailing(locale));
         map.put(BrandingConfigurationProperty.DEBRANDING_ACTIVE_JSP_PROPERTY_NAME, !isBrandingActive());

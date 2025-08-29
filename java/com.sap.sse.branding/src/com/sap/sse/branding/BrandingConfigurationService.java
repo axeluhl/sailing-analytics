@@ -103,6 +103,19 @@ public interface BrandingConfigurationService {
         
         SAILING_ANALYTICS_SAP_SAILING("sailingAnalyticsSapSailing"),
         
+        FOOTER_COPYRIGHT("footerCopyright"),
+        
+        FOOTER_PRIVACY_LINK("footerPrivacyLink"),
+        
+        FOOTER_JOBS_LINK("footerJobsLink"),
+        
+        FOOTER_SUPPORT_LINK("footerSupportLink"),
+        
+        FOOTER_WHATS_NEW_LINK("footerWhatsNewLink"),
+        
+        FOOTER_LEGAL_LINK("footerLegalLink"),
+        
+        
         /**
          * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will
          * set the {@code document.clientConfigurationContext} object to a JSON object that contains all the branding fields. 

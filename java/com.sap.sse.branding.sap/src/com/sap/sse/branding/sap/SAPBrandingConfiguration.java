@@ -92,4 +92,34 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsSapSailing(Optional<String> locale) {
         return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsSapSailing");
     }
+
+    @Override
+    public String getFooterCopyright() {
+        return "@ 2011-2025 SAP Sailing Analytics";
+    }
+
+    @Override
+    public String getFooterLegalLink() {
+        return "nothing"; //as implemented through page navigation
+    }
+
+    @Override
+    public String getFooterPrivacyLink() {
+        return "https://www.sap.com/about/legal/privacy.html?campaigncode=CRM-XH21-OSP-Sailing";
+    }
+
+    @Override
+    public String getFooterJobsLink() {
+        return "https://jobs.sapsailing.com";
+    }
+
+    @Override
+    public String getFooterSupportLink() {
+        return "https://support.sapsailing.com";
+    }
+
+    @Override
+    public String getFooterWhatsNewLink() {
+        return "nothing"; //as implemented through page navigation
+    }
 }
