@@ -94,4 +94,19 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getFooterWhatsNewLink() /*-{
         return this.footerWhatsNewLink;
     }-*/;
+    public final native String getSportsOn() /*-{
+        return this.sportsOn;
+    }-*/;
+    public final native String getFollowSports() /*-{
+        return this.followSports;
+    }-*/;
+    public final native String getFacebookLink() /*-{
+        return this.facebookLink;
+    }-*/;
+    public final native String getxLink() /*-{
+        return this.xLink;
+    }-*/;
+    public final native String getInstagramLink() /*-{
+        return this.instagramLink;
+    }-*/;
 }

@@ -101,7 +101,7 @@ public interface BrandingConfigurationService {
         
         SAILING_ANALYTICS_READ_MORE_TEXT("sailingAnalyticsReadMoreText"),
         
-        SAILING_ANALYTICS_SAP_SAILING("sailingAnalyticsSapSailing"),
+        SAILING_ANALYTICS_SAILING("sailingAnalyticsSailing"),
         
         FOOTER_COPYRIGHT("footerCopyright"),
         
@@ -115,6 +115,15 @@ public interface BrandingConfigurationService {
         
         FOOTER_LEGAL_LINK("footerLegalLink"),
         
+        SPORTS_ON("sportsOn"),
+        
+        FOLLOW_SPORTS("followSports"),
+        
+        X_LINK("xLink"),
+        
+        FACEBOOK_LINK("facebookLink"),
+        
+        INSTAGRAM_LINK("instagramLink"),
         
         /**
          * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will

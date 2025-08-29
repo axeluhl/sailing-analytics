@@ -79,13 +79,19 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String buoyPingerAppImageURL;
     private String sailingAnalyticsImageURL;
     private String sailingAnalyticsReadMoreText;
-    private String sailingAnalyticsSapSailing;
+    private String sailingAnalyticsSailing;
     private String footerCopyright;
     private String footerLegalLink;
     private String footerPrivacyLink;
     private String footerJobsLink;
     private String footerSupportLink;
     private String footerWhatsNewLink;
+    private String sportsOn;
+    private String followSports;
+    private String facebookLink;
+    private String xLink;
+    private String instagramLink;
+    
 
     public ClientConfiguration() {
         try {
@@ -105,13 +111,18 @@ public class ClientConfiguration implements BrandingConfiguration {
             buoyPingerAppImageURL = dataJso.getBuoyPingerAppImageURL();
             sailingAnalyticsImageURL = dataJso.getSailingAnalyticsImageURL();
             sailingAnalyticsReadMoreText = dataJso.getSailingAnalyticsReadMoreText();
-            sailingAnalyticsSapSailing = dataJso.getSailingAnalyticsSailing();
+            sailingAnalyticsSailing = dataJso.getSailingAnalyticsSailing();
             footerCopyright = dataJso.getFooterCopyright();
             footerLegalLink = dataJso.getFooterLegalLink();
             footerPrivacyLink = dataJso.getFooterPrivacyLink();
             footerJobsLink = dataJso.getFooterJobsLink();
             footerSupportLink = dataJso.getFooterSupportLink();
             footerWhatsNewLink = dataJso.getFooterWhatsNewLink();
+            sportsOn = dataJso.getSportsOn();
+            followSports = dataJso.getFollowSports();
+            xLink = dataJso.getxLink();
+            facebookLink = dataJso.getFacebookLink();
+            instagramLink = dataJso.getInstagramLink();
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
         }
@@ -191,7 +202,7 @@ public class ClientConfiguration implements BrandingConfiguration {
         return sailingAnalyticsReadMoreText;
     }
     public String getSailingAnalyticsSailing(Optional<String> locale) {
-        return sailingAnalyticsSapSailing;
+        return sailingAnalyticsSailing;
     }
     public String getFooterCopyright() {
         return footerCopyright;
@@ -210,5 +221,20 @@ public class ClientConfiguration implements BrandingConfiguration {
     }
     public String getFooterWhatsNewLink() {
         return footerWhatsNewLink;
-    } 
+    }
+    public String getSportsOn(Optional<String> locale) {
+        return sportsOn;
+    }
+    public String getFollowSports(Optional<String> locale) {
+        return followSports;
+    }
+    public String getFacebookLink() {
+        return facebookLink;
+    }
+    public String getxLink() {
+        return xLink;
+    }
+    public String getInstagramLink() {
+        return instagramLink;
+    }
 }

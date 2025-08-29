@@ -47,4 +47,14 @@ public interface BrandingConfiguration {
     String getFooterSupportLink();
     
     String getFooterWhatsNewLink();
+    
+    String getSportsOn(Optional<String> locale);
+    
+    String getFollowSports(Optional<String> locale);
+    
+    String getFacebookLink();
+    
+    String getxLink();
+    
+    String getInstagramLink();
 }

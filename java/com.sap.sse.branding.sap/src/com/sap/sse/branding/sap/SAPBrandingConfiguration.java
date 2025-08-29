@@ -88,9 +88,10 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getSailingAnalyticsReadMoreText(Optional<String> locale) {
         return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsReadMore");
     }
+    
     @Override
     public String getSailingAnalyticsSailing(Optional<String> locale) {
-        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsSapSailing");
+        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sailingAnalyticsSailing");
     }
 
     @Override
@@ -121,5 +122,30 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     @Override
     public String getFooterWhatsNewLink() {
         return "/gwt/Home.html#WhatsNewPlace:navigationTab=SailingAnalytics";
+    }
+
+    @Override
+    public String getSportsOn(Optional<String> locale) {
+        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "sportsOn");
+    }
+
+    @Override
+    public String getFollowSports(Optional<String> locale) {
+        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "followSports");
+    }
+
+    @Override
+    public String getFacebookLink() {
+        return "https://www.facebook.com/SAP";
+    }
+
+    @Override
+    public String getxLink() {
+        return "https://x.com/sap";
+    }
+
+    @Override
+    public String getInstagramLink() {
+        return "https://www.instagram.com/sap/";
     }
 }
