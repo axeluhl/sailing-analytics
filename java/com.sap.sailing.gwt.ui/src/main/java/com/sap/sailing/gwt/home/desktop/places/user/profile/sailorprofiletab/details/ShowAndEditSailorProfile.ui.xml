@@ -22,9 +22,15 @@
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
                 <dac:DesktopAccordion ui:field="accordionStatisticsUi" title="{i18n.statistics}" />
             </div>
+            <!-- 
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
                 <dac:DesktopAccordion ui:field="accordionPolarDiagramUi"
                     title="{i18n.polarSheetChart}" />
+            </div> 
+            -->
+            <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
+                <dac:DesktopAccordion ui:field="accordionAnalyticsUi"
+                    title="{i18n.analytics}" />
             </div>
         </div>
     </g:HTMLPanel>

@@ -14,7 +14,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
         com.sap.sse.security.ui.client.i18n.StringMessages,
         com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
-
+    
+    String analytics();
+    
+    
     String manage2Sail();
     String raceCommitteeApp();
     String tracTracEvents();
