@@ -39,52 +39,38 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
 
-
-//added imports 
 //import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.analytics.SailorProfileAnalyticsTableAndCharts;
 //import com.google.gwt.user.client.ui.HTMLPanel;
 //import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.*;
 //import com.sap.sse.gwt.resources.highcharts;
-import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
-import org.moxieapps.gwt.highcharts.client.ChartTitle;
-import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
-import org.moxieapps.gwt.highcharts.client.Series;
-import org.moxieapps.gwt.highcharts.client.Point;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.moxieapps.gwt.highcharts.client.Chart;
-import org.moxieapps.gwt.highcharts.client.Series;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
+//import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
+//import com.google.gwt.event.dom.client.ClickEvent;
+//import com.google.gwt.event.dom.client.ClickHandler;
+//import com.google.gwt.user.client.ui.Button;
+//import com.google.gwt.user.client.ui.DockLayoutPanel;
+//import com.google.gwt.user.client.ui.Widget;
+//import com.sap.sailing.gwt.ui.client.StringMessages;
+//import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
+//import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
+//import com.sap.sailing.polars.datamining.shared.PolarBackendData;
+//import com.sap.sse.common.settings.Settings;
+//import com.sap.sse.common.util.NaturalComparator;
+//import com.sap.sse.datamining.shared.GroupKey;
+//import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+//import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+//import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
+//import com.sap.sse.gwt.client.shared.components.Component;
+//import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+//import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+//import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+//import com.google.gwt.user.client.ui.DockLayoutPanel;
+//import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
-import com.sap.sailing.polars.datamining.shared.PolarBackendData;
-import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
-import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
-import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.resources.Highcharts; //Zugriff auf Injection Methode
-import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.dom.client.Style.Unit;
+import com.sap.sse.gwt.resources.Highcharts; 
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.*;
+
 /**
  * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit
  * them. The data is loaded when the accordion is opened for the first time.
@@ -106,7 +92,6 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
     InlineEditLabel titleUi;
     @UiField
     BoatClassListView boatClassesUi;
-
     @UiField
     DesktopAccordion accordionEventsUi;
     @UiField
@@ -193,14 +178,11 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         });
 
         accordionStatisticsUi.clear();
-        
         setupTables(entry);
         
         accordionAnalyticsUi.clear();
-        Label testLabel = new Label("Analytics funktioniert!");
-        accordionAnalyticsUi.addWidget(testLabel);
-        createPolarChart(entry);
-//        setupAnalyticsTablesAndCharts(entry);
+        createPolarChart(entry); 
+        
         setupTitleChangeListener(entry.getKey());
     }
 
@@ -267,129 +249,123 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                 });
     }
     
-//    // Implementation of setupAnalyticsTablesAndChart() with ChartFactory
-//    private void setupAnalyticsTablesAndCharts(SailorProfileDTO entry) {
-//        try {
-//            // Highcharts-More laden für Polar Charts
-//            Highcharts.ensureInjectedWithMore();
-//    
-//            Chart polarChart = ChartFactory.createPolarChart();
-//                polarChart.setType(Series.Type.LINE); // oder AREA, COLUMN
-//                polarChart.setChartTitleText("Sailing Performance Chart");
-//                polarChart.setPolar(true);
-//                polarChart.getYAxis().setMin(0);
-//                polarChart.setWidth("100%");
-//                polarChart.setHeight("400px");     
-//                polarChart.setOption("/pane/startAngle", 0);  // Startwinkel
-//
-//                // X-Axis = Winkel (0-360° oder -180 bis +180°)
-//                polarChart.getXAxis()
-//                    .setMin(-179)
-//                    .setMax(180)
-//                    .setTickInterval(45);  // Alle 45°
-//      
-//                // Y-Axis = Radius (Geschwindigkeit, Distanz, etc.)
-//                polarChart.getYAxis()
-//                    .setMin(0);
-// 
-//            Series series = polarChart.createSeries()
-//              .setName("Boat Speed")
-//              .addPoint(-180, 3.5)
-//              .addPoint(-135, 5.2)
-//              .addPoint(-90, 6.8)
-//              .addPoint(-45, 7.1)
-//              .addPoint(0, 4.2)
-//              .addPoint(45, 7.3)
-//              .addPoint(90, 6.9)
-//              .addPoint(135, 5.1)
-//              .addPoint(180, 3.4);              
-//            polarChart.addSeries(series);  
-//            
-//            // Chart in Panel packen
-//            SimpleLayoutPanel chartWrapper = new SimpleLayoutPanel();
-//            chartWrapper.add(polarChart);
-//            chartWrapper.setHeight("400px");
-//              
-//            // Zum Accordion hinzufügen
-//            accordionAnalyticsUi.addWidget(chartWrapper);
-//
-//            Label successLabel = new Label("Chart erfolgreich erstellt!");
-//            accordionPolarDiagramUi.addWidget(successLabel);
-//        } 
-//        catch (Exception e) {
-//              Label errorLabel = new Label("Fehler: " + e.getMessage());
-//              accordionPolarDiagramUi.addWidget(errorLabel);
-//              GWT.log("Chart error", e);
-//        }
-//    }
-    
-    
-    
-//                // Optional: Lazy Loading
-//                if (accordionAnalyticsUi.isExpanded()) {
-//                    loadPolarData(polarChart);
-//                } else {
-//                    accordionAnalyticsUi.addAccordionListener(new AccordionExpansionListener() {
-//                        @Override
-//                        public void onExpansion(boolean expanded) {
-//                            if (expanded) {
-//                                loadPolarData(polarChart);
-//                            }
-//                        }
-//                    });
-//                }
-//            }
-      //in polarChart umbenennen? Startwinkel o.ä.? oben schauen gleich einmal nur polarChart ture und das ensure injected raus
+    /** Retrieves startline distance data for polar chart visualization */
     private void createPolarChart(SailorProfileDTO entry) {
-        try {
-            // Highcharts-More laden für Polar Charts
-            Highcharts.ensureInjectedWithMore();
-                                
-            // Einfaches Line Chart erstellen
-            Chart chart = new Chart()
-                .setType(Series.Type.LINE)
-                .setChartTitleText("Sailing Performance Chart")
-                .setPolar (true)
-                .setHeight100()
-                .setWidth100();
+            presenter.getDataProvider().getStatisticFor(entry.getKey(), 
+                    SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE, 
+                    new AsyncCallback<SailorProfileStatisticDTO>() { 
+                
+                        @Override
+                        public void onSuccess(SailorProfileStatisticDTO result) {
+                            createPolarChartWithData(result);
+                        }
                         
-            // Achsen-Titel setzen
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // correct error message?
+                            Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
+                            Label errorLabel = new Label();
+                            errorLabel.setText ("Error  loading  polar chart data: " + caught.getMessage());
+                            GWT.log("Error loading polar chart data", caught);
+                        }
+            });
+    }
+    
+    /** Creates and renders a polar chart using sailor profile statistic data */
+    private void createPolarChartWithData(SailorProfileStatisticDTO statisticData) {
+              ArrayList<Point> chartPoints = new ArrayList<>();
+
+                GWT.log("Result size: " + statisticData.getResult().size()); // test
+                
+                for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+                    SimpleCompetitorWithIdDTO competitor = entry.getKey();
+                    ArrayList<SingleEntry> values = entry.getValue();
+                    
+                    // Log all competitors
+                    GWT.log("Competitor: " + (competitor != null ? competitor.getName() : "NULL") + // test
+                            "\n--->Values: " + (values != null ? values.size() : "NULL"));  // test
+                    
+                    if (values != null) { // test
+                        for (SingleEntry singleEntry : values) { // test
+                            Double value = singleEntry.getValue(); // test
+                            GWT.log("--->Value: " + value); // test
+                        }
+                    }
+                    
+                    // Iterate through the values for each competitor
+                    for (SingleEntry singleEntry : values) {
+                        Double value = singleEntry.getValue(); // Y-Value
                         
-            // Sample-Daten hinzufügen
-            Series series = chart.createSeries()
-                .setName("Boat Speed")
-                .addPoint(-180, 3.5)
-                .addPoint(-135, 5.2)
-                .addPoint(-90, 6.8)
-                .addPoint(-45, 7.1)
-                .addPoint(0, 4.2)
-                .addPoint(45, 7.3)
-                .addPoint(90, 6.9)
-                .addPoint(135, 5.1)
-                .addPoint(180, 3.4); 
-            chart.addSeries(series);
+                        /** Here you need to decide what the X-value should be
+                            For a polar chart, for example, you could:
+                            - Use the index as the angle
+                            - Convert the timestamp into an angle */
                         
-            // Chart in Panel packen
+                        /** Example: Use index as angle (distributed from 0–360 degrees)
+                            int angleIndex = chartPoints.size();
+                            double angle = (angleIndex * 360.0) / Math.max(values.size(), 1) - 180; // range -180 to +180
+                            chartPoints.add(new Point(angle, value));
+                         */
+                        
+                        int angleIndex = chartPoints.size();
+                        double angle = angleIndex * 90; // 0°, 90°, 180°, 270°
+                        if (angle > 180) angle -= 360; 
+
+                        chartPoints.add(new Point(angle, value));
+                        GWT.log("--->Added data point: " + angle + "°," + value + "m (" + competitor.getName() + ")");
+                    }
+                }   
+            GWT.log("Total chart points: " + chartPoints.size()); // test
+            
+            try {
+                //Highcharts-More for PolarChart
+                Highcharts.ensureInjectedWithMore();
+                
+                LinePlotOptions linePlotOptions = new LinePlotOptions()
+                    .setLineWidth(1)
+                    .setMarker(new Marker().setEnabled(true)); // originally false
+                
+                Chart polarChart = new Chart()
+                    .setType(Series.Type.LINE)
+                    .setLinePlotOptions(linePlotOptions)
+                    .setPolar(true) 
+                    .setHeight100()
+                    .setWidth100()
+                    .setTitle(new ChartTitle().setText("Sailing Performance Chart"), 
+                              new ChartSubtitle().setText("Average Startline Distance"));
+                polarChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
+//             lineChart.getXAxis().setMin(-180).setMax(180).setTickInterval(45);
+                polarChart.setOption("/pane/startAngle", 180);
+                polarChart.setExporting(new Exporting().setEnabled(false));
+          
+            Series series = polarChart.createSeries().setName("Average Startline Distance");
+                       
+            for (Point point : chartPoints) {
+                series.addPoint(point);
+            }
+            polarChart.addSeries(series);
+            
+            //Add Chart to Panel
             SimpleLayoutPanel chartWrapper = new SimpleLayoutPanel();
-            chartWrapper.add(chart);
+            chartWrapper.add(polarChart);
             chartWrapper.setHeight("400px");
             
-            // Zum Accordion hinzufügen
+            //Add Chart to Accordion
             accordionAnalyticsUi.addWidget(chartWrapper);
             
-            // Erfolgs-Label
-            Label successLabel = new Label("Chart erfolgreich erstellt!");
-            accordionStatisticsUi.addWidget(successLabel);
-        } 
+            //Success-Label
+            Label successLabel = new Label("Chart created successfull!");
+            accordionAnalyticsUi.addWidget(successLabel);
+        }
+        //Error-Label
         catch (Exception e) {
-            Label errorLabel = new Label("Fehler: " + e.getMessage());
-            accordionStatisticsUi.addWidget(errorLabel);
-            GWT.log("Chart error", e);
+            Label errorLabel = new Label("Error: " + e.getMessage());
+            accordionAnalyticsUi.addWidget(errorLabel);
+            GWT.log("Chart error: ", e);
         }
     }
 }
 
-    
 //polarChartTest = ChartFactory.createPolarChart();
 //polarChartTest.getYAxis().setMin(0);
 //polarChartWrapperPanel = new SimpleLayoutPanel() {
@@ -413,3 +389,146 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 //wrapper.add(polarChart);
 //wrapper.setHeight("400px"); 
 //accordionAnalyticsUi.addWidget(wrapper);
+
+
+// Optional: Lazy Loading
+//if (accordionAnalyticsUi.isExpanded()) {
+//  loadPolarData(polarChart);
+//} else {
+//  accordionAnalyticsUi.addAccordionListener(new AccordionExpansionListener() {
+//      @Override
+//      public void onExpansion(boolean expanded) {
+//          if (expanded) {
+//              loadPolarData(polarChart);
+//          }
+//      }
+//  });
+//}
+//}
+
+
+
+
+// Implementation of setupAnalyticsTablesAndChart() with ChartFactory
+//private void setupAnalyticsTablesAndCharts(SailorProfileDTO entry) {
+//  try {
+//      // Highcharts-More laden für Polar Charts
+//      Highcharts.ensureInjectedWithMore();
+//
+//      Chart polarChart = ChartFactory.createPolarChart();
+//          polarChart.setType(Series.Type.LINE); // oder AREA, COLUMN
+//          polarChart.setChartTitleText("Sailing Performance Chart");
+//          polarChart.setPolar(true);
+//          polarChart.getYAxis().setMin(0);
+//          polarChart.setWidth("100%");
+//          polarChart.setHeight("400px");     
+//          polarChart.setOption("/pane/startAngle", 0);  // Startwinkel
+//
+//          // X-Axis = Winkel (0-360° oder -180 bis +180°)
+//          polarChart.getXAxis()
+//              .setMin(-179)
+//              .setMax(180)
+//              .setTickInterval(45);  // Alle 45°
+//
+//          // Y-Axis = Radius (Geschwindigkeit, Distanz, etc.)
+//          polarChart.getYAxis()
+//              .setMin(0);
+//
+//      Series series = polarChart.createSeries()
+//        .setName("Boat Speed")
+//        .addPoint(-180, 3.5)
+//        .addPoint(-135, 5.2)
+//        .addPoint(-90, 6.8)
+//        .addPoint(-45, 7.1)
+//        .addPoint(0, 4.2)
+//        .addPoint(45, 7.3)
+//        .addPoint(90, 6.9)
+//        .addPoint(135, 5.1)
+//        .addPoint(180, 3.4);              
+//      polarChart.addSeries(series);  
+//      
+//      // Chart in Panel packen
+//      SimpleLayoutPanel chartWrapper = new SimpleLayoutPanel();
+//      chartWrapper.add(polarChart);
+//      chartWrapper.setHeight("400px");
+//        
+//      // Zum Accordion hinzufügen
+//      accordionAnalyticsUi.addWidget(chartWrapper);
+//
+//      Label successLabel = new Label("Chart erfolgreich erstellt!");
+//      accordionPolarDiagramUi.addWidget(successLabel);
+//  } 
+//  catch (Exception e) {
+//        Label errorLabel = new Label("Fehler: " + e.getMessage());
+//        accordionPolarDiagramUi.addWidget(errorLabel);
+//        GWT.log("Chart error", e);
+//  }
+//}
+//private void DEPRECATEDcreatePolarChart(SailorProfileDTO entry) {
+//  try {
+//      // Highcharts-More laden für Polar Charts
+//      Highcharts.ensureInjectedWithMore();
+//      
+//      //LinePlotOptions 
+//      LinePlotOptions linePlotOptions = new LinePlotOptions()
+//          .setLineWidth(1)
+//          .setMarker(new Marker().setEnabled(false));
+//      
+//      // Einfaches Line Chart erstellen
+//      Chart chart = new Chart()
+//          .setType(Series.Type.LINE)
+//          .setLinePlotOptions(linePlotOptions)
+//          .setPolar(true)
+//          .setHeight100()
+//          .setWidth100()
+//          .setTitle(new ChartTitle().setText("Sailing Performance Chart"), 
+//                    new ChartSubtitle().setText("KPI-1"));
+//     chart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
+//     chart.setOption("/pane/startAngle", 180);
+//     chart.setExporting(new Exporting().setEnabled(false));
+//    
+//      // Sample-Daten hinzufügen
+//      Series series = chart.createSeries()
+//          .setName("Boat Speed")
+//          .addPoint(-180, 3.5)
+//          .addPoint(-135, 5.2)
+//          .addPoint(-90, 6.8)
+//          .addPoint(-45, 7.1)
+//          .addPoint(0, 4.2)
+//          .addPoint(45, 7.3)
+//          .addPoint(90, 6.9)
+//          .addPoint(135, 5.1)
+//          .addPoint(180, 3.4); 
+//      chart.addSeries(series);
+//      
+//      Series series2 = chart.createSeries()
+//              .setName("Boat Speed")
+//              .addPoint(-190, 3.5)
+//              .addPoint(-155, 5.2)
+//              .addPoint(-90, 6.8)
+//              .addPoint(-45, 7.3)
+//              .addPoint(0, 4.2)
+//              .addPoint(45, 7.3)
+//              .addPoint(90, 6.9)
+//              .addPoint(165, 5.1)
+//              .addPoint(180, 3.6); 
+//          chart.addSeries(series2);
+//                  
+//      // Chart in Panel packen
+//      SimpleLayoutPanel chartWrapper = new SimpleLayoutPanel();
+//      chartWrapper.add(chart);
+//      chartWrapper.setHeight("400px");
+//      
+//      // Zum Accordion hinzufügen
+//      accordionAnalyticsUi.addWidget(chartWrapper);
+//      
+//      // Erfolgs-Label
+//      Label successLabel = new Label("Chart erfolgreich erstellt!");
+//      accordionStatisticsUi.addWidget(successLabel);
+//  } 
+//  catch (Exception e) {
+//      Label errorLabel = new Label("Fehler: " + e.getMessage());
+//      accordionStatisticsUi.addWidget(errorLabel);
+//      GWT.log("Chart error", e);
+//  }
+//}
