@@ -181,8 +181,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         setupTables(entry);
         
         accordionAnalyticsUi.clear();
-        createPolarChart(entry); 
-        
+//        createPolarChartWithStatistics(entry, SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE); 
+        setupPolarChart(entry, SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE);
         setupTitleChangeListener(entry.getKey());
     }
 
@@ -249,115 +249,137 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                 });
     }
     
-    /** Retrieves startline distance data for polar chart visualization */
-    private void createPolarChart(SailorProfileDTO entry) {
-            presenter.getDataProvider().getStatisticFor(entry.getKey(), 
-                    SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE, 
+    /** Sets up polar chart with lazy loading when accordion is expanded */
+    private void setupPolarChart(SailorProfileDTO entry, SailorProfileNumericStatisticType type) {
+        if(accordionAnalyticsUi.isExpanded()) { // Create PolarChart with factory here?
+            createPolarChartWithStatistics(entry, type);
+        }
+        else {
+            // load the statistic data when the accordion is expanded for the first time
+            accordionAnalyticsUi.addAccordionListener(new AccordionExpansionListener() {
+                @Override
+                public void onExpansion(boolean expanded) {
+                    if (expanded) {
+                        createPolarChartWithStatistics(entry, type);
+                    }
+                }
+            });
+        }
+    }
+    
+    /** Retrieves data for polar chart visualization */
+    private void createPolarChartWithStatistics(SailorProfileDTO entry, SailorProfileNumericStatisticType type) { // Pass a PolarChart here?
+            presenter.getDataProvider().getStatisticFor(entry.getKey(), type, 
                     new AsyncCallback<SailorProfileStatisticDTO>() { 
-                
+   
                         @Override
-                        public void onSuccess(SailorProfileStatisticDTO result) {
-                            createPolarChartWithData(result);
+                        public void onSuccess(SailorProfileStatisticDTO answer) {
+                            handleDataAndCreatePolarChart(answer);
                         }
                         
                         @Override
                         public void onFailure(Throwable caught) {
-                            // correct error message?
                             Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
-                            Label errorLabel = new Label();
-                            errorLabel.setText ("Error  loading  polar chart data: " + caught.getMessage());
-                            GWT.log("Error loading polar chart data", caught);
+                            GWT.log("Error loading data: ", caught);
                         }
             });
     }
     
-    /** Creates and renders a polar chart using sailor profile statistic data */
-    private void createPolarChartWithData(SailorProfileStatisticDTO statisticData) {
-              ArrayList<Point> chartPoints = new ArrayList<>();
+    /** Processes statistic data and converts to chart points */
+    private void handleDataAndCreatePolarChart(SailorProfileStatisticDTO statisticData) {
+            // Null check
+            if (statisticData == null || statisticData.getResult().isEmpty()) {
+                Label noDataLabel = new Label("No data available for polar chart");
+                accordionAnalyticsUi.addWidget (noDataLabel);
+                return;
+            }
+        
+            ArrayList<Point> chartPoints = new ArrayList<>();
 
-                GWT.log("Result size: " + statisticData.getResult().size()); // test
+//            GWT.log("Result size: " + statisticData.getResult().size());
+                            
+            for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+                SimpleCompetitorWithIdDTO competitor = entry.getKey();
+                ArrayList<SingleEntry> values = entry.getValue();
                 
-                for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
-                    SimpleCompetitorWithIdDTO competitor = entry.getKey();
-                    ArrayList<SingleEntry> values = entry.getValue();
+//                // Log all competitors
+//                GWT.log("Competitor: " + (competitor != null ? competitor.getName() : "NULL") + "\n--->Values: " + (values != null ? values.size() : "NULL"));     
+//                if (values != null) { // test
+//                    for (SingleEntry singleEntry : values) { 
+//                        Double value = singleEntry.getValue(); 
+//                        GWT.log("--->Value: " + value); 
+//                    }
+//                }
                     
-                    // Log all competitors
-                    GWT.log("Competitor: " + (competitor != null ? competitor.getName() : "NULL") + // test
-                            "\n--->Values: " + (values != null ? values.size() : "NULL"));  // test
+                // Iterate through the values for each competitor
+                for (SingleEntry singleEntry : values) {
+                    Double value = singleEntry.getValue(); // Y-Value
                     
-                    if (values != null) { // test
-                        for (SingleEntry singleEntry : values) { // test
-                            Double value = singleEntry.getValue(); // test
-                            GWT.log("--->Value: " + value); // test
-                        }
-                    }
+                    /** Here you need to decide what the X-value should be
+                        For a polar chart, for example, you could:
+                        - Use the index as the angle
+                        - Convert the timestamp into an angle */
                     
-                    // Iterate through the values for each competitor
-                    for (SingleEntry singleEntry : values) {
-                        Double value = singleEntry.getValue(); // Y-Value
-                        
-                        /** Here you need to decide what the X-value should be
-                            For a polar chart, for example, you could:
-                            - Use the index as the angle
-                            - Convert the timestamp into an angle */
-                        
-                        /** Example: Use index as angle (distributed from 0–360 degrees)
-                            int angleIndex = chartPoints.size();
-                            double angle = (angleIndex * 360.0) / Math.max(values.size(), 1) - 180; // range -180 to +180
-                            chartPoints.add(new Point(angle, value));
-                         */
-                        
+                    /** Example: Use index as angle (distributed from 0–360 degrees)
                         int angleIndex = chartPoints.size();
-                        double angle = angleIndex * 90; // 0°, 90°, 180°, 270°
-                        if (angle > 180) angle -= 360; 
-
+                        double angle = (angleIndex * 360.0) / Math.max(values.size(), 1) - 180; // range -180 to +180
                         chartPoints.add(new Point(angle, value));
-                        GWT.log("--->Added data point: " + angle + "°," + value + "m (" + competitor.getName() + ")");
-                    }
-                }   
-            GWT.log("Total chart points: " + chartPoints.size()); // test
+                     */
+                    
+                    // refactor?
+                    int angleIndex = chartPoints.size();
+                    double angle = angleIndex * 90; // 0°, 90°, 180°, 270°
+                    if (angle > 180) angle -= 360; 
+
+                    chartPoints.add(new Point(angle, value));
+                    GWT.log("--->Added data point: " + angle + "°," + value + "m (" + competitor.getName() + ") \nTotal chart points: " + chartPoints.size()); 
+                }
+            }  
+            polarChartFactory(statisticData, chartPoints, "Sailing Performance Chart", "Average Startline Distance", "Distance Values"); // refactor this part?
+    }
+    
+    private void polarChartFactory(SailorProfileStatisticDTO statisticData, ArrayList<Point> chartPoints, String chartTitle, String chartSubtitle, String seriesName) {      
+        try {
+            // Highcharts-More for PolarChart
+            Highcharts.ensureInjectedWithMore();
             
-            try {
-                //Highcharts-More for PolarChart
-                Highcharts.ensureInjectedWithMore();
-                
-                LinePlotOptions linePlotOptions = new LinePlotOptions()
-                    .setLineWidth(1)
-                    .setMarker(new Marker().setEnabled(true)); // originally false
-                
-                Chart polarChart = new Chart()
-                    .setType(Series.Type.LINE)
-                    .setLinePlotOptions(linePlotOptions)
-                    .setPolar(true) 
-                    .setHeight100()
-                    .setWidth100()
-                    .setTitle(new ChartTitle().setText("Sailing Performance Chart"), 
-                              new ChartSubtitle().setText("Average Startline Distance"));
-                polarChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
+            LinePlotOptions linePlotOptions = new LinePlotOptions()
+                .setLineWidth(1)
+                .setMarker(new Marker().setEnabled(true)); // originally false
+            
+            Chart polarChart = new Chart()
+                .setType(Series.Type.LINE)
+                .setLinePlotOptions(linePlotOptions)
+                .setPolar(true) 
+                .setHeight100()
+                .setWidth100()
+                .setTitle(new ChartTitle().setText(chartTitle), 
+                          new ChartSubtitle().setText(chartSubtitle));
+            polarChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
 //             lineChart.getXAxis().setMin(-180).setMax(180).setTickInterval(45);
-                polarChart.setOption("/pane/startAngle", 180);
-                polarChart.setExporting(new Exporting().setEnabled(false));
-          
-            Series series = polarChart.createSeries().setName("Average Startline Distance");
+            polarChart.setOption("/pane/startAngle", 180);
+            polarChart.setExporting(new Exporting().setEnabled(false));
+      
+            Series series = polarChart.createSeries().setName(seriesName);
                        
             for (Point point : chartPoints) {
                 series.addPoint(point);
             }
             polarChart.addSeries(series);
             
-            //Add Chart to Panel
-            SimpleLayoutPanel chartWrapper = new SimpleLayoutPanel();
-            chartWrapper.add(polarChart);
-            chartWrapper.setHeight("400px");
+            // Add Chart to Panel
+            SimpleLayoutPanel chartPanel = new SimpleLayoutPanel();
+            chartPanel.add(polarChart);
+            chartPanel.setHeight("400px");
             
-            //Add Chart to Accordion
-            accordionAnalyticsUi.addWidget(chartWrapper);
+            // Add Chart to Accordion
+            accordionAnalyticsUi.addWidget(chartPanel);
             
-            //Success-Label
+            // Success-Label
             Label successLabel = new Label("Chart created successfull!");
             accordionAnalyticsUi.addWidget(successLabel);
         }
-        //Error-Label
+        // Error-Label
         catch (Exception e) {
             Label errorLabel = new Label("Error: " + e.getMessage());
             accordionAnalyticsUi.addWidget(errorLabel);
@@ -389,25 +411,6 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 //wrapper.add(polarChart);
 //wrapper.setHeight("400px"); 
 //accordionAnalyticsUi.addWidget(wrapper);
-
-
-// Optional: Lazy Loading
-//if (accordionAnalyticsUi.isExpanded()) {
-//  loadPolarData(polarChart);
-//} else {
-//  accordionAnalyticsUi.addAccordionListener(new AccordionExpansionListener() {
-//      @Override
-//      public void onExpansion(boolean expanded) {
-//          if (expanded) {
-//              loadPolarData(polarChart);
-//          }
-//      }
-//  });
-//}
-//}
-
-
-
 
 // Implementation of setupAnalyticsTablesAndChart() with ChartFactory
 //private void setupAnalyticsTablesAndCharts(SailorProfileDTO entry) {
