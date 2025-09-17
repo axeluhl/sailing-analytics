@@ -40,36 +40,31 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
 
 //import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.analytics.SailorProfileAnalyticsTableAndCharts;
-//import com.google.gwt.user.client.ui.HTMLPanel;
-//import org.moxieapps.gwt.highcharts.client.Chart;
-//import com.sap.sse.gwt.resources.highcharts;
-//import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
 //import com.google.gwt.event.dom.client.ClickEvent;
 //import com.google.gwt.event.dom.client.ClickHandler;
-//import com.google.gwt.user.client.ui.Button;
 //import com.google.gwt.user.client.ui.DockLayoutPanel;
 //import com.google.gwt.user.client.ui.Widget;
 //import com.sap.sailing.gwt.ui.client.StringMessages;
-//import com.sap.sailing.gwt.ui.datamining.presentation.AbstractSailingResultsPresenter;
-//import com.sap.sailing.gwt.ui.datamining.presentation.ChartFactory;
-//import com.sap.sailing.polars.datamining.shared.PolarBackendData;
-//import com.sap.sse.common.settings.Settings;
-//import com.sap.sse.common.util.NaturalComparator;
 //import com.sap.sse.datamining.shared.GroupKey;
 //import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 //import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
-//import com.sap.sse.datamining.ui.client.ChartToCsvExporter;
-//import com.sap.sse.gwt.client.shared.components.Component;
-//import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-//import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-//import com.google.gwt.user.client.ui.SimpleLayoutPanel;
-//import com.google.gwt.user.client.ui.DockLayoutPanel;
-//import com.google.gwt.dom.client.Style.Unit;
+
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.gwt.resources.Highcharts; 
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.*;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
+import java.util.Map; 
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit
@@ -100,6 +95,14 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 //    DesktopAccordion accordionPolarDiagramUi;
     @UiField
     DesktopAccordion accordionAnalyticsUi;
+    
+//    @UiField
+//    ListBox competitorDropdown_1;
+//    UiField
+//    ListBox competitorDropdown_2;
+//    @UiField
+//    Button updateComparisonButton;
+    
 
     Label eventsEmptyUi;
 
@@ -182,7 +185,11 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         
         accordionAnalyticsUi.clear();
 //        createPolarChartWithStatistics(entry, SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE); 
+        addSelectionToPolarChart(entry);
         setupPolarChart(entry, SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE);
+        setupPolarChart(entry, SailorProfileNumericStatisticType.BEST_DISTANCE_TO_START);
+        setupPolarChart(entry, SailorProfileNumericStatisticType.BEST_STARTLINE_SPEED);
+        setupPolarChart(entry, SailorProfileNumericStatisticType.MAX_SPEED);
         setupTitleChangeListener(entry.getKey());
     }
 
@@ -357,10 +364,13 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                           new ChartSubtitle().setText(chartSubtitle));
             polarChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45);
 //             lineChart.getXAxis().setMin(-180).setMax(180).setTickInterval(45);
-            polarChart.setOption("/pane/startAngle", 180);
+            polarChart.setOption("/pane/startAngle", 180); // unnecessary?
             polarChart.setExporting(new Exporting().setEnabled(false));
       
             Series series = polarChart.createSeries().setName(seriesName);
+            
+            // Enable legend (shows sailor names) //working?
+            polarChart.setLegend(new Legend().setEnabled(true));
                        
             for (Point point : chartPoints) {
                 series.addPoint(point);
@@ -370,14 +380,14 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
             // Add Chart to Panel
             SimpleLayoutPanel chartPanel = new SimpleLayoutPanel();
             chartPanel.add(polarChart);
-            chartPanel.setHeight("400px");
+            chartPanel.setHeight("300px");
             
             // Add Chart to Accordion
             accordionAnalyticsUi.addWidget(chartPanel);
             
             // Success-Label
-            Label successLabel = new Label("Chart created successfull!");
-            accordionAnalyticsUi.addWidget(successLabel);
+//            Label successLabel = new Label("Chart created successfull!");
+//            accordionAnalyticsUi.addWidget(successLabel);
         }
         // Error-Label
         catch (Exception e) {
@@ -385,6 +395,347 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
             accordionAnalyticsUi.addWidget(errorLabel);
             GWT.log("Chart error: ", e);
         }
+    }
+    
+    private void addSelectionToPolarChart(SailorProfileDTO entry) {                 
+        VerticalPanel VerticalPanelCompetitorSelection = new VerticalPanel();
+        CaptionPanel CaptionPanelCompetitorSelection = new CaptionPanel("Compare the following sailors: ");
+        VerticalPanelCompetitorSelection.add(CaptionPanelCompetitorSelection);
+        
+        VerticalPanelCompetitorSelection.setWidth("100%");
+        
+        Grid GridCompetitorSelection = new Grid(2, 3);
+        
+        GridCompetitorSelection.setText(0, 0, "Competitor A");
+        GridCompetitorSelection.setText(0, 1, "Competitor B");
+        GridCompetitorSelection.setText(0, 2, "Compare"); 
+        
+        ListBox competitorDropdown_1 = new ListBox();
+        ListBox competitorDropdown_2 = new ListBox();
+        Button updateComparisonButton = new Button("Update");
+                
+        // Fill both dropdowns: first a placeholder, then all competitors 
+        competitorDropdown_1.addItem("----Selection----");
+        competitorDropdown_2.addItem("----Selection----");
+
+        for(SimpleCompetitorWithIdDTO competitor : entry.getCompetitors()) {
+            String teamName = competitor.getName();
+            String teamId = competitor.getIdAsString();
+            competitorDropdown_1.addItem (teamName, teamId);
+            competitorDropdown_2.addItem (teamName, teamId);
+        }
+        
+        competitorDropdown_2.addItem("----Average----", "AVERAGE");
+        competitorDropdown_2.addItem ("----Median----", "MEDIAN");
+        competitorDropdown_2.addItem("----Top 10%----", "TOP_10_PERCENT");
+        
+        // updateComparisonButton-Handler
+        updateComparisonButton.addClickHandler(event -> {
+            handleComparisonBtnUpdate(competitorDropdown_1, competitorDropdown_2, entry);
+        });
+
+        GridCompetitorSelection.setWidget(1, 0, competitorDropdown_1);
+        GridCompetitorSelection.setWidget(1, 1, competitorDropdown_2);
+        GridCompetitorSelection.setWidget(1, 2, updateComparisonButton);
+        
+        GridCompetitorSelection.setWidth("100%");
+        GridCompetitorSelection.getColumnFormatter().setWidth(0, "40%");
+        GridCompetitorSelection.getColumnFormatter().setWidth(1, "40%");
+        GridCompetitorSelection.getColumnFormatter().setWidth(2, "20%");
+        
+        competitorDropdown_1.setWidth("90%");
+        competitorDropdown_2.setWidth("90%");
+        updateComparisonButton.setWidth("100%");
+
+        CaptionPanelCompetitorSelection.add(GridCompetitorSelection);
+        VerticalPanelCompetitorSelection.add(CaptionPanelCompetitorSelection);
+        VerticalPanelCompetitorSelection.add(new HTML("<br/>"));
+        accordionAnalyticsUi.addWidget(VerticalPanelCompetitorSelection);
+       
+    }
+    
+    private void handleComparisonBtnUpdate(ListBox dropdown_1, ListBox dropdown_2, SailorProfileDTO entry) {
+        // Read selection from Dropdowns 
+        int selectedIndex1 = dropdown_1.getSelectedIndex();
+        int selectedIndex2 = dropdown_2.getSelectedIndex();
+        
+        // Proof selection is legit
+        if (selectedIndex1 <= 0 || selectedIndex2 <= 0) {
+            // No valid selection
+            Notification.notify("Please select both competitors", NotificationType.WARNING);
+            return;
+        }
+        
+        // Read selected values
+        String competitor1Id = dropdown_1.getSelectedValue();  
+        String competitor1Name = dropdown_1.getSelectedItemText(); 
+        
+        String competitor2Id = dropdown_2.getSelectedValue();  
+        String competitor2Name = dropdown_2.getSelectedItemText(); 
+        
+        
+        GWT.log("Selected: " + competitor1Id + " vs. " + competitor2Id +"\nValues: " + competitor1Name + " vs. " + competitor2Name);
+        
+        // remove previous charts?
+        
+        createComparisonChart(competitor1Id, competitor2Id, competitor1Name, competitor2Name, entry);
+    }
+    
+    /**
+     * Creates a comparison chart based on the user's selection
+     * Supports: sailor vs sailor, sailor vs average, sailor vs median, sailor vs top 10%.
+     */
+    private void createComparisonChart(String competitor1Id, String competitor2Id, 
+                                      String competitor1Name, String competitor2Name, 
+                                      SailorProfileDTO entry) {
+        
+        // Load data from server
+        presenter.getDataProvider().getStatisticFor(entry.getKey(), 
+            SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE, 
+            new AsyncCallback<SailorProfileStatisticDTO>() {
+                
+                @Override
+                public void onSuccess(SailorProfileStatisticDTO statisticData) {
+                    
+                    // Collect data for Competitor 1 (always a single sailor)
+                    ArrayList<Point> competitor1Points = new ArrayList<>();
+                    
+                    // Iterate over all sailor data
+                    for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+                        SimpleCompetitorWithIdDTO competitor = entry.getKey();
+                        
+                        // Process only the selected sailor
+                        if (competitor.getIdAsString().equals(competitor1Id)) {
+                            ArrayList<SingleEntry> values = entry.getValue();
+                            
+                            // Create data points for the polar chart
+                            for (int i = 0; i < values.size(); i++) {
+                                // Distribute angles evenly across 360°
+                                double angle = (i * 360.0 / values.size());
+                                if (angle > 180) angle -= 360; // Convert to range [-180, +180]
+                                
+                                Double value = values.get(i).getValue();
+                                competitor1Points.add(new Point(angle, value));
+                            }
+                            break; // Sailor found; break the loop
+                        }
+                    }
+                    
+                    // Collect data for Competitor 2 (sailor or statistic) 
+                    ArrayList<Point> competitor2Points = new ArrayList<>();
+                    
+                    // Check if Competitor 2 is a statistic
+                    if (competitor2Id.equals("AVERAGE")) {
+                        // Compute Average
+                        competitor2Points = calculateAveragePoints(statisticData);
+                        
+                    } else if (competitor2Id.equals("MEDIAN")) {
+                        // Compute Median
+                        competitor2Points = calculateMedianPoints(statisticData);
+                        
+                    } else if (competitor2Id.equals("TOP_10_PERCENT")) {
+                        // Compute top 10%
+                        competitor2Points = calculateTop10PercentPoints(statisticData);
+                        
+                    } else {
+                        // Regular sailor — same logic as for Competitor 1
+                        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+                            SimpleCompetitorWithIdDTO competitor = entry.getKey();
+                            
+                            if (competitor.getIdAsString().equals(competitor2Id)) {
+                                ArrayList<SingleEntry> values = entry.getValue();
+                                
+                                for (int i = 0; i < values.size(); i++) {
+                                    double angle = (i * 360.0 / values.size());
+                                    if (angle > 180) angle -= 360;
+                                    
+                                    Double value = values.get(i).getValue();
+                                    competitor2Points.add(new Point(angle, value));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Create the polar chart
+                    try {
+                        // Load Highcharts for the polar chart
+                        Highcharts.ensureInjectedWithMore();
+                        
+                        LinePlotOptions linePlotOptions = new LinePlotOptions()
+                                .setLineWidth(1)
+                                .setMarker(new Marker().setEnabled(true)); // originally false
+                        
+                        Chart polarChart = new Chart()
+                            .setType(Series.Type.LINE)
+                            .setLinePlotOptions(linePlotOptions)
+                            .setPolar(true)  
+                            .setHeight100()
+                            .setWidth100()
+                            .setTitle(new ChartTitle().setText("Sailor Comparison: "), 
+                                      new ChartSubtitle().setText(competitor1Name + " vs. " + competitor2Name));
+                        
+                        polarChart.getXAxis().setMin(-179).setMax(180).setTickInterval(45); // Angle axis
+//                        polarChart.getYAxis().setMin(0); // Distanz-Achse 
+                        polarChart.setOption("/pane/startAngle", 180); // unnecessary?
+                        polarChart.setExporting(new Exporting().setEnabled(false)); 
+                        
+                        // Add first series (Competitor 1)
+                        Series series_1 = polarChart.createSeries()
+                            .setName(competitor1Name)
+                            .setOption("color", "#FF6B6B"); // red
+                        
+                        // Add all points to the first series
+                        for (Point point : competitor1Points) {
+                            series_1.addPoint(point);
+                        }
+                        polarChart.addSeries(series_1);
+                        
+                        // Add second series (Competitor 2)
+                        Series series_2 = polarChart.createSeries()
+                            .setName(competitor2Name)
+                            .setOption("color", "#4ECDC4"); // turquoise
+                        
+                        // Add all points to the second series
+                        for (Point point : competitor2Points) {
+                            series_2.addPoint(point);
+                        }
+                        polarChart.addSeries(series_2);
+                        
+                        // Enable legend (shows sailor names)
+                        polarChart.setLegend(new Legend().setEnabled(true));
+                        
+                        SimpleLayoutPanel chartPanel = new SimpleLayoutPanel();
+                        chartPanel.add(polarChart);
+                        chartPanel.setHeight("300px");
+                        accordionAnalyticsUi.addWidget(chartPanel);
+                        
+                    } 
+                    // Error-Label
+                    catch (Exception e) {
+                        Label errorLabel = new Label("Error: " + e.getMessage());
+                        accordionAnalyticsUi.addWidget(errorLabel);
+                        GWT.log("Chart error: ", e);
+                    }
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
+                    GWT.log("Error loading data: ", caught);
+                }
+            });
+    }
+
+    /**
+     * Computes average values for all angles.
+     */
+    private ArrayList<Point> calculateAveragePoints(SailorProfileStatisticDTO statisticData) {
+        // Collect all values by position
+        Map<Integer, List<Double>> valuesByPosition = new HashMap<>();
+        
+        // Iterate over all sailors
+        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+            ArrayList<SingleEntry> values = entry.getValue();
+            
+            // Process each angle position
+            for (int i = 0; i < values.size(); i++) {
+                if (!valuesByPosition.containsKey(i)) {
+                    valuesByPosition.put(i, new ArrayList<>());
+                }
+                valuesByPosition.get(i).add(values.get(i).getValue());
+            }
+        }
+        
+        // Compute average per position
+        ArrayList<Point> averagePoints = new ArrayList<>();
+        for (int position = 0; position < valuesByPosition.size(); position++) {
+            // Compute angle
+            double angle = (position * 360.0 / valuesByPosition.size());
+            if (angle > 180) angle -= 360;
+            
+            // Average of all values at this position
+            double average = valuesByPosition.get(position).stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+            
+            averagePoints.add(new Point(angle, average));
+        }
+        
+        return averagePoints;
+    }
+
+    /**
+     * Computes median values for all angles.
+     */
+    private ArrayList<Point> calculateMedianPoints(SailorProfileStatisticDTO statisticData) {
+        Map<Integer, List<Double>> valuesByPosition = new HashMap<>();
+        
+        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+            ArrayList<SingleEntry> values = entry.getValue();
+            for (int i = 0; i < values.size(); i++) {
+                if (!valuesByPosition.containsKey(i)) {
+                    valuesByPosition.put(i, new ArrayList<>());
+                }
+                valuesByPosition.get(i).add(values.get(i).getValue());
+            }
+        }
+        
+        ArrayList<Point> medianPoints = new ArrayList<>();
+        for (int position = 0; position < valuesByPosition.size(); position++) {
+            double angle = (position * 360.0 / valuesByPosition.size());
+            if (angle > 180) angle -= 360;
+            
+            // Compute median
+            List<Double> values = valuesByPosition.get(position);
+            Collections.sort(values);
+            double median;
+            if (values.size() % 2 == 0) {
+                median = (values.get(values.size()/2 - 1) + values.get(values.size()/2)) / 2.0;
+            } else {
+                median = values.get(values.size()/2);
+            }
+            
+            medianPoints.add(new Point(angle, median));
+        }
+        
+        return medianPoints;
+    }
+
+    /**
+     * Computes top 10% values for all angles.
+     */
+    private ArrayList<Point> calculateTop10PercentPoints(SailorProfileStatisticDTO statisticData) {
+        Map<Integer, List<Double>> valuesByPosition = new HashMap<>();
+        
+        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : statisticData.getResult().entrySet()) {
+            ArrayList<SingleEntry> values = entry.getValue();
+            for (int i = 0; i < values.size(); i++) {
+                if (!valuesByPosition.containsKey(i)) {
+                    valuesByPosition.put(i, new ArrayList<>());
+                }
+                valuesByPosition.get(i).add(values.get(i).getValue());
+            }
+        }
+        
+        ArrayList<Point> top10Points = new ArrayList<>();
+        for (int position = 0; position < valuesByPosition.size(); position++) {
+            double angle = (position * 360.0 / valuesByPosition.size());
+            if (angle > 180) angle -= 360;
+            
+            // Compute top 10% (best = smallest values)
+            List<Double> values = valuesByPosition.get(position);
+            Collections.sort(values);
+            int top10Count = Math.max(1, (int) Math.ceil(values.size() * 0.1));
+            double top10Average = values.subList(0, top10Count).stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+            
+            top10Points.add(new Point(angle, top10Average));
+        }
+        return top10Points;
     }
 }
 
