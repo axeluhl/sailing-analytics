@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -38,6 +39,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposi
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDTO> {
     protected StringMessages stringMessages;
@@ -226,7 +228,11 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         formGrid.setWidget(rowIndex++, 1, endDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isListedOnHomepage() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
+        if (ClientConfiguration.getInstance().isBrandingActive()) {
+            formGrid.setWidget(rowIndex, 0, new Label(ClientConfiguration.getInstance().getEventBaseURL(Optional.empty()) + ":"));
+        } else {
+            formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
+        }
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.ensureDebugId("EventDialogTabs");

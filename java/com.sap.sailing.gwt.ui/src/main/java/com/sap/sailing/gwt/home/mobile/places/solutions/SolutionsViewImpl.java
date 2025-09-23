@@ -17,7 +17,7 @@ public class SolutionsViewImpl extends Composite implements SolutionsView {
     @UiField(provided = true) Solutions solutionsUi;
     
     public SolutionsViewImpl(Presenter presenter, MobilePlacesNavigator placesNavigator) {
-        this.solutionsUi = new Solutions(placesNavigator);
+        this.solutionsUi = new Solutions();
         initWidget(uiBinder.createAndBindUi(this));
     }
     

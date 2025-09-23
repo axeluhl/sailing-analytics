@@ -43,7 +43,7 @@
         </a:item>
         <a:item>
             <login:MoreLoginInformationContentMobile
-                title="{i18n.strategySimulator}" image="{local_res.simulator}"
+                title="{i18n.strategySimulatorTitle}" image="{local_res.simulator}"
                 content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
         </a:item>
         <a:item>

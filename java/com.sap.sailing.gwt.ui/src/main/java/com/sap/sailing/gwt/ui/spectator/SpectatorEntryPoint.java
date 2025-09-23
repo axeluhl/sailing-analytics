@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import java.util.Optional;
+
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -49,20 +51,18 @@ public class SpectatorEntryPoint extends AbstractSailingReadEntryPoint {
                     groupIdParam, groupNameParam, leaderboardGroupName->setHeader(leaderboardGroupName, embedded), settings.getViewMode(), embedded,
                     settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(), settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
-            if (!embedded) {
-                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
-                        getStringMessages().welcomeToSailingAnalyticsBody()));
-                if (ClientConfiguration.getInstance().isBrandingActive()) {
-                    SimplePanel feedbackPanel = new SimplePanel();
-                    feedbackPanel.getElement().getStyle().setProperty("clear", "right");
-                    feedbackPanel.addStyleName("feedbackPanel");
-                    Anchor feedbackLink = new Anchor(new SafeHtmlBuilder()
-                            .appendHtmlConstant("<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());
-                    // TODO set image
-                    feedbackLink.setHref("mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback");
-                    feedbackPanel.add(feedbackLink);
-                    groupAndFeedbackPanel.add(feedbackPanel);
-                }
+            if (!embedded && ClientConfiguration.getInstance().isBrandingActive()) {
+                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(ClientConfiguration.getInstance().getWelcomeToSailingAnalytics(Optional.empty()),
+                        ClientConfiguration.getInstance().getWelcomeToSailingAnalyticsBody(Optional.empty())));
+                SimplePanel feedbackPanel = new SimplePanel();
+                feedbackPanel.getElement().getStyle().setProperty("clear", "right");
+                feedbackPanel.addStyleName("feedbackPanel");
+                Anchor feedbackLink = new Anchor(new SafeHtmlBuilder()
+                        .appendHtmlConstant("<img src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());
+                // TODO set image
+                feedbackLink.setHref("mailto:support%40sapsailing.com?subject=[SAP Sailing] Feedback");
+                feedbackPanel.add(feedbackLink);
+                groupAndFeedbackPanel.add(feedbackPanel);
             }
             rootPanel.add(groupAndFeedbackPanel);
         }

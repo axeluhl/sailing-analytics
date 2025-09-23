@@ -9,5 +9,8 @@ public class SolutionsItem extends AccordionItem {
     @UiConstructor
     public SolutionsItem(String title, boolean showInitial) {
         super(title, /* image URL to be set through setImageUrl */ (ImageResource) null, title, showInitial);
+    } 
+    public void setHeaderText(String text) {
+        super.setHeaderText(text);
     }
 }

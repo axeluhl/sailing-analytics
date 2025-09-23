@@ -19,7 +19,7 @@ public class TabletAndDesktopSolutionsView extends Composite implements Solution
 
     public TabletAndDesktopSolutionsView(SolutionsNavigationTabs navigationTab, DesktopPlacesNavigator placesNavigator) {
         super();
-        solutions = new Solutions(navigationTab, placesNavigator);
+        solutions = new Solutions();
         initWidget(uiBinder.createAndBindUi(this));
     }
 }

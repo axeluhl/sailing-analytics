@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Anchor;
@@ -21,6 +22,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class EventDetailsComposite extends Composite  {
     private EventDTO event;
@@ -63,7 +65,11 @@ public class EventDetailsComposite extends Composite  {
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isListedOnHomepage(), "IsPublicLabel");
         officialWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
-        baseURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventBaseURL(), "BaseURLLabel");
+        if (ClientConfiguration.getInstance().isBrandingActive()) {
+            baseURL = createLabelAndAnchorWidget(grid, currentRow++, ClientConfiguration.getInstance().getEventBaseURL(Optional.empty()), "BaseURLLabel");
+        } else {
+            baseURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventBaseURL(), "BaseURLLabel");
+        }
         sailorsInfoWebsiteURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
         eventOverviewURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
         courseAreaNamesList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");

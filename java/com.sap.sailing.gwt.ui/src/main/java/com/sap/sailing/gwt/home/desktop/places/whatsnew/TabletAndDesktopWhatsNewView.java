@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.whatsnew;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sse.gwt.shared.ClientConfiguration;
 
 public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewView {
     private static SailingAnalyticsPageViewUiBinder uiBinder = GWT.create(SailingAnalyticsPageViewUiBinder.class);
@@ -71,6 +73,11 @@ public class TabletAndDesktopWhatsNewView extends Composite implements WhatsNewV
         raceCommitteeAppNotesAnchor.setHref(raceCommitteeAppNotesNavigation.getTargetUrl());
         inSightAppNotesAnchor.setHref(inSightAppNotesNavigation.getTargetUrl());
         buoyPingerAppNotesAnchor.setHref(buoyPingerAppNotesNavigation.getTargetUrl());
+        sailingAnalyticsNotesAnchor.setText(ClientConfiguration.getInstance().getSolutions2Headline(Optional.empty()));
+        sailingSimulatorNotesAnchor.setText(ClientConfiguration.getInstance().getSolutions6Headline(Optional.empty()));
+        raceCommitteeAppNotesAnchor.setText(ClientConfiguration.getInstance().getSolutions3Headline(Optional.empty()));
+        inSightAppNotesAnchor.setText(ClientConfiguration.getInstance().getSolutions4Headline(Optional.empty()));
+        buoyPingerAppNotesAnchor.setText(ClientConfiguration.getInstance().getSolutions5Headline(Optional.empty()));
         links = Arrays.asList(new Anchor[] { sailingAnalyticsNotesAnchor, sailingSimulatorNotesAnchor, raceCommitteeAppNotesAnchor, inSightAppNotesAnchor, buoyPingerAppNotesAnchor });
         contentWidgets = Arrays.asList(new HTML[] { sailingAnalyticsNotes, sailingSimulatorNotes, raceCommitteeAppNotes, inSightAppNotes, buoyPingerAppNotes });
         switch(navigationTab) {
