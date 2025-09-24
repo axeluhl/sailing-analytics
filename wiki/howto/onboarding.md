@@ -42,7 +42,7 @@ First of all, make sure you've looked at [http://www.amazon.de/Patterns-Elements
     A setup guide for windows can be found on this webpage: [https://maven.apache.org/guides/getting-started/windows-prerequisites.html](https://maven.apache.org/guides/getting-started/windows-prerequisites.html)
 8.  Forked GWT SDK 2.11.1 release candidate ([https://static.sapsailing.com/gwt-2.11.1.zip](https://static.sapsailing.com/gwt-2.11.1.zip)). The official releases can be found at [http://www.gwtproject.org/download.html](http://www.gwtproject.org/download.html)
     but shouldn't be used unless we roll back the changes of branch ``bug5077`` or GWT has merged and released the [pull request 9779](https://github.com/gwtproject/gwt/pull/9779).
-    Download the GWT DSK and extract it to a location of your preference (e.g. `C:\Program Files\gwt` on Windows or `/opt/gwt` on Linux or MacOS/X).
+    Download the GWT DSK and extract it to a location of your preference (e.g. `C:\Program Files\gwt` on Windows or `/opt` on Linux or MacOS/X).
     You will see in section [Tuning the Eclipse Installation](#onboarding-information_sap-sailing-analytics-development-setup_tuning-the-eclipse-installation)
     below how you announce this GWT SDK to your Eclipse installation.
 9. Standalone Android SDK (see section "Additional steps required for Android projects"). OPTIONALLY: You may additionally install Android Studio ([https://developer.android.com/tools/studio/index.html](https://developer.android.com/tools/studio/index.html)) or IntelliJ IDEA ([https://www.jetbrains.com/idea/download/](https://www.jetbrains.com/idea/download/)).
@@ -78,7 +78,7 @@ Depending on the location of your local repository, it's filepaths might be too 
 Copy the settings.xml (may be in $GIT_HOME/configuration/maven-settings.xml and $GIT_HOME/configuration/maven-settings-proxy.xml) **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for inside a corporate network requiring a HTTP proxy for access to external web). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. 
 
 ### Automatic Eclipse plugin installation
-The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2023-09"](https://www.eclipse.org/downloads/packages/release/2023-09/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2025-03.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2025-03.p2f`. 
+The necessary Eclipse plugins can be automatically installed into a newly unzipped version of ["2025-03"](https://www.eclipse.org/downloads/packages/release/2025-03/r/eclipse-ide-eclipse-committers) by using the `./configuration/pluginsForEclipse2025-03.p2f` file, found in the git repository cloned in _step 11_. To install the plugins open Eclipse and install Software Items from File. (File ⇒ Import ⇒ Install ⇒ Install Software from File). The description file is located at `/configuration/pluginsForEclipse2025-03.p2f`. 
 Make sure to select all Plugins (it might not be possible to select Lucene ignore that) and click next. In the pop-up dialog shown next, select the top radio button ("Update my installation to be compatible with the items being installed"). Skip the `Installation details`, accept the licence agreements and click finish. While Eclipse is installing the plugins a pop-up will appear in the background where you need to trust all plugins. Be aware that the installation may take several minutes depending on your Internet connection. 
 
 Be also aware that with this p2f-file it's not possible to update the plugins to newer versions. 
@@ -247,3 +247,8 @@ The path to the solution: On my instance in eu-west-2a, I ran aws --debug ec2 de
 - Problem: A load balancer's target group health checks fail. I was told the checks failed with 403 errors.
 Solution: This was occurring because the website didn't have any content in the /var/www/html. Whilst a site was still served (namely the Apache test page) it does throw a 403 error. If you fill the directory with and index.html the test then passes and a 200 code is returned
 - Problem: Target platform reload in Eclipse. Sometimes reloading via Window -> Plug-in Development -> Target Platform doesn't work, so open the target definition itself and try reloading there. Often a restart proves helpful after the reload. In addition, you can clean all projects and rebuild; then rebuild the individual projects that fail. Sometimes the errors are actually just warnings and you can try to run the GWT SDM (remember the other SDM's must be run if everything is brand new). Lastly, try clearing the plugins content found at `WORKSPACE_HOME/.metadata/.plugins/org.eclipse.pde.core/.bundle_pool/plugins`.
+
+### Tips for Mac users
+Mac users can install SDKMAN! to manage and install different JDKs.
+
+
