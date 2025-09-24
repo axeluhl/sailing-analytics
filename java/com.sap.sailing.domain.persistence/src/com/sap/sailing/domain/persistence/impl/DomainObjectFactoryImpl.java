@@ -191,6 +191,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -201,6 +202,7 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -239,6 +241,8 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
+import com.sap.sailing.domain.maneuverhash.impl.ManeuverRaceFingerprintImpl;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.impl.MarkPassingRaceFingerprintImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -252,11 +256,16 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.impl.ManeuverImpl;
+import com.sap.sailing.domain.tracking.impl.ManeuverWithMainCurveBoundariesImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
@@ -3278,4 +3287,84 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final MarkPassing markPassing = new MarkPassingImpl(timePoint, waypoint, competitor);
         return new Pair<>(waypoint, markPassing);
     }
+    
+    // Methods for ManeuverFingerprint -  not finished
+    
+    private Pair<RaceIdentifier, ManeuverRaceFingerprint> loadManeuversFingerprint(final Document currentDocument) {
+        final RaceIdentifier raceIdentifier = loadRaceIdentifier(currentDocument);
+        ManeuverRaceFingerprint fingerprint;
+        try {
+            final JSONObject json = Helpers.toJSONObjectSafe(
+                    new JSONParser().parse(((Document) currentDocument.get(FieldNames.MANEUVER_FINGERPRINT.name())).toJson()));
+            fingerprint = new ManeuverRaceFingerprintImpl(json);
+        } catch (JsonDeserializationException | ParseException e) {
+            logger.log(Level.WARNING, "Problem de-serializing maneuvers from document; ignoring", e);
+            fingerprint = null;
+        }
+        return new Pair<>(raceIdentifier, fingerprint);
+    }
+    
+    
+    @Override
+    public Map<RaceIdentifier, ManeuverRaceFingerprint> loadFingerprintsForManeuverHashes() {
+        final MongoCollection<Document> maneuversCollection = database.getCollection(CollectionNames.MANEUVER.name());
+        maneuversCollection.createIndex(new Document()
+                .append(FieldNames.EVENT_NAME.name(), 1)
+                .append(FieldNames.RACE_NAME.name(), 1),
+            new IndexOptions()
+                .unique(true)
+                .name("maneuversbyeventandrace")
+                .background(false));
+        final Map<RaceIdentifier, ManeuverRaceFingerprint> fingerprintHashMap = new HashMap<>();
+        for (final Document currentDocument : maneuversCollection.find()) {
+            final Pair<RaceIdentifier, ManeuverRaceFingerprint> fingerprint = loadManeuversFingerprint(currentDocument);
+            if (fingerprint != null && fingerprint.getB() != null) {
+                fingerprintHashMap.put(fingerprint.getA(), fingerprint.getB());
+            }
+        }
+        return fingerprintHashMap;
+    }
+    
+    @Override
+    public Map<Competitor, List<Maneuver>> loadManeuvers(RaceIdentifier raceIdentifier, Course course) {
+        final Map<Competitor, List<Maneuver>> result;
+        final Document query = new Document();
+        addRaceIdentifierToQuery(query, raceIdentifier);
+        final MongoCollection<Document> maneuversCollection = database.getCollection(CollectionNames.MANEUVER.name());
+        final Document doc = maneuversCollection.find(query).first();
+        if (doc != null) {
+            result = new HashMap<>();
+            final List<Document> maneuversDoc = doc.getList(FieldNames.MANEUVER.name(), Document.class);
+            for (final Document maneuversForOneCompetitorDoc : maneuversDoc) {
+                final Serializable competitorId = maneuversForOneCompetitorDoc.get(FieldNames.COMPETITOR_ID.name(), Serializable.class);
+                final Competitor competitor = baseDomainFactory.getExistingCompetitorById(competitorId);
+                for (final Document maneuvers: maneuversForOneCompetitorDoc.getList(FieldNames.MANEUVER.name(), Document.class)) {
+                    final Maneuver maneuver = loadManeuver(competitor, maneuvers, course);
+                    result.computeIfAbsent(competitor, c -> new ArrayList<>()).add(maneuver);     
+                    }
+            }
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    private Maneuver loadManeuver(Competitor competitor, Document maneuvers, Course course) {
+        //final int waypointIndex = maneuvers.getInteger(FieldNames.MANEUVER.name());
+        //final Waypoint waypoint = Util.get(course.getWaypoints(), waypointIndex);
+        //final TimePoint timePoint = TimePoint.of(maneuvers.getLong(FieldNames.TIME_AS_MILLIS.name()));
+        final ManeuverType type = (ManeuverType) maneuvers.get(FieldNames.TYPE.name());
+        final Tack newTack = (Tack) maneuvers.get(FieldNames.TACK.name());
+        final Position position = (Position) maneuvers.get(FieldNames.POSITION.name()) ;
+        final TimePoint timePoint = (TimePoint) maneuvers.get(FieldNames.TIMEPOINT.name());
+        final double maxTurningRateInDegreesPerSecond = maneuvers.getDouble(FieldNames.MAX_TURNING_RATE_IN_DEGREE_PER_SECOUND.name());
+        final ManeuverCurveBoundaries mainCurveBoundaries = (ManeuverCurveBoundaries) maneuvers.get(FieldNames.MAIN_CURVE_BOUNDARIES.name());
+        final ManeuverCurveBoundaries maneuverCurveWithStableSpeedAndCourseBoundaries = (ManeuverCurveBoundaries) maneuvers.get(FieldNames.MANEUVER_CURVE_WITH_STABLE_SPEED_AND_COURSE_BOUNDERIES.name());
+        final MarkPassing markPassing = (MarkPassing) maneuvers.get(FieldNames.MARK_PASSINGS.name());
+        final ManeuverLoss maneuverLoss = (ManeuverLoss) maneuvers.get(FieldNames.MANEUVER_LOSS.name());
+        final Maneuver maneuver = new ManeuverWithMainCurveBoundariesImpl(type, newTack, position, timePoint, mainCurveBoundaries, maneuverCurveWithStableSpeedAndCourseBoundaries,
+                maxTurningRateInDegreesPerSecond, markPassing, maneuverLoss);
+        return maneuver;
+    }
+    
 }

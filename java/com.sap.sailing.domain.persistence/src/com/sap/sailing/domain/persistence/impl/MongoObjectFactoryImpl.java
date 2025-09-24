@@ -127,12 +127,14 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithOtherTieBreaking
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -2032,4 +2034,59 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
         markPassingCollection.deleteOne(query);
     }
+    
+    
+    private List<Document> storeManeuvers(Map<Competitor, List<Maneuver>> maneuvers , Course course) {
+        final List<Document> result = new ArrayList<>();
+        for (final Entry<Competitor, List<Maneuver>> e : maneuvers.entrySet()) {
+            final Document competitorManeuver = new Document();
+            competitorManeuver.put(FieldNames.COMPETITOR_ID.name(), e.getKey().getId());
+            final List<Document> maneuverList = new ArrayList<>();
+            for (final Maneuver f : e.getValue()) {
+                final Document maneuverDoc = new Document();
+                //maneuverDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getDuration().asMillis());
+                maneuverDoc.put(FieldNames.TYPE.name(), f.getType());
+                maneuverDoc.put(FieldNames.TACK.name(), f.getNewTack());
+                maneuverDoc.put(FieldNames.POSITION.name(), f.getPosition());
+                maneuverDoc.put(FieldNames.TIMEPOINT.name(), f.getTimePoint());
+                maneuverDoc.put(FieldNames.MAIN_CURVE_BOUNDARIES.name(), f.getMainCurveBoundaries());
+                maneuverDoc.put(FieldNames.MAX_TURNING_RATE_IN_DEGREE_PER_SECOUND.name(), f.getMaxTurningRateInDegreesPerSecond());
+                maneuverDoc.put(FieldNames.MARK_PASSINGS.name(), f.getMarkPassing());
+                maneuverDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getDuration().asMillis());
+                maneuverDoc.put(FieldNames.MANEUVER_LOSS.name(), f.getManeuverLoss());
+                //maneuverDoc.put(FieldNames..name(), f.getDuration().asMillis());
+                // Test version right now, more thing will be added later
+                maneuverList.add(maneuverDoc); 
+            }
+            competitorManeuver.put(FieldNames.MANEUVER.name(), maneuverList);
+            result.add(competitorManeuver);
+        }
+        return result;
+    }
+    
+    
+    @Override
+    public void storeManeuvers(RaceIdentifier raceIdentifier, ManeuverRaceFingerprint fingerprint, Course course, Map<Competitor, List<Maneuver>> maneuvers) {
+        MongoCollection<Document> maneuverCollection = database.getCollection(CollectionNames.MANEUVER.name());
+        JSONObject fingerprintjson = fingerprint.toJson();
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        final Document result = new Document();
+        final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
+        result.put(FieldNames.MANEUVER_FINGERPRINT.name(), fingerprintDoc);
+        storeRaceIdentifier(result, raceIdentifier);
+        final List<Document> maneuverDoc = storeManeuvers( maneuvers , course);
+        result.put(FieldNames.MANEUVER.name(), maneuverDoc);
+        maneuverCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
+    }
+    
+    @Override
+    public void removeManeuvers(RaceIdentifier raceIdentifier) {
+        MongoCollection<Document> maneuverCollection = database.getCollection(CollectionNames.MANEUVER.name());
+        final Document query = new Document();
+        DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
+        maneuverCollection.deleteOne(query);
+    }
+    
+    
 }

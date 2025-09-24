@@ -16,13 +16,14 @@ import com.sap.sse.common.Util;
 //import com.sap.sailing.domain.markpassinghash.impl.MarkPassingRaceFingerprintImpl.JSON_FIELDS;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintFactory;
+//import com.sap.sailing.domain.markpassinghash.impl.MarkPassingRaceFingerprintImpl.JSON_FIELDS;
 
 public class ManeuverRaceFingerprintImpl implements ManeuverRaceFingerprint {
 
     MarkPassingRaceFingerprintFactory factory = MarkPassingRaceFingerprintFactory.INSTANCE;
     
     private static enum JSON_FIELDS {
-        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, WAYPOINTS_HASH, NUMBEROFGPSFIXES, 
+        COMPETITOR_HASH, START_OF_TRACKING_AS_MILLIS, END_OF_TRACKING_AS_MILLIS, NUMBEROFGPSFIXES, 
         GPSFIXES_HASH, RACE_ID, MARKPASSINGFINGERPRINT, START_TIME_RECEIVED_AS_MILLIS
     };
 
@@ -43,6 +44,17 @@ public class ManeuverRaceFingerprintImpl implements ManeuverRaceFingerprint {
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
         this.startTimeReceived = trackedRace.getStartTimeReceived();
+    }
+    
+    
+    public ManeuverRaceFingerprintImpl(JSONObject json) {
+        this.competitorHash = ((Number) json.get(JSON_FIELDS.COMPETITOR_HASH.name())).intValue();
+        this.numberOfGPSFixes = ((Number) json.get(JSON_FIELDS.NUMBEROFGPSFIXES.name())).intValue();
+        this.gpsFixesHash = ((Number) json.get(JSON_FIELDS.GPSFIXES_HASH.name())).intValue();
+        this.markPassingFingerprint = (MarkPassingRaceFingerprint) json.get(JSON_FIELDS.MARKPASSINGFINGERPRINT.name());
+        this.startOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.START_OF_TRACKING_AS_MILLIS.name()));
+        this.endOfTracking = TimePoint.of((Long) json.get(JSON_FIELDS.END_OF_TRACKING_AS_MILLIS.name()));
+        this.startTimeReceived = TimePoint.of((Long) json.get(JSON_FIELDS.START_TIME_RECEIVED_AS_MILLIS.name()));
     }
     
     

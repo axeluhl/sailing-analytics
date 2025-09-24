@@ -125,6 +125,11 @@ public enum CollectionNames {
     /**
      * Contains the Hashes for the {@link MarkPassingHashFingerprint}
      */
-    MARKPASSINGS;
+    MARKPASSINGS,
+    /**
+     * Contains the Hashes for the
+     */
+    
+    MANEUVER;
 
 }

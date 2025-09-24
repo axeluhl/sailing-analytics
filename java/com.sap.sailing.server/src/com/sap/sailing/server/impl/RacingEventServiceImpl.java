@@ -196,6 +196,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardWithOtherTieBreakingLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
+import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprintRegistry;
 import com.sap.sailing.domain.orc.ORCPerformanceCurveRankingMetric;
@@ -230,6 +231,7 @@ import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -471,6 +473,8 @@ Replicator {
     private final ConcurrentHashMap<UUID, LeaderboardGroup> leaderboardGroupsByID;
 
     private final ConcurrentHashMap<RaceIdentifier, MarkPassingRaceFingerprint> markPassingRaceFingerprints;
+    
+    private final ConcurrentHashMap<RaceIdentifier, ManeuverRaceFingerprint> maneuverRaceFingerprints;
 
     /**
      * See {@link #leaderboardsByNameLock}
@@ -906,6 +910,7 @@ Replicator {
         leaderboardsByName = new ConcurrentHashMap<>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for " + this, /* fair */false);
         markPassingRaceFingerprints = new ConcurrentHashMap<>();
+        maneuverRaceFingerprints = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
@@ -937,6 +942,7 @@ Replicator {
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
         loadMarkPassingRaceFingerprints();
+        loadManeuverRaceFingerprints();
         // Stores all events which run through a data migration
         // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
         for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
@@ -985,6 +991,39 @@ Replicator {
         final Map<Competitor, Map<Waypoint, MarkPassing>> result;
         if (markPassingRaceFingerprints.containsKey(raceIdentifier)) {
             result = domainObjectFactory.loadMarkPassings(raceIdentifier, course);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    private void loadManeuverRaceFingerprints() {
+        maneuverRaceFingerprints.putAll(domainObjectFactory.loadFingerprintsForManeuverHashes());
+    }
+    
+    @Override
+    public void storeManeuvers(RaceIdentifier raceIdentifier, ManeuverRaceFingerprint fingerprint,
+             Map<Competitor, List<Maneuver>> maneuvers, Course course) {
+        maneuverRaceFingerprints.put(raceIdentifier, fingerprint);
+        mongoObjectFactory.storeManeuvers(raceIdentifier, fingerprint, course,  maneuvers );
+    }
+    
+    @Override
+    public ManeuverRaceFingerprint getManeuverRaceFingerprint(RaceIdentifier raceIdentifier) {
+        return maneuverRaceFingerprints.get(raceIdentifier);
+    }
+    
+    @Override
+    public void removeStoredManeuvers(RaceIdentifier raceIdentifier) {
+        maneuverRaceFingerprints.remove(raceIdentifier);
+        mongoObjectFactory.removeManeuvers(raceIdentifier);
+    }
+    
+    @Override
+    public Map<Competitor, List<Maneuver>> loadManeuvers(RaceIdentifier raceIdentifier, Course course) {
+        final Map<Competitor, List<Maneuver>> result;
+        if (maneuverRaceFingerprints.containsKey(raceIdentifier)) {
+            result = domainObjectFactory.loadManeuvers(raceIdentifier, course);
         } else {
             result = null;
         }
