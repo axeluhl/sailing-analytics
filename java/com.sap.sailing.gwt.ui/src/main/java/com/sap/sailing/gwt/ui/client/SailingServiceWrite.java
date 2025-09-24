@@ -758,4 +758,9 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     boolean hasAIAgentCredentials();
     
     void setAIAgentCredentials(String credentials) throws Exception;
+    
+    void resetAIAgentCredentials();
+
+    void copyPairingListFromOtherLeaderboard(String sourceLeaderboardName, String targetLeaderboardName, String fromRaceColumnName,
+            String toRaceColumnInclusiveName) throws UnauthorizedException, NotFoundException;
 }

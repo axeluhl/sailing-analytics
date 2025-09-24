@@ -363,6 +363,7 @@ import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.aicore.Credentials;
 import com.sap.sse.aicore.CredentialsParser;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
@@ -4147,9 +4148,51 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
         checkAIAgentConfigPermission();
         final AIAgent aiAgent = getAIAgent();
         if (aiAgent != null) {
-            aiAgent.setCredentials(Util.hasLength(credentials)
-                    ? CredentialsParser.create().parse(credentials)
-                    : null);
+            if (Util.hasLength(credentials)) {
+                Credentials parsedCredentials;
+                try {
+                    parsedCredentials = CredentialsParser.create().parse(credentials);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Credentials could not be parsed");
+                }
+                if (parsedCredentials != null) {
+                    aiAgent.setCredentials(parsedCredentials);
+                }
+            } else {
+                throw new IllegalStateException("Blank credentials received");
+            }
         }
+    }
+    
+    @Override
+    public void resetAIAgentCredentials() {
+        checkAIAgentConfigPermission();
+        final AIAgent aiAgent = getAIAgent();
+        if (aiAgent != null) {
+            aiAgent.setCredentials(null);
+        }
+    }
+
+    @Override
+    public void copyPairingListFromOtherLeaderboard(String sourceLeaderboardName, String targetLeaderboardName,
+            String fromRaceColumnName, String toRaceColumnInclusiveName)
+            throws UnauthorizedException, NotFoundException {
+        final Leaderboard sourceLeaderboard = getLeaderboardByName(sourceLeaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(sourceLeaderboard);
+        final Leaderboard targetLeaderboard = getLeaderboardByName(targetLeaderboardName);
+        getService().getSecurityService().checkCurrentUserUpdatePermission(targetLeaderboard);
+        if (!(sourceLeaderboard instanceof RegattaLeaderboard)) {
+            throw new IllegalArgumentException("Source leaderboard " + sourceLeaderboardName
+                    + " must be a regatta leaderboard, but was: " + sourceLeaderboard.getLeaderboardType());
+        }
+        if (!(targetLeaderboard instanceof RegattaLeaderboard)) {
+            throw new IllegalArgumentException("Target leaderboard " + sourceLeaderboardName
+                    + " must be a regatta leaderboard, but was: " + targetLeaderboard.getLeaderboardType());
+        }
+        // we don't need to worry about replication here because all operations carried out by
+        // the following call will only manipulate race logs and regatta logs, and those have
+        // their own listener-based replication scheme.
+        getRaceLogTrackingAdapter().copyPairingListFromOtherLeaderboard((RegattaLeaderboard) sourceLeaderboard,
+                (RegattaLeaderboard) targetLeaderboard, fromRaceColumnName, toRaceColumnInclusiveName);
     }
 }

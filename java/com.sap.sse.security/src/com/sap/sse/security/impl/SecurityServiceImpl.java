@@ -103,6 +103,7 @@ import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
+import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.interfaces.impl.AbstractReplicableWithObjectInputStream;
 import com.sap.sse.rest.CORSFilterConfiguration;
 import com.sap.sse.security.Action;
@@ -244,6 +245,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
     
     private final ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker;
+    
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
 
     private ThreadLocal<UserGroup> temporaryDefaultTenant = new InheritableThreadLocal<>();
     
@@ -322,8 +325,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
             UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
             SubscriptionPlanProvider subscriptionPlanProvider) {
-        this(mailServiceTracker, corsFilterConfigurationTracker, userStore, accessControlStore, hasPermissionsProvider,
-                subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
+        this(mailServiceTracker, corsFilterConfigurationTracker, /* replicationServiceTracker */ null, userStore, accessControlStore,
+                hasPermissionsProvider, subscriptionPlanProvider, /* sharedAcrossSubdomainsOf */ null, /* baseUrlForCrossDomainStorage */ null);
     }
     
     /**
@@ -333,8 +336,8 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      * be shared as well.
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, ServiceTracker<CORSFilterConfiguration, CORSFilterConfiguration> corsFilterConfigurationTracker,
-            UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider,
-            SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
+            ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker, UserStore userStore, AccessControlStore accessControlStore,
+            HasPermissionsProvider hasPermissionsProvider, SubscriptionPlanProvider subscriptionPlanProvider, String sharedAcrossSubdomainsOf, String baseUrlForCrossDomainStorage) {
         initialLoadClassLoaderRegistry.addClassLoader(getClass().getClassLoader());
         if (hasPermissionsProvider == null) {
             throw new IllegalArgumentException("No HasPermissionsProvider defined");
@@ -350,6 +353,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
         this.corsFilterConfigurationTracker = corsFilterConfigurationTracker;
+        this.replicationServiceTracker = replicationServiceTracker;
         this.hasPermissionsProvider = hasPermissionsProvider;
         this.cacheManager = loadReplicationCacheManagerContents();
         this.corsFilterConfigurationsByReplicaSetName = loadCORSFilterConfigurations();
@@ -540,6 +544,10 @@ implements ReplicableSecurityService, ClearStateTestSupport {
     private CORSFilterConfiguration getCORSFilterConfiguration() {
         return corsFilterConfigurationTracker == null ? null : corsFilterConfigurationTracker.getService();
     }
+    
+    private ReplicationService getReplicationService() {
+        return replicationServiceTracker == null ? null : replicationServiceTracker.getService();
+    }
 
     @Override
     public void sendMail(String username, String subject, String body) throws MailException {
@@ -597,6 +605,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public Void internalResetPassword(String username, String passwordResetSecret) {
+        logger.info("Password reset for user "+username+" requested");
         getUserByName(username).startPasswordReset(passwordResetSecret);
         return null;
     }
@@ -1152,7 +1161,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             if (lockingAndBanning == null || !lockingAndBanning.isAuthenticationLocked()) {
                 apply(s->s.internalRecordUserCreationFromClientIP(clientIP));
             } else {
-                throw new UserManagementException("Client IP "+clientIP+" locked for user creation: "+lockingAndBanning);
+                throw new UserManagementException(UserManagementException.CLIENT_CURRENTLY_LOCKED_FOR_USER_CREATION);
             }
         }
     }
@@ -1236,6 +1245,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
+        logger.info("Password for user "+username+" was updated by "+SessionUtils.getPrincipal());
         user.passwordWasReset();
         store.updateUser(user);
         return null;
@@ -1267,7 +1277,7 @@ implements ReplicableSecurityService, ClearStateTestSupport {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
         if (user.getLockingAndBanning().isAuthenticationLocked()) {
-            throw new UserManagementException("Password authentication is locked for user "+username);
+            throw new UserManagementException(UserManagementException.PASSWORD_AUTHENTICATION_CURRENTLY_LOCKED_FOR_USER);
         }
         final UsernamePasswordAccount account = (UsernamePasswordAccount) user.getAccount(AccountType.USERNAME_PASSWORD);
         String hashedOldPassword = hashPassword(password, account.getSalt());
@@ -1326,7 +1336,15 @@ implements ReplicableSecurityService, ClearStateTestSupport {
 
     @Override
     public LockingAndBanning failedBearerTokenAuthentication(String clientIP) {
-        return apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+        final LockingAndBanning result;
+        final ReplicationService replicationService = getReplicationService();
+        if (replicationService == null || !replicationService.isReplicationStarting()) {
+            result = apply(s->s.internalFailedBearerTokenAuthentication(clientIP));
+        } else {
+            logger.warning("Replication is starting, so not recording failed bearer token authentication for client IP "+clientIP);
+            result = null;
+        }
+        return result;
     }
     
     @Override
@@ -3462,7 +3480,6 @@ implements ReplicableSecurityService, ClearStateTestSupport {
      *            when not empty, all users that have permission to this {@link SecuredSecurityTypes#SERVER SERVER}
      *            action on the {@code replicaSet} will receive the e-mail in addition to the server owner. No user will
      *            receive the e-mail twice.
-     * @return
      */
     @Override
     public Iterable<User> getUsersToInformAboutReplicaSet(String serverName, Optional<HasPermissions.Action> alsoSendToAllUsersWithThisPermissionOnReplicaSet) {
