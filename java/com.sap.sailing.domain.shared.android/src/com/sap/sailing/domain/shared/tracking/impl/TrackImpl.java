@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tracking.impl;
+package com.sap.sailing.domain.shared.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.function.Function;
 
-import com.sap.sailing.domain.tracking.AddResult;
-import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
-import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.shared.tracking.AddResult;
+import com.sap.sailing.domain.shared.tracking.FixAcceptancePredicate;
+import com.sap.sailing.domain.shared.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
