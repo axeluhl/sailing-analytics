@@ -1,5 +1,7 @@
 # Operating System Upgrade Across Landscape
 
+[[_TOC_]]
+
 Mainly for security reasons we strive to keep the operating systems on which our EC2 instances are running up to date. This includes running the latest Linux kernels and having all packages updated to their latest versions as per the Amazon Linux or other Linux versions used. While doing so, we aim to keep service interruptions to a minimum and in particular keep services available at least in read-only mode also during upgrades.
 
 We distinguish between in-place upgrades without the need to re-boot, in-place upgrade requiring a reboot (e.g., due to Linux kernel updates), and upgrades that replace EC2 instances by new EC2 instances. The latter case can be sub-divided into cases where an incremental image upgrade can be used to produce a new version of an Amazon Machine Image (AMI) used for that instance type, and cases where a new from-scratch AMI set-up will be required. Also, the procedures to use depend on the type of service run on the instance that requires an upgrade.
