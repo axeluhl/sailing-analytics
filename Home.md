@@ -62,6 +62,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[Upgrading an EC2 image|wiki/info/landscape/upgrading-ec2-image]]
   * [[Creating a webserver EC2 image from scratch|wiki/info/landscape/creating-ec2-image-for-webserver-from-scratch]]
+  * [[Upgrading Operating System Across Landscape|wiki/info/landscape/operating-system-upgrade]]
   * [[EC2 mail relaying vs. Amazon Simple E-Mail Service (SES)|wiki/info/landscape/mail-relaying]]
   * [[Establishing support@sapsailing.com with AWS SES, SNS, and Lambda|wiki/info/landscape/support-email]]
   * [[Creating an EC2 image for a MongoDB Replica Set from scratch|wiki/info/landscape/creating-ec2-mongodb-image-from-scratch]]
