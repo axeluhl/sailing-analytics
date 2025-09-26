@@ -224,6 +224,15 @@ public interface BrandingConfigurationService {
 
 
         SOLUTIONS6_READ_MORE_LINK("solutions6ReadMoreLink"),
+        
+        MORE_LOGIN_INFORMATION_SIMULATOR_URL("moreLoginInformationSimulatorURL"),
+
+        MORE_LOGIN_INFORMATION_SAILOR_PROFILES_URL("moreLoginInformationSailorProfilesURL"),
+
+        MORE_LOGIN_INFORMATION_SETTINGS_URL("moreLoginInformationSettingsURL"),
+
+        MORE_LOGIN_INFORMATION_NOTIFICATIONS_URL("moreLoginInformationNotificationsURL"),
+
 
         /**
          * If you place the value of the property identified by this constant into a {@code script} tag in a HTML/JSP page, it will

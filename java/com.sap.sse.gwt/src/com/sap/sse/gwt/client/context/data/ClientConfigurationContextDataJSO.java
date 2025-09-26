@@ -247,4 +247,16 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getSolutions6ReadMoreLink() /*-{
         return this.solutions6ReadMoreLink;
     }-*/;
+    public final native String getMoreLoginInformationNotificationsURL() /*-{
+        return this.moreLoginInformationNotificationsURL;
+    }-*/;
+    public final native String getMoreLoginInformationSettingsURL() /*-{
+        return this.moreLoginInformationSettingsURL;
+    }-*/;
+    public final native String getMoreLoginInformationSailorProfilesURL() /*-{
+        return this.moreLoginInformationSailorProfilesURL;
+    }-*/;
+    public final native String getMoreLoginInformationSimulatorURL() /*-{
+        return this.moreLoginInformationSimulatorURL;
+    }-*/;
 }

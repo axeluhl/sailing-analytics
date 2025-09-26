@@ -149,4 +149,13 @@ public interface BrandingConfiguration {
     String getSolutions5ReadMoreLink();
     
     String getSolutions6ReadMoreLink();
+    
+    String getMoreLoginInformationNotificationsURL();
+    
+    String getMoreLoginInformationSettingsURL();
+    
+    String getMoreLoginInformationSailorProfilesURL();
+    
+    String getMoreLoginInformationSimulatorURL();
+    
 }

@@ -377,4 +377,24 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getSolutions6ReadMoreLink() {
         return "/gwt/Home.html#WhatsNewPlace:navigationTab=SailingSimulator";
     }
+    
+    @Override
+    public String getMoreLoginInformationNotificationsURL() {
+        return "/sap-branding/images/notifications.png";
+    }
+    
+    @Override
+    public String getMoreLoginInformationSettingsURL() {
+        return "/sap-branding/images/settings.png";
+    }
+    
+    @Override
+    public String getMoreLoginInformationSailorProfilesURL() {
+        return " /sap-branding/images/sailorprofiles.png";
+    }
+    
+    @Override
+    public String getMoreLoginInformationSimulatorURL() {
+        return "/sap-branding/images/simulator.png";
+    }
 }

@@ -140,6 +140,10 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         map.put(BrandingConfigurationProperty.SOLUTIONS4_READ_MORE_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getSolutions4ReadMoreLink());
         map.put(BrandingConfigurationProperty.SOLUTIONS5_READ_MORE_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getSolutions5ReadMoreLink());
         map.put(BrandingConfigurationProperty.SOLUTIONS6_READ_MORE_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getSolutions6ReadMoreLink());
+        map.put(BrandingConfigurationProperty.MORE_LOGIN_INFORMATION_SIMULATOR_URL, brandingConfiguration == null ? "" : brandingConfiguration.getMoreLoginInformationSimulatorURL());
+        map.put(BrandingConfigurationProperty.MORE_LOGIN_INFORMATION_SAILOR_PROFILES_URL, brandingConfiguration == null ? "" : brandingConfiguration.getMoreLoginInformationSailorProfilesURL());
+        map.put(BrandingConfigurationProperty.MORE_LOGIN_INFORMATION_SETTINGS_URL, brandingConfiguration == null ? "" : brandingConfiguration.getMoreLoginInformationSettingsURL());
+        map.put(BrandingConfigurationProperty.MORE_LOGIN_INFORMATION_NOTIFICATIONS_URL, brandingConfiguration == null ? "" : brandingConfiguration.getMoreLoginInformationNotificationsURL());
         map.put(BrandingConfigurationProperty.FOOTER_LEGAL_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFooterLegalLink());
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_READ_MORE_TEXT, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsReadMoreText(locale));
         map.put(BrandingConfigurationProperty.SPORTS_ON, brandingConfiguration == null ? "" : brandingConfiguration.getSportsOn(locale));

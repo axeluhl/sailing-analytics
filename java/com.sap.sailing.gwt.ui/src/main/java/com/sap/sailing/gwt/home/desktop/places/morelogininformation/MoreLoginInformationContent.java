@@ -44,5 +44,27 @@ public class MoreLoginInformationContent extends Widget {
         }
         imageUi.addClassName(imageOnLeft ? style.left() : style.right());
     }
+    
+    public void configureImage(String url) {
+        if (url != null) {
+            imageUi.setSrc(url);
+        }
+    }
+    
+    public String getContent() {
+        return textUi.getInnerText();
+    }
+    
+    public void setContent(String content) {
+        textUi.setInnerText(content);
+    }
+    
+    public String getTitle() {
+        return titleUi.getInnerText();
+    }
+    
+    public void setTitle(String title) {
+        titleUi.setInnerText(title);
+    }
 
 }

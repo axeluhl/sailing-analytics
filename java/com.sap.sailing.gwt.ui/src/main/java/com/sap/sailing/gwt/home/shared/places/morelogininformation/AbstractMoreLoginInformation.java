@@ -14,11 +14,14 @@ public class AbstractMoreLoginInformation extends Composite implements MoreLogin
     @UiField
     public Element registerControl;
 
-    protected AbstractMoreLoginInformation(UiBinder<Widget, AbstractMoreLoginInformation> uiBinder,
-            Runnable registerCallback) {
-        initWidget(uiBinder.createAndBindUi(this));
-        DOM.sinkEvents(registerControl, Event.ONCLICK);
-        Event.setEventListener(registerControl, event -> registerCallback.run());
+    protected <T extends AbstractMoreLoginInformation>
+    AbstractMoreLoginInformation(UiBinder<Widget, T> uiBinder,
+                                 Runnable registerCallback) {
+      @SuppressWarnings("unchecked")
+      T owner = (T) this;                        // safe: 'this' is actually a T at runtime
+      initWidget(uiBinder.createAndBindUi(owner));
+      DOM.sinkEvents(registerControl, Event.ONCLICK);
+      Event.setEventListener(registerControl, event -> registerCallback.run());
     }
 
     @Override

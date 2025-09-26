@@ -137,6 +137,10 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String solutions4ReadMoreLink;
     private String solutions5ReadMoreLink;
     private String solutions6ReadMoreLink;
+    private String moreLoginInformationNotificationsURL;
+    private String moreLoginInformationSettingsURL;
+    private String moreLoginInformationSailorProfilesURL;
+    private String moreLoginInformationSimulatorURL;
 
     public ClientConfiguration() {
         try {
@@ -214,6 +218,10 @@ public class ClientConfiguration implements BrandingConfiguration {
             solutions4ReadMoreLink = dataJso.getSolutions4ReadMoreLink();
             solutions5ReadMoreLink = dataJso.getSolutions5ReadMoreLink();
             solutions6ReadMoreLink = dataJso.getSolutions6ReadMoreLink();
+            moreLoginInformationNotificationsURL = dataJso.getMoreLoginInformationNotificationsURL();
+            moreLoginInformationSettingsURL = dataJso.getMoreLoginInformationSettingsURL();
+            moreLoginInformationSailorProfilesURL = dataJso.getMoreLoginInformationSailorProfilesURL();
+            moreLoginInformationSimulatorURL = dataJso.getMoreLoginInformationSimulatorURL();
 
         } catch (RuntimeException e) {
             GWT.log("no branding information found.");
@@ -475,5 +483,21 @@ public class ClientConfiguration implements BrandingConfiguration {
 
     public String getSolutions6ReadMoreLink() {
         return solutions6ReadMoreLink;
+    }
+
+    public String getMoreLoginInformationNotificationsURL() {
+        return moreLoginInformationNotificationsURL;
+    }
+
+    public String getMoreLoginInformationSettingsURL() {
+        return moreLoginInformationSettingsURL;
+    }
+
+    public String getMoreLoginInformationSailorProfilesURL() {
+        return moreLoginInformationSailorProfilesURL;
+    }
+
+    public String getMoreLoginInformationSimulatorURL() {
+        return moreLoginInformationSimulatorURL;
     }
 }
