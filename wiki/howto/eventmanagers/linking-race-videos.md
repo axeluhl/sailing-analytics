@@ -64,7 +64,7 @@ This articel provides a short guidance of how to synchronize races with their Yo
 # Example
 
 Here is an example video:
-<video control src="https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4" type="video/mp4">
+<video controls width="640" src="https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 Did that show?
