@@ -60,3 +60,12 @@ This articel provides a short guidance of how to synchronize races with their Yo
 
 ![Figure 4: Link all races covered by the video](https://s3-eu-west-1.amazonaws.com/media.sapsailing.com/wiki/how%20to/linking%20race%20videos/multi_sync.png)
 **Figure 4: Link all races covered by the video**
+
+# Example
+
+Here is an example video:
+<video control>
+  <source src="https://sapsailing-documentation.s3-eu-west-1.amazonaws.com/adminconsole/Advanced+Topics/Leaderboard+Group+explained.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+Did that show?
