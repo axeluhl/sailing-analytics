@@ -24,10 +24,8 @@
         <a:header>
             <g:HTMLPanel>
                 <h1 class="{style.title}" ui:field="headline">
-                    <ui:text from="{i18n.moreLoginInformationHeadline}" />
                 </h1>
                 <p ui:field="intro">
-                    <ui:text from="{i18n.moreLoginInformationIntroduction}" />
                 </p>
             </g:HTMLPanel>
         </a:header>
@@ -44,7 +42,7 @@
         <a:item>
             <login:MoreLoginInformationContentMobile ui:field="strategySimulator"
                 title="{i18n.strategySimulatorTitle}" image="{local_res.simulator}"
-                content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
+                content=""/>
         </a:item>
         <a:item>
             <login:MoreLoginInformationContentMobile ui:field="userNotifications"

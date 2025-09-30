@@ -82,7 +82,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String distanceInMeters();
     String averageSpeedInKnots();
     String rankGain();
-    String sapSailingAnalytics();
+    String sailingAnalytics();
     String leaderboard();
     String leaderboards();
     String leaderboardSettings();
@@ -1795,11 +1795,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String exportStatisticsCurveToCsv();
     String csvCopiedToClipboard();
     String minDataCount();
-    String moreLoginInformationHeadline();
-    String moreLoginInformationIntroduction();
+    String moreLoginInformationHeadline(String brandName);
+    String moreLoginInformationIntroduction(String brandName);
     String moreLoginInformationSectionUserSettingsHeading();
     String moreLoginInformationSectionUserSettingsDescription();
-    String moreLoginInformationSectionStrategySimulatorDescription();
+    String moreLoginInformationSectionStrategySimulatorDescription(String brandName);
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
     String moreLoginInformationRegisterControlText();
