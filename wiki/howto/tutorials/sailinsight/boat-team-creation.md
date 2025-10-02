@@ -3,7 +3,7 @@ This guide will show you how to create your *first boat* or manage multiple boat
 **Sail Insight** allows you to sail with multiple boats or teams. When you first set up **Sail Insight**, we ask you to set up your first boat, but you can edit it or create more at any time.
 
 <video
-  controls
+  controls="true"
   src="https://sapsailing-documentation.s3.eu-west-1.amazonaws.com/SailInsight/Boats+and+Team+Creation+%5BrbdmoTf7w64%5D.webm"
   type="video/webm"
   style="display:block;margin:1rem auto;max-width:100%;width:340px;height:auto;">

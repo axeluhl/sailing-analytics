@@ -1,7 +1,7 @@
 This guide will show you how to create an event with **Sail Insight**.
 
 <video
-  controls
+  controls="true"
   src="https://sapsailing-documentation.s3.eu-west-1.amazonaws.com/SailInsight/Create+an+Event+%5Bf_sguquMRsQ%5D.mp4"
   type="video/mp4"
   style="display:block;margin:1rem auto;max-width:100%;width:340px;height:auto;">

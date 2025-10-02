@@ -1,7 +1,7 @@
 This episode shows you how to manage *marks* or pair them in **Sail Insight** :
 
 <video
-  controls
+  controls="true"
   src="https://sapsailing-documentation.s3.eu-west-1.amazonaws.com/SailInsight/Managing+Marks+%5Bf3fjGuP-SbU%5D.webm"
   type="video/webm"
   style="display:block;margin:1rem auto;max-width:100%;width:340px;height:auto;">
