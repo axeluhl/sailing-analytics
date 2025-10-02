@@ -12,10 +12,6 @@ public class SailingServerConfigurationImpl implements SailingServerConfiguratio
         this.isStandaloneServer = isStandaloneServer;
     }
 
-    public SailingServerConfigurationImpl(boolean isStandaloneServer, Boolean debrandingActive) {
-        this.isStandaloneServer = isStandaloneServer;
-    }
-
     @Override
     public boolean isStandaloneServer() {
         return isStandaloneServer;
