@@ -93,7 +93,6 @@ public class ClientConfiguration implements BrandingConfiguration {
     private String instagramLink;
     private String welcomeToSailingAnalytics;
     private String welcomeToSailingAnalyticsBody;
-    private String eventBaseURL;
     private String solutions1Headline;
     private String solutions2Headline;
     private String solutions3Headline;
@@ -174,7 +173,6 @@ public class ClientConfiguration implements BrandingConfiguration {
             instagramLink = dataJso.getInstagramLink();
             welcomeToSailingAnalytics = dataJso.getWelcomeToSailingAnalytics();
             welcomeToSailingAnalyticsBody = dataJso.getWelcomeToSailingAnalyticsBody();
-            eventBaseURL = dataJso.getEventBaseURL();
             solutions1Headline = dataJso.getSolutions1Headline();
             solutions2Headline = dataJso.getSolutions2Headline();
             solutions3Headline = dataJso.getSolutions3Headline();
@@ -342,9 +340,6 @@ public class ClientConfiguration implements BrandingConfiguration {
     }
     public String getWelcomeToSailingAnalyticsBody(Optional<String> locale) {
         return welcomeToSailingAnalyticsBody;
-    }
-    public String getEventBaseURL(Optional<String> locale) {
-        return eventBaseURL;
     }
     public String getSolutions1Headline(Optional<String> locale) {
         return solutions1Headline;

@@ -115,9 +115,6 @@ public class ClientConfigurationContextDataJSO extends JavaScriptObject {
     public final native String getWelcomeToSailingAnalyticsBody()/*-{
         return this.welcomeToSailingAnalyticsBody;
     }-*/;
-    public final native String getEventBaseURL()/*-{
-        return this.eventBaseURL;
-    }-*/;
     public final native String getSolutions1Headline() /*-{
         return this.solutions1Headline;
     }-*/;

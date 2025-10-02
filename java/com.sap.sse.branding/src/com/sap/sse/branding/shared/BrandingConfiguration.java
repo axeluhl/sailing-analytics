@@ -62,8 +62,6 @@ public interface BrandingConfiguration {
     
     String getWelcomeToSailingAnalyticsBody(Optional<String> locale);
     
-    String getEventBaseURL(Optional<String> locale);
-    
     String getSolutions1Headline(Optional<String> locale);
     
     String getSolutions2Headline(Optional<String> locale);

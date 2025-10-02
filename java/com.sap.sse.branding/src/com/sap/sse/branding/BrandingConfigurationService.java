@@ -129,8 +129,6 @@ public interface BrandingConfigurationService {
         
         WELCOME_TO_SAILING_ANALYTICS_BODY("welcomeToSailingAnalyticsBody"),
         
-        EVENT_BASE_URL("eventBaseURL"),
-        
         SOLUTIONS1_HEADLINE("solutions1Headline"),
         
         SOLUTIONS2_HEADLINE("solutions2Headline"),

@@ -157,11 +157,6 @@ public class SAPBrandingConfiguration implements BrandingConfiguration {
     public String getWelcomeToSailingAnalyticsBody(Optional<String> locale) {
         return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "welcomeToSailingAnalyticsBody");
     }
-
-    @Override
-    public String getEventBaseURL(Optional<String> locale) {
-        return sailingServerStringMessages.get(locale.map(l->Locale.forLanguageTag(l)).orElse(Locale.ENGLISH), "eventBaseURL");
-    }
     
     @Override
     public String getSolutions1Headline(Optional<String> locale) {

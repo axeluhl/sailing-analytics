@@ -120,9 +120,9 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
         hideContentContainer();
         dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot());
         if (ClientConfiguration.getInstance().isBrandingActive()) {
-            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage() + " " + ClientConfiguration.getInstance().getBrandTitle(Optional.empty()) + " Sailing Analytics.");
+            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage(ClientConfiguration.getInstance().getBrandTitle(Optional.empty())) + " ");
         } else {
-            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage() + " Sailing Analytics.");
+            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage(""));
         }
         totalWindSpeedHeader.setInnerHTML(stringConstants.dashboardTrueWindSpeed());
         totalWindDirectionHeader.setInnerHTML(stringConstants.dashboardTrueWindDirection());

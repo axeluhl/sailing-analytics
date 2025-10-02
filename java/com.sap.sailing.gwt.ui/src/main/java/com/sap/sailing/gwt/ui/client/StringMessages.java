@@ -1306,7 +1306,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceDistanceTraveledIncludingGateStartTooltip();
     String dashboardHeader();
     String dashboardNoWindBotAvailableHeader();
-    String dashboardNoWindBotAvailableMessage();
+    String dashboardNoWindBotAvailableMessage(String brandTitle);
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
     String dashboardTrueWindDirection();
