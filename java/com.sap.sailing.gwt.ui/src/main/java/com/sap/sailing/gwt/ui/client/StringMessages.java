@@ -1306,7 +1306,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceDistanceTraveledIncludingGateStartTooltip();
     String dashboardHeader();
     String dashboardNoWindBotAvailableHeader();
-    String dashboardNoWindBotAvailableMessage(String brandTitle);
+    String dashboardNoWindBotAvailableMessage(String brandTitleWithTrailingBlank);
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
     String dashboardTrueWindDirection();
@@ -1795,11 +1795,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String exportStatisticsCurveToCsv();
     String csvCopiedToClipboard();
     String minDataCount();
-    String moreLoginInformationHeadline(String brandName);
-    String moreLoginInformationIntroduction(String brandName);
+    String moreLoginInformationHeadline(String brandNameWithTrailingBlank);
+    String moreLoginInformationIntroduction(String brandNameWithTrailingBlank);
     String moreLoginInformationSectionUserSettingsHeading();
     String moreLoginInformationSectionUserSettingsDescription();
-    String moreLoginInformationSectionStrategySimulatorDescription(String brandName);
+    String moreLoginInformationSectionStrategySimulatorDescription(String brandNameWithTrailingBlank);
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
     String moreLoginInformationRegisterControlText();
