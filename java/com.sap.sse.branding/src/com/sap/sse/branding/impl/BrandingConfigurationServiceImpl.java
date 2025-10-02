@@ -150,7 +150,6 @@ public class BrandingConfigurationServiceImpl implements BrandingConfigurationSe
         map.put(BrandingConfigurationProperty.FOLLOW_SPORTS, brandingConfiguration == null ? "" : brandingConfiguration.getFollowSports(locale));
         map.put(BrandingConfigurationProperty.X_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getxLink());
         map.put(BrandingConfigurationProperty.FACEBOOK_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getFacebookLink());
-        map.put(BrandingConfigurationProperty.EVENT_BASE_URL, brandingConfiguration == null ? "" : brandingConfiguration.getEventBaseURL(locale));
         map.put(BrandingConfigurationProperty.INSTAGRAM_LINK, brandingConfiguration == null ? "" : brandingConfiguration.getInstagramLink());
         map.put(BrandingConfigurationProperty.SAILING_ANALYTICS_SAILING, brandingConfiguration == null ? "" : brandingConfiguration.getSailingAnalyticsSailing(locale));
         map.put(BrandingConfigurationProperty.WELCOME_TO_SAILING_ANALYTICS, brandingConfiguration == null ? "" : brandingConfiguration.getWelcomeToSailingAnalytics(locale));
