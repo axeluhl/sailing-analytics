@@ -26,7 +26,7 @@ public class MoreLoginInformationDesktop extends AbstractMoreLoginInformation {
     interface MoreLoginInformationUiBinder extends UiBinder<Widget, AbstractMoreLoginInformation> {
     }
     
-    @UiField HeadingElement  headline;
+    @UiField HeadingElement headline;
     @UiField ParagraphElement intro;
     
     @UiField MoreLoginInformationContent sailorProfiles;
@@ -50,5 +50,4 @@ public class MoreLoginInformationDesktop extends AbstractMoreLoginInformation {
             strategySimulator.setContent(I18N.moreLoginInformationSectionStrategySimulatorDescription(""));
         }
     }
-
 }

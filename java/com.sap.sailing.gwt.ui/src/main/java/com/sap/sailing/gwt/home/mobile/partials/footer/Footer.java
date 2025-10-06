@@ -78,18 +78,23 @@ public class Footer extends Composite {
             }
         }
     }
+    
     private static boolean hideIfBlank(DivElement el, String text) {
+        final boolean result;
         if (!Util.hasLength(text)) {
             el.getStyle().setDisplay(Display.NONE);
-            return true;
+            result = true;
+        } else {
+            result = false;
         }
-        return false;
+        return result;
     }
+    
     private static void setHrefOrHide(AnchorElement el, String url) {
         if (!Util.hasLength(url)) {
-          el.getStyle().setDisplay(Display.NONE);
+            el.getStyle().setDisplay(Display.NONE);
         } else {
-          el.setHref(url);
+            el.setHref(url);
         }
     }
 }

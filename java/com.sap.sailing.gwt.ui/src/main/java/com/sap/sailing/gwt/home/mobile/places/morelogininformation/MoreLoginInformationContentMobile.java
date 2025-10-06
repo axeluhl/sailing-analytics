@@ -25,10 +25,6 @@ public class MoreLoginInformationContentMobile extends AccordionItem {
         }
     }
     
-    public String getContent() {
-        return this.contentLabel.getText();
-    }
-    
     public void setContent(String content) {
         contentLabel.setText(content != null ? content : "");
     }
@@ -41,5 +37,4 @@ public class MoreLoginInformationContentMobile extends AccordionItem {
         this.titleText = title != null ? title : "";
         setHeaderText(this.titleText); 
     }
-
 }

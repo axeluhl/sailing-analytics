@@ -51,10 +51,6 @@ public class MoreLoginInformationContent extends Widget {
         }
     }
     
-    public String getContent() {
-        return textUi.getInnerText();
-    }
-    
     public void setContent(String content) {
         textUi.setInnerText(content);
     }

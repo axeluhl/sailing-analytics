@@ -50,12 +50,14 @@ public class SocialFooter extends Composite {
         }
         htmlPanel.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "socialFooter");
     }
-    private static void setHrefOrHide(DivElement el1, AnchorElement el2, DivElement topTextElement, String url, String text) {
+
+    private static void setHrefOrHide(DivElement el1, AnchorElement el2, DivElement topTextElement, String url,
+            String text) {
         if (!Util.hasLength(text)) {
-          el1.getStyle().setDisplay(Display.NONE);
+            el1.getStyle().setDisplay(Display.NONE);
         } else {
-          topTextElement.setInnerText(text);
-          el2.setHref(url);
+            topTextElement.setInnerText(text);
+            el2.setHref(url);
         }
     }
 }
