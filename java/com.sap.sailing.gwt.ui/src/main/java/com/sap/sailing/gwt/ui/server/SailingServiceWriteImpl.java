@@ -4057,11 +4057,12 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
                 final boolean isCurrentlyPublic = Boolean.TRUE.equals(serverGroup.getRoleAssociation(viewerRole));
                 final boolean shouldBePublic = serverConfiguration.isPublic();
                 if (isCurrentlyPublic != shouldBePublic) {
+                    // value changed
                     if (getSecurityService().hasCurrentUserUpdatePermission(serverGroup)
                             && getSecurityService().hasCurrentUserMetaPermissionsOfRoleDefinitionWithQualification(
                                     viewerRole, new Ownership(null, serverGroup))) {
                         if (serverConfiguration.isPublic()) {
-                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, true);
+                            getSecurityService().putRoleDefinitionToUserGroup(serverGroup, viewerRole, /* forAll */ true);
                         } else {
                             getSecurityService().removeRoleDefintionFromUserGroup(serverGroup, viewerRole);
                         }

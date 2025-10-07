@@ -27,14 +27,14 @@ public class SocialFooter extends Composite {
     @UiField HTMLPanel htmlPanel;
     @UiField HeadingElement socialHeading;
     @UiField DivElement xItem;
-    @UiField DivElement fbItem;
-    @UiField DivElement igItem;
+    @UiField DivElement facebookItem;
+    @UiField DivElement instagramItem;
     @UiField AnchorElement xLink;
-    @UiField AnchorElement fbLink;
-    @UiField AnchorElement igLink;
+    @UiField AnchorElement facebookLink;
+    @UiField AnchorElement instagramLink;
     @UiField DivElement xTopText;
-    @UiField DivElement fbTopText;
-    @UiField DivElement igTopText;
+    @UiField DivElement facebookTopText;
+    @UiField DivElement instagramTopText;
 
     public SocialFooter() {
         ClientConfiguration cfg = ClientConfiguration.getInstance();
@@ -45,8 +45,8 @@ public class SocialFooter extends Composite {
         } else {
             socialHeading.setInnerText(cfg.getFollowSports(Optional.empty()));
             setHrefOrHide(xItem, xLink, xTopText, cfg.getxLink(), cfg.getSportsOn(Optional.empty()));
-            setHrefOrHide(fbItem, fbLink, fbTopText, cfg.getFacebookLink(), cfg.getSportsOn(Optional.empty()));
-            setHrefOrHide(igItem, igLink, igTopText, cfg.getInstagramLink(), cfg.getSportsOn(Optional.empty()));
+            setHrefOrHide(facebookItem, facebookLink, facebookTopText, cfg.getFacebookLink(), cfg.getSportsOn(Optional.empty()));
+            setHrefOrHide(instagramItem, instagramLink, instagramTopText, cfg.getInstagramLink(), cfg.getSportsOn(Optional.empty()));
         }
         htmlPanel.getElement().setAttribute(DEBUG_ID_ATTRIBUTE, "socialFooter");
     }
