@@ -77,24 +77,15 @@ public class GetNumericStatisticForSailorProfileAction
     @GwtIncompatible
     public SailorProfileStatisticDTO execute(SailingDispatchContext ctx) throws DispatchException {
         final Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result = new HashMap<>(); // Map with sailor and statistic values
+//        final Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> aggregatesForOtherCompetitors = new HashMap<>();
+        final Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> aggregateForOtherCompetitors = new HashMap<>(); // aggregate wether than aggregates
         // added globalAggregator
-        final Aggregator globalCompetitorValuesAggregator = new AverageAggregator();
         CompetitorAndBoatStore store = ctx.getRacingEventService().getCompetitorAndBoatStore(); // Get available sailors and boats
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME); // List of the user's sailor profiles
         SailorProfilePreference pref = findSailorProfile(store, prefs); // Select a specific profile
-
-//        List<Double> startlineDistancesForCalculatingAverageForCompetitor = new ArrayList<Double>(); // List for calculating averages of the Competitor
-//        List<Double> startlineDistancesForCalculatingAverageForOtherCompetitors = new ArrayList<Double>(); // List for calculating averages of the other Competitors
-        
         for (Competitor competitor : pref.getCompetitors()) { // prefs is the selected sailor profile // // getCompetitors returns all sailors stored in this profile
-            
-//            Create own aggregator for calculating average of competitors distance to startline at start
-//            Aggregator competitorAvgAggregator = new AverageAggregator();
-                        
-//            startlineDistancesForCalculatingAverageForCompetitor.clear(); // Clear lists for calculating averages
-//            startlineDistancesForCalculatingAverageForOtherCompetitors.clear();  
-            
             final Aggregator aggregator = determineAggregator(); // new aggregator for each competitor
+            final Aggregator aggregatorForOtherCompetitors = determineAggregator(); // new aggregator for other competitors
             if (aggregator == null) {
                 continue;
             }
@@ -121,146 +112,36 @@ public class GetNumericStatisticForSailorProfileAction
                         }
                         for (TrackedRace tr : leaderboard.getTrackedRaces()) { // Loop through leaderboard races (e.g., "Race 1", "Medal Race")
                             if (Util.contains(tr.getRace().getCompetitors(), competitor)) { // Get all race participants via tr.getRace().getCompetitors()
-                                //
-//                                List<Double> competitorDistancesThisRace = new ArrayList<>();
-//                                List<Double> fieldDistancesThisRace = new ArrayList<>();
-                                
                                 extractValue(competitor, aggregator, end, leaderboard, tr, leaderboardGroup, event); // Extract performance value for competitor and add it to the aggregator
-//                                
-//                                // Retrieve startline distance
-//                                Distance distance = tr.getDistanceToStartLine(competitor, 0);
-//                                aggregator.add(distance, null, null, null, null, null, null, null, null);
-//                    
-//                                
-//                                // Only calculate with valid data, exclude false starts etc.
-//                                if (distance != null) {
-//                                    // Find the RaceColumn for this TrackedRace
-//                                    RaceColumn raceColumn = null;
-//                                    for (RaceColumn rc : leaderboard.getRaceColumns()) {
-//                                        if (rc.getTrackedRace(competitor) == tr) {
-//                                            raceColumn = rc;
-//                                            break;
-//                                        }
-//                                    }
-//                                    
-//                                    // Check MaxPointsReason
-//                                    MaxPointsReason reason = null;
-//                                    if (raceColumn != null) {
-//                                        reason = leaderboard.getMaxPointsReason(competitor, raceColumn, end);
-//                                    }
-//                                    
-//                                    // null (normal race), none (no reason), standard penalty (STP) (legit), redress (RDG) (legit)
-//                                    if (reason == null || reason == MaxPointsReason.NONE || reason == MaxPointsReason.STP || reason == MaxPointsReason.RDG) {
-//                                        //nicht type spezifisch, cases hinzufügen oder extraxt value mit einem anderen aggregator (averager z.B.) zwei Instanzen von Aggregator für Mittelwertsbildung anuzahl der werte und summe mitführen
-//                                        if(distance != null){ 
-//                                            startlineDistancesForCalculatingAverageForCompetitor.add(distance.getMeters()); // Add startline distance values to the startlineDistancesForCalculatingAverage list
-//                                                
-//                                        System.out.println("\n========My Sailor: Distance (VALID)========" +
-//                                                           " Sailor: " + competitor.getName() +
-//                                                           " Race: " + tr.getRace().getName() +
-//                                                           " Distance: " + distance.getMeters() + "m" + 
-//                                                           " Reason: " + (reason != null ? reason.name() : "NONE") +
-//                                                           " ========");
-//                                            } else { //DNS (Did not start, DNF (Did not finish, DSQ (Disqualified), OCS (On Course Side)...
-//                                                System.out.println("\n========Excluded========" +
-//                                                                   " Sailor: " + competitor.getName() +
-//                                                                   " Race: " + tr.getRace().getName() +
-//                                                                   " Distance: " + distance.getMeters() + "m" + 
-//                                                                   " Reeason: " + reason.name() +
-//                                                                   " ========%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-//                                        }
+//                                for (final Competitor otherCompetitor : tr.getRace().getCompetitors()) {
+//                                    if (!Util.contains(tr.getRace().getCompetitors(), competitor)) {
+//                                        extractValue(otherCompetitor, aggregatorForOtherCompetitors, end, leaderboard, tr, leaderboardGroup, event);
 //                                    }
 //                                }
-//                                
-//                                // Print "distance to startline at start" for the selected sailor
-//                                System.out.println("\n========My Sailor: Distance to Startline at Start========" +
-//                                                   " Selected Sailor: " + competitor.getName() +
-//                                                   " Race: " + tr.getRace().getName() +
-//                                                   " Distance: " + (distance != null ? distance.getMeters() + "m" : "null") + 
-//                                                   " ========");
-//                                
-//                                // Print "VMG" for the selected sailor
-//                                System.out.println("\n========My Sailor: VMG per Leg========");
-//                                for (TrackedLeg leg : tr.getTrackedLegs()) {
-//                                    TrackedLegOfCompetitor competitorLeg = leg.getTrackedLeg(competitor);
-//                                    if (competitorLeg != null) {
-//                                        try {
-//                                            Speed averageVMG = competitorLeg.getAverageVelocityMadeGood(end, new com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache(end));
-//                                            System.out.println("Selected Sailor: " + competitor.getName() + 
-//                                                              ", Leg " + leg.getLeg().toString() + " VMG: " + 
-//                                                              (averageVMG != null ? averageVMG.getKnots() + " knots" : "null"));
-//                                            
-//                                            if (averageVMG != null) {
-////                                                aggregator.add(averageVMG, null, null, null, null, null, null, null, null);
-////                                                add logic for calculating average for VMGvmgValues.add(averageVMG.getKnots());
-//                                            }
-//                                        } catch (Exception e) {
-//                                            System.out.println("Error calculating VMG for " + competitor.getName() + ": " + e.getMessage());
-//                                        }
-//                                    }
-//                                }
-//
-//                                // Print "distance to startline at start" for the other sailors from the same race 
-//                                for (Competitor otherCompetitor : tr.getRace().getCompetitors()) {
-//                                    if (INCLUDE_COMPETITOR_IN_FIELD_AVERAGE || !otherCompetitor.equals(competitor)) {
-//                                        Distance otherDistance = tr.getDistanceToStartLine(otherCompetitor, 0);
-//                                        System.out.println("========Other Sailors from the same race: Distance to Startline at Start========" +
-//                                                           " Competitor: " + otherCompetitor.getName() + 
-//                                                           " Race: " + tr.getRace().getName() + 
-//                                                           " Distance: " + (otherDistance != null ? otherDistance.getMeters() + "m" : "null") + //otherDistance.getMeters() + "m" + 
-//                                                           " ========");
-//                                        // Check also false starts etc. 
-//                                        // Check for null etc.
-//                                        if (otherDistance != null) {
-//                                            startlineDistancesForCalculatingAverageForOtherCompetitors.add(otherDistance.getMeters()); // Add startline distance values to the startlineDistancesForCalculatingAverageForOtherCompetitors list
-//                                        }
-//                                    }
-//                                }
+                                // Added with other validation
+                                for (final Competitor otherCompetitor : tr.getRace().getCompetitors()) {
+                                    if (!otherCompetitor.equals(competitor)) {
+                                        extractValue(otherCompetitor, aggregatorForOtherCompetitors, end, leaderboard, tr, leaderboardGroup, event);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-//            // Calculate and print out average startline distance for competitor
-//            if (!startlineDistancesForCalculatingAverageForCompetitor.isEmpty()) {
-//                double avgStartlineDistance = startlineDistancesForCalculatingAverageForCompetitor.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-//                System.out.println("\n========My Sailor: Local Average Startline Distance========" + 
-//                                   " Sailor: " + competitor.getName() + 
-//                                   " Average Distance: " + avgStartlineDistance + "m" + 
-//                                   " Based on " + startlineDistancesForCalculatingAverageForCompetitor.size() + " races" + "========================================================================");
-//            }
-//            
-//            // Calculate and print out average startline distance for other competitors
-//            if (!startlineDistancesForCalculatingAverageForOtherCompetitors.isEmpty()) {
-//                double avgStartlineDistance = startlineDistancesForCalculatingAverageForOtherCompetitors.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-//                System.out.println("\n========Other Sailors from the same race: Average Startline Distance========" + 
-//                                 " Average Distance: " + avgStartlineDistance + "m" + 
-//                                 " Based on " + startlineDistancesForCalculatingAverageForOtherCompetitors.size() + " races" + "========================================================================");
-//            }
-                
             result.put(new SimpleCompetitorWithIdDTO(competitor), aggregator.getResult()); 
-            
-            // added 
-            if (type == SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE_WITH_VALIDATION ) {
-                ArrayList<SingleEntry> competitorResult = aggregator.getResult();
-                if (!competitorResult.isEmpty()) {
-                    Double competitorAverage = competitorResult.get(0).getValue();
-                    globalCompetitorValuesAggregator.add(competitorAverage, null, null, null, null, null, null, null, null);
-                } 
-            }
+//            aggregatesForOtherCompetitors.put(new SimpleCompetitorWithIdDTO(competitor), aggregatorForOtherCompetitors.getResult()); 
+            aggregateForOtherCompetitors.put(new SimpleCompetitorWithIdDTO(competitor), aggregatorForOtherCompetitors.getResult()); 
+
         }
         List<String> competitorNames = StreamSupport.stream(pref.getCompetitors().spliterator(), false)
                 .map(Competitor::getName).collect(Collectors.toList());
         String serializedQuery = DataMiningQueryCreatorForSailorProfiles.getSerializedDataMiningQuery(type,
                 competitorNames);
-
-        
-        // add the result for the "Team" competitor
-//        if (type == SailorProfileNumericStatisticType.AVERAGE_STARTLINE_DISTANCE_WITH_VALIDATION) {
-//            result.put(new SimpleCompetitorWithIdDTO("TEAM_AVERAGE"), globalTeamAggregator.getResult());
-//        }
+        // add the for the "Team" competitor
         keepOnlyBestIfNecessary(result, type.getAggregationType());
-        return new SailorProfileStatisticDTO(result, serializedQuery); // return the SailorProfileStatisticDTO
+//        return new SailorProfileStatisticDTO(result, aggregatesForOtherCompetitors, serializedQuery); // return the SailorProfileStatisticDTO
+        return new SailorProfileStatisticDTO(result, aggregateForOtherCompetitors, serializedQuery); // return the SailorProfileStatisticDTO
     }
 
     /**
@@ -355,17 +236,13 @@ public class GetNumericStatisticForSailorProfileAction
     @GwtIncompatible
     private void keepOnlyBestIfNecessary(Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> results,
             StatisticType type) {
-
         final Set<SimpleCompetitorWithIdDTO> competitorsToRemove = new HashSet<>();
         if (type == StatisticType.HIGHEST_IS_BEST || type == StatisticType.LOWEST_IS_BEST) {
-
             // set best value to min/max depending whether highest/lowest is best
             double best = (type == StatisticType.HIGHEST_IS_BEST) ? Double.MIN_VALUE : Double.MAX_VALUE;
             SimpleCompetitorWithIdDTO bestCompetitor = null;
-
             for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> mapEntry : results.entrySet()) {
                 for (SingleEntry statisticEntry : mapEntry.getValue()) {
-
                     // lower is better -> best must be bigger then the value of this entry to update the best
                     // higher is better -> best must be smaller then the value of this entry to update the best
                     if ((type == StatisticType.LOWEST_IS_BEST && best > statisticEntry.getValue())

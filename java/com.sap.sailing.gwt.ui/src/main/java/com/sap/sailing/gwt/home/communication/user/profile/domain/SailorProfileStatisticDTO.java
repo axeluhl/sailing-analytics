@@ -21,6 +21,7 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
     private static final long serialVersionUID = 2924378586764418626L;
     // keep as specified as possible to save gwt compiler time
     private HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result = new HashMap<>();
+    private HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> aggregateForOtherCompetitors = new HashMap<>();
     private String dataMiningQuery;
 
     // GWTSerialisation only
@@ -29,13 +30,18 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
     }
 
     public SailorProfileStatisticDTO(Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result,
-            String dataMiningQuery) {
+            Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> aggregateForOtherCompetitors, String dataMiningQuery) {
         this.result.putAll(result);
+        this.aggregateForOtherCompetitors.putAll(aggregateForOtherCompetitors);
         this.dataMiningQuery = dataMiningQuery;
     }
 
     public HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> getResult() {
         return result;
+    }
+
+    public HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> getAggregateForOtherCompetitors() {
+        return aggregateForOtherCompetitors;
     }
 
     public String getDataMiningQuery() {
