@@ -262,7 +262,10 @@ public class IgtimiWindReceiver implements BulkFixReceiver {
      * Searches for the last fix at or before {@code timePoint} in the given {@link trackToCleanUp}. If such a fix is
      * found, adds the given fix to {@code fixesUsed} and clears all fixes from the {@code trackToCleanUp} that are
      * earlier than the {@code timePoint} given. This in particular preserves at least one live fix which will "hide"
-     * older, e.g., buffered fixes that may be received when a WindBot device sends them out-of-order.
+     * older, e.g., buffered fixes that may be received when a WindBot device sends them out-of-order. For old, buffered
+     * fixes this may still mean that could be dropped prior to being converted into a {@link Wind} object with an older
+     * time stamp, but usually---and particularly with buffered data from previous days---this shouldn't be a problem.
+     * Also, old data can still be imported at a later point in time. 
      * <p>
      * 
      * This assumes that the {@code fix} passed has been "consumed" now, and earlier fixes will not be relevant anymore.
