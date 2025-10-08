@@ -46,6 +46,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -242,5 +243,5 @@ public interface DomainObjectFactory {
      */
     Map<Competitor, Map<Waypoint, MarkPassing>> loadMarkPassings(RaceIdentifier raceIdentifier, Course course);
     
-    Map<Competitor, List<Maneuver>> loadManeuvers(RaceIdentifier raceIdentifier, Course course);
+    Map<Competitor, List<Maneuver>> loadManeuvers(TrackedRace trackedRace, Course course);
 }

@@ -128,6 +128,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
+import com.sap.sailing.domain.maneuverhash.MarkPassingProxy;
 import com.sap.sailing.domain.markpassinghash.MarkPassingRaceFingerprint;
 import com.sap.sailing.domain.persistence.FieldNames;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -135,6 +136,8 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.ManeuverCurveBoundaries;
+import com.sap.sailing.domain.tracking.ManeuverLoss;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -2035,8 +2038,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         markPassingCollection.deleteOne(query);
     }
     
-    
-    private List<Document> storeManeuvers(Map<Competitor, List<Maneuver>> maneuvers , Course course) {
+    private List<Document> storeManeuvers(Map<Competitor, List<Maneuver>> maneuvers , RaceIdentifier raceIdentifier, Course course) {
         final List<Document> result = new ArrayList<>();
         for (final Entry<Competitor, List<Maneuver>> e : maneuvers.entrySet()) {
             final Document competitorManeuver = new Document();
@@ -2044,18 +2046,28 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             final List<Document> maneuverList = new ArrayList<>();
             for (final Maneuver f : e.getValue()) {
                 final Document maneuverDoc = new Document();
-                //maneuverDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getDuration().asMillis());
-                maneuverDoc.put(FieldNames.TYPE.name(), f.getType());
-                maneuverDoc.put(FieldNames.TACK.name(), f.getNewTack());
-                maneuverDoc.put(FieldNames.POSITION.name(), f.getPosition());
-                maneuverDoc.put(FieldNames.TIMEPOINT.name(), f.getTimePoint());
-                maneuverDoc.put(FieldNames.MAIN_CURVE_BOUNDARIES.name(), f.getMainCurveBoundaries());
+                maneuverDoc.put(FieldNames.TYPE.name(), f.getType().name());
+                maneuverDoc.put(FieldNames.TACK.name(), f.getNewTack().name());
+                maneuverDoc.put(FieldNames.POSITION_LAT_RAD.name(), f.getPosition().getLatRad()); 
+                maneuverDoc.put(FieldNames.POSITION_LNG_RAD.name(), f.getPosition().getLngRad()); 
+                maneuverDoc.put(FieldNames.TIMEPOINT.name(), f.getTimePoint().asMillis());
+
+                final Document mainCurveBoundariesDoc = new Document();
+                maneuverDoc.put(FieldNames.MAIN_CURVE_BOUNDARIES.name(), storeMainCurveBoundaries(f.getMainCurveBoundaries(), mainCurveBoundariesDoc)); 
+                final Document maeuverCurveWithStableSpeedAndBoundariesDoc = new Document();
+                maneuverDoc.put(FieldNames.MANEUVER_CURVE_WITH_STABLE_SPEED_AND_COURSE_BOUNDERIES.name(), storeMainCurveBoundaries(f.getManeuverCurveWithStableSpeedAndCourseBoundaries(), maeuverCurveWithStableSpeedAndBoundariesDoc)); 
                 maneuverDoc.put(FieldNames.MAX_TURNING_RATE_IN_DEGREE_PER_SECOUND.name(), f.getMaxTurningRateInDegreesPerSecond());
-                maneuverDoc.put(FieldNames.MARK_PASSINGS.name(), f.getMarkPassing());
+                
+                // if umschrieben in einzeiler
+                if (f.getMarkPassing() != null)
+                    maneuverDoc.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), course.getIndexOfWaypoint(f.getMarkPassing().getWaypoint()));
+                else
+                    maneuverDoc.put(FieldNames.INDEX_OF_PASSED_WAYPOINT.name(), -1);
                 maneuverDoc.put(FieldNames.TIME_AS_MILLIS.name(), f.getDuration().asMillis());
-                maneuverDoc.put(FieldNames.MANEUVER_LOSS.name(), f.getManeuverLoss());
-                //maneuverDoc.put(FieldNames..name(), f.getDuration().asMillis());
-                // Test version right now, more thing will be added later
+                if (f.getManeuverLoss() != null)
+                    maneuverDoc.put(FieldNames.MANEUVER_LOSS.name(), storemaneuverLoss(f.getManeuverLoss()));
+                else
+                    maneuverDoc.put(FieldNames.MANEUVER_LOSS.name(), null);
                 maneuverList.add(maneuverDoc); 
             }
             competitorManeuver.put(FieldNames.MANEUVER.name(), maneuverList);
@@ -2064,7 +2076,34 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    
+    private Document storemaneuverLoss(ManeuverLoss maneuverLoss) {
+        final Document maneuverLossDoc = new Document();
+        maneuverLossDoc.put(FieldNames.DISTANCE_SAILED_POMA.name(), maneuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle().getMeters());
+        maneuverLossDoc.put(FieldNames.DISTANCE_SAILED_INMPOMA.name(), maneuverLoss.getDistanceSailedIfNotManeuveringProjectedOnMiddleManeuverAngle().getMeters());
+        maneuverLossDoc.put(FieldNames.START_POSITION_LAT_RAD.name(), maneuverLoss.getManeuverStartPosition().getLatRad());
+        maneuverLossDoc.put(FieldNames.START_POSITION_LNG_RAD.name(), maneuverLoss.getManeuverStartPosition().getLngRad());
+        maneuverLossDoc.put(FieldNames.END_POSITION_LAT_RAD.name(), maneuverLoss.getManeuverStartPosition().getLngRad());
+        maneuverLossDoc.put(FieldNames.END_POSITION_LNG_RAD.name(), maneuverLoss.getManeuverStartPosition().getLngRad());
+        maneuverLossDoc.put(FieldNames.SPEED_WITH_BEARING_BEFORE_DEGREES.name(), maneuverLoss.getSpeedWithBearingBefore().getBearing().getDegrees());
+        maneuverLossDoc.put(FieldNames.SPEED_WITH_BEARING_BEFORE_SPEED.name(), maneuverLoss.getSpeedWithBearingBefore().getKnots());
+        maneuverLossDoc.put(FieldNames.DEGREE_BEARING.name(), maneuverLoss.getMiddleManeuverAngle().getDegrees());
+        maneuverLossDoc.put(FieldNames.DURATION.name(), maneuverLoss.getManeuverDuration().asMillis());
+        return maneuverLossDoc;
+    }
+
+    private Document storeMainCurveBoundaries(ManeuverCurveBoundaries f, Document d) {
+        d.put(FieldNames.TIMEPOINT_BEFORE.name(), f.getTimePointBefore().asMillis());
+        d.put(FieldNames.TIMEPOINT_AFTER.name(), f.getTimePointAfter().asMillis());
+        d.put(FieldNames.SPEED_WITH_BEARING_BEFORE_DEGREES.name(), f.getSpeedWithBearingBefore().getBearing().getDegrees());
+        d.put(FieldNames.SPEED_WITH_BEARING_BEFORE_SPEED.name(), f.getSpeedWithBearingBefore().getKnots());
+        d.put(FieldNames.SPEED_WITH_BEARING_AFTER_DEGREES.name(), f.getSpeedWithBearingAfter().getBearing().getDegrees());
+        d.put(FieldNames.SPEED_WITH_BEARING_AFTER_SPEED.name(), f.getSpeedWithBearingAfter().getKnots());
+        d.put(FieldNames.DIRECTION_CHANGE_IN_DEGREES.name(), f.getDirectionChangeInDegrees());
+        d.put(FieldNames.LOWEST_SPEED.name(), f.getLowestSpeed().getKnots());
+        d.put(FieldNames.HIGHEST_SPEED.name(), f.getHighestSpeed().getKnots());
+        return d;
+    }
+
     @Override
     public void storeManeuvers(RaceIdentifier raceIdentifier, ManeuverRaceFingerprint fingerprint, Course course, Map<Competitor, List<Maneuver>> maneuvers) {
         MongoCollection<Document> maneuverCollection = database.getCollection(CollectionNames.MANEUVER.name());
@@ -2075,7 +2114,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         final Document fingerprintDoc = Document.parse(fingerprintjson.toString());
         result.put(FieldNames.MANEUVER_FINGERPRINT.name(), fingerprintDoc);
         storeRaceIdentifier(result, raceIdentifier);
-        final List<Document> maneuverDoc = storeManeuvers( maneuvers , course);
+        final List<Document> maneuverDoc = storeManeuvers( maneuvers , raceIdentifier, course);
         result.put(FieldNames.MANEUVER.name(), maneuverDoc);
         maneuverCollection.replaceOne(query, result, new ReplaceOptions().upsert(true));
     }
@@ -2087,6 +2126,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DomainObjectFactoryImpl.addRaceIdentifierToQuery(query, raceIdentifier);
         maneuverCollection.deleteOne(query);
     }
-    
-    
 }

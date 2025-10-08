@@ -1020,10 +1020,11 @@ Replicator {
     }
     
     @Override
-    public Map<Competitor, List<Maneuver>> loadManeuvers(RaceIdentifier raceIdentifier, Course course) {
+    public Map<Competitor, List<Maneuver>> loadManeuvers(TrackedRace trackedRace, Course course) {
         final Map<Competitor, List<Maneuver>> result;
+        RaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
         if (maneuverRaceFingerprints.containsKey(raceIdentifier)) {
-            result = domainObjectFactory.loadManeuvers(raceIdentifier, course);
+            result = domainObjectFactory.loadManeuvers(trackedRace, course);
         } else {
             result = null;
         }
