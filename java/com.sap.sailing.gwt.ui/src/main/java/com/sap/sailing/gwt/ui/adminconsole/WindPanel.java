@@ -358,7 +358,9 @@ public class WindPanel extends FormPanel implements FilterablePanelProvider<Race
                 if (Window.confirm(warningMessage)) {
                     resultReport.setText(stringMessages.loading());
                     sailingServiceWrite.importWindFromIgtimi(new ArrayList<>(refreshableRaceSelectionModel.getSelectedSet()),
-                            correctByDeclination.getValue(), optionalBearerTokenBox.getValue(), new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
+                            correctByDeclination.getValue(),
+                            Util.hasLength(optionalBearerTokenBox.getValue()) ? optionalBearerTokenBox.getValue().trim() : null,
+                            new AsyncCallback<Map<RegattaAndRaceIdentifier, Integer>>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorImportingIgtimiWind(caught.getMessage()));
