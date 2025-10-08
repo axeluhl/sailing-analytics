@@ -118,7 +118,7 @@ public class GetNumericStatisticForSailorProfileAction
 //                                        extractValue(otherCompetitor, aggregatorForOtherCompetitors, end, leaderboard, tr, leaderboardGroup, event);
 //                                    }
 //                                }
-                                // Added with other validation
+//                                // Added with other validation
                                 for (final Competitor otherCompetitor : tr.getRace().getCompetitors()) {
                                     if (!otherCompetitor.equals(competitor)) {
                                         extractValue(otherCompetitor, aggregatorForOtherCompetitors, end, leaderboard, tr, leaderboardGroup, event);
@@ -140,6 +140,9 @@ public class GetNumericStatisticForSailorProfileAction
                 competitorNames);
         // add the for the "Team" competitor
         keepOnlyBestIfNecessary(result, type.getAggregationType());
+        
+        // !!!
+//        keepOnlyBestIfNecessary(aggregateForOtherCompetitors, type.getAggregationType()); // !!! added so only one value gets exposed
 //        return new SailorProfileStatisticDTO(result, aggregatesForOtherCompetitors, serializedQuery); // return the SailorProfileStatisticDTO
         return new SailorProfileStatisticDTO(result, aggregateForOtherCompetitors, serializedQuery); // return the SailorProfileStatisticDTO
     }
