@@ -33,6 +33,9 @@ public class SeleniumTestInvocationProvider implements TestTemplateInvocationCon
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
         TestEnvironmentConfiguration config = TestEnvironmentConfiguration.getInstance();
+        for (Entry<String, String> e : config.getSystemProperties().entrySet()) {
+            System.setProperty(e.getKey(), e.getValue());
+        }
         return config.getDriverDefinitions().stream().map(driverDef -> {
             return new SeleniumTestContext(driverDef);
         });
