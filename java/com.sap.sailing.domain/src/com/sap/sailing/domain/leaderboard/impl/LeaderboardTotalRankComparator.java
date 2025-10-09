@@ -273,24 +273,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                 }
                 if (raceColumn.isTotalOrderDefinedByFleet()) {
-                    final int preemptiveColumnResult;
-                    final FleetComparisonResult compareByFleetResult = compareByFleet(raceColumn, o1, o2, fleetWithCorrectOrderingForCompetitorBySeries);
-                    if (compareByFleetResult.getAuthoritativeFleetComparisonResult() != null) {
-                        preemptiveColumnResult = compareByFleetResult.getAuthoritativeFleetComparisonResult();
-                        defaultFleetBasedComparisonResult = 0;
-                    } else {
-                        if (defaultFleetBasedComparisonResult == 0) {
-                            defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
-                        }
-                        preemptiveColumnResult = 0;
-                    }
+                    final int preemptiveColumnResult = compareByFleet(raceColumn, o1, o2, fleetWithCorrectOrderingForCompetitorBySeries);
                     if (preemptiveColumnResult != 0) {
                         return preemptiveColumnResult;
                     }
                 }
             }
         }
-        // TODO bug5877: pass leaderboard and competitors and a totalPointsSupplier (based on totalPointsCache, see call to compareByBetterScore below) to allow for identifying competitors promoted through to later medal race
         int result = scoringScheme.compareByMedalRaceParticipation(zeroBasedIndexOfLastMedalSeriesInWhichO1Scored, zeroBasedIndexOfLastMedalSeriesInWhichO2Scored);
         if (result == 0) {
             result = defaultFleetBasedComparisonResult;
@@ -363,68 +352,17 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return lastResortNaturalComparator.compare(o1.getStableLastResortOrderingCriterion(), o2.getStableLastResortOrderingCriterion());
     }
 
-    private static class FleetComparisonResult {
-        /**
-         * Is non-{@code 0} if the two competitors have been identified as having raced in different fleets in
-         * {@code raceColumn} with those fleets having different {@link Fleet#getOrdering() orderings}, or {@code 0}
-         * if the two competitors have been identified authoritatively having raced in the same fleet in
-         * {@code raceColumn}. Remains {@code null} if at least one competitor's fleet couldn't be identified.
-         * Evaluation of further comparison criteria is not necessary only if an authoritative non-{@code 0}
-         * answer was found. If fleet comparison has been calculated for all columns and no authoritative answer
-         * was found, the {@link #defaultFleetComparisonResultBasedOnUnknownFleetAssignment} result can be used.
-         */
-        private final Integer authoritativeFleetComparisonResult;
-        
-        /**
-         * When for one of the two competitors compared the fleet in which she raced in a race column
-         * could not be determined and the other competitor can be identified as having competed in the
-         * best or in the worst fleet in that column, a default comparison result is derived from this
-         * such that the competitor with the unknown fleet assignment would be considered worse than
-         * a participant of the best, and better than a participant of the worst fleet.<p>
-         * 
-         * This result only has relevance if no non-{@code 0} authoritative result can be acquired across
-         * all columns of the leaderboard.
-         */
-        private final int defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
-
-        public FleetComparisonResult(Integer authoritativeFleetComparisonResult,
-                int defaultFleetComparisonResultBasedOnUnknownFleetAssignment) {
-            super();
-            this.authoritativeFleetComparisonResult = authoritativeFleetComparisonResult;
-            this.defaultFleetComparisonResultBasedOnUnknownFleetAssignment = defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
-        }
-
-        public Integer getAuthoritativeFleetComparisonResult() {
-            return authoritativeFleetComparisonResult;
-        }
-
-        public int getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment() {
-            return defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
-        }
-    }
-    
-    private FleetComparisonResult compareByFleet(final RaceColumn raceColumn, final Competitor o1, final Competitor o2,
+    private int compareByFleet(final RaceColumn raceColumn, final Competitor o1, final Competitor o2,
             final Map<Series, Map<Competitor, Fleet>> fleetWithCorrectOrderingForCompetitorBySeries) {
+        final int result;
         final Fleet o1f = getAFleetWithCorrectOrderingOfCompetitorFromCacheOrRaceColumnAndCache(raceColumn, o1, fleetWithCorrectOrderingForCompetitorBySeries);
         final Fleet o2f = getAFleetWithCorrectOrderingOfCompetitorFromCacheOrRaceColumnAndCache(raceColumn, o2, fleetWithCorrectOrderingForCompetitorBySeries);
-        // if the fleet for both was identified because both were tracked in this column, then if the fleets
-        // don't compare equal, return the fleet comparison as result immediately. Example: o1 competed in Gold fleet,
-        // o2 in Silver fleet; Gold compares better to Silver, so o1 is compared better to o2.
-        final FleetComparisonResult result;
-        if (o1f != null) {
-            if (o2f != null) {
-                result = new FleetComparisonResult(o1f.compareTo(o2f), 0);
-            } else {
-                // check if o1's fleet is best or worst in column; in that case, o1's membership in this fleet and the fact
-                // that o2 is not part of that fleet determines the result
-                result = new FleetComparisonResult(null, extremeFleetComparison(raceColumn, o1f));
-            }
-        } else if (o2f != null) {
-            // check if o2's fleet is best or worst in column; in that case, o2's membership in this fleet and the fact
-            // that o1 is not part of that fleet determines the result
-            result = new FleetComparisonResult(null, -extremeFleetComparison(raceColumn, o2f));
+        // if the fleet for both was identified because both were tracked in this column, then return the fleet comparison as result.
+        // Example: o1 competed in Gold fleet, o2 in Silver fleet; Gold compares better to Silver, so o1 is compared better to o2.
+        if (o1f != null && o2f != null) {
+            result = o1f.compareTo(o2f);
         } else {
-            result = new FleetComparisonResult(null, 0);
+            result = 0;
         }
         return result;
     }
@@ -467,6 +405,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         }
         return null;
     }
+    
     private Fleet getFleetOfCompetitorFromRaceColumnAndCache(final RaceColumn raceColumn, final Competitor competitor,
             final Map<Series, Map<Competitor, Fleet>> orderedFleetsForCompetitorsBySeries, final Series series,
             Map<Competitor, Fleet> fleetForCompetitorInSeries) {
@@ -479,34 +418,6 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             fleetForCompetitorInSeries.put(competitor, fleetWithCorrectOrdering);
         }
         return fleetWithCorrectOrdering;
-    }
-
-    /**
-     * If the race column only has one fleet, no decision is made and 0 is returned. Otherwise, if <code>fleet</code> is the
-     * best fleet with others in the column being worse, return "better" (lesser; -1). If <code>fleet</code> is the worst fleet
-     * with others in the column being better, return "worse" (greater; 1). Otherwise, return 0.
-     */
-    private int extremeFleetComparison(RaceColumn raceColumn, Fleet fleet) {
-        boolean allOthersAreGreater = true;
-        boolean allOthersAreLess = true;
-        boolean othersExist = false;
-        for (Fleet f : raceColumn.getFleets()) {
-            if (f != fleet) {
-                othersExist = true;
-                allOthersAreGreater = allOthersAreGreater && f.compareTo(fleet) > 0;
-                allOthersAreLess = allOthersAreLess && f.compareTo(fleet) < 0;
-            }
-        }
-        int result = 0;
-        if (othersExist) {
-            assert !(allOthersAreGreater && allOthersAreLess);
-            if (allOthersAreGreater) {
-                result = -1;
-            } else if (allOthersAreLess) {
-                result = 1;
-            }
-        }
-        return result;
     }
 
     /**

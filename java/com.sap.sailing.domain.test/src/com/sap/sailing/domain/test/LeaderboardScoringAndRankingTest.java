@@ -2800,7 +2800,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     /**
      * See bug 3752: when the medal race participants do not race in a "Last Race" gold fleet and the "Last Race" column comes before the
      * medal race column, medal race participants must still rank better than all others; participants not in the medal race and not in
-     * any of the gold and silver fleet of the last race may rank between gold and silver fleet based on the "extreme fleet" idea.
+     * any of the gold and silver fleet of the last race are to be ranked based on their score only, not based on fleet assignment.
      */
     @Test
     public void testTotalRankComparatorForOrderedSplitFleetsWithMedalRaceParticipantsNotRacingInLastRaceGoldFleet() throws NoWindException {
@@ -2872,7 +2872,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         Collections.shuffle(silver);
         List<Competitor> lastRaceSilver = new ArrayList<>(silver);
         final Competitor theUntrackedCompetitorInLastRace = lastRaceSilver.get(lastRaceSilver.size()-1);
-        lastRaceSilver.remove(theUntrackedCompetitorInLastRace); // one participant accidentally not tracked; expected to end up between silver and gold
+        lastRaceSilver.remove(theUntrackedCompetitorInLastRace); // one participant accidentally not tracked; expected to be ranked based on score, not fleet
         List<Competitor> medal = new ArrayList<>(gold.subList(0, 2)); // take two gold race participants as medal race participants
         List<Competitor> lastRaceGold = new ArrayList<>(gold);
         lastRaceGold.removeAll(medal); // no medal race participant participates in the last race's gold fleet
@@ -2918,18 +2918,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
                 assertTrue(Util.indexOf(rankedCompetitors, lastRaceGoldParticipant) < Util.indexOf(rankedCompetitors, silverParticipant));
             }
         }
-        // assert that theUntrackedCompetitorInLastRace ended up between the last race's silver and gold fleet participants
-        // based on the "extreme fleet" rule:
-        for (final Competitor c : competitors) {
-            if (c != theUntrackedCompetitorInLastRace) {
-                if (lastRaceGold.contains(c) || medal.contains(c)) {
-                    assertTrue(Util.indexOf(rankedCompetitors, c) < Util.indexOf(rankedCompetitors, theUntrackedCompetitorInLastRace));
-                } else {
-                    assertTrue(silver.contains(c));
-                    assertTrue(Util.indexOf(rankedCompetitors, c) > Util.indexOf(rankedCompetitors, theUntrackedCompetitorInLastRace));
-                }
-            }
-        }
+        // theUntrackedCompetitorInLastRace was simply scored based on points, but how it ended up in between the competitors of which
+        // fleet is probably random, so we cannot assert a fixed position here.
     }
 
     /**
