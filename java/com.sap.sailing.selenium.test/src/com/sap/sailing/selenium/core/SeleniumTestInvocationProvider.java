@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.core;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.Extension;
