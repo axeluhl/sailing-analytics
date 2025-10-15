@@ -7,6 +7,8 @@ import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.places.morelogininformation.AbstractMoreLoginInformation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,12 +21,11 @@ public class MoreLoginInformationDesktop extends AbstractMoreLoginInformation {
     private static final StringMessages I18N = StringMessages.INSTANCE;
 
     
-    interface Binder extends UiBinder<Widget, MoreLoginInformationDesktop> {}
-    private static final Binder BINDER = GWT.create(Binder.class);
+    private static MoreLoginInformationUiBinder uiBinder = GWT.create(MoreLoginInformationUiBinder.class);
 
-
-    interface MoreLoginInformationUiBinder extends UiBinder<Widget, AbstractMoreLoginInformation> {
+    interface MoreLoginInformationUiBinder extends UiBinder<Widget, MoreLoginInformationDesktop> {
     }
+
     
     @UiField HeadingElement headline;
     @UiField ParagraphElement intro;
@@ -35,7 +36,10 @@ public class MoreLoginInformationDesktop extends AbstractMoreLoginInformation {
     @UiField MoreLoginInformationContent userNotifications;
 
     public MoreLoginInformationDesktop(Runnable registerCallback) {
-        super(BINDER, registerCallback);
+        super(registerCallback);
+        initWidget(uiBinder.createAndBindUi(this));
+        DOM.sinkEvents(registerControl, Event.ONCLICK);
+        Event.setEventListener(registerControl, event -> registerCallback.run());
         if (ClientConfiguration.getInstance().isBrandingActive() ) {
             headline.setInnerText(I18N.moreLoginInformationHeadline(ClientConfiguration.getInstance().getBrandTitle(Optional.empty()) + " "));
             intro.setInnerText(I18N.moreLoginInformationIntroduction(ClientConfiguration.getInstance().getBrandTitle(Optional.empty()) + " "));
