@@ -38,6 +38,8 @@ public class Footer extends Composite {
     @UiField DivElement copyrightDiv;
     @UiField AnchorElement imprintAnchorLink;
     @UiField AnchorElement desktopUi;
+    @UiField AnchorElement sapJobsAnchor;
+    @UiField AnchorElement privacyAnchor;
 
     private final MobilePlacesNavigator placeNavigator;
 
@@ -62,6 +64,8 @@ public class Footer extends Composite {
             supportAnchor.getStyle().setDisplay(Display.NONE);
             whatsNewLinkUi.getElement().getStyle().setDisplay(Display.NONE);
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
+            sapJobsAnchor.getStyle().setDisplay(Display.NONE);
+            privacyAnchor.getStyle().setDisplay(Display.NONE);
         }
     }
 

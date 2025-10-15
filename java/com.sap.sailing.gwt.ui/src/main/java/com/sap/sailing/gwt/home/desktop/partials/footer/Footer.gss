@@ -50,6 +50,7 @@
 }
 @media (min-width: 45em) {
   .sitefooter_language {
+    float: right;
     text-align: right;
   }
 }
