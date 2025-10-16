@@ -30,7 +30,7 @@
                     <g:Anchor title="{i18n.whatsNew}" ui:field="whatsNewLinkUi">
                         <ui:text from='{i18n.whatsNew}' />
                     </g:Anchor>
-                    <a ui:field="pipe" title="pipe"/>
+                    <span ui:field="pipe"></span>
                     <a ui:field="desktopUi" title="{i18n.desktop}" href="">
                         <ui:text from='{i18n.desktop}' />
                     </a>
