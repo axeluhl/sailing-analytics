@@ -40,6 +40,7 @@ public class Footer extends Composite {
     @UiField AnchorElement desktopUi;
     @UiField AnchorElement sapJobsAnchor;
     @UiField AnchorElement privacyAnchor;
+    @UiField AnchorElement pipe;
 
     private final MobilePlacesNavigator placeNavigator;
 
@@ -66,6 +67,8 @@ public class Footer extends Composite {
             imprintAnchorLink.getStyle().setDisplay(Display.NONE);
             sapJobsAnchor.getStyle().setDisplay(Display.NONE);
             privacyAnchor.getStyle().setDisplay(Display.NONE);
+        } else {
+            pipe.setInnerText("|");
         }
     }
 
