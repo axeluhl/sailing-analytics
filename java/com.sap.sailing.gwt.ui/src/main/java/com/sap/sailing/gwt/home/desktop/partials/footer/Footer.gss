@@ -3,6 +3,7 @@
  */
  @def SITEFOOTER_BACKGROUND_COLOR #333;
  @def SITEFOOTER_TEXT_COLOR #fff;
+ 
 .sitefooter {
   font-size: 1rem;
   background: SITEFOOTER_BACKGROUND_COLOR;
@@ -55,7 +56,7 @@
 }
 @media (max-width: 70em) {
   .sitefooter {
-    line-height: 1.5;
+    line-height: 3;
     padding-top: 1em;
     padding-bottom: 1em;
   }
@@ -72,16 +73,5 @@
     gap: 0.5em 2em;
     text-align: left;
     width: 100%;
-  }
-  .sitefooter_links_link {
-    display: inline;
-    margin: 0;
-  }
-  .sitefooter_language {
-    float: none;
-    display: block;
-    text-align: left;
-    width: 100%;
-    margin-top: 0.5em;
   }
 }
