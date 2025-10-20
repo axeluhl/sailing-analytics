@@ -14,8 +14,8 @@ on:
         description: Build with a local target platform (set to "true" to use local target platform)
         default: 'false'
       runner_cpus:
-        description: Default is 16, but can be 4, 8, and 64 as well
-        default: '16'
+        description: Default is what you get from ubuntu-latest, but can be 4, 8, 16, and 64 as well
+        default: ''
       firefox_version:
         description: Version to use for Selenium tests; default is 137.0, but could, e.g., be "141.0" or "latest"
         default: '140.0'
@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write
       checks: write
-    runs-on: ubuntu-latest-${{ github.event.inputs.runner_cpus == '' && '16' || github.event.inputs.runner_cpus }}cpu
+    runs-on: ubuntu-latest${{ github.event.inputs.runner_cpus == '' && '' || '-'+github.event.inputs.runner_cpus }}cpu
     steps:
       - name: Allocate swap space
         shell: bash
