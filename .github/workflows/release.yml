@@ -14,7 +14,7 @@ on:
         description: Build with a local target platform (set to "true" to use local target platform)
         default: 'false'
       runner_cpus:
-        description: Default is what you get from ubuntu-latest, but can be 4, 8, and 64 as well
+        description: Default is what you get from ubuntu-latest, usually 4 CPUs, but can be 8, and 64 as well
         default: ''
       firefox_version:
         description: Version to use for Selenium tests; default is 137.0, but could, e.g., be "141.0" or "latest"
