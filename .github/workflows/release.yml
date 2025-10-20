@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write
       checks: write
-    runs-on: ubuntu-latest${{ github.event.inputs.runner_cpus == '' && '' || '-'+github.event.inputs.runner_cpus }}cpu
+    runs-on: ${{ format('ubuntu-latest{0}', github.event.inputs.runner_cpus == '' && '' || format('-{0}cpu', github.event.inputs.runner_cpus)) }}
     steps:
       - name: Allocate swap space
         shell: bash
