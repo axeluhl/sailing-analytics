@@ -31,7 +31,7 @@ jobs:
       - name: "node-cleanup"
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache/CodeQL
-          sudo docker image prune --all --force
+          sudo docker image prune --force
           sudo docker builder prune -a
       - run: df -h
       - name: Allocate swap space
