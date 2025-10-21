@@ -45,11 +45,11 @@ jobs:
       - name: Allocate swap space
         shell: bash
         run: |
-          sudo dd if=/dev/zero of=/mnt/large-swapfile bs=1G count=10
-          sudo chmod 600 /mnt/large-swapfile
-          sudo mkswap /mnt/large-swapfile
-          sudo chown root:root /mnt/large-swapfile
-          sudo swapon /mnt/large-swapfile
+          sudo dd if=/dev/zero of=/large-swapfile bs=1G count=10
+          sudo chmod 600 /large-swapfile
+          sudo mkswap /large-swapfile
+          sudo chown root:root /large-swapfile
+          sudo swapon /large-swapfile
       - name: Collect Workflow Telemetry
         uses: catchpoint/workflow-telemetry-action@94c3c3d9567a0205de6da68a76c428ce4e769af1 # v2.0.0
         with:
