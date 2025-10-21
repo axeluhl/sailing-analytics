@@ -25,6 +25,7 @@ jobs:
     permissions:
       contents: write
       checks: write
+      actions: read
     runs-on: ${{ github.event.inputs.runner_cpus != '' && format('ubuntu-latest-{0}cpu', github.event.inputs.runner_cpus) || 'ubuntu-latest' }}
     steps:
       - run: df -h
