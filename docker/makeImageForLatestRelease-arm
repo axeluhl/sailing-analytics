@@ -2,9 +2,10 @@
 release_prefix="$1"
 GITHUB_REPOSITORY="$2"
 OWNER=${GITHUB_REPOSITORY%%/*}
+OWNER_LOWER=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
 REPO=${GITHUB_REPOSITORY##*/}
 REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
-PACKAGE="$OWNER/$REPO_LOWER"
+PACKAGE="$OWNER_LOWER/$REPO_LOWER"
 GITROOT="`dirname $0`/.."
 DOCKERDIR="${GITROOT}/docker"
 DOCKERFILE="$DOCKERDIR/Dockerfile"
