@@ -27,7 +27,7 @@ else
   RELEASE_TIMESTAMP=$( echo ${RELEASE_FULL_NAME} | sed -e 's/^\(.*\)-\([0-9]*\)$/\2/' )
   echo "Found release ${RELEASE_FULL_NAME} with name ${RELEASE_NAME} and time stamp ${RELEASE_TIMESTAMP}, notes ID is ${RELEASE_NOTES_TXT_ASSET_ID}, tarball ID is ${RELEASE_TAR_GZ_ASSET_ID}" >&2
   RELEASE_TAR_GZ_FILE_NAME="${RELEASE_FULL_NAME}.tar.gz"
-  curl -o "${RELEASE_TAR_GZ_FILE_NAME}" -L -H 'Accept: application/octet-stream' -H 'Authorization: Bearer '${BEARER_TOKEN} 'https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/'${RELEASE_TAR_GZ_ASSET_ID}
-  curl -o release-notes.txt -L -H 'Accept: application/octet-stream' -H 'Authorization: Bearer '${BEARER_TOKEN} 'https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/'${RELEASE_NOTES_TXT_ASSET_ID}
+  curl -o "${RELEASE_TAR_GZ_FILE_NAME}" -L -H 'Accept: application/octet-stream' -H 'Authorization: Bearer '${BEARER_TOKEN} 'https://api.github.com/repos/'${GITHUB_REPOSITORY}'/releases/assets/'${RELEASE_TAR_GZ_ASSET_ID}
+  curl -o release-notes.txt -L -H 'Accept: application/octet-stream' -H 'Authorization: Bearer '${BEARER_TOKEN} 'https://api.github.com/repos/'${GITHUB_REPOSITORY}'/releases/assets/'${RELEASE_NOTES_TXT_ASSET_ID}
   echo "${RELEASE_TAR_GZ_FILE_NAME}"
 fi
