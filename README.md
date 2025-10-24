@@ -74,12 +74,113 @@ See [here](https://www.sapsailing.com/gwt/Home.html#/imprint/:) for a list of co
 
 ## Building and Running
 
-This assumes you have completed the onboarding (see again [here](https://wiki.sapsailing.com/wiki/howto/onboarding)) successfully. To build, then invoke
+Builds usually run on [GitHub Actions](https://github.com/SAP/sailing-analytics/actions/workflows/release.yml) upon every push. A few repository secrets ensure that the build process has the permissions it needs. Pushes to the ``main``, ``docker-24`` and ``releases/*`` branches also publish a [release](https://github.com/SAP/sailing-analytics/releases) after a successful build.
+
+There are two options for building, detailed below; for both, you need to fulfill a few prerequisites.
+
+### Prerequisites
+
+If you have forked the repository and would like to run your own build, you will need the following prerequisites:
+
+#### Google Maps API Key
+
+Create or log on to your Google account and go to the [Google Cloud Console](https://console.cloud.google.com/apis/) and create an API key at least for the Maps JavaScript API. To later run the full product, while you're here, you can also create an API key for the YouTube Data API v3.
+
+#### AWS S3 Bucket for Upload Tests
+
+The build runs integration tests using the AWS API, requiring an access key with permission to upload to a bucket called ``sapsailing-automatic-upload-test``. Create that bucket in your AWS S3 environment. You can create an IAM user with CLI access and a permission policy that restricts write permissions to just that test bucket. You have to create the bucked in AWS region ``eu-west-1``. A permission policy for that user can look like this:
+
+```
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "Stmt1422015883000",
+			"Effect": "Allow",
+			"Action": [
+				"s3:AbortMultipartUpload",
+				"s3:DeleteObject",
+				"s3:DeleteObjectVersion",
+				"s3:GetBucketAcl",
+				"s3:GetBucketCORS",
+				"s3:GetBucketLocation",
+				"s3:GetBucketLogging",
+				"s3:GetBucketNotification",
+				"s3:GetBucketPolicy",
+				"s3:GetBucketTagging",
+				"s3:GetBucketVersioning",
+				"s3:GetBucketWebsite",
+				"s3:GetLifecycleConfiguration",
+				"s3:GetObject",
+				"s3:GetObjectAcl",
+				"s3:GetObjectTorrent",
+				"s3:GetObjectVersion",
+				"s3:GetObjectVersionAcl",
+				"s3:GetObjectVersionTorrent",
+				"s3:ListAllMyBuckets",
+				"s3:ListBucket",
+				"s3:ListBucketMultipartUploads",
+				"s3:ListBucketVersions",
+				"s3:ListMultipartUploadParts",
+				"s3:PutBucketLogging",
+				"s3:PutBucketNotification",
+				"s3:PutBucketPolicy",
+				"s3:PutBucketTagging",
+				"s3:PutBucketVersioning",
+				"s3:PutBucketWebsite",
+				"s3:PutLifecycleConfiguration",
+				"s3:PutObject",
+				"s3:PutObjectAcl",
+				"s3:PutObjectVersionAcl",
+				"s3:RestoreObject"
+			],
+			"Resource": [
+				"arn:aws:s3:::sapsailing-automatic-upload-test/*",
+				"arn:aws:s3:::sapsailing-automatic-upload-test"
+			]
+		}
+	]
+}
+```
+
+Create an access key for that user and note key ID and secret.
+
+#### Account(s) for geonames.org
+
+The build runs integration tests against [geonames.org](https://geonames.org). Use their login/sign-up form to create your user account and note its username.
+
+### Get the GitHub Actions build to work in your forked repository
+
+Assign the IDs and secrets from the prerequisites to repository secrets in your forked repository as follows:
+
+```
+AWS_S3_TEST_S3ACCESSID: {your-S3-test-bucket-upload-token-ID}
+AWS_S3_TEST_S3ACCESSKEY: {key-for-your-S3-token}
+GEONAMES_ORG_USERNAMES: {comma-separated-list-of-geonames.org-usernames}
+GOOGLE_MAPS_AUTHENTICATION_PARAMS: key={your-Google-Maps-API-key}
+```
+
+Then, manually trigger the ``release`` workflow with default options. You find the "Run workflow" drop-down in your forked repository under ``https://github.com/{your-github-user}/[your-repository-name}/actions/workflows/release.yml``.
+
+Release builds will trigger the ``create-docker-image`` workflow which will produce a Docker image of your release and publish it as a "ghcr" package in your repository. Note that package names are computed from the repository name by converting the latter to all lowercase characters.
+
+### Run a build locally
+
+This assumes you have completed the onboarding (see again [here](https://wiki.sapsailing.com/wiki/howto/onboarding)) successfully, including the Maven-specific parts such as having Maven installed (>= 3.9.x) and having a valid ``toolchains.xml`` file in your ~/.m2 folder. Furthermore, set and export the following environment variables:
+
+```
+export AWS_S3_TEST_S3ACCESSID={your-S3-test-bucket-upload-token-ID}
+export AWS_S3_TEST_S3ACCESSKEY={key-for-your-S3-token}
+export GEONAMES_ORG_USERNAMES={comma-separated-list-of-geonames.org-usernames}
+export GOOGLE_MAPS_AUTHENTICATION_PARAMS=key={your-Google-Maps-API-key}
+```
+
+To build, then invoke
 
 ```
     configuration/buildAndUpdateProduct.sh build
 ```
-This will build the Android companion apps first, then the web application. If the build was successful you can install the product locally by invoking
+This will build the Android companion apps first, then the web application. If you lack a proper Android SDK set-up, consider using the ``-a`` option to skip building the Android apps. If the build was successful you can install the product locally by invoking
 
 ```
     configuration/buildAndUpdateProduct.sh install [ -s <server-name> ]
