@@ -162,7 +162,7 @@ GOOGLE_MAPS_AUTHENTICATION_PARAMS: key={your-Google-Maps-API-key}
 
 Then, manually trigger the ``release`` workflow with default options. You find the "Run workflow" drop-down in your forked repository under ``https://github.com/{your-github-user}/[your-repository-name}/actions/workflows/release.yml``.
 
-Release builds will trigger the ``create-docker-image`` workflow which will produce a Docker image of your release and publish it as a "ghcr" package in your repository. Note that package names are computed from the repository name by converting the latter to all lowercase characters.
+Release builds will trigger the ``create-docker-image`` workflow which will produce a Docker image of your release and publish it as a "ghcr" package in your repository. Note that package names are computed from the repository name by converting the latter to all lowercase characters. If you want to use your packages in the docker-compose configurations from the ``docker/`` folder, make sure to adjust the package name so it points to your own fork's package registry.
 
 If you want automatic validation of your changes to the ``main`` branch also for newer Java versions, you can use the ``merge-main-into-docker-24`` workflow. It requires another secret:
 
@@ -181,6 +181,8 @@ export AWS_S3_TEST_S3ACCESSID={your-S3-test-bucket-upload-token-ID}
 export AWS_S3_TEST_S3ACCESSKEY={key-for-your-S3-token}
 export GEONAMES_ORG_USERNAMES={comma-separated-list-of-geonames.org-usernames}
 export GOOGLE_MAPS_AUTHENTICATION_PARAMS=key={your-Google-Maps-API-key}
+export JAVA8_HOME={location-of-your-JDK8}
+export JAVA_HOME={location-of-your-JDK17-or-newer}
 ```
 
 To build, then invoke
@@ -208,9 +210,9 @@ Run the ``buildAndUpdateProduct.sh`` without any arguments to see the sub-comman
 
 ## Downloading, Installing and Running an Official Release
 
-You need to have Java 8 installed. Get one from [here](https://tools.eu1.hana.ondemand.com/#cloud). Either ensure that this JVM's ``java`` executable in on the ``PATH`` or set ``JAVA_HOME`` appropriately.
+You need to have Java 8 installed. Get one from, e.g., [here](https://tools.eu1.hana.ondemand.com/#cloud). Either ensure that this JVM's ``java`` executable in on the ``PATH`` or set ``JAVA_HOME`` appropriately.
 
-At [https://releases.sapsailing.com](https://releases.sapsailing.com) you find official product builds. To fetch and install one of them, make an empty directory, change into it and run the ``refreshInstance.sh`` command, e.g., like this:
+At [https://github.com/SAP/sailing-analytics/releases](https://github.com/SAP/sailing-analytics/releases) you find official product builds. To fetch and install one of them, make an empty directory, change into it and run the ``refreshInstance.sh`` command, e.g., like this:
 ```
     mkdir sailinganalytics
     cd sailinganalytics
@@ -222,7 +224,6 @@ This will download and install the latest release and configure it such that it 
 In addition to the necessary ``MONGODB_URI`` variable you may need to inject a few secrets into your runtime environment:
 
 - ``MANAGE2SAIL_ACCESS_TOKEN`` access token for result and regatta structure import from the Manage2Sail regatta management system
-- ``IGTIMI_CLIENT_ID`` / ``IGTIMI_CLIENT_SECRET`` credentials for ``igtimi.com`` in case you have one or more WindBot devices that you would like to integrate with
 - ``GOOGLE_MAPS_AUTHENTICATION_PARAMS`` as in ``"key=..."`` or ``"client=..."``, required to display the Google Map in the race viewer. Obtain a Google Maps key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
 - ``YOUTUBE_API_KEY`` as in ``"key=..."``, required to analyze time stamps and durations of YouTube videos when linking to races. Obtain a YouTube API key from the Google Cloud Developer console, e.g., [here](https://console.cloud.google.com/apis/dashboard).
 
