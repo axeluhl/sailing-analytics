@@ -32,11 +32,11 @@ Based on the ``docker/docker-compose.yml`` definition you should end up with thr
 
 Try a request to [``http://127.0.0.1:8888/index.html``](http://127.0.0.1:8888/index.html) or [``http://127.0.0.1:8888/gwt/status``](http://127.0.0.1:8888/gwt/status) to see if things worked.
 
-To use Java 17, use the ``docker-compose-17.yml`` file instead:
+To use Java 24, use the ``docker-compose-24.yml`` file instead:
 
 ```
     cd docker
-    docker-compose -f docker-compose-17.yml up
+    docker-compose -f docker-compose-24.yml up
 ```
 
 ## Requirements
