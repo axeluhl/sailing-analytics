@@ -72,7 +72,7 @@ jobs:
         uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
         with:
           build-args: RELEASE=${{ env.RELEASE }}
-          tags: ghcr.io/${{steps.ghcr.outputs.PACKAGE}}:${{ env.RELEASE }}${{ env.BRANCH == 'main' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest', steps.ghcs.outputs.PAKAGE) || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-17', steps.ghcs.outputs.PAKAGE) || env.BRANCH == 'docker-21' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-21', steps.ghcs.outputs.PAKAGE) || env.BRANCH == 'docker-24' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-24', steps.ghcs.outputs.PAKAGE) || '' }}
+          tags: ghcr.io/${{steps.ghcr.outputs.PACKAGE}}:${{ env.RELEASE }}${{ env.BRANCH == 'main' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest', steps.ghcs.outputs.PACKAGE) || env.BRANCH == 'docker-17' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-17', steps.ghcs.outputs.PACKAGE) || env.BRANCH == 'docker-21' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-21', steps.ghcs.outputs.PACKAGE) || env.BRANCH == 'docker-24' && github.event.inputs.release == '' && format(',ghcr.io/{0}:latest-24', steps.ghcs.outputs.PACKAGE) || '' }}
           annotations: |
             maintainer=axel.uhl@sap.com
             index:org.opencontainers.image.title=Sailing Analytics
