@@ -23,9 +23,10 @@ jobs:
           # $GITHUB_REPOSITORY is in format owner/repo
           OWNER=${GITHUB_REPOSITORY%%/*}          # extract owner
           REPO=${GITHUB_REPOSITORY##*/}           # extract repo
+          OWNER_LOWER=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')  # lowercase owner
           REPO_LOWER=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')  # lowercase repo
-          PACKAGE="ghcr.io/$OWNER/$REPO_LOWER"
-          echo "PACKAGE=$OWNER/$REPO_LOWER" >> $GITHUB_OUTPUT
+          PACKAGE="$OWNER_LOWER/$REPO_LOWER"
+          echo "PACKAGE=${PACKAGE}" >> $GITHUB_OUTPUT
       - name: Checkout
         uses: actions/checkout@v4
         with:
