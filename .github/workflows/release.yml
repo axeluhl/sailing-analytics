@@ -5,6 +5,7 @@ on:
       - 'wiki/**'
       - '.github/workflows/*'
       - '**/*.md'
+      - 'README.md'
   workflow_dispatch:
     inputs:
       skip_tests:
