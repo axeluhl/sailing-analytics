@@ -164,6 +164,14 @@ Then, manually trigger the ``release`` workflow with default options. You find t
 
 Release builds will trigger the ``create-docker-image`` workflow which will produce a Docker image of your release and publish it as a "ghcr" package in your repository. Note that package names are computed from the repository name by converting the latter to all lowercase characters.
 
+If you want automatic validation of your changes to the ``main`` branch also for newer Java versions, you can use the ``merge-main-into-docker-24`` workflow. It requires another secret:
+
+```
+REPO_TOKEN_FOR_MERGE_AND_PUSH: {a-GitHub-token-enabled-for-push}
+```
+
+The workflow will launch automatically after a release has been performed for the ``main`` branch and will try to merge the latest ``main`` branch into ``docker-24`` and pushing the merge result if the merge was successful. This will then trigger a build for the ``docker-24`` branch which, if successul, will in turn produce a release and a docker image for use with Java 24.
+
 ### Run a build locally
 
 This assumes you have completed the onboarding (see again [here](https://wiki.sapsailing.com/wiki/howto/onboarding)) successfully, including the Maven-specific parts such as having Maven installed (>= 3.9.x) and having a valid ``toolchains.xml`` file in your ~/.m2 folder. Furthermore, set and export the following environment variables:
