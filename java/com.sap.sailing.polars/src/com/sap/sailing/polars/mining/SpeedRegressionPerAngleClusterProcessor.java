@@ -110,7 +110,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     @Override
     public boolean canProcessElements() {
-        // TODO Auto-generated method stub
         return true;
     }
 
@@ -269,14 +268,15 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     @Override
     public Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> getInputType() {
-        // TODO Auto-generated method stub
-        return null;
+        @SuppressWarnings("unchecked")
+        final Class<GroupedDataEntry<GPSFixMovingWithPolarContext>> result = (Class<GroupedDataEntry<GPSFixMovingWithPolarContext>>) (Class<?>) GroupedDataEntry.class;
+        return result;
     }
 
     @Override
     public Class<Void> getResultType() {
         // No result type here, since this is a special case of a processor. It's the end of the pipe so to say.
-        return null;
+        return Void.class;
     }
 
     @Override
@@ -291,19 +291,17 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     @Override
     public void abort() {
-        // TODO Auto-generated method stub
+        // Nothing to do here
     }
 
     @Override
     public boolean isAborted() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public AdditionalResultDataBuilder getAdditionalResultData(AdditionalResultDataBuilder additionalDataBuilder) {
-        // TODO Auto-generated method stub
-        return null;
+        return additionalDataBuilder;
     }
 
     public ClusterGroup<Bearing> getAngleCluster() {

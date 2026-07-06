@@ -2352,9 +2352,9 @@ Replicator {
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
             }
-            if (windEstimationFactoryService != null) {
-                trackedRace.setWindEstimation(
-                        windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace));
+            if (windEstimationFactoryService != null) { // FIXME bug6241: the PolarFixCacheUpdater will only start computing polars when the race has finished LOADING and then takes a while;
+                trackedRace.setWindEstimation(          // FIXME bug6241: we may even want to wait for all polars from race loading to have completed computing, at least for the boat class(es) affected
+                        windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace)); // because the wind estimation from maneuvers needs polars for good results (or sometimes any results at all)
             }
             numberOfTrackedRacesStillLoading.incrementAndGet();
             trackedRace.runWhenDoneLoading(()->numberOfTrackedRacesStillLoading.decrementAndGet());
