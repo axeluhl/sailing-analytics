@@ -448,7 +448,7 @@ public class PolarDataMiner {
         return speedRegressionPerAngleClusterProcessor.getSpeedRegressionFunction(boatClass, trueWindAngle);
     }
 
-    public void raceFinishedTracking(final TrackedRace race) {
+    public void raceFinishedLoading(final TrackedRace race) {
         processRacesThatFinishedLoadingExecutor.execute(()->{ // no Subject association necessary here
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));

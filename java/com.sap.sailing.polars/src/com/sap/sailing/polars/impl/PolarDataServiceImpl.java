@@ -232,7 +232,7 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
 
     @Override
     public void raceFinishedLoading(TrackedRace race) {
-        polarDataMiner.raceFinishedTracking(race);
+        polarDataMiner.raceFinishedLoading(race);
     }
 
     @Override
