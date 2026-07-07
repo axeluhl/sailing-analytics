@@ -66,8 +66,9 @@ public class ManeuverRaceFingerprintImpl extends MarkPassingRaceFingerprintImpl 
                     int k = w.getId() == null ? 0 : w.getId().hashCode();
                     int v = 0;
                     for (Wind wf : trackedRace.getOrCreateWindTrack(w).getFixes()) {
-                        v = v + (int) (wf.getPosition().getLatDeg() + wf.getPosition().getLngDeg()
-                                + wf.getKilometersPerHour());
+                        v = v + (int)
+                                ((wf.getPosition() == null ? 0.0 : (wf.getPosition().getLatDeg() + wf.getPosition().getLngDeg()))
+                                 + wf.getKilometersPerHour());
                     }
                     res = res ^ k;
                     res = res ^ v;

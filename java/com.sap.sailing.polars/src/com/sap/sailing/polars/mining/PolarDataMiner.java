@@ -449,6 +449,11 @@ public class PolarDataMiner {
     }
 
     public void raceFinishedLoading(final TrackedRace race) {
+        // TODO bug6241: we could install a second workflow processor chain ending at the same result receivers
+        // (cubicRegressionPerCourseProcessor and speedRegressionPerAngleClusterProcessor), but with the possibility
+        // to call finish() on its entry point, assuming that this call will wait for all processors to finish
+        // (asynchronous) processing. Then, call back to RacingEventService.RaceAdditionListener.raceAdded(...)
+        // somehow, triggering the installation of the maneuver-based wind estimator
         processRacesThatFinishedLoadingExecutor.execute(()->{ // no Subject association necessary here
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
