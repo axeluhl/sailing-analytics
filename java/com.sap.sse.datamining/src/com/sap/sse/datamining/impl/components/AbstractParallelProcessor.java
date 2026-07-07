@@ -149,7 +149,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
         while (areUnfinishedInstructionsLeft() && !isAborted) {
             try {
-                Thread.sleep(SLEEP_TIME_DURING_FINISHING);
+                Thread.sleep(SLEEP_TIME_DURING_FINISHING); // TODO shouldn't this better be handled by wait/notify on unfinishedInstructionsCounter changes?
             } catch (InterruptedException e) {
                 if (!isAborted) {
                     onFailure(e);

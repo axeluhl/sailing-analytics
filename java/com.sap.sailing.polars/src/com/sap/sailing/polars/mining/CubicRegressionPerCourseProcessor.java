@@ -47,6 +47,10 @@ public class CubicRegressionPerCourseProcessor implements
      */
     private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
+    private boolean isFinished;
+
+    private boolean isAborted;
+
     public CubicRegressionPerCourseProcessor filterToBoatClasses(Iterable<BoatClass> boatClasses) {
         final Set<BoatClass> allowedBoatClasses = Util.asSet(boatClasses);
         final CubicRegressionPerCourseProcessor filteredProcessor = new CubicRegressionPerCourseProcessor();
@@ -232,22 +236,22 @@ public class CubicRegressionPerCourseProcessor implements
 
     @Override
     public void finish() throws InterruptedException {
-        // Nothing to do here
+        isFinished = true;
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return isFinished;
     }
 
     @Override
     public void abort() {
-        // Nothing to do here
+        isAborted = true;
     }
 
     @Override
     public boolean isAborted() {
-        return false;
+        return isAborted;
     }
 
     @Override

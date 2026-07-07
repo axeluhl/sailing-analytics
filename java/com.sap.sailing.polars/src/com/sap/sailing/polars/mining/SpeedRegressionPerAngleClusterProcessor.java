@@ -61,6 +61,10 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      */
     private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
+    private boolean isFinished;
+
+    private boolean isAborted;
+
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
@@ -281,22 +285,22 @@ public class SpeedRegressionPerAngleClusterProcessor implements
 
     @Override
     public void finish() throws InterruptedException {
-        // Nothing to do here
+        isFinished = true;
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return isFinished;
     }
 
     @Override
     public void abort() {
-        // Nothing to do here
+        isAborted = true;
     }
 
     @Override
     public boolean isAborted() {
-        return false;
+        return isAborted;
     }
 
     @Override
