@@ -93,7 +93,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     
     @Override
     public synchronized void afterInstructionFinished(ProcessorInstruction<ResultType> instruction) {
-        if (unfinishedInstructionsCounter.getAndDecrement() == 0) {
+        if (unfinishedInstructionsCounter.decrementAndGet() == 0) {
             for (final Runnable callback : callbacksWhenNoMoreUnfinishedInstructions) {
                 callback.run();
             }
