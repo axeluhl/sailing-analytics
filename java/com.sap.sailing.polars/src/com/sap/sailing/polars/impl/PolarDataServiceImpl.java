@@ -231,8 +231,8 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     }
 
     @Override
-    public void raceFinishedLoading(TrackedRace race) {
-        polarDataMiner.raceFinishedLoading(race);
+    public void raceFinishedLoading(TrackedRace race, Runnable callbackWhenRaceChangingToTrackingOfFinishedStatus) {
+        polarDataMiner.raceFinishedLoading(race, callbackWhenRaceChangingToTrackingOfFinishedStatus);
     }
 
     @Override

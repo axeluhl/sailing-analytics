@@ -2346,15 +2346,18 @@ Replicator {
             final TrackedRaceReplicatorAndNotifier trackedRaceReplicator = new TrackedRaceReplicatorAndNotifier(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator, /* fire wind already loaded */ true, /* notifyAboutGPSFixesAlreadyLoaded */ true);
-            final PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
+            // the PolarFixCacheUpdater is asked to activate the wind estimation only once the "mining" of polar
+            // data from the LOADING phase of races has finished; this way, the wind estimation track 
+            final PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace, () -> {
+                if (windEstimationFactoryService != null) { // FIXME bug6241: the PolarFixCacheUpdater will only start computing polars when the race has finished LOADING and then takes a while;
+                    trackedRace.setWindEstimation(          // FIXME bug6241: we may even want to wait for all polars from race loading to have completed computing, at least for the boat class(es) affected
+                            windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace)); // because the wind estimation from maneuvers needs polars for good results (or sometimes any results at all)
+                }
+            });
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
             if (polarDataService != null) {
                 trackedRace.setPolarDataService(polarDataService);
-            }
-            if (windEstimationFactoryService != null) { // FIXME bug6241: the PolarFixCacheUpdater will only start computing polars when the race has finished LOADING and then takes a while;
-                trackedRace.setWindEstimation(          // FIXME bug6241: we may even want to wait for all polars from race loading to have completed computing, at least for the boat class(es) affected
-                        windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace)); // because the wind estimation from maneuvers needs polars for good results (or sometimes any results at all)
             }
             numberOfTrackedRacesStillLoading.incrementAndGet();
             trackedRace.runWhenDoneLoading(()->numberOfTrackedRacesStillLoading.decrementAndGet());
@@ -2462,9 +2465,12 @@ Replicator {
     private class PolarFixCacheUpdater extends AbstractRaceChangeListener {
 
         private final TrackedRace race;
+        private final Runnable callbackWhenRaceChangingToTrackingOrFinishedStatus;
+        private boolean callbackExecutionScheduled;
 
-        public PolarFixCacheUpdater(TrackedRace race) {
+        public PolarFixCacheUpdater(TrackedRace race, Runnable callbackWhenRaceChangingToTrackingOrFinishedStatus) {
             this.race = race;
+            this.callbackWhenRaceChangingToTrackingOrFinishedStatus = callbackWhenRaceChangingToTrackingOrFinishedStatus;
         }
 
         @Override
@@ -2479,11 +2485,17 @@ Replicator {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING
                     && newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
                 if (polarDataService != null) {
-                    polarDataService.raceFinishedLoading(race);
+                    callbackExecutionScheduled = true;
+                    polarDataService.raceFinishedLoading(race, callbackWhenRaceChangingToTrackingOrFinishedStatus);
                 }
             }
+            // also trigger the callback in case the race moves across the LOADING status without ever entering it
+            if (!callbackExecutionScheduled && callbackWhenRaceChangingToTrackingOrFinishedStatus != null
+                    && newStatus.getStatus().getOrder() > TrackedRaceStatusEnum.LOADING.getOrder()) {
+                callbackExecutionScheduled = true;
+                callbackWhenRaceChangingToTrackingOrFinishedStatus.run();
+            }
         }
-
     }
 
     /**

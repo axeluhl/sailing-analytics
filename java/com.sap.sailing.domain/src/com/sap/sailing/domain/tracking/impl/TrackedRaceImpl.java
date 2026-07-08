@@ -4100,7 +4100,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private void updateManeuversAndWindWithNewWindEstimation(IncrementalWindEstimation windEstimation,
             IncrementalWindEstimation previousWindEstimation) {
-        WindSource windSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
+        final WindSource windSource = new WindSourceImpl(WindSourceType.MANEUVER_BASED_ESTIMATION);
         windTracks.remove(windSource);
         if (windEstimation != null) {
             windTracks.put(windSource, windEstimation.getWindTrack());

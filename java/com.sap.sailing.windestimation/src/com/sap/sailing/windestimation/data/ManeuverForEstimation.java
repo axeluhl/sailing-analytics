@@ -14,7 +14,7 @@ import com.sap.sse.common.TimePoint;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverForEstimation extends SimpleManeuverForEstimationImpl implements Comparable<ManeuverForEstimation> {
+public class ManeuverForEstimation extends SimpleManeuverForEstimationImpl {
 
     private final double courseChangeInDegrees;
     private final double courseChangeWithinMainCurveInDegrees;
@@ -116,11 +116,6 @@ public class ManeuverForEstimation extends SimpleManeuverForEstimationImpl imple
 
     public String getCompetitorName() {
         return competitorName;
-    }
-
-    @Override
-    public int compareTo(ManeuverForEstimation o) {
-        return getManeuverTimePoint().compareTo(o.getManeuverTimePoint());
     }
 
     @Override

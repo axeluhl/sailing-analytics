@@ -1,11 +1,15 @@
 package com.sap.sse.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.subject.Subject;
@@ -24,6 +28,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     private final Processor<ResultType, ?>[] resultReceivers;
     private final ExecutorService executor;
     private final AtomicInteger unfinishedInstructionsCounter;
+    private final Set<Runnable> callbacksWhenNoMoreUnfinishedInstructions = Collections.newSetFromMap(new ConcurrentHashMap<Runnable, Boolean>());
     
     private boolean isFinished = false;
     private boolean isAborted = false;
@@ -82,15 +87,49 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         }
     }
 
-    @Override
-    public void afterInstructionFinished(ProcessorInstruction<ResultType> instruction) {
-        unfinishedInstructionsCounter.getAndDecrement();
-    }
-    
     protected Processor<ResultType, ?>[] getResultReceivers() {
         return resultReceivers;
     }
     
+    @Override
+    public synchronized void afterInstructionFinished(ProcessorInstruction<ResultType> instruction) {
+        if (unfinishedInstructionsCounter.getAndDecrement() == 0) {
+            for (final Runnable callback : callbacksWhenNoMoreUnfinishedInstructions) {
+                callback.run();
+            }
+            callbacksWhenNoMoreUnfinishedInstructions.clear();
+        }
+    }
+    
+    /**
+     * Enqueues a callback for the event where the {@link #unfinishedInstructionsCounter} or this processor is equal to
+     * or gets decremented to zero and all {@link #resultReceivers} have also called back into a runnable passed now
+     * to their {@link AbstractParallelProcessor#runWhenFinishedProcessing(Runnable)} method.
+     * 
+     * @param callbackWhenAllLoadedFixesHaveBeenProcessed
+     *            must not be {@code null}
+     */
+    @Override
+    public void runWhenFinishedProcessing(final Runnable callbackWhenAllLoadedFixesHaveBeenProcessed) {
+        if (callbackWhenAllLoadedFixesHaveBeenProcessed == null) {
+            throw new NullPointerException("callbackWhenAllLoadedFixesHaveBeenProcessed must not be null");
+        }
+        final AtomicInteger resultReceiverCallbackCounter = new AtomicInteger(resultReceivers.length);
+        for (final Processor<ResultType, ?> resultReceiver : resultReceivers) {
+            resultReceiver.runWhenFinishedProcessing(()->{
+               if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
+                   synchronized (this) {
+                       if (unfinishedInstructionsCounter.get() == 0) {
+                           callbackWhenAllLoadedFixesHaveBeenProcessed.run();
+                       } else {
+                           callbacksWhenNoMoreUnfinishedInstructions.add(callbackWhenAllLoadedFixesHaveBeenProcessed);
+                       }
+                   }
+               }
+            });
+        }
+    }
+
     /**
      * Forwards the given <code>result</code> to the result receivers, if it's {@link #isResultValid(Object) valid}
      * and if the processor hasn't been {@link #abort() aborted}.

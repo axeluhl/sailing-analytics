@@ -6,7 +6,7 @@ import com.sap.sse.common.Position;
 import com.sap.sse.common.SpeedWithBearing;
 import com.sap.sse.common.TimePoint;
 
-public interface SimpleManeuverForEstimation {
+public interface SimpleManeuverForEstimation extends Comparable<SimpleManeuverForEstimation> {
 
     Bearing getMiddleCourse();
 

@@ -63,4 +63,8 @@ public class SimpleManeuverForEstimationImpl implements SimpleManeuverForEstimat
         return speedWithBearingAfter;
     }
 
+    @Override
+    public int compareTo(SimpleManeuverForEstimation o) {
+        return getManeuverTimePoint().compareTo(o.getManeuverTimePoint());
+    }
 }

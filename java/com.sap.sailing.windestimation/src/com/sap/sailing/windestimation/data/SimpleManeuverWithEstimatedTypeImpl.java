@@ -27,7 +27,12 @@ public class SimpleManeuverWithEstimatedTypeImpl<T extends SimpleManeuverForEsti
     public double getConfidence() {
         return confidence;
     }
-    
+
+    @Override
+    public int compareTo(SimpleManeuverWithEstimatedType<T> o) {
+        return getManeuver().compareTo(o.getManeuver());
+    }
+
     @Override
     public String toString() {
         return "" + maneuver + " of type " + maneuverType + ", confidence="

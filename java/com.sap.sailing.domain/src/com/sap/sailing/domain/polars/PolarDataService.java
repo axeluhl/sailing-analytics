@@ -154,7 +154,7 @@ public interface PolarDataService {
     BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException;
     
-    void raceFinishedLoading(TrackedRace race);
+    void raceFinishedLoading(TrackedRace race, Runnable callbackWhenRaceChangingToTrackingOfFinishedStatus);
 
     /**
      * See {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)}

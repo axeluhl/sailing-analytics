@@ -35,6 +35,8 @@ import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphExportHelper;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphLevel;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.SimpleManeuverForEstimation;
+import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -173,7 +175,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         }
         
         private void updateGraphGenerator(Competitor competitor, Iterable<CompleteManeuverCurve> newManeuvers, TrackTimeInfo trackTimeInfo) {
-            List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
+            List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType = new ArrayList<>();
             final MstManeuverGraphComponents graphComponents;
             for (CompleteManeuverCurve newManeuverSpot : newManeuvers) {
                 // The add(...) method on IncrementalMstManeuverGraphGenerator is synchronized on the one instance per race.
@@ -198,7 +200,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             if (graphComponents != null) {
                 Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
                 for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
-                    ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
+                    SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation> maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                             inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
                             inference.getConfidence());
                     maneuversWithEstimatedType.add(maneuverWithEstimatedType);
