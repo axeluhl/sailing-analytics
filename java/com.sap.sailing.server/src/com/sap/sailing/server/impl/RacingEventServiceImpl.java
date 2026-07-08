@@ -2349,8 +2349,12 @@ Replicator {
             // the PolarFixCacheUpdater is asked to activate the wind estimation only once the "mining" of polar
             // data from the LOADING phase of races has finished; this way, the wind estimation track 
             final PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace, () -> {
-                if (windEstimationFactoryService != null) { // FIXME bug6241: the PolarFixCacheUpdater will only start computing polars when the race has finished LOADING and then takes a while;
-                    trackedRace.setWindEstimation(          // FIXME bug6241: we may even want to wait for all polars from race loading to have completed computing, at least for the boat class(es) affected
+                // the PolarFixCacheUpdater will only start computing polars when the race has finished LOADING and then takes a while;
+                // we may want to wait for all polars from race loading to have completed computing prior to
+                // activating the wind estimation from maneuvers; so we register this callback that will runn
+                // when the specific LOADING workflow chain inside the PolarDataMiner is done. See also bug6241
+                if (windEstimationFactoryService != null) { 
+                    trackedRace.setWindEstimation(
                             windEstimationFactoryService.createIncrementalWindEstimationTrack(trackedRace)); // because the wind estimation from maneuvers needs polars for good results (or sometimes any results at all)
                 }
             });
