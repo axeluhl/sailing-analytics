@@ -29,21 +29,22 @@ public class TestWaitingForInstructionsToFinish {
         assertTrue(waitSucceeded[0]);
     }
     
+    /**
+     * Implements a test with the first parallel processor taking a while in the executor to compute its result
+     * (e.g., blocked on a barrier/latch), but we register the callback on it immediately after calling
+     * processElement(...). The result receivers haven't yet received the result. This test verifies that the callback
+     * isn't fired before the result receivers have also processed the result. The test shall fail for
+     * 4cac492293155f2afd9b0650c7a30ed0914595ba on branch bug6241 because there we first wait for the result receivers
+     * to have a zero count of unfinished instructions, which they have immediately when they haven't been passed any
+     * results yet, and then immediately register the callback on the first (entry-point) processor upon reaching zero
+     * unfinished instructions, which is the case as soon as its result has been forwarded to the result receivers.<p>
+     * 
+     * To solve this, the waiting would probably need to be reversed. We know that the entry-point processor will
+     * decrement its unfinished instructions count only *after* invoking processElement(...) on all result receivers,
+     * which will then already in turn increment theirs.
+     */
     @Test
     public void testEarlyCallbackWhenResultReceiversHaventStartedYet() throws InterruptedException, BrokenBarrierException {
-        // TODO implement a test with the first parallel processor taking a while in the executor to compute its result
-        // (e.g., blocked on a barrier/latch), but we register the callback on it immediately after calling processElement(...).
-        // The result receivers haven't yet received the result. This test verifies that the callback isn't fired before the
-        // result receivers have also processed the result.
-        // The test shall fail for 4cac492293155f2afd9b0650c7a30ed0914595ba on branch bug6241 because there we first wait for the
-        // result receivers to have a zero count of unfinished instructions, which they have immediately when they haven't been
-        // passed any results yet, and then immediately register the callback on the first (entry-point) processor upon
-        // reaching zero unfinished instructions, which is the case as soon as its result has been forwarded to the result receivers.
-        //
-        // To solve this, the waiting would probably need to be reversed. We know that the entry-point processor will decrement
-        // its unfinished instructions count only *after* invoking processElement(...) on all result receivers, which will then
-        // already in turn increment theirs.
-        //
         // Set-up:
         final Collection<Processor<Integer, ?>> resultReceivers = new ArrayList<>();
         final CyclicBarrier barrier = new CyclicBarrier(2);
@@ -115,9 +116,9 @@ public class TestWaitingForInstructionsToFinish {
                 waitSucceeded.notifyAll();
             }
         });
-        barrier.await(); // this releases the entry-point task's computeResult
+        barrier.await(); // this releases the entry-point task's computeResult, so no forwarding to result receivers has taken place so far
         afterForwardingToResultReceivers.await(); // after this we know the result receivers have received the result
-        afterFinishingEntryPoint.await(); // after this we know the entry-point callback has fired
+        afterFinishingEntryPoint.await(); // after this we know the entry-point callback would have fired if no pending instructions anymore
         assertFalse(waitSucceeded[0]); // because we haven't yet unblocked the barrier for the result receiver
         resultReceiverBarrier.await(); // now the result receiver can continue
         synchronized (waitSucceeded) {

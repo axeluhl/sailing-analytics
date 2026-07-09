@@ -114,27 +114,24 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         if (callbackWhenAllLoadedFixesHaveBeenProcessed == null) {
             throw new NullPointerException("callbackWhenAllLoadedFixesHaveBeenProcessed must not be null");
         }
-        final AtomicInteger resultReceiverCallbackCounter = new AtomicInteger(resultReceivers.length);
-        if (resultReceivers.length == 0) {
-            invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(callbackWhenAllLoadedFixesHaveBeenProcessed);
-        } else {
-            for (final Processor<ResultType, ?> resultReceiver : resultReceivers) {
-                // FIXME bug6241: the following is unsafe when calling this right after sending an element to processElement(...);
-                // FIXME bug6241: because the executor may not have picked up the task yet or may not have reached the forwarding
-                // FIXME bug6241: to the result receivers in instructionSucceeded(...), so their unfinishedInstructionsCounter is still at zero,
-                // FIXME bug6241: so we would immediately decrement the resultReceiverCallbackCounter and then immediately reach 0 and invoke
-                // FIXME bug6241: the callback just when this processor has finished its first task; we need to reverse the waits!
-                resultReceiver.runWhenFinishedProcessing(()->{
-                   if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
-                       invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(callbackWhenAllLoadedFixesHaveBeenProcessed);
-                   }
-                });
+        invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(()->{
+            if (resultReceivers.length == 0) {
+                callbackWhenAllLoadedFixesHaveBeenProcessed.run();
+            } else {
+                final AtomicInteger resultReceiverCallbackCounter = new AtomicInteger(resultReceivers.length);
+                for (final Processor<ResultType, ?> resultReceiver : resultReceivers) {
+                    resultReceiver.runWhenFinishedProcessing(()->{
+                        if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
+                            // this was the last result receiver we were waiting for; trigger callback
+                            callbackWhenAllLoadedFixesHaveBeenProcessed.run();
+                        }
+                    });
+                }
             }
-        }
+        });
     }
 
-    private void invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(
-            final Runnable callbackWhenAllLoadedFixesHaveBeenProcessed) {
+    private void invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(final Runnable callbackWhenAllLoadedFixesHaveBeenProcessed) {
         synchronized (this) {
             if (unfinishedInstructionsCounter.get() == 0) {
                 callbackWhenAllLoadedFixesHaveBeenProcessed.run();
