@@ -4095,6 +4095,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final IncrementalWindEstimation previousWindEstimation = this.windEstimation;
         if (previousWindEstimation != windEstimation) { // bug5959 comment #15: if maneuvers were sent during initial load of RacingEventService and they were based on the IncrementalWindEstimation just received through initial load of WindEstimationFactoryService, don't re-compute those maneuvers!
             updateManeuversAndWindWithNewWindEstimation(windEstimation, previousWindEstimation);
+            // FIXME bug6142: especially when changing from null to non-null, now the maneuver detectors would be able to pass the maneuvers on to the wind estimation; how / when to trigger this?
         }
     }
 
