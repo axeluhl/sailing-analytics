@@ -85,6 +85,14 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private PlotLine speedAveragePlotLine;
     private PlotLine speedMinPlotLine;
     private PlotLine speedMaxPlotLine;
+    private double directionRunningAvg;
+    private double directionRunningMin;
+    private double directionRunningMax;
+    private int directionPointCount;
+    private double speedRunningAvg;
+    private double speedRunningMin;
+    private double speedRunningMax;
+    private int speedPointCount;
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
@@ -388,6 +396,9 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                        && windSourceDirectionPoints.get(windSource).length != 0) {
                 previousDirectionPoint = windSourceDirectionPoints.get(windSource)[windSourceDirectionPoints.get(windSource).length - 1];
             }
+            if (!append) {
+                resetStatAccumulators();
+            }
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
@@ -418,9 +429,20 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     }
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
-
+                    final double dirVal = newDirectionPoint.getY().doubleValue();
+                    directionPointCount++;
+                    directionRunningAvg += (dirVal - directionRunningAvg) / directionPointCount;
+                    if (dirVal < directionRunningMin) { directionRunningMin = dirVal; }
+                    if (dirVal > directionRunningMax) { directionRunningMax = dirVal; }
                     Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
+                    if (wind.dampenedTrueWindSpeedInKnots != null) {
+                        final double spdVal = wind.dampenedTrueWindSpeedInKnots;
+                        speedPointCount++;
+                        speedRunningAvg += (spdVal - speedRunningAvg) / speedPointCount;
+                        if (spdVal < speedRunningMin) { speedRunningMin = spdVal; }
+                        if (spdVal > speedRunningMax) { speedRunningMax = spdVal; }
+                    }
                 }
             }
             
@@ -511,7 +533,19 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
         firstPointOfFirstSeries = null;
+        resetStatAccumulators();
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
+    }
+
+    private void resetStatAccumulators() {
+        directionRunningAvg = 0;
+        directionRunningMin = Double.MAX_VALUE;
+        directionRunningMax = -Double.MAX_VALUE;
+        directionPointCount = 0;
+        speedRunningAvg = 0;
+        speedRunningMin = Double.MAX_VALUE;
+        speedRunningMax = -Double.MAX_VALUE;
+        speedPointCount = 0;
     }
 
     /**
@@ -592,69 +626,31 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (!showAvg && !showMin && !showMax) {
             return;
         }
-        double dirSum = 0, dirMin = Double.MAX_VALUE, dirMax = -Double.MAX_VALUE;
-        int dirCount = 0;
-        double spdSum = 0, spdMin = Double.MAX_VALUE, spdMax = -Double.MAX_VALUE;
-        int spdCount = 0;
-        for (final Point[] points : windSourceDirectionPoints.values()) {
-            if (points != null) {
-                for (final Point p : points) {
-                    if (p != null && p.getY() != null) {
-                        final double v = p.getY().doubleValue();
-                        dirSum += v;
-                        if (v < dirMin) {
-                            dirMin = v;
-                        }
-                        if (v > dirMax) {
-                            dirMax = v;
-                        }
-                        dirCount++;
-                    }
-                }
-            }
-        }
-        for (final Point[] points : windSourceSpeedPoints.values()) {
-            if (points != null) {
-                for (final Point p : points) {
-                    if (p != null && p.getY() != null) {
-                        final double v = p.getY().doubleValue();
-                        spdSum += v;
-                        if (v < spdMin) {
-                            spdMin = v;
-                        }
-                        if (v > spdMax) {
-                            spdMax = v;
-                        }
-                        spdCount++;
-                    }
-                }
-            }
-        }
-        if (dirCount > 0) {
+        if (directionPointCount > 0) {
             if (showAvg) {
-                directionAveragePlotLine.setValue(dirSum / dirCount);
+                directionAveragePlotLine.setValue(directionRunningAvg);
                 chart.getYAxis(0).addPlotLines(directionAveragePlotLine);
             }
             if (showMin) {
-                directionMinPlotLine.setValue(dirMin);
+                directionMinPlotLine.setValue(directionRunningMin);
                 chart.getYAxis(0).addPlotLines(directionMinPlotLine);
             }
             if (showMax) {
-                directionMaxPlotLine.setValue(dirMax);
+                directionMaxPlotLine.setValue(directionRunningMax);
                 chart.getYAxis(0).addPlotLines(directionMaxPlotLine);
             }
         }
-        if (spdCount > 0) {
+        if (speedPointCount > 0) {
             if (showAvg) {
-                speedAveragePlotLine.setValue(spdSum / spdCount);
+                speedAveragePlotLine.setValue(speedRunningAvg);
                 chart.getYAxis(1).addPlotLines(speedAveragePlotLine);
             }
             if (showMin) {
-                speedMinPlotLine.setValue(spdMin);
+                speedMinPlotLine.setValue(speedRunningMin);
                 chart.getYAxis(1).addPlotLines(speedMinPlotLine);
             }
             if (showMax) {
-                speedMaxPlotLine.setValue(spdMax);
+                speedMaxPlotLine.setValue(speedRunningMax);
                 chart.getYAxis(1).addPlotLines(speedMaxPlotLine);
             }
         }
