@@ -328,6 +328,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String clickChartToSetTime();
     String position();
     String windSourcesUsed();
+    String windStatisticsLines();
     String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
     String feedback();
     String startStopPlaying();
@@ -350,6 +351,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String courseMiddleLine();
     String showWindSpeedSeries();
     String showWindDirectionSeries();
+    String showWindAverageLine();
+    String showWindMinLine();
+    String showWindMaxLine();
     String fleet();
     String boat();
     String boatClass();
@@ -908,6 +912,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windImport_ResultEntry(String raceName, String regattaName, int windFixesCount, String firstWindDate, String lastWindDate);
     String showWindSpeedSeriesTooltip();
     String showWindDirectionSeriesTooltip();
+    String showWindAverageLineTooltip();
+    String showWindMinLineTooltip();
+    String showWindMaxLineTooltip();
     String combinedWindSourceTypeTooltip();
     String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();

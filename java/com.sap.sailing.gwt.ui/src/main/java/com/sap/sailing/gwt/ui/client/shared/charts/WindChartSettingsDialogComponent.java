@@ -31,6 +31,9 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     private final Map<WindSourceType, CheckBox> windSpeedCheckboxes;
     private CheckBox showWindSpeedSeriesCheckbox;
     private CheckBox showWindDirectionsSeriesCheckbox;
+    private CheckBox showAverageLineCheckbox;
+    private CheckBox showMinLineCheckbox;
+    private CheckBox showMaxLineCheckbox;
 
     private final StringMessages stringMessages;
     
@@ -110,7 +113,20 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             checkbox.getElement().getStyle().setMarginLeft(15.0, Unit.PX);
             windSpeedSourcesPanel.add(checkbox);
         }
-        
+
+        vp.add(dialog.createHeadlineLabel(stringMessages.windStatisticsLines()));
+        showAverageLineCheckbox = dialog.createCheckbox(stringMessages.showWindAverageLine());
+        showAverageLineCheckbox.setTitle(stringMessages.showWindAverageLineTooltip());
+        showAverageLineCheckbox.setValue(initialSettings.isShowAverageLine());
+        vp.add(showAverageLineCheckbox);
+        showMinLineCheckbox = dialog.createCheckbox(stringMessages.showWindMinLine());
+        showMinLineCheckbox.setTitle(stringMessages.showWindMinLineTooltip());
+        showMinLineCheckbox.setValue(initialSettings.isShowMinLine());
+        vp.add(showMinLineCheckbox);
+        showMaxLineCheckbox = dialog.createCheckbox(stringMessages.showWindMaxLine());
+        showMaxLineCheckbox.setTitle(stringMessages.showWindMaxLineTooltip());
+        showMaxLineCheckbox.setValue(initialSettings.isShowMaxLine());
+        vp.add(showMaxLineCheckbox);
         return vp;
     }
 
@@ -134,9 +150,10 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 windSpeedSourcesToDisplay.add(e.getKey());
             }
         }
-        return new WindChartSettings(showWindSpeedSeriesCheckbox.getValue(), windSpeedSourcesToDisplay, 
-                showWindDirectionsSeriesCheckbox.getValue(), windDirectionSourcesToDisplay, 
-                resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000);
+        return new WindChartSettings(showWindSpeedSeriesCheckbox.getValue(), windSpeedSourcesToDisplay,
+                showWindDirectionsSeriesCheckbox.getValue(), windDirectionSourcesToDisplay,
+                resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000,
+                showAverageLineCheckbox.getValue(), showMinLineCheckbox.getValue(), showMaxLineCheckbox.getValue());
     }
 
     @Override

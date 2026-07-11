@@ -79,6 +79,12 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private final Map<WindSource, Point[]> windSourceDirectionPoints;
     private final Map<WindSource, Point[]> windSourceSpeedPoints;
     private Point firstPointOfFirstSeries;
+    private PlotLine directionAveragePlotLine;
+    private PlotLine directionMinPlotLine;
+    private PlotLine directionMaxPlotLine;
+    private PlotLine speedAveragePlotLine;
+    private PlotLine speedMinPlotLine;
+    private PlotLine speedMaxPlotLine;
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
@@ -181,6 +187,12 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             }
         }));
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
+        directionAveragePlotLine = chart.getYAxis(0).createPlotLine().setColor("#2060C0").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
+        directionMinPlotLine = chart.getYAxis(0).createPlotLine().setColor("#20A020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
+        directionMaxPlotLine = chart.getYAxis(0).createPlotLine().setColor("#C02020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
+        speedAveragePlotLine = chart.getYAxis(1).createPlotLine().setColor("#2060C0").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
+        speedMinPlotLine = chart.getYAxis(1).createPlotLine().setColor("#20A020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
+        speedMaxPlotLine = chart.getYAxis(1).createPlotLine().setColor("#C02020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
 
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -444,6 +456,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         
         timeOfEarliestRequestInMillis = newMinTimepoint;
         timeOfLatestRequestInMillis = newMaxTimepoint;
+        updateStatPlotLines();
     }
 
     @Override
@@ -477,8 +490,17 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (!oldWindSourceTypesToRequest.equals(getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection())) {
             clearCacheAndReload = true;
         }
+        final boolean statLinesChanged = settings.isShowAverageLine() != newSettings.isShowAverageLine()
+                || settings.isShowMinLine() != newSettings.isShowMinLine()
+                || settings.isShowMaxLine() != newSettings.isShowMaxLine();
+        settings.setShowAverageLine(newSettings.isShowAverageLine());
+        settings.setShowMinLine(newSettings.isShowMinLine());
+        settings.setShowMaxLine(newSettings.isShowMaxLine());
         if (clearCacheAndReload) {
             clearCacheAndReload();
+        }
+        if (statLinesChanged) {
+            updateStatPlotLines();
         }
         updateVisibleSeries();
     }
@@ -550,6 +572,92 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     private void clearChart() {
         chart.removeAllSeries();
+        removeStatPlotLines();
+    }
+
+    private void removeStatPlotLines() {
+        chart.getYAxis(0).removePlotLine(directionAveragePlotLine);
+        chart.getYAxis(0).removePlotLine(directionMinPlotLine);
+        chart.getYAxis(0).removePlotLine(directionMaxPlotLine);
+        chart.getYAxis(1).removePlotLine(speedAveragePlotLine);
+        chart.getYAxis(1).removePlotLine(speedMinPlotLine);
+        chart.getYAxis(1).removePlotLine(speedMaxPlotLine);
+    }
+
+    private void updateStatPlotLines() {
+        removeStatPlotLines();
+        final boolean showAvg = settings.isShowAverageLine();
+        final boolean showMin = settings.isShowMinLine();
+        final boolean showMax = settings.isShowMaxLine();
+        if (!showAvg && !showMin && !showMax) {
+            return;
+        }
+        double dirSum = 0, dirMin = Double.MAX_VALUE, dirMax = -Double.MAX_VALUE;
+        int dirCount = 0;
+        double spdSum = 0, spdMin = Double.MAX_VALUE, spdMax = -Double.MAX_VALUE;
+        int spdCount = 0;
+        for (final Point[] points : windSourceDirectionPoints.values()) {
+            if (points != null) {
+                for (final Point p : points) {
+                    if (p != null && p.getY() != null) {
+                        final double v = p.getY().doubleValue();
+                        dirSum += v;
+                        if (v < dirMin) {
+                            dirMin = v;
+                        }
+                        if (v > dirMax) {
+                            dirMax = v;
+                        }
+                        dirCount++;
+                    }
+                }
+            }
+        }
+        for (final Point[] points : windSourceSpeedPoints.values()) {
+            if (points != null) {
+                for (final Point p : points) {
+                    if (p != null && p.getY() != null) {
+                        final double v = p.getY().doubleValue();
+                        spdSum += v;
+                        if (v < spdMin) {
+                            spdMin = v;
+                        }
+                        if (v > spdMax) {
+                            spdMax = v;
+                        }
+                        spdCount++;
+                    }
+                }
+            }
+        }
+        if (dirCount > 0) {
+            if (showAvg) {
+                directionAveragePlotLine.setValue(dirSum / dirCount);
+                chart.getYAxis(0).addPlotLines(directionAveragePlotLine);
+            }
+            if (showMin) {
+                directionMinPlotLine.setValue(dirMin);
+                chart.getYAxis(0).addPlotLines(directionMinPlotLine);
+            }
+            if (showMax) {
+                directionMaxPlotLine.setValue(dirMax);
+                chart.getYAxis(0).addPlotLines(directionMaxPlotLine);
+            }
+        }
+        if (spdCount > 0) {
+            if (showAvg) {
+                speedAveragePlotLine.setValue(spdSum / spdCount);
+                chart.getYAxis(1).addPlotLines(speedAveragePlotLine);
+            }
+            if (showMin) {
+                speedMinPlotLine.setValue(spdMin);
+                chart.getYAxis(1).addPlotLines(speedMinPlotLine);
+            }
+            if (showMax) {
+                speedMaxPlotLine.setValue(spdMax);
+                chart.getYAxis(1).addPlotLines(speedMaxPlotLine);
+            }
+        }
     }
 
     /**
@@ -688,7 +796,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
         windSpeedSourcesToDisplay.add(type);
         windDirectionSourcesToDisplay.add(type);
-        WindChartSettings patched = new WindChartSettings(true,windSpeedSourcesToDisplay,true,windDirectionSourcesToDisplay,settings.getResolutionInMilliseconds());
+        WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true, windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(), settings.isShowAverageLine(), settings.isShowMinLine(), settings.isShowMaxLine());
         updateSettings(patched);
         preselectFilter = windprovider;
         updateVisibleSeries();

@@ -22,6 +22,9 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
 
     private BooleanSetting showWindSpeedSeries;
     private BooleanSetting showWindDirectionsSeries;
+    private BooleanSetting showAverageLine;
+    private BooleanSetting showMinLine;
+    private BooleanSetting showMaxLine;
     
     @Override
     protected void addChildSettings() {
@@ -36,6 +39,9 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
         resolutionInMilliseconds = new LongSetting("resolutionInMilliseconds", this, DEFAULT_RESOLUTION_IN_MILLISECONDS);
         showWindSpeedSeries = new BooleanSetting("showWindSpeedSeries", this, true);
         showWindDirectionsSeries = new BooleanSetting("showWindDirectionsSeries", this, true);
+        showAverageLine = new BooleanSetting("showAverageLine", this, false);
+        showMinLine = new BooleanSetting("showMinLine", this, false);
+        showMaxLine = new BooleanSetting("showMaxLine", this, false);
     }
 
     /**
@@ -45,14 +51,18 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
         super();
     }
     
-    public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay, 
-            boolean showWindDirectionsSeries, Set<WindSourceType> windDirectionSourcesToDisplay, long resolutionInMilliseconds) {
+    public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay,
+            boolean showWindDirectionsSeries, Set<WindSourceType> windDirectionSourcesToDisplay, long resolutionInMilliseconds,
+            boolean showAverageLine, boolean showMinLine, boolean showMaxLine) {
         this();
         this.showWindSpeedSeries.setValue(showWindSpeedSeries);
         this.windSpeedSourcesToDisplay.setValues(windSpeedSourcesToDisplay);
         this.showWindDirectionsSeries.setValue(showWindDirectionsSeries);
         this.windDirectionSourcesToDisplay.setValues(windDirectionSourcesToDisplay);
         this.resolutionInMilliseconds.setValue(resolutionInMilliseconds);
+        this.showAverageLine.setValue(showAverageLine);
+        this.showMinLine.setValue(showMinLine);
+        this.showMaxLine.setValue(showMaxLine);
     }
     
     public Set<WindSourceType> getWindDirectionSourcesToDisplay() {
@@ -97,5 +107,29 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
         if(windSpeedSourcesToDisplay != null) {
             this.windSpeedSourcesToDisplay.setValues(windSpeedSourcesToDisplay);
         }
+    }
+
+    public boolean isShowAverageLine() {
+        return showAverageLine.getValue();
+    }
+
+    public void setShowAverageLine(final boolean showAverageLine) {
+        this.showAverageLine.setValue(showAverageLine);
+    }
+
+    public boolean isShowMinLine() {
+        return showMinLine.getValue();
+    }
+
+    public void setShowMinLine(final boolean showMinLine) {
+        this.showMinLine.setValue(showMinLine);
+    }
+
+    public boolean isShowMaxLine() {
+        return showMaxLine.getValue();
+    }
+
+    public void setShowMaxLine(final boolean showMaxLine) {
+        this.showMaxLine.setValue(showMaxLine);
     }
 }
