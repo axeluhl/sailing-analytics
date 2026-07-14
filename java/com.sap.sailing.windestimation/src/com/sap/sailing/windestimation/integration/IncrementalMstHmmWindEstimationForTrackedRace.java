@@ -45,7 +45,6 @@ import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedTypeImpl;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
-import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.PolarsBasedTwsCalculatorImpl;
 import com.sap.sailing.windestimation.windinference.WindTrackCalculator;
@@ -120,23 +119,32 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             PolarDataService polarDataService, long millisecondsOverWhichToAverage,
             ManeuverClassifiersCache maneuverClassifiersCache,
             GaussianBasedTwdTransitionDistributionCache gaussianBasedTwdTransitionDistributionCache) {
+        // bug6241: enforced by callers (WindEstimationFactoryServiceImpl and the
+        // per-race installation coordination in RacingEventServiceImpl) so that the
+        // estimator captures a live polar service. Without polars, classification and
+        // wind-speed inference degrade to null and Dummy-based, which is what produced
+        // the incorrect wind estimation from maneuvers described by this bug.
+        if (polarDataService == null) {
+            throw new IllegalArgumentException(
+                    "polarDataService must not be null; see bug6241 and WindEstimationFactoryServiceImpl."
+                            + "createIncrementalWindEstimationTrack for the required precondition on the tracked race.");
+        }
         this.estimatedWindTrack = new WindTrackWithConfidenceForEachWindFixImpl(millisecondsOverWhichToAverage,
                 WindSourceType.MANEUVER_BASED_ESTIMATION.getBaseConfidence(),
-                WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed() && polarDataService != null,
+                WindSourceType.MANEUVER_BASED_ESTIMATION.useSpeed(),
                 IncrementalMstHmmWindEstimationForTrackedRace.class.getSimpleName()+" "+
                 trackedRace.getRaceIdentifier(), false, windTrackWithConfidences);
         this.updateQueue = new ConcurrentLinkedDeque<>();
         this.trackedRace = trackedRace;
         this.windSource = windSource;
-        DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
+        final DistanceAndDurationAwareWindTransitionProbabilitiesCalculator transitionProbabilitiesCalculator = new DistanceAndDurationAwareWindTransitionProbabilitiesCalculator(
                 gaussianBasedTwdTransitionDistributionCache, true);
         this.mstManeuverGraphGenerator = new IncrementalMstManeuverGraphGenerator(
                 new CompleteManeuverCurveToManeuverForEstimationConverter(trackedRace, polarDataService),
                 transitionProbabilitiesCalculator, maneuverClassifiersCache);
         this.bestPathsCalculator = new MstBestPathsCalculatorImpl(transitionProbabilitiesCalculator);
         this.windTrackCalculator = new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
-                polarDataService == null ? new DummyBasedTwsCalculatorImpl()
-                        : new PolarsBasedTwsCalculatorImpl(polarDataService));
+                new PolarsBasedTwsCalculatorImpl(polarDataService));
     }
 
     @Override
