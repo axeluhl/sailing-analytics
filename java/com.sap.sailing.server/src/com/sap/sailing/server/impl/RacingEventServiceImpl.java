@@ -4858,6 +4858,23 @@ Replicator {
     }
 
     private void setPolarDataServiceOnAllTrackedRaces(PolarDataService service) {
+        // Capture the wind factory at method entry: on replicas, initiallyFillFromInternal
+        // deserializes each DynamicTrackedRegatta with its trackedRaces map already populated
+        // and then invokes ensureRegattaHasRaceAdditionListener(...), which calls
+        // TrackedRegatta.addRaceListener(...) -- and that in turn synchronously replays
+        // raceAdded(...) for every pre-existing tracked race. At that moment
+        // polarDataService and windEstimationFactoryService may both still be null (their
+        // OSGi trackers have not fired yet). If the wind factory arrives before the polar
+        // service, setWindEstimationFactoryService -> setWindEstimationOnAllTrackedRaces
+        // schedules an install per race, and scheduleWindEstimationInstallation's inner
+        // callback (past-LOADING guard) fires immediately because replicated races typically
+        // arrive already past LOADING; it then sees polarDataService == null and drops out
+        // silently, without registering a runWhenPolarLoadingFinishedFor callback.
+        // We compensate here: once the polar service actually arrives, if the wind factory
+        // is already available, reschedule the install per race. scheduleWindEstimationInstallation
+        // is idempotent, guarded against duplicate installation, so this is a safe no-op
+        // for races that already got their estimator through another code path. See bug6241.
+        final WindEstimationFactoryService factoryAtMethodEntry = windEstimationFactoryService;
         Iterable<Regatta> allRegattas = getAllRegattas();
         for (Regatta regatta : allRegattas) {
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
@@ -4869,6 +4886,9 @@ Replicator {
                         trackedRace.setPolarDataService(service);
                         if (service != null) {
                             service.insertExistingFixes(trackedRace);
+                            if (factoryAtMethodEntry != null) {
+                                scheduleWindEstimationInstallation(trackedRace, factoryAtMethodEntry);
+                            }
                         }
                     }
                 } catch (Throwable e) {
