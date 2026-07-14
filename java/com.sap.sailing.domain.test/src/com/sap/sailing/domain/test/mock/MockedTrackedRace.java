@@ -1409,6 +1409,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public void runWhenPastLoading(Runnable callback) {
+    }
+
+    @Override
     public void runSynchronizedOnStatus(Runnable runnable) {
     }
 
