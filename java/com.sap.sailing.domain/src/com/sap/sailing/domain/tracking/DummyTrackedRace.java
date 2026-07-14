@@ -835,6 +835,10 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public void runWhenPastLoading(Runnable callback) {
+    }
+
+    @Override
     public void runSynchronizedOnStatus(Runnable runnable) {
     }
 

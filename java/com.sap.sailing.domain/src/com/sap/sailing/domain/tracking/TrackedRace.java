@@ -1462,6 +1462,31 @@ public interface TrackedRace
     void runWhenDoneLoading(Runnable runnable);
 
     /**
+     * Runs {@code callback} exactly once, at the first moment when the race's status reaches an
+     * {@link TrackedRaceStatus#getStatus() order} strictly greater than
+     * {@link TrackedRaceStatusEnum#LOADING} (i.e., {@link TrackedRaceStatusEnum#TRACKING},
+     * {@link TrackedRaceStatusEnum#FINISHED}, {@link TrackedRaceStatusEnum#ERROR}, or
+     * {@link TrackedRaceStatusEnum#REMOVED}), <em>provided</em> the race is still a member of its
+     * {@link TrackedRegatta} at that moment. If the race is
+     * {@link TrackedRegatta#removeTrackedRace removed} from its regatta before the status condition
+     * is met, {@code callback} is never invoked and any listeners registered by this method are
+     * torn down. This means an implementation must register a status listener on this race as well
+     * as a race-removal listener on the containing regatta and coordinate them so that both are
+     * removed regardless of which branch settles first.
+     * <p>
+     *
+     * Note the difference to {@link #runWhenDoneLoading(Runnable)}: this method treats any status
+     * strictly beyond LOADING as "done loading," including {@link TrackedRaceStatusEnum#ERROR} and
+     * {@link TrackedRaceStatusEnum#REMOVED} (via status transition), which makes it usable for
+     * races that transition, e.g., directly from {@link TrackedRaceStatusEnum#PREPARED} to
+     * {@link TrackedRaceStatusEnum#TRACKING} without ever entering LOADING.
+     *
+     * @param callback
+     *            must not be {@code null}
+     */
+    void runWhenPastLoading(Runnable callback);
+
+    /**
      * Executes the {@code callable} under synchronization with the {@link #getStatus() race status}; in other words,
      * while the callable executes, the race status of this race cannot be updated.
      */

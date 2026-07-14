@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -3213,6 +3214,87 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 });
             } else {
                 runnable.run();
+            }
+        }
+    }
+
+    @Override
+    public void runWhenPastLoading(final Runnable callback) {
+        final int loadingOrder = TrackedRaceStatusEnum.LOADING.getOrder();
+        // Two listeners cooperate to settle the outcome exactly once: a status listener
+        // on this race that fires the callback when the race moves past LOADING, and a
+        // race-removal listener on the containing regatta that silently cancels if the
+        // race is removed first. The one-shot CAS on `settled` guarantees exactly one
+        // branch (fire or cancel) wins; both listeners are removed in either case.
+        // The status-notifier monitor is held only around the initial check and
+        // registration of the status listener so we don't cross-lock with the regatta
+        // when adding the regatta listener; the post-registration re-check catches any
+        // status transition that raced with us.
+        final AtomicBoolean settled = new AtomicBoolean(false);
+        final TrackedRegatta regatta = getTrackedRegatta();
+        final RaceListener[] regattaListenerHolder = new RaceListener[1];
+        final AbstractRaceChangeListener[] statusListenerHolder = new AbstractRaceChangeListener[1];
+        final Runnable tearDown = () -> {
+            if (statusListenerHolder[0] != null) {
+                removeListener(statusListenerHolder[0]);
+            }
+            if (regattaListenerHolder[0] != null) {
+                regatta.removeRaceListener(regattaListenerHolder[0]);
+            }
+        };
+        final Runnable settleAndFire = () -> {
+            if (settled.compareAndSet(false, true)) {
+                try {
+                    tearDown.run();
+                } finally {
+                    callback.run();
+                }
+            }
+        };
+        final Runnable settleWithoutFiring = () -> {
+            if (settled.compareAndSet(false, true)) {
+                tearDown.run();
+            }
+        };
+        statusListenerHolder[0] = new AbstractRaceChangeListener() {
+            @Override
+            public void statusChanged(final TrackedRaceStatus newStatus, final TrackedRaceStatus oldStatus) {
+                if (newStatus.getStatus().getOrder() > loadingOrder) {
+                    settleAndFire.run();
+                }
+            }
+        };
+        regattaListenerHolder[0] = new RaceListener() {
+            @Override
+            public void raceAdded(final TrackedRace trackedRace) {
+                // not interested in additions
+            }
+            @Override
+            public void raceRemoved(final TrackedRace trackedRace) {
+                if (trackedRace == TrackedRaceImpl.this) {
+                    settleWithoutFiring.run();
+                }
+            }
+        };
+        final boolean alreadyPast;
+        synchronized (getStatusNotifier()) {
+            if (getStatus().getStatus().getOrder() > loadingOrder) {
+                alreadyPast = true;
+            } else {
+                alreadyPast = false;
+                addListener(statusListenerHolder[0]);
+            }
+        }
+        if (alreadyPast) {
+            callback.run();
+        } else {
+            regatta.addRaceListener(regattaListenerHolder[0], Optional.empty(), /* synchronous */ false);
+            // Close the race between the initial check + listener registration and the
+            // regatta-listener registration: if we already transitioned in between, fire
+            // now. The CAS on `settled` makes this safe against concurrent status events
+            // that may already be delivering to statusListenerHolder[0].
+            if (getStatus().getStatus().getOrder() > loadingOrder) {
+                settleAndFire.run();
             }
         }
     }

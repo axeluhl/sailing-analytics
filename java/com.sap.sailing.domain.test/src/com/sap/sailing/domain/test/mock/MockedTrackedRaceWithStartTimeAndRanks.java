@@ -922,6 +922,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public void runWhenPastLoading(Runnable callback) {
+    }
+
+    @Override
     public void runSynchronizedOnStatus(Runnable runnable) {
     }
 
