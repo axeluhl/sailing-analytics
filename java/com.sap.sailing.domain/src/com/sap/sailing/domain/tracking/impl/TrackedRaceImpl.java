@@ -197,6 +197,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.shared.util.impl.ApproximateTime;
 import com.sap.sse.shared.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.IdentityWrapper;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 import difflib.DiffUtils;
@@ -4177,7 +4178,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final IncrementalWindEstimation previousWindEstimation = this.windEstimation;
         if (previousWindEstimation != windEstimation) { // bug5959 comment #15: if maneuvers were sent during initial load of RacingEventService and they were based on the IncrementalWindEstimation just received through initial load of WindEstimationFactoryService, don't re-compute those maneuvers!
             updateManeuversAndWindWithNewWindEstimation(windEstimation, previousWindEstimation);
-            // FIXME bug6142: especially when changing from null to non-null, now the maneuver detectors would be able to pass the maneuvers on to the wind estimation; how / when to trigger this?
         }
     }
 
@@ -4190,11 +4190,56 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         updateWindSourcesByType(windSource);
         this.windEstimation = windEstimation;
-        // TODO Make more efficient by reusing the state of incremental maneuver detectors. The already computed
-        // complete maneuver curves can be fed directly into the windEstimation.
+        // Clear the maneuver-detector cache so future maneuver detections pick up the new
+        // WindEstimationInteraction from the current windEstimation. See also bug6184: maneuver
+        // detection itself does not consume MANEUVER_BASED_ESTIMATION, so the maneuvers won't
+        // change; only the side-channel notification to the wind estimator will now target the
+        // new estimator instance.
         maneuverDetectorPerCompetitorCache.clearCache();
         shortTimeWindCache.clearCache();
-        // no need to trigger maneuver recalculation because it is not using the MANEUVER_BASED_ESTIMATION; see also bug6184
+        // bug6241: if a new (non-null) wind estimation is being installed and we already have
+        // maneuvers for this race (either loaded from the persistent maneuver cache, or
+        // previously computed with a null / stale WindEstimationInteraction so they never
+        // reached the current estimator), feed those maneuvers to the new estimator now via
+        // alreadyClassifiedManeuversAvailable. The feed runs on a background task per
+        // competitor so that this method returns quickly and, importantly, does not block the
+        // setter's caller (typically the OSGi service-tracker thread or the
+        // RaceAdditionListener callback thread) on the potentially-slow
+        // maneuverCache.get(_, /* waitForLatest */ true) call that may still be waiting for
+        // maneuver detection to complete.
+        if (windEstimation != null) {
+            feedAlreadyKnownManeuversToWindEstimation(windEstimation);
+        }
+    }
+
+    /**
+     * Schedules a per-competitor background task that reads the competitor's currently-known
+     * maneuvers from {@link #maneuverCache} (waiting, if necessary, for a pending detection to
+     * complete or for the DB-load path to have delivered its results) and, if any are present,
+     * hands them off to {@code newWindEstimation} via
+     * {@link IncrementalWindEstimation#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}.
+     * <p>
+     *
+     * The task guards against being obsoleted by a subsequent {@link #setWindEstimation} that
+     * replaces {@code newWindEstimation}: before performing the hand-off it checks that the
+     * race's current {@link #windEstimation} is still the same instance it was scheduled with.
+     * See bug6241.
+     */
+    private void feedAlreadyKnownManeuversToWindEstimation(final IncrementalWindEstimation newWindEstimation) {
+        for (final Competitor competitor : getRace().getCompetitors()) {
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().execute(() -> {
+                try {
+                    final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
+                    if (maneuvers != null && !maneuvers.isEmpty()
+                            && TrackedRaceImpl.this.windEstimation == newWindEstimation) {
+                        newWindEstimation.alreadyClassifiedManeuversAvailable(competitor, maneuvers);
+                    }
+                } catch (Throwable e) {
+                    logger.log(Level.WARNING, "Failed to feed already-known maneuvers of competitor " + competitor
+                            + " into the wind estimation of race " + getRaceIdentifier(), e);
+                }
+            });
+        }
     }
 
     /**
