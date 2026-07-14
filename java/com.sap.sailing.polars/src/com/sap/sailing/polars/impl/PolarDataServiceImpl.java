@@ -236,6 +236,11 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     }
 
     @Override
+    public void runWhenPolarLoadingFinishedFor(TrackedRace race, Runnable callback) {
+        polarDataMiner.runWhenPolarLoadingFinishedFor(race, callback);
+    }
+
+    @Override
     public BearingWithConfidence<Void> getManeuverAngle(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed)
             throws NotEnoughDataHasBeenAddedException {
         if (maneuverType != ManeuverType.TACK && maneuverType != ManeuverType.JIBE) {

@@ -157,6 +157,21 @@ public interface PolarDataService {
     void raceFinishedLoading(TrackedRace race, Runnable callbackWhenRaceChangingToTrackingOfFinishedStatus);
 
     /**
+     * Registers {@code callback} to fire once the polar-data loading pipeline has fully drained
+     * the fixes belonging to {@code race}. Unlike
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)}, this method does <em>not</em> ingest
+     * the race's fixes; it only observes the pipeline. It is safe to call multiple times for the
+     * same race, and before or after {@link #raceFinishedLoading} has been called for it. If
+     * ingestion for the race hasn't started yet, the callback is parked until it does, so that
+     * the callback never fires prematurely on a pipeline that happens to be momentarily idle
+     * before this race's fixes were queued. See bug6241.
+     *
+     * @param callback
+     *            must not be {@code null}
+     */
+    void runWhenPolarLoadingFinishedFor(TrackedRace race, Runnable callback);
+
+    /**
      * See {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)}
      * Always use regression
      */

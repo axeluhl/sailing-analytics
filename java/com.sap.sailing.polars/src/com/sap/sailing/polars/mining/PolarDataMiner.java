@@ -92,6 +92,43 @@ public class PolarDataMiner {
     private final ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
 
     /**
+     * Coordinates callbacks registered through
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} and
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)} such that the callback for a given race
+     * is only registered on the {@link #preFilteringProcessorForLoadedFixes loading pipeline's}
+     * drain <em>after</em> the race's fixes have been queued into that pipeline. Otherwise, a
+     * caller of {@code runWhenPolarLoadingFinishedFor} could register a drain callback while the
+     * pipeline is momentarily idle (before ingestion for that race started), and the callback
+     * would fire immediately, before this race's fixes had even entered the pipeline.
+     * <p>
+     *
+     * Semantics: the map is keyed by races whose fixes have <em>not yet</em> been queued into the
+     * loading pipeline. Values are lists of callbacks parked pending that ingestion. When
+     * ingestion for a race completes queueing all its fixes (see
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)}), the race is removed from this map and
+     * all parked callbacks, together with any callback passed to that {@code raceFinishedLoading}
+     * call itself, are registered on the drain of {@link #preFilteringProcessorForLoadedFixes}.
+     * A race is added to this map by
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} the first time a callback is
+     * registered for it before its ingestion has started; subsequent {@code
+     * runWhenPolarLoadingFinishedFor} calls for a race present in this map append to its list.
+     * Callers of {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} that arrive
+     * <em>after</em> ingestion has completed queueing (race not present in this map at that time)
+     * register their callback on the drain directly. See bug6241.
+     */
+    private final Map<TrackedRace, List<Runnable>> callbacksWaitingForFixIngestion = new HashMap<>();
+
+    /**
+     * Records races whose fixes have been fully queued into
+     * {@link #preFilteringProcessorForLoadedFixes}. Once a race is in this set, a caller of
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} for that race registers
+     * its callback on the drain directly (rather than parking it in
+     * {@link #callbacksWaitingForFixIngestion}). Guarded by the monitor of
+     * {@link #callbacksWaitingForFixIngestion}.
+     */
+    private final Set<TrackedRace> racesWithIngestedFixes = new HashSet<>();
+
+    /**
      * Entry point to the data mining pipeline for incremental updates, usually by races in status
      * {@link TrackedRaceStatusEnum#TRACKING}. It receives its data through the
      * {@link #addFix(GPSFixMoving, Competitor, TrackedRace)} method and targets the same terminal processors
@@ -497,11 +534,6 @@ public class PolarDataMiner {
      *            incremental updates.
      */
     public void raceFinishedLoading(final TrackedRace race, Runnable callbackWhenAllLoadedFixesHaveBeenProcessed) {
-        // TODO bug6241: we could install a second workflow processor chain ending at the same result receivers
-        // (cubicRegressionPerCourseProcessor and speedRegressionPerAngleClusterProcessor), but with the possibility
-        // to call finish() on its entry point, assuming that this call will wait for all processors to finish
-        // (asynchronous) processing. Then, call back to RacingEventService.RaceAdditionListener.raceAdded(...)
-        // somehow, triggering the installation of the maneuver-based wind estimator
         processRacesThatFinishedLoadingExecutor.execute(()->{ // no Subject association necessary here
             logger.info("All queued fixes for newly loaded race will process now. "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName()));
@@ -524,6 +556,19 @@ public class PolarDataMiner {
                     preFilteringProcessorForLoadedFixes.processElement(new GPSFixMovingWithOriginInfo(fix, race, competitor));
                 }
             }
+            // All of this race's fixes have now been submitted to preFilteringProcessorForLoadedFixes.
+            // Any callbacks parked in callbacksWaitingForFixIngestion for this race, along with the
+            // one passed to this method (if any), can now safely be registered on the drain. See bug6241.
+            final List<Runnable> callbacksToRegisterOnDrain;
+            synchronized (callbacksWaitingForFixIngestion) {
+                racesWithIngestedFixes.add(race);
+                callbacksToRegisterOnDrain = callbacksWaitingForFixIngestion.remove(race);
+            }
+            if (callbacksToRegisterOnDrain != null) {
+                for (final Runnable parked : callbacksToRegisterOnDrain) {
+                    preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(parked);
+                }
+            }
             if (callbackWhenAllLoadedFixesHaveBeenProcessed != null) {
                 preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(callbackWhenAllLoadedFixesHaveBeenProcessed);
             }
@@ -531,6 +576,53 @@ public class PolarDataMiner {
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName())
                     + "; stats: " + stats);
         });
+    }
+
+    /**
+     * Registers {@code callback} to fire once the {@link #preFilteringProcessorForLoadedFixes
+     * loading pipeline} has fully drained the fixes belonging to {@code race}. Unlike
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)}, this method does <em>not</em> ingest
+     * the race's fixes into the pipeline; it only observes the pipeline. It may be called any
+     * number of times for the same race, before or after {@code raceFinishedLoading} has been
+     * called for that race:
+     * <ul>
+     *   <li>If ingestion for {@code race} has already completed queueing all its fixes into the
+     *   pipeline (i.e., {@link #raceFinishedLoading} has already run to the point of queueing all
+     *   competitor fixes), {@code callback} is registered on the pipeline's drain immediately.
+     *   Because the pipeline may already have finished processing all fixes by then, {@code
+     *   callback} may run before this method returns (per the semantics of
+     *   {@code AbstractParallelProcessor.runWhenFinishedProcessing}, which invokes the callback
+     *   synchronously when the pipeline is already idle).</li>
+     *   <li>If ingestion for {@code race} has <em>not</em> started or is still in progress,
+     *   {@code callback} is parked in {@link #callbacksWaitingForFixIngestion} and registered on
+     *   the drain by {@link #raceFinishedLoading} once queueing completes. This prevents the
+     *   race condition where a caller registers a drain callback while the pipeline is
+     *   momentarily idle and the callback fires before this race's fixes have entered the
+     *   pipeline.</li>
+     * </ul>
+     * See bug6241.
+     *
+     * @param callback
+     *            must not be {@code null}
+     */
+    public void runWhenPolarLoadingFinishedFor(final TrackedRace race, final Runnable callback) {
+        if (callback == null) {
+            throw new NullPointerException("callback must not be null");
+        }
+        final boolean registerOnDrainImmediately;
+        synchronized (callbacksWaitingForFixIngestion) {
+            if (racesWithIngestedFixes.contains(race)) {
+                registerOnDrainImmediately = true;
+            } else {
+                registerOnDrainImmediately = false;
+                callbacksWaitingForFixIngestion
+                        .computeIfAbsent(race, r -> new ArrayList<>())
+                        .add(callback);
+            }
+        }
+        if (registerOnDrainImmediately) {
+            preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(callback);
+        }
     }
 
     public void registerListener(BoatClass boatClass, PolarsChangedListener listener) {
