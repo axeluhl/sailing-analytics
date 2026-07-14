@@ -14,13 +14,16 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.maneuverdetection.TrackTimeInfo;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.CompleteManeuverCurve;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -34,9 +37,12 @@ import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorIm
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphExportHelper;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphLevel;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.SimpleManeuverForEstimation;
+import com.sap.sailing.windestimation.data.SimpleManeuverForEstimationImpl;
 import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedTypeImpl;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -47,7 +53,6 @@ import com.sap.sailing.windestimation.windinference.WindTrackCalculatorImpl;
 import com.sap.sse.common.Position;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.Util.Triple;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -77,14 +82,30 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     private final static Executor recalculator = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
 
     /**
-     * Contains update requests scheduled by {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}. Adding
-     * and removing elements must {@code synchronize} on this {@link IncrementalMstHmmWindEstimationForTrackedRace} object.
-     * When adding an element and {@link #updateTask} is {@code null}, a new update task must be scheduled and assigned
-     * to {@link #updateTask} while holding this object's monitor ({@code synchronized}). When checking for the next
-     * element to be removed and then deciding to terminate and clear the {@link #updateTask}, also this object's
-     * monitor must be held.
+     * A pending update to be processed by a {@link GraphRecalculationTask}. Two flavors are
+     * supported: {@link NewSpotsUpdate} (from
+     * {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}) which feeds
+     * raw {@link CompleteManeuverCurve}s through the MST/HMM graph before reconciliation, and
+     * {@link PreClassifiedUpdate} (from
+     * {@link #alreadyClassifiedManeuversAvailable(Competitor, Iterable)}) which skips the graph
+     * because the maneuvers already carry their type.
      */
-    private final ConcurrentLinkedDeque<Triple<Competitor, Iterable<CompleteManeuverCurve>, TrackTimeInfo>> updateQueue;
+    private interface PendingUpdate {
+        void apply();
+    }
+
+    /**
+     * Contains update requests scheduled by
+     * {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)} and
+     * {@link #alreadyClassifiedManeuversAvailable(Competitor, Iterable)}. Adding and removing
+     * elements must {@code synchronize} on this
+     * {@link IncrementalMstHmmWindEstimationForTrackedRace} object. When adding an element and
+     * {@link #updateTask} is {@code null}, a new update task must be scheduled and assigned to
+     * {@link #updateTask} while holding this object's monitor ({@code synchronized}). When
+     * checking for the next element to be removed and then deciding to terminate and clear the
+     * {@link #updateTask}, also this object's monitor must be held.
+     */
+    private final ConcurrentLinkedDeque<PendingUpdate> updateQueue;
     
     /**
      * A task that is scheduled with the {@link #recalculator} and is set to a non-{@code null} task if and only if one
@@ -157,7 +178,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         @Override
         public void run() {
             logger.fine(()->"This is a new recalculation task for "+trackedRace.getRaceIdentifier());
-            Triple<Competitor, Iterable<CompleteManeuverCurve>, TrackTimeInfo> nextUpdate;
+            PendingUpdate nextUpdate;
             do {
                 synchronized (IncrementalMstHmmWindEstimationForTrackedRace.this) {
                     nextUpdate = updateQueue.poll();
@@ -169,15 +190,35 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                 }
                 if (nextUpdate != null) {
                     logger.fine(()->"Handling next update task for "+trackedRace.getRaceIdentifier()+"; still "+updateQueue.size()+" tasks in the queue");
-                    updateGraphGenerator(nextUpdate.getA(), nextUpdate.getB(), nextUpdate.getC());
+                    nextUpdate.apply();
                 }
             } while (nextUpdate != null);
         }
-        
-        private void updateGraphGenerator(Competitor competitor, Iterable<CompleteManeuverCurve> newManeuvers, TrackTimeInfo trackTimeInfo) {
-            List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType = new ArrayList<>();
+    }
+
+    /**
+     * The classic path used by incremental maneuver detection:
+     * {@link IncrementalMstHmmWindEstimationForTrackedRace#newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}
+     * enqueues one of these per notification, and its {@link #apply()} runs the raw
+     * {@link CompleteManeuverCurve}s through the MST/HMM graph before reconciling the resulting
+     * wind fixes into the estimated wind track.
+     */
+    private class NewSpotsUpdate implements PendingUpdate {
+        private final Competitor competitor;
+        private final Iterable<CompleteManeuverCurve> newManeuvers;
+        private final TrackTimeInfo trackTimeInfo;
+
+        NewSpotsUpdate(final Competitor competitor, final Iterable<CompleteManeuverCurve> newManeuvers,
+                final TrackTimeInfo trackTimeInfo) {
+            this.competitor = competitor;
+            this.newManeuvers = newManeuvers;
+            this.trackTimeInfo = trackTimeInfo;
+        }
+
+        @Override
+        public void apply() {
             final MstManeuverGraphComponents graphComponents;
-            for (CompleteManeuverCurve newManeuverSpot : newManeuvers) {
+            for (final CompleteManeuverCurve newManeuverSpot : newManeuvers) {
                 // The add(...) method on IncrementalMstManeuverGraphGenerator is synchronized on the one instance per race.
                 // But this newManeuverSpotsDetected method may be called by separate threads for different competitors.
                 // If the calculation takes long, many pooled threads may block, reducing throughput to sequential
@@ -198,54 +239,159 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                 }
             }
             if (graphComponents != null) {
-                Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
-                for (GraphLevelInference<MstGraphLevel> inference : bestPath) {
-                    SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation> maneuverWithEstimatedType = new ManeuverWithEstimatedType(
+                final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType = new ArrayList<>();
+                final Iterable<GraphLevelInference<MstGraphLevel>> bestPath = bestPathsCalculator.getBestNodes(graphComponents);
+                for (final GraphLevelInference<MstGraphLevel> inference : bestPath) {
+                    final SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation> maneuverWithEstimatedType = new ManeuverWithEstimatedType(
                             inference.getGraphLevel().getManeuver(), inference.getGraphNode().getManeuverType(),
                             inference.getConfidence());
                     maneuversWithEstimatedType.add(maneuverWithEstimatedType);
                 }
                 Collections.sort(maneuversWithEstimatedType);
-                List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
-                        .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
-                Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
-                        newWindTrack.size());
-                for (WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
-                    newWindTrackMap.put(wind.getRelativeTo(), wind);
-                }
-                // Now we're adjusting windTrackWithConfidences and the estimatedWindTrack incrementally and consistently
-                // so that afterwards the contents match the newWindTrack
-                // FIXME bug6026: the "consistently" seems to be causing problems when a new wind estimation model is ingested
-                List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
-                estimatedWindTrack.lockForWrite();
-                try {
-                    for (Iterator<WindWithConfidence<Pair<Position, TimePoint>>> previousWindFixesIterator = windTrackWithConfidences
-                            .values().iterator(); previousWindFixesIterator.hasNext();) {
-                        WindWithConfidence<Pair<Position, TimePoint>> previousWind = previousWindFixesIterator.next();
-                        WindWithConfidence<Pair<Position, TimePoint>> newWind = newWindTrackMap
-                                .get(previousWind.getRelativeTo());
-                        if (newWind == null) {
-                            previousWindFixesIterator.remove();
-                            trackedRace.removeWind(previousWind.getObject(), windSource);
-                        } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
-                            previousWindFixesIterator.remove();
-                            trackedRace.removeWind(previousWind.getObject(), windSource);
-                            windFixesToAdd.add(newWind);
-                        }
-                    }
-                    for (WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
-                        if (!windTrackWithConfidences.containsKey(newWind.getRelativeTo())) {
-                            windFixesToAdd.add(newWind);
-                        }
-                    }
-                    for (WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
-                        windTrackWithConfidences.put(windFixToAdd.getRelativeTo(), windFixToAdd);
-                        trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
-                    }
-                } finally {
-                    estimatedWindTrack.unlockAfterWrite();
+                applyManeuverClassificationsToWindTrack(maneuversWithEstimatedType);
+            }
+        }
+    }
+
+    /**
+     * The DB-load / re-adaptation path used by
+     * {@link IncrementalMstHmmWindEstimationForTrackedRace#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}:
+     * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM
+     * graph and go straight to converting them into wind fixes and reconciling into the wind
+     * track. See bug6241.
+     */
+    private class PreClassifiedUpdate implements PendingUpdate {
+        private final Competitor competitor;
+        private final Iterable<Maneuver> maneuvers;
+
+        PreClassifiedUpdate(final Competitor competitor, final Iterable<Maneuver> maneuvers) {
+            this.competitor = competitor;
+            this.maneuvers = maneuvers;
+        }
+
+        @Override
+        public void apply() {
+            final BoatClass boatClass = trackedRace.getRace().getBoatClass();
+            final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType = new ArrayList<>();
+            for (final Maneuver maneuver : maneuvers) {
+                final ManeuverTypeForClassification classification = mapManeuverType(maneuver.getType());
+                if (classification != null) {
+                    // DB-loaded maneuvers are considered clean: they are the ones that were persisted
+                    // after having been accepted as valid, non-penalty-circle maneuvers.
+                    final SimpleManeuverForEstimation forEstimation = new SimpleManeuverForEstimationImpl(
+                            maneuver.getTimePoint(), maneuver.getPosition(),
+                            maneuver.getMainCurveBoundaries().getMiddleCourse(),
+                            maneuver.getSpeedWithBearingBefore(), maneuver.getSpeedWithBearingAfter(),
+                            /* clean */ true, boatClass);
+                    // Full confidence: these maneuvers came from the persistent cache with their
+                    // type already resolved by a prior computation that had all inputs available.
+                    maneuversWithEstimatedType.add(new SimpleManeuverWithEstimatedTypeImpl<>(forEstimation,
+                            classification, /* confidence */ 1.0));
                 }
             }
+            if (!maneuversWithEstimatedType.isEmpty()) {
+                Collections.sort(maneuversWithEstimatedType);
+                logger.fine(()->"Feeding "+maneuversWithEstimatedType.size()+" pre-classified maneuvers from competitor "
+                        +competitor+" into the wind estimation of race "+trackedRace.getRaceIdentifier());
+                applyManeuverClassificationsToWindTrack(maneuversWithEstimatedType);
+            }
+        }
+    }
+
+    /**
+     * Turns a list of already-typed maneuvers into wind fixes via {@link #windTrackCalculator}
+     * and merges them into the {@link #estimatedWindTrack} incrementally and consistently, so
+     * that afterwards the contents match the newly-produced wind track. Extracted from the
+     * previous inline body of {@code GraphRecalculationTask.updateGraphGenerator} so that both
+     * the {@link NewSpotsUpdate MST/HMM path} and the {@link PreClassifiedUpdate DB-load path}
+     * share exactly the same reconciliation semantics.
+     * <p>
+     * FIXME bug6026: the "consistently" seems to be causing problems when a new wind estimation
+     * model is ingested.
+     */
+    private void applyManeuverClassificationsToWindTrack(
+            final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType) {
+        final List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
+                .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
+        final Map<Pair<Position, TimePoint>, WindWithConfidence<Pair<Position, TimePoint>>> newWindTrackMap = new HashMap<>(
+                newWindTrack.size());
+        for (final WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
+            newWindTrackMap.put(wind.getRelativeTo(), wind);
+        }
+        final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
+        estimatedWindTrack.lockForWrite();
+        try {
+            for (Iterator<WindWithConfidence<Pair<Position, TimePoint>>> previousWindFixesIterator = windTrackWithConfidences
+                    .values().iterator(); previousWindFixesIterator.hasNext();) {
+                final WindWithConfidence<Pair<Position, TimePoint>> previousWind = previousWindFixesIterator.next();
+                final WindWithConfidence<Pair<Position, TimePoint>> newWind = newWindTrackMap
+                        .get(previousWind.getRelativeTo());
+                if (newWind == null) {
+                    previousWindFixesIterator.remove();
+                    trackedRace.removeWind(previousWind.getObject(), windSource);
+                } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
+                    previousWindFixesIterator.remove();
+                    trackedRace.removeWind(previousWind.getObject(), windSource);
+                    windFixesToAdd.add(newWind);
+                }
+            }
+            for (final WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
+                if (!windTrackWithConfidences.containsKey(newWind.getRelativeTo())) {
+                    windFixesToAdd.add(newWind);
+                }
+            }
+            for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
+                windTrackWithConfidences.put(windFixToAdd.getRelativeTo(), windFixToAdd);
+                trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
+            }
+        } finally {
+            estimatedWindTrack.unlockAfterWrite();
+        }
+    }
+
+    /**
+     * Maps a domain {@link ManeuverType} to its wind-estimation counterpart, or {@code null} if
+     * the type doesn't correspond to a maneuver kind the wind-track calculator can produce a
+     * wind fix from (e.g., PENALTY_CIRCLE or UNKNOWN). Matches the mapping in
+     * ManeuverWithEstimatedTypeFromManeuverTest.
+     */
+    private static ManeuverTypeForClassification mapManeuverType(final ManeuverType type) {
+        final ManeuverTypeForClassification result;
+        switch (type) {
+        case BEAR_AWAY:
+            result = ManeuverTypeForClassification.BEAR_AWAY;
+            break;
+        case HEAD_UP:
+            result = ManeuverTypeForClassification.HEAD_UP;
+            break;
+        case JIBE:
+            result = ManeuverTypeForClassification.JIBE;
+            break;
+        case TACK:
+            result = ManeuverTypeForClassification.TACK;
+            break;
+        case PENALTY_CIRCLE:
+        case UNKNOWN:
+        default:
+            result = null;
+            break;
+        }
+        return result;
+    }
+
+    /**
+     * Enqueues the given {@link PendingUpdate} and ensures that a {@link GraphRecalculationTask}
+     * exists to process it. Callers must not hold this object's monitor.
+     */
+    private synchronized void submit(final PendingUpdate update) {
+        final boolean queueWasEmpty = updateQueue.isEmpty();
+        updateQueue.add(update);
+        logger.fine(()->"Currently "+updateQueue.size()+" update jobs enqueued for race "+trackedRace.getRaceIdentifier());
+        if (queueWasEmpty && updateTask == null) {
+            logger.fine(()->"Creating a new recalculation task for "+trackedRace.getRaceIdentifier());
+            updateTask = new GraphRecalculationTask();
+            IncrementalMstHmmWindEstimationForTrackedRace.this.notifyAll();
+            recalculator.execute(updateTask);
         }
     }
 
@@ -254,20 +400,22 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * The method is {@code synchronized} to implement the choreography with {@link GraphRecalculationTask} which also synchronizes
      * on this object while trying to fetch the next update from the {@link #updateQueue} and if not having retrieved an element
      * setting {@link #updateTask} to {@code null} and terminating the task.
-     * 
+     *
      * @see #updateTask
      */
     @Override
-    public synchronized void newManeuverSpotsDetected(Competitor competitor, Iterable<CompleteManeuverCurve> newManeuvers, TrackTimeInfo trackTimeInfo) {
-        final boolean queueWasEmpty = updateQueue.isEmpty();
-        updateQueue.add(new Triple<>(competitor, newManeuvers, trackTimeInfo));
-        logger.fine(()->"Currently "+updateQueue.size()+" update jobs enqueued for race "+trackedRace.getRaceIdentifier());
-        if (queueWasEmpty && updateTask == null) {
-            logger.fine(()->"Creating a new recalculation task for "+trackedRace.getRaceIdentifier());
-            updateTask = new GraphRecalculationTask();
-            IncrementalMstHmmWindEstimationForTrackedRace.this.notifyAll();
-            recalculator.execute(updateTask);
-        }
+    public void newManeuverSpotsDetected(final Competitor competitor, final Iterable<CompleteManeuverCurve> newManeuvers,
+            final TrackTimeInfo trackTimeInfo) {
+        submit(new NewSpotsUpdate(competitor, newManeuvers, trackTimeInfo));
+    }
+
+    /**
+     * Enqueues an already-classified-maneuvers hand-off; see
+     * {@link IncrementalWindEstimation#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}.
+     */
+    @Override
+    public void alreadyClassifiedManeuversAvailable(final Competitor competitor, final Iterable<Maneuver> maneuvers) {
+        submit(new PreClassifiedUpdate(competitor, maneuvers));
     }
 
     private boolean isWindNearlySame(Wind oneWind, Wind otherWind) {
