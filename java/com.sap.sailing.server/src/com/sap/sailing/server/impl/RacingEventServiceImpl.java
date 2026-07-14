@@ -2390,7 +2390,8 @@ Replicator {
             final PolarFixCacheUpdater polarFixCacheUpdater = new PolarFixCacheUpdater(trackedRace);
             polarFixCacheUpdaters.put(trackedRace, polarFixCacheUpdater);
             trackedRace.addListener(polarFixCacheUpdater);
-            if (polarDataService != null) {
+            if (polarDataService != null) { // this shouldn't really be necessary after the bug6241 changes as we now
+                                            // require a valid PolarDataService prior to restoring/loading any races
                 trackedRace.setPolarDataService(polarDataService);
             }
             // Schedule installation of the maneuver-based wind estimation on this race.

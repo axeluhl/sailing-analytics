@@ -2869,10 +2869,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 .approximate(from, to);
     }
     
-
     private void ensureManeuverCacheIsFilledForAllCompetitors() {
         maneuverCache.ensureFilled();
     }
+
     public void triggerManeuverCacheRecalculationForAllCompetitors() {
         if (cachesSuspended) {
             triggerManeuverCacheInvalidationForAllCompetitors = true;
