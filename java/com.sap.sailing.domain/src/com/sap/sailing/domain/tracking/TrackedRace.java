@@ -1384,6 +1384,13 @@ public interface TrackedRace
     void setWindEstimation(IncrementalWindEstimation windEstimation);
 
     /**
+     * Returns the currently-installed maneuver-based wind estimation for this race, or
+     * {@code null} if none is installed. Reflects the most recent successful
+     * {@link #setWindEstimation(IncrementalWindEstimation)} call.
+     */
+    IncrementalWindEstimation getWindEstimation();
+
+    /**
      * Obtains a quick, rough summary of the wind conditions during this race, based on a few wind samples at the
      * beginning, in the middle and at the end of the race. This is summarized in a min and max wind speed as well
      * as a single average wind direction.

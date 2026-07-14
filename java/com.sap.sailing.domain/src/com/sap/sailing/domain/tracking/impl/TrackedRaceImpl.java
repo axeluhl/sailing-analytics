@@ -4174,6 +4174,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public IncrementalWindEstimation getWindEstimation() {
+        return windEstimation;
+    }
+
+    @Override
     public void setWindEstimation(IncrementalWindEstimation windEstimation) {
         final IncrementalWindEstimation previousWindEstimation = this.windEstimation;
         if (previousWindEstimation != windEstimation) { // bug5959 comment #15: if maneuvers were sent during initial load of RacingEventService and they were based on the IncrementalWindEstimation just received through initial load of WindEstimationFactoryService, don't re-compute those maneuvers!

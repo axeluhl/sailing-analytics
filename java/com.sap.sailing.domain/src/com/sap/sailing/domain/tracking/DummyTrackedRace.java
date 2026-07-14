@@ -826,6 +826,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public IncrementalWindEstimation getWindEstimation() {
+        return null;
+    }
+
+    @Override
     public TrackingConnectorInfo getTrackingConnectorInfo() {
         return null;
     }
