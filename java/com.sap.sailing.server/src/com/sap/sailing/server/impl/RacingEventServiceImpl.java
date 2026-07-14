@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -596,6 +597,18 @@ Replicator {
 
     private final AtomicInteger numberOfTrackedRacesStillLoading;
 
+    /**
+     * Counts down when {@link #setPolarDataService(PolarDataService)} first receives a non-null
+     * polar-data service. Restoring tracked races (see {@link #restoreTrackedRaces()}) waits on
+     * this latch on a background thread so that every {@link TrackedRace} produced by restore
+     * has a non-null polar-data service already installed when it is added, per the invariant
+     * that a maneuver-based wind estimation should never be built for a race whose polar data
+     * hasn't at least started to become available. See bug6241 and
+     * {@link com.sap.sailing.windestimation.integration.WindEstimationFactoryServiceImpl#createIncrementalWindEstimationTrack}
+     * for the corresponding check on the other end.
+     */
+    private final CountDownLatch polarDataServiceArrived = new CountDownLatch(1);
+
     private final ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker;
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
@@ -961,7 +974,28 @@ Replicator {
             }
         }
         if (restoreTrackedRaces) {
-            restoreTrackedRaces();
+            // bug6241: defer restoration to a background thread that awaits polarDataService
+            // arrival. This way every tracked race added by the restore has a non-null polar
+            // service from the start, matching the invariant that a maneuver-based wind
+            // estimator should only ever be built for a race whose polar service is available.
+            // The alternative -- restoring synchronously in the constructor -- would race
+            // with the OSGi service tracker that installs the PolarDataService, which opens
+            // AFTER RacingEventServiceImpl is constructed (see Activator.start ordering).
+            final Thread deferredRestoreThread = new Thread(() -> {
+                try {
+                    polarDataServiceArrived.await();
+                    restoreTrackedRaces();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.log(Level.WARNING,
+                            "Deferred restoreTrackedRaces was interrupted before PolarDataService arrived; no races restored",
+                            e);
+                } catch (Throwable e) {
+                    logger.log(Level.SEVERE, "Deferred restoreTrackedRaces failed", e);
+                }
+            }, "RacingEventServiceImpl-deferred-restoreTrackedRaces");
+            deferredRestoreThread.setDaemon(true);
+            deferredRestoreThread.start();
         } else {
             getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
         }
@@ -4714,6 +4748,11 @@ Replicator {
             polarDataService = service;
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);
+            // bug6241: unblock the deferred restoreTrackedRaces() background task so it can
+            // now proceed with adding tracked races. Every race added after this point will
+            // observe a non-null polarDataService in this RacingEventServiceImpl and will have
+            // it installed by RaceAdditionListener.raceAdded.
+            polarDataServiceArrived.countDown();
         }
     }
 
@@ -4842,6 +4881,16 @@ Replicator {
 
     public void unsetPolarDataService(PolarDataService service) {
         if (polarDataService == service) {
+            // bug6241: losing the PolarDataService is a serious event -- the maneuver-based
+            // wind estimation depends on it and cannot be usefully constructed while it is
+            // absent (see WindEstimationFactoryServiceImpl.createIncrementalWindEstimationTrack).
+            // We log severe so operators notice; existing tracked-race estimators are torn
+            // down via setPolarDataServiceOnAllTrackedRaces(null) which invokes
+            // TrackedRace.setPolarDataService(null) on each race. If the service is later
+            // re-registered, races that were previously loading their wind estimation will
+            // pick up the new service via scheduleWindEstimationInstallation as usual.
+            logger.log(Level.SEVERE, "PolarDataService has been unregistered from RacingEventService. "
+                    + "Maneuver-based wind estimation is now unavailable until it is re-registered.");
             polarDataService = null;
             setPolarDataServiceOnAllTrackedRaces(null);
         }
