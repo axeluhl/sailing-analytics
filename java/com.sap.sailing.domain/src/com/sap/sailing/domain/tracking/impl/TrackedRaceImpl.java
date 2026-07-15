@@ -221,8 +221,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     /**
      * Dedicated executor for {@link #feedAlreadyKnownManeuversToWindEstimation(IncrementalWindEstimation)}
-     * waiter tasks. These tasks call {@code maneuverCache.get(competitor, /* waitForLatest */
-     * true)} which may block on maneuver-detection futures that themselves run on the shared
+     * waiter tasks. These tasks call {@code maneuverCache.get(competitor, true)} (with
+     * {@code waitForLatest} set to {@code true}), which may block on maneuver-detection futures
+     * that themselves run on the shared
      * {@link ThreadPoolUtil#getDefaultBackgroundTaskThreadPoolExecutor()}. If we scheduled the
      * waiters on that same shared pool, all pool threads would end up blocked in waits while
      * the detection tasks they wait for sit queued behind them -- a classic pool-starvation
@@ -233,7 +234,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private static final ScheduledExecutorService feedManeuversToWindEstimationExecutor =
             ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(
-                    /* size */ Math.max(2, ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize() / 4),
+                    Math.max(2, ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize() / 4),
                     TrackedRaceImpl.class.getSimpleName() + " feedManeuversToWindEstimation");
 
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
