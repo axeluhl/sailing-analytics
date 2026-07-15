@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -217,6 +218,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
+
+    /**
+     * Dedicated executor for {@link #feedAlreadyKnownManeuversToWindEstimation(IncrementalWindEstimation)}
+     * waiter tasks. These tasks call {@code maneuverCache.get(competitor, /* waitForLatest */
+     * true)} which may block on maneuver-detection futures that themselves run on the shared
+     * {@link ThreadPoolUtil#getDefaultBackgroundTaskThreadPoolExecutor()}. If we scheduled the
+     * waiters on that same shared pool, all pool threads would end up blocked in waits while
+     * the detection tasks they wait for sit queued behind them -- a classic pool-starvation
+     * deadlock (observed in CI runs where all "Default background executor" threads were stuck
+     * in FutureTaskWithCancelBlocking.get with 76 queued tasks and no active detection). Using a
+     * separate pool decouples the waiters from the pool that runs the tasks they wait for.
+     * See bug6241.
+     */
+    private static final ScheduledExecutorService feedManeuversToWindEstimationExecutor =
+            ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor(
+                    /* size */ Math.max(2, ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize() / 4),
+                    TrackedRaceImpl.class.getSimpleName() + " feedManeuversToWindEstimation");
 
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
@@ -4232,7 +4250,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void feedAlreadyKnownManeuversToWindEstimation(final IncrementalWindEstimation newWindEstimation) {
         for (final Competitor competitor : getRace().getCompetitors()) {
-            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().execute(() -> {
+            feedManeuversToWindEstimationExecutor.execute(() -> {
                 try {
                     final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
                     if (maneuvers != null && !maneuvers.isEmpty()
