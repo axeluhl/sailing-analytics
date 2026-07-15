@@ -329,6 +329,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String position();
     String windSourcesUsed();
     String windStatisticsLines();
+    String toAllSelected();
     String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
     String feedback();
     String startStopPlaying();
@@ -354,6 +355,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindAverageLine();
     String showWindMinLine();
     String showWindMaxLine();
+    String windStatAvg();
+    String windStatMin();
+    String windStatMax();
     String fleet();
     String boat();
     String boatClass();
