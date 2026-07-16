@@ -43,6 +43,7 @@ import com.sap.sailing.windestimation.data.SimpleManeuverForEstimation;
 import com.sap.sailing.windestimation.data.SimpleManeuverForEstimationImpl;
 import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.SimpleManeuverWithEstimatedTypeImpl;
+import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.model.classifier.maneuver.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.model.regressor.twdtransition.GaussianBasedTwdTransitionDistributionCache;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
@@ -70,6 +71,19 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     private static final Logger logger = Logger.getLogger(IncrementalMstHmmWindEstimationForTrackedRace.class.getName());
 
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_REUSE = 1.0;
+
+    /**
+     * Used by {@link PreClassifiedUpdate} to apply the same maneuver-eligibility filter that
+     * the graph path applies via
+     * {@code CompleteManeuverCurveToManeuverForEstimationConverter}: maneuvers whose direction
+     * change (on either the main curve or the stable-speed-and-course boundaries) is not
+     * classified as {@code REGULAR} are excluded from wind-track contribution. Without this
+     * filter, the DB-load / re-adaptation hand-off would contribute wind fixes for maneuvers
+     * that the graph path silently skips, causing the estimator's track to contain extras at
+     * positions/timepoints the graph path never produces. See bug6241.
+     */
+    private static final ManeuverForEstimationTransformer maneuverEligibilityFilter = new ManeuverForEstimationTransformer();
+
     private final IncrementalMstManeuverGraphGenerator mstManeuverGraphGenerator;
     private final MstBestPathsCalculator bestPathsCalculator;
     private final WindTrackCalculator windTrackCalculator;
@@ -266,7 +280,14 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}:
      * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM
      * graph and go straight to converting them into wind fixes and reconciling into the wind
-     * track. See bug6241.
+     * track. To stay consistent with what the graph path would produce for the same race, this
+     * update applies the same maneuver-eligibility filter that
+     * {@code CompleteManeuverCurveToManeuverForEstimationConverter.convertCleanManeuverSpotToManeuverForEstimation}
+     * applies (via {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis}), and
+     * uses the same {@code middleCourse} accessor that the graph-path adapter uses (see
+     * {@code ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve.getMiddleCourse},
+     * which reads from
+     * {@link Maneuver#getManeuverCurveWithStableSpeedAndCourseBoundaries()}). See bug6241.
      */
     private class PreClassifiedUpdate implements PendingUpdate {
         private final Competitor competitor;
@@ -283,12 +304,18 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType = new ArrayList<>();
             for (final Maneuver maneuver : maneuvers) {
                 final ManeuverTypeForClassification classification = mapManeuverType(maneuver.getType());
-                if (classification != null) {
+                final boolean isEligible = classification != null
+                        && maneuverEligibilityFilter.isManeuverEligibleForAnalysis(
+                                maneuver.getMainCurveBoundaries().getDirectionChangeInDegrees(),
+                                maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getDirectionChangeInDegrees());
+                if (isEligible) {
                     // DB-loaded maneuvers are considered clean: they are the ones that were persisted
                     // after having been accepted as valid, non-penalty-circle maneuvers.
+                    // middleCourse is read from the stable-speed-and-course boundaries to match the
+                    // graph-path adapter (see the class-level Javadoc).
                     final SimpleManeuverForEstimation forEstimation = new SimpleManeuverForEstimationImpl(
                             maneuver.getTimePoint(), maneuver.getPosition(),
-                            maneuver.getMainCurveBoundaries().getMiddleCourse(),
+                            maneuver.getManeuverCurveWithStableSpeedAndCourseBoundaries().getMiddleCourse(),
                             maneuver.getSpeedWithBearingBefore(), maneuver.getSpeedWithBearingAfter(),
                             /* clean */ true, boatClass);
                     // Full confidence: these maneuvers came from the persistent cache with their
