@@ -353,6 +353,22 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         for (final WindWithConfidence<Pair<Position, TimePoint>> wind : newWindTrack) {
             newWindTrackMap.put(wind.getRelativeTo(), wind);
         }
+        // bug6241: mutate the internal windTrackWithConfidences map under the write lock, but
+        // fire the corresponding trackedRace.removeWind/recordWind notifications OUTSIDE it.
+        // Those downstream calls trigger maneuver-cache recalculation, which is the intended
+        // bootstrap: NN+HMM pre-classifies spots -> wind fixes on the estimation track -> the
+        // recalc re-runs detection so existing spots can be re-typed against the updated wind
+        // picture. The re-run reads other wind sources and, in isManeuverSpotWindNearlySame,
+        // also this estimation track (that read is what triggers a re-typing when the
+        // estimation track changes). Holding the write lock across the downstream calls
+        // therefore creates a lock-order inversion with those readers via SmartFutureCache
+        // internals: the estimator holds write on the wind track and then acquires internal
+        // state inside SmartFutureCache.triggerUpdate, while concurrent detection tasks
+        // (running from SmartFutureCache callbacks) try to acquire the wind track's read
+        // lock. Releasing the wind-track write lock before firing the downstream side-effects
+        // removes the inversion. The invariant guarded by the lock -- the contents of
+        // windTrackWithConfidences -- is fully updated by the time we release.
+        final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToRemove = new ArrayList<>();
         final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
         estimatedWindTrack.lockForWrite();
         try {
@@ -363,10 +379,10 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                         .get(previousWind.getRelativeTo());
                 if (newWind == null) {
                     previousWindFixesIterator.remove();
-                    trackedRace.removeWind(previousWind.getObject(), windSource);
+                    windFixesToRemove.add(previousWind);
                 } else if (!isWindNearlySame(newWind.getObject(), previousWind.getObject())) {
                     previousWindFixesIterator.remove();
-                    trackedRace.removeWind(previousWind.getObject(), windSource);
+                    windFixesToRemove.add(previousWind);
                     windFixesToAdd.add(newWind);
                 }
             }
@@ -377,10 +393,17 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
             }
             for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
                 windTrackWithConfidences.put(windFixToAdd.getRelativeTo(), windFixToAdd);
-                trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
             }
         } finally {
             estimatedWindTrack.unlockAfterWrite();
+        }
+        // Apply the collected deltas to the tracked race now that we no longer hold the
+        // estimated wind track's write lock.
+        for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToRemove : windFixesToRemove) {
+            trackedRace.removeWind(windFixToRemove.getObject(), windSource);
+        }
+        for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
+            trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
         }
     }
 
