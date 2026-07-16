@@ -90,6 +90,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
+    private Long zoomFromMillis;
+    private Long zoomToMillis;
 
     private final ColorMapImpl<WindSource> colorMap;
 
@@ -623,12 +625,15 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     /** Which statistic a plot line represents. */
     private enum StatKind { AVG, MIN, MAX }
 
-    /** Computes avg/min/max over a point array. Returns null if there are no valid points. */
-    private static double[] computeStatValues(final Point[] points) {
+    /** Computes avg/min/max over a point array. Returns null if there are no valid points.
+     *  If fromMillis/toMillis are non-null, only points within that time window are included. */
+    private static double[] computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis) {
         double sum = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
         int count = 0;
         for (final Point p : points) {
             if (p != null && p.getY() != null) {
+                if (fromMillis != null && p.getX().longValue() < fromMillis) { continue; }
+                if (toMillis != null && p.getX().longValue() > toMillis) { continue; }
                 final double v = p.getY().doubleValue();
                 sum += v;
                 if (v < min) { min = v; }
@@ -708,7 +713,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final Series series = seriesMap.get(source);
             if (series != null && series.isVisible() && entry.getValue() != null
                     && enabledTypes.contains(source.getType())) {
-                final double[] stats = computeStatValues(entry.getValue());
+                final double[] stats = computeStatValues(entry.getValue(), zoomFromMillis, zoomToMillis);
                 if (stats != null) {
                     final String color = colorMap.getColorByID(source).getAsHtml();
                     final String sourceName = WindSourceTypeFormatter.format(source, stringMessages);
@@ -789,6 +794,22 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
         // in the BaseChart class would not be called 
         chart.redraw();
+    }
+
+    @Override
+    public void onTimeZoomChanged(final Date zoomStartTimepoint, final Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
+        zoomFromMillis = zoomStartTimepoint.getTime();
+        zoomToMillis = zoomEndTimepoint.getTime();
+        updateStatPlotLines();
+    }
+
+    @Override
+    public void onTimeZoomReset() {
+        super.onTimeZoomReset();
+        zoomFromMillis = null;
+        zoomToMillis = null;
+        updateStatPlotLines();
     }
 
     /**
