@@ -11,6 +11,7 @@ import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
 import com.sap.sailing.domain.markpassinghash.impl.MarkPassingRaceFingerprintImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sse.common.Position;
 import com.sap.sse.common.Util;
 
 public class ManeuverRaceFingerprintImpl extends MarkPassingRaceFingerprintImpl implements ManeuverRaceFingerprint {
@@ -66,9 +67,9 @@ public class ManeuverRaceFingerprintImpl extends MarkPassingRaceFingerprintImpl 
                     int k = w.getId() == null ? 0 : w.getId().hashCode();
                     int v = 0;
                     for (Wind wf : trackedRace.getOrCreateWindTrack(w).getFixes()) {
-                        v = v + (int)
-                                ((wf.getPosition() == null ? 0.0 : (wf.getPosition().getLatDeg() + wf.getPosition().getLngDeg()))
-                                 + wf.getKilometersPerHour());
+                        final Position wfPosition = wf.getPosition();
+                        v = v + (int) ((wfPosition==null?0:wfPosition.getLatDeg()) + (wfPosition==null?0:wfPosition.getLngDeg())
+                                + wf.getKilometersPerHour());
                     }
                     res = res ^ k;
                     res = res ^ v;
