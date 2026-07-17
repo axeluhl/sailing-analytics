@@ -15,7 +15,9 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -57,6 +59,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
+    private final List<EventDTO> existingEvents;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -124,11 +127,12 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
      */
     public EventDialog(EventParameterValidator validator, SailingServiceWriteAsync sailingServiceWrite,
             StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
-            Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
+            Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, Collection<EventDTO> existingEvents, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.ensureDebugId("eventDialog");
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
         this.stringMessages = stringMessages;
+        this.existingEvents = new ArrayList<>(existingEvents);
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
             availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
@@ -241,7 +245,36 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         final ScrollPanel leaderboardGroupTab = new ScrollPanel(leaderboardGroupList);
         leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
         tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
-        final ScrollPanel courseAreasTab = new ScrollPanel(courseAreaNameList);
+        final VerticalPanel courseAreasPanel = new VerticalPanel();
+        final ListBox copyFromEventDropDown = createListBox(false);
+        copyFromEventDropDown.addItem(stringMessages.pleaseSelect());
+        for (final EventDTO event : existingEvents) {
+            copyFromEventDropDown.addItem(event.getName(), event.getName());
+        }
+        copyFromEventDropDown.addChangeHandler(e -> {
+            final int selectedIndex = copyFromEventDropDown.getSelectedIndex();
+            if (selectedIndex > 0) {
+                final String selectedEventName = copyFromEventDropDown.getValue(selectedIndex);
+                for (final EventDTO event : existingEvents) {
+                    if (event.getName().equals(selectedEventName)) {
+                        // copy with fresh UUIDs so these become independent course areas of this event
+                        final List<CourseAreaDTO> copies = new ArrayList<>();
+                        for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
+                            copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                        }
+                        courseAreaNameList.setValue(copies);
+                        break;
+                    }
+                }
+            }
+        });
+        final HorizontalPanel copyFromPanel = new HorizontalPanel();
+        copyFromPanel.setSpacing(3);
+        copyFromPanel.add(new Label(stringMessages.copyCourseAreasFromEvent()));
+        copyFromPanel.add(copyFromEventDropDown);
+        courseAreasPanel.add(copyFromPanel);
+        courseAreasPanel.add(courseAreaNameList);
+        final ScrollPanel courseAreasTab = new ScrollPanel(courseAreasPanel);
         courseAreasTab.ensureDebugId("CourseAreasTab");
         tabPanel.add(courseAreasTab, stringMessages.courseAreas());
         final ScrollPanel imagesTab = new ScrollPanel(imagesListComposite);

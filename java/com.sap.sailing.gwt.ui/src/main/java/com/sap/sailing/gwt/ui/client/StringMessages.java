@@ -1457,6 +1457,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String createDefaultRegattaLeaderboard();
     String doYouWantToCreateADefaultRegattaLeaderboard();
     String copyCourse();
+    String copyCourseAreasFromEvent();
     String copyCompetitors();
     String smartphoneTracking();
     String titelOfChooseNameDialog();
