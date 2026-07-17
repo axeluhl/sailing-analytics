@@ -4244,25 +4244,40 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * {@link IncrementalWindEstimation#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}.
      * <p>
      *
+     * Only invoked when the {@link #maneuverCache} is <em>not</em> updatable via computation
+     * (i.e., the maneuvers were loaded from the persistent cache as
+     * {@link com.sap.sailing.domain.maneuverhash.impl.ManeuversFromDatabase}). In the compute
+     * path -- a {@link com.sap.sailing.domain.maneuverhash.impl.ManeuversFromSmartFutureCache}
+     * -- detection produces the same maneuvers and the maneuver detector will invoke
+     * {@link IncrementalWindEstimation#newManeuverSpotsDetected} on the newly installed
+     * estimator, which drives the NN+HMM graph path and produces the wind fixes with the
+     * proper cross-competitor spatial and temporal proximity awareness. Feeding the same
+     * maneuvers a second time via {@code alreadyClassifiedManeuversAvailable} would produce
+     * per-competitor slices without that MST aggregation and would clobber the correct
+     * fixes through the reconciliation step of {@code applyManeuverClassificationsToWindTrack}
+     * -- see bug6241.
+     * <p>
+     *
      * The task guards against being obsoleted by a subsequent {@link #setWindEstimation} that
      * replaces {@code newWindEstimation}: before performing the hand-off it checks that the
      * race's current {@link #windEstimation} is still the same instance it was scheduled with.
-     * See bug6241.
      */
     private void feedAlreadyKnownManeuversToWindEstimation(final IncrementalWindEstimation newWindEstimation) {
-        for (final Competitor competitor : getRace().getCompetitors()) {
-            feedManeuversToWindEstimationExecutor.execute(() -> {
-                try {
-                    final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
-                    if (maneuvers != null && !maneuvers.isEmpty()
-                            && TrackedRaceImpl.this.windEstimation == newWindEstimation) {
-                        newWindEstimation.alreadyClassifiedManeuversAvailable(competitor, maneuvers);
+        if (!maneuverCache.canBeUpdated()) {
+            for (final Competitor competitor : getRace().getCompetitors()) {
+                feedManeuversToWindEstimationExecutor.execute(() -> {
+                    try {
+                        final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
+                        if (maneuvers != null && !maneuvers.isEmpty()
+                                && TrackedRaceImpl.this.windEstimation == newWindEstimation) {
+                            newWindEstimation.alreadyClassifiedManeuversAvailable(competitor, maneuvers);
+                        }
+                    } catch (Throwable e) {
+                        logger.log(Level.WARNING, "Failed to feed already-known maneuvers of competitor " + competitor
+                                + " into the wind estimation of race " + getRaceIdentifier(), e);
                     }
-                } catch (Throwable e) {
-                    logger.log(Level.WARNING, "Failed to feed already-known maneuvers of competitor " + competitor
-                            + " into the wind estimation of race " + getRaceIdentifier(), e);
-                }
-            });
+                });
+            }
         }
     }
 
