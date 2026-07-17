@@ -279,7 +279,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * The DB-load / re-adaptation path used by
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}:
      * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM
-     * graph and go straight to converting them into wind fixes and reconciling into the wind
+     * graph and go straight to converting them into wind fixes and adding them into the wind
      * track. To stay consistent with what the graph path would produce for the same race, this
      * update applies the same maneuver-eligibility filter that
      * {@code CompleteManeuverCurveToManeuverForEstimationConverter.convertCleanManeuverSpotToManeuverForEstimation}
@@ -287,7 +287,19 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * uses the same {@code middleCourse} accessor that the graph-path adapter uses (see
      * {@code ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve.getMiddleCourse},
      * which reads from
-     * {@link Maneuver#getManeuverCurveWithStableSpeedAndCourseBoundaries()}). See bug6241.
+     * {@link Maneuver#getManeuverCurveWithStableSpeedAndCourseBoundaries()}).
+     * <p>
+     *
+     * Unlike {@link NewSpotsUpdate}, this update is scheduled <em>per competitor</em>: the
+     * caller (e.g. {@code TrackedRaceImpl.feedAlreadyKnownManeuversToWindEstimation}) fires
+     * one update per competitor with just that competitor's maneuvers. Consequently, the
+     * corresponding {@code newWindTrack} produced by {@link #windTrackCalculator} covers only
+     * that competitor's contribution -- not the whole race. The reconciliation body of
+     * {@link #applyManeuverClassificationsToWindTrack} is designed for whole-race inputs
+     * (produced by the MST graph across all competitors) and would remove all other
+     * competitors' fixes on every per-competitor call. This update therefore uses the
+     * additive-only helper {@link #addManeuverClassificationsToWindTrack} which inserts
+     * missing fixes without removing existing ones. See bug6241.
      */
     private class PreClassifiedUpdate implements PendingUpdate {
         private final Competitor competitor;
@@ -328,7 +340,7 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
                 Collections.sort(maneuversWithEstimatedType);
                 logger.fine(()->"Feeding "+maneuversWithEstimatedType.size()+" pre-classified maneuvers from competitor "
                         +competitor+" into the wind estimation of race "+trackedRace.getRaceIdentifier());
-                applyManeuverClassificationsToWindTrack(maneuversWithEstimatedType);
+                addManeuverClassificationsToWindTrack(maneuversWithEstimatedType);
             }
         }
     }
@@ -401,6 +413,47 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
         // estimated wind track's write lock.
         for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToRemove : windFixesToRemove) {
             trackedRace.removeWind(windFixToRemove.getObject(), windSource);
+        }
+        for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
+            trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
+        }
+    }
+
+    /**
+     * Additive-only counterpart of {@link #applyManeuverClassificationsToWindTrack}: inserts
+     * any wind fixes for {@code maneuversWithEstimatedType} that are not already present in
+     * {@link #windTrackWithConfidences}, and does <em>not</em> remove any pre-existing fixes.
+     * Used by the DB-load / re-adaptation path ({@link PreClassifiedUpdate}) which invokes
+     * per competitor: the corresponding {@code newWindTrack} covers only one competitor's
+     * contribution, so the full reconciliation of
+     * {@link #applyManeuverClassificationsToWindTrack} would clobber fixes belonging to
+     * other competitors on every call. Additive semantics are correct here because the DB
+     * load supplies the whole race's typed maneuvers across the successive per-competitor
+     * calls, and the union of those per-competitor wind fixes is the intended track content.
+     * See bug6241.
+     * <p>
+     *
+     * As with {@link #applyManeuverClassificationsToWindTrack}, the mutation of
+     * {@link #windTrackWithConfidences} happens under the wind track's write lock and the
+     * corresponding {@code trackedRace.recordWind} notifications are fired outside the lock
+     * to avoid a lock-order inversion with concurrent maneuver detection reading the wind
+     * track.
+     */
+    private void addManeuverClassificationsToWindTrack(
+            final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType) {
+        final List<WindWithConfidence<Pair<Position, TimePoint>>> newWindTrack = windTrackCalculator
+                .getWindTrackFromManeuverClassifications(maneuversWithEstimatedType);
+        final List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAdd = new ArrayList<>();
+        estimatedWindTrack.lockForWrite();
+        try {
+            for (final WindWithConfidence<Pair<Position, TimePoint>> newWind : newWindTrack) {
+                if (!windTrackWithConfidences.containsKey(newWind.getRelativeTo())) {
+                    windTrackWithConfidences.put(newWind.getRelativeTo(), newWind);
+                    windFixesToAdd.add(newWind);
+                }
+            }
+        } finally {
+            estimatedWindTrack.unlockAfterWrite();
         }
         for (final WindWithConfidence<Pair<Position, TimePoint>> windFixToAdd : windFixesToAdd) {
             trackedRace.recordWind(windFixToAdd.getObject(), windSource, false);
