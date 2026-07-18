@@ -20,6 +20,7 @@ import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.Style;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
@@ -29,6 +30,7 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.PlotLineLabel;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
@@ -79,23 +81,17 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private final Map<WindSource, Point[]> windSourceDirectionPoints;
     private final Map<WindSource, Point[]> windSourceSpeedPoints;
     private Point firstPointOfFirstSeries;
-    private PlotLine directionAveragePlotLine;
-    private PlotLine directionMinPlotLine;
-    private PlotLine directionMaxPlotLine;
-    private PlotLine speedAveragePlotLine;
-    private PlotLine speedMinPlotLine;
-    private PlotLine speedMaxPlotLine;
-    private double directionRunningAvg;
-    private double directionRunningMin;
-    private double directionRunningMax;
-    private int directionPointCount;
-    private double speedRunningAvg;
-    private double speedRunningMin;
-    private double speedRunningMax;
-    private int speedPointCount;
+    private final Map<WindSource, PlotLine> directionAvgPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, PlotLine> directionMinPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, PlotLine> directionMaxPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, PlotLine> speedAvgPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, PlotLine> speedMinPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, PlotLine> speedMaxPlotLines = new HashMap<WindSource, PlotLine>();
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
+    private Long zoomFromMillis;
+    private Long zoomToMillis;
 
     private final ColorMapImpl<WindSource> colorMap;
 
@@ -147,7 +143,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
         chart.setStyleName(chartsCss.chartStyle());
-        ChartUtil.useCheckboxesToShowAndHide(chart);
+        ChartUtil.useCheckboxesToShowAndHide(chart, this::updateStatPlotLines);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -195,12 +191,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             }
         }));
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
-        directionAveragePlotLine = chart.getYAxis(0).createPlotLine().setColor("#2060C0").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
-        directionMinPlotLine = chart.getYAxis(0).createPlotLine().setColor("#20A020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
-        directionMaxPlotLine = chart.getYAxis(0).createPlotLine().setColor("#C02020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
-        speedAveragePlotLine = chart.getYAxis(1).createPlotLine().setColor("#2060C0").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
-        speedMinPlotLine = chart.getYAxis(1).createPlotLine().setColor("#20A020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
-        speedMaxPlotLine = chart.getYAxis(1).createPlotLine().setColor("#C02020").setWidth(1.5).setDashStyle(DashStyle.SHORT_DASH);
 
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -396,9 +386,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                        && windSourceDirectionPoints.get(windSource).length != 0) {
                 previousDirectionPoint = windSourceDirectionPoints.get(windSource)[windSourceDirectionPoints.get(windSource).length - 1];
             }
-            if (!append) {
-                resetStatAccumulators();
-            }
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
@@ -429,20 +416,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     }
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
-                    final double dirVal = newDirectionPoint.getY().doubleValue();
-                    directionPointCount++;
-                    directionRunningAvg += (dirVal - directionRunningAvg) / directionPointCount;
-                    if (dirVal < directionRunningMin) { directionRunningMin = dirVal; }
-                    if (dirVal > directionRunningMax) { directionRunningMax = dirVal; }
                     Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
-                    if (wind.dampenedTrueWindSpeedInKnots != null) {
-                        final double spdVal = wind.dampenedTrueWindSpeedInKnots;
-                        speedPointCount++;
-                        speedRunningAvg += (spdVal - speedRunningAvg) / speedPointCount;
-                        if (spdVal < speedRunningMin) { speedRunningMin = spdVal; }
-                        if (spdVal > speedRunningMax) { speedRunningMax = spdVal; }
-                    }
                 }
             }
             
@@ -478,7 +453,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         
         timeOfEarliestRequestInMillis = newMinTimepoint;
         timeOfLatestRequestInMillis = newMaxTimepoint;
-        updateStatPlotLines();
     }
 
     @Override
@@ -506,25 +480,59 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         }
         settings.setShowWindDirectionsSeries(newSettings.isShowWindDirectionsSeries());
         settings.setWindDirectionSourcesToDisplay(newSettings.getWindDirectionSourcesToDisplay());
-
         settings.setShowWindSpeedSeries(newSettings.isShowWindSpeedSeries());
         settings.setWindSpeedSourcesToDisplay(newSettings.getWindSpeedSourcesToDisplay());
         if (!oldWindSourceTypesToRequest.equals(getNamesOfWindSourceTypesOfWhichToDisplaySpeedOrDirection())) {
             clearCacheAndReload = true;
         }
-        final boolean statLinesChanged = settings.isShowAverageLine() != newSettings.isShowAverageLine()
-                || settings.isShowMinLine() != newSettings.isShowMinLine()
-                || settings.isShowMaxLine() != newSettings.isShowMaxLine();
-        settings.setShowAverageLine(newSettings.isShowAverageLine());
-        settings.setShowMinLine(newSettings.isShowMinLine());
-        settings.setShowMaxLine(newSettings.isShowMaxLine());
+        final boolean dirAvgChanged = !settings.getDirectionAvgSources().equals(newSettings.getDirectionAvgSources());
+        final boolean dirMinChanged = !settings.getDirectionMinSources().equals(newSettings.getDirectionMinSources());
+        final boolean dirMaxChanged = !settings.getDirectionMaxSources().equals(newSettings.getDirectionMaxSources());
+        final boolean spdAvgChanged = !settings.getSpeedAvgSources().equals(newSettings.getSpeedAvgSources());
+        final boolean spdMinChanged = !settings.getSpeedMinSources().equals(newSettings.getSpeedMinSources());
+        final boolean spdMaxChanged = !settings.getSpeedMaxSources().equals(newSettings.getSpeedMaxSources());
+        settings.setDirectionAvgSources(newSettings.getDirectionAvgSources());
+        settings.setDirectionMinSources(newSettings.getDirectionMinSources());
+        settings.setDirectionMaxSources(newSettings.getDirectionMaxSources());
+        settings.setDirectionAvgBulk(newSettings.isDirectionAvgBulk());
+        settings.setDirectionMinBulk(newSettings.isDirectionMinBulk());
+        settings.setDirectionMaxBulk(newSettings.isDirectionMaxBulk());
+        settings.setSpeedAvgSources(newSettings.getSpeedAvgSources());
+        settings.setSpeedMinSources(newSettings.getSpeedMinSources());
+        settings.setSpeedMaxSources(newSettings.getSpeedMaxSources());
+        settings.setSpeedAvgBulk(newSettings.isSpeedAvgBulk());
+        settings.setSpeedMinBulk(newSettings.isSpeedMinBulk());
+        settings.setSpeedMaxBulk(newSettings.isSpeedMaxBulk());
         if (clearCacheAndReload) {
             clearCacheAndReload();
         }
-        if (statLinesChanged) {
-            updateStatPlotLines();
-        }
         updateVisibleSeries();
+        if (!clearCacheAndReload) {
+            if (dirAvgChanged) {
+                updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                        settings.getDirectionAvgSources(), directionAvgPlotLines, StatKind.AVG, true);
+            }
+            if (dirMinChanged) {
+                updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                        settings.getDirectionMinSources(), directionMinPlotLines, StatKind.MIN, true);
+            }
+            if (dirMaxChanged) {
+                updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                        settings.getDirectionMaxSources(), directionMaxPlotLines, StatKind.MAX, true);
+            }
+            if (spdAvgChanged) {
+                updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                        settings.getSpeedAvgSources(), speedAvgPlotLines, StatKind.AVG, false);
+            }
+            if (spdMinChanged) {
+                updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                        settings.getSpeedMinSources(), speedMinPlotLines, StatKind.MIN, false);
+            }
+            if (spdMaxChanged) {
+                updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                        settings.getSpeedMaxSources(), speedMaxPlotLines, StatKind.MAX, false);
+            }
+        }
     }
 
     private void clearCacheAndReload() {
@@ -533,19 +541,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
         firstPointOfFirstSeries = null;
-        resetStatAccumulators();
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
-    }
-
-    private void resetStatAccumulators() {
-        directionRunningAvg = 0;
-        directionRunningMin = Double.MAX_VALUE;
-        directionRunningMax = -Double.MAX_VALUE;
-        directionPointCount = 0;
-        speedRunningAvg = 0;
-        speedRunningMin = Double.MAX_VALUE;
-        speedRunningMax = -Double.MAX_VALUE;
-        speedPointCount = 0;
     }
 
     /**
@@ -574,6 +570,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                                 if (result != null) {
                                     updateChartSeries(result, append);
                                     updateVisibleSeries();
+                                    updateStatPlotLines();
                                 } else {
                                     if (!append) {
                                         clearChart(); // no wind known for untracked race
@@ -609,51 +606,146 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         removeStatPlotLines();
     }
 
+    /** Removes all six stat plot lines (avg/min/max for direction and speed) from the chart and clears the maps. */
     private void removeStatPlotLines() {
-        chart.getYAxis(0).removePlotLine(directionAveragePlotLine);
-        chart.getYAxis(0).removePlotLine(directionMinPlotLine);
-        chart.getYAxis(0).removePlotLine(directionMaxPlotLine);
-        chart.getYAxis(1).removePlotLine(speedAveragePlotLine);
-        chart.getYAxis(1).removePlotLine(speedMinPlotLine);
-        chart.getYAxis(1).removePlotLine(speedMaxPlotLine);
+        for (final PlotLine pl : directionAvgPlotLines.values()) { chart.getYAxis(0).removePlotLine(pl); }
+        for (final PlotLine pl : directionMinPlotLines.values()) { chart.getYAxis(0).removePlotLine(pl); }
+        for (final PlotLine pl : directionMaxPlotLines.values()) { chart.getYAxis(0).removePlotLine(pl); }
+        for (final PlotLine pl : speedAvgPlotLines.values()) { chart.getYAxis(1).removePlotLine(pl); }
+        for (final PlotLine pl : speedMinPlotLines.values()) { chart.getYAxis(1).removePlotLine(pl); }
+        for (final PlotLine pl : speedMaxPlotLines.values()) { chart.getYAxis(1).removePlotLine(pl); }
+        directionAvgPlotLines.clear();
+        directionMinPlotLines.clear();
+        directionMaxPlotLines.clear();
+        speedAvgPlotLines.clear();
+        speedMinPlotLines.clear();
+        speedMaxPlotLines.clear();
     }
 
+    /** Which statistic a plot line represents. */
+    private enum StatKind { AVG, MIN, MAX }
+
+    /** Computes avg/min/max over a point array. Returns null if there are no valid points.
+     *  If fromMillis/toMillis are non-null, only points within that time window are included. */
+    private static double[] computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis) {
+        double sum = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+        int count = 0;
+        for (final Point p : points) {
+            if (p != null && p.getY() != null) {
+                if (fromMillis != null && p.getX().longValue() < fromMillis) { continue; }
+                if (toMillis != null && p.getX().longValue() > toMillis) { continue; }
+                final double v = p.getY().doubleValue();
+                sum += v;
+                if (v < min) { min = v; }
+                if (v > max) { max = v; }
+                count++;
+            }
+        }
+        if (count == 0) {
+            return null;
+        }
+        return new double[]{sum / count, min, max};
+    }
+
+    /**
+     * Creates a single stat plot line. Direction lines are dashed, speed lines are dotted.
+     * Avg is drawn thicker than min/max. The label sits on the left for direction, right for speed.
+     * The line color is a darkened version of the series color so it stands out from the main line.
+     */
+    private PlotLine buildStatPlotLine(final int yAxisIndex, final String color, final double value,
+            final StatKind kind, final boolean isDirection, final String labelText) {
+        final DashStyle dashStyle = isDirection ? DashStyle.DASH : DashStyle.DOT;
+        final double width = isDirection
+                ? (kind == StatKind.AVG ? 2 : 1.5)
+                : (kind == StatKind.AVG ? 3 : 2);
+        final PlotLineLabel.Align align = isDirection ? PlotLineLabel.Align.LEFT : PlotLineLabel.Align.RIGHT;
+        final int labelX = isDirection ? 4 : -4;
+        final String lineColor = darkenColor(color, 0.65);
+        final PlotLine pl = chart.getYAxis(yAxisIndex).createPlotLine()
+                .setColor(lineColor)
+                .setWidth(width)
+                .setDashStyle(dashStyle)
+                .setZIndex(5)
+                .setLabel(new PlotLineLabel()
+                        .setText(labelText)
+                        .setAlign(align)
+                        .setX(labelX)
+                        .setY(-4)
+                        .setStyle(new Style().setOption("fontSize", "11px").setOption("color", lineColor)));
+        pl.setValue(value);
+        return pl;
+    }
+
+    /** Multiplies each RGB channel by factor to produce a darker shade of the given hex color. */
+    private static String darkenColor(final String hex, final double factor) {
+        final String h = hex.startsWith("#") ? hex.substring(1) : hex;
+        final int r = (int) (Integer.parseInt(h.substring(0, 2), 16) * factor);
+        final int g = (int) (Integer.parseInt(h.substring(2, 4), 16) * factor);
+        final int b = (int) (Integer.parseInt(h.substring(4, 6), 16) * factor);
+        return "#" + toHex2(r) + toHex2(g) + toHex2(b);
+    }
+
+    private static String toHex2(final int v) {
+        final String s = Integer.toHexString(v);
+        return s.length() < 2 ? "0" + s : s;
+    }
+
+    /**
+     * Redraws the plot lines for one stat type (avg, min, or max) on one axis.
+     * Removes the old lines first, then adds a new line for each visible source whose type
+     * appears in enabledTypes. Called individually per stat so only the changed ones are redrawn.
+     */
+    private void updateStatPlotLinesForStat(
+            final Map<WindSource, Point[]> pointsMap,
+            final Map<WindSource, Series> seriesMap,
+            final int yAxisIndex,
+            final Set<WindSourceType> enabledTypes,
+            final Map<WindSource, PlotLine> plotLineMap,
+            final StatKind kind,
+            final boolean isDirection) {
+        for (final PlotLine pl : plotLineMap.values()) {
+            chart.getYAxis(yAxisIndex).removePlotLine(pl);
+        }
+        plotLineMap.clear();
+        final NumberFormat fmt = NumberFormat.getFormat("0.#");
+        for (final Map.Entry<WindSource, Point[]> entry : pointsMap.entrySet()) {
+            final WindSource source = entry.getKey();
+            final Series series = seriesMap.get(source);
+            if (series != null && series.isVisible() && entry.getValue() != null
+                    && enabledTypes.contains(source.getType())) {
+                final double[] stats = computeStatValues(entry.getValue(), zoomFromMillis, zoomToMillis);
+                if (stats != null) {
+                    final String color = colorMap.getColorByID(source).getAsHtml();
+                    final String sourceName = WindSourceTypeFormatter.format(source, stringMessages);
+                    final double statValue = kind == StatKind.AVG ? stats[0] : (kind == StatKind.MIN ? stats[1] : stats[2]);
+                    final String kindLabel = kind == StatKind.AVG ? stringMessages.windStatAvg()
+                            : (kind == StatKind.MIN ? stringMessages.windStatMin() : stringMessages.windStatMax());
+                    final String unit = isDirection ? stringMessages.degreesShort() : stringMessages.knotsUnit();
+                    final String labelText = kindLabel + " " + sourceName + ": " + fmt.format(statValue) + unit;
+                    final PlotLine pl = buildStatPlotLine(yAxisIndex, color, statValue, kind, isDirection, labelText);
+                    chart.getYAxis(yAxisIndex).addPlotLines(pl);
+                    plotLineMap.put(source, pl);
+                }
+            }
+        }
+    }
+
+    /** Redraws all six stat plot lines at once. Used when all of them need to refresh together —
+     *  after new data loads or when a legend series is toggled. When only one stat setting changes
+     *  in the dialog, updateStatPlotLinesForStat is called directly for just that one. */
     private void updateStatPlotLines() {
-        removeStatPlotLines();
-        final boolean showAvg = settings.isShowAverageLine();
-        final boolean showMin = settings.isShowMinLine();
-        final boolean showMax = settings.isShowMaxLine();
-        if (!showAvg && !showMin && !showMax) {
-            return;
-        }
-        if (directionPointCount > 0) {
-            if (showAvg) {
-                directionAveragePlotLine.setValue(directionRunningAvg);
-                chart.getYAxis(0).addPlotLines(directionAveragePlotLine);
-            }
-            if (showMin) {
-                directionMinPlotLine.setValue(directionRunningMin);
-                chart.getYAxis(0).addPlotLines(directionMinPlotLine);
-            }
-            if (showMax) {
-                directionMaxPlotLine.setValue(directionRunningMax);
-                chart.getYAxis(0).addPlotLines(directionMaxPlotLine);
-            }
-        }
-        if (speedPointCount > 0) {
-            if (showAvg) {
-                speedAveragePlotLine.setValue(speedRunningAvg);
-                chart.getYAxis(1).addPlotLines(speedAveragePlotLine);
-            }
-            if (showMin) {
-                speedMinPlotLine.setValue(speedRunningMin);
-                chart.getYAxis(1).addPlotLines(speedMinPlotLine);
-            }
-            if (showMax) {
-                speedMaxPlotLine.setValue(speedRunningMax);
-                chart.getYAxis(1).addPlotLines(speedMaxPlotLine);
-            }
-        }
+        updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                settings.getDirectionAvgSources(), directionAvgPlotLines, StatKind.AVG, true);
+        updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                settings.getDirectionMinSources(), directionMinPlotLines, StatKind.MIN, true);
+        updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
+                settings.getDirectionMaxSources(), directionMaxPlotLines, StatKind.MAX, true);
+        updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                settings.getSpeedAvgSources(), speedAvgPlotLines, StatKind.AVG, false);
+        updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                settings.getSpeedMinSources(), speedMinPlotLines, StatKind.MIN, false);
+        updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
+                settings.getSpeedMaxSources(), speedMaxPlotLines, StatKind.MAX, false);
     }
 
     /**
@@ -702,6 +794,22 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
         // in the BaseChart class would not be called 
         chart.redraw();
+    }
+
+    @Override
+    public void onTimeZoomChanged(final Date zoomStartTimepoint, final Date zoomEndTimepoint) {
+        super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
+        zoomFromMillis = zoomStartTimepoint.getTime();
+        zoomToMillis = zoomEndTimepoint.getTime();
+        updateStatPlotLines();
+    }
+
+    @Override
+    public void onTimeZoomReset() {
+        super.onTimeZoomReset();
+        zoomFromMillis = null;
+        zoomToMillis = null;
+        updateStatPlotLines();
     }
 
     /**
@@ -792,7 +900,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
         windSpeedSourcesToDisplay.add(type);
         windDirectionSourcesToDisplay.add(type);
-        WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true, windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(), settings.isShowAverageLine(), settings.isShowMinLine(), settings.isShowMaxLine());
+        WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true, windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(), settings.getDirectionAvgSources(), settings.getDirectionMinSources(), settings.getDirectionMaxSources(), settings.isDirectionAvgBulk(), settings.isDirectionMinBulk(), settings.isDirectionMaxBulk(), settings.getSpeedAvgSources(), settings.getSpeedMinSources(), settings.getSpeedMaxSources(), settings.isSpeedAvgBulk(), settings.isSpeedMinBulk(), settings.isSpeedMaxBulk());
         updateSettings(patched);
         preselectFilter = windprovider;
         updateVisibleSeries();
