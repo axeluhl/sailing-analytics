@@ -639,10 +639,13 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 count++;
             }
         }
+        final double[] result;
         if (count == 0) {
-            return null;
+            result = null;
+        } else {
+            result = new double[]{sum / count, min, max};
         }
-        return new double[]{sum / count, min, max};
+        return result;
     }
 
     /**
