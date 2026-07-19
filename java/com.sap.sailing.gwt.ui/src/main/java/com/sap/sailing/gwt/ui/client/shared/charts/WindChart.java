@@ -238,7 +238,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     private void updateVisibleSeries() {
         final Set<Series> visibleSeries = new HashSet<Series>(Arrays.asList(chart.getSeries()));
-
         if (preselectFilter != null) {
             forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
             forceSeriesSelection(visibleSeries, windSourceSpeedSeries);
@@ -250,7 +249,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final Set<WindSourceType> speedSourceTypesToDisplay = settings.getWindSpeedSourcesToDisplay();
             updateSeries(visibleSeries, windSourceSpeedSeries, showSpeedSeries, speedSourceTypesToDisplay);
         }
-
         onResize();
     }
 
@@ -892,15 +890,21 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     /**
-     * Forces the display of a specific windProvider preselected, and all of same type unselected. Will be disabled by either updateSettings or once the provider was properly found and shown
+     * Forces the display of a specific windProvider preselected, and all of same type unselected. Will be disabled by
+     * either updateSettings or once the provider was properly found and shown
      */
     public void showProvider(WindSource windprovider) {
-        WindSourceType type = windprovider.getType();
-        Set<WindSourceType> windSpeedSourcesToDisplay = new HashSet<>();
-        Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
+        final WindSourceType type = windprovider.getType();
+        final Set<WindSourceType> windSpeedSourcesToDisplay = new HashSet<>();
+        final Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
         windSpeedSourcesToDisplay.add(type);
         windDirectionSourcesToDisplay.add(type);
-        WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true, windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(), settings.getDirectionAvgSources(), settings.getDirectionMinSources(), settings.getDirectionMaxSources(), settings.isDirectionAvgBulk(), settings.isDirectionMinBulk(), settings.isDirectionMaxBulk(), settings.getSpeedAvgSources(), settings.getSpeedMinSources(), settings.getSpeedMaxSources(), settings.isSpeedAvgBulk(), settings.isSpeedMinBulk(), settings.isSpeedMaxBulk());
+        final WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true,
+                windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(),
+                settings.getDirectionAvgSources(), settings.getDirectionMinSources(), settings.getDirectionMaxSources(),
+                settings.isDirectionAvgBulk(), settings.isDirectionMinBulk(), settings.isDirectionMaxBulk(),
+                settings.getSpeedAvgSources(), settings.getSpeedMinSources(), settings.getSpeedMaxSources(),
+                settings.isSpeedAvgBulk(), settings.isSpeedMinBulk(), settings.isSpeedMaxBulk());
         updateSettings(patched);
         preselectFilter = windprovider;
         updateVisibleSeries();
