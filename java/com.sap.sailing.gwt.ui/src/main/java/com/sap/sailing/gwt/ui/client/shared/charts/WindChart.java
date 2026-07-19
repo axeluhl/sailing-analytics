@@ -630,20 +630,21 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         int count = 0;
         for (final Point p : points) {
             if (p != null && p.getY() != null) {
-                if (fromMillis != null && p.getX().longValue() < fromMillis) { continue; }
-                if (toMillis != null && p.getX().longValue() > toMillis) { continue; }
-                final double v = p.getY().doubleValue();
-                sum += v;
-                if (v < min) { min = v; }
-                if (v > max) { max = v; }
-                count++;
+                if ((fromMillis == null || p.getX().longValue() >= fromMillis)
+                 && (toMillis == null || p.getX().longValue() <= toMillis)) {
+                    final double v = p.getY().doubleValue();
+                    sum += v;
+                    if (v < min) { min = v; }
+                    if (v > max) { max = v; }
+                    count++;
+                }
             }
         }
         final double[] result;
         if (count == 0) {
             result = null;
         } else {
-            result = new double[]{sum / count, min, max};
+            result = new double[] { sum / count, min, max };
         }
         return result;
     }
