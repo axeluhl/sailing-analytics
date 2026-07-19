@@ -370,32 +370,26 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
-
-        for (WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
-            WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
-            Series directionSeries = getOrCreateDirectionSeries(windSource);
-            Series speedSeries = null;
-            if (windSource.getType().useSpeed()) {
-                speedSeries = getOrCreateSpeedSeries(windSource);
-            }
-
+        for (final WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
+            final WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
+            final Series directionSeries = getOrCreateDirectionSeries(windSource);
+            final Series speedSeries = windSource.getType().useSpeed() ? getOrCreateSpeedSeries(windSource) : null;
             Point previousDirectionPoint = null;
             if (append && windSourceDirectionPoints.get(windSource) != null
                        && windSourceDirectionPoints.get(windSource).length != 0) {
                 previousDirectionPoint = windSourceDirectionPoints.get(windSource)[windSourceDirectionPoints.get(windSource).length - 1];
             }
-            Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
-            Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
+            final Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
+            final Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
-
-            for (WindDTO wind : windTrackInfo.windFixes) {
+            for (final WindDTO wind : windTrackInfo.windFixes) {
                 if (newMinTimepoint == null || wind.requestTimepoint < newMinTimepoint) {
                     newMinTimepoint = wind.requestTimepoint;
                 }
                 if (newMaxTimepoint == null || wind.requestTimepoint > newMaxTimepoint) {
                     newMaxTimepoint = wind.requestTimepoint;
                 }
-                //if we are in non appending mode, the data is the truth, use all of it without filtering
+                // if we are in non appending mode, the data is the truth, use all of it without filtering
                 if (!append || ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis)) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
@@ -404,7 +398,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                         // name += " Confidence:" + wind.confidence;
                         newDirectionPoint.setName(name);
                     }
-                    
                     if (previousDirectionPoint != null) {
                         newDirectionPoint = ChartPointRecalculator.stayClosestToPreviousPoint(previousDirectionPoint,
                                 newDirectionPoint);
@@ -414,11 +407,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     }
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
-                    Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
+                    final Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
                 }
             }
-            
             Point[] newDirectionPoints;
             Point[] newSpeedPoints = null;
             if (append) {
@@ -443,7 +435,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 setSeriesPoints(speedSeries, newSpeedPoints, /* manageZoom */ true);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
-            
             if (firstPointOfFirstSeries == null && newDirectionPoints.length != 0) { //If firstPointOfFirstSeries is null, than this series is the first
                 firstPointOfFirstSeries = newDirectionPoints[0];
             }
