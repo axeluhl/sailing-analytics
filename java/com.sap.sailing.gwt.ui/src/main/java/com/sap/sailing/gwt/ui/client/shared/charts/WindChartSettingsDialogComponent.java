@@ -132,18 +132,15 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         hp.add(new Label(stringMessages.stepSizeInSeconds() + ":"));
         hp.add(resolutionInSecondsBox);
         vp.add(hp);
-
         final FlexTable dirTable = new FlexTable();
         dirTable.getElement().getStyle().setMarginLeft(15.0, Unit.PX);
         dirTable.setCellPadding(2);
-
         showWindDirectionsSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindDirectionSeries());
         showWindDirectionsSeriesCheckbox.setTitle(stringMessages.showWindDirectionSeriesTooltip());
         showWindDirectionsSeriesCheckbox.setValue(initialSettings.isShowWindDirectionsSeries());
         showWindDirectionsSeriesCheckbox.addStyleName(CSS.accentCheckbox());
         dirTable.setWidget(0, 0, showWindDirectionsSeriesCheckbox);
         dirTable.getFlexCellFormatter().setColSpan(0, 0, 4);
-
         final StatToggle[] dirBulk = buildSourceSection(dialog, dirTable, 1,
                 windDirectionSourceCheckboxes, dirAvgToggles, dirMinToggles, dirMaxToggles,
                 initialSettings.getWindDirectionSourcesToDisplay(),
@@ -166,18 +163,15 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 setSectionTogglesDisabled(dirAvgToggles, dirMinToggles, dirMaxToggles, dirBulkAvg, dirBulkMin, dirBulkMax, !enabled);
             }
         });
-
         final FlexTable spdTable = new FlexTable();
         spdTable.getElement().getStyle().setMarginLeft(8.0, Unit.PX);
         spdTable.setCellPadding(2);
-
         showWindSpeedSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindSpeedSeries());
         showWindSpeedSeriesCheckbox.setTitle(stringMessages.showWindSpeedSeriesTooltip());
         showWindSpeedSeriesCheckbox.setValue(initialSettings.isShowWindSpeedSeries());
         showWindSpeedSeriesCheckbox.addStyleName(CSS.accentCheckbox());
         spdTable.setWidget(0, 0, showWindSpeedSeriesCheckbox);
         spdTable.getFlexCellFormatter().setColSpan(0, 0, 4);
-
         final StatToggle[] spdBulk = buildSourceSection(dialog, spdTable, 1,
                 windSpeedSourceCheckboxes, spdAvgToggles, spdMinToggles, spdMaxToggles,
                 initialSettings.getWindSpeedSourcesToDisplay(),
@@ -200,10 +194,8 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 setSectionTogglesDisabled(spdAvgToggles, spdMinToggles, spdMaxToggles, spdBulkAvg, spdBulkMin, spdBulkMax, !enabled);
             }
         });
-
         final SimplePanel divider = new SimplePanel();
         divider.addStyleName(CSS.sectionDivider());
-
         final HorizontalPanel sectionsPanel = new HorizontalPanel();
         sectionsPanel.setVerticalAlignment(HorizontalPanel.ALIGN_TOP);
         sectionsPanel.add(dirTable);
@@ -239,11 +231,11 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     }
 
     /**
-     * Builds one section of the settings table — either the direction or speed half.
-     * Each section has a "to all selected" bulk row at the top, followed by one row per wind source.
-     * Per-source avg/min/max buttons are hidden while the corresponding bulk button is on.
-     * When a source is newly checked while a bulk button is on, that source inherits the bulk state.
-     * Returns the three bulk toggles so the caller can wire them up to the show/hide checkbox.
+     * Builds one section of the settings table — either the direction or speed half. Each section has a "to all
+     * selected" bulk row at the top, followed by one row per wind source. Per-source avg/min/max buttons are hidden
+     * while the corresponding bulk button is on. When a source is newly checked while a bulk button is on, that source
+     * inherits the bulk state. Returns the three bulk toggles in the order {@code bulkAvg, bulkMin, bulkMax}, so the
+     * caller can wire them up to the show/hide checkbox.
      */
     private StatToggle[] buildSourceSection(final DataEntryDialog<?> dialog, final FlexTable table, final int startRow,
             final Map<WindSourceType, CheckBox> sourceCheckboxes,
@@ -260,14 +252,12 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         final StatToggle bulkAvg = new StatToggle(stringMessages.windStatAvg(), initialBulkAvg, CSS, true);
         final StatToggle bulkMin = new StatToggle(stringMessages.windStatMin(), initialBulkMin, CSS, true);
         final StatToggle bulkMax = new StatToggle(stringMessages.windStatMax(), initialBulkMax, CSS, true);
-
         final Label toAllLabel = new Label(stringMessages.toAllSelected());
         toAllLabel.addStyleName(CSS.toAllSelectedLabel());
         table.setWidget(startRow, 0, toAllLabel);
         table.setWidget(startRow, 1, bulkAvg.asWidget());
         table.setWidget(startRow, 2, bulkMin.asWidget());
         table.setWidget(startRow, 3, bulkMax.asWidget());
-
         int row = startRow + 1;
         for (final WindSourceType type : ALL_SOURCE_TYPES) {
             if (!directionSection && !type.useSpeed()) {
@@ -279,7 +269,6 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             sourceBox.setValue(sourceSelected);
             sourceBox.setEnabled(sectionEnabled);
             sourceCheckboxes.put(type, sourceBox);
-
             final StatToggle avgToggle = new StatToggle(stringMessages.windStatAvg(), avgSources.contains(type), CSS, false);
             final StatToggle minToggle = new StatToggle(stringMessages.windStatMin(), minSources.contains(type), CSS, false);
             final StatToggle maxToggle = new StatToggle(stringMessages.windStatMax(), maxSources.contains(type), CSS, false);
@@ -289,7 +278,6 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             avgToggles.put(type, avgToggle);
             minToggles.put(type, minToggle);
             maxToggles.put(type, maxToggle);
-
             avgToggle.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(final ClickEvent event) {
@@ -308,7 +296,6 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                     maxToggle.toggle();
                 }
             });
-
             sourceBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(final ValueChangeEvent<Boolean> event) {
@@ -329,7 +316,6 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                     maxToggle.asWidget().setVisible(checked && !bulkMax.isOn());
                 }
             });
-
             table.getCellFormatter().addStyleName(row, 0, CSS.sourceCheckboxIndent());
             table.setWidget(row, 0, sourceBox);
             table.setWidget(row, 1, avgToggle.asWidget());
