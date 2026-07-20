@@ -122,12 +122,20 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
             } else {
                 final AtomicInteger resultReceiverCallbackCounter = new AtomicInteger(resultReceivers.length);
                 for (final Processor<ResultType, ?> resultReceiver : resultReceivers) {
-                    resultReceiver.runWhenFinishedProcessing(()->{
-                        if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
-                            // this was the last result receiver we were waiting for; trigger callback
-                            LOGGER.info("Running callback after done processing and result receivers finished too: "
-                                    +callbackWhenAllLoadedFixesHaveBeenProcessed);
-                            callbackWhenAllLoadedFixesHaveBeenProcessed.run();
+                    resultReceiver.runWhenFinishedProcessing(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
+                                // this was the last result receiver we were waiting for; trigger callback
+                                LOGGER.info("Running callback after done processing and result receivers finished too: "
+                                        +callbackWhenAllLoadedFixesHaveBeenProcessed);
+                                callbackWhenAllLoadedFixesHaveBeenProcessed.run();
+                            }
+                        }
+                        
+                        @Override
+                        public String toString() {
+                            return callbackWhenAllLoadedFixesHaveBeenProcessed.toString();
                         }
                     });
                 }
