@@ -4842,15 +4842,23 @@ Replicator {
             final TrackedRaceStatusEnum status = trackedRace.getStatus().getStatus();
             if (status != TrackedRaceStatusEnum.ERROR && polarDataService != null
                     && windEstimationFactoryService == service) {
-                polarDataService.runWhenPolarLoadingFinishedFor(trackedRace, () -> {
-                    synchronized (trackedRace) {
-                        if (trackedRace.getWindEstimation() == null
-                                && windEstimationFactoryService == service
-                                && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.REMOVED
-                                && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.ERROR) {
-                            trackedRace.setWindEstimation(
-                                    service.createIncrementalWindEstimationTrack(trackedRace));
+                polarDataService.runWhenPolarLoadingFinishedFor(trackedRace, new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (trackedRace) {
+                            if (trackedRace.getWindEstimation() == null
+                                    && windEstimationFactoryService == service
+                                    && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.REMOVED
+                                    && trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.ERROR) {
+                                trackedRace.setWindEstimation(
+                                        service.createIncrementalWindEstimationTrack(trackedRace));
+                            }
                         }
+                    }
+                    
+                    @Override
+                    public String toString() {
+                        return "Installing wind estimation for race "+trackedRace.getRaceIdentifier().toString();
                     }
                 });
             }

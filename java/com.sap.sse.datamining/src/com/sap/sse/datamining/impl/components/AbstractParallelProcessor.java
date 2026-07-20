@@ -116,6 +116,8 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
         }
         invokeOrScheduleCallbackForWhenNoMoreUnfinishedInstructions(()->{
             if (resultReceivers.length == 0) {
+                LOGGER.info("Running callback after done processing and no result receivers: "
+                        +callbackWhenAllLoadedFixesHaveBeenProcessed);
                 callbackWhenAllLoadedFixesHaveBeenProcessed.run();
             } else {
                 final AtomicInteger resultReceiverCallbackCounter = new AtomicInteger(resultReceivers.length);
@@ -123,6 +125,8 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
                     resultReceiver.runWhenFinishedProcessing(()->{
                         if (resultReceiverCallbackCounter.decrementAndGet() == 0) {
                             // this was the last result receiver we were waiting for; trigger callback
+                            LOGGER.info("Running callback after done processing and result receivers finished too: "
+                                    +callbackWhenAllLoadedFixesHaveBeenProcessed);
                             callbackWhenAllLoadedFixesHaveBeenProcessed.run();
                         }
                     });
