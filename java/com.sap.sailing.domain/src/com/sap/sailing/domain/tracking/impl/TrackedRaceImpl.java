@@ -4263,21 +4263,40 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * race's current {@link #windEstimation} is still the same instance it was scheduled with.
      */
     private void feedAlreadyKnownManeuversToWindEstimation(final IncrementalWindEstimation newWindEstimation) {
-        if (!maneuverCache.canBeUpdated()) {
-            for (final Competitor competitor : getRace().getCompetitors()) {
-                feedManeuversToWindEstimationExecutor.execute(() -> {
-                    try {
-                        final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
-                        if (maneuvers != null && !maneuvers.isEmpty()
-                                && TrackedRaceImpl.this.windEstimation == newWindEstimation) {
-                            newWindEstimation.alreadyClassifiedManeuversAvailable(competitor, maneuvers);
-                        }
-                    } catch (Throwable e) {
-                        logger.log(Level.WARNING, "Failed to feed already-known maneuvers of competitor " + competitor
-                                + " into the wind estimation of race " + getRaceIdentifier(), e);
+        // Feed regardless of maneuverCache.canBeUpdated(). Before bug6241's polar-data
+        // hold-back, wind-estimation installation happened early enough that the maneuver
+        // detector, when constructed via createManeuverDetectorCache(), captured a non-null
+        // windEstimation and the graph path (IncrementalManeuverDetectorImpl ->
+        // newManeuverSpotsDetected) fed the estimator naturally as spots were detected. With
+        // the hold-back in place the estimator may only be installed after detection has
+        // already completed with a captured windEstimationInteraction == null, in which case
+        // the graph path is a silent no-op for that race. Feeding here from maneuverCache
+        // covers both cases:
+        // <ul>
+        //   <li>DB-load path (!canBeUpdated()): as before -- maneuvers loaded from persistent
+        //   cache, never seen by any detector on this JVM.</li>
+        //   <li>Compute path (canBeUpdated()): maneuvers freshly detected on this JVM but with
+        //   a null windEstimationInteraction on the detector, so the graph path never fed
+        //   them.</li>
+        // </ul>
+        // In the (rare) case where detection is still in progress at the time this runs,
+        // maneuverCache.get(_, /* waitForLatest */ true) waits for it to complete, and any
+        // parallel newManeuverSpotsDetected calls the detector may still be making will be
+        // enqueued on the estimator's update queue and processed serially; duplicate wind
+        // fixes are handled by the estimator's reconciling logic.
+        for (final Competitor competitor : getRace().getCompetitors()) {
+            feedManeuversToWindEstimationExecutor.execute(() -> {
+                try {
+                    final List<Maneuver> maneuvers = maneuverCache.get(competitor, /* waitForLatest */ true);
+                    if (maneuvers != null && !maneuvers.isEmpty()
+                            && TrackedRaceImpl.this.windEstimation == newWindEstimation) {
+                        newWindEstimation.alreadyClassifiedManeuversAvailable(competitor, maneuvers);
                     }
-                });
-            }
+                } catch (Throwable e) {
+                    logger.log(Level.WARNING, "Failed to feed already-known maneuvers of competitor " + competitor
+                            + " into the wind estimation of race " + getRaceIdentifier(), e);
+                }
+            });
         }
     }
 

@@ -123,10 +123,62 @@ public class PolarDataMiner {
      * {@link #preFilteringProcessorForLoadedFixes}. Once a race is in this set, a caller of
      * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} for that race registers
      * its callback on the drain directly (rather than parking it in
-     * {@link #callbacksWaitingForFixIngestion}). Guarded by the monitor of
-     * {@link #callbacksWaitingForFixIngestion}.
+     * {@link #callbacksWaitingForFixIngestion}) provided
+     * {@link #loadingOfAllRacesToRestoreStarted} is already {@code true}. Guarded by the monitor
+     * of {@link #callbacksWaitingForFixIngestion}.
      */
     private final Set<TrackedRace> racesWithIngestedFixes = new HashSet<>();
+
+    /**
+     * Set by {@link #markLoadingOfAllRacesToRestoreStarted()} to signal that the caller (typically
+     * {@code RacingEventServiceImpl.restoreTrackedRaces()}) has finished the enumeration loop that
+     * triggers loading for every race to be restored during startup. It does <em>not</em> imply
+     * that all those races have already progressed past {@code LOADING}: some may still be
+     * loading, some may take a long time, some may never leave {@code LOADING} at all. The flag
+     * only signals that no <em>new</em> startup races will show up unannounced.
+     * <p>
+     *
+     * Before this flag is set, the {@link #preFilteringProcessorForLoadedFixes loading pipeline}
+     * can transiently be idle (counter==0) between two races' ingestion bursts; registering a
+     * drain callback in such a window would fire it immediately, before other startup races have
+     * had a chance to feed fixes into the pipeline. Once this flag is set, any pipeline
+     * idle window is a genuine drain of everything that has been ingested so far. Combined with
+     * the {@link #racesWithIngestedFixes} gate, a callback for a specific race only fires once
+     * <em>that race's</em> fixes have made it in <em>and</em> the pipeline has drained everything
+     * ingested up to that point.
+     * <p>
+     *
+     * Callbacks registered via {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)}
+     * whose race has already been ingested but which arrive while this flag is still
+     * {@code false} are parked in {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart}
+     * until the flag flips.
+     * <p>
+     *
+     * The flag is <em>initialized</em> to {@code false} only when this miner was constructed with
+     * {@code waitForLoadingOfAllRacesToRestoreToBeStarted == true}. Otherwise (the default) it
+     * is initialized to {@code true} so that the second gate is effectively bypassed and this
+     * miner behaves exactly as before bug6241's second-gate addition; this suits ad-hoc clients
+     * and tests that instantiate a miner outside a startup-restore flow and never call
+     * {@link #markLoadingOfAllRacesToRestoreStarted()}. See bug6241.
+     */
+    private volatile boolean loadingOfAllRacesToRestoreStarted;
+
+    /**
+     * Callbacks whose race has already been fully ingested but which arrived before
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} was called. They are held here until the
+     * flag flips, at which point each is registered on
+     * {@link #preFilteringProcessorForLoadedFixes}'s drain. Guarded by the monitor of
+     * {@link #callbacksWaitingForFixIngestion}.
+     */
+    private final List<Runnable> callbacksWaitingForLoadingOfAllRacesToRestoreToStart = new ArrayList<>();
+
+    /**
+     * Snapshot of the constructor argument. Used only to distinguish a redundant call to
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} on a gated miner (worth a WARN, because
+     * the client's contract is to call exactly once) from a call on a non-gated miner (silently
+     * ignored, because the client didn't request gating).
+     */
+    private final boolean waitForLoadingOfAllRacesToRestoreToBeStarted;
 
     /**
      * Entry point to the data mining pipeline for incremental updates, usually by races in status
@@ -172,16 +224,53 @@ public class PolarDataMiner {
         };
     }
 
+    /**
+     * Convenience constructor equivalent to calling
+     * {@link #PolarDataMiner(PolarSheetGenerationSettings, CubicRegressionPerCourseProcessor,
+     * SpeedRegressionPerAngleClusterProcessor, ClusterGroup, boolean)} with
+     * {@code waitForLoadingOfAllRacesToRestoreToBeStarted == false}. Callbacks registered via
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} then only wait for the
+     * specific race's fixes to have been queued into the loading pipeline, not for a subsequent
+     * signal from the client. Suited for ad-hoc uses, tests, and other flows that don't have a
+     * distinguished "startup restore" phase driving many races through this miner.
+     */
     public PolarDataMiner(PolarSheetGenerationSettings backendPolarSettings,
             CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor,
             SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor,
             ClusterGroup<Bearing> angleClusterGroup) {
+        this(backendPolarSettings, cubicRegressionPerCourseProcessor,
+                speedRegressionPerAngleClusterProcessor, angleClusterGroup,
+                /* waitForLoadingOfAllRacesToRestoreToBeStarted */ false);
+    }
+
+    /**
+     * @param waitForLoadingOfAllRacesToRestoreToBeStarted
+     *            when {@code true}, this miner enters the "gated" mode described on
+     *            {@link #loadingOfAllRacesToRestoreStarted}: callbacks registered via
+     *            {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} will not fire
+     *            until the client has explicitly called
+     *            {@link #markLoadingOfAllRacesToRestoreStarted()} <em>and</em> the specific
+     *            race's fixes have made it into the loading pipeline. This is the mode used by
+     *            the OSGi/production wiring, where {@code RacingEventServiceImpl} makes that
+     *            promise. Constructing with {@code true} without ever calling
+     *            {@code markLoadingOfAllRacesToRestoreStarted()} will result in callbacks
+     *            being held indefinitely. When {@code false} (the default via the shorter
+     *            constructor), the second gate is bypassed, matching the behavior before
+     *            bug6241's addition.
+     */
+    public PolarDataMiner(PolarSheetGenerationSettings backendPolarSettings,
+            CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor,
+            SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor,
+            ClusterGroup<Bearing> angleClusterGroup,
+            boolean waitForLoadingOfAllRacesToRestoreToBeStarted) {
         cubicRegressionPerCourseProcessor.setListeners(listeners);
         speedRegressionPerAngleClusterProcessor.setListeners(listeners);
         backendPolarSheetGenerationSettings = backendPolarSettings;
         this.cubicRegressionPerCourseProcessor = cubicRegressionPerCourseProcessor;
         this.speedRegressionPerAngleClusterProcessor = speedRegressionPerAngleClusterProcessor;
         this.angleClusterGroup = angleClusterGroup;
+        this.waitForLoadingOfAllRacesToRestoreToBeStarted = waitForLoadingOfAllRacesToRestoreToBeStarted;
+        this.loadingOfAllRacesToRestoreStarted = !waitForLoadingOfAllRacesToRestoreToBeStarted;
         try {
             setUpWorkflow();
         } catch (ClassCastException | NoSuchMethodException | SecurityException e) {
@@ -558,19 +647,20 @@ public class PolarDataMiner {
             }
             // All of this race's fixes have now been submitted to preFilteringProcessorForLoadedFixes.
             // Any callbacks parked in callbacksWaitingForFixIngestion for this race, along with the
-            // one passed to this method (if any), can now safely be registered on the drain. See bug6241.
-            final List<Runnable> callbacksToRegisterOnDrain;
+            // one passed to this method (if any), can now safely be handed off to the
+            // "wait for global drain" stage. See bug6241.
+            final List<Runnable> callbacksToHandOff;
             synchronized (callbacksWaitingForFixIngestion) {
                 racesWithIngestedFixes.add(race);
-                callbacksToRegisterOnDrain = callbacksWaitingForFixIngestion.remove(race);
+                callbacksToHandOff = callbacksWaitingForFixIngestion.remove(race);
             }
-            if (callbacksToRegisterOnDrain != null) {
-                for (final Runnable parked : callbacksToRegisterOnDrain) {
-                    preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(parked);
+            if (callbacksToHandOff != null) {
+                for (final Runnable parked : callbacksToHandOff) {
+                    registerOnDrainOrWaitForRestoreStart(parked);
                 }
             }
             if (callbackWhenAllLoadedFixesHaveBeenProcessed != null) {
-                preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(callbackWhenAllLoadedFixesHaveBeenProcessed);
+                registerOnDrainOrWaitForRestoreStart(callbackWhenAllLoadedFixesHaveBeenProcessed);
             }
             logger.info("Finished injecting fixes for race "
                     + (race.getRace() != null ? race.getRace().getName() : race.getRaceIdentifier().getRaceName())
@@ -580,27 +670,32 @@ public class PolarDataMiner {
 
     /**
      * Registers {@code callback} to fire once the {@link #preFilteringProcessorForLoadedFixes
-     * loading pipeline} has fully drained the fixes belonging to {@code race}. Unlike
-     * {@link #raceFinishedLoading(TrackedRace, Runnable)}, this method does <em>not</em> ingest
-     * the race's fixes into the pipeline; it only observes the pipeline. It may be called any
-     * number of times for the same race, before or after {@code raceFinishedLoading} has been
-     * called for that race:
-     * <ul>
-     *   <li>If ingestion for {@code race} has already completed queueing all its fixes into the
-     *   pipeline (i.e., {@link #raceFinishedLoading} has already run to the point of queueing all
-     *   competitor fixes), {@code callback} is registered on the pipeline's drain immediately.
-     *   Because the pipeline may already have finished processing all fixes by then, {@code
-     *   callback} may run before this method returns (per the semantics of
-     *   {@code AbstractParallelProcessor.runWhenFinishedProcessing}, which invokes the callback
-     *   synchronously when the pipeline is already idle).</li>
-     *   <li>If ingestion for {@code race} has <em>not</em> started or is still in progress,
-     *   {@code callback} is parked in {@link #callbacksWaitingForFixIngestion} and registered on
-     *   the drain by {@link #raceFinishedLoading} once queueing completes. This prevents the
-     *   race condition where a caller registers a drain callback while the pipeline is
-     *   momentarily idle and the callback fires before this race's fixes have entered the
-     *   pipeline.</li>
-     * </ul>
-     * See bug6241.
+     * loading pipeline} has fully drained the fixes belonging to {@code race} <em>and</em> the
+     * caller has announced (via {@link #markLoadingOfAllRacesToRestoreStarted()}) that no further
+     * startup races will be added. Unlike {@link #raceFinishedLoading(TrackedRace, Runnable)},
+     * this method does <em>not</em> ingest the race's fixes into the pipeline; it only observes
+     * the pipeline. It may be called any number of times for the same race, before or after
+     * {@code raceFinishedLoading} has been called for that race, and before or after the
+     * "loading started" signal has flipped.
+     * <p>
+     *
+     * Firing is gated by two conditions, both of which must hold:
+     * <ol>
+     *   <li>{@code race}'s fixes have been fully queued into the pipeline (i.e.
+     *   {@link #raceFinishedLoading} has ingested them and added the race to
+     *   {@link #racesWithIngestedFixes}). This prevents firing while the pipeline is idle simply
+     *   because this race's ingestion hasn't started yet.</li>
+     *   <li>{@link #markLoadingOfAllRacesToRestoreStarted()} has been called. This prevents
+     *   firing during a transient global idle window that occurs between two startup races'
+     *   ingestion bursts.</li>
+     * </ol>
+     *
+     * Depending on which of these already hold at the time of the call, {@code callback} is
+     * either registered on the drain immediately (both hold), parked in
+     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} (fix ingestion done, signal
+     * pending), or parked in {@link #callbacksWaitingForFixIngestion} (fix ingestion pending;
+     * once ingestion completes, the callback moves to the drain or to the signal-pending list
+     * as appropriate). See bug6241.
      *
      * @param callback
      *            must not be {@code null}
@@ -609,18 +704,74 @@ public class PolarDataMiner {
         if (callback == null) {
             throw new NullPointerException("callback must not be null");
         }
-        final boolean registerOnDrainImmediately;
+        final boolean fixIngestionAlreadyDone;
         synchronized (callbacksWaitingForFixIngestion) {
             if (racesWithIngestedFixes.contains(race)) {
-                registerOnDrainImmediately = true;
+                fixIngestionAlreadyDone = true;
             } else {
-                registerOnDrainImmediately = false;
+                fixIngestionAlreadyDone = false;
                 callbacksWaitingForFixIngestion
                         .computeIfAbsent(race, r -> new ArrayList<>())
                         .add(callback);
             }
         }
-        if (registerOnDrainImmediately) {
+        if (fixIngestionAlreadyDone) {
+            registerOnDrainOrWaitForRestoreStart(callback);
+        }
+    }
+
+    /**
+     * Second-stage gate for callbacks whose race's fixes are already ingested (or whose
+     * fix-ingestion parking has just been drained by
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)}). If
+     * {@link #loadingOfAllRacesToRestoreStarted} is already set the callback goes straight to the
+     * drain; otherwise it is parked in
+     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} where
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} will pick it up. See bug6241.
+     */
+    private void registerOnDrainOrWaitForRestoreStart(final Runnable callback) {
+        final boolean signalAlreadyGiven;
+        synchronized (callbacksWaitingForFixIngestion) {
+            if (loadingOfAllRacesToRestoreStarted) {
+                signalAlreadyGiven = true;
+            } else {
+                signalAlreadyGiven = false;
+                callbacksWaitingForLoadingOfAllRacesToRestoreToStart.add(callback);
+            }
+        }
+        if (signalAlreadyGiven) {
+            preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(callback);
+        }
+    }
+
+    /**
+     * Announces that the caller (typically {@code RacingEventServiceImpl.restoreTrackedRaces()})
+     * has finished the enumeration loop that triggers loading for every race to be restored
+     * during startup. From now on, any transient idle window on
+     * {@link #preFilteringProcessorForLoadedFixes} is a genuine drain of everything that has been
+     * ingested up to that point; there won't be surprise ingestion bursts from previously
+     * unknown startup races. Callbacks that have been parked in
+     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} (because they were queued for
+     * a race whose fixes were already ingested, but arrived before this signal) are moved onto
+     * the drain now. Idempotent: subsequent calls are logged and ignored. See bug6241.
+     */
+    public void markLoadingOfAllRacesToRestoreStarted() {
+        final Iterable<Runnable> toRegisterOnDrain;
+        synchronized (callbacksWaitingForFixIngestion) {
+            if (loadingOfAllRacesToRestoreStarted) {
+                if (waitForLoadingOfAllRacesToRestoreToBeStarted) {
+                    logger.warning("markLoadingOfAllRacesToRestoreStarted() called more than once; ignoring.");
+                }
+                // otherwise: this miner is running without the second gate; the call is a
+                // harmless no-op (the client didn't request gating, so there's nothing parked).
+                toRegisterOnDrain = Collections.emptyList();
+            } else {
+                loadingOfAllRacesToRestoreStarted = true;
+                toRegisterOnDrain = new ArrayList<>(callbacksWaitingForLoadingOfAllRacesToRestoreToStart);
+                callbacksWaitingForLoadingOfAllRacesToRestoreToStart.clear();
+            }
+        }
+        for (final Runnable callback : toRegisterOnDrain) {
             preFilteringProcessorForLoadedFixes.runWhenFinishedProcessing(callback);
         }
     }

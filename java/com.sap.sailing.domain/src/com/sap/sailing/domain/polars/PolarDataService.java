@@ -172,6 +172,34 @@ public interface PolarDataService {
     void runWhenPolarLoadingFinishedFor(TrackedRace race, Runnable callback);
 
     /**
+     * Signals to this polar data service that its client has finished enumerating and triggering
+     * loading for every race that will be restored during startup. From this point on the client
+     * makes no further ingestion promises, so any transient idle window on the loading pipeline
+     * is a genuine drain of everything ingested so far. Callbacks registered via
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} whose race is already
+     * ingested but which arrived before this signal fire on the next drain after this call.
+     * <p>
+     *
+     * The signal is about the enumeration/triggering side only: it does <em>not</em> imply that
+     * the enumerated races have already progressed past {@code LOADING} — some may still be
+     * loading, some may take a long time, some may never leave {@code LOADING} at all. The
+     * signal only promises that no new startup races will show up unannounced.
+     * <p>
+     *
+     * Whether calling this method has any effect depends on how the implementation was
+     * constructed. Implementations built for the gated (production) mode hold
+     * {@link #runWhenPolarLoadingFinishedFor} callbacks until this signal arrives; implementations
+     * built in the default non-gated mode ignore this call. It is always safe to call regardless
+     * of the implementation's mode.
+     * <p>
+     *
+     * Idempotent: subsequent calls after the first are logged (in gated mode) or silently
+     * ignored (in non-gated mode).
+     * See bug6241.
+     */
+    void markLoadingOfAllRacesToRestoreStarted();
+
+    /**
      * See {@link #getAverageSpeedWithBearing(BoatClass, Speed, LegType, Tack, boolean)}
      * Always use regression
      */

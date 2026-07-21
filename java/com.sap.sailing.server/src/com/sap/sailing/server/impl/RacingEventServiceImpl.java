@@ -1176,6 +1176,15 @@ Replicator {
                 }
             }
         }).getNumberOfParametersToLoad();
+        // Enumeration complete: every race to restore has had its loading triggered (some may
+        // still be in LOADING state and some may never leave it; that's fine). Announce this to
+        // the polar data service, which if constructed in gated mode will now release any
+        // drain-callback waiters (see bug6241). Announcing to a non-gated instance is a harmless
+        // no-op. Since restoreTrackedRaces() only starts after the polarDataServiceArrived latch
+        // has counted down (see the deferred task in the constructor), and the polars bundle now
+        // registers its service exactly once and only after full initialization, polarDataService
+        // is guaranteed non-null at this point.
+        polarDataService.markLoadingOfAllRacesToRestoreStarted();
     }
 
     @Override
@@ -4747,6 +4756,10 @@ Replicator {
     public void setPolarDataService(PolarDataService service) {
         if (this.polarDataService == null && service != null) {
             polarDataService = service;
+            // The polars bundle now registers its service only after it has already obtained the
+            // DomainFactory from the RacingEventService itself (see
+            // com.sap.sailing.polars.impl.Activator), so registering it back here is only kept
+            // as a defensive no-op for services registered by other paths (e.g. test harnesses).
             polarDataService.registerDomainFactory(baseDomainFactory);
             setPolarDataServiceOnAllTrackedRaces(service);
             // bug6241: unblock the deferred restoreTrackedRaces() background task so it can
@@ -4913,11 +4926,11 @@ Replicator {
             // bug6241: losing the PolarDataService is a serious event -- the maneuver-based
             // wind estimation depends on it and cannot be usefully constructed while it is
             // absent (see WindEstimationFactoryServiceImpl.createIncrementalWindEstimationTrack).
-            // We log severe so operators notice; existing tracked-race estimators are torn
-            // down via setPolarDataServiceOnAllTrackedRaces(null) which invokes
-            // TrackedRace.setPolarDataService(null) on each race. If the service is later
-            // re-registered, races that were previously loading their wind estimation will
-            // pick up the new service via scheduleWindEstimationInstallation as usual.
+            // With the polars bundle now registering its service exactly once after full
+            // initialization (see com.sap.sailing.polars.impl.Activator), this call should only
+            // happen at bundle shutdown or on catastrophic OSGi framework events. Existing
+            // tracked-race estimators are torn down via setPolarDataServiceOnAllTrackedRaces(null)
+            // which invokes TrackedRace.setPolarDataService(null) on each race.
             logger.log(Level.SEVERE, "PolarDataService has been unregistered from RacingEventService. "
                     + "Maneuver-based wind estimation is now unavailable until it is re-registered.");
             polarDataService = null;
