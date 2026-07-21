@@ -3,6 +3,8 @@ package com.sap.sailing.server.gateway.interfaces;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
@@ -47,6 +50,8 @@ public interface SailingServer extends SecuredServer {
     String getLeaderboardFromShardingKey(String shardingKey) throws Exception;
 
     Iterable<UUID> getEventIds() throws Exception;
+
+    Map<String, List<CourseAreaDTO>> getEventNamesAndCourseAreas() throws Exception;
 
     MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds, boolean override,
             boolean compress, boolean exportWind, boolean exportDeviceConfigs,

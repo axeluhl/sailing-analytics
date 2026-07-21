@@ -449,6 +449,8 @@ public interface SailingServiceWrite extends FileStorageManagementGwtService, Sa
     RemoteSailingServerReferenceDTO getCompleteRemoteServerReference(String sailingServerName)
             throws UnauthorizedException, Exception;
 
+    Map<String, List<CourseAreaDTO>> getRemoteEventNamesAndCourseAreas(String baseUrl) throws Exception;
+
     void setWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO);
 
     void removeAndUntrackRaces(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers);
