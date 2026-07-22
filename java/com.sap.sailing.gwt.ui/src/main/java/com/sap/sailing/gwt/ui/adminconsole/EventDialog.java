@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
@@ -277,7 +278,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         localPanel.add(new Label(stringMessages.copyCourseAreasFromEvent()));
         localPanel.add(copyFromEventDropDown);
         final TextBox remoteBaseUrlBox = new TextBox();
-        remoteBaseUrlBox.setValue("https://www.sapsailing.com");
+        remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
         remoteBaseUrlBox.setVisibleLength(40);
         final ListBox remoteEventDropDown = createListBox(false);
         // single-element array to hold the loaded remote event data so the change handler can access it without a second RPC call
