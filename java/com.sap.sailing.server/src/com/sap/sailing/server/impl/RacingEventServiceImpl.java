@@ -158,6 +158,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
+import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -271,6 +272,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResu
 import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportConstants;
+import com.sap.sailing.server.gateway.interfaces.SailingServer;
+import com.sap.sailing.server.gateway.interfaces.SailingServerFactory;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.interfaces.CourseAndMarkConfigurationFactory;
@@ -602,6 +605,8 @@ Replicator {
 
     private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
 
+    private ServiceTracker<SailingServerFactory, SailingServerFactory> sailingServerFactoryTracker;
+
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -701,7 +706,8 @@ Replicator {
             ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker,
             ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker,
             ServiceTracker<ResultUrlRegistry, ResultUrlRegistry> resultUrlRegistryServiceTracker,
-            ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker) {
+            ServiceTracker<BrandingConfigurationService, BrandingConfigurationService> brandingConfigurationServiceTracker,
+            ServiceTracker<SailingServerFactory, SailingServerFactory> sailingServerFactoryTracker) {
         this((final RaceLogAndTrackedRaceResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -734,6 +740,7 @@ Replicator {
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
                 securityServiceTracker, sharedSailingDataTracker, /* replicationServiceTracker */ null,
                 scoreCorrectionProviderServiceTracker, competitorProviderServiceTracker, resultUrlRegistryServiceTracker);
+        this.sailingServerFactoryTracker = sailingServerFactoryTracker;
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -1835,6 +1842,18 @@ Replicator {
     public com.sap.sse.common.Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(
             RemoteSailingServerReference ref) {
         return remoteSailingServerSet.getEventsComplete(ref);
+    }
+
+    @Override
+    // Creates an anonymous (no auth token) connection to the remote server — sufficient for public events.
+    // SailingServerFactory is wired via OSGi; null check guards against it not yet being available at call time.
+    public Map<String, List<CourseAreaDTO>> getRemoteEventNamesAndCourseAreas(final String baseUrl) throws Exception {
+        final SailingServerFactory factory = sailingServerFactoryTracker == null ? null : sailingServerFactoryTracker.getService();
+        if (factory == null) {
+            throw new IllegalStateException("SailingServerFactory not available");
+        }
+        final SailingServer sailingServer = factory.getSailingServer(new java.net.URL(baseUrl));
+        return sailingServer.getEventNamesAndCourseAreas();
     }
 
     @Override

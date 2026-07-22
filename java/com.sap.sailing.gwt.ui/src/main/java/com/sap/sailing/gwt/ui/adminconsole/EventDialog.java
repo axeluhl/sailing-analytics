@@ -12,6 +12,8 @@ import java.util.UUID;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
@@ -60,6 +62,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ExternalLinksComposite externalLinksComposite;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
     private final List<EventDTO> existingEvents;
+    private SailingServiceWriteAsync sailingServiceWrite;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -131,6 +134,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.ensureDebugId("eventDialog");
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
+        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
         this.existingEvents = new ArrayList<>(existingEvents);
         this.availableLeaderboardGroupsByName = new HashMap<>();
@@ -268,11 +272,58 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 }
             }
         });
-        final HorizontalPanel copyFromPanel = new HorizontalPanel();
-        copyFromPanel.setSpacing(3);
-        copyFromPanel.add(new Label(stringMessages.copyCourseAreasFromEvent()));
-        copyFromPanel.add(copyFromEventDropDown);
-        courseAreasPanel.add(copyFromPanel);
+        final HorizontalPanel localPanel = new HorizontalPanel();
+        localPanel.setSpacing(3);
+        localPanel.add(new Label(stringMessages.copyCourseAreasFromEvent()));
+        localPanel.add(copyFromEventDropDown);
+        final TextBox remoteBaseUrlBox = new TextBox();
+        remoteBaseUrlBox.setValue("https://www.sapsailing.com");
+        remoteBaseUrlBox.setVisibleLength(40);
+        final ListBox remoteEventDropDown = createListBox(false);
+        // single-element array to hold the loaded remote event data so the change handler can access it without a second RPC call
+        final List<Map<String, List<CourseAreaDTO>>> remoteEventsCache = new ArrayList<>(Collections.singletonList((Map<String, List<CourseAreaDTO>>) null));
+        final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
+        loadRemoteEventsButton.addClickHandler(e -> {
+            remoteEventDropDown.clear();
+            remoteEventDropDown.addItem(stringMessages.pleaseSelect());
+            remoteEventsCache.set(0, null);
+            sailingServiceWrite.getRemoteEventNamesAndCourseAreas(remoteBaseUrlBox.getValue(),
+                    new AsyncCallback<java.util.Map<String, List<CourseAreaDTO>>>() {
+                @Override
+                public void onSuccess(final java.util.Map<String, List<CourseAreaDTO>> result) {
+                    remoteEventsCache.set(0, result);
+                    for (final String eventName : result.keySet()) {
+                        remoteEventDropDown.addItem(eventName, eventName);
+                    }
+                }
+                @Override
+                public void onFailure(final Throwable caught) {
+                }
+            });
+        });
+        remoteEventDropDown.addChangeHandler(e -> {
+            final int selectedIndex = remoteEventDropDown.getSelectedIndex();
+            if (selectedIndex > 0 && remoteEventsCache.get(0) != null) {
+                final String selectedEventName = remoteEventDropDown.getValue(selectedIndex);
+                final List<CourseAreaDTO> courseAreas = remoteEventsCache.get(0).get(selectedEventName);
+                if (courseAreas != null) {
+                    // copy with fresh UUIDs so these become independent course areas of this event
+                    final List<CourseAreaDTO> copies = new ArrayList<>();
+                    for (final CourseAreaDTO area : courseAreas) {
+                        copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                    }
+                    courseAreaNameList.setValue(copies);
+                }
+            }
+        });
+        final HorizontalPanel remotePanel = new HorizontalPanel();
+        remotePanel.setSpacing(3);
+        remotePanel.add(new Label(stringMessages.copyCourseAreasFromRemoteServer()));
+        remotePanel.add(remoteBaseUrlBox);
+        remotePanel.add(loadRemoteEventsButton);
+        remotePanel.add(remoteEventDropDown);
+        courseAreasPanel.add(localPanel);
+        courseAreasPanel.add(remotePanel);
         courseAreasPanel.add(courseAreaNameList);
         final ScrollPanel courseAreasTab = new ScrollPanel(courseAreasPanel);
         courseAreasTab.ensureDebugId("CourseAreasTab");
