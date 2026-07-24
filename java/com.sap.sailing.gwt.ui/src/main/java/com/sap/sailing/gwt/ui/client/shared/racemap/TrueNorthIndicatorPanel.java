@@ -5,6 +5,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
 import com.sap.sse.gwt.client.shared.settings.DummyOnSettingsStoredCallback;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.premium.PaywallResolver;
@@ -59,7 +60,8 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
         final RaceMapSettings newRaceMapSettings = new RaceMapSettings.RaceMapSettingsBuilder(oldRaceMapSettings, securedDTO, paywallResolver)
                 .withWindUp(newWindUpSettings)
-                .withShowSatelliteLayer(oldRaceMapSettings.isShowSatelliteLayer() && !newWindUpSettings)
+                .withShowSatelliteLayer(oldRaceMapSettings.isShowSatelliteLayer() &&
+                        (!newWindUpSettings || GoogleMapsLoader.isMapLibreRequested()))
                 .build();
         if (map.getComponentContext() != null && map.getComponentContext().isStorageSupported(map)) {
             map.getComponentContext().storeSettingsForContext(map, newRaceMapSettings,

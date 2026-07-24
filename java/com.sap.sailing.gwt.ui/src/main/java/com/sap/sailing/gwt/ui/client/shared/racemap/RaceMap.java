@@ -3781,7 +3781,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }-*/;
 
     private String getMapTypeId(boolean windUp, boolean showSatelliteLayer) {
-        return showSatelliteLayer && !windUp ? MapTypeId.SATELLITE.toString() : SAILING_ANALYTICS_MAP_TYPE_ID;
+        return showSatelliteLayer && (!windUp || GoogleMapsLoader.isMapLibreRequested())
+                ? MapTypeId.SATELLITE.toString() : SAILING_ANALYTICS_MAP_TYPE_ID;
     }
 
     /**
