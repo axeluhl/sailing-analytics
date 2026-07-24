@@ -1,6 +1,6 @@
 // GWT adapter: exposes branflake GWT Maps wrapper conventions over the Google-style MapLibre facade.
 // Keep MapLibre provider behavior in google-maps-maplibre-compat.js.
-import { installGoogleMapsCompat } from './google-maps-maplibre-compat.js?v=race-map-feedback-15';
+import { installGoogleMapsCompat } from './google-maps-maplibre-compat.js?v=race-map-feedback-16';
 
 function call(handler, event = {}) {
     if (typeof handler === 'function') handler(event);
@@ -48,6 +48,11 @@ function newOverlay(NativeClass, options = {}) {
         else delete nativeOptions.map;
     }
     const overlay = new NativeClass(nativeOptions);
+    const setMap = overlay.setMap.bind(overlay);
+    overlay.setMap = map => {
+        if (isMapWidget(map) && !map.map) map.ready(() => setMap(map.map));
+        else setMap(unwrapMap(map));
+    };
     if (mapWidget && !mapWidget.map) mapWidget.ready(() => overlay.setMap(mapWidget.map));
     return overlay;
 }

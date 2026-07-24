@@ -1,6 +1,6 @@
 // Core facade: implements the Google Maps JavaScript API surface on MapLibre GL JS.
 // Keep GWT wrapper conventions in gwt-maps-maplibre-compat.js.
-import { applyRaceStyle, createArrowSvg, createRaceStyle, lngLat, setSatelliteVisible } from './maplibre-test-utils.js?v=race-map-feedback-8';
+import { applyRaceStyle, createArrowSvg, createRaceStyle, lngLat, setSatelliteVisible } from './maplibre-test-utils.js?v=race-map-feedback-9';
 
 function asLngLatLiteral(value) {
     if (Array.isArray(value)) return { lat: value[1], lng: value[0] };
@@ -198,8 +198,8 @@ class CompatMap {
         });
         // MapLibre listens for gestures on this container, so interactive panes must be descendants.
         this.map.getCanvasContainer().append(this.overlayLayer, this.markerLayer, this.overlayMouseTarget, this.floatPane);
-        this.resizeObserver = new ResizeObserver(() => { this.map.resize(); this.updateOverlayPointerEvents(); });
-        this.resizeObserver.observe(element);
+        requestAnimationFrame(() => this.map.resize());
+        this.map.on('resize', this.updateOverlayPointerEvents);
         const controlPositions = {
             1: ['10px', '', '', '10px'], 2: ['10px', '', '', '50%'], 3: ['10px', '10px', '', ''],
             // RaceMap's LEFT_TOP control already supplies its own 10px margin; keep overlays and boats untouched.
