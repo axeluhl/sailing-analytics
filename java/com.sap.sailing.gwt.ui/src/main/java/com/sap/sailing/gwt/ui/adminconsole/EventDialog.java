@@ -281,24 +281,26 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
         remoteBaseUrlBox.setVisibleLength(40);
         final ListBox remoteEventDropDown = createListBox(false);
-        // single-element array to hold the loaded remote event data so the change handler can access it without a second RPC call
-        final List<Map<String, List<CourseAreaDTO>>> remoteEventsCache = new ArrayList<>(Collections.singletonList((Map<String, List<CourseAreaDTO>>) null));
+        //cache loaded remote events so the change handler can access them without a second RPC call
+        final List<List<EventDTO>> remoteEventsCache = new ArrayList<>(Collections.singletonList((List<EventDTO>) null));
         final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
         loadRemoteEventsButton.addClickHandler(e -> {
             remoteEventDropDown.clear();
             remoteEventDropDown.addItem(stringMessages.pleaseSelect());
             remoteEventsCache.set(0, null);
-            sailingServiceWrite.getRemoteEventNamesAndCourseAreas(remoteBaseUrlBox.getValue(),
-                    new AsyncCallback<java.util.Map<String, List<CourseAreaDTO>>>() {
+            sailingServiceWrite.getRemoteEvents(remoteBaseUrlBox.getValue(),
+                    new AsyncCallback<List<EventDTO>>() {
                 @Override
-                public void onSuccess(final java.util.Map<String, List<CourseAreaDTO>> result) {
+                public void onSuccess(final List<EventDTO> result) {
                     remoteEventsCache.set(0, result);
-                    for (final String eventName : result.keySet()) {
-                        remoteEventDropDown.addItem(eventName, eventName);
+                    for (final EventDTO event : result) {
+                        remoteEventDropDown.addItem(event.getName(), event.getName());
                     }
                 }
                 @Override
                 public void onFailure(final Throwable caught) {
+                    remoteEventDropDown.clear();
+                    remoteEventDropDown.addItem(caught.getMessage());
                 }
             });
         });
@@ -306,14 +308,16 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             final int selectedIndex = remoteEventDropDown.getSelectedIndex();
             if (selectedIndex > 0 && remoteEventsCache.get(0) != null) {
                 final String selectedEventName = remoteEventDropDown.getValue(selectedIndex);
-                final List<CourseAreaDTO> courseAreas = remoteEventsCache.get(0).get(selectedEventName);
-                if (courseAreas != null) {
-                    // copy with fresh UUIDs so these become independent course areas of this event
-                    final List<CourseAreaDTO> copies = new ArrayList<>();
-                    for (final CourseAreaDTO area : courseAreas) {
-                        copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                for (final EventDTO event : remoteEventsCache.get(0)) {
+                    if (event.getName().equals(selectedEventName)) {
+                        //copy with fresh UUIDs so these become independent course areas of this event
+                        final List<CourseAreaDTO> copies = new ArrayList<>();
+                        for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
+                            copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                        }
+                        courseAreaNameList.setValue(copies);
+                        break;
                     }
-                    courseAreaNameList.setValue(copies);
                 }
             }
         });

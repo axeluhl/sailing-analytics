@@ -158,7 +158,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.AnniversaryType;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -1849,13 +1848,13 @@ Replicator {
     @Override
     // Creates an anonymous (no auth token) connection to the remote server — sufficient for public events.
     // SailingServerFactory is wired via OSGi; null check guards against it not yet being available at call time.
-    public Map<String, List<CourseAreaDTO>> getRemoteEventNamesAndCourseAreas(final String baseUrl) throws Exception {
+    public Iterable<EventBase> getRemoteEvents(final String baseUrl) throws Exception {
         final SailingServerFactory factory = sailingServerFactoryTracker == null ? null : sailingServerFactoryTracker.getService();
         if (factory == null) {
             throw new IllegalStateException("SailingServerFactory not available");
         }
         final SailingServer sailingServer = factory.getSailingServer(new java.net.URL(baseUrl));
-        return sailingServer.getEventNamesAndCourseAreas();
+        return sailingServer.getEvents();
     }
 
     @Override

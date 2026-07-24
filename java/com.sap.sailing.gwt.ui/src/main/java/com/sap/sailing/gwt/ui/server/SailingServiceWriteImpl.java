@@ -825,11 +825,6 @@ public class SailingServiceWriteImpl extends SailingServiceImpl implements Saili
     }
 
     @Override
-    public Map<String, List<CourseAreaDTO>> getRemoteEventNamesAndCourseAreas(final String baseUrl) throws Exception {
-        return getService().getRemoteEventNamesAndCourseAreas(baseUrl);
-    }
-
-    @Override
     public void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind) {
         getSecurityService().checkCurrentUserUpdatePermission(raceIdentifier);
         getService().apply(new SetRaceIsKnownToStartUpwind(raceIdentifier, raceIsKnownToStartUpwind));

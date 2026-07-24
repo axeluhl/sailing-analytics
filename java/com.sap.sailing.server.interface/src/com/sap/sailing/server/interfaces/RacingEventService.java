@@ -58,7 +58,6 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -768,7 +767,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(RemoteSailingServerReference ref);
 
-    Map<String, List<CourseAreaDTO>> getRemoteEventNamesAndCourseAreas(String baseUrl) throws Exception;
+    Iterable<EventBase> getRemoteEvents(String baseUrl) throws Exception;
 
     /**
      * Searches the content of this server, not that of any remote servers referenced by any {@link RemoteSailingServerReference}s.

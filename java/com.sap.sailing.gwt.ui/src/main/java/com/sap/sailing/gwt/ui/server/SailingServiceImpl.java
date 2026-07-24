@@ -3564,6 +3564,23 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
+    public List<EventDTO> getRemoteEvents(final String baseUrl) throws Exception {
+        final List<EventDTO> result = new ArrayList<>();
+        for (final EventBase event : getService().getRemoteEvents(baseUrl)) {
+            final EventDTO eventDTO = new EventDTO(event.getName());
+            copyEventBaseFieldsToDTO(event, eventDTO);
+            if (event.getVenue() != null) {
+                eventDTO.getVenue().setCourseAreas(new ArrayList<CourseAreaDTO>());
+                for (final CourseArea courseArea : event.getVenue().getCourseAreas()) {
+                    eventDTO.getVenue().getCourseAreas().add(convertToCourseAreaDTO(courseArea));
+                }
+            }
+            result.add(eventDTO);
+        }
+        return result;
+    }
+
+    @Override
     public List<UrlDTO> getResultImportUrls(String resultProviderName) {
         final List<UrlDTO> result = new ArrayList<>();
         SecurityService securityService = getSecurityService();

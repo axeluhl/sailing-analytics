@@ -3,17 +3,15 @@ package com.sap.sailing.server.gateway.interfaces;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sse.security.util.SecuredServer;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
@@ -51,11 +49,8 @@ public interface SailingServer extends SecuredServer {
 
     Iterable<UUID> getEventIds() throws Exception;
 
-    /**
-     * Fetches all public events from the remote server and returns their course areas keyed by event name. Reuses the
-     * existing /v1/events endpoint which already serializes venue+courseAreas in its response.
-     */
-    Map<String, List<CourseAreaDTO>> getEventNamesAndCourseAreas() throws Exception;
+    //fetches all public events from the remote server, reusing the /v1/events endpoint which serializes venue+courseAreas.
+    Iterable<EventBase> getEvents() throws Exception;
 
     MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds, boolean override,
             boolean compress, boolean exportWind, boolean exportDeviceConfigs,

@@ -274,9 +274,6 @@ public interface SailingServiceWriteAsync extends FileStorageManagementGwtServic
     void getCompleteRemoteServerReference(String sailingServerName,
             AsyncCallback<RemoteSailingServerReferenceDTO> callback);
 
-    void getRemoteEventNamesAndCourseAreas(String baseUrl,
-            AsyncCallback<Map<String, List<CourseAreaDTO>>> callback);
-
     /**
      * Remove mark properties by UUIDs
      *

@@ -25,14 +25,19 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.common.DataImportProgress;
-import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.server.gateway.deserialization.impl.CompareServersResultJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DataImportProgressJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MasterDataImportResultJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.RemoteSailingServerReferenceJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.TrackingConnectorInfoJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.gateway.interfaces.CompareServersResult;
 import com.sap.sailing.server.gateway.interfaces.MasterDataImportResult;
 import com.sap.sailing.server.gateway.interfaces.SailingServer;
@@ -43,16 +48,10 @@ import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.MasterDataImportResource;
 import com.sap.sailing.server.gateway.jaxrs.api.RemoteServerReferenceResource;
 import com.sap.sailing.server.gateway.serialization.LeaderboardGroupConstants;
-import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MasterDataImportResultJsonSerializer;
-import com.sap.sse.common.Distance;
-import com.sap.sse.common.Position;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MeterDistance;
-import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sse.security.util.impl.SecuredServerImpl;
 import com.sap.sse.shared.json.JsonDeserializationException;
 
@@ -111,34 +110,18 @@ public class SailingServerImpl extends SecuredServerImpl implements SailingServe
         return Util.map(jsonResponse, o->UUID.fromString(((JSONObject) o).get(EventBaseJsonSerializer.FIELD_ID).toString()));
     }
 
-    // Fetches all public events from the remote server and returns their course areas keyed by event name.
-    // Reuses the existing /v1/events endpoint which already serializes venue+courseAreas in its response.
     @Override
-    public Map<String, List<CourseAreaDTO>> getEventNamesAndCourseAreas() throws ClientProtocolException, IOException, ParseException {
+    public Iterable<EventBase> getEvents() throws ClientProtocolException, IOException, ParseException, JsonDeserializationException {
         final URL eventsUrl = new URL(getBaseUrl(), GATEWAY_URL_PREFIX+EventsResource.V1_EVENTS);
         final HttpGet getEvents = new HttpGet(eventsUrl.toString());
         final JSONArray jsonResponse = (JSONArray) getJsonParsedResponse(getEvents).getA();
-        final Map<String, List<CourseAreaDTO>> result = new HashMap<>();
+        final EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
+                new VenueJsonDeserializer(new CourseAreaJsonDeserializer(com.sap.sailing.domain.base.DomainFactory.INSTANCE)),
+                new LeaderboardGroupBaseJsonDeserializer(),
+                new TrackingConnectorInfoJsonDeserializer());
+        final List<EventBase> result = new ArrayList<>();
         for (final Object o : jsonResponse) {
-            final JSONObject eventJson = (JSONObject) o;
-            final String eventName = (String) eventJson.get(EventBaseJsonSerializer.FIELD_NAME);
-            final List<CourseAreaDTO> courseAreas = new ArrayList<>();
-            final JSONObject venueJson = (JSONObject) eventJson.get(EventBaseJsonSerializer.FIELD_VENUE);
-            if (venueJson != null) {
-                final JSONArray courseAreasJson = (JSONArray) venueJson.get(VenueJsonSerializer.FIELD_COURSE_AREAS);
-                if (courseAreasJson != null) {
-                    for (final Object ca : courseAreasJson) {
-                        final JSONObject caJson = (JSONObject) ca;
-                        final String caName = (String) caJson.get(CourseAreaJsonSerializer.FIELD_NAME);
-                        final JSONObject centerJson = (JSONObject) caJson.get(CourseAreaJsonSerializer.FIELD_CENTER_POSITION);
-                        final Position centerPosition = centerJson != null ? new PositionJsonDeserializer().deserialize(centerJson) : null;
-                        final Number radiusNumber = (Number) caJson.get(CourseAreaJsonSerializer.FIELD_RADIUS_IN_METERS);
-                        final Distance radius = radiusNumber != null ? new MeterDistance(radiusNumber.doubleValue()) : null;
-                        courseAreas.add(new CourseAreaDTO(UUID.randomUUID(), caName, centerPosition, radius));
-                    }
-                }
-            }
-            result.put(eventName, courseAreas);
+            result.add(deserializer.deserialize((JSONObject) o));
         }
         return result;
     }
