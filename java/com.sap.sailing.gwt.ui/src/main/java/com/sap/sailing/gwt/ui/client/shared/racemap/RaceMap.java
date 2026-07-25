@@ -2265,6 +2265,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private final StringBuilder startLineAdvantageText = new StringBuilder();
     private final StringBuilder finishLineAdvantageText = new StringBuilder();
+    /**
+     * tooltip textx for the course middle lines, using the same key type as {@link #courseMiddleLines}.
+     */
     private final Map<Set<ControlPointDTO>, StringBuilder> courseMiddleLineTexts = new HashMap<>();
     final LineInfoProvider startLineInfoProvider = new LineInfoProvider() {
         @Override
