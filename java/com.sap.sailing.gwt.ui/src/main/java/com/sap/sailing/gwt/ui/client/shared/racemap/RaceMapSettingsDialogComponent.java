@@ -84,7 +84,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
         showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
         showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
-        showSatelliteLayerCheckbox.setEnabled(!initialSettings.isWindUp());
+        showSatelliteLayerCheckbox.setEnabled(GoogleMapsLoader.isMapLibreRequested() || !initialSettings.isWindUp());
         vp.add(showSatelliteLayerCheckbox);
         if (GoogleMapsLoader.isMapLibreRequested()) {
             showSeaMarksCheckbox = dialog.createCheckbox(stringMessages.showSeaMarks());
