@@ -162,8 +162,16 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
             // fires synchronously here if the estimator was installed while we were computing;
             // otherwise it registers a callback that fires once setWindEstimation is called with
             // a non-null argument, and cancels silently if the race is removed before that
-            // happens. See bug6241 for the rationale.
-            race.runWhenWindEstimationInstalled(this::retypeAndStoreAfterWindEstimationSettled);
+            // happens. Because the setWindEstimation call typically happens on a shared
+            // background-executor thread and the follow-up work (waitUntilDone, recalculate,
+            // get(waitForLatest=true)) then blocks waiting for other tasks on the *same* shared
+            // pool, running it on the setWindEstimation caller's thread risks starving the pool
+            // (fatal with pool size 1). Detach onto a dedicated thread so the caller of
+            // setWindEstimation returns immediately. See bug6241 for the rationale.
+            race.runWhenWindEstimationInstalled(() ->
+                    new Thread(this::retypeAndStoreAfterWindEstimationSettled,
+                            "Retyping and storing maneuvers after wind estimation for "+race.getName())
+                            .start());
         }
     }
 
