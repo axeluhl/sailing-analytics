@@ -261,6 +261,11 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         int row = startRow + 1;
         for (final WindSourceType type : ALL_SOURCE_TYPES) {
             if (!directionSection && !type.useSpeed()) {
+                table.getCellFormatter().addStyleName(row, 0, CSS.sourceCheckboxIndent());
+                final Label filler = new Label(WindSourceTypeFormatter.format(type, stringMessages));
+                filler.addStyleName(CSS.sourceFillerLabel());
+                table.setWidget(row, 0, filler);
+                row++;
                 continue;
             }
             final boolean sourceSelected = selectedSources.contains(type);
@@ -323,67 +328,31 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             table.setWidget(row, 3, maxToggle.asWidget());
             row++;
         }
-        bulkAvg.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(final ClickEvent event) {
-                bulkAvg.toggle();
-                if (bulkAvg.isOn()) {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            avgToggles.get(e.getKey()).setState(StatState.ON);
-                            avgToggles.get(e.getKey()).asWidget().setVisible(false);
-                        }
-                    }
-                } else {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            avgToggles.get(e.getKey()).asWidget().setVisible(true);
-                        }
-                    }
-                }
-            }
-        });
-        bulkMin.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(final ClickEvent event) {
-                bulkMin.toggle();
-                if (bulkMin.isOn()) {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            minToggles.get(e.getKey()).setState(StatState.ON);
-                            minToggles.get(e.getKey()).asWidget().setVisible(false);
-                        }
-                    }
-                } else {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            minToggles.get(e.getKey()).asWidget().setVisible(true);
-                        }
-                    }
-                }
-            }
-        });
-        bulkMax.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(final ClickEvent event) {
-                bulkMax.toggle();
-                if (bulkMax.isOn()) {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            maxToggles.get(e.getKey()).setState(StatState.ON);
-                            maxToggles.get(e.getKey()).asWidget().setVisible(false);
-                        }
-                    }
-                } else {
-                    for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
-                        if (e.getValue().getValue()) {
-                            maxToggles.get(e.getKey()).asWidget().setVisible(true);
-                        }
-                    }
-                }
-            }
-        });
+        addBulkClickHandler(bulkAvg, avgToggles, sourceCheckboxes);
+        addBulkClickHandler(bulkMin, minToggles, sourceCheckboxes);
+        addBulkClickHandler(bulkMax, maxToggles, sourceCheckboxes);
         return new StatToggle[]{bulkAvg, bulkMin, bulkMax};
+    }
+
+    private void addBulkClickHandler(final StatToggle bulk, final Map<WindSourceType, StatToggle> perSourceToggles,
+            final Map<WindSourceType, CheckBox> sourceCheckboxes) {
+        bulk.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(final ClickEvent event) {
+                bulk.toggle();
+                for (final Map.Entry<WindSourceType, CheckBox> e : sourceCheckboxes.entrySet()) {
+                    if (e.getValue().getValue()) {
+                        final StatToggle toggle = perSourceToggles.get(e.getKey());
+                        if (bulk.isOn()) {
+                            toggle.setState(StatState.ON);
+                            toggle.asWidget().setVisible(false);
+                        } else {
+                            toggle.asWidget().setVisible(true);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
