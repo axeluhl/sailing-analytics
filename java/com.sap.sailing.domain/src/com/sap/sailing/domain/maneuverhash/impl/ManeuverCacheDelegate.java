@@ -176,23 +176,52 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
     }
 
     /**
-     * Second phase of {@link #computeAndStore()}: waits for the wind estimator to drain, triggers
-     * per-competitor recalculation so maneuvers get re-typed with the estimator's wind fixes,
-     * then snapshots and persists. Invoked from
-     * {@link com.sap.sailing.domain.tracking.TrackedRace#runWhenWindEstimationInstalled(Runnable)}.
+     * Second phase of {@link #computeAndStore()}: sequences maneuver-cache re-typing so that the
+     * stored maneuvers reflect the wind fixes the estimator produces from the spots emitted by
+     * the detector.
+     * <p>
+     *
+     * The choreography is two-round: the first round of {@link ManeuverCache#recalculate}
+     * triggers a fresh full-scan pass of the detector for each competitor (their per-competitor
+     * detectors were {@link TrackedRaceImpl#setWindEstimation cleared} when the wind estimator
+     * was installed, so the fresh detector emits spots into the now-non-null
+     * {@code WindEstimationInteraction}). The estimator asynchronously processes those spots and
+     * publishes wind fixes on its {@code MANEUVER_BASED_ESTIMATION} track. Once the estimator
+     * has drained (via {@code waitUntilDone}), a second round of recalculation re-types the
+     * spots using the newly-available wind and captures the classified maneuvers, which are then
+     * persisted. See bug6241; without this sequencing the initial recalc runs while the
+     * estimator has queued but not yet processed the spots, so typing still sees no wind and
+     * produces UNKNOWN maneuvers which then get persisted permanently.
      */
     private void retypeAndStoreAfterWindEstimationSettled() {
+        // Round 1: trigger fresh detection per competitor. Their detector cache was cleared when
+        // setWindEstimation ran, so new detectors are built with a non-null wind-estimation
+        // interaction and emit spots to the estimator during this pass.
+        for (final Competitor competitor : race.getRace().getCompetitors()) {
+            cacheToUse.recalculate(competitor);
+            cacheToUse.get(competitor, /* waitForLatest */ true);
+        }
+        // Wait for the estimator to drain the spots emitted in Round 1 and produce its wind
+        // fixes. Those fixes flow into the tracked race's MANEUVER_BASED_ESTIMATION track and
+        // become visible to getWind(pos, at) lookups.
         final IncrementalWindEstimation windEstimation = race.getWindEstimation();
+        boolean estimatorSettled = true;
         if (windEstimation != null) {
             try {
                 windEstimation.waitUntilDone();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                estimatorSettled = false;
                 logger.log(Level.WARNING, "Interrupted while waiting for wind estimation to finish inference for race "
                         +race.getRaceIdentifier()+"; skipping maneuver re-type and store");
             }
         }
-        if (!Thread.currentThread().isInterrupted()) {
+        if (estimatorSettled) {
+            // Round 2: recalculate per competitor. This time the detector's
+            // lastManeuverDetectionResult is populated from Round 1 and no new raw fixes have
+            // arrived, so it takes the re-type branch of detectManeuverSpots (line 150 of
+            // IncrementalManeuverDetectorImpl) and re-types the existing spots using the current
+            // wind -- which now includes the estimator's fixes.
             final Map<Competitor, List<Maneuver>> maneuvers = new HashMap<>();
             for (final Competitor competitor : race.getRace().getCompetitors()) {
                 cacheToUse.recalculate(competitor);
