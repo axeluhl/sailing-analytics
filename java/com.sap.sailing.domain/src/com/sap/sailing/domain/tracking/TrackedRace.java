@@ -1494,6 +1494,39 @@ public interface TrackedRace
     void runWhenPastLoading(Runnable callback);
 
     /**
+     * Executes {@code callback} once a non-{@code null} {@link IncrementalWindEstimation} has been
+     * {@link #setWindEstimation(IncrementalWindEstimation) installed} on this race. If one is
+     * already installed at call time, the callback fires synchronously on the caller's thread;
+     * otherwise the callback is registered and fires on whichever thread first invokes
+     * {@code setWindEstimation} with a non-{@code null} argument.
+     * <p>
+     *
+     * The callback also cancels silently, without firing, if the race is removed before the
+     * estimation is installed (matching the cancellation semantics of
+     * {@link #runWhenPastLoading(Runnable)}), so that callers don't leak resources when a race
+     * disappears during startup or teardown.
+     * <p>
+     *
+     * The default implementation checks {@link #getWindEstimation()} once: if non-{@code null},
+     * the callback fires synchronously; otherwise it is discarded. This is only appropriate for
+     * test doubles and other implementations without a dynamic {@link #setWindEstimation(IncrementalWindEstimation)}
+     * lifecycle. Implementations with such a lifecycle (notably {@code TrackedRaceImpl}) must
+     * override to register the callback and fire it when the estimation is installed.
+     * <p>
+     *
+     * See bug6241: used to sequence maneuver-cache re-typing and persistence after the wind
+     * estimator has been installed and had a chance to produce wind fixes.
+     *
+     * @param callback
+     *            must not be {@code null}
+     */
+    default void runWhenWindEstimationInstalled(Runnable callback) {
+        if (getWindEstimation() != null) {
+            callback.run();
+        }
+    }
+
+    /**
      * Executes the {@code callable} under synchronization with the {@link #getStatus() race status}; in other words,
      * while the callable executes, the race status of this race cannot be updated.
      */

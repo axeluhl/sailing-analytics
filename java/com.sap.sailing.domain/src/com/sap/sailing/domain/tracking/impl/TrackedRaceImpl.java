@@ -463,6 +463,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private transient volatile IncrementalWindEstimation windEstimation;
 
+    /**
+     * Callbacks awaiting the first non-{@code null} {@link #setWindEstimation(IncrementalWindEstimation)}
+     * invocation, registered via {@link #runWhenWindEstimationInstalled(Runnable)}. Guarded by
+     * {@link #windEstimationInstalledCallbacksLock}. Cleared once the wind estimation is installed;
+     * subsequent registrations invoke the callback synchronously on the caller's thread without
+     * adding to this list.
+     */
+    private transient List<Runnable> windEstimationInstalledCallbacks;
+
+    /**
+     * Monitor guarding the {@link #windEstimationInstalledCallbacks} list and the read-then-decide
+     * against {@link #windEstimation} in {@link #runWhenWindEstimationInstalled(Runnable)}.
+     * Reinitialized in {@link #readObject(ObjectInputStream)} on replicas because both this field
+     * and the underlying list are transient.
+     */
+    private transient Object windEstimationInstalledCallbacksLock = new Object();
+
     private transient ShortTimeAfterLastHitCache<Competitor, IncrementalManeuverDetector> maneuverDetectorPerCompetitorCache;
 
     /**
@@ -814,6 +831,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         competitorRankingsLocks = createCompetitorRankingsLockMap();
         directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         maneuverDetectorPerCompetitorCache = createManeuverDetectorCache();
+        // bug6241: re-establish the "wait for wind estimation to be installed" callback plumbing
+        // on the replica. Both fields are transient; without this initialization,
+        // runWhenWindEstimationInstalled would NPE on the synchronized (windEstimationInstalledCallbacksLock)
+        // block. The list itself starts empty because no callbacks are pending on a fresh replica --
+        // any pending state on the master lives only in the master's memory. windEstimationInstalledCallbacks
+        // is left null and lazily created on first registration in runWhenWindEstimationInstalled.
+        windEstimationInstalledCallbacksLock = new Object();
+        windEstimationInstalledCallbacks = null;
         logger.info("Deserialized race " + getRace().getName());
     }
     
@@ -3320,6 +3345,83 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public void runWhenWindEstimationInstalled(final Runnable callback) {
+        // Same two-cooperating-listeners pattern as runWhenPastLoading, but the "fire" trigger is
+        // the first non-null setWindEstimation call (observed via the callback list drained inside
+        // updateManeuversAndWindWithNewWindEstimation) rather than a status transition. If a wind
+        // estimation is already installed when this method is called, we fire synchronously on the
+        // caller's thread; otherwise we register a callback and a regatta-removal listener so we
+        // silently cancel if the race disappears before installation. See bug6241.
+        final AtomicBoolean settled = new AtomicBoolean(false);
+        final TrackedRegatta regatta = getTrackedRegatta();
+        final RaceListener[] regattaListenerHolder = new RaceListener[1];
+        final Runnable[] installCallbackHolder = new Runnable[1];
+        final Runnable tearDown = () -> {
+            if (installCallbackHolder[0] != null) {
+                synchronized (windEstimationInstalledCallbacksLock) {
+                    if (windEstimationInstalledCallbacks != null) {
+                        windEstimationInstalledCallbacks.remove(installCallbackHolder[0]);
+                    }
+                }
+            }
+            if (regattaListenerHolder[0] != null) {
+                regatta.removeRaceListener(regattaListenerHolder[0]);
+            }
+        };
+        final Runnable settleAndFire = () -> {
+            if (settled.compareAndSet(false, true)) {
+                try {
+                    tearDown.run();
+                } finally {
+                    callback.run();
+                }
+            }
+        };
+        final Runnable settleWithoutFiring = () -> {
+            if (settled.compareAndSet(false, true)) {
+                tearDown.run();
+            }
+        };
+        installCallbackHolder[0] = () -> settleAndFire.run();
+        regattaListenerHolder[0] = new RaceListener() {
+            @Override
+            public void raceAdded(final TrackedRace trackedRace) {
+                // not interested in additions
+            }
+            @Override
+            public void raceRemoved(final TrackedRace trackedRace) {
+                if (trackedRace == TrackedRaceImpl.this) {
+                    settleWithoutFiring.run();
+                }
+            }
+        };
+        final boolean alreadyInstalled;
+        synchronized (windEstimationInstalledCallbacksLock) {
+            if (windEstimation != null) {
+                alreadyInstalled = true;
+            } else {
+                alreadyInstalled = false;
+                if (windEstimationInstalledCallbacks == null) {
+                    windEstimationInstalledCallbacks = new ArrayList<>();
+                }
+                windEstimationInstalledCallbacks.add(installCallbackHolder[0]);
+            }
+        }
+        if (alreadyInstalled) {
+            callback.run();
+        } else {
+            regatta.addRaceListener(regattaListenerHolder[0], Optional.empty(), /* synchronous */ false);
+            // Close the race between the initial check + list append and the regatta-listener
+            // registration: if setWindEstimation ran in that window and drained our callback (or
+            // the field became non-null another way), fire now. The CAS on `settled` makes this
+            // safe against concurrent installations.
+            if (windEstimation != null) {
+                settleAndFire.run();
+            }
+        }
+    }
+
+    @Override
     public void attachRaceLog(RaceLog raceLog) {
         synchronized (TrackedRaceImpl.this) {
             attachedRaceLogs.put(raceLog.getId(), raceLog);
@@ -4233,6 +4335,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // maneuver detection to complete.
         if (windEstimation != null) {
             feedAlreadyKnownManeuversToWindEstimation(windEstimation);
+            // bug6241: fire "wind estimation installed" callbacks -- for example, from
+            // ManeuverCacheDelegate.resume()'s Path B thread that wants to re-type maneuvers
+            // after the estimator has had a chance to produce wind fixes. Snapshot and clear the
+            // list under the monitor so subsequent runWhenWindEstimationInstalled(...) calls
+            // observe the installed state and invoke synchronously.
+            final List<Runnable> callbacksToFire;
+            synchronized (windEstimationInstalledCallbacksLock) {
+                if (windEstimationInstalledCallbacks != null && !windEstimationInstalledCallbacks.isEmpty()) {
+                    callbacksToFire = new ArrayList<>(windEstimationInstalledCallbacks);
+                    windEstimationInstalledCallbacks.clear();
+                } else {
+                    callbacksToFire = Collections.emptyList();
+                }
+            }
+            for (final Runnable callback : callbacksToFire) {
+                try {
+                    callback.run();
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING,
+                            "runWhenWindEstimationInstalled callback threw for race " + getRaceIdentifier(), t);
+                }
+            }
         }
     }
 
