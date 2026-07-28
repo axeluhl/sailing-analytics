@@ -281,7 +281,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
         remoteBaseUrlBox.setVisibleLength(40);
         final ListBox remoteEventDropDown = createListBox(false);
-        //cache loaded remote events so the change handler can access them without a second RPC call
+        // cache loaded remote events so the change handler can access them without a second RPC call
         final List<List<EventDTO>> remoteEventsCache = new ArrayList<>(Collections.singletonList((List<EventDTO>) null));
         final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
         loadRemoteEventsButton.addClickHandler(e -> {
@@ -310,7 +310,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 final String selectedEventName = remoteEventDropDown.getValue(selectedIndex);
                 for (final EventDTO event : remoteEventsCache.get(0)) {
                     if (event.getName().equals(selectedEventName)) {
-                        //copy with fresh UUIDs so these become independent course areas of this event
+                        // copy with fresh UUIDs so these become independent course areas of this event
                         final List<CourseAreaDTO> copies = new ArrayList<>();
                         for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
                             copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));

@@ -767,6 +767,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     Util.Pair<Iterable<EventBase>, Exception> getCompleteRemoteServerReference(RemoteSailingServerReference ref);
 
+    /**
+     * Fetches events known by the replica set accessible under the {@code baseUrl} provided. Creates a connection to
+     * the remote server with the current user's bearer token, authenticating against the remote environment in case of
+     * shared security.
+     */
     Iterable<EventBase> getRemoteEvents(String baseUrl) throws Exception;
 
     /**

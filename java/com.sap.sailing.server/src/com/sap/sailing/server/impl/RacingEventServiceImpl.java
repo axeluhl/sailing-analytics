@@ -1846,8 +1846,6 @@ Replicator {
     }
 
     @Override
-    // Creates an anonymous (no auth token) connection to the remote server — sufficient for public events.
-    // SailingServerFactory is wired via OSGi; null check guards against it not yet being available at call time.
     public Iterable<EventBase> getRemoteEvents(final String baseUrl) throws Exception {
         final SailingServerFactory factory = sailingServerFactoryTracker == null ? null : sailingServerFactoryTracker.getService();
         if (factory == null) {
