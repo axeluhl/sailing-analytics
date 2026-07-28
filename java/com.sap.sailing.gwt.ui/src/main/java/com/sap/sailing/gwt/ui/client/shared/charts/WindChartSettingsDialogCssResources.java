@@ -19,6 +19,7 @@ public interface WindChartSettingsDialogCssResources extends ClientBundle {
         String statButtonSectionDisabled();
         String toAllSelectedLabel();
         String sourceCheckboxIndent();
+        String sourceFillerLabel();
         String accentCheckbox();
         String sectionDivider();
     }

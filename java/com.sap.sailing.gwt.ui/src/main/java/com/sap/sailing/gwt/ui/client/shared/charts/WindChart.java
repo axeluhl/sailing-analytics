@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -87,11 +88,11 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private final Map<WindSource, PlotLine> speedAvgPlotLines = new HashMap<WindSource, PlotLine>();
     private final Map<WindSource, PlotLine> speedMinPlotLines = new HashMap<WindSource, PlotLine>();
     private final Map<WindSource, PlotLine> speedMaxPlotLines = new HashMap<WindSource, PlotLine>();
+    private final Map<WindSource, StatAccumulator> directionAccumulators = new HashMap<WindSource, StatAccumulator>();
+    private final Map<WindSource, StatAccumulator> speedAccumulators = new HashMap<WindSource, StatAccumulator>();
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-    private Long zoomFromMillis;
-    private Long zoomToMillis;
 
     private final ColorMapImpl<WindSource> colorMap;
 
@@ -238,7 +239,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     private void updateVisibleSeries() {
         final Set<Series> visibleSeries = new HashSet<Series>(Arrays.asList(chart.getSeries()));
-
         if (preselectFilter != null) {
             forceSeriesSelection(visibleSeries, windSourceDirectionSeries);
             forceSeriesSelection(visibleSeries, windSourceSpeedSeries);
@@ -250,7 +250,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final Set<WindSourceType> speedSourceTypesToDisplay = settings.getWindSpeedSourcesToDisplay();
             updateSeries(visibleSeries, windSourceSpeedSeries, showSpeedSeries, speedSourceTypesToDisplay);
         }
-
         onResize();
     }
 
@@ -372,32 +371,35 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         Long newMinTimepoint = timeOfEarliestRequestInMillis;
         Long newMaxTimepoint = timeOfLatestRequestInMillis;
-
-        for (WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
-            WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
-            Series directionSeries = getOrCreateDirectionSeries(windSource);
-            Series speedSeries = null;
-            if (windSource.getType().useSpeed()) {
-                speedSeries = getOrCreateSpeedSeries(windSource);
-            }
-
+        for (final WindSource windSource: result.windTrackInfoByWindSource.keySet()) {
+            final WindTrackInfoDTO windTrackInfo = result.windTrackInfoByWindSource.get(windSource);
+            final Series directionSeries = getOrCreateDirectionSeries(windSource);
+            final Series speedSeries = windSource.getType().useSpeed() ? getOrCreateSpeedSeries(windSource) : null;
             Point previousDirectionPoint = null;
             if (append && windSourceDirectionPoints.get(windSource) != null
                        && windSourceDirectionPoints.get(windSource).length != 0) {
                 previousDirectionPoint = windSourceDirectionPoints.get(windSource)[windSourceDirectionPoints.get(windSource).length - 1];
             }
-            Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
-            Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
+            final Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
+            final Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
-
-            for (WindDTO wind : windTrackInfo.windFixes) {
+            if (!append) {
+                directionAccumulators.put(windSource, new StatAccumulator(true));
+                if (windSource.getType().useSpeed()) {
+                    speedAccumulators.put(windSource, new StatAccumulator(false));
+                }
+            }
+            final StatAccumulator dirAccumulator = directionAccumulators.computeIfAbsent(windSource, s -> new StatAccumulator(true));
+            final StatAccumulator spdAccumulator = windSource.getType().useSpeed()
+                    ? speedAccumulators.computeIfAbsent(windSource, s -> new StatAccumulator(false)) : null;
+            for (final WindDTO wind : windTrackInfo.windFixes) {
                 if (newMinTimepoint == null || wind.requestTimepoint < newMinTimepoint) {
                     newMinTimepoint = wind.requestTimepoint;
                 }
                 if (newMaxTimepoint == null || wind.requestTimepoint > newMaxTimepoint) {
                     newMaxTimepoint = wind.requestTimepoint;
                 }
-                //if we are in non appending mode, the data is the truth, use all of it without filtering
+                // if we are in non appending mode, the data is the truth, use all of it without filtering
                 if (!append || ((timeOfEarliestRequestInMillis == null || wind.requestTimepoint < timeOfEarliestRequestInMillis) || 
                     timeOfLatestRequestInMillis == null || wind.requestTimepoint > timeOfLatestRequestInMillis)) {
                     Point newDirectionPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindFromDeg);
@@ -406,7 +408,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                         // name += " Confidence:" + wind.confidence;
                         newDirectionPoint.setName(name);
                     }
-                    
                     if (previousDirectionPoint != null) {
                         newDirectionPoint = ChartPointRecalculator.stayClosestToPreviousPoint(previousDirectionPoint,
                                 newDirectionPoint);
@@ -416,11 +417,16 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     }
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
-                    Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
+                    if (wind.dampenedTrueWindFromDeg != null) {
+                        dirAccumulator.add(wind.dampenedTrueWindFromDeg);
+                    }
+                    final Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
+                    if (spdAccumulator != null && wind.dampenedTrueWindSpeedInKnots != null) {
+                        spdAccumulator.add(wind.dampenedTrueWindSpeedInKnots);
+                    }
                 }
             }
-            
             Point[] newDirectionPoints;
             Point[] newSpeedPoints = null;
             if (append) {
@@ -445,7 +451,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 setSeriesPoints(speedSeries, newSpeedPoints, /* manageZoom */ true);
                 windSourceSpeedPoints.put(windSource, newSpeedPoints);
             }
-            
             if (firstPointOfFirstSeries == null && newDirectionPoints.length != 0) { //If firstPointOfFirstSeries is null, than this series is the first
                 firstPointOfFirstSeries = newDirectionPoints[0];
             }
@@ -510,27 +515,27 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (!clearCacheAndReload) {
             if (dirAvgChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionAvgSources(), directionAvgPlotLines, StatKind.AVG, true);
+                        settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, true);
             }
             if (dirMinChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionMinSources(), directionMinPlotLines, StatKind.MIN, true);
+                        settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, true);
             }
             if (dirMaxChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionMaxSources(), directionMaxPlotLines, StatKind.MAX, true);
+                        settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, true);
             }
             if (spdAvgChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedAvgSources(), speedAvgPlotLines, StatKind.AVG, false);
+                        settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, false);
             }
             if (spdMinChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedMinSources(), speedMinPlotLines, StatKind.MIN, false);
+                        settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, false);
             }
             if (spdMaxChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedMaxSources(), speedMaxPlotLines, StatKind.MAX, false);
+                        settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, false);
             }
         }
     }
@@ -540,6 +545,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         timeOfLatestRequestInMillis = null;
         windSourceDirectionPoints.clear();
         windSourceSpeedPoints.clear();
+        directionAccumulators.clear();
+        speedAccumulators.clear();
         firstPointOfFirstSeries = null;
         loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
     }
@@ -604,6 +611,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private void clearChart() {
         chart.removeAllSeries();
         removeStatPlotLines();
+        directionAccumulators.clear();
+        speedAccumulators.clear();
     }
 
     /** Removes all six stat plot lines (avg/min/max for direction and speed) from the chart and clears the maps. */
@@ -624,27 +633,97 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     /** Which statistic a plot line represents. */
     private enum StatKind { AVG, MIN, MAX }
+    /** Running accumulators for stat computation. Direction uses circular (sin/cos) averaging; speed uses arithmetic. */
+    private static final class StatAccumulator {
+        private double sinSum, cosSum, sum, min, max;
+        private int count;
+        private final boolean isDirection;
+        StatAccumulator(final boolean isDirection) {
+            this.isDirection = isDirection;
+            reset();
+        }
+        void reset() {
+            sinSum = 0;
+            cosSum = 0;
+            sum = 0;
+            min = Double.MAX_VALUE;
+            max = -Double.MAX_VALUE;
+            count = 0;
+        }
+        void add(final double v) {
+            if (isDirection) {
+                final double radians = Math.toRadians(v);
+                sinSum += Math.sin(radians);
+                cosSum += Math.cos(radians);
+            } else {
+                sum += v;
+            }
+            if (v < min) { min = v; }
+            if (v > max) { max = v; }
+            count++;
+        }
+        Map<StatKind, Double> toStatMap() {
+            if (count == 0) {
+                return null;
+            }
+            final Map<StatKind, Double> result = new EnumMap<StatKind, Double>(StatKind.class);
+            if (isDirection) {
+                final double avg = Math.toDegrees(Math.atan2(sinSum / count, cosSum / count));
+                result.put(StatKind.AVG, avg < 0 ? avg + 360 : avg);
+                result.put(StatKind.MIN, ((min % 360) + 360) % 360);
+                result.put(StatKind.MAX, ((max % 360) + 360) % 360);
+            } else {
+                result.put(StatKind.AVG, sum / count);
+                result.put(StatKind.MIN, min);
+                result.put(StatKind.MAX, max);
+            }
+            return result;
+        }
+    }
 
     /** Computes avg/min/max over a point array. Returns null if there are no valid points.
-     *  If fromMillis/toMillis are non-null, only points within that time window are included. */
-    private static double[] computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis) {
-        double sum = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
+     *  If fromMillis/toMillis are non-null, only points within that time window are included.
+     *  For direction series, the average is computed using circular (vector) averaging so that
+     *  the 0/360 wrap-around is handled correctly; min/max are normalized back to 0-360. */
+    private static Map<StatKind, Double> computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis,
+            final boolean isDirection) {
+        double sinSum = 0, cosSum = 0, sum = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
         int count = 0;
         for (final Point p : points) {
             if (p != null && p.getY() != null) {
-                if (fromMillis != null && p.getX().longValue() < fromMillis) { continue; }
-                if (toMillis != null && p.getX().longValue() > toMillis) { continue; }
-                final double v = p.getY().doubleValue();
-                sum += v;
-                if (v < min) { min = v; }
-                if (v > max) { max = v; }
-                count++;
+                if ((fromMillis == null || p.getX().longValue() >= fromMillis)
+                 && (toMillis == null || p.getX().longValue() <= toMillis)) {
+                    final double v = p.getY().doubleValue();
+                    if (isDirection) {
+                        final double radians = Math.toRadians(v);
+                        sinSum += Math.sin(radians);
+                        cosSum += Math.cos(radians);
+                    } else {
+                        sum += v;
+                    }
+                    if (v < min) { min = v; }
+                    if (v > max) { max = v; }
+                    count++;
+                }
             }
         }
+        final Map<StatKind, Double> result;
         if (count == 0) {
-            return null;
+            result = null;
+        } else {
+            result = new EnumMap<StatKind, Double>(StatKind.class);
+            if (isDirection) {
+                final double avg = Math.toDegrees(Math.atan2(sinSum / count, cosSum / count));
+                result.put(StatKind.AVG, avg < 0 ? avg + 360 : avg);
+                result.put(StatKind.MIN, ((min % 360) + 360) % 360);
+                result.put(StatKind.MAX, ((max % 360) + 360) % 360);
+            } else {
+                result.put(StatKind.AVG, sum / count);
+                result.put(StatKind.MIN, min);
+                result.put(StatKind.MAX, max);
+            }
         }
-        return new double[]{sum / count, min, max};
+        return result;
     }
 
     /**
@@ -701,6 +780,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final int yAxisIndex,
             final Set<WindSourceType> enabledTypes,
             final Map<WindSource, PlotLine> plotLineMap,
+            final Map<WindSource, StatAccumulator> accumulators,
             final StatKind kind,
             final boolean isDirection) {
         for (final PlotLine pl : plotLineMap.values()) {
@@ -708,16 +788,23 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         }
         plotLineMap.clear();
         final NumberFormat fmt = NumberFormat.getFormat("0.#");
+        final Util.Pair<Date, Date> zoom = timeRangeWithZoomProvider.isZoomed() ? timeRangeWithZoomProvider.getTimeZoom() : null;
         for (final Map.Entry<WindSource, Point[]> entry : pointsMap.entrySet()) {
             final WindSource source = entry.getKey();
             final Series series = seriesMap.get(source);
             if (series != null && series.isVisible() && entry.getValue() != null
                     && enabledTypes.contains(source.getType())) {
-                final double[] stats = computeStatValues(entry.getValue(), zoomFromMillis, zoomToMillis);
+                final Map<StatKind, Double> stats;
+                if (zoom == null) {
+                    final StatAccumulator acc = accumulators.get(source);
+                    stats = acc == null ? null : acc.toStatMap();
+                } else {
+                    stats = computeStatValues(entry.getValue(), zoom.getA().getTime(), zoom.getB().getTime(), isDirection);
+                }
                 if (stats != null) {
                     final String color = colorMap.getColorByID(source).getAsHtml();
                     final String sourceName = WindSourceTypeFormatter.format(source, stringMessages);
-                    final double statValue = kind == StatKind.AVG ? stats[0] : (kind == StatKind.MIN ? stats[1] : stats[2]);
+                    final double statValue = stats.get(kind);
                     final String kindLabel = kind == StatKind.AVG ? stringMessages.windStatAvg()
                             : (kind == StatKind.MIN ? stringMessages.windStatMin() : stringMessages.windStatMax());
                     final String unit = isDirection ? stringMessages.degreesShort() : stringMessages.knotsUnit();
@@ -735,17 +822,17 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      *  in the dialog, updateStatPlotLinesForStat is called directly for just that one. */
     private void updateStatPlotLines() {
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionAvgSources(), directionAvgPlotLines, StatKind.AVG, true);
+                settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, true);
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionMinSources(), directionMinPlotLines, StatKind.MIN, true);
+                settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, true);
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionMaxSources(), directionMaxPlotLines, StatKind.MAX, true);
+                settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, true);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedAvgSources(), speedAvgPlotLines, StatKind.AVG, false);
+                settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, false);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedMinSources(), speedMinPlotLines, StatKind.MIN, false);
+                settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, false);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedMaxSources(), speedMaxPlotLines, StatKind.MAX, false);
+                settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, false);
     }
 
     /**
@@ -799,16 +886,12 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     @Override
     public void onTimeZoomChanged(final Date zoomStartTimepoint, final Date zoomEndTimepoint) {
         super.onTimeZoomChanged(zoomStartTimepoint, zoomEndTimepoint);
-        zoomFromMillis = zoomStartTimepoint.getTime();
-        zoomToMillis = zoomEndTimepoint.getTime();
         updateStatPlotLines();
     }
 
     @Override
     public void onTimeZoomReset() {
         super.onTimeZoomReset();
-        zoomFromMillis = null;
-        zoomToMillis = null;
         updateStatPlotLines();
     }
 
@@ -892,15 +975,21 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     }
 
     /**
-     * Forces the display of a specific windProvider preselected, and all of same type unselected. Will be disabled by either updateSettings or once the provider was properly found and shown
+     * Forces the display of a specific windProvider preselected, and all of same type unselected. Will be disabled by
+     * either updateSettings or once the provider was properly found and shown
      */
     public void showProvider(WindSource windprovider) {
-        WindSourceType type = windprovider.getType();
-        Set<WindSourceType> windSpeedSourcesToDisplay = new HashSet<>();
-        Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
+        final WindSourceType type = windprovider.getType();
+        final Set<WindSourceType> windSpeedSourcesToDisplay = new HashSet<>();
+        final Set<WindSourceType> windDirectionSourcesToDisplay = new HashSet<>();
         windSpeedSourcesToDisplay.add(type);
         windDirectionSourcesToDisplay.add(type);
-        WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true, windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(), settings.getDirectionAvgSources(), settings.getDirectionMinSources(), settings.getDirectionMaxSources(), settings.isDirectionAvgBulk(), settings.isDirectionMinBulk(), settings.isDirectionMaxBulk(), settings.getSpeedAvgSources(), settings.getSpeedMinSources(), settings.getSpeedMaxSources(), settings.isSpeedAvgBulk(), settings.isSpeedMinBulk(), settings.isSpeedMaxBulk());
+        final WindChartSettings patched = new WindChartSettings(true, windSpeedSourcesToDisplay, true,
+                windDirectionSourcesToDisplay, settings.getResolutionInMilliseconds(),
+                settings.getDirectionAvgSources(), settings.getDirectionMinSources(), settings.getDirectionMaxSources(),
+                settings.isDirectionAvgBulk(), settings.isDirectionMinBulk(), settings.isDirectionMaxBulk(),
+                settings.getSpeedAvgSources(), settings.getSpeedMinSources(), settings.getSpeedMaxSources(),
+                settings.isSpeedAvgBulk(), settings.isSpeedMinBulk(), settings.isSpeedMaxBulk());
         updateSettings(patched);
         preselectFilter = windprovider;
         updateVisibleSeries();

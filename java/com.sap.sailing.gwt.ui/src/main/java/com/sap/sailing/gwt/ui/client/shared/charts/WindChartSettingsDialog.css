@@ -83,3 +83,9 @@
     border-left: 1px solid #cccccc;
     margin: 0 8px;
 }
+
+.sourceFillerLabel {
+    color: #aaa;
+    font-size: 12px;
+    padding: 2px 0;
+}
