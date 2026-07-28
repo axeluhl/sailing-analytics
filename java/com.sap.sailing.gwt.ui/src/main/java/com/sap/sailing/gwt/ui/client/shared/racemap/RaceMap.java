@@ -1629,6 +1629,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         // Do mark specific actions
                         showCourseMarksOnMap(raceMapDataDTO.coursePositions, transitionTimeInMillis);
+                        if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
+                            updateCoordinateSystemFromSettings();
+                        }
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
