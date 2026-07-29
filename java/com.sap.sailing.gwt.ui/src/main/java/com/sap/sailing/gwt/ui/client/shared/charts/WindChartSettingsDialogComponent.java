@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -90,6 +91,11 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
 
         Widget asWidget() {
             return label;
+        }
+
+        void setShown(final boolean shown) {
+            label.getElement().getStyle().setVisibility(
+                shown ? Visibility.VISIBLE : Visibility.HIDDEN);
         }
 
         void addClickHandler(final ClickHandler handler) {
@@ -277,9 +283,9 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
             final StatToggle avgToggle = new StatToggle(stringMessages.windStatAvg(), avgSources.contains(type), CSS, false);
             final StatToggle minToggle = new StatToggle(stringMessages.windStatMin(), minSources.contains(type), CSS, false);
             final StatToggle maxToggle = new StatToggle(stringMessages.windStatMax(), maxSources.contains(type), CSS, false);
-            avgToggle.asWidget().setVisible(sourceSelected && !bulkAvg.isOn());
-            minToggle.asWidget().setVisible(sourceSelected && !bulkMin.isOn());
-            maxToggle.asWidget().setVisible(sourceSelected && !bulkMax.isOn());
+            avgToggle.setShown(sourceSelected && !bulkAvg.isOn());
+            minToggle.setShown(sourceSelected && !bulkMin.isOn());
+            maxToggle.setShown(sourceSelected && !bulkMax.isOn());
             avgToggles.put(type, avgToggle);
             minToggles.put(type, minToggle);
             maxToggles.put(type, maxToggle);
@@ -316,9 +322,9 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                             maxToggle.setState(StatState.ON);
                         }
                     }
-                    avgToggle.asWidget().setVisible(checked && !bulkAvg.isOn());
-                    minToggle.asWidget().setVisible(checked && !bulkMin.isOn());
-                    maxToggle.asWidget().setVisible(checked && !bulkMax.isOn());
+                    avgToggle.setShown(checked && !bulkAvg.isOn());
+                    minToggle.setShown(checked && !bulkMin.isOn());
+                    maxToggle.setShown(checked && !bulkMax.isOn());
                 }
             });
             table.getCellFormatter().addStyleName(row, 0, CSS.sourceCheckboxIndent());
@@ -345,9 +351,9 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                         final StatToggle toggle = perSourceToggles.get(e.getKey());
                         if (bulk.isOn()) {
                             toggle.setState(StatState.ON);
-                            toggle.asWidget().setVisible(false);
+                            toggle.setShown(false);
                         } else {
-                            toggle.asWidget().setVisible(true);
+                            toggle.setShown(true);
                         }
                     }
                 }

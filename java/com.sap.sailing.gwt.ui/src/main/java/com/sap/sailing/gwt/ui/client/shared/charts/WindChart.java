@@ -56,6 +56,11 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.KnotSpeedImpl;
+import com.sap.sse.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sse.common.scalablevalue.impl.ScalableSpeed;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -88,8 +93,8 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private final Map<WindSource, PlotLine> speedAvgPlotLines = new HashMap<WindSource, PlotLine>();
     private final Map<WindSource, PlotLine> speedMinPlotLines = new HashMap<WindSource, PlotLine>();
     private final Map<WindSource, PlotLine> speedMaxPlotLines = new HashMap<WindSource, PlotLine>();
-    private final Map<WindSource, StatAccumulator> directionAccumulators = new HashMap<WindSource, StatAccumulator>();
-    private final Map<WindSource, StatAccumulator> speedAccumulators = new HashMap<WindSource, StatAccumulator>();
+    private final Map<WindSource, DirectionStatAccumulator> directionAccumulators = new HashMap<WindSource, DirectionStatAccumulator>();
+    private final Map<WindSource, SpeedStatAccumulator> speedAccumulators = new HashMap<WindSource, SpeedStatAccumulator>();
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
@@ -384,14 +389,13 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int currentPointIndex = 0;
             if (!append) {
-                directionAccumulators.put(windSource, new StatAccumulator(true));
+                directionAccumulators.put(windSource, new DirectionStatAccumulator());
                 if (windSource.getType().useSpeed()) {
-                    speedAccumulators.put(windSource, new StatAccumulator(false));
+                    speedAccumulators.put(windSource, new SpeedStatAccumulator());
                 }
             }
-            final StatAccumulator dirAccumulator = directionAccumulators.computeIfAbsent(windSource, s -> new StatAccumulator(true));
-            final StatAccumulator spdAccumulator = windSource.getType().useSpeed()
-                    ? speedAccumulators.computeIfAbsent(windSource, s -> new StatAccumulator(false)) : null;
+            final DirectionStatAccumulator dirAccumulator = directionAccumulators.computeIfAbsent(windSource, s -> new DirectionStatAccumulator());
+            final SpeedStatAccumulator spdAccumulator = windSource.getType().useSpeed() ? speedAccumulators.computeIfAbsent(windSource, s -> new SpeedStatAccumulator()) : null;
             for (final WindDTO wind : windTrackInfo.windFixes) {
                 if (newMinTimepoint == null || wind.requestTimepoint < newMinTimepoint) {
                     newMinTimepoint = wind.requestTimepoint;
@@ -633,97 +637,75 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     /** Which statistic a plot line represents. */
     private enum StatKind { AVG, MIN, MAX }
-    /** Running accumulators for stat computation. Direction uses circular (sin/cos) averaging; speed uses arithmetic. */
-    private static final class StatAccumulator {
-        private double sinSum, cosSum, sum, min, max;
-        private int count;
-        private final boolean isDirection;
-        StatAccumulator(final boolean isDirection) {
-            this.isDirection = isDirection;
-            reset();
-        }
-        void reset() {
-            sinSum = 0;
-            cosSum = 0;
-            sum = 0;
-            min = Double.MAX_VALUE;
-            max = -Double.MAX_VALUE;
-            count = 0;
-        }
-        void add(final double v) {
-            if (isDirection) {
-                final double radians = Math.toRadians(v);
-                sinSum += Math.sin(radians);
-                cosSum += Math.cos(radians);
-            } else {
-                sum += v;
-            }
-            if (v < min) { min = v; }
-            if (v > max) { max = v; }
-            count++;
-        }
+    //Base class for running stat accumulators. Subclasses handle avg computation differently.
+    private abstract static class StatAccumulator {
+        protected double min = Double.MAX_VALUE;
+        protected double max = -Double.MAX_VALUE;
+        protected int count = 0;
+        abstract void add(double v);
+        abstract double computeAvg();
         Map<StatKind, Double> toStatMap() {
+            final Map<StatKind, Double> result;
             if (count == 0) {
-                return null;
-            }
-            final Map<StatKind, Double> result = new EnumMap<StatKind, Double>(StatKind.class);
-            if (isDirection) {
-                final double avg = Math.toDegrees(Math.atan2(sinSum / count, cosSum / count));
-                result.put(StatKind.AVG, avg < 0 ? avg + 360 : avg);
-                result.put(StatKind.MIN, ((min % 360) + 360) % 360);
-                result.put(StatKind.MAX, ((max % 360) + 360) % 360);
+                result = null;
             } else {
-                result.put(StatKind.AVG, sum / count);
+                result = new EnumMap<StatKind, Double>(StatKind.class);
+                result.put(StatKind.AVG, computeAvg());
                 result.put(StatKind.MIN, min);
                 result.put(StatKind.MAX, max);
             }
             return result;
         }
     }
+    /** Accumulates wind direction values using circular (sin/cos) averaging via {@link ScalableBearing}. */
+    private static final class DirectionStatAccumulator extends StatAccumulator {
+        private ScalableBearing scalableSum = null;
+        @Override
+        void add(final double v) {
+            final ScalableBearing sb = new ScalableBearing(new DegreeBearingImpl(v));
+            scalableSum = scalableSum == null ? sb : (ScalableBearing) scalableSum.add(sb);
+            if (v < min) { min = v; }
+            if (v > max) { max = v; }
+            count++;
+        }
+        @Override
+        double computeAvg() {
+            final Bearing avg = scalableSum.divide(count);
+            return avg == null ? 0 : avg.getDegrees();
+        }
+    }
+    /** Accumulates wind speed values using arithmetic averaging via {@link ScalableSpeed}. */
+    private static final class SpeedStatAccumulator extends StatAccumulator {
+        private ScalableSpeed scalableSum = null;
+        @Override
+        void add(final double v) {
+            final ScalableSpeed ss = new ScalableSpeed(new KnotSpeedImpl(v));
+            scalableSum = scalableSum == null ? ss : (ScalableSpeed) scalableSum.add(ss);
+            if (v < min) { min = v; }
+            if (v > max) { max = v; }
+            count++;
+        }
+        @Override
+        double computeAvg() {
+            return scalableSum.divide(count).getKnots();
+        }
+    }
 
-    /** Computes avg/min/max over a point array. Returns null if there are no valid points.
-     *  If fromMillis/toMillis are non-null, only points within that time window are included.
-     *  For direction series, the average is computed using circular (vector) averaging so that
-     *  the 0/360 wrap-around is handled correctly; min/max are normalized back to 0-360. */
+    /** Computes avg/min/max over a point array for zoom. Returns null if there are no valid points.
+     *  Direction values are normalized to 0-360 before accumulation to undo the shift applied by stayClosestToPreviousPoint. */
     private static Map<StatKind, Double> computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis,
             final boolean isDirection) {
-        double sinSum = 0, cosSum = 0, sum = 0, min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
-        int count = 0;
+        final StatAccumulator acc = isDirection ? new DirectionStatAccumulator() : new SpeedStatAccumulator();
         for (final Point p : points) {
             if (p != null && p.getY() != null) {
                 if ((fromMillis == null || p.getX().longValue() >= fromMillis)
                  && (toMillis == null || p.getX().longValue() <= toMillis)) {
                     final double v = p.getY().doubleValue();
-                    if (isDirection) {
-                        final double radians = Math.toRadians(v);
-                        sinSum += Math.sin(radians);
-                        cosSum += Math.cos(radians);
-                    } else {
-                        sum += v;
-                    }
-                    if (v < min) { min = v; }
-                    if (v > max) { max = v; }
-                    count++;
+                    acc.add(isDirection ? ((v % 360) + 360) % 360 : v);
                 }
             }
         }
-        final Map<StatKind, Double> result;
-        if (count == 0) {
-            result = null;
-        } else {
-            result = new EnumMap<StatKind, Double>(StatKind.class);
-            if (isDirection) {
-                final double avg = Math.toDegrees(Math.atan2(sinSum / count, cosSum / count));
-                result.put(StatKind.AVG, avg < 0 ? avg + 360 : avg);
-                result.put(StatKind.MIN, ((min % 360) + 360) % 360);
-                result.put(StatKind.MAX, ((max % 360) + 360) % 360);
-            } else {
-                result.put(StatKind.AVG, sum / count);
-                result.put(StatKind.MIN, min);
-                result.put(StatKind.MAX, max);
-            }
-        }
-        return result;
+        return acc.toStatMap();
     }
 
     /**
@@ -734,9 +716,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     private PlotLine buildStatPlotLine(final int yAxisIndex, final String color, final double value,
             final StatKind kind, final boolean isDirection, final String labelText) {
         final DashStyle dashStyle = isDirection ? DashStyle.DASH : DashStyle.DOT;
-        final double width = isDirection
-                ? (kind == StatKind.AVG ? 2 : 1.5)
-                : (kind == StatKind.AVG ? 3 : 2);
+        final double width = isDirection ? (kind == StatKind.AVG ? 2 : 1.5) : (kind == StatKind.AVG ? 3 : 2);
         final PlotLineLabel.Align align = isDirection ? PlotLineLabel.Align.LEFT : PlotLineLabel.Align.RIGHT;
         final int labelX = isDirection ? 4 : -4;
         final String lineColor = darkenColor(color, 0.65);
@@ -780,7 +760,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final int yAxisIndex,
             final Set<WindSourceType> enabledTypes,
             final Map<WindSource, PlotLine> plotLineMap,
-            final Map<WindSource, StatAccumulator> accumulators,
+            final Map<WindSource, ? extends StatAccumulator> accumulators,
             final StatKind kind,
             final boolean isDirection) {
         for (final PlotLine pl : plotLineMap.values()) {
