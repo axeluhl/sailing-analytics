@@ -18,6 +18,11 @@ function toGoogleZoom(mapLibreZoom) {
     return mapLibreZoom + 1 - GOOGLE_ZOOM_SCALE_CORRECTION;
 }
 
+function headingDelta(from, to) {
+    const delta = Math.abs((from - to) % 360);
+    return delta > 180 ? 360 - delta : delta;
+}
+
 function isSatelliteMapType(mapTypeId) {
     const id = typeof mapTypeId === 'string' ? mapTypeId.toLowerCase() : mapTypeId;
     return id === 'satellite' || id === 'hybrid';
@@ -245,6 +250,23 @@ class CompatMap {
             if (this.userZoomInProgress) this.emit('dragend');
         });
         this.map.on('rotate', () => this.emit('heading_changed'));
+        // A rotation the user performs themselves outranks a heading still being applied.
+        this.map.on('rotatestart', event => { if (event?.originalEvent) this.pendingHeading = null; });
+        // Google applies a heading instantly, so it always reaches the requested angle. Here the
+        // rotation is animated and any camera command arriving mid-flight cancels it, which would
+        // strand the map at a partial bearing. Reconcile on idle rather than on moveend: moveend
+        // also fires when rotateTo stops a previous animation, before the rotation has begun.
+        this.map.on('idle', () => {
+            if (this.pendingHeading == null) return;
+            if (headingDelta(this.map.getBearing(), this.pendingHeading) < 0.5) {
+                this.pendingHeading = null;
+                return;
+            }
+            if (this.map.isMoving()) return;
+            const heading = this.pendingHeading;
+            this.pendingHeading = null;
+            this.map.jumpTo({ bearing: heading });
+        });
         this.map.on('idle', () => {
             if (!this.cameraChangedSinceIdle) return;
             this.cameraChangedSinceIdle = false;
@@ -472,7 +494,10 @@ class CompatMap {
         });
         this.map.panTo(center);
     }
-    setHeading(degrees) { this.map.rotateTo(degrees, { duration: 500, easing: t => t * (2 - t) }); }
+    setHeading(degrees) {
+        this.pendingHeading = degrees;
+        this.map.rotateTo(degrees, { duration: 500, easing: t => t * (2 - t) });
+    }
     getHeading() { return (this.map.getBearing() + 360) % 360; }
     setMapTypeId(mapTypeId) { this.options.mapTypeId = mapTypeId; setSatelliteVisible(this.map, isSatelliteMapType(mapTypeId)); }
     getMapTypeId() { return this.options.mapTypeId || 'roadmap'; }
