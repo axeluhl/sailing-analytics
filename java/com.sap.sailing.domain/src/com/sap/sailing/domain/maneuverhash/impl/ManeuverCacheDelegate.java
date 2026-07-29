@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.maneuverhash.ManeuverCache;
 import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprint;
 import com.sap.sailing.domain.maneuverhash.ManeuverRaceFingerprintFactory;
@@ -80,13 +81,29 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
         } else {
             fingerprint = null;
         }
-        // Self-heal check (bug6241): if the fingerprint matches but the loaded maneuvers are all
-        // empty for every competitor, the previous run of the server persisted a "computed and
-        // empty" verdict -- likely because the maneuver detector completed before the wind
-        // estimator had a chance to produce wind fixes, so spots got typed as UNKNOWN and the
-        // storage step wrote empty lists. Treat that as a stale cache miss and fall through to
-        // the compute path, which now sequences its storage after the wind estimator has settled
-        // so it doesn't reproduce the poisoned state.
+        // Self-heal check (bug6241): if the fingerprint matches but the loaded maneuvers cannot
+        // possibly produce a maneuver-based wind estimate, treat the DB record as a stale cache
+        // miss and fall through to the compute path. Two poisoned states are recognised:
+        //
+        //   * "all empty" -- every competitor's list is null or empty. This is the original
+        //     failure mode: the maneuver detector completed with no wind context at all and the
+        //     storage step wrote empty lists.
+        //
+        //   * "no classifiable maneuvers" -- lists are non-empty but every stored maneuver is
+        //     typed as UNKNOWN or PENALTY_CIRCLE (i.e. none of TACK/JIBE/HEAD_UP/BEAR_AWAY is
+        //     present anywhere in the race). This happens when the detector ran while
+        //     getWind(pos, at) still returned null everywhere so createManeuverFromManeuverCurveAndWind
+        //     hit the "wind == null" branch (ManeuverDetectorImpl line ~699) and typed every
+        //     spot as UNKNOWN. Feeding such records back through
+        //     IncrementalWindEstimation.alreadyClassifiedManeuversAvailable produces zero wind
+        //     fixes because IncrementalMstHmmWindEstimationForTrackedRace.mapManeuverType maps
+        //     UNKNOWN and PENALTY_CIRCLE to null -- the whole batch gets filtered out and the
+        //     MBE wind track stays empty. That's what surfaces to callers as hasWindData=false.
+        //
+        // Either case is unambiguous evidence that the DB record was produced without a working
+        // wind estimator. The compute path now sequences its storage after the wind estimator
+        // has settled (see computeAndStore / retypeAndStoreAfterWindEstimationSettled), so
+        // recomputing here overwrites the poison and heals the DB.
         final boolean useDbLoad;
         final Map<Competitor, List<Maneuver>> loadedManeuvers;
         if (fingerprint != null && fingerprint.matches(race)) {
@@ -94,6 +111,12 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
             if (isAllEmpty(loadedManeuvers)) {
                 logger.info("Maneuver fingerprints match for race "+race.getRaceIdentifier()
                         +" but stored maneuvers are empty for every competitor; treating as stale cache miss and re-computing (see bug6241)");
+                useDbLoad = false;
+            } else if (hasNoClassifiableManeuver(loadedManeuvers)) {
+                logger.info("Maneuver fingerprints match for race "+race.getRaceIdentifier()
+                        +" but no stored maneuver is classifiable as TACK/JIBE/HEAD_UP/BEAR_AWAY;"
+                        +" the DB record cannot yield a maneuver-based wind estimate. Treating as stale"
+                        +" cache miss and re-computing (see bug6241)");
                 useDbLoad = false;
             } else {
                 logger.info("Maneuver fingerprints match for race "+race.getRaceIdentifier()+"; loading from DB instead of computing");
@@ -127,6 +150,50 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
             }
         }
         return allEmpty;
+    }
+
+    /**
+     * Returns {@code true} iff none of the stored maneuvers across all competitors is typed as
+     * {@link ManeuverType#TACK TACK}, {@link ManeuverType#JIBE JIBE}, {@link ManeuverType#HEAD_UP
+     * HEAD_UP} or {@link ManeuverType#BEAR_AWAY BEAR_AWAY}. Those four are the types that the
+     * maneuver-based wind estimator can turn into a wind fix; anything else
+     * ({@link ManeuverType#PENALTY_CIRCLE PENALTY_CIRCLE}, {@link ManeuverType#UNKNOWN UNKNOWN},
+     * {@code null}) is filtered out in {@code IncrementalMstHmmWindEstimationForTrackedRace
+     * .mapManeuverType}, so a stored record consisting only of those non-classifiable types
+     * would yield zero wind fixes when fed back via {@code alreadyClassifiedManeuversAvailable}.
+     * <p>
+     *
+     * Assumes the caller has already established that {@link #isAllEmpty} is {@code false}:
+     * this method exists to catch the second poisoned state where the lists are non-empty but
+     * every entry is unclassifiable (typically all-{@link ManeuverType#UNKNOWN UNKNOWN} from a
+     * detection pass that had no wind context; see the {@link #resume()} rationale).
+     */
+    private boolean hasNoClassifiableManeuver(Map<Competitor, List<Maneuver>> maneuvers) {
+        boolean noneClassifiable = true;
+        if (maneuvers != null) {
+            outer:
+            for (final List<Maneuver> forCompetitor : maneuvers.values()) {
+                if (forCompetitor != null) {
+                    for (final Maneuver maneuver : forCompetitor) {
+                        if (maneuver != null && isClassifiableType(maneuver.getType())) {
+                            noneClassifiable = false;
+                            break outer;
+                        }
+                    }
+                }
+            }
+        }
+        return noneClassifiable;
+    }
+
+    /**
+     * The four maneuver types that {@code IncrementalMstHmmWindEstimationForTrackedRace
+     * .mapManeuverType} maps to a non-{@code null} {@code ManeuverTypeForClassification}, i.e.
+     * the ones that can feed a wind fix. Keep this list in sync with that mapping.
+     */
+    private boolean isClassifiableType(ManeuverType type) {
+        return type == ManeuverType.TACK || type == ManeuverType.JIBE
+                || type == ManeuverType.HEAD_UP || type == ManeuverType.BEAR_AWAY;
     }
 
     /**
