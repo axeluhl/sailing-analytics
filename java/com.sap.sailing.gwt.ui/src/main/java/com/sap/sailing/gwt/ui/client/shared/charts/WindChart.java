@@ -528,27 +528,27 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         if (!clearCacheAndReload) {
             if (dirAvgChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, true);
+                        settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, /* isDirection */ true);
             }
             if (dirMinChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, true);
+                        settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, /* isDirection */ true);
             }
             if (dirMaxChanged) {
                 updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                        settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, true);
+                        settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, /* isDirection */ true);
             }
             if (spdAvgChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, false);
+                        settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, /* isDirection */ false);
             }
             if (spdMinChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, false);
+                        settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, /* isDirection */ false);
             }
             if (spdMaxChanged) {
                 updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                        settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, false);
+                        settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, /* isDirection */ false);
             }
         }
     }
@@ -847,17 +847,17 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      *  in the dialog, updateStatPlotLinesForStat is called directly for just that one. */
     private void updateStatPlotLines() {
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, true);
+                settings.getDirectionAvgSources(), directionAvgPlotLines, directionAccumulators, StatKind.AVG, /* isDirection */ true);
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, true);
+                settings.getDirectionMinSources(), directionMinPlotLines, directionAccumulators, StatKind.MIN, /* isDirection */ true);
         updateStatPlotLinesForStat(windSourceDirectionPoints, windSourceDirectionSeries, 0,
-                settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, true);
+                settings.getDirectionMaxSources(), directionMaxPlotLines, directionAccumulators, StatKind.MAX, /* isDirection */ true);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, false);
+                settings.getSpeedAvgSources(), speedAvgPlotLines, speedAccumulators, StatKind.AVG, /* isDirection */ false);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, false);
+                settings.getSpeedMinSources(), speedMinPlotLines, speedAccumulators, StatKind.MIN, /* isDirection */ false);
         updateStatPlotLinesForStat(windSourceSpeedPoints, windSourceSpeedSeries, 1,
-                settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, false);
+                settings.getSpeedMaxSources(), speedMaxPlotLines, speedAccumulators, StatKind.MAX, /* isDirection */ false);
     }
 
     /**

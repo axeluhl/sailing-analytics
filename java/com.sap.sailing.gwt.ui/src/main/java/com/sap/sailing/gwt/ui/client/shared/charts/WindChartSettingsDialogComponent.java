@@ -152,12 +152,12 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 initialSettings.getWindDirectionSourcesToDisplay(),
                 initialSettings.getDirectionAvgSources(), initialSettings.getDirectionMinSources(), initialSettings.getDirectionMaxSources(),
                 initialSettings.isDirectionAvgBulk(), initialSettings.isDirectionMinBulk(), initialSettings.isDirectionMaxBulk(),
-                initialSettings.isShowWindDirectionsSeries(), true);
+                initialSettings.isShowWindDirectionsSeries(), /* directionSection */ true);
         dirBulkAvg = dirBulk[0];
         dirBulkMin = dirBulk[1];
         dirBulkMax = dirBulk[2];
         if (!initialSettings.isShowWindDirectionsSeries()) {
-            setSectionTogglesDisabled(dirAvgToggles, dirMinToggles, dirMaxToggles, dirBulkAvg, dirBulkMin, dirBulkMax, true);
+            setSectionTogglesDisabled(dirAvgToggles, dirMinToggles, dirMaxToggles, dirBulkAvg, dirBulkMin, dirBulkMax, /* disabled */ true);
         }
         showWindDirectionsSeriesCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -183,12 +183,12 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 initialSettings.getWindSpeedSourcesToDisplay(),
                 initialSettings.getSpeedAvgSources(), initialSettings.getSpeedMinSources(), initialSettings.getSpeedMaxSources(),
                 initialSettings.isSpeedAvgBulk(), initialSettings.isSpeedMinBulk(), initialSettings.isSpeedMaxBulk(),
-                initialSettings.isShowWindSpeedSeries(), false);
+                initialSettings.isShowWindSpeedSeries(), /* directionSection */ false);
         spdBulkAvg = spdBulk[0];
         spdBulkMin = spdBulk[1];
         spdBulkMax = spdBulk[2];
         if (!initialSettings.isShowWindSpeedSeries()) {
-            setSectionTogglesDisabled(spdAvgToggles, spdMinToggles, spdMaxToggles, spdBulkAvg, spdBulkMin, spdBulkMax, true);
+            setSectionTogglesDisabled(spdAvgToggles, spdMinToggles, spdMaxToggles, spdBulkAvg, spdBulkMin, spdBulkMax, /* disabled */ true);
         }
         showWindSpeedSeriesCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
