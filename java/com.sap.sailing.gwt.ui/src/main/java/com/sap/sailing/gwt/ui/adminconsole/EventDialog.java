@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,8 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
@@ -253,15 +256,17 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         final VerticalPanel courseAreasPanel = new VerticalPanel();
         final ListBox copyFromEventDropDown = createListBox(false);
         copyFromEventDropDown.addItem(stringMessages.pleaseSelect());
-        for (final EventDTO event : existingEvents) {
-            copyFromEventDropDown.addItem(event.getName(), event.getName());
+        final List<EventDTO> sortedExistingEvents = new ArrayList<>(existingEvents);
+        sortedExistingEvents.sort(Comparator.comparing(EventDTO::getName));
+        for (final EventDTO event : sortedExistingEvents) {
+            copyFromEventDropDown.addItem(event.getName(), event.getId().toString());
         }
         copyFromEventDropDown.addChangeHandler(e -> {
             final int selectedIndex = copyFromEventDropDown.getSelectedIndex();
             if (selectedIndex > 0) {
-                final String selectedEventName = copyFromEventDropDown.getValue(selectedIndex);
-                for (final EventDTO event : existingEvents) {
-                    if (event.getName().equals(selectedEventName)) {
+                final String selectedEventId = copyFromEventDropDown.getValue(selectedIndex);
+                for (final EventDTO event : sortedExistingEvents) {
+                    if (event.getId().toString().equals(selectedEventId)) {
                         // copy with fresh UUIDs so these become independent course areas of this event
                         final List<CourseAreaDTO> copies = new ArrayList<>();
                         for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
@@ -281,24 +286,33 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
         remoteBaseUrlBox.setVisibleLength(40);
         final ListBox remoteEventDropDown = createListBox(false);
+        remoteEventDropDown.setEnabled(false);
+        final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator();
         // cache loaded remote events so the change handler can access them without a second RPC call
-        final List<List<EventDTO>> remoteEventsCache = new ArrayList<>(Collections.singletonList((List<EventDTO>) null));
+        @SuppressWarnings("unchecked")
+        final List<EventDTO>[] remoteEventsCache = new List[1];
         final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
         loadRemoteEventsButton.addClickHandler(e -> {
             remoteEventDropDown.clear();
             remoteEventDropDown.addItem(stringMessages.pleaseSelect());
-            remoteEventsCache.set(0, null);
+            remoteEventDropDown.setEnabled(false);
+            remoteEventsCache[0] = null;
+            remoteLoadBusyIndicator.setBusy(true);
             sailingServiceWrite.getRemoteEvents(remoteBaseUrlBox.getValue(),
                     new AsyncCallback<List<EventDTO>>() {
                 @Override
                 public void onSuccess(final List<EventDTO> result) {
-                    remoteEventsCache.set(0, result);
+                    remoteLoadBusyIndicator.setBusy(false);
+                    remoteEventsCache[0] = result;
+                    result.sort(Comparator.comparing(EventDTO::getName));
                     for (final EventDTO event : result) {
-                        remoteEventDropDown.addItem(event.getName(), event.getName());
+                        remoteEventDropDown.addItem(event.getName(), event.getId().toString());
                     }
+                    remoteEventDropDown.setEnabled(true);
                 }
                 @Override
                 public void onFailure(final Throwable caught) {
+                    remoteLoadBusyIndicator.setBusy(false);
                     remoteEventDropDown.clear();
                     remoteEventDropDown.addItem(caught.getMessage());
                 }
@@ -306,10 +320,10 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         });
         remoteEventDropDown.addChangeHandler(e -> {
             final int selectedIndex = remoteEventDropDown.getSelectedIndex();
-            if (selectedIndex > 0 && remoteEventsCache.get(0) != null) {
-                final String selectedEventName = remoteEventDropDown.getValue(selectedIndex);
-                for (final EventDTO event : remoteEventsCache.get(0)) {
-                    if (event.getName().equals(selectedEventName)) {
+            if (selectedIndex > 0 && remoteEventsCache[0] != null) {
+                final String selectedEventId = remoteEventDropDown.getValue(selectedIndex);
+                for (final EventDTO event : remoteEventsCache[0]) {
+                    if (event.getId().toString().equals(selectedEventId)) {
                         // copy with fresh UUIDs so these become independent course areas of this event
                         final List<CourseAreaDTO> copies = new ArrayList<>();
                         for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
@@ -326,6 +340,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         remotePanel.add(new Label(stringMessages.copyCourseAreasFromRemoteServer()));
         remotePanel.add(remoteBaseUrlBox);
         remotePanel.add(loadRemoteEventsButton);
+        remotePanel.add(remoteLoadBusyIndicator);
         remotePanel.add(remoteEventDropDown);
         courseAreasPanel.add(localPanel);
         courseAreasPanel.add(remotePanel);

@@ -3207,7 +3207,13 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     private void copyEventBaseFieldsToDTO(EventBase event, EventBaseDTO eventDTO) {
-        eventDTO.setVenue(new VenueDTO(event.getVenue() != null ? event.getVenue().getName() : null));
+        final VenueDTO venueDTO = new VenueDTO(event.getVenue() != null ? event.getVenue().getName() : null);
+        if (event.getVenue() != null) {
+            final List<CourseAreaDTO> courseAreaDTOs = new ArrayList<>();
+            Util.addAll(Util.map(event.getVenue().getCourseAreas(), this::convertToCourseAreaDTO), courseAreaDTOs);
+            venueDTO.setCourseAreas(courseAreaDTOs);
+        }
+        eventDTO.setVenue(venueDTO);
         eventDTO.startDate = event.getStartDate() != null ? event.getStartDate().asDate() : null;
         eventDTO.endDate = event.getStartDate() != null ? event.getEndDate().asDate() : null;
         eventDTO.isPublic = event.isPublic();
@@ -3569,12 +3575,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
         for (final EventBase event : getService().getRemoteEvents(baseUrl)) {
             final EventDTO eventDTO = new EventDTO(event.getName());
             copyEventBaseFieldsToDTO(event, eventDTO);
-            if (event.getVenue() != null) {
-                eventDTO.getVenue().setCourseAreas(new ArrayList<CourseAreaDTO>());
-                for (final CourseArea courseArea : event.getVenue().getCourseAreas()) {
-                    eventDTO.getVenue().getCourseAreas().add(convertToCourseAreaDTO(courseArea));
-                }
-            }
             result.add(eventDTO);
         }
         return result;
