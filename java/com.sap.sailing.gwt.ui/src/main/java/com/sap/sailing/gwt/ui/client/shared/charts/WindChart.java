@@ -37,6 +37,7 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
@@ -57,8 +58,11 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Bearing;
+import com.sap.sse.common.DoublePair;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.KnotSpeedImpl;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sse.common.scalablevalue.impl.ScalableSpeed;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -197,13 +201,13 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             }
         }));
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
-
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
-                        long value = axisLabelsData.getValueAsLong() % 360;
-                        return Long.valueOf(value < 0 ? value + 360 : value).toString();
+                        final double directionInDegreesYAxis = axisLabelsData.getValueAsDouble();
+                        final double normalized = normalizeYAxisDirectionValue(directionInDegreesYAxis);
+                        return Long.valueOf(Double.valueOf(normalized).longValue()).toString();
                     }
                 }));
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)
@@ -224,6 +228,12 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         } else {
             clearChart();
         }
+    }
+
+    private static double normalizeYAxisDirectionValue(final double directionInDegreesYAxis) {
+        double value = directionInDegreesYAxis % 360;
+        final double normalized = value < 0 ? value + 360 : value;
+        return normalized;
     }
     
     @Override
@@ -422,7 +432,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     directionPoints[currentPointIndex] = newDirectionPoint;
                     previousDirectionPoint = newDirectionPoint;
                     if (wind.dampenedTrueWindFromDeg != null) {
-                        dirAccumulator.add(wind.dampenedTrueWindFromDeg);
+                        dirAccumulator.add(newDirectionPoint.getY().doubleValue());
                     }
                     final Point newSpeedPoint = new Point(wind.requestTimepoint, wind.dampenedTrueWindSpeedInKnots);
                     speedPoints[currentPointIndex++] = newSpeedPoint;
@@ -435,7 +445,6 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             Point[] newSpeedPoints = null;
             if (append) {
                 Point[] oldDirectionPoints = windSourceDirectionPoints.get(windSource) != null ? windSourceDirectionPoints.get(windSource) : new Point[0];
-                
                 newDirectionPoints = new Point[oldDirectionPoints.length + currentPointIndex];
                 System.arraycopy(oldDirectionPoints, 0, newDirectionPoints, 0, oldDirectionPoints.length);
                 System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, currentPointIndex);
@@ -637,71 +646,107 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
 
     /** Which statistic a plot line represents. */
     private enum StatKind { AVG, MIN, MAX }
-    //Base class for running stat accumulators. Subclasses handle avg computation differently.
-    private abstract static class StatAccumulator {
-        protected double min = Double.MAX_VALUE;
-        protected double max = -Double.MAX_VALUE;
+    
+    /**
+     * Base class for running stat accumulators. Subclasses handle avg computation differently. The accumulator uses a
+     * {@link ScalableValue} sub-type for computing averages. It assumes that values of this type will be displayed in a
+     * chart, using a {@code double} value for the Y-axis display. As such, it supports converting {@code double} values
+     * into a {@link ScalableValue} of the respective sub-type and adding it to the accumulator as the corresponding
+     * {@link ScalableValue}, and vice-versa it supports converting a {@link ScalableValue} or whatever it averages to
+     * ({@code AveragesTo}) to a {@code double} value for us in the chart's Y-axis.
+     */
+    private abstract static class StatAccumulator<T extends ScalableValue<ValueType, AveragesTo>, ValueType, AveragesTo extends Comparable<AveragesTo>> {
+        protected double min;
+        protected double max;
         protected int count = 0;
-        abstract void add(double v);
-        abstract double computeAvg();
+        private ScalableValue<ValueType, AveragesTo> sum;
+
+        public StatAccumulator() {
+            min = Double.MAX_VALUE;
+            max = Double.MIN_VALUE;
+            sum = null;
+        }
+        
+        public abstract double getDoubleValue(AveragesTo t);
+        
+        protected abstract T fromDoubleValue(double d);
+        
+        public void add(double v) {
+            final T scalableValue = fromDoubleValue(v);
+            sum = sum == null ? scalableValue : sum.add(scalableValue);
+            if (v > max) {
+                max = v;
+            }
+            if (v < min) {
+                min = v;
+            }
+            count++;
+        }
+
+        private AveragesTo computeAvg() {
+            return sum.divide(count);
+        }
+
         Map<StatKind, Double> toStatMap() {
             final Map<StatKind, Double> result;
             if (count == 0) {
                 result = null;
             } else {
                 result = new EnumMap<StatKind, Double>(StatKind.class);
-                result.put(StatKind.AVG, computeAvg());
+                result.put(StatKind.AVG, getDoubleValue(computeAvg()));
                 result.put(StatKind.MIN, min);
                 result.put(StatKind.MAX, max);
+                GWT.log("Stats of "+this+": "+result);
             }
             return result;
         }
     }
-    /** Accumulates wind direction values using circular (sin/cos) averaging via {@link ScalableBearing}. */
-    private static final class DirectionStatAccumulator extends StatAccumulator {
-        private ScalableBearing scalableSum = null;
+
+    /**
+     * Accumulates wind direction values using circular (sin/cos) averaging via {@link ScalableBearing}. The {@code double}
+     * representation is the {@link Bearing#getDegrees() degree} value.
+     */
+    private static final class DirectionStatAccumulator extends StatAccumulator<ScalableBearing, DoublePair, Bearing> {
         @Override
-        void add(final double v) {
-            final ScalableBearing sb = new ScalableBearing(new DegreeBearingImpl(v));
-            scalableSum = scalableSum == null ? sb : (ScalableBearing) scalableSum.add(sb);
-            if (v < min) { min = v; }
-            if (v > max) { max = v; }
-            count++;
+        protected ScalableBearing fromDoubleValue(double bearingInDegrees) {
+            return new ScalableBearing(new DegreeBearingImpl(bearingInDegrees));
         }
+
         @Override
-        double computeAvg() {
-            final Bearing avg = scalableSum.divide(count);
-            return avg == null ? 0 : avg.getDegrees();
+        public double getDoubleValue(Bearing bearing) {
+            return bearing.getDegrees();
         }
     }
-    /** Accumulates wind speed values using arithmetic averaging via {@link ScalableSpeed}. */
-    private static final class SpeedStatAccumulator extends StatAccumulator {
-        private ScalableSpeed scalableSum = null;
+    
+    /**
+     * Accumulates wind speed values using arithmetic averaging via {@link ScalableSpeed}. The {@code double}
+     * representation is the {@link Speed#getKnots() speed in knots}.
+     */
+    private static final class SpeedStatAccumulator extends StatAccumulator<ScalableSpeed, Double, Speed> {
         @Override
-        void add(final double v) {
-            final ScalableSpeed ss = new ScalableSpeed(new KnotSpeedImpl(v));
-            scalableSum = scalableSum == null ? ss : (ScalableSpeed) scalableSum.add(ss);
-            if (v < min) { min = v; }
-            if (v > max) { max = v; }
-            count++;
+        protected ScalableSpeed fromDoubleValue(double knots) {
+            return new ScalableSpeed(new KnotSpeedImpl(knots));
         }
+
         @Override
-        double computeAvg() {
-            return scalableSum.divide(count).getKnots();
+        public double getDoubleValue(Speed speed) {
+            return speed.getKnots();
         }
     }
 
-    /** Computes avg/min/max over a point array for zoom. Returns null if there are no valid points.
-     *  Direction values are normalized to 0-360 before accumulation to undo the shift applied by stayClosestToPreviousPoint. */
+    /**
+     * Computes avg/min/max over a point array for zoom. Returns null if there are no valid points. Direction values are
+     * normalized to 0-360 before accumulation to undo the shift applied by stayClosestToPreviousPoint.
+     */
     private static Map<StatKind, Double> computeStatValues(final Point[] points, final Long fromMillis, final Long toMillis,
             final boolean isDirection) {
-        final StatAccumulator acc = isDirection ? new DirectionStatAccumulator() : new SpeedStatAccumulator();
+        final StatAccumulator<?, ?, ?> acc = isDirection ? new DirectionStatAccumulator() : new SpeedStatAccumulator();
         for (final Point p : points) {
             if (p != null && p.getY() != null) {
                 if ((fromMillis == null || p.getX().longValue() >= fromMillis)
                  && (toMillis == null || p.getX().longValue() <= toMillis)) {
                     final double v = p.getY().doubleValue();
-                    acc.add(isDirection ? ((v % 360) + 360) % 360 : v);
+                    acc.add(v);
                 }
             }
         }
@@ -760,7 +805,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
             final int yAxisIndex,
             final Set<WindSourceType> enabledTypes,
             final Map<WindSource, PlotLine> plotLineMap,
-            final Map<WindSource, ? extends StatAccumulator> accumulators,
+            final Map<WindSource, ? extends StatAccumulator<?, ?, ?>> accumulators,
             final StatKind kind,
             final boolean isDirection) {
         for (final PlotLine pl : plotLineMap.values()) {
@@ -776,7 +821,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     && enabledTypes.contains(source.getType())) {
                 final Map<StatKind, Double> stats;
                 if (zoom == null) {
-                    final StatAccumulator acc = accumulators.get(source);
+                    final StatAccumulator<?, ?, ?> acc = accumulators.get(source);
                     stats = acc == null ? null : acc.toStatMap();
                 } else {
                     stats = computeStatValues(entry.getValue(), zoom.getA().getTime(), zoom.getB().getTime(), isDirection);
@@ -788,7 +833,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                     final String kindLabel = kind == StatKind.AVG ? stringMessages.windStatAvg()
                             : (kind == StatKind.MIN ? stringMessages.windStatMin() : stringMessages.windStatMax());
                     final String unit = isDirection ? stringMessages.degreesShort() : stringMessages.knotsUnit();
-                    final String labelText = kindLabel + " " + sourceName + ": " + fmt.format(statValue) + unit;
+                    final String labelText = kindLabel + " " + sourceName + ": " + fmt.format(isDirection ? normalizeYAxisDirectionValue(statValue) : statValue) + unit;
                     final PlotLine pl = buildStatPlotLine(yAxisIndex, color, statValue, kind, isDirection, labelText);
                     chart.getYAxis(yAxisIndex).addPlotLines(pl);
                     plotLineMap.put(source, pl);
