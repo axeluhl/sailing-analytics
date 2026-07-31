@@ -25,6 +25,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider;
 import com.sap.sse.gwt.client.controls.slider.TimeSlider.BarOverlay;
@@ -106,14 +108,21 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
     /**
      * @param forcePaddingRightToAlignToCharts
      *            if <code>true</code>, the right padding will always be set such that the time panel lines up with
-     *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
-     *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
+     *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends on
+     *            the flag set by {@link #setLiveGenerallyPossible(boolean)}
+     * @param pendingServerOperationsCountSupplier
+     *            an optional {@link AsyncActionsExecutor} that, if not {@code null}, will be used to display the
+     *            {@link AsyncActionsExecutor#getNumberOfPendingActions() number of pending actions} in the advanced
+     *            sub-panel of this time panel. Updates are handled using the
+     *            {@link AsyncActionsExecutor#addListener(com.sap.sse.gwt.client.async.AsyncActionsExecutor.Listener)
+     *            listener} support.
      */
     public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts, UserService userService,
-            final SecuredDTO raceDTO) {
+            final SecuredDTO raceDTO, AsyncActionsExecutor pendingServerOperationsCountSupplier,
+            TimeRangeActionsExecutor<?, ?, ?> pendingTimeRangeActionsSupplier) {
         super(parent, context);
         this.raceDTO = raceDTO;
         this.userService = userService;
@@ -128,21 +137,21 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         timePanelInnerWrapper = new FlowPanel();
         timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
         timePanelInnerWrapper.setSize("100%", "100%");
-        
+        // slider panel
         timePanelSlider = new SimplePanel();
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
         timePanelSliderFlowWrapper.add(timePanelSlider);
-
+        // play/pause
         playSpeedImg = resources.timesliderPlaySpeedIcon();
         playPauseButton = new Button("");
-
+        // play mode visualization
         playModeLiveActiveImg = resources.timesliderPlayStateLiveActiveIcon();
         playModeReplayActiveImg = resources.timesliderPlayStateReplayActiveIcon();
         playModeInactiveImg = resources.timesliderPlayStateLiveInactiveIcon();
         playModeImage = new Image(playModeInactiveImg);
-
+        // time slider
         timeSlider = new TimeSlider();
         timeSlider.setEnabled(true);
         timeSlider.setLabelFormatter(new SliderBar.LabelFormatter() {
@@ -287,7 +296,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         controlsPanel.add(playSpeedControlPanel);
-        controlsPanel.add(playModeControlPanel );
+        controlsPanel.add(playModeControlPanel);
         controlsPanel.add(timeDelayPanel);
         controlsPanel.add(timeControlPanel);
         controlsPanel.add(timeToStartControlPanel);
@@ -300,7 +309,23 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
             }
         });
         controlsPanel.add(resetZoomButton);
+        if (pendingServerOperationsCountSupplier != null) {
+            final Label pendingServerOperationsCounter = new Label(getPendingServerOperationsCounterLabelText(pendingServerOperationsCountSupplier));
+            pendingServerOperationsCounter.addStyleName("timePanel-controls-pendingServerOperationsCounter");
+            controlsPanel.add(pendingServerOperationsCounter);
+            pendingServerOperationsCountSupplier.addListener(
+                    newPendingOperationsCount->{
+                        pendingServerOperationsCounter.setText(getPendingServerOperationsCounterLabelText(pendingServerOperationsCountSupplier));
+                        pendingServerOperationsCounter.getElement().getStyle().setProperty("backgroundSize",
+                                "calc("+
+                                (100*pendingServerOperationsCountSupplier.getNumberOfPendingActions()/AsyncActionsExecutor.DEFAULT_MAX_PENDING_CALLS)+"% - 30px) 100%");
+                    });
+        }
         hideControlsPanel();
+    }
+
+    private String getPendingServerOperationsCounterLabelText(AsyncActionsExecutor pendingServerOperationsCountSupplier) {
+        return stringMessages.pendingServerOperations(pendingServerOperationsCountSupplier.getNumberOfPendingActions());
     }
     
     public TimeRangeWithZoomProvider getTimeRangeProvider() {
