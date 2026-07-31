@@ -49,6 +49,10 @@ import com.sap.sse.common.Util.Pair;
  * @author Tim Hessenmüller (D062243)
  */
 public class TimeRangeActionsExecutor<Result, SubResult, Key> {
+    public static interface Listener {
+        void onNumberOfPendingCallsChanged(int newNumberOfPendingCalls);
+    }
+    
     /**
      * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server for a
      * potentially trimmed request. The compound {@code Result} is {@link TimeRangeAsyncCallback#unzipResult(Object)
@@ -80,6 +84,8 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                 final TimeRangeResultCache<SubResult> cache = getSubResultCache(key);
                 cache.registerResult(action, trimmedSubResultForKey);
             }
+            numberOfPendingActions--;
+            notifyListeners();
         }
 
         @Override
@@ -89,6 +95,8 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                 callback.onFailure(caught);
                 callbackWasCalled = true;
             }
+            numberOfPendingActions--;
+            notifyListeners();
         }
 
         /**
@@ -141,9 +149,14 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
         }
     }
 
-    private final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>(); //TODO Invalidation
+    private final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>();
+    
+    private int numberOfPendingActions;
+    
+    private final Set<Listener> listeners;
 
     public TimeRangeActionsExecutor() {
+        this.listeners = new HashSet<>();
     }
 
     /**
@@ -202,10 +215,24 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
                 trimmedTimeRanges.put(subRequest.getKey(), potentiallyTrimmedTimeRange);
             }
         }
+        numberOfPendingActions++;
+        notifyListeners();
         action.execute(trimmedTimeRanges, execCallback);
     }
 
     private TimeRangeResultCache<SubResult> getSubResultCache(Key key) {
         return cacheMap.computeIfAbsent(key, k->new TimeRangeResultCache<>());
+    }
+
+    public void addListener(Listener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+    
+    private void notifyListeners() {
+        listeners.forEach(l->l.onNumberOfPendingCallsChanged(numberOfPendingActions));
     }
 }

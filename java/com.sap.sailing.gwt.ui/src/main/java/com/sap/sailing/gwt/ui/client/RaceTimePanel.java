@@ -17,6 +17,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -80,13 +81,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private final Duration initialTimeAfterRaceStartInReplayMode;
     
     public RaceTimePanel(Component<?> parent, ComponentContext<?> context, RaceTimePanelLifecycle componentLifecycle,
-            UserService userService,
-            Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
+            UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider,
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode,
-            final RaceWithCompetitorsAndBoatsDTO raceDTO, AsyncActionsExecutor pendingServerOperationsCountSupplier) {
+            final RaceWithCompetitorsAndBoatsDTO raceDTO, AsyncActionsExecutor pendingServerOperationsCountSupplier,
+            TimeRangeActionsExecutor<?, ?, ?> timeRangeActionsExecutor) {
         super(parent, context, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
-                forcePaddingRightToAlignToCharts, userService, raceDTO, pendingServerOperationsCountSupplier, timeRangeActionsExecutor);
+                forcePaddingRightToAlignToCharts, userService, raceDTO, pendingServerOperationsCountSupplier,
+                timeRangeActionsExecutor);
         this.raceDTO = raceDTO;
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;

@@ -25,6 +25,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.util.IntHolder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.TimeRangeActionsExecutor;
 import com.sap.sse.gwt.client.controls.slider.SliderBar;
@@ -310,18 +311,38 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         });
         controlsPanel.add(resetZoomButton);
         if (pendingServerOperationsCountSupplier != null) {
+            final IntHolder pendingServerOperationsCount = new IntHolder(0);
+            final IntHolder pendingTimeRangeActionsCount = new IntHolder(0);
             final Label pendingServerOperationsCounter = new Label(getPendingServerOperationsCounterLabelText(pendingServerOperationsCountSupplier));
             pendingServerOperationsCounter.addStyleName("timePanel-controls-pendingServerOperationsCounter");
             controlsPanel.add(pendingServerOperationsCounter);
             pendingServerOperationsCountSupplier.addListener(
                     newPendingOperationsCount->{
-                        pendingServerOperationsCounter.setText(getPendingServerOperationsCounterLabelText(pendingServerOperationsCountSupplier));
-                        pendingServerOperationsCounter.getElement().getStyle().setProperty("backgroundSize",
-                                "calc("+
-                                (100*pendingServerOperationsCountSupplier.getNumberOfPendingActions()/AsyncActionsExecutor.DEFAULT_MAX_PENDING_CALLS)+"% - 30px) 100%");
+                        pendingServerOperationsCount.value = newPendingOperationsCount;
+                        updatePendingOperationsLabel(pendingServerOperationsCountSupplier, pendingServerOperationsCount,
+                                pendingTimeRangeActionsCount, pendingServerOperationsCounter);
                     });
+            if (pendingTimeRangeActionsSupplier != null) {
+                pendingTimeRangeActionsSupplier.addListener(newPendingTimeRangeActions->{
+                    pendingTimeRangeActionsCount.value = newPendingTimeRangeActions;
+                    updatePendingOperationsLabel(pendingServerOperationsCountSupplier, pendingServerOperationsCount,
+                            pendingTimeRangeActionsCount, pendingServerOperationsCounter);
+                });
+            }
         }
         hideControlsPanel();
+    }
+
+    private void updatePendingOperationsLabel(AsyncActionsExecutor pendingServerOperationsCountSupplier,
+            final IntHolder pendingServerOperationsCount, final IntHolder pendingTimeRangeActionsCount,
+            final Label pendingServerOperationsCounter) {
+        final int EXPECTED_MAX_NUMBER_OF_PENDING_TIME_RANGE_ACTIONS = 10;
+        final int numberOfPendingServerOperations = pendingServerOperationsCount.value+pendingTimeRangeActionsCount.value;
+        pendingServerOperationsCounter.setText(stringMessages.pendingServerOperations(numberOfPendingServerOperations));
+        pendingServerOperationsCounter.getElement().getStyle().setProperty("backgroundSize",
+                (numberOfPendingServerOperations > 0
+                ? "max(calc("+(100*numberOfPendingServerOperations/(AsyncActionsExecutor.DEFAULT_MAX_PENDING_CALLS+EXPECTED_MAX_NUMBER_OF_PENDING_TIME_RANGE_ACTIONS))+"% - 30px), 10px)"
+                : "0") + " 100%");
     }
 
     private String getPendingServerOperationsCounterLabelText(AsyncActionsExecutor pendingServerOperationsCountSupplier) {
