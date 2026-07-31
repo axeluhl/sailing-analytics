@@ -1851,7 +1851,17 @@ Replicator {
         if (factory == null) {
             throw new IllegalStateException("SailingServerFactory not available");
         }
-        final SailingServer sailingServer = factory.getSailingServer(new java.net.URL(baseUrl));
+        final SailingServer sailingServer = factory.getSailingServer(new URL(baseUrl));
+        return sailingServer.getEvents();
+    }
+
+    @Override
+    public Iterable<EventBase> getRemoteEvents(final String baseUrl, final String bearerTokenOrNull) throws Exception {
+        final SailingServerFactory factory = sailingServerFactoryTracker == null ? null : sailingServerFactoryTracker.getService();
+        if (factory == null) {
+            throw new IllegalStateException("SailingServerFactory not available");
+        }
+        final SailingServer sailingServer = factory.getSailingServer(new URL(baseUrl), bearerTokenOrNull);
         return sailingServer.getEvents();
     }
 

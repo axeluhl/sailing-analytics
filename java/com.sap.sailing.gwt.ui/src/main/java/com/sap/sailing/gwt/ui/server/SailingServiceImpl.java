@@ -3570,9 +3570,9 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<EventDTO> getRemoteEvents(final String baseUrl) throws Exception {
+    public List<EventDTO> getRemoteEvents(final String baseUrl, final String bearerTokenOrNull) throws Exception {
         final List<EventDTO> result = new ArrayList<>();
-        for (final EventBase event : getService().getRemoteEvents(baseUrl)) {
+        for (final EventBase event : getService().getRemoteEvents(baseUrl, bearerTokenOrNull)) {
             final EventDTO eventDTO = new EventDTO(event.getName());
             copyEventBaseFieldsToDTO(event, eventDTO);
             result.add(eventDTO);

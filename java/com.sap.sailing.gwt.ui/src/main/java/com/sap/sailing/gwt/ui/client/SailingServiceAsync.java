@@ -284,7 +284,7 @@ public interface SailingServiceAsync extends RemoteReplicationServiceAsync {
     
     void getRemoteSailingServerReferences(AsyncCallback<List<RemoteSailingServerReferenceDTO>> callback);
 
-    void getRemoteEvents(String baseUrl, AsyncCallback<List<EventDTO>> callback);
+    void getRemoteEvents(String baseUrl, String bearerTokenOrNull, AsyncCallback<List<EventDTO>> callback);
 
     void getResultImportUrls(String resultProviderName, AsyncCallback<List<UrlDTO>> callback);
 

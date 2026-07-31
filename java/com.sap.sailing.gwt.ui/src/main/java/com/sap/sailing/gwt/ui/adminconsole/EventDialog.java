@@ -254,6 +254,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
         tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
         final VerticalPanel courseAreasPanel = new VerticalPanel();
+        courseAreasPanel.setSpacing(5);
         final ListBox copyFromEventDropDown = createListBox(false);
         copyFromEventDropDown.addItem(stringMessages.pleaseSelect());
         final List<EventDTO> sortedExistingEvents = new ArrayList<>(existingEvents);
@@ -285,6 +286,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         final TextBox remoteBaseUrlBox = new TextBox();
         remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
         remoteBaseUrlBox.setVisibleLength(40);
+        final TextBox bearerTokenOrNullBox = new TextBox();
+        bearerTokenOrNullBox.setVisibleLength(30);
         final ListBox remoteEventDropDown = createListBox(false);
         remoteEventDropDown.setEnabled(false);
         final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator();
@@ -298,7 +301,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
             remoteEventDropDown.setEnabled(false);
             remoteEventsCache[0] = null;
             remoteLoadBusyIndicator.setBusy(true);
-            sailingServiceWrite.getRemoteEvents(remoteBaseUrlBox.getValue(),
+            final String bearerTokenOrNull = bearerTokenOrNullBox.getValue().trim().isEmpty() ? null : bearerTokenOrNullBox.getValue().trim();
+            sailingServiceWrite.getRemoteEvents(remoteBaseUrlBox.getValue(), bearerTokenOrNull,
                     new AsyncCallback<List<EventDTO>>() {
                 @Override
                 public void onSuccess(final List<EventDTO> result) {
@@ -335,12 +339,22 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 }
             }
         });
-        final HorizontalPanel remotePanel = new HorizontalPanel();
+        final VerticalPanel remotePanel = new VerticalPanel();
+        remotePanel.setWidth("100%");
         remotePanel.setSpacing(3);
-        remotePanel.add(new Label(stringMessages.copyCourseAreasFromRemoteServer()));
-        remotePanel.add(remoteBaseUrlBox);
-        remotePanel.add(loadRemoteEventsButton);
-        remotePanel.add(remoteLoadBusyIndicator);
+        final HorizontalPanel remoteUrlRow = new HorizontalPanel();
+        remoteUrlRow.setSpacing(3);
+        remoteUrlRow.add(new Label(stringMessages.copyCourseAreasFromRemoteServer()));
+        remoteUrlRow.add(remoteBaseUrlBox);
+        remoteUrlRow.add(loadRemoteEventsButton);
+        remoteUrlRow.add(remoteLoadBusyIndicator);
+        final HorizontalPanel remoteBearerRow = new HorizontalPanel();
+        remoteBearerRow.setSpacing(3);
+        remoteBearerRow.add(new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
+        remoteBearerRow.add(bearerTokenOrNullBox);
+        remoteEventDropDown.setWidth("100%");
+        remotePanel.add(remoteUrlRow);
+        remotePanel.add(remoteBearerRow);
         remotePanel.add(remoteEventDropDown);
         courseAreasPanel.add(localPanel);
         courseAreasPanel.add(remotePanel);
