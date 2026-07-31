@@ -27,12 +27,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  * @author c5163874, Simon Marcel Pamies
  */
-public class AsyncActionsExecutor {
+public class AsyncActionsExecutor extends AbstractActionsExecutor {
     private final static Logger logger = Logger.getLogger(AsyncActionsExecutor.class.getName());
-    
-    public static interface Listener {
-        void onNumberOfPendingCallsChanged(int newNumberOfPendingCalls);
-    }
     
     private class ExecutionJob<T> implements AsyncCallback<T> {
         private final AsyncAction<T> action;
@@ -104,8 +100,6 @@ public class AsyncActionsExecutor {
     private final Map<String, Set<Runnable>> runAfterLastActionForCategoryReturned;
     private final Set<Runnable> runAfterLastActionReturned;
     
-    private int numPendingCalls = 0;
-    private final Set<Listener> listeners;
     private TimePoint timePointOfFirstExecutorInit = null;
 
     public AsyncActionsExecutor() {
@@ -114,7 +108,6 @@ public class AsyncActionsExecutor {
     }
     
     public AsyncActionsExecutor(int maxPendingCalls, int maxPendingCallsPerType, Duration durationAfterToResetQueue) {
-        this.listeners = new HashSet<>();
         if (maxPendingCalls < maxPendingCallsPerType) {
             throw new RuntimeException("The number of max pending calls can not be lower than the number of max pending calls per type.");
         }
@@ -127,14 +120,6 @@ public class AsyncActionsExecutor {
         this.lastRequestedActionsNotBeingSentOut = new HashMap<>();
         this.timePointOfTypeLastBeingExecuted = new HashMap<>();
         this.timePointOfFirstExecutorInit = MillisecondsTimePoint.now(); // triggering duration to reset
-    }
-    
-    public void addListener(Listener listener) {
-        listeners.add(listener);
-    }
-    
-    public void removeListener(Listener listener) {
-        listeners.remove(listener);
     }
     
     /**
@@ -178,12 +163,12 @@ public class AsyncActionsExecutor {
     }
     
     public int getNumberOfPendingActions() {
-        return numPendingCalls;
+        return numberOfPendingActions;
     }
     
     private void execute(ExecutionJob<?> job) {
         Integer numActionsOfType = actionsPerTypeCounter.computeIfAbsent(job.getType(), j->Integer.valueOf(0));
-        if (numPendingCalls >= maxPendingCalls || (numActionsOfType >= maxPendingCallsPerType)) {
+        if (numberOfPendingActions >= maxPendingCalls || (numActionsOfType >= maxPendingCallsPerType)) {
             final TimePoint now = MillisecondsTimePoint.now();
             final TimePoint timePointToInspectForResetDecision = timePointOfTypeLastBeingExecuted.get(job.getType()) != null ?
                     timePointOfTypeLastBeingExecuted.get(job.getType()) : timePointOfFirstExecutorInit;
@@ -191,7 +176,7 @@ public class AsyncActionsExecutor {
                     now.minus(durationAfterToResetQueue).after(timePointToInspectForResetDecision)) {
                 logger.info("Resetting number of pending calls after "+durationAfterToResetQueue+" of no response");
                 // reset the number of pending calls
-                numPendingCalls = 0;
+                numberOfPendingActions = 0;
                 // reset number of pending actions per type - 0 is fine as checkForEmptyCallQueue
                 // will check for a number less than maxPendingCallsPerType to send out the
                 // last job pending for a given type
@@ -216,13 +201,9 @@ public class AsyncActionsExecutor {
             }
         }
         actionsPerTypeCounter.put(job.getType(), numActionsOfType+1);
-        numPendingCalls++;
+        numberOfPendingActions++;
         job.execute();
         notifyListeners();
-    }
-
-    private void notifyListeners() {
-        listeners.forEach(l->l.onNumberOfPendingCallsChanged(numPendingCalls));
     }
 
     private void callCompleted(ExecutionJob<?> job) {
@@ -238,12 +219,12 @@ public class AsyncActionsExecutor {
             }
 
         }
-        if (numPendingCalls > 0) { // don't let it go negative; we may have reset the queue
+        if (numberOfPendingActions > 0) { // don't let it go negative; we may have reset the queue
             // and then one or more pending requests may have returned late
-            numPendingCalls--;
+            numberOfPendingActions--;
         }
         notifyListeners();
-        if (numPendingCalls == 0) {
+        if (numberOfPendingActions == 0) {
             runAfterLastActionReturned.forEach(callback->callback.run());
         }
         timePointOfTypeLastBeingExecuted.put(type, MillisecondsTimePoint.now());

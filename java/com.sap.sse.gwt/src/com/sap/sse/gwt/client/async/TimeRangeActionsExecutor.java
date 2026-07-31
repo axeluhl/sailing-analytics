@@ -48,11 +48,7 @@ import com.sap.sse.common.Util.Pair;
  *
  * @author Tim Hessenmüller (D062243)
  */
-public class TimeRangeActionsExecutor<Result, SubResult, Key> {
-    public static interface Listener {
-        void onNumberOfPendingCallsChanged(int newNumberOfPendingCalls);
-    }
-    
+public class TimeRangeActionsExecutor<Result, SubResult, Key> extends AbstractActionsExecutor {
     /**
      * Callback called by {@link TimeRangeActionsExecutor#executor} upon receiving an answer from the server for a
      * potentially trimmed request. The compound {@code Result} is {@link TimeRangeAsyncCallback#unzipResult(Object)
@@ -151,14 +147,6 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
 
     private final Map<Key, TimeRangeResultCache<SubResult>> cacheMap = new HashMap<>();
     
-    private int numberOfPendingActions;
-    
-    private final Set<Listener> listeners;
-
-    public TimeRangeActionsExecutor() {
-        this.listeners = new HashSet<>();
-    }
-
     /**
      * Executes a {@link TimeRangeAsyncAction} and returns the results to a {@link TimeRangeAsyncCallback}. Calls
      * {@link #execute(TimeRangeAsyncAction, AsyncCallback, boolean)} with {@code forceTimeRange} set to {@code false},
@@ -222,17 +210,5 @@ public class TimeRangeActionsExecutor<Result, SubResult, Key> {
 
     private TimeRangeResultCache<SubResult> getSubResultCache(Key key) {
         return cacheMap.computeIfAbsent(key, k->new TimeRangeResultCache<>());
-    }
-
-    public void addListener(Listener listener) {
-        listeners.add(listener);
-    }
-    
-    public void removeListener(Listener listener) {
-        listeners.remove(listener);
-    }
-    
-    private void notifyListeners() {
-        listeners.forEach(l->l.onNumberOfPendingCallsChanged(numberOfPendingActions));
     }
 }
