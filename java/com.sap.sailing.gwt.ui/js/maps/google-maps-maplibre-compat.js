@@ -206,7 +206,7 @@ class CompatMap {
         requestAnimationFrame(() => this.map.resize());
         this.map.on('resize', this.updateOverlayPointerEvents);
         const controlPositions = {
-            1: ['10px', '', '', '10px'], 2: ['10px', '', '', '50%'], 3: ['10px', '10px', '', ''],
+            1: ['10px', '', '', '10px'], 2: ['0px', '', '', '50%'], 3: ['10px', '10px', '', ''],
             // RaceMap's LEFT_TOP control already supplies its own 10px margin; keep overlays and boats untouched.
             4: ['50%', '', '', '10px'], 5: ['60px', '', '', '0px'], 6: ['', '', '23px', '0px'],
             7: ['60px', '10px', '', ''], 8: ['50%', '10px', '', ''], 9: ['', '0px', '10px', ''],
