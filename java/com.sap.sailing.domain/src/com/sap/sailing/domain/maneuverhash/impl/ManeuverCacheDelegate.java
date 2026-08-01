@@ -328,8 +328,24 @@ public class ManeuverCacheDelegate implements SerializableManeuverCache {
         return new ManeuversFromSmartFutureCache((DynamicTrackedRaceImpl) race);
     }
 
+    /**
+     * Reflects the current {@link #cacheToUse inner cache}. Returns {@code true} when the delegate is
+     * currently backed by a compute-capable cache (a {@link ManeuversFromSmartFutureCache}) and
+     * {@code false} when it is currently backed by a passive {@link ManeuversFromDatabase}. The value
+     * switches at {@link #resume()} time depending on whether the fingerprint matched (DB-load) or not
+     * (compute), and again in {@link #triggerUpdate(Competitor)} if an update is requested on a
+     * currently-passive cache -- see the comment in {@code triggerUpdate}.
+     * <p>
+     *
+     * Callers use this to distinguish the two states, e.g., {@code TrackedRaceImpl
+     * .feedAlreadyKnownManeuversToWindEstimation} only feeds when the delegate is in the DB-load
+     * state (bug6241). Prior to bug6241 this method returned {@code true} unconditionally, which was
+     * a semantic bug: the delegate always <em>can</em> switch to a compute-capable cache on demand,
+     * but that's not what the {@link ManeuverCache#canBeUpdated} contract asks -- it asks whether
+     * the cache currently accepts {@link #triggerUpdate} without a mode switch.
+     */
     @Override
     public boolean canBeUpdated() {
-        return true;
+        return cacheToUse.canBeUpdated();
     }
 }
