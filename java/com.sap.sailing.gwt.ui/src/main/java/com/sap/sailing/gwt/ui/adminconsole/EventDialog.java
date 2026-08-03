@@ -30,12 +30,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.domain.common.windfinder.AvailableWindFinderSpotCollections;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sailing.landscape.common.SharedLandscapeConstants;
 import com.sap.sse.gwt.client.DateAndTimeFormatterUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
@@ -255,110 +255,156 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
         final VerticalPanel courseAreasPanel = new VerticalPanel();
         courseAreasPanel.setSpacing(5);
-        final ListBox copyFromEventDropDown = createListBox(false);
-        copyFromEventDropDown.addItem(stringMessages.pleaseSelect());
+        final Map<String, EventDTO> eventsCache = new HashMap<>();
+        for (final EventDTO event : existingEvents) {
+            eventsCache.put(event.getId().toString(), event);
+        }
+        final ListBox eventDropDown = createListBox(false);
+        eventDropDown.addItem(stringMessages.pleaseSelect());
         final List<EventDTO> sortedExistingEvents = new ArrayList<>(existingEvents);
         sortedExistingEvents.sort(Comparator.comparing(EventDTO::getName));
         for (final EventDTO event : sortedExistingEvents) {
-            copyFromEventDropDown.addItem(event.getName(), event.getId().toString());
+            eventDropDown.addItem(event.getName(), event.getId().toString());
         }
-        copyFromEventDropDown.addChangeHandler(e -> {
-            final int selectedIndex = copyFromEventDropDown.getSelectedIndex();
-            if (selectedIndex > 0) {
-                final String selectedEventId = copyFromEventDropDown.getValue(selectedIndex);
-                for (final EventDTO event : sortedExistingEvents) {
-                    if (event.getId().toString().equals(selectedEventId)) {
-                        // copy with fresh UUIDs so these become independent course areas of this event
+        final Button appendButton = new Button(stringMessages.appendCourseAreas());
+        appendButton.setEnabled(false);
+        appendButton.addStyleName("btn-secondary");
+        final Button replaceAllButton = new Button(stringMessages.replaceAllCourseAreas());
+        replaceAllButton.setEnabled(false);
+        replaceAllButton.addStyleName("btn-secondary");
+        final Button clearAndPickButton = new Button(stringMessages.clearAndPickCourseAreas());
+        clearAndPickButton.setEnabled(false);
+        clearAndPickButton.addStyleName("btn-secondary");
+        final List<CourseAreaDTO> initialCourseAreas = new ArrayList<>(courseAreaNameList.getValue());
+        final Button resetButton = new Button(stringMessages.resetCourseAreas());
+        resetButton.addClickHandler(e -> courseAreaNameList.setValue(new ArrayList<>(initialCourseAreas)));
+        eventDropDown.addChangeHandler(e -> {
+            final boolean hasSelection = eventDropDown.getSelectedIndex() > 0;
+            appendButton.setEnabled(hasSelection);
+            replaceAllButton.setEnabled(hasSelection);
+            clearAndPickButton.setEnabled(hasSelection);
+        });
+        appendButton.addClickHandler(e -> {
+            final EventDTO selected = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
+            if (selected != null) {
+                new CourseAreaSelectionDialog(selected.getVenue().getCourseAreas(), stringMessages,
+                        new DataEntryDialog.DialogCallback<List<CourseAreaDTO>>() {
+                    @Override
+                    public void ok(final List<CourseAreaDTO> result) {
+                        final List<CourseAreaDTO> updated = new ArrayList<>(courseAreaNameList.getValue());
+                        for (final CourseAreaDTO area : result) {
+                            updated.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                        }
+                        courseAreaNameList.setValue(updated);
+                    }
+                    @Override
+                    public void cancel() {}
+                }).show();
+            }
+        });
+        replaceAllButton.addClickHandler(e -> {
+            final EventDTO selected = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
+            if (selected != null) {
+                final List<CourseAreaDTO> copies = new ArrayList<>();
+                for (final CourseAreaDTO area : selected.getVenue().getCourseAreas()) {
+                    copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                }
+                courseAreaNameList.setValue(copies);
+            }
+        });
+        clearAndPickButton.addClickHandler(e -> {
+            final EventDTO selected = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
+            if (selected != null) {
+                new CourseAreaSelectionDialog(selected.getVenue().getCourseAreas(), stringMessages,
+                        new DataEntryDialog.DialogCallback<List<CourseAreaDTO>>() {
+                    @Override
+                    public void ok(final List<CourseAreaDTO> result) {
                         final List<CourseAreaDTO> copies = new ArrayList<>();
-                        for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
+                        for (final CourseAreaDTO area : result) {
                             copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
                         }
                         courseAreaNameList.setValue(copies);
-                        break;
                     }
-                }
+                    @Override
+                    public void cancel() {}
+                }).show();
             }
         });
-        final HorizontalPanel localPanel = new HorizontalPanel();
-        localPanel.setSpacing(3);
-        localPanel.add(new Label(stringMessages.copyCourseAreasFromEvent()));
-        localPanel.add(copyFromEventDropDown);
         final TextBox remoteBaseUrlBox = new TextBox();
-        remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
-        remoteBaseUrlBox.setVisibleLength(40);
+        remoteBaseUrlBox.setWidth("300px");
+        remoteBaseUrlBox.getElement().setPropertyString("placeholder", stringMessages.remoteServerUrlPlaceholder());
         final TextBox bearerTokenOrNullBox = new TextBox();
-        bearerTokenOrNullBox.setVisibleLength(30);
-        final ListBox remoteEventDropDown = createListBox(false);
-        remoteEventDropDown.setEnabled(false);
+        bearerTokenOrNullBox.setWidth("200px");
+        bearerTokenOrNullBox.getElement().setPropertyString("placeholder", stringMessages.bearerTokenPlaceholder());
         final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator();
-        // cache loaded remote events so the change handler can access them without a second RPC call
-        @SuppressWarnings("unchecked")
-        final List<EventDTO>[] remoteEventsCache = new List[1];
         final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
         loadRemoteEventsButton.addClickHandler(e -> {
-            remoteEventDropDown.clear();
-            remoteEventDropDown.addItem(stringMessages.pleaseSelect());
-            remoteEventDropDown.setEnabled(false);
-            remoteEventsCache[0] = null;
-            remoteLoadBusyIndicator.setBusy(true);
-            final String bearerTokenOrNull = bearerTokenOrNullBox.getValue().trim().isEmpty() ? null : bearerTokenOrNullBox.getValue().trim();
-            sailingServiceWrite.getRemoteEvents(remoteBaseUrlBox.getValue(), bearerTokenOrNull,
-                    new AsyncCallback<List<EventDTO>>() {
-                @Override
-                public void onSuccess(final List<EventDTO> result) {
-                    remoteLoadBusyIndicator.setBusy(false);
-                    remoteEventsCache[0] = result;
-                    result.sort(Comparator.comparing(EventDTO::getName));
-                    for (final EventDTO event : result) {
-                        remoteEventDropDown.addItem(event.getName(), event.getId().toString());
-                    }
-                    remoteEventDropDown.setEnabled(true);
+            eventDropDown.clear();
+            eventDropDown.addItem(stringMessages.pleaseSelect());
+            eventsCache.clear();
+            final String baseUrl = remoteBaseUrlBox.getValue().trim();
+            if (baseUrl.isEmpty()) {
+                final List<EventDTO> sorted = new ArrayList<>(existingEvents);
+                sorted.sort(Comparator.comparing(EventDTO::getName));
+                for (final EventDTO event : sorted) {
+                    eventsCache.put(event.getId().toString(), event);
+                    eventDropDown.addItem(event.getName(), event.getId().toString());
                 }
-                @Override
-                public void onFailure(final Throwable caught) {
-                    remoteLoadBusyIndicator.setBusy(false);
-                    remoteEventDropDown.clear();
-                    remoteEventDropDown.addItem(caught.getMessage());
-                }
-            });
-        });
-        remoteEventDropDown.addChangeHandler(e -> {
-            final int selectedIndex = remoteEventDropDown.getSelectedIndex();
-            if (selectedIndex > 0 && remoteEventsCache[0] != null) {
-                final String selectedEventId = remoteEventDropDown.getValue(selectedIndex);
-                for (final EventDTO event : remoteEventsCache[0]) {
-                    if (event.getId().toString().equals(selectedEventId)) {
-                        // copy with fresh UUIDs so these become independent course areas of this event
-                        final List<CourseAreaDTO> copies = new ArrayList<>();
-                        for (final CourseAreaDTO area : event.getVenue().getCourseAreas()) {
-                            copies.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                eventDropDown.setEnabled(true);
+            } else {
+                remoteLoadBusyIndicator.setBusy(true);
+                eventDropDown.setEnabled(false);
+                final String bearerTokenOrNull = bearerTokenOrNullBox.getValue().trim().isEmpty() ? null : bearerTokenOrNullBox.getValue().trim();
+                sailingServiceWrite.getRemoteEvents(baseUrl, bearerTokenOrNull,
+                        new AsyncCallback<List<EventDTO>>() {
+                    @Override
+                    public void onSuccess(final List<EventDTO> result) {
+                        remoteLoadBusyIndicator.setBusy(false);
+                        result.sort(Comparator.comparing(EventDTO::getName));
+                        for (final EventDTO event : result) {
+                            eventsCache.put(event.getId().toString(), event);
+                            eventDropDown.addItem(event.getName(), event.getId().toString());
                         }
-                        courseAreaNameList.setValue(copies);
-                        break;
+                        eventDropDown.setEnabled(true);
                     }
-                }
+                    @Override
+                    public void onFailure(final Throwable caught) {
+                        remoteLoadBusyIndicator.setBusy(false);
+                        eventDropDown.clear();
+                        eventDropDown.addItem(caught.getMessage());
+                    }
+                });
             }
         });
-        final VerticalPanel remotePanel = new VerticalPanel();
-        remotePanel.setWidth("100%");
-        remotePanel.setSpacing(3);
-        final HorizontalPanel remoteUrlRow = new HorizontalPanel();
-        remoteUrlRow.setSpacing(3);
-        remoteUrlRow.add(new Label(stringMessages.copyCourseAreasFromRemoteServer()));
-        remoteUrlRow.add(remoteBaseUrlBox);
-        remoteUrlRow.add(loadRemoteEventsButton);
-        remoteUrlRow.add(remoteLoadBusyIndicator);
-        final HorizontalPanel remoteBearerRow = new HorizontalPanel();
-        remoteBearerRow.setSpacing(3);
-        remoteBearerRow.add(new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
-        remoteBearerRow.add(bearerTokenOrNullBox);
-        remoteEventDropDown.setWidth("100%");
-        remotePanel.add(remoteUrlRow);
-        remotePanel.add(remoteBearerRow);
-        remotePanel.add(remoteEventDropDown);
-        courseAreasPanel.add(localPanel);
-        courseAreasPanel.add(remotePanel);
+        final VerticalPanel copyPanel = new VerticalPanel();
+        copyPanel.setWidth("100%");
+        copyPanel.setSpacing(3);
+        final Grid remoteInputGrid = new Grid(2, 3);
+        remoteInputGrid.setWidget(0, 0, new Label(stringMessages.copyCourseAreasFromEvent()));
+        remoteInputGrid.setWidget(0, 1, remoteBaseUrlBox);
+        final HorizontalPanel loadRow = new HorizontalPanel();
+        loadRow.setSpacing(3);
+        loadRow.add(loadRemoteEventsButton);
+        loadRow.add(remoteLoadBusyIndicator);
+        remoteInputGrid.setWidget(0, 2, loadRow);
+        remoteInputGrid.setWidget(1, 0, new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
+        remoteInputGrid.setWidget(1, 1, bearerTokenOrNullBox);
+        eventDropDown.setWidth("100%");
+        final HorizontalPanel actionButtons = new HorizontalPanel();
+        actionButtons.setSpacing(3);
+        actionButtons.add(appendButton);
+        actionButtons.add(replaceAllButton);
+        actionButtons.add(clearAndPickButton);
+        final HorizontalPanel eventDropDownRow = new HorizontalPanel();
+        eventDropDownRow.setSpacing(3);
+        eventDropDownRow.setWidth("100%");
+        eventDropDownRow.add(eventDropDown);
+        eventDropDownRow.add(actionButtons);
+        copyPanel.add(remoteInputGrid);
+        copyPanel.add(eventDropDownRow);
+        courseAreasPanel.add(copyPanel);
         courseAreasPanel.add(courseAreaNameList);
+        courseAreasPanel.add(resetButton);
         final ScrollPanel courseAreasTab = new ScrollPanel(courseAreasPanel);
         courseAreasTab.ensureDebugId("CourseAreasTab");
         tabPanel.add(courseAreasTab, stringMessages.courseAreas());
