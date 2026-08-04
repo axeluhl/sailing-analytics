@@ -37,6 +37,7 @@ import com.sap.sailing.windestimation.aggregator.msthmm.MstBestPathsCalculatorIm
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphExportHelper;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstGraphLevel;
 import com.sap.sailing.windestimation.aggregator.msthmm.MstManeuverGraphGenerator.MstManeuverGraphComponents;
+import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.data.SimpleManeuverForEstimation;
@@ -75,9 +76,9 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     /**
      * Used by {@link PreClassifiedUpdate} to apply the same maneuver-eligibility filter that the graph path applies via
      * {@link CompleteManeuverCurveToManeuverForEstimationConverter}: maneuvers whose direction change (on either the
-     * main curve or the stable-speed-and-course boundaries) is not classified as {@code REGULAR} are excluded from
-     * wind-track contribution. Without this filter, the DB-load / re-adaptation hand-off would contribute wind fixes
-     * for maneuvers that the graph path silently skips, causing the estimator's track to contain extras at
+     * main curve or the stable-speed-and-course boundaries) is not classified as {@link ManeuverCategory#REGULAR} are
+     * excluded from wind-track contribution. Without this filter, the DB-load / re-adaptation hand-off would contribute
+     * wind fixes for maneuvers that the graph path silently skips, causing the estimator's track to contain extras at
      * positions/timepoints the graph path never produces. See bug6241.
      */
     private static final ManeuverForEstimationTransformer maneuverEligibilityFilter = new ManeuverForEstimationTransformer();
@@ -178,16 +179,18 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#mstManeuverGraphGenerator maneuver graph generator} before
      * updating the wind estimations based on maneuvers. Adding a maneuver spot to the maneuver graph generator
      * synchronizes on that generator and therefore doing the same for multiple competitors for the same race from
-     * multiple threads will block all but one of those threads.<p>
+     * multiple threads will block all but one of those threads.
+     * <p>
      * 
-     * With this task, a separate queue ({@link IncrementalMstHmmWindEstimationForTrackedRace#updateQueue}) is
-     * used to pull updates from that queue and add them to the maneuver graph generator, then processing the updates
-     * to generate new wind estimations.<p>
+     * With this task, a separate queue ({@link IncrementalMstHmmWindEstimationForTrackedRace#updateQueue}) is used to
+     * pull updates from that queue and add them to the maneuver graph generator, then processing the updates to
+     * generate new wind estimations.
+     * <p>
      * 
      * A task of this type repeats this until the queue is empty and then terminates. Trying to fetch the next update
-     * from the queue, deciding whether to terminate this task, and adding the next update to the queue are all synchronized
-     * on the enclosing {@link IncrementalMstHmmWindEstimationForTrackedRace} object, ensuring that exactly one task
-     * exists for the enclosing instance whenever an update is enqueued or processing.
+     * from the queue, deciding whether to terminate this task, and adding the next update to the queue are all
+     * synchronized on the enclosing {@link IncrementalMstHmmWindEstimationForTrackedRace} object, ensuring that exactly
+     * one task exists for the enclosing instance whenever an update is enqueued or processing.
      * 
      * @author Axel Uhl (d043530)
      *
@@ -217,9 +220,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     /**
      * The classic path used by incremental maneuver detection:
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}
-     * enqueues one of these per notification, and its {@link #apply()} runs the raw
-     * {@link CompleteManeuverCurve}s through the MST/HMM graph before reconciling the resulting
-     * wind fixes into the estimated wind track.
+     * enqueues one of these per notification, and its {@link #apply()} runs the raw {@link CompleteManeuverCurve}s
+     * through the MST/HMM graph before reconciling the resulting wind fixes into the estimated wind track.
      */
     private class NewSpotsUpdate implements PendingUpdate {
         private final Competitor competitor;
@@ -274,27 +276,23 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     /**
      * The DB-load / re-adaptation path used by
      * {@link IncrementalMstHmmWindEstimationForTrackedRace#alreadyClassifiedManeuversAvailable(Competitor, Iterable)}:
-     * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM
-     * graph and go straight to converting them into wind fixes and adding them into the wind
-     * track. To stay consistent with what the graph path would produce for the same race, this
-     * update applies the same maneuver-eligibility filter that
+     * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM graph and go straight
+     * to converting them into wind fixes and adding them into the wind track. To stay consistent with what the graph
+     * path would produce for the same race, this update applies the same maneuver-eligibility filter that
      * {@code CompleteManeuverCurveToManeuverForEstimationConverter.convertCleanManeuverSpotToManeuverForEstimation}
-     * applies (via {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis}), and
-     * uses the same {@code middleCourse} accessor that the graph-path adapter uses (see
-     * {@code ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve.getMiddleCourse},
-     * which reads from
+     * applies (via {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis}), and uses the same
+     * {@code middleCourse} accessor that the graph-path adapter uses (see
+     * {@code ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve.getMiddleCourse}, which reads from
      * {@link Maneuver#getManeuverCurveWithStableSpeedAndCourseBoundaries()}).
      * <p>
      *
-     * Unlike {@link NewSpotsUpdate}, this update is scheduled <em>per competitor</em>: the
-     * caller (e.g. {@code TrackedRaceImpl.feedAlreadyKnownManeuversToWindEstimation}) fires
-     * one update per competitor with just that competitor's maneuvers. Consequently, the
-     * corresponding {@code newWindTrack} produced by {@link #windTrackCalculator} covers only
-     * that competitor's contribution -- not the whole race. The reconciliation body of
-     * {@link #applyManeuverClassificationsToWindTrack} is designed for whole-race inputs
-     * (produced by the MST graph across all competitors) and would remove all other
-     * competitors' fixes on every per-competitor call. This update therefore uses the
-     * additive-only helper {@link #addManeuverClassificationsToWindTrack} which inserts
+     * Unlike {@link NewSpotsUpdate}, this update is scheduled <em>per competitor</em>: the caller (e.g.
+     * {@code TrackedRaceImpl.feedAlreadyKnownManeuversToWindEstimation}) fires one update per competitor with just that
+     * competitor's maneuvers. Consequently, the corresponding {@code newWindTrack} produced by
+     * {@link #windTrackCalculator} covers only that competitor's contribution -- not the whole race. The reconciliation
+     * body of {@link #applyManeuverClassificationsToWindTrack} is designed for whole-race inputs (produced by the MST
+     * graph across all competitors) and would remove all other competitors' fixes on every per-competitor call. This
+     * update therefore uses the additive-only helper {@link #addManeuverClassificationsToWindTrack} which inserts
      * missing fixes without removing existing ones. See bug6241.
      */
     private class PreClassifiedUpdate implements PendingUpdate {
@@ -342,15 +340,13 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     }
 
     /**
-     * Turns a list of already-typed maneuvers into wind fixes via {@link #windTrackCalculator}
-     * and merges them into the {@link #estimatedWindTrack} incrementally and consistently, so
-     * that afterwards the contents match the newly-produced wind track. Extracted from the
-     * previous inline body of {@code GraphRecalculationTask.updateGraphGenerator} so that both
-     * the {@link NewSpotsUpdate MST/HMM path} and the {@link PreClassifiedUpdate DB-load path}
-     * share exactly the same reconciliation semantics.
+     * Turns a list of already-typed maneuvers into wind fixes via {@link #windTrackCalculator} and merges them into the
+     * {@link #estimatedWindTrack} incrementally and consistently, so that afterwards the contents match the
+     * newly-produced wind track. Extracted from the previous inline body of
+     * {@code GraphRecalculationTask.updateGraphGenerator} so that both the {@link NewSpotsUpdate MST/HMM path} and the
+     * {@link PreClassifiedUpdate DB-load path} share exactly the same reconciliation semantics.
      * <p>
-     * FIXME bug6026: the "consistently" seems to be causing problems when a new wind estimation
-     * model is ingested.
+     * FIXME bug6026: the "consistently" seems to be causing problems when a new wind estimation model is ingested.
      */
     private void applyManeuverClassificationsToWindTrack(
             final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType) {
@@ -416,24 +412,19 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     }
 
     /**
-     * Additive-only counterpart of {@link #applyManeuverClassificationsToWindTrack}: inserts
-     * any wind fixes for {@code maneuversWithEstimatedType} that are not already present in
-     * {@link #windTrackWithConfidences}, and does <em>not</em> remove any pre-existing fixes.
-     * Used by the DB-load / re-adaptation path ({@link PreClassifiedUpdate}) which invokes
-     * per competitor: the corresponding {@code newWindTrack} covers only one competitor's
-     * contribution, so the full reconciliation of
-     * {@link #applyManeuverClassificationsToWindTrack} would clobber fixes belonging to
-     * other competitors on every call. Additive semantics are correct here because the DB
-     * load supplies the whole race's typed maneuvers across the successive per-competitor
-     * calls, and the union of those per-competitor wind fixes is the intended track content.
-     * See bug6241.
+     * Additive-only counterpart of {@link #applyManeuverClassificationsToWindTrack}: inserts any wind fixes for
+     * {@code maneuversWithEstimatedType} that are not already present in {@link #windTrackWithConfidences}, and does
+     * <em>not</em> remove any pre-existing fixes. Used by the DB-load / re-adaptation path
+     * ({@link PreClassifiedUpdate}) which invokes per competitor: the corresponding {@code newWindTrack} covers only
+     * one competitor's contribution, so the full reconciliation of {@link #applyManeuverClassificationsToWindTrack}
+     * would clobber fixes belonging to other competitors on every call. Additive semantics are correct here because the
+     * DB load supplies the whole race's typed maneuvers across the successive per-competitor calls, and the union of
+     * those per-competitor wind fixes is the intended track content. See bug6241.
      * <p>
      *
-     * As with {@link #applyManeuverClassificationsToWindTrack}, the mutation of
-     * {@link #windTrackWithConfidences} happens under the wind track's write lock and the
-     * corresponding {@code trackedRace.recordWind} notifications are fired outside the lock
-     * to avoid a lock-order inversion with concurrent maneuver detection reading the wind
-     * track.
+     * As with {@link #applyManeuverClassificationsToWindTrack}, the mutation of {@link #windTrackWithConfidences}
+     * happens under the wind track's write lock and the corresponding {@code trackedRace.recordWind} notifications are
+     * fired outside the lock to avoid a lock-order inversion with concurrent maneuver detection reading the wind track.
      */
     private void addManeuverClassificationsToWindTrack(
             final List<SimpleManeuverWithEstimatedType<? extends SimpleManeuverForEstimation>> maneuversWithEstimatedType) {
@@ -457,10 +448,9 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     }
 
     /**
-     * Maps a domain {@link ManeuverType} to its wind-estimation counterpart, or {@code null} if
-     * the type doesn't correspond to a maneuver kind the wind-track calculator can produce a
-     * wind fix from (e.g., PENALTY_CIRCLE or UNKNOWN). Matches the mapping in
-     * ManeuverWithEstimatedTypeFromManeuverTest.
+     * Maps a domain {@link ManeuverType} to its wind-estimation counterpart, or {@code null} if the type doesn't
+     * correspond to a maneuver kind the wind-track calculator can produce a wind fix from (e.g., PENALTY_CIRCLE or
+     * UNKNOWN). Matches the mapping in ManeuverWithEstimatedTypeFromManeuverTest.
      */
     private static ManeuverTypeForClassification mapManeuverType(final ManeuverType type) {
         final ManeuverTypeForClassification result;
@@ -487,8 +477,8 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     }
 
     /**
-     * Enqueues the given {@link PendingUpdate} and ensures that a {@link GraphRecalculationTask}
-     * exists to process it. Callers must not hold this object's monitor.
+     * Enqueues the given {@link PendingUpdate} and ensures that a {@link GraphRecalculationTask} exists to process it.
+     * Callers must not hold this object's monitor.
      */
     private synchronized void submit(final PendingUpdate update) {
         final boolean queueWasEmpty = updateQueue.isEmpty();
@@ -503,10 +493,10 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     }
 
     /**
-     * Enqueues an update into {@link #updateQueue} and ensures that a {@link GraphRecalculationTask} exists to handle it.
-     * The method is {@code synchronized} to implement the choreography with {@link GraphRecalculationTask} which also synchronizes
-     * on this object while trying to fetch the next update from the {@link #updateQueue} and if not having retrieved an element
-     * setting {@link #updateTask} to {@code null} and terminating the task.
+     * Enqueues an update into {@link #updateQueue} and ensures that a {@link GraphRecalculationTask} exists to handle
+     * it. The method is {@code synchronized} to implement the choreography with {@link GraphRecalculationTask} which
+     * also synchronizes on this object while trying to fetch the next update from the {@link #updateQueue} and if not
+     * having retrieved an element setting {@link #updateTask} to {@code null} and terminating the task.
      *
      * @see #updateTask
      */
@@ -537,5 +527,4 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     public WindSource getWindSource() {
         return windSource;
     }
-
 }
