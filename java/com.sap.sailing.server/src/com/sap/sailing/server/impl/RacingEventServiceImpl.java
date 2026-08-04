@@ -4824,13 +4824,16 @@ Replicator {
      *       used by, e.g., RaceLogRaceTracker-tracked races without loadable data. If the
      *       race is removed from its regatta before the transition, the install is silently
      *       cancelled.</li>
-     *   <li>the polar-data mining pipeline has drained this race's loaded fixes (see
+     *   <li>the polar-data mining pipeline has drained (see
      *       {@link PolarDataService#runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)}).
-     *       This is essential because the estimator captures the polar service at
-     *       construction time and uses it for classification and wind-speed inference; if
-     *       we installed the estimator before the polars for this race had been fed to the
-     *       polar-data service, the estimator would be permanently using a polar model that
-     *       reflects an incomplete data set.</li>
+     *       Note that this is a <em>global</em> drain of the shared loading pipeline, gated so
+     *       it does not fire before this race's own fixes have been ingested; it waits for the
+     *       fixes of all races loaded so far, not just this one. That is essential because the
+     *       estimator captures the polar service at construction time and uses it for
+     *       classification and wind-speed inference; installing the estimator before the polars
+     *       had been fully mined would leave it permanently using a polar model that reflects an
+     *       incomplete data set. Waiting for the global drain is deliberate and accepts some
+     *       startup sequentiality in exchange for a complete polar model.</li>
      * </ul>
      * <p>
      *

@@ -157,14 +157,37 @@ public interface PolarDataService {
     void raceFinishedLoading(TrackedRace race, Runnable callbackWhenRaceChangingToTrackingOfFinishedStatus);
 
     /**
-     * Registers {@code callback} to fire once the polar-data loading pipeline has fully drained
-     * the fixes belonging to {@code race}. Unlike
-     * {@link #raceFinishedLoading(TrackedRace, Runnable)}, this method does <em>not</em> ingest
-     * the race's fixes; it only observes the pipeline. It is safe to call multiple times for the
-     * same race, and before or after {@link #raceFinishedLoading} has been called for it. If
-     * ingestion for the race hasn't started yet, the callback is parked until it does, so that
-     * the callback never fires prematurely on a pipeline that happens to be momentarily idle
-     * before this race's fixes were queued. See bug6241.
+     * Registers {@code callback} to fire once the polar-data loading pipeline has fully drained.
+     * <p>
+     *
+     * IMPORTANT — this waits for a <em>global</em> drain, not a per-race one. The loading pipeline
+     * is shared across all races, so the callback fires only when the fixes of <em>every</em>
+     * race ingested so far (not just {@code race}) have been processed. The {@code race} parameter
+     * does <em>not</em> scope the wait to that race; it only gates <em>when</em> the callback is
+     * allowed to start observing the drain, via two conditions that both must hold before the
+     * callback is attached to the pipeline's drain:
+     * <ol>
+     *   <li>{@code race}'s fixes have actually been ingested into the pipeline (i.e.
+     *   {@link #raceFinishedLoading(TrackedRace, Runnable)} has run for it). Without this gate the
+     *   callback could fire on a pipeline that is merely momentarily idle because this race's
+     *   fixes haven't been queued yet, producing an incomplete polar model for {@code race}.</li>
+     *   <li>{@link #markLoadingOfAllRacesToRestoreStarted()} has been signalled, so a transient
+     *   idle window between two startup races' ingestion bursts is not mistaken for a real
+     *   drain.</li>
+     * </ol>
+     * The consequence is intended: a caller waiting on {@code race} effectively waits for the
+     * whole loaded-fix backlog to be processed, which on a cold start of a large archive can be
+     * substantial (the estimator install for an early race waits behind every other race's polar
+     * ingestion). This "wait for everything" behavior is deliberate — we want the polar model to
+     * reflect all loaded data before any maneuver-based wind estimation is installed — and the
+     * mild sequentiality it implies is accepted. It is <em>not</em> a per-race isolation
+     * guarantee; do not rely on this firing as soon as only {@code race}'s own fixes are done.
+     * <p>
+     *
+     * Unlike {@link #raceFinishedLoading(TrackedRace, Runnable)}, this method does <em>not</em>
+     * ingest the race's fixes; it only observes the pipeline. It is safe to call multiple times
+     * for the same race, and before or after {@link #raceFinishedLoading} has been called for it.
+     * See bug6241.
      *
      * @param callback
      *            must not be {@code null}

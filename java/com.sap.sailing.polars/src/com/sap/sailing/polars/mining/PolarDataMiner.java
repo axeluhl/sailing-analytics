@@ -670,11 +670,18 @@ public class PolarDataMiner {
 
     /**
      * Registers {@code callback} to fire once the {@link #preFilteringProcessorForLoadedFixes
-     * loading pipeline} has fully drained the fixes belonging to {@code race} <em>and</em> the
-     * caller has announced (via {@link #markLoadingOfAllRacesToRestoreStarted()}) that no further
-     * startup races will be added. Unlike {@link #raceFinishedLoading(TrackedRace, Runnable)},
-     * this method does <em>not</em> ingest the race's fixes into the pipeline; it only observes
-     * the pipeline. It may be called any number of times for the same race, before or after
+     * loading pipeline} has fully drained <em>globally</em> (i.e. the fixes of <em>every</em>
+     * race ingested so far, not only {@code race}) <em>and</em> the caller has announced (via
+     * {@link #markLoadingOfAllRacesToRestoreStarted()}) that no further startup races will be
+     * added. The {@code race} parameter does not scope the wait to that race's fixes -- the
+     * terminal processors are shared and there is no per-race completion tracking; it only gates
+     * <em>when</em> the callback is allowed onto the shared drain (see the two conditions below).
+     * Waiting on {@code race} therefore effectively waits for the whole loaded-fix backlog; this
+     * "wait for everything" behavior is intended (we want the polar model complete before any
+     * maneuver-based wind estimation is installed) even though it introduces some sequentiality
+     * on a large cold start. Unlike {@link #raceFinishedLoading(TrackedRace, Runnable)}, this
+     * method does <em>not</em> ingest the race's fixes into the pipeline; it only observes the
+     * pipeline. It may be called any number of times for the same race, before or after
      * {@code raceFinishedLoading} has been called for that race, and before or after the
      * "loading started" signal has flipped.
      * <p>
