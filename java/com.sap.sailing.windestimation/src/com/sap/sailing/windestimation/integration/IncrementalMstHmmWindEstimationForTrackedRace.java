@@ -279,10 +279,10 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
      * each maneuver already carries its {@link Maneuver#getType() type}, so we skip the MST/HMM graph and go straight
      * to converting them into wind fixes and adding them into the wind track. To stay consistent with what the graph
      * path would produce for the same race, this update applies the same maneuver-eligibility filter that
-     * {@code CompleteManeuverCurveToManeuverForEstimationConverter.convertCleanManeuverSpotToManeuverForEstimation}
-     * applies (via {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis}), and uses the same
+     * {@link CompleteManeuverCurveToManeuverForEstimationConverter#convertCleanManeuverSpotToManeuverForEstimation(CompleteManeuverCurve, CompleteManeuverCurve, CompleteManeuverCurve, Competitor, TrackTimeInfo)}
+     * applies (via {@link ManeuverForEstimationTransformer#isManeuverEligibleForAnalysis(double, double)}), and uses the same
      * {@code middleCourse} accessor that the graph-path adapter uses (see
-     * {@code ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve.getMiddleCourse}, which reads from
+     * {@link ConvertableManeuverForEstimationAdapterForCompleteManeuverCurve#getMiddleCourse()}, which reads from
      * {@link Maneuver#getManeuverCurveWithStableSpeedAndCourseBoundaries()}).
      * <p>
      *
