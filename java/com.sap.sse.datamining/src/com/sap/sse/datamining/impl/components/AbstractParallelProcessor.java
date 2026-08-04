@@ -23,7 +23,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
                                                                        implements ProcessorInstructionHandler<ResultType> {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractParallelProcessor.class.getName());
-    private static final int SLEEP_TIME_DURING_FINISHING = 100;
+    private static final int SLEEP_TIME_DURING_FINISHING_MILLIS = 100;
 
     private final Processor<ResultType, ?>[] resultReceivers;
     private final ExecutorService executor;
@@ -212,7 +212,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     protected void sleepUntilAllInstructionsFinished() throws InterruptedException {
         while (areUnfinishedInstructionsLeft() && !isAborted) {
             try {
-                Thread.sleep(SLEEP_TIME_DURING_FINISHING); // TODO shouldn't this better be handled by wait/notify on unfinishedInstructionsCounter changes?
+                Thread.sleep(SLEEP_TIME_DURING_FINISHING_MILLIS); // TODO shouldn't this better be handled by wait/notify on unfinishedInstructionsCounter changes?
             } catch (InterruptedException e) {
                 if (!isAborted) {
                     onFailure(e);
