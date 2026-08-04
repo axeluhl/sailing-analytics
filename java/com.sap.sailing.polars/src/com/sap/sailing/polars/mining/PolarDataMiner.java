@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -92,91 +93,98 @@ public class PolarDataMiner {
     private final ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
 
     /**
-     * Coordinates callbacks registered through
-     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} and
-     * {@link #raceFinishedLoading(TrackedRace, Runnable)} such that the callback for a given race
-     * is only registered on the {@link #preFilteringProcessorForLoadedFixes loading pipeline's}
-     * drain <em>after</em> the race's fixes have been queued into that pipeline. Otherwise, a
-     * caller of {@code runWhenPolarLoadingFinishedFor} could register a drain callback while the
-     * pipeline is momentarily idle (before ingestion for that race started), and the callback
+     * Coordinates callbacks registered through {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} and
+     * {@link #raceFinishedLoading(TrackedRace, Runnable)} such that the callback for a given race is only registered on
+     * the {@link #preFilteringProcessorForLoadedFixes loading pipeline's} drain <em>after</em> the race's fixes have
+     * been queued into that pipeline. Otherwise, a caller of {@code runWhenPolarLoadingFinishedFor} could register a
+     * drain callback while the pipeline is momentarily idle (before ingestion for that race started), and the callback
      * would fire immediately, before this race's fixes had even entered the pipeline.
      * <p>
      *
-     * Semantics: the map is keyed by races whose fixes have <em>not yet</em> been queued into the
-     * loading pipeline. Values are lists of callbacks parked pending that ingestion. When
-     * ingestion for a race completes queueing all its fixes (see
-     * {@link #raceFinishedLoading(TrackedRace, Runnable)}), the race is removed from this map and
-     * all parked callbacks, together with any callback passed to that {@code raceFinishedLoading}
-     * call itself, are registered on the drain of {@link #preFilteringProcessorForLoadedFixes}.
-     * A race is added to this map by
-     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} the first time a callback is
-     * registered for it before its ingestion has started; subsequent {@code
-     * runWhenPolarLoadingFinishedFor} calls for a race present in this map append to its list.
-     * Callers of {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} that arrive
-     * <em>after</em> ingestion has completed queueing (race not present in this map at that time)
-     * register their callback on the drain directly. See bug6241.
+     * Semantics: the map is keyed by races whose fixes have <em>not yet</em> been queued into the loading pipeline.
+     * Values are lists of callbacks parked pending that ingestion. When ingestion for a race completes queueing all its
+     * fixes (see {@link #raceFinishedLoading(TrackedRace, Runnable)}), the race is removed from this map and all parked
+     * callbacks, together with any callback passed to that {@code raceFinishedLoading} call itself, are registered on
+     * the drain of {@link #preFilteringProcessorForLoadedFixes}. A race is added to this map by
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} the first time a callback is registered for it
+     * before its ingestion has started; subsequent {@code
+     * runWhenPolarLoadingFinishedFor} calls for a race present in this map append to its list. Callers of
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} that arrive <em>after</em> ingestion has completed
+     * queueing (race not present in this map at that time) register their callback on the drain directly. See bug6241.
+     * <p>
+     *
+     * Keyed weakly ({@link WeakHashMap}) so that a {@link TrackedRace} which is removed from its regatta while it still
+     * has parked callbacks here (e.g. removed while stuck in {@link TrackedRaceStatusEnum#LOADING}, before its fixes
+     * were ever ingested) does not keep the race -- and its whole set of tracks -- reachable for the lifetime of this
+     * miner. Entries for such races clear once the race becomes weakly reachable. Live races are unaffected: their
+     * entry is removed explicitly in {@link #raceFinishedLoading} when the parked callbacks are handed off.
      */
-    private final Map<TrackedRace, List<Runnable>> callbacksWaitingForFixIngestion = new HashMap<>();
+    private final Map<TrackedRace, List<Runnable>> callbacksWaitingForFixIngestion =
+            new WeakHashMap<>();
 
     /**
-     * Records races whose fixes have been fully queued into
-     * {@link #preFilteringProcessorForLoadedFixes}. Once a race is in this set, a caller of
-     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} for that race registers
-     * its callback on the drain directly (rather than parking it in
-     * {@link #callbacksWaitingForFixIngestion}) provided
-     * {@link #loadingOfAllRacesToRestoreStarted} is already {@code true}. Guarded by the monitor
-     * of {@link #callbacksWaitingForFixIngestion}.
+     * Records races whose fixes have been fully queued into {@link #preFilteringProcessorForLoadedFixes}. Once a race
+     * is in this set, a caller of {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} for that race
+     * registers its callback on the drain directly (rather than parking it in {@link #callbacksWaitingForFixIngestion})
+     * provided {@link #loadingOfAllRacesToRestoreStarted} is already {@code true}. Guarded by the monitor of
+     * {@link #callbacksWaitingForFixIngestion}.
+     * <p>
+     *
+     * This set is only ever added to (in {@link #raceFinishedLoading}); there is no natural point at which an entry
+     * could be safely removed, because a {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} call for a race
+     * may legitimately arrive long after ingestion (e.g. when a wind-estimation factory swap reschedules the install
+     * per race). To avoid pinning every {@link TrackedRace} ever loaded -- and transitively all of its tracks -- for
+     * the lifetime of this miner (a real leak on long-running ARCHIVE servers that load tens of thousands of races), it
+     * is held as a weak set ({@link Collections#newSetFromMap(Map) Collections.newSetFromMap(}{@link WeakHashMap
+     * new WeakHashMap<>())}). An entry disappears once the race is no longer strongly reachable anywhere else, at which
+     * point no further {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} call for it can occur anyway, so
+     * losing the "already ingested" bit is harmless. For any race that is still alive, the entry remains and the gate
+     * keeps working exactly as before. See bug6241.
      */
-    private final Set<TrackedRace> racesWithIngestedFixes = new HashSet<>();
+    private final Set<TrackedRace> racesWithIngestedFixes = Collections.newSetFromMap(new WeakHashMap<>());
 
     /**
      * Set by {@link #markLoadingOfAllRacesToRestoreStarted()} to signal that the caller (typically
-     * {@code RacingEventServiceImpl.restoreTrackedRaces()}) has finished the enumeration loop that
-     * triggers loading for every race to be restored during startup. It does <em>not</em> imply
-     * that all those races have already progressed past {@code LOADING}: some may still be
-     * loading, some may take a long time, some may never leave {@code LOADING} at all. The flag
-     * only signals that no <em>new</em> startup races will show up unannounced.
+     * {@code RacingEventServiceImpl.restoreTrackedRaces()}) has finished the enumeration loop that triggers loading for
+     * every race to be restored during startup. It does <em>not</em> imply that all those races have already progressed
+     * past {@code LOADING}: some may still be loading, some may take a long time, some may never leave {@code LOADING}
+     * at all. The flag only signals that no <em>new</em> startup races will show up unannounced.
      * <p>
      *
-     * Before this flag is set, the {@link #preFilteringProcessorForLoadedFixes loading pipeline}
-     * can transiently be idle (counter==0) between two races' ingestion bursts; registering a
-     * drain callback in such a window would fire it immediately, before other startup races have
-     * had a chance to feed fixes into the pipeline. Once this flag is set, any pipeline
-     * idle window is a genuine drain of everything that has been ingested so far. Combined with
-     * the {@link #racesWithIngestedFixes} gate, a callback for a specific race only fires once
-     * <em>that race's</em> fixes have made it in <em>and</em> the pipeline has drained everything
-     * ingested up to that point.
+     * Before this flag is set, the {@link #preFilteringProcessorForLoadedFixes loading pipeline} can transiently be
+     * idle (counter==0) between two races' ingestion bursts; registering a drain callback in such a window would fire
+     * it immediately, before other startup races have had a chance to feed fixes into the pipeline. Once this flag is
+     * set, any pipeline idle window is a genuine drain of everything that has been ingested so far. Combined with the
+     * {@link #racesWithIngestedFixes} gate, a callback for a specific race only fires once <em>that race's</em> fixes
+     * have made it in <em>and</em> the pipeline has drained everything ingested up to that point.
      * <p>
      *
-     * Callbacks registered via {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)}
-     * whose race has already been ingested but which arrive while this flag is still
-     * {@code false} are parked in {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart}
-     * until the flag flips.
+     * Callbacks registered via {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} whose race has already
+     * been ingested but which arrive while this flag is still {@code false} are parked in
+     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} until the flag flips.
      * <p>
      *
      * The flag is <em>initialized</em> to {@code false} only when this miner was constructed with
-     * {@code waitForLoadingOfAllRacesToRestoreToBeStarted == true}. Otherwise (the default) it
-     * is initialized to {@code true} so that the second gate is effectively bypassed and this
-     * miner behaves exactly as before bug6241's second-gate addition; this suits ad-hoc clients
-     * and tests that instantiate a miner outside a startup-restore flow and never call
-     * {@link #markLoadingOfAllRacesToRestoreStarted()}. See bug6241.
+     * {@code waitForLoadingOfAllRacesToRestoreToBeStarted == true}. Otherwise (the default) it is initialized to
+     * {@code true} so that the second gate is effectively bypassed and this miner behaves exactly as before bug6241's
+     * second-gate addition; this suits ad-hoc clients and tests that instantiate a miner outside a startup-restore flow
+     * and never call {@link #markLoadingOfAllRacesToRestoreStarted()}. See bug6241.
      */
     private volatile boolean loadingOfAllRacesToRestoreStarted;
 
     /**
      * Callbacks whose race has already been fully ingested but which arrived before
-     * {@link #markLoadingOfAllRacesToRestoreStarted()} was called. They are held here until the
-     * flag flips, at which point each is registered on
-     * {@link #preFilteringProcessorForLoadedFixes}'s drain. Guarded by the monitor of
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} was called. They are held here until the flag flips, at which
+     * point each is registered on {@link #preFilteringProcessorForLoadedFixes}'s drain. Guarded by the monitor of
      * {@link #callbacksWaitingForFixIngestion}.
      */
     private final List<Runnable> callbacksWaitingForLoadingOfAllRacesToRestoreToStart = new ArrayList<>();
 
     /**
      * Snapshot of the constructor argument. Used only to distinguish a redundant call to
-     * {@link #markLoadingOfAllRacesToRestoreStarted()} on a gated miner (worth a WARN, because
-     * the client's contract is to call exactly once) from a call on a non-gated miner (silently
-     * ignored, because the client didn't request gating).
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} on a gated miner (worth a WARN, because the client's contract is
+     * to call exactly once) from a call on a non-gated miner (silently ignored, because the client didn't request
+     * gating).
      */
     private final boolean waitForLoadingOfAllRacesToRestoreToBeStarted;
 
