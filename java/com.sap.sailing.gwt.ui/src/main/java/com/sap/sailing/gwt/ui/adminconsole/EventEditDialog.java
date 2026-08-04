@@ -30,7 +30,7 @@ public class EventEditDialog extends EventDialog {
         baseURLEntryField = createTextBox(event.getBaseURL());
         baseURLEntryField.setVisibleLength(50);
         id = event.id;
-        courseAreaNameList.setValue(new ArrayList<>(event.getVenue().getCourseAreas()));
+        courseAreaList.setValue(new ArrayList<>(event.getVenue().getCourseAreas()));
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());

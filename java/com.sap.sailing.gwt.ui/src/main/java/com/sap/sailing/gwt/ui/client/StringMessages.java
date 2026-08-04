@@ -1470,13 +1470,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String copyCourse();
     String copyCourseAreasFromEvent();
     String copyCourseAreasFromRemoteServer();
+    String copyCourseAreasFromAnotherUrl();
     String loadRemoteEvents();
     String bearerTokenOrNullForRemoteEvents();
     String remoteServerUrlPlaceholder();
     String bearerTokenPlaceholder();
     String appendCourseAreas();
-    String replaceAllCourseAreas();
-    String clearAndPickCourseAreas();
+    String appendCourseAreasConfirm();
+    String clearAllCourseAreas();
     String selectCourseAreas();
     String resetCourseAreas();
     String copyCompetitors();

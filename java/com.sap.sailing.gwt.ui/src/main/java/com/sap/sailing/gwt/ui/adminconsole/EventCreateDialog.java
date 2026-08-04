@@ -45,6 +45,6 @@ public class EventCreateDialog extends EventDialog {
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
         // add default course area
-        courseAreaNameList.setValue(Collections.singletonList(new CourseAreaDTO(UUID.randomUUID(), "Default")));
+        courseAreaList.setValue(Collections.singletonList(new CourseAreaDTO(UUID.randomUUID(), "Default")));
     }
 }
