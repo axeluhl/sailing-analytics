@@ -28,13 +28,14 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     private final Processor<ResultType, ?>[] resultReceivers;
     private final ExecutorService executor;
     private final AtomicInteger unfinishedInstructionsCounter;
-    private final Set<Runnable> callbacksWhenNoMoreUnfinishedInstructions = Collections.newSetFromMap(new ConcurrentHashMap<Runnable, Boolean>());
+    private final Set<Runnable> callbacksWhenNoMoreUnfinishedInstructions;
     
     private boolean isFinished = false;
     private boolean isAborted = false;
 
     public AbstractParallelProcessor(Class<InputType> inputType, Class<ResultType> resultType, ExecutorService executor, Collection<Processor<ResultType, ?>> resultReceivers) {
         super(inputType, resultType);
+        this.callbacksWhenNoMoreUnfinishedInstructions = Collections.newSetFromMap(new ConcurrentHashMap<Runnable, Boolean>());
         this.executor = executor;
         @SuppressWarnings("unchecked")
         final Processor<ResultType, ?>[] resultReceiversAsArray = (Processor<ResultType, ?>[]) new Processor<?, ?>[resultReceivers.size()];
