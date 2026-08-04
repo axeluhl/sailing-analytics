@@ -721,12 +721,10 @@ public class PolarDataMiner {
     }
 
     /**
-     * Second-stage gate for callbacks whose race's fixes are already ingested (or whose
-     * fix-ingestion parking has just been drained by
-     * {@link #raceFinishedLoading(TrackedRace, Runnable)}). If
-     * {@link #loadingOfAllRacesToRestoreStarted} is already set the callback goes straight to the
-     * drain; otherwise it is parked in
-     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} where
+     * Second-stage gate for callbacks whose race's fixes are already ingested (or whose fix-ingestion parking has just
+     * been drained by {@link #raceFinishedLoading(TrackedRace, Runnable)}). If
+     * {@link #loadingOfAllRacesToRestoreStarted} is already set the callback goes straight to the drain; otherwise it
+     * is parked in {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} where
      * {@link #markLoadingOfAllRacesToRestoreStarted()} will pick it up. See bug6241.
      */
     private void registerOnDrainOrWaitForRestoreStart(final Runnable callback) {
@@ -745,15 +743,13 @@ public class PolarDataMiner {
     }
 
     /**
-     * Announces that the caller (typically {@code RacingEventServiceImpl.restoreTrackedRaces()})
-     * has finished the enumeration loop that triggers loading for every race to be restored
-     * during startup. From now on, any transient idle window on
-     * {@link #preFilteringProcessorForLoadedFixes} is a genuine drain of everything that has been
-     * ingested up to that point; there won't be surprise ingestion bursts from previously
-     * unknown startup races. Callbacks that have been parked in
-     * {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} (because they were queued for
-     * a race whose fixes were already ingested, but arrived before this signal) are moved onto
-     * the drain now. Idempotent: subsequent calls are logged and ignored. See bug6241.
+     * Announces that the caller (typically {@code RacingEventServiceImpl.restoreTrackedRaces()}) has finished the
+     * enumeration loop that triggers loading for every race to be restored during startup. From now on, any transient
+     * idle window on {@link #preFilteringProcessorForLoadedFixes} is a genuine drain of everything that has been
+     * ingested up to that point; there won't be surprise ingestion bursts from previously unknown startup races.
+     * Callbacks that have been parked in {@link #callbacksWaitingForLoadingOfAllRacesToRestoreToStart} (because they
+     * were queued for a race whose fixes were already ingested, but arrived before this signal) are moved onto the
+     * drain now. Idempotent: subsequent calls are logged and ignored. See bug6241.
      */
     public void markLoadingOfAllRacesToRestoreStarted() {
         final Iterable<Runnable> toRegisterOnDrain;

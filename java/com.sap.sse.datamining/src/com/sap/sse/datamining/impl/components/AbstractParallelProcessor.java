@@ -103,7 +103,7 @@ public abstract class AbstractParallelProcessor<InputType, ResultType> extends A
     }
     
     /**
-     * Enqueues a callback for the event where the {@link #unfinishedInstructionsCounter} or this processor is equal to
+     * Enqueues a callback for the event where the {@link #unfinishedInstructionsCounter} on this processor is equal to
      * or gets decremented to zero and all {@link #resultReceivers} have also called back into a runnable passed now
      * to their {@link AbstractParallelProcessor#runWhenFinishedProcessing(Runnable)} method.
      * 

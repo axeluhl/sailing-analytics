@@ -73,13 +73,11 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     private static final double WIND_COURSE_TOLERANCE_IN_DEGREES_TO_IGNORE_FOR_REUSE = 1.0;
 
     /**
-     * Used by {@link PreClassifiedUpdate} to apply the same maneuver-eligibility filter that
-     * the graph path applies via
-     * {@code CompleteManeuverCurveToManeuverForEstimationConverter}: maneuvers whose direction
-     * change (on either the main curve or the stable-speed-and-course boundaries) is not
-     * classified as {@code REGULAR} are excluded from wind-track contribution. Without this
-     * filter, the DB-load / re-adaptation hand-off would contribute wind fixes for maneuvers
-     * that the graph path silently skips, causing the estimator's track to contain extras at
+     * Used by {@link PreClassifiedUpdate} to apply the same maneuver-eligibility filter that the graph path applies via
+     * {@link CompleteManeuverCurveToManeuverForEstimationConverter}: maneuvers whose direction change (on either the
+     * main curve or the stable-speed-and-course boundaries) is not classified as {@code REGULAR} are excluded from
+     * wind-track contribution. Without this filter, the DB-load / re-adaptation hand-off would contribute wind fixes
+     * for maneuvers that the graph path silently skips, causing the estimator's track to contain extras at
      * positions/timepoints the graph path never produces. See bug6241.
      */
     private static final ManeuverForEstimationTransformer maneuverEligibilityFilter = new ManeuverForEstimationTransformer();
@@ -95,13 +93,11 @@ public class IncrementalMstHmmWindEstimationForTrackedRace implements Incrementa
     private final static Executor recalculator = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
 
     /**
-     * A pending update to be processed by a {@link GraphRecalculationTask}. Two flavors are
-     * supported: {@link NewSpotsUpdate} (from
-     * {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}) which feeds
+     * A pending update to be processed by a {@link GraphRecalculationTask}. Two flavors are supported:
+     * {@link NewSpotsUpdate} (from {@link #newManeuverSpotsDetected(Competitor, Iterable, TrackTimeInfo)}) which feeds
      * raw {@link CompleteManeuverCurve}s through the MST/HMM graph before reconciliation, and
-     * {@link PreClassifiedUpdate} (from
-     * {@link #alreadyClassifiedManeuversAvailable(Competitor, Iterable)}) which skips the graph
-     * because the maneuvers already carry their type.
+     * {@link PreClassifiedUpdate} (from {@link #alreadyClassifiedManeuversAvailable(Competitor, Iterable)}) which skips
+     * the graph because the maneuvers already carry their type.
      */
     private interface PendingUpdate {
         void apply();

@@ -4820,7 +4820,7 @@ Replicator {
      *   <li>the race has reached a status strictly past
      *       {@link TrackedRaceStatusEnum#LOADING} (see
      *       {@link TrackedRace#runWhenPastLoading(Runnable)}). This covers the normal
-     *       LOADING -> TRACKING transition and the direct PREPARED -> TRACKING transition
+     *       LOADING -> TRACKING/FINISHED transition and the direct PREPARED -> TRACKING transition
      *       used by, e.g., RaceLogRaceTracker-tracked races without loadable data. If the
      *       race is removed from its regatta before the transition, the install is silently
      *       cancelled.</li>
