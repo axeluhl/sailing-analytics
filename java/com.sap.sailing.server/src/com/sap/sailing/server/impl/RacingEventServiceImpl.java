@@ -2371,6 +2371,15 @@ Replicator {
             if (polarFixCacheUpdater != null) {
                 trackedRace.removeListener(polarFixCacheUpdater);
             }
+            // bug6241: let the polar data service forget any wind-estimation-install callbacks it
+            // still has parked for this race (see PolarDataService.raceRemoved). Without this the
+            // parked callback -- which strongly captures trackedRace -- would pin the race and all
+            // of its tracks for the lifetime of the service if the race is removed before its
+            // polar loading completed. polarDataService may still be null if it has not been
+            // registered via its OSGi ServiceTracker yet.
+            if (polarDataService != null) {
+                polarDataService.raceRemoved(trackedRace);
+            }
             trackedRace.runSynchronizedOnStatus(()->{
                 if (!trackedRace.hasFinishedLoading()) {
                     numberOfTrackedRacesStillLoading.decrementAndGet();

@@ -113,14 +113,19 @@ public class PolarDataMiner {
      * queueing (race not present in this map at that time) register their callback on the drain directly. See bug6241.
      * <p>
      *
-     * Keyed weakly ({@link WeakHashMap}) so that a {@link TrackedRace} which is removed from its regatta while it still
-     * has parked callbacks here (e.g. removed while stuck in {@link TrackedRaceStatusEnum#LOADING}, before its fixes
-     * were ever ingested) does not keep the race -- and its whole set of tracks -- reachable for the lifetime of this
-     * miner. Entries for such races clear once the race becomes weakly reachable. Live races are unaffected: their
-     * entry is removed explicitly in {@link #raceFinishedLoading} when the parked callbacks are handed off.
+     * Keyed strongly ({@link HashMap}). An entry pins its {@link TrackedRace} key while callbacks
+     * are parked for it, which is intentional: the parked {@link Runnable}s typically capture the
+     * same {@code race} strongly anyway (e.g. the wind-estimation install closure in
+     * {@code RacingEventServiceImpl.scheduleWindEstimationInstallation}), so weak-keying this map
+     * would be defeated by its own values and give a false sense of safety. Entries are removed
+     * for live races in {@link #raceFinishedLoading} (once the parked callbacks are handed off to
+     * the drain) and, for races that are removed before their fixes were ever ingested, by
+     * {@link #raceRemoved(TrackedRace)}. Callers of
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} are contractually required to
+     * arrange for {@link #raceRemoved(TrackedRace)} to be called when the race goes away; see that
+     * method's contract.
      */
-    private final Map<TrackedRace, List<Runnable>> callbacksWaitingForFixIngestion =
-            new WeakHashMap<>();
+    private final Map<TrackedRace, List<Runnable>> callbacksWaitingForFixIngestion = new HashMap<>();
 
     /**
      * Records races whose fixes have been fully queued into {@link #preFilteringProcessorForLoadedFixes}. Once a race
@@ -130,16 +135,18 @@ public class PolarDataMiner {
      * {@link #callbacksWaitingForFixIngestion}.
      * <p>
      *
-     * This set is only ever added to (in {@link #raceFinishedLoading}); there is no natural point at which an entry
-     * could be safely removed, because a {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} call for a race
-     * may legitimately arrive long after ingestion (e.g. when a wind-estimation factory swap reschedules the install
-     * per race). To avoid pinning every {@link TrackedRace} ever loaded -- and transitively all of its tracks -- for
-     * the lifetime of this miner (a real leak on long-running ARCHIVE servers that load tens of thousands of races), it
-     * is held as a weak set ({@link Collections#newSetFromMap(Map) Collections.newSetFromMap(}{@link WeakHashMap
-     * new WeakHashMap<>())}). An entry disappears once the race is no longer strongly reachable anywhere else, at which
+     * There is no natural point during normal operation at which an entry could be removed, because a
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} call for a race may legitimately arrive long after
+     * ingestion (e.g. when a wind-estimation factory swap reschedules the install per race). To avoid pinning every
+     * {@link TrackedRace} ever loaded -- and transitively all of its tracks -- for the lifetime of this miner (a real
+     * leak on long-running ARCHIVE servers that load tens of thousands of races), this set is held weakly
+     * ({@link Collections#newSetFromMap(Map) Collections.newSetFromMap(}{@link WeakHashMap
+     * new WeakHashMap<>())}). Unlike {@link #callbacksWaitingForFixIngestion} this set has no values, so nothing
+     * defeats the weak keys: an entry disappears once the race is no longer strongly reachable anywhere else, at which
      * point no further {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} call for it can occur anyway, so
-     * losing the "already ingested" bit is harmless. For any race that is still alive, the entry remains and the gate
-     * keeps working exactly as before. See bug6241.
+     * losing the "already ingested" bit is harmless. As a belt-and-suspenders measure the entry is also removed
+     * eagerly in {@link #raceRemoved(TrackedRace)} rather than waiting for garbage collection. For any race that is
+     * still alive, the entry remains and the gate keeps working exactly as before. See bug6241.
      */
     private final Set<TrackedRace> racesWithIngestedFixes = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -177,6 +184,18 @@ public class PolarDataMiner {
      * {@link #markLoadingOfAllRacesToRestoreStarted()} was called. They are held here until the flag flips, at which
      * point each is registered on {@link #preFilteringProcessorForLoadedFixes}'s drain. Guarded by the monitor of
      * {@link #callbacksWaitingForFixIngestion}.
+     * <p>
+     *
+     * Lifecycle / leak-safety: this list is bounded and self-clearing under normal operation --
+     * {@link #markLoadingOfAllRacesToRestoreStarted()} drains it fully and clears it exactly once, moving every parked
+     * callback onto the pipeline drain. It is not keyed by {@link TrackedRace} and does not itself pin any race
+     * (individual callbacks may still capture a race, but only transiently, until the drain fires). The only way it
+     * can retain callbacks indefinitely is if {@link #markLoadingOfAllRacesToRestoreStarted()} is never called on a
+     * miner constructed in gated mode -- i.e. a broken startup contract on the client side, not a per-race leak. Once
+     * the flag is set, further callbacks bypass this list and go straight to the drain (see
+     * {@link #registerOnDrainOrWaitForRestoreStart(Runnable)}), so the list stays empty thereafter. Because it is not
+     * race-keyed, {@link #raceRemoved(TrackedRace)} does not prune it; a race removed after its callback landed here
+     * but before the flag flips will simply have its (now moot) callback fire once on the next drain.
      */
     private final List<Runnable> callbacksWaitingForLoadingOfAllRacesToRestoreToStart = new ArrayList<>();
 
@@ -234,13 +253,12 @@ public class PolarDataMiner {
 
     /**
      * Convenience constructor equivalent to calling
-     * {@link #PolarDataMiner(PolarSheetGenerationSettings, CubicRegressionPerCourseProcessor,
-     * SpeedRegressionPerAngleClusterProcessor, ClusterGroup, boolean)} with
-     * {@code waitForLoadingOfAllRacesToRestoreToBeStarted == false}. Callbacks registered via
-     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} then only wait for the
-     * specific race's fixes to have been queued into the loading pipeline, not for a subsequent
-     * signal from the client. Suited for ad-hoc uses, tests, and other flows that don't have a
-     * distinguished "startup restore" phase driving many races through this miner.
+     * {@link #PolarDataMiner(PolarSheetGenerationSettings, CubicRegressionPerCourseProcessor, SpeedRegressionPerAngleClusterProcessor, ClusterGroup, boolean)}
+     * with {@code waitForLoadingOfAllRacesToRestoreToBeStarted == false}. Callbacks registered via
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} then only wait for the specific race's fixes to
+     * have been queued into the loading pipeline, not for a subsequent signal from the client. Suited for ad-hoc uses,
+     * tests, and other flows that don't have a distinguished "startup restore" phase driving many races through this
+     * miner.
      */
     public PolarDataMiner(PolarSheetGenerationSettings backendPolarSettings,
             CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor,
@@ -255,16 +273,13 @@ public class PolarDataMiner {
      * @param waitForLoadingOfAllRacesToRestoreToBeStarted
      *            when {@code true}, this miner enters the "gated" mode described on
      *            {@link #loadingOfAllRacesToRestoreStarted}: callbacks registered via
-     *            {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} will not fire
-     *            until the client has explicitly called
-     *            {@link #markLoadingOfAllRacesToRestoreStarted()} <em>and</em> the specific
-     *            race's fixes have made it into the loading pipeline. This is the mode used by
-     *            the OSGi/production wiring, where {@code RacingEventServiceImpl} makes that
-     *            promise. Constructing with {@code true} without ever calling
-     *            {@code markLoadingOfAllRacesToRestoreStarted()} will result in callbacks
-     *            being held indefinitely. When {@code false} (the default via the shorter
-     *            constructor), the second gate is bypassed, matching the behavior before
-     *            bug6241's addition.
+     *            {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} will not fire until the client has
+     *            explicitly called {@link #markLoadingOfAllRacesToRestoreStarted()} <em>and</em> the specific race's
+     *            fixes have made it into the loading pipeline. This is the mode used by the OSGi/production wiring,
+     *            where {@code RacingEventServiceImpl} makes that promise. Constructing with {@code true} without ever
+     *            calling {@code markLoadingOfAllRacesToRestoreStarted()} will result in callbacks being held
+     *            indefinitely. When {@code false} (the default via the shorter constructor), the second gate is
+     *            bypassed, matching the behavior before bug6241's addition.
      */
     public PolarDataMiner(PolarSheetGenerationSettings backendPolarSettings,
             CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor,
@@ -711,6 +726,21 @@ public class PolarDataMiner {
      * pending), or parked in {@link #callbacksWaitingForFixIngestion} (fix ingestion pending;
      * once ingestion completes, the callback moves to the drain or to the signal-pending list
      * as appropriate). See bug6241.
+     * <p>
+     *
+     * LEAK CONTRACT -- read before calling. A {@code callback} parked here (in
+     * {@link #callbacksWaitingForFixIngestion}) is held strongly, keyed by {@code race}, until
+     * either its race's fixes are ingested ({@link #raceFinishedLoading}) or the race is
+     * explicitly forgotten. Parked callbacks also typically capture {@code race} strongly
+     * themselves. Consequently, if a race is registered here but its fixes are never ingested
+     * (e.g. it is removed while still in {@link TrackedRaceStatusEnum#LOADING}), the entry --
+     * and the whole {@link TrackedRace} with all its tracks -- would be pinned for the lifetime
+     * of this miner. To prevent that, the caller MUST call {@link #raceRemoved(TrackedRace)} when
+     * the race is removed from its regatta / the racing event service. In this codebase that is
+     * wired through {@code RacingEventServiceImpl.RaceAdditionListener.raceRemoved(TrackedRace)}.
+     * Do not rely on garbage collection to clean up {@link #callbacksWaitingForFixIngestion}: its
+     * keys are strong precisely because weak keys would be defeated by the callbacks' own
+     * strong references back to the race.
      *
      * @param callback
      *            must not be {@code null}
@@ -732,6 +762,43 @@ public class PolarDataMiner {
         }
         if (fixIngestionAlreadyDone) {
             registerOnDrainOrWaitForRestoreStart(callback);
+        }
+    }
+
+    /**
+     * Forgets all state this miner holds for {@code race}, so that a removed race and its tracks
+     * can be garbage-collected rather than pinned for the lifetime of the miner. Specifically it
+     * drops any callbacks still parked for {@code race} in {@link #callbacksWaitingForFixIngestion}
+     * (the install those callbacks would drive is for the now-removed race instance, so it needn't
+     * fire; note this does not abort any of {@code race}'s fixes that are already being drained
+     * through the loading pipeline) and removes the race from {@link #racesWithIngestedFixes}.
+     * <p>
+     *
+     * This is the removal side of the {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)}
+     * leak contract: because parked callbacks are held strongly and typically capture the race
+     * strongly themselves, {@link #callbacksWaitingForFixIngestion} cannot rely on weak keys and
+     * must be pruned explicitly when a race goes away. Callers (in this codebase,
+     * {@code RacingEventServiceImpl.RaceAdditionListener.raceRemoved(TrackedRace)}) must invoke
+     * this when a race is removed from its regatta / the racing event service.
+     * {@link #racesWithIngestedFixes} is already held weakly and would clear on its own, but is
+     * pruned here too as a belt-and-suspenders measure so the memory is reclaimed promptly rather
+     * than at the next garbage collection.
+     * <p>
+     *
+     * Idempotent and safe to call for a race this miner never saw: a race with no state simply
+     * results in no-ops. Guarded by the same {@link #callbacksWaitingForFixIngestion} monitor as
+     * the registration methods.
+     *
+     * @param race
+     *            the race to forget; must not be {@code null}
+     */
+    public void raceRemoved(final TrackedRace race) {
+        if (race == null) {
+            throw new NullPointerException("race must not be null");
+        }
+        synchronized (callbacksWaitingForFixIngestion) {
+            callbacksWaitingForFixIngestion.remove(race);
+            racesWithIngestedFixes.remove(race);
         }
     }
 

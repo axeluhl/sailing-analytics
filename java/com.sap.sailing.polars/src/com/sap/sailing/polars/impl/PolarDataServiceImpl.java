@@ -274,6 +274,11 @@ public class PolarDataServiceImpl extends AbstractReplicableWithObjectInputStrea
     }
 
     @Override
+    public void raceRemoved(TrackedRace race) {
+        polarDataMiner.raceRemoved(race);
+    }
+
+    @Override
     public void markLoadingOfAllRacesToRestoreStarted() {
         polarDataMiner.markLoadingOfAllRacesToRestoreStarted();
     }

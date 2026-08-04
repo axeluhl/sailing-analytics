@@ -195,6 +195,24 @@ public interface PolarDataService {
     void runWhenPolarLoadingFinishedFor(TrackedRace race, Runnable callback);
 
     /**
+     * Releases any state the polar data service holds for {@code race}, allowing a removed race
+     * and its tracks to be garbage-collected. Callers of
+     * {@link #runWhenPolarLoadingFinishedFor(TrackedRace, Runnable)} MUST call this when the race
+     * is removed from its regatta / the racing event service: a callback parked for a race whose
+     * polar loading never completes is held strongly (and typically captures the race strongly
+     * itself), so without this call the race and all of its tracks would be pinned for the
+     * lifetime of the service. In this codebase the call is wired through
+     * {@code RacingEventServiceImpl.RaceAdditionListener.raceRemoved(TrackedRace)}.
+     * <p>
+     *
+     * Idempotent and safe to call for a race the service never tracked. See bug6241.
+     *
+     * @param race
+     *            the race to forget; must not be {@code null}
+     */
+    void raceRemoved(TrackedRace race);
+
+    /**
      * Signals to this polar data service that its client has finished enumerating and triggering
      * loading for every race that will be restored during startup. From this point on the client
      * makes no further ingestion promises, so any transient idle window on the loading pipeline
