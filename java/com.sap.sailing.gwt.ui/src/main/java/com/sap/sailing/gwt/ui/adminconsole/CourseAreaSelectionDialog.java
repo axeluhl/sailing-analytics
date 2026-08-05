@@ -15,6 +15,10 @@ import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * Pop-up dialog used by {@link CourseAreaTabComposite} to let the user pick zero or more {@link CourseAreaDTO course
+ * areas} from a list.
+ */
 public class CourseAreaSelectionDialog extends DataEntryDialog<List<CourseAreaDTO>> {
     private final List<CourseAreaDTO> courseAreas;
     private final StringMessages stringMessages;

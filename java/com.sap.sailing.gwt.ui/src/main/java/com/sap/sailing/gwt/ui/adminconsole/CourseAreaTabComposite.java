@@ -29,6 +29,11 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * Tab within {@link EventDialog} to create and maintain course areas with their names and optional
+ * geometries, as well as the possibility to copy course area definitions from other local or remote
+ * events.
+ */
 public class CourseAreaTabComposite extends Composite {
     private final CourseAreaListInlineEditorComposite courseAreaList;
 
