@@ -821,7 +821,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             ? new RotatedCoordinateSystem(new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90)))
                             : new RotateAndTranslateCoordinateSystem(centerOfCourse, new DegreeBearingImpl(lastCombinedTrueWindFromDirectionInIntegerDegrees).add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer(), /* populateDefaults */ false);
+                        mapOptions = getMapOptions(/* wind-up */ true, settings.isShowSatelliteLayer(), settings.isShowSeaMarks(), /* populateDefaults */ false);
                         if (vectorRenderingTypeSupported) {
                             mapOptions.setHeading(lastCombinedTrueWindFromDirectionInIntegerDegrees);
                         }
@@ -841,7 +841,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(/* wind-up */ false, settings.isShowSatelliteLayer(), /* populateDefaults */ false);
+                mapOptions = getMapOptions(/* wind-up */ false, settings.isShowSatelliteLayer(), settings.isShowSeaMarks(), /* populateDefaults */ false);
                 if (vectorRenderingTypeSupported) {
                     mapOptions.setHeading(0);
                 }
@@ -904,11 +904,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return result;
     }
 
-    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel, final boolean showSatelliteLayer) {
+    private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel, final boolean showSatelliteLayer, boolean showSeaMarks) {
         Runnable onLoad = new Runnable() {
             @Override
             public void run() {
-                MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer, /* populateDefaults */ true);
+                MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer, showSeaMarks, /* populateDefaults */ true);
                 mapOptions.setRenderingType(RenderingType.VECTOR);
                 map = new MapWidget(mapOptions);
                 vectorRenderingTypeSupported = isVectorRenderingTypeSupported(map);
@@ -3314,8 +3314,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             requiresUpdateCoordinateSystem = true;
         }
         if (GoogleMapsLoader.isMapLibreRequested() && newSettings.isShowSeaMarks() != settings.isShowSeaMarks()) {
-            MapOptions mapOptions = MapOptions.newInstance(false);
-            setSeaMarksVisible(mapOptions, newSettings.isShowSeaMarks());
+            MapOptions mapOptions = MapOptions.newInstance(/* withdefaults */ false);
+            mapOptions.setSeaMarksVisible(newSettings.isShowSeaMarks());
             map.setOptions(mapOptions);
         }
         if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
@@ -3555,7 +3555,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void initializeData(boolean showMapControls, boolean showHeaderPanel) {
-        loadMapsAPIV3(showMapControls, showHeaderPanel, this.settings.isShowSatelliteLayer());
+        loadMapsAPIV3(showMapControls, showHeaderPanel, this.settings.isShowSatelliteLayer(), this.settings.isShowSeaMarks());
     }
 
     @Override
@@ -3767,7 +3767,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return new BoatsBoundsCalculator().calculateNewBounds(RaceMap.this);
     }
     
-    private MapOptions getMapOptions(boolean windUp, boolean showSatelliteLayer, boolean populateDefaults) {
+    private MapOptions getMapOptions(boolean windUp, boolean showSatelliteLayer, boolean showSeaMarks, boolean populateDefaults) {
         MapOptions mapOptions = MapOptions.newInstance(populateDefaults);
         // Google Maps API does not support rotated satellite images
         mapOptions.setMapTypeId(getMapTypeId(windUp, showSatelliteLayer));
@@ -3782,14 +3782,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         mapOptions.setStreetViewControl(false);
         mapOptions.setIsFractionalZoomEnabled(true);
         if (GoogleMapsLoader.isMapLibreRequested()) {
-            setSeaMarksVisible(mapOptions, settings.isShowSeaMarks());
+            mapOptions.setSeaMarksVisible(showSeaMarks);
         }
         return mapOptions;
     }
-
-    private static native void setSeaMarksVisible(MapOptions mapOptions, boolean visible) /*-{
-        mapOptions.seaMarksVisible = visible;
-    }-*/;
 
     private String getMapTypeId(boolean windUp, boolean showSatelliteLayer) {
         return showSatelliteLayer && (!windUp || GoogleMapsLoader.isMapLibreRequested())

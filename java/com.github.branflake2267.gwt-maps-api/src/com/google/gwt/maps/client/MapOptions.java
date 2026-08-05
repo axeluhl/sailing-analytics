@@ -293,6 +293,14 @@ public class MapOptions extends JavaScriptObject {
   }-*/;
 
   /**
+   * Activates or de-activates visibility of objects from nautical charts, such as cardinal and lateral buoys,
+   * as well as lights.
+   */
+  public final native void setSeaMarksVisible(boolean visible) /*-{
+      this.seaMarksVisible = visible;
+  }-*/;
+
+  /**
    * get If false, prevents the map from being controlled by the keyboard. Keyboard shortcuts are enabled by default.
    * 
    * @return boolean
