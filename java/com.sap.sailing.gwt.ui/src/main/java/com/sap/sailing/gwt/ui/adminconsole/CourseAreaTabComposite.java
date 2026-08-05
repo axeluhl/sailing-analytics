@@ -97,7 +97,7 @@ public class CourseAreaTabComposite extends Composite {
             eventDropDown.addItem(stringMessages.pleaseSelectAnEvent());
             eventsCache.clear();
             final String baseUrl = remoteBaseUrlBox.getValue().trim();
-            if (baseUrl.isEmpty()) {
+            if (baseUrl.isEmpty()) { // use local events
                 final List<EventDTO> sorted = new ArrayList<>(existingEvents);
                 sorted.sort(Comparator.comparing(EventDTO::getName));
                 for (final EventDTO event : sorted) {
@@ -105,7 +105,7 @@ public class CourseAreaTabComposite extends Composite {
                     eventDropDown.addItem(event.getName(), event.getId().toString());
                 }
                 eventDropDown.setEnabled(true);
-            } else {
+            } else { // load events from remote environment
                 remoteLoadBusyIndicator.setBusy(true);
                 eventDropDown.setEnabled(false);
                 final String bearerTokenOrNull = bearerTokenOrNullBox.getValue().trim().isEmpty() ? null : bearerTokenOrNullBox.getValue().trim();
