@@ -57,8 +57,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
     private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
-    private final List<EventDTO> existingEvents;
-    private SailingServiceWriteAsync sailingServiceWrite;
 
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -130,9 +128,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.ensureDebugId("eventDialog");
         this.storageServiceAvailable = new FileStorageServiceConnectionTestObservable(sailingServiceWrite);
-        this.sailingServiceWrite = sailingServiceWrite;
         this.stringMessages = stringMessages;
-        this.existingEvents = new ArrayList<>(existingEvents);
         this.availableLeaderboardGroupsByName = new HashMap<>();
         for (final LeaderboardGroupDTO lgDTO : availableLeaderboardGroups) {
             availableLeaderboardGroupsByName.put(lgDTO.getName(), lgDTO);
