@@ -49,7 +49,10 @@ public interface SailingServer extends SecuredServer {
 
     Iterable<UUID> getEventIds() throws Exception;
 
-    //fetches all public events from the remote server, reusing the /v1/events endpoint which serializes venue+courseAreas.
+    /**
+     * Fetches all public events from the remote server, reusing the {@code /v1/events} endpoint which serializes
+     * venue and course areas.
+     */
     Iterable<EventBase> getEvents() throws Exception;
 
     MasterDataImportResult importMasterData(SailingServer from, Iterable<UUID> leaderboardGroupIds, boolean override,
