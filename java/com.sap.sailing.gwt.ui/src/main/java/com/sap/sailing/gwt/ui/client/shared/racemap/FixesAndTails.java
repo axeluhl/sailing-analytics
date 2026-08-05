@@ -652,12 +652,15 @@ public class FixesAndTails {
 
     private void synchronizeTailPath(Colorline tail, List<GPSFixDTOWithSpeedWindTackAndLegType> fixes,
             int firstShownFix, int lastShownFix) {
-        if (tail == null) return;
-        final MVCArray<LatLng> expectedPath = MVCArray.newInstance();
-        for (int i = Math.max(0, firstShownFix); i <= lastShownFix && i < fixes.size(); i++) {
-            expectedPath.push(coordinateSystem.toLatLng(fixes.get(i).position));
+        if (tail != null) {
+            final MVCArray<LatLng> expectedPath = MVCArray.newInstance();
+            for (int i = Math.max(0, firstShownFix); i <= lastShownFix && i < fixes.size(); i++) {
+                expectedPath.push(coordinateSystem.toLatLng(fixes.get(i).position));
+            }
+            if (tail.getLength() != expectedPath.getLength()) {
+                tail.setPath(expectedPath);
+            }
         }
-        if (tail.getLength() != expectedPath.getLength()) tail.setPath(expectedPath);
     }
 
     /**
