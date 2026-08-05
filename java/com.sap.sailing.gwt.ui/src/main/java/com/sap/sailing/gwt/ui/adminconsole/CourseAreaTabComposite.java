@@ -59,12 +59,10 @@ public class CourseAreaTabComposite extends Composite {
         appendButton.setEnabled(false);
         appendButton.addStyleName("btn-secondary");
         final Button clearAllButton = new Button(stringMessages.clearAllCourseAreas());
-        clearAllButton.setEnabled(false);
         clearAllButton.addStyleName("btn-secondary");
         eventDropDown.addChangeHandler(e -> {
             final boolean hasSelection = eventDropDown.getSelectedIndex() > 0;
             appendButton.setEnabled(hasSelection);
-            clearAllButton.setEnabled(hasSelection);
         });
         appendButton.addClickHandler(e -> {
             final EventDTO selected = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
