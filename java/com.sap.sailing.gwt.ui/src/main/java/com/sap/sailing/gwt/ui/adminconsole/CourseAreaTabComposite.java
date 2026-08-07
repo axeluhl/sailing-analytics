@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -17,8 +23,12 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceWriteAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -55,49 +65,121 @@ public class CourseAreaTabComposite extends Composite {
         for (final EventDTO event : sortedExistingEvents) {
             eventDropDown.addItem(event.getName(), event.getId().toString());
         }
-        final Button appendButton = new Button(stringMessages.appendCourseAreas());
-        appendButton.setEnabled(false);
-        appendButton.addStyleName("btn-secondary");
+        final ListBox courseAreaDropDown = new ListBox();
+        courseAreaDropDown.addItem(stringMessages.chooseWhatToAdd());
+        courseAreaDropDown.setEnabled(false);
+        courseAreaDropDown.setWidth("400px");
         final Button clearAllButton = new Button(stringMessages.clearAllCourseAreas());
         clearAllButton.addStyleName("btn-secondary");
         eventDropDown.addChangeHandler(e -> {
-            final boolean hasSelection = eventDropDown.getSelectedIndex() > 0;
-            appendButton.setEnabled(hasSelection);
-        });
-        appendButton.addClickHandler(e -> {
-            final EventDTO selected = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
-            if (selected != null) {
-                new CourseAreaSelectionDialog(selected.getVenue().getCourseAreas(), stringMessages,
-                        new DataEntryDialog.DialogCallback<List<CourseAreaDTO>>() {
-                    @Override
-                    public void ok(final List<CourseAreaDTO> result) {
-                        final List<CourseAreaDTO> updated = new ArrayList<>(courseAreaList.getValue());
-                        for (final CourseAreaDTO area : result) {
-                            updated.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
-                        }
-                        courseAreaList.setValue(updated);
+            final int selectedIndex = eventDropDown.getSelectedIndex();
+            courseAreaDropDown.clear();
+            if (selectedIndex > 0) {
+                final EventDTO selected = eventsCache.get(eventDropDown.getValue(selectedIndex));
+                if (selected != null && selected.getVenue() != null) {
+                    courseAreaDropDown.addItem(stringMessages.chooseWhatToAdd());
+                    courseAreaDropDown.addItem(stringMessages.addAllCourseAreas());
+                    for (final CourseAreaDTO area : selected.getVenue().getCourseAreas()) {
+                        courseAreaDropDown.addItem(area.getName(), area.getId().toString());
                     }
-                    @Override
-                    public void cancel() {}
-                }).show();
+                    courseAreaDropDown.setEnabled(true);
+                }
+            } else {
+                courseAreaDropDown.addItem(stringMessages.chooseWhatToAdd());
+                courseAreaDropDown.setEnabled(false);
             }
         });
+        courseAreaDropDown.addChangeHandler(e -> {
+            final int selectedIndex = courseAreaDropDown.getSelectedIndex();
+            if (selectedIndex <= 0) {
+                return;
+            }
+            final EventDTO selectedEvent = eventsCache.get(eventDropDown.getValue(eventDropDown.getSelectedIndex()));
+            if (selectedEvent == null) {
+                return;
+            }
+            final List<CourseAreaDTO> toAdd = new ArrayList<>();
+            if (selectedIndex == 1) {
+                for (final CourseAreaDTO area : selectedEvent.getVenue().getCourseAreas()) {
+                    toAdd.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                }
+            } else {
+                final List<CourseAreaDTO> areas = selectedEvent.getVenue().getCourseAreas();
+                if (selectedIndex - 2 < areas.size()) {
+                    final CourseAreaDTO area = areas.get(selectedIndex - 2);
+                    toAdd.add(new CourseAreaDTO(UUID.randomUUID(), area.getName(), area.getCenterPosition(), area.getRadius()));
+                }
+            }
+            final List<CourseAreaDTO> updated = new ArrayList<>(courseAreaList.getValue());
+            updated.addAll(toAdd);
+            courseAreaList.setValue(updated);
+            courseAreaDropDown.setSelectedIndex(0);
+        });
         clearAllButton.addClickHandler(e -> courseAreaList.setValue(new ArrayList<>()));
-        final TextBox remoteBaseUrlBox = new TextBox();
-        remoteBaseUrlBox.setValue(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
-        remoteBaseUrlBox.setWidth("300px");
-        remoteBaseUrlBox.getElement().setPropertyString("placeholder", stringMessages.remoteServerUrlPlaceholder());
-        final TextBox bearerTokenOrNullBox = new TextBox();
-        bearerTokenOrNullBox.setWidth("200px");
-        bearerTokenOrNullBox.getElement().setPropertyString("placeholder", stringMessages.bearerTokenPlaceholder());
-        final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator();
-        final Button loadRemoteEventsButton = new Button(stringMessages.loadRemoteEvents());
-        loadRemoteEventsButton.addClickHandler(e -> {
+        final String[] bearerTokenHolder = new String[1];
+        final Button authenticateButton = new Button(stringMessages.authenticate());
+        authenticateButton.addClickHandler(e -> {
+            final TextBox tokenBox = new TextBox();
+            tokenBox.setWidth("300px");
+            tokenBox.getElement().setPropertyString("placeholder", stringMessages.bearerTokenPlaceholder());
+            if (bearerTokenHolder[0] != null) {
+                tokenBox.setValue(bearerTokenHolder[0]);
+            }
+            new DataEntryDialog<String>(stringMessages.authenticate(), null, stringMessages.ok(), stringMessages.cancel(), null,
+                    new DataEntryDialog.DialogCallback<String>() {
+                @Override
+                public void ok(final String result) {
+                    bearerTokenHolder[0] = result.trim().isEmpty() ? null : result.trim();
+                }
+                @Override
+                public void cancel() {}
+            }) {
+                @Override
+                protected String getResult() {
+                    return tokenBox.getValue();
+                }
+                @Override
+                protected Widget getAdditionalWidget() {
+                    final VerticalPanel panel = new VerticalPanel();
+                    panel.setSpacing(3);
+                    final HorizontalPanel tokenRow = new HorizontalPanel();
+                    tokenRow.setSpacing(3);
+                    tokenRow.add(new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
+                    tokenRow.add(tokenBox);
+                    panel.add(tokenRow);
+                    final Label explanationLabel = new Label(stringMessages.helptextBearerToken());
+                    explanationLabel.setWidth("400px");
+                    explanationLabel.getElement().getStyle().setProperty("whiteSpace", "normal");
+                    explanationLabel.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+                    explanationLabel.getElement().getStyle().setFontSize(11, Style.Unit.PX);
+                    panel.add(explanationLabel);
+                    return panel;
+                }
+            }.show();
+        });
+        final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator(false, 0.7f) {
+            @Override
+            public void setBusy(final boolean busy) {
+                super.setBusy(busy);
+                getElement().getStyle().setDisplay(Style.Display.BLOCK);
+                getElement().getStyle().setVisibility(busy ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
+            }
+        };
+        remoteLoadBusyIndicator.setBusy(false);
+        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+        oracle.add(stringMessages.localEvents());
+        oracle.add(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
+        oracle.add("http://localhost:8889");
+        final SuggestBox sourceBox = new SuggestBox(oracle);
+        sourceBox.setValue(stringMessages.localEvents());
+        sourceBox.setWidth("300px");
+        final Runnable loadEvents = () -> {
             eventDropDown.clear();
-            eventDropDown.addItem(stringMessages.pleaseSelectAnEvent());
             eventsCache.clear();
-            final String baseUrl = remoteBaseUrlBox.getValue().trim();
-            if (baseUrl.isEmpty()) { // use local events
+            final String source = sourceBox.getValue().trim();
+            final boolean isLocal = source.isEmpty() || source.equals(stringMessages.localEvents());
+            if (isLocal) {
+                eventDropDown.addItem(stringMessages.pleaseSelectALocalEvent());
                 final List<EventDTO> sorted = new ArrayList<>(existingEvents);
                 sorted.sort(Comparator.comparing(EventDTO::getName));
                 for (final EventDTO event : sorted) {
@@ -105,15 +187,17 @@ public class CourseAreaTabComposite extends Composite {
                     eventDropDown.addItem(event.getName(), event.getId().toString());
                 }
                 eventDropDown.setEnabled(true);
-            } else { // load events from remote environment
+            } else {
+                eventDropDown.addItem(stringMessages.pleaseSelectAnEventFrom(source));
                 remoteLoadBusyIndicator.setBusy(true);
                 eventDropDown.setEnabled(false);
-                final String bearerTokenOrNull = bearerTokenOrNullBox.getValue().trim().isEmpty() ? null : bearerTokenOrNullBox.getValue().trim();
-                sailingServiceWrite.getRemoteEvents(baseUrl, bearerTokenOrNull,
-                        new AsyncCallback<List<EventDTO>>() {
+                authenticateButton.setEnabled(false);
+                final String bearerTokenOrNull = bearerTokenHolder[0];
+                sailingServiceWrite.getRemoteEvents(source, bearerTokenOrNull,new AsyncCallback<List<EventDTO>>() {
                     @Override
                     public void onSuccess(final List<EventDTO> result) {
                         remoteLoadBusyIndicator.setBusy(false);
+                        authenticateButton.setEnabled(true);
                         result.sort(Comparator.comparing(EventDTO::getName));
                         for (final EventDTO event : result) {
                             eventsCache.put(event.getId().toString(), event);
@@ -124,38 +208,47 @@ public class CourseAreaTabComposite extends Composite {
                     @Override
                     public void onFailure(final Throwable caught) {
                         remoteLoadBusyIndicator.setBusy(false);
+                        authenticateButton.setEnabled(true);
                         eventDropDown.clear();
                         eventDropDown.addItem(caught.getMessage());
                     }
                 });
             }
+        };
+        sourceBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
+            @Override
+            public void onSelection(final SelectionEvent<SuggestOracle.Suggestion> event) {
+                loadEvents.run();
+            }
+        });
+        sourceBox.getValueBox().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(final KeyUpEvent event) {
+                if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                    loadEvents.run();
+                }
+            }
         });
         final VerticalPanel copyPanel = new VerticalPanel();
         copyPanel.setWidth("100%");
         copyPanel.setSpacing(3);
-        final Grid remoteInputGrid = new Grid(2, 3);
-        remoteInputGrid.setWidget(0, 0, new Label(stringMessages.copyCourseAreasFromAnotherUrl()));
-        remoteInputGrid.setWidget(0, 1, remoteBaseUrlBox);
-        final HorizontalPanel loadRow = new HorizontalPanel();
-        loadRow.setSpacing(3);
-        loadRow.add(loadRemoteEventsButton);
-        loadRow.add(remoteLoadBusyIndicator);
-        remoteInputGrid.setWidget(0, 2, loadRow);
-        remoteInputGrid.setWidget(1, 0, new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
-        remoteInputGrid.setWidget(1, 1, bearerTokenOrNullBox);
-        eventDropDown.setWidth("100%");
-        final HorizontalPanel actionButtons = new HorizontalPanel();
-        actionButtons.setSpacing(3);
-        actionButtons.add(appendButton);
-        actionButtons.add(clearAllButton);
-        final HorizontalPanel eventDropDownRow = new HorizontalPanel();
-        eventDropDownRow.setSpacing(3);
-        eventDropDownRow.setWidth("100%");
-        eventDropDownRow.add(new Label(stringMessages.event() + ":"));
-        eventDropDownRow.add(eventDropDown);
-        eventDropDownRow.add(actionButtons);
-        copyPanel.add(remoteInputGrid);
-        copyPanel.add(eventDropDownRow);
+        final Grid inputGrid = new Grid(3, 3);
+        inputGrid.setWidget(0, 0, new Label(stringMessages.copyCourseAreasFromAnotherUrl()));
+        sourceBox.setTitle(stringMessages.helptextCopySource());
+        final HorizontalPanel sourceBoxRow = new HorizontalPanel();
+        sourceBoxRow.setSpacing(3);
+        sourceBoxRow.add(sourceBox);
+        sourceBoxRow.add(remoteLoadBusyIndicator);
+        inputGrid.setWidget(0, 1, sourceBoxRow);
+        inputGrid.setWidget(0, 2, authenticateButton);
+        eventDropDown.setWidth("400px");
+        inputGrid.setWidget(1, 0, new Label(stringMessages.event() + ":"));
+        inputGrid.setWidget(1, 1, eventDropDown);
+        inputGrid.setWidget(1, 2, clearAllButton);
+        courseAreaDropDown.setWidth("400px");
+        inputGrid.setWidget(2, 0, new Label(stringMessages.courseAreas() + ":"));
+        inputGrid.setWidget(2, 1, courseAreaDropDown);
+        copyPanel.add(inputGrid);
         courseAreasPanel.add(copyPanel);
         courseAreasPanel.add(courseAreaList);
         initWidget(courseAreasPanel);

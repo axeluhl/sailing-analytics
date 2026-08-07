@@ -1250,6 +1250,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
     String pleaseSelectAnEvent();
+    String pleaseSelectALocalEvent();
+    String pleaseSelectAnEventFrom(String source);
+    String localEvents();
     String selectALeaderboard();
     String autoplayConfiguration();
     String startAutoplay();
@@ -1474,8 +1477,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String bearerTokenOrNullForRemoteEvents();
     String remoteServerUrlPlaceholder();
     String bearerTokenPlaceholder();
+    String authenticate();
+    String helptextCopySource();
+    String helptextBearerToken();
     String appendCourseAreas();
     String appendCourseAreasConfirm();
+    String addAllCourseAreas();
+    String chooseWhatToAdd();
     String clearAllCourseAreas();
     String selectCourseAreas();
     String resetCourseAreas();
