@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -167,9 +168,12 @@ public class CourseAreaTabComposite extends Composite {
         };
         remoteLoadBusyIndicator.setBusy(false);
         final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        oracle.add(stringMessages.localEvents());
-        oracle.add(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
-        oracle.add("http://localhost:8889");
+        final List<String> suggestValues = Arrays.asList(stringMessages.localEvents(),
+                SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL, "http://localhost:8889");
+        for (final String suggestValue : suggestValues) {
+            oracle.add(suggestValue);
+        }
+        oracle.setDefaultSuggestionsFromText(suggestValues);
         final SuggestBox sourceBox = new SuggestBox(oracle);
         sourceBox.setValue(stringMessages.localEvents());
         sourceBox.setWidth("300px");
