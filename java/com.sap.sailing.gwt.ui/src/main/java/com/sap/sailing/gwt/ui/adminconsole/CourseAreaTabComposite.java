@@ -19,6 +19,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -54,6 +55,67 @@ public class CourseAreaTabComposite extends Composite {
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 30));
         final VerticalPanel courseAreasPanel = new VerticalPanel();
         courseAreasPanel.setSpacing(5);
+        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+        final List<String> oracleSuggestions = new ArrayList<>();
+        oracleSuggestions.add(stringMessages.localEvents());
+        oracleSuggestions.add(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
+        oracleSuggestions.add("http://localhost:8889");
+        oracle.addAll(oracleSuggestions);
+        oracle.setDefaultSuggestionsFromText(oracleSuggestions);
+        final SuggestBox sourceBox = new SuggestBox(oracle);
+        sourceBox.setValue(stringMessages.localEvents());
+        sourceBox.setWidth("300px");
+        final String[] bearerTokenHolder = new String[1];
+        final Runnable[] loadEventsHolder = new Runnable[1];
+        final Button authenticateButton = new Button(stringMessages.authenticate());
+        authenticateButton.addClickHandler(e -> {
+            new DataEntryDialog<String>(stringMessages.authenticate(), null, stringMessages.ok(), stringMessages.cancel(), null,
+                    new DataEntryDialog.DialogCallback<String>() {
+                @Override
+                public void ok(final String result) {
+                    bearerTokenHolder[0] = result.trim().isEmpty() ? null : result.trim();
+                    loadEventsHolder[0].run();
+                }
+                @Override
+                public void cancel() {}
+            }) {
+                private final TextBox tokenBox = createTextBox(bearerTokenHolder[0] != null ? bearerTokenHolder[0] : "", 40);
+                @Override
+                protected String getResult() {
+                    return tokenBox.getValue();
+                }
+                @Override
+                protected Focusable getInitialFocusWidget() {
+                    return tokenBox;
+                }
+                @Override
+                protected Widget getAdditionalWidget() {
+                    final VerticalPanel panel = new VerticalPanel();
+                    panel.setSpacing(3);
+                    final HorizontalPanel tokenRow = new HorizontalPanel();
+                    tokenRow.setSpacing(3);
+                    tokenRow.add(new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
+                    tokenRow.add(tokenBox);
+                    panel.add(tokenRow);
+                    final Label explanationLabel = new Label(stringMessages.helptextBearerToken());
+                    explanationLabel.setWidth("400px");
+                    explanationLabel.getElement().getStyle().setProperty("whiteSpace", "normal");
+                    explanationLabel.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+                    explanationLabel.getElement().getStyle().setFontSize(11, Style.Unit.PX);
+                    panel.add(explanationLabel);
+                    return panel;
+                }
+            }.show();
+        });
+        final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator(false, 0.7f) {
+            @Override
+            public void setBusy(final boolean busy) {
+                super.setBusy(busy);
+                getElement().getStyle().setDisplay(Style.Display.BLOCK);
+                getElement().getStyle().setVisibility(busy ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
+            }
+        };
+        remoteLoadBusyIndicator.setBusy(false);
         final Map<String, EventDTO> eventsCache = new HashMap<>();
         for (final EventDTO event : existingEvents) {
             eventsCache.put(event.getId().toString(), event);
@@ -116,63 +178,6 @@ public class CourseAreaTabComposite extends Composite {
             courseAreaDropDown.setSelectedIndex(0);
         });
         clearAllButton.addClickHandler(e -> courseAreaList.setValue(new ArrayList<>()));
-        final String[] bearerTokenHolder = new String[1];
-        final Button authenticateButton = new Button(stringMessages.authenticate());
-        authenticateButton.addClickHandler(e -> {
-            final TextBox tokenBox = new TextBox();
-            tokenBox.setWidth("300px");
-            tokenBox.getElement().setPropertyString("placeholder", stringMessages.bearerTokenPlaceholder());
-            if (bearerTokenHolder[0] != null) {
-                tokenBox.setValue(bearerTokenHolder[0]);
-            }
-            new DataEntryDialog<String>(stringMessages.authenticate(), null, stringMessages.ok(), stringMessages.cancel(), null,
-                    new DataEntryDialog.DialogCallback<String>() {
-                @Override
-                public void ok(final String result) {
-                    bearerTokenHolder[0] = result.trim().isEmpty() ? null : result.trim();
-                }
-                @Override
-                public void cancel() {}
-            }) {
-                @Override
-                protected String getResult() {
-                    return tokenBox.getValue();
-                }
-                @Override
-                protected Widget getAdditionalWidget() {
-                    final VerticalPanel panel = new VerticalPanel();
-                    panel.setSpacing(3);
-                    final HorizontalPanel tokenRow = new HorizontalPanel();
-                    tokenRow.setSpacing(3);
-                    tokenRow.add(new Label(stringMessages.bearerTokenOrNullForRemoteEvents()));
-                    tokenRow.add(tokenBox);
-                    panel.add(tokenRow);
-                    final Label explanationLabel = new Label(stringMessages.helptextBearerToken());
-                    explanationLabel.setWidth("400px");
-                    explanationLabel.getElement().getStyle().setProperty("whiteSpace", "normal");
-                    explanationLabel.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-                    explanationLabel.getElement().getStyle().setFontSize(11, Style.Unit.PX);
-                    panel.add(explanationLabel);
-                    return panel;
-                }
-            }.show();
-        });
-        final BusyIndicator remoteLoadBusyIndicator = new SimpleBusyIndicator(false, 0.7f) {
-            @Override
-            public void setBusy(final boolean busy) {
-                super.setBusy(busy);
-                getElement().getStyle().setDisplay(Style.Display.BLOCK);
-                getElement().getStyle().setVisibility(busy ? Style.Visibility.VISIBLE : Style.Visibility.HIDDEN);
-            }
-        };
-        remoteLoadBusyIndicator.setBusy(false);
-        final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
-        oracle.add(stringMessages.localEvents());
-        oracle.add(SharedLandscapeConstants.DEFAULT_SAILING_SERVER_URL);
-        oracle.add("http://localhost:8889");
-        final SuggestBox sourceBox = new SuggestBox(oracle);
-        sourceBox.setValue(stringMessages.localEvents());
-        sourceBox.setWidth("300px");
         final Runnable loadEvents = () -> {
             eventDropDown.clear();
             eventsCache.clear();
@@ -191,13 +196,11 @@ public class CourseAreaTabComposite extends Composite {
                 eventDropDown.addItem(stringMessages.pleaseSelectAnEventFrom(source));
                 remoteLoadBusyIndicator.setBusy(true);
                 eventDropDown.setEnabled(false);
-                authenticateButton.setEnabled(false);
                 final String bearerTokenOrNull = bearerTokenHolder[0];
                 sailingServiceWrite.getRemoteEvents(source, bearerTokenOrNull,new AsyncCallback<List<EventDTO>>() {
                     @Override
                     public void onSuccess(final List<EventDTO> result) {
                         remoteLoadBusyIndicator.setBusy(false);
-                        authenticateButton.setEnabled(true);
                         result.sort(Comparator.comparing(EventDTO::getName));
                         for (final EventDTO event : result) {
                             eventsCache.put(event.getId().toString(), event);
@@ -208,13 +211,13 @@ public class CourseAreaTabComposite extends Composite {
                     @Override
                     public void onFailure(final Throwable caught) {
                         remoteLoadBusyIndicator.setBusy(false);
-                        authenticateButton.setEnabled(true);
                         eventDropDown.clear();
                         eventDropDown.addItem(caught.getMessage());
                     }
                 });
             }
         };
+        loadEventsHolder[0] = loadEvents;
         sourceBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(final SelectionEvent<SuggestOracle.Suggestion> event) {
