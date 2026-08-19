@@ -1819,6 +1819,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = Response.serverError().entity("Latitudes and longitudes arrays in query parameters latDeg[] and lngDeg[] must have equal count").build();
         } else if (intervalasmillis == null) {
             response = Response.serverError().entity("intervalasmillis query parameter is missing").build();
+        } else if (intervalasmillis <= 0) {
+            response = Response.serverError().entity("intervalasmillis query parameter must be a positive value").build();
         } else {
             response = getWindWithSerializer(regattaName, raceName, fromtime, fromtimeasmillis, totime, totimeasmillis, secondaryUserBearerToken, request,
                 new WindForTrackedRaceSerializerFactory() {
