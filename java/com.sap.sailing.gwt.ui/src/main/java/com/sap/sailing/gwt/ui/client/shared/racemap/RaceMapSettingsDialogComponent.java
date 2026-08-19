@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
+import com.sap.sailing.gwt.ui.shared.racemap.MapsLoader;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MeterDistance;
@@ -84,9 +84,9 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
         showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
         showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
-        showSatelliteLayerCheckbox.setEnabled(GoogleMapsLoader.isMapLibreRequested() || !initialSettings.isWindUp());
+        showSatelliteLayerCheckbox.setEnabled(MapsLoader.isMapLibreRequested() || !initialSettings.isWindUp());
         vp.add(showSatelliteLayerCheckbox);
-        if (GoogleMapsLoader.isMapLibreRequested()) {
+        if (MapsLoader.isMapLibreRequested()) {
             showSeaMarksCheckbox = dialog.createCheckbox(stringMessages.showSeaMarks());
             showSeaMarksCheckbox.setValue(initialSettings.isShowSeaMarks());
             showSeaMarksCheckbox.ensureDebugId("showSeaMarksCheckBox");

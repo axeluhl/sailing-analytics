@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
+import com.sap.sailing.gwt.ui.shared.racemap.MapsLoader;
 
 public class Activator implements BundleActivator {
     private static BundleContext context;
@@ -37,7 +37,7 @@ public class Activator implements BundleActivator {
     private final static String YOUTUBE_V3_API_KEY_ENV_VAR_NAME = "YOUTUBE_V3_API_KEY";
     
     /**
-     * Required by {@link GoogleMapsLoader#load(Runnable, String)} and to be provided through a system property named
+     * Required by {@link MapsLoader#load(Runnable, String)} and to be provided through a system property named
      * after {@link GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME}. The value would be something like
      * {@code client=abcde&channel=fghij}.
      */

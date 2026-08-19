@@ -19,7 +19,7 @@ import com.sap.sse.common.Util;
  * will trigger all callbacks registered through the {@link #load(Runnable, String)} method until the maps API
  * invokes the callback registered.
  */
-public class GoogleMapsLoader {
+public class MapsLoader {
     /**
      * Note: If you use 3, it will take the newest stable available. We want that, although we didn't test with that yet!
      * Google Release notes: https://developers.google.com/maps/documentation/javascript/releases.
@@ -57,7 +57,7 @@ public class GoogleMapsLoader {
     private static boolean loaded = false;
     private static final Set<Runnable> callbacks = new HashSet<>();
     
-    private GoogleMapsLoader() {
+    private MapsLoader() {
     }
 
     /**
@@ -165,8 +165,8 @@ public class GoogleMapsLoader {
      * compatibility ES module callback, which reach {@link #callback()} through this same global.
      */
     private static native void installGlobalCallback() /*-{
-        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = $entry(function() {
-            @com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::callback()();
+        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.MapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = $entry(function() {
+            @com.sap.sailing.gwt.ui.shared.racemap.MapsLoader::callback()();
         });
     }-*/;
 
@@ -183,6 +183,6 @@ public class GoogleMapsLoader {
      * {@link #installGlobalCallback()}.
      */
     private static native void clearGlobalCallback() /*-{
-        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = null;
+        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.MapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = null;
     }-*/;
 }

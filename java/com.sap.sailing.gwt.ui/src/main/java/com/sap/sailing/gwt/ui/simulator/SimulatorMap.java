@@ -45,7 +45,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
+import com.sap.sailing.gwt.ui.shared.racemap.MapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.PathNameFormatter;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
@@ -445,7 +445,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             @Override
             public void onSuccess(String googleMapsLoaderAuthenticationParams) {
-                GoogleMapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
+                MapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
             }
         });
     }

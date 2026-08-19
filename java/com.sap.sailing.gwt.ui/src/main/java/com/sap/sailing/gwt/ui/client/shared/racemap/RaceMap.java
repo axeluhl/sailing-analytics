@@ -146,7 +146,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.DetailTypeMetricOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
-import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader;
+import com.sap.sailing.gwt.ui.shared.racemap.MapsLoader;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
 import com.sap.sse.common.Bearing;
@@ -1076,7 +1076,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
             @Override
             public void onSuccess(String googleMapsLoaderAuthenticationParams) {
-                GoogleMapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
+                MapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
             }
         });
     }
@@ -3312,7 +3312,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.isShowSatelliteLayer() != settings.isShowSatelliteLayer()) {
             requiresUpdateCoordinateSystem = true;
         }
-        if (GoogleMapsLoader.isMapLibreRequested() && newSettings.isShowSeaMarks() != settings.isShowSeaMarks()) {
+        if (MapsLoader.isMapLibreRequested() && newSettings.isShowSeaMarks() != settings.isShowSeaMarks()) {
             MapOptions mapOptions = MapOptions.newInstance(/* withdefaults */ false);
             mapOptions.setSeaMarksVisible(newSettings.isShowSeaMarks());
             map.setOptions(mapOptions);
@@ -3780,14 +3780,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
         mapOptions.setIsFractionalZoomEnabled(true);
-        if (GoogleMapsLoader.isMapLibreRequested()) {
+        if (MapsLoader.isMapLibreRequested()) {
             mapOptions.setSeaMarksVisible(showSeaMarks);
         }
         return mapOptions;
     }
 
     private String getMapTypeId(boolean windUp, boolean showSatelliteLayer) {
-        return showSatelliteLayer && (!windUp || GoogleMapsLoader.isMapLibreRequested())
+        return showSatelliteLayer && (!windUp || MapsLoader.isMapLibreRequested())
                 ? MapTypeId.SATELLITE.toString() : SAILING_ANALYTICS_MAP_TYPE_ID;
     }
 
