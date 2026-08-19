@@ -6,6 +6,8 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ScriptElement;
+import com.google.gwt.user.client.Window;
+import com.sap.sse.common.Util;
 
 /**
  * The {@link #load(Runnable, String)} method can be used by clients to request the loading of the Google Maps API.
@@ -48,7 +50,6 @@ public class GoogleMapsLoader {
             if (!loading) {
                 loading = true;
                 final boolean mapLibreRequested = isMapLibreRequested();
-                setProvider(mapLibreRequested);
                 if (mapLibreRequested) {
                     loadMapLibre();
                 } else {
@@ -62,17 +63,13 @@ public class GoogleMapsLoader {
         }
     }
 
-    public static native boolean isMapLibreRequested() /*-{
-        return new $wnd.URLSearchParams($wnd.location.search).get('maps') === 'maplibre';
-    }-*/;
-
-    private static native void setProvider(boolean mapLibreRequested) /*-{
-        $wnd.__mapsProvider = { provider: mapLibreRequested ? 'maplibre' : 'google', loaded: false };
-    }-*/;
+    public static boolean isMapLibreRequested() {
+        return Util.equalsWithNull("maplibre", Window.Location.getParameter("maps"));
+    }
 
     /**
-     * Loads MapLibre GL JS plus the Google-Maps-compatible facade from {@code js/maps/}, then fires
-     * the queued callbacks via {@link #callback()}. Triggered by {@code ?maps=maplibre} in the page URL.
+     * Loads MapLibre GL JS plus the Google-Maps-compatible facade from {@code js/maps/}, then fires the queued
+     * callbacks via {@link #callback()}. Triggered by {@code ?maps=maplibre} in the page URL.
      */
     private static native void loadMapLibre() /*-{
         var runCallback = $entry(function() {
@@ -105,17 +102,12 @@ public class GoogleMapsLoader {
     
     private static void callback() {
         loaded = true;
-        markProviderLoaded();
         loading = false;
         callbacks.forEach(Runnable::run);
         callbacks.clear();
         clearCallback();
     }
 
-    private static native void markProviderLoaded() /*-{
-        $wnd.__mapsProvider.loaded = true;
-    }-*/;
-    
     private static native void installCallback() /*-{
         $wnd.googleMapsLoadedCallback = $entry(function() {
             @com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::callback()();

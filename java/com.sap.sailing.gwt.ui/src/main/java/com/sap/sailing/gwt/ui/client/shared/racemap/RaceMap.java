@@ -905,7 +905,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel, final boolean showSatelliteLayer, boolean showSeaMarks) {
-        Runnable onLoad = new Runnable() {
+        final Runnable onLoad = new Runnable() {
             @Override
             public void run() {
                 MapOptions mapOptions = getMapOptions(/* wind up */ false, showSatelliteLayer, showSeaMarks, /* populateDefaults */ true);
@@ -1086,7 +1086,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         sharingAndVideoPanel.add(advancedFunctionsButton);
         sharingAndVideoPanel.add(createExitFullScreenButton());
         map.setControls(ControlPosition.RIGHT_TOP, sharingAndVideoPanel);
-        
         final HorizontalPanel popupContent = new HorizontalPanel();
         popupContent.addStyleName(raceMapStyle.moreOptions());
         popupContent.add(createZoomOutButton());
