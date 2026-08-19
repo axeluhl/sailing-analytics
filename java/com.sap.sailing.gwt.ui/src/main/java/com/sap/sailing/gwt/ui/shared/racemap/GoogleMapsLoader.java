@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.common.Util;
@@ -31,7 +32,27 @@ public class GoogleMapsLoader {
      * for more details. Examples: <tt>drawing,geometry,places,visualization</tt>
      */
     public final static String LIBRARIES = "drawing,geometry";
-    
+
+    /**
+     * The version of the vendored MapLibre GL JS distribution shipped under {@code js/maps/vendor/maplibre-gl/}.
+     */
+    private final static String MAPLIBRE_VERSION = "5.9.0";
+
+    /**
+     * The relative URL of the Google-Maps-compatibility facade ES module. The query parameter is a cache-busting
+     * marker that is bumped whenever the facade changes.
+     */
+    private final static String MAPS_COMPAT_MODULE_URL = "./js/maps/gwt-maps-maplibre-compat.js?v=race-map-feedback-17";
+
+    /**
+     * The name of the {@code window} global through which both the Google Maps API and the compatibility ES module
+     * invoke {@link #callback()}. For the Google path it is passed as the {@code &callback=} URL parameter; for the
+     * MapLibre path it is referenced from the injected module text. Only one path runs per page load, so a single
+     * shared name suffices; it is installed via {@link #installGlobalCallback()} and removed via
+     * {@link #clearGlobalCallback()}.
+     */
+    private final static String MAP_LOADED_CALLBACK_GLOBAL = "mapLoadedCallback";
+
     private static boolean loading = false;
     private static boolean loaded = false;
     private static final Set<Runnable> callbacks = new HashSet<>();
@@ -53,10 +74,10 @@ public class GoogleMapsLoader {
                 if (mapLibreRequested) {
                     loadMapLibre();
                 } else {
-                    installCallback();
+                    installGlobalCallback();
                     final ScriptElement scriptElement = Document.get().createScriptElement();
                     scriptElement.setSrc("https://maps.googleapis.com/maps/api/js?v="+API_VERSION+"&" + authenticationParams
-                            + "&libraries="+LIBRARIES+"&callback=googleMapsLoadedCallback");
+                            + "&libraries="+LIBRARIES+"&callback="+MAP_LOADED_CALLBACK_GLOBAL);
                     Document.get().getHead().appendChild(scriptElement);
                 }
             }
@@ -69,52 +90,99 @@ public class GoogleMapsLoader {
 
     /**
      * Loads MapLibre GL JS plus the Google-Maps-compatible facade from {@code js/maps/}, then fires the queued
-     * callbacks via {@link #callback()}. Triggered by {@code ?maps=maplibre} in the page URL.
+     * callbacks via {@link #callback()}. Triggered by {@code ?maps=maplibre} in the page URL. If MapLibre and the
+     * Google-Maps facade are already present in the window, the callbacks are fired right away; otherwise the
+     * MapLibre stylesheet and script are injected, followed by the compatibility ES module which finally invokes
+     * the callback.
      */
-    private static native void loadMapLibre() /*-{
-        var runCallback = $entry(function() {
+    private static void loadMapLibre() {
+        if (isMapLibreReady()) {
+            callback();
+        } else {
+            final LinkElement css = Document.get().createLinkElement();
+            css.setRel("stylesheet");
+            css.setHref("./js/maps/vendor/maplibre-gl/" + MAPLIBRE_VERSION + "/maplibre-gl.css");
+            Document.get().getHead().appendChild(css);
+            loadScript("./js/maps/vendor/maplibre-gl/" + MAPLIBRE_VERSION + "/maplibre-gl.js", () -> {
+                final ScriptElement module = Document.get().createScriptElement();
+                module.setType("module");
+                installMapsCompatModule(module);
+                Document.get().getHead().appendChild(module);
+            });
+        }
+    }
+
+    /**
+     * Creates a {@link ScriptElement} for the given {@code src}, wires {@code onLoad} to its {@code onload} event and
+     * a hard-failing handler to its {@code onerror} event, and appends it to the document head so that loading starts.
+     */
+    private static void loadScript(final String src, final Runnable onLoad) {
+        final ScriptElement scriptElement = Document.get().createScriptElement();
+        scriptElement.setSrc(src);
+        setOnLoad(scriptElement, onLoad);
+        Document.get().getHead().appendChild(scriptElement);
+    }
+
+    /**
+     * @return {@code true} if both MapLibre GL JS and the Google-Maps-compatible facade are already available on the
+     * window, meaning no further script injection is required.
+     */
+    private static native boolean isMapLibreReady() /*-{
+        return !!($wnd.maplibregl && $wnd.maplibregl.Map &&
+                $wnd.google && $wnd.google.maps && $wnd.google.maps.Map);
+    }-*/;
+
+    /**
+     * Wires {@code onLoad} to the {@code onload} event of the given script element and installs an {@code onerror}
+     * handler that throws so failures surface instead of being swallowed silently.
+     */
+    private static native void setOnLoad(ScriptElement scriptElement, Runnable onLoad) /*-{
+        scriptElement.onload = $entry(function() {
+            onLoad.@java.lang.Runnable::run()();
+        });
+        scriptElement.onerror = function() {
+            throw new Error('Failed to load ' + scriptElement.src);
+        };
+    }-*/;
+
+    /**
+     * Populates the given module script element with the source that imports and installs the Google-Maps-compatible
+     * facade and, once installed, invokes {@link #callback()}. The callback is exposed as the
+     * {@value #MAP_LOADED_CALLBACK_GLOBAL} global (see {@link #installGlobalCallback()}) that the module body calls
+     * after {@code installGwtMapsCompat()} has run.
+     */
+    private static void installMapsCompatModule(final ScriptElement scriptElement) {
+        installGlobalCallback();
+        scriptElement.setText(
+                "import { installGwtMapsCompat } from '" + MAPS_COMPAT_MODULE_URL + "';\n" +
+                "installGwtMapsCompat();\n" +
+                "window." + MAP_LOADED_CALLBACK_GLOBAL + "();\n");
+    }
+
+    /**
+     * Installs {@link #callback()} as the {@value #MAP_LOADED_CALLBACK_GLOBAL} {@code window} global, wrapped via
+     * {@code $entry} so that it enters the GWT event loop correctly. Used by both the Google Maps API callback and the
+     * compatibility ES module callback, which reach {@link #callback()} through this same global.
+     */
+    private static native void installGlobalCallback() /*-{
+        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = $entry(function() {
             @com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::callback()();
         });
-        if ($wnd.maplibregl && $wnd.maplibregl.Map &&
-                $wnd.google && $wnd.google.maps && $wnd.google.maps.Map) {
-            runCallback();
-            return;
-        }
-        var loadScript = function(src, onload) {
-            var s = $doc.createElement('script');
-            s.src = src;
-            s.onload = onload;
-            s.onerror = function() { throw new Error('Failed to load ' + src); };
-            $doc.head.appendChild(s);
-        };
-        var css = $doc.createElement('link');
-        css.rel = 'stylesheet';
-        css.href = './js/maps/vendor/maplibre-gl/5.9.0/maplibre-gl.css';
-        $doc.head.appendChild(css);
-        loadScript('./js/maps/vendor/maplibre-gl/5.9.0/maplibre-gl.js', function() {
-            var m = $doc.createElement('script');
-            m.type = 'module';
-            m.text = "import { installGwtMapsCompat } from './js/maps/gwt-maps-maplibre-compat.js?v=race-map-feedback-17'; installGwtMapsCompat(); window.__sailingMapsLoaded();";
-            $wnd.__sailingMapsLoaded = runCallback;
-            $doc.head.appendChild(m);
-        });
     }-*/;
-    
+
     private static void callback() {
         loaded = true;
         loading = false;
         callbacks.forEach(Runnable::run);
         callbacks.clear();
-        clearCallback();
+        clearGlobalCallback();
     }
 
-    private static native void installCallback() /*-{
-        $wnd.googleMapsLoadedCallback = $entry(function() {
-            @com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::callback()();
-        });
-    }-*/;
-    
-    private static native void clearCallback() /*-{
-        $wnd.googleMapsLoadedCallback = null;
+    /**
+     * Removes the {@value #MAP_LOADED_CALLBACK_GLOBAL} {@code window} global installed by
+     * {@link #installGlobalCallback()}.
+     */
+    private static native void clearGlobalCallback() /*-{
+        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.GoogleMapsLoader::MAP_LOADED_CALLBACK_GLOBAL] = null;
     }-*/;
 }
