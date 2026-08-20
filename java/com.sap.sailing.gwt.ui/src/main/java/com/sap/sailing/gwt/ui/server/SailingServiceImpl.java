@@ -532,7 +532,7 @@ import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 /**
  * The server side implementation of the RPC service.
  */
-public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher {
+public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet implements SailingService, RaceFetcher, RegattaFetcher, MapAuthenticationParamsSupport {
     protected static final Logger logger = Logger.getLogger(SailingServiceImpl.class.getName());
 
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -6117,11 +6117,6 @@ public class SailingServiceImpl extends ResultCachingProxiedRemoteServiceServlet
                 Collections.singletonList(new YellowBrickRaceRecordDTO(config.getName(),
                         raceMetadata.getRaceUrl(), hasRememberedRegatta(raceMetadata.getRaceId()),
                         raceMetadata.getTimePointOfLastFix(), raceMetadata.getNumberOfCompetitors())));
-    }
-
-    @Override
-    public String getGoogleMapsLoaderAuthenticationParams() {
-        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
     }
 
     /**

@@ -37,7 +37,8 @@ public class Activator implements BundleActivator {
     private final static String YOUTUBE_V3_API_KEY_ENV_VAR_NAME = "YOUTUBE_V3_API_KEY";
     
     /**
-     * Required by {@link MapsLoader#load(Runnable, String)} and to be provided through a system property named
+     * Required by {@link MapsLoader#load(Runnable, com.sap.sailing.gwt.ui.client.MapAuthenticationParamsProviderAsync, com.sap.sse.gwt.client.ErrorReporter, com.sap.sailing.gwt.ui.client.StringMessages)}
+     * and to be provided through a system property named
      * after {@link GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_PROPERTY_NAME}. The value would be something like
      * {@code client=abcde&channel=fghij}.
      */

@@ -4,20 +4,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.LinkElement;
-import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.gwt.ui.client.MapAuthenticationParamsProviderAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
- * The {@link #load(Runnable, String)} method can be used by clients to request the loading of the Google Maps API.
- * The callback passed will be invoked immediately if the API has already been loaded (e.g., by another
- * client call to the {@link #load(Runnable, String)} method within the same frame / document); it will be queued
- * for invocation by a Google Maps API callback function registered otherwise. This callback function
- * is injected at most once when the {@link #load(Runnable, String)} method is invoked for the first time and
- * will trigger all callbacks registered through the {@link #load(Runnable, String)} method until the maps API
- * invokes the callback registered.
+ * The {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} method can be used
+ * by clients to request the loading of a map API. Which {@link MapProvider} is used is decided from the {@code ?maps=}
+ * page URL parameter: {@code maplibre} selects {@link MapLibreProvider}, anything else selects
+ * {@link GoogleMapsProvider}. The callback passed will be invoked immediately if the API has already been loaded (e.g.,
+ * by another client call within the same frame / document); it will be queued for invocation otherwise. A single shared
+ * {@code window} callback global is installed at most once when
+ * {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} is invoked for the first
+ * time; the selected provider's injected script triggers that global, which in turn invokes all queued callbacks via
+ * {@link #callback()}.
  */
 public class MapsLoader {
     /**
@@ -35,24 +37,26 @@ public class MapsLoader {
 
     /**
      * The version of the vendored MapLibre GL JS distribution shipped under {@code js/maps/vendor/maplibre-gl/}.
+     * Package-private so {@link MapLibreProvider} can read it.
      */
-    private final static String MAPLIBRE_VERSION = "5.9.0";
+    final static String MAPLIBRE_VERSION = "5.9.0";
 
     /**
      * The relative URL of the Google-Maps-compatibility facade ES module. The query parameter is a cache-busting
-     * marker that is bumped whenever the facade changes.
+     * marker that is bumped whenever the facade changes. Package-private so {@link MapLibreProvider} can read it.
      */
-    private final static String MAPS_COMPAT_MODULE_URL = "./js/maps/gwt-maps-maplibre-compat.js?v=race-map-feedback-17";
+    final static String MAPS_COMPAT_MODULE_URL = "./js/maps/gwt-maps-maplibre-compat.js?v=race-map-feedback-17";
 
     /**
      * The name of the {@code window} global through which both the Google Maps API and the compatibility ES module
      * invoke {@link #callback()}. For the Google path it is passed as the {@code &callback=} URL parameter; for the
      * MapLibre path it is referenced from the injected module text. Only one path runs per page load, so a single
      * shared name suffices; it is installed via {@link #installGlobalCallback()} and removed via
-     * {@link #clearGlobalCallback()}.
+     * {@link #clearGlobalCallback()}. Package-private so the providers can read it.
      */
-    private final static String MAP_LOADED_CALLBACK_GLOBAL = "mapLoadedCallback";
+    final static String MAP_LOADED_CALLBACK_GLOBAL = "mapLoadedCallback";
 
+    private static MapProvider currentProvider;
     private static boolean loading = false;
     private static boolean loaded = false;
     private static final Set<Runnable> callbacks = new HashSet<>();
@@ -61,102 +65,58 @@ public class MapsLoader {
     }
 
     /**
-     * @param callback must not be {@code null}.
+     * Requests the loading of the map API through the {@link MapProvider} selected from the {@code ?maps=} page URL
+     * parameter. The shared callback global is installed once, then the provider's {@link MapProvider#load()} is
+     * invoked; the provider's injected script eventually triggers {@link #callback()}, which fires all queued
+     * callbacks.
+     *
+     * @param callback
+     *            must not be {@code null}.
+     * @param authProvider
+     *            supplies the Google Maps authentication parameters; only used when {@link GoogleMapsProvider} is
+     *            selected.
+     * @param errorReporter
+     *            used to report an authentication failure; only used when {@link GoogleMapsProvider} is selected.
+     * @param stringMessages
+     *            supplies the user-facing authentication-failure message; only used when {@link GoogleMapsProvider} is
+     *            selected.
      */
-    public static void load(Runnable callback, String authenticationParams) {
+    public static void load(final Runnable callback, final MapAuthenticationParamsProviderAsync authProvider,
+            final ErrorReporter errorReporter, final StringMessages stringMessages) {
         if (loaded) {
             Scheduler.get().scheduleDeferred(() -> callback.run());
         } else {
             callbacks.add(callback);
             if (!loading) {
                 loading = true;
-                final boolean mapLibreRequested = isMapLibreRequested();
-                if (mapLibreRequested) {
-                    loadMapLibre();
-                } else {
-                    installGlobalCallback();
-                    final ScriptElement scriptElement = Document.get().createScriptElement();
-                    scriptElement.setSrc("https://maps.googleapis.com/maps/api/js?v="+API_VERSION+"&" + authenticationParams
-                            + "&libraries="+LIBRARIES+"&callback="+MAP_LOADED_CALLBACK_GLOBAL);
-                    Document.get().getHead().appendChild(scriptElement);
-                }
+                currentProvider = isMapLibreRequested() ? new MapLibreProvider()
+                        : new GoogleMapsProvider(authProvider, errorReporter, stringMessages);
+                installGlobalCallback();
+                currentProvider.load();
             }
         }
     }
 
-    public static boolean isMapLibreRequested() {
-        return Util.equalsWithNull("maplibre", Window.Location.getParameter("maps"));
-    }
-
     /**
-     * Loads MapLibre GL JS plus the Google-Maps-compatible facade from {@code js/maps/}, then fires the queued
-     * callbacks via {@link #callback()}. Triggered by {@code ?maps=maplibre} in the page URL. If MapLibre and the
-     * Google-Maps facade are already present in the window, the callbacks are fired right away; otherwise the
-     * MapLibre stylesheet and script are injected, followed by the compatibility ES module which finally invokes
-     * the callback.
+     * @return the {@link MapProvider} selected by the most recent
+     *         {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} call, so
+     *         callers can query its {@link MapProvider#getCapabilities() capabilities} instead of checking the provider
+     *         identity directly.
+     * @throws IllegalStateException
+     *             if no provider has been selected yet because {@code load(...)} has not been called.
      */
-    private static void loadMapLibre() {
-        if (isMapLibreReady()) {
-            callback();
+    public static MapProvider getProvider() {
+        final MapProvider result;
+        if (currentProvider == null) {
+            throw new IllegalStateException("Map not loaded yet - call load() first");
         } else {
-            final LinkElement css = Document.get().createLinkElement();
-            css.setRel("stylesheet");
-            css.setHref("./js/maps/vendor/maplibre-gl/" + MAPLIBRE_VERSION + "/maplibre-gl.css");
-            Document.get().getHead().appendChild(css);
-            loadScript("./js/maps/vendor/maplibre-gl/" + MAPLIBRE_VERSION + "/maplibre-gl.js", () -> {
-                final ScriptElement module = Document.get().createScriptElement();
-                module.setType("module");
-                installMapsCompatModule(module);
-                Document.get().getHead().appendChild(module);
-            });
+            result = currentProvider;
         }
+        return result;
     }
 
-    /**
-     * Creates a {@link ScriptElement} for the given {@code src}, wires {@code onLoad} to its {@code onload} event and
-     * a hard-failing handler to its {@code onerror} event, and appends it to the document head so that loading starts.
-     */
-    private static void loadScript(final String src, final Runnable onLoad) {
-        final ScriptElement scriptElement = Document.get().createScriptElement();
-        scriptElement.setSrc(src);
-        setOnLoad(scriptElement, onLoad);
-        Document.get().getHead().appendChild(scriptElement);
-    }
-
-    /**
-     * @return {@code true} if both MapLibre GL JS and the Google-Maps-compatible facade are already available on the
-     * window, meaning no further script injection is required.
-     */
-    private static native boolean isMapLibreReady() /*-{
-        return !!($wnd.maplibregl && $wnd.maplibregl.Map &&
-                $wnd.google && $wnd.google.maps && $wnd.google.maps.Map);
-    }-*/;
-
-    /**
-     * Wires {@code onLoad} to the {@code onload} event of the given script element and installs an {@code onerror}
-     * handler that throws so failures surface instead of being swallowed silently.
-     */
-    private static native void setOnLoad(ScriptElement scriptElement, Runnable onLoad) /*-{
-        scriptElement.onload = $entry(function() {
-            onLoad.@java.lang.Runnable::run()();
-        });
-        scriptElement.onerror = function() {
-            throw new Error('Failed to load ' + scriptElement.src);
-        };
-    }-*/;
-
-    /**
-     * Populates the given module script element with the source that imports and installs the Google-Maps-compatible
-     * facade and, once installed, invokes {@link #callback()}. The callback is exposed as the
-     * {@value #MAP_LOADED_CALLBACK_GLOBAL} global (see {@link #installGlobalCallback()}) that the module body calls
-     * after {@code installGwtMapsCompat()} has run.
-     */
-    private static void installMapsCompatModule(final ScriptElement scriptElement) {
-        installGlobalCallback();
-        scriptElement.setText(
-                "import { installGwtMapsCompat } from '" + MAPS_COMPAT_MODULE_URL + "';\n" +
-                "installGwtMapsCompat();\n" +
-                "window." + MAP_LOADED_CALLBACK_GLOBAL + "();\n");
+    private static boolean isMapLibreRequested() {
+        return Util.equalsWithNull("maplibre", Window.Location.getParameter("maps"));
     }
 
     /**
@@ -170,7 +130,12 @@ public class MapsLoader {
         });
     }-*/;
 
-    private static void callback() {
+    /**
+     * Fires all queued callbacks and clears the shared callback global. Package-private so {@link MapLibreProvider}'s
+     * already-loaded fast path can invoke it directly (nothing is injected in that case, so nothing else would fire
+     * it).
+     */
+    static void callback() {
         loaded = true;
         loading = false;
         callbacks.forEach(Runnable::run);

@@ -437,17 +437,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
               }
           }
         };
-        simulatorService.getGoogleMapsLoaderAuthenticationParams(new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorNoAuthenticationParamsForGoogleMapsFound(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(String googleMapsLoaderAuthenticationParams) {
-                MapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
-            }
-        });
+        MapsLoader.load(onLoad, simulatorService, errorReporter, stringMessages);
     }
 
     private void initializeOverlays() {

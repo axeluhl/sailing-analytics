@@ -1068,17 +1068,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
             }
         };
-        sailingService.getGoogleMapsLoaderAuthenticationParams(new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorNoAuthenticationParamsForGoogleMapsFound(caught.getMessage()));
-            }
-
-            @Override
-            public void onSuccess(String googleMapsLoaderAuthenticationParams) {
-                MapsLoader.load(onLoad, googleMapsLoaderAuthenticationParams);
-            }
-        });
+        MapsLoader.load(onLoad, sailingService, errorReporter, stringMessages);
     }
     
     private void createAdvancedFunctionsButtonGroup(boolean showMapControls) {
@@ -3312,7 +3302,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (newSettings.isShowSatelliteLayer() != settings.isShowSatelliteLayer()) {
             requiresUpdateCoordinateSystem = true;
         }
-        if (MapsLoader.isMapLibreRequested() && newSettings.isShowSeaMarks() != settings.isShowSeaMarks()) {
+        if (MapsLoader.getProvider().getCapabilities().supportsNauticalChartOverlay()
+                && newSettings.isShowSeaMarks() != settings.isShowSeaMarks()) {
             MapOptions mapOptions = MapOptions.newInstance(/* withdefaults */ false);
             mapOptions.setSeaMarksVisible(newSettings.isShowSeaMarks());
             map.setOptions(mapOptions);
@@ -3780,14 +3771,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         // no need to try to position the scale control; it always ends up at the right bottom corner
         mapOptions.setStreetViewControl(false);
         mapOptions.setIsFractionalZoomEnabled(true);
-        if (MapsLoader.isMapLibreRequested()) {
+        if (MapsLoader.getProvider().getCapabilities().supportsNauticalChartOverlay()) {
             mapOptions.setSeaMarksVisible(showSeaMarks);
         }
         return mapOptions;
     }
 
     private String getMapTypeId(boolean windUp, boolean showSatelliteLayer) {
-        return showSatelliteLayer && (!windUp || MapsLoader.isMapLibreRequested())
+        final boolean satelliteAllowed = !windUp
+                || MapsLoader.getProvider().getCapabilities().supportsSatelliteInRotatedView();
+        return showSatelliteLayer && satelliteAllowed
                 ? MapTypeId.SATELLITE.toString() : SAILING_ANALYTICS_MAP_TYPE_ID;
     }
 

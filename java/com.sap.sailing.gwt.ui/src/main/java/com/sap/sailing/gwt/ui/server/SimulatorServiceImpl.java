@@ -99,7 +99,7 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet implements SimulatorService {
+public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet implements SimulatorService, MapAuthenticationParamsSupport {
     private static final long serialVersionUID = 4445427185387524086L;
 
     private static final Logger logger = Logger.getLogger(SimulatorServiceImpl.class.getName());
@@ -955,10 +955,5 @@ public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet 
             timepointAsMillis += stepTimeMilliseconds;
         }
         return timepointAsMillis - startTimePoint2asMillis;
-    }
-
-    @Override
-    public String getGoogleMapsLoaderAuthenticationParams() {
-        return Activator.getInstance().getGoogleMapsLoaderAuthenticationParams();
     }
 }

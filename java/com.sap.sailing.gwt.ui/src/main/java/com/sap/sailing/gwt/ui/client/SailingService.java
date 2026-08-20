@@ -118,7 +118,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to the time-dependent
  * service methods, an empty (non-<code>null</code>) result is returned.
  */
-public interface SailingService extends RemoteService, RemoteReplicationService {
+public interface SailingService extends RemoteService, RemoteReplicationService, MapAuthenticationParamsProvider {
 
     List<TracTracConfigurationWithSecurityDTO> getPreviousTracTracConfigurations()
             throws UnauthorizedException, Exception;
@@ -600,8 +600,6 @@ public interface SailingService extends RemoteService, RemoteReplicationService 
 
     List<CourseAreaDTO> getCourseAreaForEventOfLeaderboard(String leaderboardName);
 
-    String getGoogleMapsLoaderAuthenticationParams();
-    
     String getBrandAffiliationWithSailing(String locale);
     
 }

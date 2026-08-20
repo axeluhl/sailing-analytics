@@ -84,9 +84,11 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSatelliteLayerCheckbox.setValue(initialSettings.isShowSatelliteLayer());
         showSatelliteLayerCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isShowSatelliteLayer()));
         showSatelliteLayerCheckbox.ensureDebugId("showSatelliteLayerCheckBox");
-        showSatelliteLayerCheckbox.setEnabled(MapsLoader.isMapLibreRequested() || !initialSettings.isWindUp());
+        showSatelliteLayerCheckbox.setEnabled(
+                MapsLoader.getProvider().getCapabilities().supportsSatelliteInRotatedView()
+                        || !initialSettings.isWindUp());
         vp.add(showSatelliteLayerCheckbox);
-        if (MapsLoader.isMapLibreRequested()) {
+        if (MapsLoader.getProvider().getCapabilities().supportsNauticalChartOverlay()) {
             showSeaMarksCheckbox = dialog.createCheckbox(stringMessages.showSeaMarks());
             showSeaMarksCheckbox.setValue(initialSettings.isShowSeaMarks());
             showSeaMarksCheckbox.ensureDebugId("showSeaMarksCheckBox");
