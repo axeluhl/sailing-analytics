@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.user.client.Timer;
@@ -518,7 +517,6 @@ public class FixesAndTails {
             }
         };
         for (GPSFixDTOWithSpeedWindTackAndLegType mergeThisFix : mergeThis) {
-            synchronizeTailPath(tail, intoThis, indexOfFirstShownFix, indexOfLastShownFix);
             int intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
@@ -646,21 +644,6 @@ public class FixesAndTails {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private void synchronizeTailPath(Colorline tail, List<GPSFixDTOWithSpeedWindTackAndLegType> fixes,
-            int firstShownFix, int lastShownFix) {
-        if (tail != null) {
-            final int start = Math.max(0, firstShownFix);
-            final int end = Math.min(lastShownFix+1, fixes.size());
-            if (end-start != tail.getLength()) {
-                final MVCArray<LatLng> expectedPath = MVCArray.newInstance();
-                for (int i = start; i <= lastShownFix && i < fixes.size(); i++) {
-                    expectedPath.push(coordinateSystem.toLatLng(fixes.get(i).position));
-                }
-                tail.setPath(expectedPath);
             }
         }
     }
