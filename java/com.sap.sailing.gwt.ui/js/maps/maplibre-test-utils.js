@@ -77,6 +77,28 @@ export function setSatelliteVisible(map, visible) {
     else map.once('idle', apply);
 }
 
+// Adds a compact AttributionControl that starts collapsed. MapLibre's `compact: true` still opens
+// the bubble once attributions populate (on styledata/sourcedata), so we strip the "show" class the
+// first time it appears. After that the control keeps `maplibregl-compact`, so MapLibre no longer
+// re-expands it and user clicks continue to toggle it normally.
+export function addCollapsedAttributionControl(map, position = 'bottom-right') {
+    const control = new maplibregl.AttributionControl({ compact: true });
+    map.addControl(control, position);
+    const collapse = () => {
+        const attrib = map.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact-show');
+        if (attrib) {
+            attrib.classList.remove('maplibregl-compact-show');
+            map.off('styledata', collapse);
+            map.off('sourcedata', collapse);
+            map.off('idle', collapse);
+        }
+    };
+    map.on('styledata', collapse);
+    map.on('sourcedata', collapse);
+    map.on('idle', collapse);
+    return control;
+}
+
 export function createRaceMap(containerId, options = {}) {
     const center = options.center || MARSEILLE_CENTER;
     const map = new maplibregl.Map({
@@ -85,9 +107,11 @@ export function createRaceMap(containerId, options = {}) {
         center: lngLat(center),
         zoom: toMapLibreZoom(options.zoom ?? 15),
         bearing: options.bearing ?? 0,
-        pitch: 0
+        pitch: 0,
+        attributionControl: false
     });
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right');
+    addCollapsedAttributionControl(map, 'bottom-right');
     applyRaceStyle(map, options.seaMarksVisible);
     return map;
 }
