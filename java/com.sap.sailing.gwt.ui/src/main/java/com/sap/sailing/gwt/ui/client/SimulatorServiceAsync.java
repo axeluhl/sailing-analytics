@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sse.common.Position;
 
-public interface SimulatorServiceAsync extends MapAuthenticationParamsProviderAsync {
+public interface SimulatorServiceAsync extends MapChooserAndAuthenticationParamsProviderAsync {
 
     void getRaceLocations(AsyncCallback<Position[]> callback);
 

@@ -99,7 +99,7 @@ import com.sap.sse.security.shared.TypeRelativeObjectIdentifier;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 
-public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet implements SimulatorService, MapAuthenticationParamsSupport {
+public class SimulatorServiceImpl extends DelegatingProxiedRemoteServiceServlet implements SimulatorService, MapChooserAndAuthenticationParamsSupport {
     private static final long serialVersionUID = 4445427185387524086L;
 
     private static final Logger logger = Logger.getLogger(SimulatorServiceImpl.class.getName());

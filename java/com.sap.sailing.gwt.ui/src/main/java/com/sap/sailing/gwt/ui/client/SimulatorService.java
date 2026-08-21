@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.windpattern.WindPatternNotFoundException;
 import com.sap.sse.common.Position;
 
-public interface SimulatorService extends RemoteService, MapAuthenticationParamsProvider {
+public interface SimulatorService extends RemoteService, MapChooserAndAuthenticationParamsProvider {
 
     Position[] getRaceLocations();
 

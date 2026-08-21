@@ -140,4 +140,8 @@ fi
 if [ -n "${GEONAMES_ORG_USERNAMES}" ]; then
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dgeonames.org.usernames=${GEONAMES_ORG_USERNAMES}"
 fi
+if [ -n "${MAP_PROVIDER_TYPE}" ]; then
+  # options: GOOGLE or MAPLIBRE; see enumeration MapProviderTypes
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dmap.provider.type=${MAP_PROVIDER_TYPE}"
+fi
 export GITHUB_TOKEN

@@ -4,20 +4,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.ui.client.MapAuthenticationParamsProviderAsync;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.client.MapChooserAndAuthenticationParamsProviderAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 /**
- * The {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} method can be used
+ * The {@link #load(Runnable, MapChooserAndAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} method can be used
  * by clients to request the loading of a map API. Which {@link MapProvider} is used is decided from the {@code ?maps=}
  * page URL parameter: {@code maplibre} selects {@link MapLibreProvider}, anything else selects
  * {@link GoogleMapsProvider}. The callback passed will be invoked immediately if the API has already been loaded (e.g.,
  * by another client call within the same frame / document); it will be queued for invocation otherwise. A single shared
  * {@code window} callback global is installed at most once when
- * {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} is invoked for the first
+ * {@link #load(Runnable, MapChooserAndAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} is invoked for the first
  * time; the selected provider's injected script triggers that global, which in turn invokes all queued callbacks via
  * {@link #callback()}.
  */
@@ -81,7 +80,7 @@ public class MapsLoader {
      *            supplies the user-facing authentication-failure message; only used when {@link GoogleMapsProvider} is
      *            selected.
      */
-    public static void load(final Runnable callback, final MapAuthenticationParamsProviderAsync authProvider,
+    public static void load(final Runnable callback, final MapChooserAndAuthenticationParamsProviderAsync authProvider,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         if (loaded) {
             Scheduler.get().scheduleDeferred(() -> callback.run());
@@ -89,17 +88,43 @@ public class MapsLoader {
             callbacks.add(callback);
             if (!loading) {
                 loading = true;
-                currentProvider = isMapLibreRequested() ? new MapLibreProvider()
-                        : new GoogleMapsProvider(authProvider, errorReporter, stringMessages);
-                installGlobalCallback();
-                currentProvider.load();
+                authProvider.getMapType(new AsyncCallback<MapProviderTypes>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorObtainingMapType(caught.getMessage()), /* silentMode */ true);
+                    }
+
+                    @Override
+                    public void onSuccess(MapProviderTypes result) {
+                        currentProvider = getMapsProviderOfType(result, authProvider, errorReporter, stringMessages);
+                        installGlobalCallback();
+                        currentProvider.load();
+                    }
+                });
             }
         }
     }
 
+    private static MapProvider getMapsProviderOfType(MapProviderTypes type,
+            final MapChooserAndAuthenticationParamsProviderAsync authProvider, final ErrorReporter errorReporter,
+            final StringMessages stringMessages) {
+        final MapProvider result;
+        switch (type) {
+        case GOOGLE:
+            result = new GoogleMapsProvider(authProvider, errorReporter, stringMessages);
+            break;
+        case MAPLIBRE:
+            result = new MapLibreProvider();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown map provider type: "+type);
+        }
+        return result;
+    }
+    
     /**
      * @return the {@link MapProvider} selected by the most recent
-     *         {@link #load(Runnable, MapAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} call, so
+     *         {@link #load(Runnable, MapChooserAndAuthenticationParamsProviderAsync, ErrorReporter, StringMessages)} call, so
      *         callers can query its {@link MapProvider#getCapabilities() capabilities} instead of checking the provider
      *         identity directly.
      * @throws IllegalStateException
@@ -113,10 +138,6 @@ public class MapsLoader {
             result = currentProvider;
         }
         return result;
-    }
-
-    private static boolean isMapLibreRequested() {
-        return Util.equalsWithNull("maplibre", Window.Location.getParameter("maps"));
     }
 
     /**

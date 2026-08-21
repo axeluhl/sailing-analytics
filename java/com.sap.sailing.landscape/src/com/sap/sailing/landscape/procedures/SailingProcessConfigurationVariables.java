@@ -32,6 +32,15 @@ public enum SailingProcessConfigurationVariables implements ProcessConfiguration
     IGTIMI_BEARER_TOKEN,
     
     /**
+     * Chooses the implementation type for the map display used, e.g., in {@code Simulator} and {@code RaceBoard}
+     * entry points. See also the enumeration type {@code MapProviderTypes} and the {@code Activator} of the
+     * {@code com.sap.sailing.gwt.ui} bundle where this is used as an environment variable.<p>
+     * 
+     * The values, as per {@code MapProviderTypes}, currently can be "GOOGLE" or "MAPLIBRE".
+     */
+    MAP_PROVIDER_TYPE,
+    
+    /**
      * Provides a Google Maps JavaScript API key, typically in the format "key=..." or "client=...&channel=...".
      * You can obtain one from your <a href="https://console.cloud.google.com">Google Cloud Console</a>
      */

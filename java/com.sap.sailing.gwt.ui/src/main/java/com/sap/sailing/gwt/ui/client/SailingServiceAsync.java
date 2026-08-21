@@ -116,7 +116,7 @@ import com.sap.sse.security.shared.dto.SecuredDTO;
 /**
  * The async counterpart of {@link SailingService}
  */
-public interface SailingServiceAsync extends RemoteReplicationServiceAsync, MapAuthenticationParamsProviderAsync {
+public interface SailingServiceAsync extends RemoteReplicationServiceAsync, MapChooserAndAuthenticationParamsProviderAsync {
 
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 

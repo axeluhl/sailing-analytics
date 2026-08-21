@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.ui.client.MapAuthenticationParamsProviderAsync;
+import com.sap.sailing.gwt.ui.client.MapChooserAndAuthenticationParamsProviderAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 
@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * not support satellite in a rotated (wind-up) view, and it has no nautical chart / sea-mark overlay support.
  * <p>
  * Loading requires authentication parameters that are fetched asynchronously via the injected
- * {@link MapAuthenticationParamsProviderAsync}. On failure the injected {@link ErrorReporter} and {@link StringMessages}
+ * {@link MapChooserAndAuthenticationParamsProviderAsync}. On failure the injected {@link ErrorReporter} and {@link StringMessages}
  * are used to report the same user-facing message the call sites reported before this strategy was introduced. Once the
  * parameters arrive, the Maps API script is injected with a {@code &callback=} pointing at the shared global installed
  * by {@link MapsLoader}.
@@ -30,11 +30,11 @@ public class GoogleMapsProvider implements MapProvider {
         }
     };
 
-    private final MapAuthenticationParamsProviderAsync authProvider;
+    private final MapChooserAndAuthenticationParamsProviderAsync authProvider;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
-    public GoogleMapsProvider(final MapAuthenticationParamsProviderAsync authProvider,
+    public GoogleMapsProvider(final MapChooserAndAuthenticationParamsProviderAsync authProvider,
             final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.authProvider = authProvider;
         this.errorReporter = errorReporter;

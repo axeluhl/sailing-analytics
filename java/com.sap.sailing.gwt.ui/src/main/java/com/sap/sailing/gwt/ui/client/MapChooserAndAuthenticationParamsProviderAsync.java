@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.shared.racemap.MapProviderTypes;
 
 /**
  * Shared async GWT-RPC super-interface for services that can supply the authentication parameters needed to load a
@@ -13,6 +14,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * The method name is retained from the original {@link SailingService}/{@link SimulatorService} contract to avoid a
  * wider GWT-RPC serialization-policy change.
  */
-public interface MapAuthenticationParamsProviderAsync {
+public interface MapChooserAndAuthenticationParamsProviderAsync {
     void getGoogleMapsLoaderAuthenticationParams(AsyncCallback<String> callback);
+
+    void getMapType(AsyncCallback<MapProviderTypes> asyncCallback);
 }

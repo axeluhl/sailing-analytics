@@ -26,6 +26,17 @@
           <h2 class="articleSubheadline">August 2026</h2>
           <ul class="bulletList">
                 <li>Added "zuerichsee" as reviewed <a href="https://windfinder.com">WindFinder</a> spot collection</li>
+                <li>A new map type is introduced, as an alternative to the Google Maps JavaScript API used traditionally.
+                    It is based on MapLibre / <a href="https://openfreemap.org/">OpenFreeMap</a>. The default is still
+                    the Google Map, and as usual it requires an API key in the <tt>GOOGLE_MAPS_AUTHENTICATION_PARAMS</tt>
+                    environment variable, feeding into the {@code google.maps.authenticationparams} system property.
+                    Alternatively, the {@code MAP_PROVIDER_TYPE} environment variable, feeding into the
+                    {@code map.provider.type} system property can be set to {@code "MAPLIBRE"} to choose the
+                    MapLibre implementation, which does not require any API key. Note: the MapLibre implementation
+                    is currently based on the tile server hosted by OpenFreeMap; there are no scaling or availability
+                    service-level agreements (SLA) in place for this. OpenFreeMap can be
+                    <a href="https://github.com/sponsors/hyperknot">sponsored</a>. We may, in the future, consider
+                    offering ways for self-hosting the tile server, too.</li>
           </ul>
           <h2 class="articleSubheadline">July 2026</h2>
           <ul class="bulletList">

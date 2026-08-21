@@ -5,13 +5,15 @@ import java.util.Optional;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import com.sap.sailing.gwt.ui.shared.racemap.MapProviderTypes;
 import com.sap.sailing.gwt.ui.shared.racemap.MapsLoader;
 
 public class Activator implements BundleActivator {
     private static BundleContext context;
     private SailingServiceImpl sailingServiceToStopWhenStopping;
     private static Activator INSTANCE;
-    
+
+    private final static String MAP_PROVIDER_TYPE_PROPERTY_NAME = "map.provider.type";
     /**
      * If the system property named after this constant is set, its value is used for Google Maps API authentication.
      * It takes precedence over the environment variable named after {@link #GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_ENV_VAR_NAME}.
@@ -98,5 +100,10 @@ public class Activator implements BundleActivator {
 
     public void setSailingService(SailingServiceImpl sailingServiceImpl) {
         sailingServiceToStopWhenStopping = sailingServiceImpl;
+    }
+
+    public MapProviderTypes getMapProviderType() {
+        return Optional.ofNullable(context.getProperty(MAP_PROVIDER_TYPE_PROPERTY_NAME))
+                .map(mapTypeName -> MapProviderTypes.valueOf(mapTypeName)).orElse(MapProviderTypes.GOOGLE);
     }
 }
