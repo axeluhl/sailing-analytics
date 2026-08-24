@@ -144,4 +144,8 @@ if [ -n "${MAP_PROVIDER_TYPE}" ]; then
   # options: GOOGLE or MAPLIBRE; see enumeration MapProviderTypes
   ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dmap.provider.type=${MAP_PROVIDER_TYPE}"
 fi
+if [ -n "${MAP_PROVIDER_TILESERVER}" ]; then
+  # defaults to https://tiles.openfreemap.org/styles/liberty
+  ADDITIONAL_JAVA_ARGS="${ADDITIONAL_JAVA_ARGS} -Dmap.provider.tileserver=${MAP_PROVIDER_TILESERVER}"
+fi
 export GITHUB_TOKEN

@@ -29,14 +29,22 @@
                 <li>A new map type is introduced, as an alternative to the Google Maps JavaScript API used traditionally.
                     It is based on MapLibre / <a href="https://openfreemap.org/">OpenFreeMap</a>. The default is still
                     the Google Map, and as usual it requires an API key in the <tt>GOOGLE_MAPS_AUTHENTICATION_PARAMS</tt>
-                    environment variable, feeding into the {@code google.maps.authenticationparams} system property.
-                    Alternatively, the {@code MAP_PROVIDER_TYPE} environment variable, feeding into the
-                    {@code map.provider.type} system property can be set to {@code "MAPLIBRE"} to choose the
+                    environment variable, feeding into the <tt>google.maps.authenticationparams</tt> system property.
+                    Alternatively, the <tt>MAP_PROVIDER_TYPE</tt> environment variable, feeding into the
+                    <tt>map.provider.type</tt> system property can be set to <tt>"MAPLIBRE"</tt> to choose the
                     MapLibre implementation, which does not require any API key. Note: the MapLibre implementation
                     is currently based on the tile server hosted by OpenFreeMap; there are no scaling or availability
                     service-level agreements (SLA) in place for this. OpenFreeMap can be
                     <a href="https://github.com/sponsors/hyperknot">sponsored</a>. We may, in the future, consider
                     offering ways for self-hosting the tile server, too.</li>
+                <li>When <tt>MAP_PROVIDER_TYPE</tt> and/or, respectively, the <tt>map.provider.type</tt> system property
+                    have be set to <tt>"MAPLIBRE"</tt>, you have the option of self-hosting a map tile server for the
+                    standard vector maps (excluding satellite and nautical chart layers). See also
+                    <a href="https://github.com/hyperknot/openfreemap/blob/main/docs/self_hosting.md">self-hosting OpenFreeMap</a>
+                    or an <a href="https://github.com/axeluhl/openfreemap/blob/AL2023/docs/self_hosting.md">AWS-specific fork</a>.
+                    When you do this, you have to set the <tt>map.provider.tileserver</tt> system property, forwarded to by
+                    the <tt>MAP_PROVIDER_TILESERVER</tt> environment variable by the <tt>env-default-rules.sh</tt> script,
+                    so it points to your own tile server installation. The default is <tt>https://tiles.openfreemap.org/styles/liberty</tt>.</li>
           </ul>
           <h2 class="articleSubheadline">July 2026</h2>
           <ul class="bulletList">
