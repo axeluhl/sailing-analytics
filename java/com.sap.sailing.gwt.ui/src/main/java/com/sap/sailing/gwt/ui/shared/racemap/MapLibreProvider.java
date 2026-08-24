@@ -1,8 +1,13 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.dom.client.ScriptElement;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.ui.client.MapChooserAndAuthenticationParamsProviderAsync;
 
 /**
  * {@link MapProvider} backed by MapLibre GL JS plus a Google-Maps-compatible facade. Unlike Google Maps, MapLibre can
@@ -15,8 +20,22 @@ import com.google.gwt.dom.client.ScriptElement;
  * {@link MapsLoader}. Because {@link #isMapLibreReady()}, {@link #loadScript(String, Runnable)} and its
  * {@link #setOnLoad(ScriptElement, Runnable)} JSNI helper are used only for the MapLibre load sequence, they live here
  * as private members.
+ * <p>
+ * Before injecting anything, the configured tile-server style URL (system property {@code map.provider.tileserver},
+ * surfaced through {@link MapChooserAndAuthenticationParamsProviderAsync#getMapTileServerStyleUrl(AsyncCallback)}) is
+ * fetched and published to the {@value #TILE_SERVER_STYLE_URL_GLOBAL} {@code window} global, from which the ES module's
+ * {@code createRaceStyle()} reads it. If the fetch fails or returns nothing, the global is left unset and the module
+ * falls back to its built-in public OpenFreeMap default.
  */
 public class MapLibreProvider implements MapProvider {
+    /**
+     * Name of the {@code window} global carrying the configured MapLibre style document URL. Read by
+     * {@code createRaceStyle()} in {@code js/maps/maplibre-test-utils.js}; must be kept in sync with it.
+     */
+    static final String TILE_SERVER_STYLE_URL_GLOBAL = "__sapMapTileServerStyleUrl";
+
+    private static final Logger logger = Logger.getLogger(MapLibreProvider.class.getName());
+
     private static final MapCapabilities CAPABILITIES = new MapCapabilities() {
         @Override
         public boolean supportsSatelliteInRotatedView() {
@@ -28,6 +47,12 @@ public class MapLibreProvider implements MapProvider {
             return true;
         }
     };
+
+    private final MapChooserAndAuthenticationParamsProviderAsync authProvider;
+
+    public MapLibreProvider(final MapChooserAndAuthenticationParamsProviderAsync authProvider) {
+        this.authProvider = authProvider;
+    }
 
     @Override
     public String getName() {
@@ -41,6 +66,36 @@ public class MapLibreProvider implements MapProvider {
 
     @Override
     public void load() {
+        // Resolve the configured style URL first, publish it to the window global, then inject MapLibre. On failure we
+        // simply proceed without the global so the ES module uses its built-in public OpenFreeMap default.
+        authProvider.getMapTileServerStyleUrl(new AsyncCallback<String>() {
+            @Override
+            public void onFailure(final Throwable caught) {
+                // Non-fatal: the map still loads, but it will use the ES module's client-side fallback default
+                // (DEFAULT_RACE_VECTOR_STYLE_URL) instead of the server-configured "map.provider.tileserver" URL. Log it
+                // so this silent degradation is visible when diagnosing why a self-hosted tile server is not being used.
+                logger.log(Level.WARNING, "Could not retrieve the configured MapLibre tile-server style URL from the "
+                        + "server; falling back to the client-side default style. The map will load, but the "
+                        + "'map.provider.tileserver' configuration will not take effect for this page load.", caught);
+                injectMapLibre();
+            }
+
+            @Override
+            public void onSuccess(final String styleUrl) {
+                if (styleUrl != null && !styleUrl.isEmpty()) {
+                    setTileServerStyleUrl(styleUrl);
+                }
+                injectMapLibre();
+            }
+        });
+    }
+
+    /**
+     * Injects the MapLibre stylesheet, script and compatibility ES module (or fires the shared callback immediately if
+     * both are already present). Split out of {@link #load()} so it can run after the configured style URL has been
+     * published to the window global.
+     */
+    private void injectMapLibre() {
         if (isMapLibreReady()) {
             MapsLoader.callback();
         } else {
@@ -57,6 +112,14 @@ public class MapLibreProvider implements MapProvider {
             });
         }
     }
+
+    /**
+     * Publishes the configured MapLibre style document URL to the {@value #TILE_SERVER_STYLE_URL_GLOBAL} {@code window}
+     * global so the compatibility ES module's {@code createRaceStyle()} can read it.
+     */
+    private static native void setTileServerStyleUrl(String styleUrl) /*-{
+        $wnd[@com.sap.sailing.gwt.ui.shared.racemap.MapLibreProvider::TILE_SERVER_STYLE_URL_GLOBAL] = styleUrl;
+    }-*/;
 
     /**
      * @return {@code true} if both MapLibre GL JS and the Google-Maps-compatible facade are already available on the

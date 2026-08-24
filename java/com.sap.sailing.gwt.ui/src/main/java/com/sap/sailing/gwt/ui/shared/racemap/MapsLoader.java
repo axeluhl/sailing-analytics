@@ -114,7 +114,7 @@ public class MapsLoader {
             result = new GoogleMapsProvider(authProvider, errorReporter, stringMessages);
             break;
         case MAPLIBRE:
-            result = new MapLibreProvider();
+            result = new MapLibreProvider(authProvider);
             break;
         default:
             throw new IllegalArgumentException("Unknown map provider type: "+type);

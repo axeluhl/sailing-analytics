@@ -18,4 +18,11 @@ public interface MapChooserAndAuthenticationParamsProviderAsync {
     void getGoogleMapsLoaderAuthenticationParams(AsyncCallback<String> callback);
 
     void getMapType(AsyncCallback<MapProviderTypes> asyncCallback);
+
+    /**
+     * Asynchronously retrieves the MapLibre vector style document URL configured on the server (system property
+     * {@code map.provider.tileserver}), or the public OpenFreeMap default when unset. Only relevant when the
+     * {@link MapProviderTypes#MAPLIBRE} provider is selected.
+     */
+    void getMapTileServerStyleUrl(AsyncCallback<String> callback);
 }

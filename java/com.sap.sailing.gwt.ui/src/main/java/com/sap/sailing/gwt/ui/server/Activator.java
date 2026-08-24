@@ -14,6 +14,22 @@ public class Activator implements BundleActivator {
     private static Activator INSTANCE;
 
     private final static String MAP_PROVIDER_TYPE_PROPERTY_NAME = "map.provider.type";
+
+    /**
+     * Name of the system property that overrides the MapLibre vector style document URL used by the MapLibre map
+     * provider (see {@code js/maps/maplibre-test-utils.js}, {@code createRaceStyle()}). The value must be a full
+     * MapLibre style URL, e.g. {@code https://maptiles.sapsailing.com/styles/liberty} when pointing at a self-hosted
+     * OpenFreeMap deployment. When unset (or blank) the public OpenFreeMap default
+     * {@link #DEFAULT_MAP_TILESERVER_STYLE_URL} is used. Only consulted for the MapLibre provider; Google Maps is
+     * unaffected.
+     */
+    private final static String MAP_TILESERVER_STYLE_URL_PROPERTY_NAME = "map.provider.tileserver";
+
+    /**
+     * Default MapLibre style document URL used when {@link #MAP_TILESERVER_STYLE_URL_PROPERTY_NAME} is not set: the
+     * public OpenFreeMap "liberty" style.
+     */
+    public final static String DEFAULT_MAP_TILESERVER_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
     /**
      * If the system property named after this constant is set, its value is used for Google Maps API authentication.
      * It takes precedence over the environment variable named after {@link #GOOGLE_MAPS_LOADER_AUTHENTICATION_PARAMS_ENV_VAR_NAME}.
@@ -105,5 +121,15 @@ public class Activator implements BundleActivator {
     public MapProviderTypes getMapProviderType() {
         return Optional.ofNullable(context.getProperty(MAP_PROVIDER_TYPE_PROPERTY_NAME))
                 .map(mapTypeName -> MapProviderTypes.valueOf(mapTypeName)).orElse(MapProviderTypes.GOOGLE);
+    }
+
+    /**
+     * Returns the MapLibre vector style document URL to use, taken from the system property named after
+     * {@link #MAP_TILESERVER_STYLE_URL_PROPERTY_NAME} when set to a non-blank value, otherwise
+     * {@link #DEFAULT_MAP_TILESERVER_STYLE_URL} (the public OpenFreeMap "liberty" style). Never {@code null}.
+     */
+    public String getMapTileServerStyleUrl() {
+        return Optional.ofNullable(context.getProperty(MAP_TILESERVER_STYLE_URL_PROPERTY_NAME))
+                .map(String::trim).filter(url -> !url.isEmpty()).orElse(DEFAULT_MAP_TILESERVER_STYLE_URL);
     }
 }

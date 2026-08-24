@@ -26,4 +26,9 @@ public interface MapChooserAndAuthenticationParamsSupport extends MapChooserAndA
     default MapProviderTypes getMapType() {
         return Activator.getInstance().getMapProviderType();
     }
+
+    @Override
+    default String getMapTileServerStyleUrl() {
+        return Activator.getInstance().getMapTileServerStyleUrl();
+    }
 }

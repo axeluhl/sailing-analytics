@@ -2,7 +2,13 @@ export const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-g
 export const MAPLIBRE_JS = 'https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js';
 
 export const MARSEILLE_CENTER = { lat: 43.275, lng: 5.322 };
-export const RACE_VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+// Client-side fallback default only. The real tile/style server URL is configured at launch time via the server system
+// property "map.provider.tileserver", which the com.sap.sailing.gwt.ui Activator reads and the MapLibre provider
+// publishes to window.__sapMapTileServerStyleUrl (see MapLibreProvider). This constant is used by createRaceStyle() only
+// when that global is unset - i.e. when the server RPC delivering the configured URL has failed (the server itself
+// already falls back to the public OpenFreeMap "liberty" style via Activator.DEFAULT_MAP_TILESERVER_STYLE_URL when the
+// property is not set, so under normal operation the global is always present).
+export const DEFAULT_RACE_VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 export const RACE_WATER_COLOR = '#00437d';
 
 export function lngLat(point) {
@@ -16,7 +22,10 @@ function toMapLibreZoom(googleZoom) {
 }
 
 export function createRaceStyle() {
-    return RACE_VECTOR_STYLE_URL;
+    // Prefer the launch-time-configured style URL (window.__sapMapTileServerStyleUrl, set by MapLibreProvider from the
+    // "map.provider.tileserver" system property); fall back to DEFAULT_RACE_VECTOR_STYLE_URL only if that global is unset
+    // (e.g. the server RPC failed).
+    return (typeof window !== 'undefined' && window.__sapMapTileServerStyleUrl) || DEFAULT_RACE_VECTOR_STYLE_URL;
 }
 
 export function applyRaceStyle(map, seaMarksVisible = false) {
