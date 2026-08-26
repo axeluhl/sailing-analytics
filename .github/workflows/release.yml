@@ -7,6 +7,13 @@ on:
       - '**/*.md'
       - 'README.md'
       - 'docs/**'
+  # Run for pull requests only once an approving review has been submitted.
+  # The build for a PR (which may originate from an untrusted fork) therefore
+  # never executes before a maintainer has vetted the exact code. Secrets are
+  # released to the PR build via the "privileged-pr-build" environment gate
+  # (see the "environment" key on the build job below).
+  pull_request_review:
+    types: [submitted]
   workflow_dispatch:
     inputs:
       skip_tests:
@@ -26,11 +33,19 @@ jobs:
   # The "changes" job will cause the "build" job to get skipped for trivial changes
   changes:
     permissions: {}
+    # Only run for push, manual dispatch, or a PR review that is an approval.
+    # A non-approving review (comment / changes-requested) must not trigger a build.
+    if: ${{ github.event_name != 'pull_request_review' || github.event.review.state == 'approved' }}
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # On an approving review, evaluate the filter against the reviewed PR
+          # head commit rather than the base branch.
+          ref: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - id: filter
         uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
         with:
@@ -45,6 +60,17 @@ jobs:
   build:
     needs: changes
     if: ${{ needs.changes.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch' }}
+    # For a PR review-triggered run, reference the "privileged-pr-build"
+    # environment so its protection rules (a required-reviewer team) must pass
+    # before the job is sent to a runner and before any secrets are released.
+    # For push / workflow_dispatch the name evaluates to an empty string, which
+    # GitHub treats as "no environment" — those runs are NOT gated and use the
+    # repository-level secrets exactly as before. The environment deliberately
+    # holds no secrets of its own: because same-named secrets resolve
+    # environment > repository, leaving it empty means the repository-level
+    # values are used, so secret rotation stays in a single place.
+    environment:
+      name: ${{ github.event_name == 'pull_request_review' && 'privileged-pr-build' || '' }}
     permissions:
       contents: write
       checks: write
@@ -94,6 +120,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: '500'
+          # On an approving review, build the reviewed PR head commit (which may
+          # come from an untrusted fork) rather than the base branch, and do not
+          # leave the GITHUB_TOKEN in .git/config where that PR code could read
+          # it. For push / workflow_dispatch these evaluate to the previous
+          # defaults, so existing runs are unchanged.
+          ref: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: ${{ github.event_name != 'pull_request_review' }}
       - name: Install JDK 8
         uses: actions/setup-java@v4
         with:
@@ -243,6 +276,8 @@ jobs:
             echo "Build passed."
           elif [[ "${{ needs.build.result }}" == "skipped" && "${{ needs.changes.outputs.should_run }}" == "false" ]]; then
             echo "No relevant changes — skipping is OK."
+          elif [[ "${{ needs.changes.result }}" == "skipped" ]]; then
+            echo "Pipeline did not apply to this event (e.g. a non-approving review) — nothing to gate."
           else
             echo "Build failed or was cancelled."
             exit 1
