@@ -159,7 +159,7 @@ jobs:
             path: build.log
             retention-days: 90
       - name: Collect Test Reports
-        uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1.9.1
+        uses: dorny/test-reporter@a6ddd83ac95ff4586f5d3aceeb314d9a1841db95 # v3.0.0
         if: always()
         with:
           name: Maven Tests
