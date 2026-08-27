@@ -27,6 +27,22 @@ on:
       - '**/*.md'
       - 'README.md'
       - 'docs/**'
+  # Auto-build submitted PRs. A same-repo PR (branch pushed by a committer) runs
+  # the full build with tests and secrets — same trust as a direct branch push.
+  # A fork PR runs compile-only with NO secrets (GitHub withholds secrets from
+  # fork pull_request runs at the event level); the secret-bearing full build of
+  # fork code stays gated behind a maintainer pushing a *-reviewed-for-build tag.
+  # No branches: filter here — for pull_request that would filter by BASE branch;
+  # omitting it targets PRs into any branch. Draft PRs are excluded by the build
+  # job's if:. See the "Determine build mode" step for the fork/same-repo split.
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'wiki/**'
+      - '.github/workflows/*'
+      - '**/*.md'
+      - 'README.md'
+      - 'docs/**'
   workflow_dispatch:
     inputs:
       skip_tests:
@@ -72,7 +88,9 @@ jobs:
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: >-
+      ${{ (needs.changes.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch')
+          && (github.event_name != 'pull_request' || github.event.pull_request.draft == false) }}
     permissions:
       contents: write
       checks: write
@@ -85,13 +103,20 @@ jobs:
         id: mode
         shell: bash
         # skip_tests=true means "compile only, no tests, no secrets". It is true
-        # for a workflow_dispatch with skip_tests=true, OR for a push of a
-        # *-reviewed-for-compile tag. Everything else (branches, *-reviewed-for-build
-        # tags) runs the full build with tests and secrets.
+        # for a workflow_dispatch with skip_tests=true, for a push of a
+        # *-reviewed-for-compile tag, OR for a fork-originated pull_request (fork
+        # runs get no secrets, so we compile without tests; the secret-bearing
+        # full build of fork code is gated behind a *-reviewed-for-build tag).
+        # Everything else (branches, same-repo PRs, *-reviewed-for-build tags)
+        # runs the full build with tests and secrets.
         run: |
           skip=false
           if [[ "${{ github.event.inputs.skip_tests }}" == "true" ]]; then skip=true; fi
           if [[ "${{ github.ref }}" == refs/tags/*-reviewed-for-compile ]]; then skip=true; fi
+          if [[ "${{ github.event_name }}" == "pull_request" \
+             && "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            skip=true
+          fi
           echo "skip_tests=$skip" >> "$GITHUB_OUTPUT"
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@v1.3.1
