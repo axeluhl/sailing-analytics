@@ -1,6 +1,26 @@
 name: release
 on:
   push:
+    # NOTE: introducing a "tags:" filter makes GitHub treat any Git ref kind that
+    # is NOT filtered as "undefined", and the workflow then stops running for it.
+    # So branches MUST be listed explicitly here; without "branches: ['**']" the
+    # tag filter below would silently disable all branch-push builds. '**' (not
+    # '*') is required to match branch names containing slashes (e.g. releases/x).
+    branches:
+      - '**'
+    # Reviewed-fork-PR tags. A maintainer fetches a fork PR head, reviews the
+    # exact SHA, then pushes one of these tags at that SHA. Because a tag push is
+    # a push event in this (base) repo, the run executes in trusted context WITH
+    # secrets — the only way to run secret-bearing validation on fork-authored
+    # code. '*-reviewed-for-compile' runs a compile-only build with NO secrets
+    # (cheap sanity check); '*-reviewed-for-build' runs the full build with tests
+    # and secrets. Safety rests on the maintainer having read that exact SHA
+    # before pushing the tag. See the "Determine build mode" step below.
+    tags:
+      - '*-reviewed-for-compile'
+      - '*-reviewed-for-build'
+    # paths-ignore is not evaluated for tag pushes (GitHub rule), so it only
+    # scopes branch pushes, exactly as before.
     paths-ignore:
       - 'wiki/**'
       - '.github/workflows/*'
@@ -58,7 +78,21 @@ jobs:
       checks: write
       actions: read
     runs-on: ${{ github.event.inputs.runner_cpus != '' && format('ubuntu-latest-{0}cpu', github.event.inputs.runner_cpus) || 'ubuntu-latest' }}
+    outputs:
+      skip_tests: ${{ steps.mode.outputs.skip_tests }}
     steps:
+      - name: Determine build mode
+        id: mode
+        shell: bash
+        # skip_tests=true means "compile only, no tests, no secrets". It is true
+        # for a workflow_dispatch with skip_tests=true, OR for a push of a
+        # *-reviewed-for-compile tag. Everything else (branches, *-reviewed-for-build
+        # tags) runs the full build with tests and secrets.
+        run: |
+          skip=false
+          if [[ "${{ github.event.inputs.skip_tests }}" == "true" ]]; then skip=true; fi
+          if [[ "${{ github.ref }}" == refs/tags/*-reviewed-for-compile ]]; then skip=true; fi
+          echo "skip_tests=$skip" >> "$GITHUB_OUTPUT"
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@v1.3.1
         with:
@@ -137,17 +171,21 @@ jobs:
       - shell: bash
         env: # Or as an environment variable
           TMP: /mnt/tmp
-          AWS_S3_TEST_S3ACCESSID: ${{ secrets.AWS_S3_TEST_S3ACCESSID }}
-          AWS_S3_TEST_S3ACCESSKEY: ${{ secrets.AWS_S3_TEST_S3ACCESSKEY }}
-          GEONAMES_ORG_USERNAMES: ${{ secrets.GEONAMES_ORG_USERNAMES }}
-          GOOGLE_MAPS_AUTHENTICATION_PARAMS: ${{ secrets.GOOGLE_MAPS_AUTHENTICATION_PARAMS }}
+          # These five are consumed only at TEST runtime. For a compile-only run
+          # (skip_tests) they resolve to '' so the real secret values are never
+          # placed in the process environment where reviewed-but-fork-authored
+          # code could read them. The full build (skip_tests false) gets them all.
+          AWS_S3_TEST_S3ACCESSID: ${{ steps.mode.outputs.skip_tests == 'true' && '' || secrets.AWS_S3_TEST_S3ACCESSID }}
+          AWS_S3_TEST_S3ACCESSKEY: ${{ steps.mode.outputs.skip_tests == 'true' && '' || secrets.AWS_S3_TEST_S3ACCESSKEY }}
+          GEONAMES_ORG_USERNAMES: ${{ steps.mode.outputs.skip_tests == 'true' && '' || secrets.GEONAMES_ORG_USERNAMES }}
+          GOOGLE_MAPS_AUTHENTICATION_PARAMS: ${{ steps.mode.outputs.skip_tests == 'true' && '' || secrets.GOOGLE_MAPS_AUTHENTICATION_PARAMS }}
           POLAR_DATA_BASE_URL: ${{ vars.POLAR_DATA_BASE_URL }}
-          POLAR_DATA_BEARER_TOKEN: ${{ secrets.POLAR_DATA_BEARER_TOKEN }}
+          POLAR_DATA_BEARER_TOKEN: ${{ steps.mode.outputs.skip_tests == 'true' && '' || secrets.POLAR_DATA_BEARER_TOKEN }}
           APP_PARAMETERS: "-Daws.region=eu-west-1"
           JAVA8_HOME: ${{env.JAVA_HOME_8_X64}}
           JAVA17_HOME: ${{env.JAVA_HOME_17_X64}}
         run: |
-            ./configuration/buildAndUpdateProduct.sh -x ${{ github.event.inputs.runner_cpus == '' && '4' || github.event.inputs.runner_cpus }} ${{ github.event.inputs.skip_tests == 'true' && '-t' || '' }} ${{ github.event.inputs.local_target_platform == 'true' && '-v' || '' }} build 2>&1
+            ./configuration/buildAndUpdateProduct.sh -x ${{ github.event.inputs.runner_cpus == '' && '4' || github.event.inputs.runner_cpus }} ${{ steps.mode.outputs.skip_tests == 'true' && '-t' || '' }} ${{ github.event.inputs.local_target_platform == 'true' && '-v' || '' }} build 2>&1
       - name: show disk stats
         if: always()
         run: df -h
@@ -160,7 +198,9 @@ jobs:
             retention-days: 90
       - name: Collect Test Reports
         uses: dorny/test-reporter@a6ddd83ac95ff4586f5d3aceeb314d9a1841db95 # v3.0.0
-        if: always()
+        # Skip for compile-only runs: no tests ran, so there are no TEST-*.xml
+        # and fail-on-error would otherwise error on zero matches.
+        if: ${{ always() && steps.mode.outputs.skip_tests != 'true' }}
         with:
           name: Maven Tests
           path: '**/TEST-*.xml' 
@@ -240,6 +280,11 @@ jobs:
           echo "Identified CI job: ${JOB}"
           curl -u "${{ vars.CI_JOB_USERNAME }}:${{ secrets.CI_JOB_PASSWORD}}" ${{ vars.CI_BASE_URL }}/job/${JOB}/build?token=${{ secrets.CI_JOB_TOKEN }}
 
+  # build-gate is the REQUIRED status check in branch protection. It must go
+  # green ONLY for a genuine full build (tests actually ran) or a legitimate
+  # trivial-change skip. A compile-only run (skip_tests true, e.g. a
+  # *-reviewed-for-compile tag or a workflow_dispatch with skip_tests=true) must
+  # NOT satisfy it — so those cannot qualify a PR for merge.
   build-gate:
     permissions: {}
     needs: [changes, build]
@@ -247,12 +292,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          if [[ "${{ needs.build.result }}" == "success" ]]; then
-            echo "Build passed."
+          if [[ "${{ needs.build.result }}" == "success" && "${{ needs.build.outputs.skip_tests }}" != "true" ]]; then
+            echo "Full build with tests passed."
           elif [[ "${{ needs.build.result }}" == "skipped" && "${{ needs.changes.outputs.should_run }}" == "false" ]]; then
             echo "No relevant changes — skipping is OK."
+          elif [[ "${{ needs.build.result }}" == "success" && "${{ needs.build.outputs.skip_tests }}" == "true" ]]; then
+            echo "Compile-only build (tests skipped) does not satisfy the required check."
+            exit 1
           else
             echo "Build failed or was cancelled."
+            exit 1
+          fi
+
+  # compile-gate is an ADVISORY (non-required) check. It reflects only whether
+  # the build job compiled successfully, regardless of whether tests ran — a full
+  # build implies compilation succeeded. It gives *-reviewed-for-compile runs a
+  # distinct green/red on the PR without touching the required build-gate check.
+  compile-gate:
+    permissions: {}
+    needs: [changes, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "Compilation succeeded."
+          elif [[ "${{ needs.build.result }}" == "skipped" && "${{ needs.changes.outputs.should_run }}" == "false" ]]; then
+            echo "No relevant changes — nothing to compile."
+          else
+            echo "Compilation failed or was cancelled."
             exit 1
           fi
 
