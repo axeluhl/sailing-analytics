@@ -53,21 +53,20 @@ jobs:
           fetch-depth: ${{ github.event_name == 'pull_request_review' && '0' || '1' }}
           persist-credentials: false
       - id: filter
-        uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           # pull_request_review is not a pull_request event, so the action does
           # not auto-detect the PR base. Diff the PR head against the PR base
           # explicitly so a docs-only PR is correctly seen as no code change.
           base: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.base.sha || '' }}
           ref: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.head.sha || '' }}
-          # With the default 'some' quantifier a negated rule still counts as a
+          # Under the default 'some' quantifier a negated rule still counts as a
           # match (picomatch treats '!README.md' as "anything but README.md"),
-          # so a changed README.md would set code=true. The pinned v3.0.3 does
-          # not support 'some-with-excludes' (a v4 addition), so use 'every':
-          # code is true only when a changed file matches ALL rules, i.e. the
-          # positive '**' AND every '!' exclusion (a trivial file fails one of
-          # them and is thus excluded).
-          predicate-quantifier: 'every'
+          # so a changed README.md would set code=true. 'some-with-excludes'
+          # (v4+) makes the '!' rules act as real exclusions: code is true only
+          # when a changed file matches the positive '**' rule AND none of the
+          # excludes.
+          predicate-quantifier: 'some-with-excludes'
           filters: |
             code:
               - '**'
