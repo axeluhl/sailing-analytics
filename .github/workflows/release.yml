@@ -60,8 +60,17 @@ jobs:
           # explicitly so a docs-only PR is correctly seen as no code change.
           base: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.base.sha || '' }}
           ref: ${{ github.event_name == 'pull_request_review' && github.event.pull_request.head.sha || '' }}
+          # With the default 'some' quantifier a negated rule still counts as a
+          # match (picomatch treats '!README.md' as "anything but README.md"),
+          # so a changed README.md would set code=true. The pinned v3.0.3 does
+          # not support 'some-with-excludes' (a v4 addition), so use 'every':
+          # code is true only when a changed file matches ALL rules, i.e. the
+          # positive '**' AND every '!' exclusion (a trivial file fails one of
+          # them and is thus excluded).
+          predicate-quantifier: 'every'
           filters: |
             code:
+              - '**'
               - '!wiki/**'
               - '!.github/workflows/*'
               - '!**/*.md'
