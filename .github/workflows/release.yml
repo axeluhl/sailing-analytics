@@ -69,7 +69,7 @@ jobs:
     outputs:
       should_run: ${{ steps.filter.outputs.code }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: filter
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
@@ -161,23 +161,23 @@ jobs:
           echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
           ${{ steps.setup-firefox.outputs.firefox-path }} --version
       - name: Check out the repository to the runner
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: '500'
       - name: Install JDK 8
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '8'
           mvn-toolchain-id: 'JavaSE-1.8'
       - name: Install JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '17'
           mvn-toolchain-id: 'JavaSE-17'
       - name: Install JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '25'
@@ -218,7 +218,7 @@ jobs:
         if: always()
         run: df -h
       - name: Upload build log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
             name: build.log
@@ -246,7 +246,7 @@ jobs:
         run: |
           echo "SIMPLE_VERSION_INFO=$( basename dist/* )" >>${GITHUB_ENV}
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
             name: test-results
@@ -254,7 +254,7 @@ jobs:
                 **/surefire-reports/**
             retention-days: 90
       - name: Upload distribution artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docker-24' || github.ref == 'refs/heads/docker-25' || startsWith(github.ref, 'refs/heads/releases/') }}
         with:
             name: ${{ env.SIMPLE_VERSION_INFO }}
