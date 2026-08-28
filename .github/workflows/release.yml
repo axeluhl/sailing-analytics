@@ -310,13 +310,28 @@ jobs:
 
   # build-gate is the REQUIRED status check in branch protection. It must go
   # green ONLY for a genuine full build (tests actually ran) or a legitimate
-  # trivial-change skip. A compile-only run (skip_tests true, e.g. a
-  # *-reviewed-for-compile tag or a workflow_dispatch with skip_tests=true) must
-  # NOT satisfy it — so those cannot qualify a PR for merge.
+  # trivial-change skip.
+  #
+  # A SUCCESSFUL compile-only run (build succeeded AND skip_tests true — e.g. a
+  # fork pull_request, a *-reviewed-for-compile tag, or a workflow_dispatch with
+  # skip_tests=true) must NOT qualify a PR for merge, but should also NOT show as
+  # a failed/red run. So for that one case this job is SKIPPED via its if:. A
+  # required check whose job never starts is left "Expected — waiting" (pending):
+  # the PR stays un-mergeable WITHOUT a red X, and the workflow run is not marked
+  # failed. Merge qualification for fork code then comes only from a maintainer
+  # pushing a *-reviewed-for-build tag (full trusted build with tests).
+  #
+  # IMPORTANT: this must be a job-level skip (job never starts), NOT run-then-
+  # report-skipped — a job that runs and reports conclusion "skipped" counts as
+  # PASSED for branch protection and would let the PR merge. Also note the guard
+  # is deliberately narrow: it fires ONLY for a *successful* compile-only build.
+  # A compile-only build that FAILED (build.result != success) still runs the
+  # gate below and goes red, and the trivial-change skip still runs and goes
+  # green — so docs-only PRs are not left pending forever.
   build-gate:
     permissions: {}
     needs: [changes, build]
-    if: always()
+    if: ${{ !(needs.build.result == 'success' && needs.build.outputs.skip_tests == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -324,9 +339,6 @@ jobs:
             echo "Full build with tests passed."
           elif [[ "${{ needs.build.result }}" == "skipped" && "${{ needs.changes.outputs.should_run }}" == "false" ]]; then
             echo "No relevant changes — skipping is OK."
-          elif [[ "${{ needs.build.result }}" == "success" && "${{ needs.build.outputs.skip_tests }}" == "true" ]]; then
-            echo "Compile-only build (tests skipped) does not satisfy the required check."
-            exit 1
           else
             echo "Build failed or was cancelled."
             exit 1
